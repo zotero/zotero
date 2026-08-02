@@ -1110,7 +1110,7 @@ Zotero.Embeddings.Indexing = new function () {
 			...Zotero.ItemFields.getTypeFieldsFromBase('title')
 		])];
 		let rows = await Zotero.DB.queryAsync(
-			"SELECT DISTINCT libraryID, itemID FROM itemData "
+			"SELECT libraryID, itemID, value FROM itemData "
 				+ "JOIN itemDataValues USING (valueID) "
 				+ "JOIN items USING (itemID) "
 				+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
@@ -1118,7 +1118,12 @@ Zotero.Embeddings.Indexing = new function () {
 			Zotero.ItemTypes.getID('attachment')
 		);
 		let byLibrary = new Map();
+		let seen = new Set();
 		for (let row of rows) {
+			if (seen.has(row.itemID) || !_hasEmbeddableText(row.value)) {
+				continue;
+			}
+			seen.add(row.itemID);
 			let ids = byLibrary.get(row.libraryID);
 			if (!ids) {
 				ids = [];
@@ -1195,6 +1200,20 @@ Zotero.Embeddings.Indexing = new function () {
 		);
 	}
 
+	// Text with too little in it to say anything: a one-character title is
+	// noise in an alphabetic script, while a single ideograph can be a whole
+	// word, so those count.
+	function _hasEmbeddableText(text) {
+		text = (text || '').trim();
+		if (!text) {
+			return false;
+		}
+		if (/[\p{Ideographic}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(text)) {
+			return true;
+		}
+		return [...text].length > 1;
+	}
+
 	// Text we embed for an item: its title and abstract. A title alone is
 	// enough -- it's useful signal even without an abstract. Returns null only
 	// for items with neither.
@@ -1210,8 +1229,7 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Compute and store embeddings for the given items, skipping any whose
 	// stored embedding is already up to date (via sourceHash). Items with no
-	// embeddable text (neither a title nor an abstract) have any existing
-	// embedding removed.
+	// embeddable text have any existing embedding removed.
 	//
 	// @param {Zotero.Item[]} items
 	// @param {Object} [options]
@@ -1255,7 +1273,7 @@ Zotero.Embeddings.Indexing = new function () {
 		let toDelete = [];
 		for (let item of items) {
 			let text = _getItemText(item);
-			if (!text) {
+			if (!_hasEmbeddableText(text)) {
 				if (storedHashes.has(item.id)) {
 					toDelete.push(item.id);
 				}
