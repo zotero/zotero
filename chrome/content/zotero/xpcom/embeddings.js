@@ -763,6 +763,54 @@ Zotero.Embeddings = new function () {
 			(score - minScore) / (maxDisplayScore - minScore)));
 	};
 
+	/**
+	 * The item fields whose text is embedded, and so the fields a query can
+	 * match literally.
+	 *
+	 * @return {Number[]}
+	 */
+	this.getIndexedFieldIDs = function () {
+		return [...new Set([
+			Zotero.ItemFields.getID('title'),
+			Zotero.ItemFields.getID('abstractNote'),
+			...Zotero.ItemFields.getTypeFieldsFromBase('title')
+		])];
+	};
+
+	// Items among the given ones whose indexed text contains every word of the
+	// query, matched as substrings the way quick search matches them.
+	async function _findLiteralMatches(queryText, itemIDs) {
+		let terms = Zotero.Embeddings.normalizeQuery(queryText).split(/\s+/).filter(Boolean);
+		if (!terms.length || !itemIDs.length) {
+			return new Set();
+		}
+		let fieldIDs = Zotero.Embeddings.getIndexedFieldIDs();
+		let matched = null;
+		for (let term of terms) {
+			let ids = new Set();
+			let chunkSize = 500;
+			for (let i = 0; i < itemIDs.length; i += chunkSize) {
+				let chunk = itemIDs.slice(i, i + chunkSize);
+				let rows = await Zotero.DB.columnQueryAsync(
+					"SELECT DISTINCT itemID FROM itemData "
+						+ "JOIN itemDataValues USING (valueID) "
+						+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
+						+ "AND itemID IN (" + chunk.map(() => '?').join(',') + ") "
+						+ "AND value LIKE ? ESCAPE '\\'",
+					[...chunk, '%' + term.replace(/[\\%_]/g, '\\$&') + '%']
+				);
+				for (let id of rows || []) {
+					ids.add(id);
+				}
+			}
+			matched = matched ? new Set([...matched].filter(id => ids.has(id))) : ids;
+			if (!matched.size) {
+				break;
+			}
+		}
+		return matched;
+	}
+
 	// mozStorage returns a BLOB as an array of byte values; reinterpret those
 	// bytes as the stored Float32 embedding vector.
 	function _blobToVector(blob) {
@@ -773,9 +821,12 @@ Zotero.Embeddings = new function () {
 	/**
 	 * Score a given set of items by similarity to a query. Items without a
 	 * stored embedding aren't scored, and neither are items scoring below the
-	 * model's minimum, which aren't matches (see minScore in MODELS). Used to
-	 * apply semantic ranking within an existing result scope (e.g. the current
-	 * collection) rather than the whole library.
+	 * model's minimum, which aren't matches (see minScore in MODELS) -- unless
+	 * nothing clears it, in which case items whose text contains the query's
+	 * words are scored, since the model missing what an item says literally
+	 * shouldn't leave the search with nothing to show. Used to apply semantic
+	 * ranking within an existing result scope (e.g. the current collection)
+	 * rather than the whole library.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -787,6 +838,7 @@ Zotero.Embeddings = new function () {
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		let scores = new Map();
+		let belowFloor = new Map();
 		if (!itemIDs.length || !this.isEnabled()) {
 			return scores;
 		}
@@ -839,6 +891,18 @@ Zotero.Embeddings = new function () {
 				if (dot >= minScore) {
 					scores.set(row.itemID, dot);
 				}
+				else {
+					belowFloor.set(row.itemID, dot);
+				}
+			}
+		}
+		// Nothing was similar enough to the query to be a match, so fall back to
+		// the items that use its words, ranked by their own scores, which leave
+		// the relevance bar empty
+		if (!scores.size && belowFloor.size) {
+			let literal = await _findLiteralMatches(queryText, [...belowFloor.keys()]);
+			for (let itemID of literal) {
+				scores.set(itemID, belowFloor.get(itemID));
 			}
 		}
 		if (generation !== _modelGeneration) {
@@ -1104,11 +1168,7 @@ Zotero.Embeddings.Indexing = new function () {
 	//
 	// @return {Promise<Map>} - libraryID -> [itemID, ...]
 	async function _getEligibleItemIDs() {
-		let fieldIDs = [...new Set([
-			Zotero.ItemFields.getID('title'),
-			Zotero.ItemFields.getID('abstractNote'),
-			...Zotero.ItemFields.getTypeFieldsFromBase('title')
-		])];
+		let fieldIDs = Zotero.Embeddings.getIndexedFieldIDs();
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT libraryID, itemID, value FROM itemData "
 				+ "JOIN itemDataValues USING (valueID) "

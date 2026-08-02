@@ -89,6 +89,67 @@ describe("Zotero.Embeddings", function () {
 				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
+
+		it("should fall back to text matches when nothing clears the minimum", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.initDB();
+			let mean = Zotero.Embeddings.getMeanVector();
+
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(mean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
+						+ "VALUES (?, ?, 'hash')",
+					[item.id, blob], { debugParams: false }
+				);
+			};
+			// Neither item is close to the query, but one says the word
+			let literal = await createDataObject('item',
+				{ title: 'Migratory timing in Arctic-breeding shorebirds' });
+			await store(literal, axis(1));
+			let unrelated = await createDataObject('item',
+				{ title: 'Guild regulation in early modern Nuremberg' });
+			await store(unrelated, axis(2));
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('birds',
+					[literal.id, unrelated.id]);
+				assert.isTrue(scores.has(literal.id));
+				assert.isBelow(scores.get(literal.id), 0.2);
+				assert.isFalse(scores.has(unrelated.id));
+
+				// Every word has to appear
+				scores = await Zotero.Embeddings.scoreItemIDs('breeding penguins',
+					[literal.id, unrelated.id]);
+				assert.isFalse(scores.has(literal.id));
+
+				// With a real match to show, text matches stay out of it
+				let match = await createDataObject('item', { title: 'Birds' });
+				await store(match, axis(0));
+				scores = await Zotero.Embeddings.scoreItemIDs('birds',
+					[literal.id, unrelated.id, match.id]);
+				assert.isTrue(scores.has(match.id));
+				assert.isFalse(scores.has(literal.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+			}
+		});
 	});
 
 	describe("#getScoreFraction()", function () {
