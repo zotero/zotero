@@ -47,12 +47,14 @@ Zotero.Embeddings = new function () {
 			// bge prepends a retrieval instruction to queries; passages get none.
 			queryPrefix: 'Represent this sentence for searching relevant passages: ',
 			passagePrefix: '',
-			// Centered scores (see _center()) spread out, so this maps the
-			// band onto the Relevance column's 0-1 bar (see getScoreFraction()).
-			// Display-only, so retuning it doesn't require a revision bump.
-			// Fitted to observed distributions: unrelated text and text with
-			// little content score below ~0.1, good matches ~0.41-0.63.
-			displayScoreRange: [0.1, 0.6],
+			// Scores below this aren't matches at all: for a query with nothing
+			// to match, short or generic text scores a little above zero against
+			// anything, and ranking that is worse than returning nothing.
+			// Fitted to observed distributions, as is the ceiling that scales the
+			// Relevance column's bar (see getScoreFraction()); neither affects
+			// stored vectors, so retuning them doesn't require a revision bump.
+			minScore: 0.2,
+			maxDisplayScore: 0.6,
 			// The direction every embedding from this model shares, which carries
 			// no meaning: subtracting it before comparing (see _center()) keeps
 			// text with little content from scoring as a moderate match against
@@ -102,9 +104,11 @@ Zotero.Embeddings = new function () {
 			pooling: 'mean',
 			queryPrefix: 'query: ',
 			passagePrefix: 'passage: ',
-			// Fitted as above; this model scores text with little content
-			// higher than the English one, so the floor sits higher
-			displayScoreRange: [0.15, 0.45],
+			// Fitted as above. This model scores short, generic text around 0.3
+			// against any query, so its floor sits high enough to cut some weak
+			// but genuine matches -- the price of not ranking noise.
+			minScore: 0.35,
+			maxDisplayScore: 0.6,
 			// The direction every embedding from this model shares, which carries
 			// no meaning: subtracting it before comparing (see _center()) keeps
 			// text with little content from scoring as a moderate match against
@@ -741,9 +745,10 @@ Zotero.Embeddings = new function () {
 
 	/**
 	 * Map a raw similarity score onto the active model's display range, for
-	 * the Relevance column's bar. The ranges are empirical per-model
-	 * constants (see displayScoreRange in MODELS): scores at or below the
-	 * floor render as an empty bar, at or above the ceiling as a full one.
+	 * the Relevance column's bar. The band runs from the model's minimum score,
+	 * the weakest match shown, to an empirical ceiling (see MODELS): scores at
+	 * or below the floor render as an empty bar, at or above the ceiling as a
+	 * full one.
 	 *
 	 * @param {Number} score
 	 * @return {Number} - 0-1
@@ -753,8 +758,9 @@ Zotero.Embeddings = new function () {
 		if (!model) {
 			return 0;
 		}
-		let [min, max] = model.displayScoreRange;
-		return Math.min(1, Math.max(0, (score - min) / (max - min)));
+		let { minScore, maxDisplayScore } = model;
+		return Math.min(1, Math.max(0,
+			(score - minScore) / (maxDisplayScore - minScore)));
 	};
 
 	// mozStorage returns a BLOB as an array of byte values; reinterpret those
@@ -766,9 +772,10 @@ Zotero.Embeddings = new function () {
 
 	/**
 	 * Score a given set of items by similarity to a query. Items without a
-	 * stored embedding aren't scored. Used to apply semantic ranking within an
-	 * existing result scope (e.g. the current collection) rather than the
-	 * whole library.
+	 * stored embedding aren't scored, and neither are items scoring below the
+	 * model's minimum, which aren't matches (see minScore in MODELS). Used to
+	 * apply semantic ranking within an existing result scope (e.g. the current
+	 * collection) rather than the whole library.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -803,6 +810,7 @@ Zotero.Embeddings = new function () {
 		let generation = _modelGeneration;
 		let query = _center(await this.embedQuery(queryText));
 		let dim = query.length;
+		let minScore = _getModel().minScore;
 
 		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
 		// parameter limit for large collections), scoring each as we go.
@@ -828,7 +836,9 @@ Zotero.Embeddings = new function () {
 				for (let d = 0; d < dim; d++) {
 					dot += query[d] * vec[d];
 				}
-				scores.set(row.itemID, dot);
+				if (dot >= minScore) {
+					scores.set(row.itemID, dot);
+				}
 			}
 		}
 		if (generation !== _modelGeneration) {
