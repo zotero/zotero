@@ -47,12 +47,45 @@ Zotero.Embeddings = new function () {
 			// bge prepends a retrieval instruction to queries; passages get none.
 			queryPrefix: 'Represent this sentence for searching relevant passages: ',
 			passagePrefix: '',
-			// Raw cosine scores cluster in a model-specific band; this maps that
+			// Centered scores (see _center()) spread out, so this maps the
 			// band onto the Relevance column's 0-1 bar (see getScoreFraction()).
 			// Display-only, so retuning it doesn't require a revision bump.
-			// Fitted to observed distributions: irrelevant mass ~0.44-0.50,
-			// strong matches ~0.65-0.75.
-			displayScoreRange: [0.5, 0.75],
+			// Fitted to observed distributions: unrelated text and text with
+			// little content score below ~0.1, good matches ~0.41-0.63.
+			displayScoreRange: [0.1, 0.6],
+			// The direction every embedding from this model shares, which carries
+			// no meaning: subtracting it before comparing (see _center()) keeps
+			// text with little content from scoring as a moderate match against
+			// everything. Computed over a corpus of titles and abstracts across
+			// fields and languages; a change to it needs a displayScoreRange
+			// refit but not a revision bump, since stored vectors are unaffected.
+			meanVector: '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',
 			l10nID: 'preferences-advanced-semantic-search-english',
 			files: [
 				'config.json',
@@ -69,7 +102,42 @@ Zotero.Embeddings = new function () {
 			pooling: 'mean',
 			queryPrefix: 'query: ',
 			passagePrefix: 'passage: ',
-			displayScoreRange: [0.78, 0.92],
+			// Fitted as above; this model scores text with little content
+			// higher than the English one, so the floor sits higher
+			displayScoreRange: [0.15, 0.45],
+			// The direction every embedding from this model shares, which carries
+			// no meaning: subtracting it before comparing (see _center()) keeps
+			// text with little content from scoring as a moderate match against
+			// everything. Computed over a corpus of titles and abstracts across
+			// fields and languages; a change to it needs a displayScoreRange
+			// refit but not a revision bump, since stored vectors are unaffected.
+			meanVector: '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',
 			l10nID: 'preferences-advanced-semantic-search-multilingual',
 			files: [
 				'config.json',
@@ -512,6 +580,59 @@ Zotero.Embeddings = new function () {
 	 * @param {String} text
 	 * @return {Promise<Float32Array>}
 	 */
+	var _meanVectors = new Map();
+
+	/**
+	 * The active model's mean vector, decoded once (see meanVector in MODELS)
+	 *
+	 * @return {Float32Array|null}
+	 */
+	this.getMeanVector = function () {
+		return _getMeanVector();
+	};
+
+	function _getMeanVector() {
+		let name = Zotero.Embeddings.getModelName();
+		if (!_meanVectors.has(name)) {
+			let encoded = _getModel().meanVector;
+			let mean = null;
+			if (encoded) {
+				let binary = atob(encoded);
+				let bytes = new Uint8Array(binary.length);
+				for (let i = 0; i < binary.length; i++) {
+					bytes[i] = binary.charCodeAt(i);
+				}
+				mean = new Float32Array(bytes.buffer);
+			}
+			_meanVectors.set(name, mean);
+		}
+		return _meanVectors.get(name);
+	}
+
+	/**
+	 * Subtract the model's mean vector and scale back to unit length.
+	 *
+	 * Every embedding a model produces shares a large common direction that
+	 * says nothing about the text, which leaves unrelated items looking
+	 * moderately similar to everything -- an item with almost no text scores
+	 * about as well as a real match. Removing it spreads the scores out, so
+	 * that no relevance reads as no score rather than as a middling one.
+	 *
+	 * @param {Float32Array} vector
+	 * @return {Float32Array}
+	 */
+	function _center(vector) {
+		let mean = _getMeanVector();
+		if (!mean || mean.length !== vector.length) {
+			return vector;
+		}
+		let out = new Float32Array(vector.length);
+		for (let i = 0; i < vector.length; i++) {
+			out[i] = vector[i] - mean[i];
+		}
+		return _normalize(out);
+	}
+
 	function _normalize(vector) {
 		let sum = 0;
 		for (let val of vector) {
@@ -680,7 +801,7 @@ Zotero.Embeddings = new function () {
 			);
 		}
 		let generation = _modelGeneration;
-		let query = await this.embedQuery(queryText);
+		let query = _center(await this.embedQuery(queryText));
 		let dim = query.length;
 
 		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
@@ -702,7 +823,7 @@ Zotero.Embeddings = new function () {
 				chunk
 			);
 			for (let row of rows) {
-				let vec = _blobToVector(row.embedding);
+				let vec = _center(_blobToVector(row.embedding));
 				let dot = 0;
 				for (let d = 0; d < dim; d++) {
 					dot += query[d] * vec[d];

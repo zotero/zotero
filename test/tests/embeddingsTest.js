@@ -42,13 +42,13 @@ describe("Zotero.Embeddings", function () {
 
 	describe("#getScoreFraction()", function () {
 		it("should clamp scores into the active model's display range", function () {
-			// bge-small-en-v1.5's displayScoreRange is [0.5, 0.75]
+			// bge-small-en-v1.5's displayScoreRange is [0.1, 0.6]
 			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5');
 			try {
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.4), 0);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.5), 0);
-				assert.approximately(Zotero.Embeddings.getScoreFraction(0.625), 0.5, 0.001);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.75), 1);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0), 0);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.1), 0);
+				assert.approximately(Zotero.Embeddings.getScoreFraction(0.35), 0.5, 0.001);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.6), 1);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
 				// No known model -> empty bar
 				stub.returns('');
@@ -313,6 +313,169 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stub.restore();
+			}
+		});
+	});
+	describe("TEMP mean computation", function () {
+		before(function () {
+			if (!Services.env.get("ZOTERO_TEST_EMBEDDINGS_INFERENCE")) {
+				this.skip();
+			}
+		});
+
+		it("should compute a mean vector for each model", async function () {
+			this.timeout(1800000);
+			await loadZoteroPane();
+
+			// Titles and abstract fragments across fields and languages, so the
+			// mean captures the direction every embedding shares rather than
+			// any one subject
+			let corpus = [
+				'Grounded theory methodology in qualitative sociology',
+				'The gut microbiome influences host metabolism through short-chain fatty acid production',
+				'A transformer architecture for protein structure prediction from sequence alone',
+				'Sleep deprivation impairs hippocampal memory consolidation in rodents',
+				'Does peer review improve manuscript quality? Evidence from a randomized trial',
+				'Dopaminergic neurons in the ventral tegmental area encode reward prediction error',
+				'Bilingualism and the onset of dementia: a population-based cohort study',
+				'The amyloid cascade hypothesis of Alzheimer disease revisited',
+				'Critiques of the serotonin hypothesis of depression',
+				'Machine learning emulation of atmospheric convection',
+				'The colonial history of the French Atlantic world, 1660-1800',
+				'CRISPR screens identify regulators of T cell exhaustion',
+				'Measurement of the Higgs boson mass in the four-lepton channel',
+				'Ocean acidification reduces coral reef calcification rates',
+				'Urban heat islands and heat-related mortality in European cities',
+				'Patronage and the economics of eighteenth-century opera',
+				'Quantum error correction with surface codes on superconducting qubits',
+				'Wage inequality and the decline of labor market institutions',
+				'Antibiotic resistance in hospital-acquired Klebsiella infections',
+				'Neural correlates of decision making under uncertainty',
+				'Land use change and pollinator decline in temperate agriculture',
+				'A grammar of evidentiality in Amazonian languages',
+				'Constitutional courts and democratic backsliding',
+				'Stellar nucleosynthesis in asymptotic giant branch stars',
+				'Tectonic controls on Himalayan river incision',
+				'The reception of Ovid in medieval French romance',
+				'Randomized trial of cognitive behavioral therapy for insomnia',
+				'Supply chain resilience after the 2020 disruption',
+				'Photocatalytic water splitting with earth-abundant catalysts',
+				'Archaeological evidence for early dairying in Neolithic Europe',
+				'Social media use and adolescent wellbeing: a longitudinal analysis',
+				'Numerical methods for stiff differential equations',
+				'The epidemiology of long COVID in primary care',
+				'Rhetoric and citizenship in the Roman republic',
+				'Deep learning for medical image segmentation',
+				'Monetary policy transmission in emerging markets',
+				'Gene flow between domestic and wild populations of Atlantic salmon',
+				'Phenomenology of embodiment in twentieth-century philosophy',
+				'Nanoparticle drug delivery across the blood-brain barrier',
+				'Historical demography of the Black Death in England',
+				'Étude sur la transition énergétique dans les villes européennes',
+				'Die Rolle des Gedächtnisses in der deutschen Nachkriegsliteratur',
+				'Un estudio sobre la biodiversidad en los bosques tropicales',
+				'気候変動が海洋生態系に与える影響についての研究',
+				'Исследование структуры белков методом криоэлектронной микроскопии',
+				'城市化进程中的社会流动性研究',
+				'Uno studio sulla conservazione dei manoscritti medievali',
+				'Estudo sobre políticas públicas de saúde no Brasil',
+				'Onderzoek naar waterbeheer in laaggelegen gebieden',
+				'Badania nad historią gospodarczą Europy Środkowej'
+			];
+
+			for (let modelName of Zotero.Embeddings.getAvailableModels().map(m => m.name)) {
+				Zotero.Prefs.set('embeddings.model', modelName);
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				await Zotero.Embeddings.preloadModel();
+
+				let vectors = [];
+				for (let i = 0; i < corpus.length; i += 10) {
+					vectors.push(...await Zotero.Embeddings.embedPassages(corpus.slice(i, i + 10)));
+				}
+				let mean = new Float32Array(vectors[0].length);
+				for (let vector of vectors) {
+					for (let d = 0; d < mean.length; d++) {
+						mean[d] += vector[d] / vectors.length;
+					}
+				}
+				let bytes = new Uint8Array(mean.buffer);
+				let binary = '';
+				for (let byte of bytes) {
+					binary += String.fromCharCode(byte);
+				}
+				Zotero.debug('MEAN ' + modelName + ' dim=' + mean.length + ' '
+					+ btoa(binary));
+			}
+			await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+		});
+	});
+	describe("#scoreItemIDs() centering", function () {
+		it("should score text with nothing to say near zero", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.initDB();
+			let mean = Zotero.Embeddings.getMeanVector();
+			assert.isNotNull(mean);
+
+			let store = async (item, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
+						+ "VALUES (?, ?, 'hash')",
+					[item.id, blob], { debugParams: false }
+				);
+			};
+			let normalized = (vector) => {
+				let sum = 0;
+				for (let val of vector) {
+					sum += val * val;
+				}
+				let out = new Float32Array(vector.length);
+				for (let i = 0; i < vector.length; i++) {
+					out[i] = vector[i] / Math.sqrt(sum);
+				}
+				return out;
+			};
+
+			// One item whose vector is the direction every embedding shares,
+			// and one that differs from it
+			let empty = await createDataObject('item');
+			await store(empty, normalized(mean));
+			let distinct = await createDataObject('item');
+			let other = Float32Array.from(mean);
+			for (let i = 0; i < other.length; i += 2) {
+				other[i] += 0.05;
+			}
+			await store(distinct, normalized(other));
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(normalized(other))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+					[empty.id, distinct.id]);
+				// Without centering the two would be nearly indistinguishable,
+				// since both consist mostly of the shared direction
+				let raw = 0;
+				let a = normalized(mean);
+				let b = normalized(other);
+				for (let i = 0; i < a.length; i++) {
+					raw += a[i] * b[i];
+				}
+				assert.isAbove(raw, 0.5);
+				// The shared direction is gone, so what's left of the first
+				// item says nothing about the query
+				assert.isBelow(Math.abs(scores.get(empty.id)), 0.2);
+				assert.isAbove(scores.get(distinct.id), 0.9);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 	});
