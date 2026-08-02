@@ -248,6 +248,37 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should skip items with too little text to say anything", async function () {
+			this.timeout(60000);
+			await createDataObject('item', { title: 'C' });
+			await createDataObject('item', { title: '猫' });
+			await createDataObject('item', { title: 'A study of feline behavior' });
+
+			let vector = new Float32Array(4).fill(0.5);
+			let texts = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					texts.push(...passages);
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves()
+			];
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+
+			assert.include(texts, 'A study of feline behavior');
+			// A single ideograph is a word; a single letter isn't
+			assert.include(texts, '猫');
+			assert.notInclude(texts, 'C');
+		});
+
 		it("should look up stored hashes without a query per item", async function () {
 			this.timeout(60000);
 			for (let i = 0; i < 5; i++) {
