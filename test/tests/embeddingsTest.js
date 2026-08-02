@@ -40,14 +40,65 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#scoreItemIDs() floor", function () {
+		it("should not return items scoring below the model's minimum", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.initDB();
+			let mean = Zotero.Embeddings.getMeanVector();
+
+			// Centering subtracts the mean, so an item stored as the mean plus
+			// one axis scores against the query by that axis's share of it
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(mean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
+						+ "VALUES (?, ?, 'hash')",
+					[item.id, blob], { debugParams: false }
+				);
+			};
+			let close = await createDataObject('item');
+			await store(close, axis(0));
+			let distant = await createDataObject('item');
+			await store(distant, axis(1));
+			// Almost all of the query lies along the first item's axis
+			let query = axis(0, 0.9);
+			query[1] += 0.1;
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(query)
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+					[close.id, distant.id]);
+				assert.isAbove(scores.get(close.id), 0.9);
+				assert.isFalse(scores.has(distant.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+			}
+		});
+	});
+
 	describe("#getScoreFraction()", function () {
 		it("should clamp scores into the active model's display range", function () {
-			// bge-small-en-v1.5's displayScoreRange is [0.1, 0.6]
+			// bge-small-en-v1.5's band runs from 0.2 to 0.6
 			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5');
 			try {
 				assert.equal(Zotero.Embeddings.getScoreFraction(0), 0);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.1), 0);
-				assert.approximately(Zotero.Embeddings.getScoreFraction(0.35), 0.5, 0.001);
+				assert.equal(Zotero.Embeddings.getScoreFraction(0.2), 0);
+				assert.approximately(Zotero.Embeddings.getScoreFraction(0.4), 0.5, 0.001);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.6), 1);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
 				// No known model -> empty bar
@@ -469,8 +520,8 @@ describe("Zotero.Embeddings", function () {
 				}
 				assert.isAbove(raw, 0.5);
 				// The shared direction is gone, so what's left of the first
-				// item says nothing about the query
-				assert.isBelow(Math.abs(scores.get(empty.id)), 0.2);
+				// item says nothing about the query and isn't a match at all
+				assert.isFalse(scores.has(empty.id));
 				assert.isAbove(scores.get(distinct.id), 0.9);
 			}
 			finally {
