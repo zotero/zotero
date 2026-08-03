@@ -603,6 +603,8 @@
 			// Zotero.Search.combineConditions), so treat it as 'item' here.
 			let bindableBelow = resultLevel == 'any' ? 'item' : resultLevel;
 			let counts = {};
+			// Conditions that match at every level (a tag, say) can be bound to any of them
+			let anyLevel = 0;
 			for (let row of this.conditionsContainer.children) {
 				// Skip a row just added via "+" until the user engages with it, so adding a row
 				// doesn't immediately suggest grouping it
@@ -610,19 +612,29 @@
 					continue;
 				}
 				let level = row.conditionLevel;
-				if (Zotero.Search._isAncestorLevel(bindableBelow, level)) {
+				if (level == 'any') {
+					anyLevel++;
+				}
+				else if (Zotero.Search._isAncestorLevel(bindableBelow, level)) {
 					counts[level] = (counts[level] || 0) + 1;
 				}
 			}
-			let levels = Object.keys(counts);
-			// Drop a stored binding once no condition at its level remains
-			if (this._resultLevel != 'any' && !levels.includes(this._resultLevel)) {
+			// The levels this group can bind to at all: one of its conditions matches there, or
+			// -- for a condition that matches anywhere -- any level below the result level
+			let optionLevels = ['attachment', 'note', 'annotation'].filter(l => counts[l]
+				|| (anyLevel && Zotero.Search._isAncestorLevel(bindableBelow, l)));
+			// Drop a stored binding once it isn't one of them, as when the result level moves
+			// down to the bound level and binding there stops meaning anything
+			if (this._resultLevel != 'any' && !optionLevels.includes(this._resultLevel)) {
 				this._resultLevel = 'any';
 			}
-			// Binding is offered once some level has 2+ conditions, and an existing binding
-			// stays visible (and clearable) even when its group no longer qualifies, so it
-			// can't invisibly constrain the group from a hidden menu
-			if (this._resultLevel == 'any' && !levels.some(l => counts[l] >= 2)) {
+			// Binding is offered once it would mean something: a level shared by 2+ conditions
+			// ties them to one entity, and a condition that matches at any level is narrowed to
+			// the bound one. An existing binding stays visible (and clearable) even when its
+			// group no longer qualifies, so it can't invisibly constrain the group from a
+			// hidden menu.
+			if (this._resultLevel == 'any' && !anyLevel
+					&& !optionLevels.some(l => counts[l] >= 2)) {
 				this.bindingMenu.hidden = true;
 				// Plain group: "Match [all] of the following:" (the suffix carries the colon)
 				this.querySelector('.join-mode-suffix').hidden = false;
@@ -634,7 +646,6 @@
 			// Rebuild the popup only when its option set changes. Rebuilding it on every refresh
 			// would replace the menuitems mid-selection -- when the change came from this menu
 			// itself -- and wedge the drop-down.
-			let optionLevels = ['attachment', 'note', 'annotation'].filter(l => levels.includes(l));
 			let key = optionLevels.join(',');
 			if (key !== this._bindingMenuKey) {
 				this._bindingMenuKey = key;

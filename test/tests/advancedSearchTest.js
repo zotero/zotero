@@ -1538,6 +1538,59 @@ describe("Advanced Search", function () {
 					['title', 'groupStart', 'joinMode', 'tag', 'tag', 'groupEnd']);
 			});
 
+			it("should keep a binding that scopes a condition matching at any level", async function () {
+				// An item whose attachment has the tag, and one where the tag is on a
+				// note instead
+				var hit = await createDataObject('item');
+				var attachment = await importFileAttachment('test.png', { parentID: hit.id });
+				attachment.setTags([{ tag: 'zbound' }]);
+				await attachment.saveTx();
+				var miss = await createDataObject('item');
+				var note = new Zotero.Item('note');
+				note.parentID = miss.id;
+				note.setNote('note');
+				note.setTags([{ tag: 'zbound' }]);
+				await note.saveTx();
+
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'attachment');
+				s.addCondition('tag', 'is', 'zbound');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+				searchBox.updateSearch();
+
+				var group = conditions.querySelector('search-condition-group');
+				assert.equal(group.resultLevel, 'attachment');
+				// The tag has to be on the attachment, not anywhere in the item
+				var ids = await searchBox.search.search();
+				assert.include(ids, hit.id);
+				assert.notInclude(ids, miss.id);
+			});
+
+			it("should drop a binding that the result level makes meaningless", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'attachment');
+				s.addCondition('groupStart', 'true', '');
+				s.addCondition('resultLevel', 'attachment');
+				s.addCondition('tag', 'is', 'zbound');
+				s.addCondition('groupEnd', 'true', '');
+				pane.search = s;
+				searchBox.updateSearch();
+
+				// Results are attachments, so binding the group to the attachment says
+				// nothing the result level doesn't
+				var group = conditions.querySelector('search-condition-group');
+				assert.equal(group.resultLevel, 'any');
+				assert.deepEqual(
+					Object.values(searchBox.search.getConditions()).map(c => c.condition),
+					['resultLevel', 'groupStart', 'tag', 'groupEnd']
+				);
+			});
+
 			it("should wrap a condition in a new group in its place", function () {
 				var s = new Zotero.Search();
 				s.libraryID = Zotero.Libraries.userLibraryID;
