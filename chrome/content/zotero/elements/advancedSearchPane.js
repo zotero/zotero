@@ -170,7 +170,7 @@
 
 		refresh() {
 			this._ensureSearch();
-			let libraryID = ZoteroPane.getSelectedLibraryID();
+			let libraryID = ZoteroPane.getSelectedLibraryIDs()[0];
 			// Keep the previous library when the selected row doesn't have one (e.g., Feeds)
 			if (libraryID) {
 				this._search.libraryID = libraryID;

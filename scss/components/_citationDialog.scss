@@ -549,6 +549,11 @@
 			}
 		}
 		&.empty {
+			// the bottom area's divider immediately follows, so hide this
+			// layout's divider to avoid a doubled line
+			> .divider {
+				display: none;
+			}
 			#list-layout-wrapper {
 				padding: 0;
 			}
@@ -582,7 +587,7 @@
 				font-size: 1.1rem;
 			}
 
-			#citation-preview-empty, #citation-preview-error {
+			#citation-preview-error {
 				padding-top: 2px;
 				color: var(--fill-secondary);
 				font-family: $font-family-base;

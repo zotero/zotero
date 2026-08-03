@@ -96,7 +96,7 @@ describe("ZoteroPane", function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);
 			var noteID = await zp.newNote(false, false, "Test");
-			assert.equal(zp.collectionsView.getSelectedCollection(), collection);
+			assert.equal(zp.collectionsView.getSelectedCollections()[0], collection);
 			var selected = zp.itemsView.getSelectedItems(true);
 			assert.lengthOf(selected, 1);
 			assert.equal(selected, noteID);
@@ -939,7 +939,7 @@ describe("ZoteroPane", function () {
 			assert.isFalse(cv.getRowIndexByID(id));
 			await zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			// Duplicate Items should be selected
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('duplicateLibraries'))[userLibraryID])
 			
@@ -961,7 +961,7 @@ describe("ZoteroPane", function () {
 			assert.isFalse(cv.getRowIndexByID(id));
 			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			// Unfiled Items should be selected
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
@@ -983,7 +983,7 @@ describe("ZoteroPane", function () {
 			
 			// Library should have been expanded and Duplicate Items selected
 			assert.ok(cv.getRowIndexByID(id));
-			assert.equal(zp.getCollectionTreeRow().id, id);
+			assert.equal(zp.getCollectionTreeRows()[0].id, id);
 		});
 		
 		it("should hide a virtual collection in My Library", async function () {
@@ -1183,6 +1183,35 @@ describe("ZoteroPane", function () {
 
 			await selectLibrary(win);
 			await group.eraseTx();
+		});
+
+		it("shouldn't offer Remove from Collection when a saved search is also selected", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+			let item = await createDataObject('item', { collections: [collection.id] });
+
+			let cv = zp.collectionsView;
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let removeItems = menu.querySelector('.zotero-menuitem-remove-items');
+			let moveToTrash = menu.querySelector('.zotero-menuitem-move-to-trash');
+
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+			await zp.itemsView.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(removeItems.hidden, "Offered for a collection on its own");
+
+			// Items in the saved search needn't be in the collection, so removing
+			// from the collection isn't meaningful
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			await zp.itemsView.selectItems([item.id]);
+			await zp.buildItemContextMenu();
+			assert.isTrue(removeItems.hidden, "Not offered alongside a saved search");
+			assert.isFalse(moveToTrash.hidden, "Move to Trash is still offered");
+
+			await selectLibrary(win);
 		});
 
 		it("shouldn't open the item context menu on a library header row", async function () {

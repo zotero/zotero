@@ -191,8 +191,8 @@ var Zotero_File_Interface = new function () {
 	 */
 	this.exportFile = async function () {
 		var exporter = new Zotero_File_Exporter();
-		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryID();
-		if (exporter.libraryID === false) {
+		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryIDs()[0];
+		if (exporter.libraryID === undefined) {
 			throw new Error('No library selected');
 		}
 		exporter.name = Zotero.Libraries.getName(exporter.libraryID);
@@ -221,9 +221,9 @@ var Zotero_File_Interface = new function () {
 			if (!exporter.items) throw ("No items to save");
 			
 			// find name
-			var search = ZoteroPane_Local.getSelectedSavedSearch();
-			if (search) {
-				exporter.name = search.name;
+			var searches = ZoteroPane_Local.getSelectedSavedSearches();
+			if (searches.length) {
+				exporter.name = searches.map(s => s.name).join(', ');
 			}
 		}
 		exporter.save();
@@ -385,7 +385,7 @@ var Zotero_File_Interface = new function () {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		try {
 			let zp = Zotero.getActiveZoteroPane();
-			libraryID = zp.getSelectedLibraryID();
+			libraryID = zp.getSelectedLibraryIDs()[0];
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -591,7 +591,7 @@ var Zotero_File_Interface = new function () {
 		var importCollections = [];
 		try {
 			let zp = Zotero.getActiveZoteroPane();
-			libraryID = zp.getSelectedLibraryID();
+			libraryID = zp.getSelectedLibraryIDs()[0];
 			if (addToLibraryRoot) {
 				await zp.collectionsView.selectLibrary(libraryID);
 			}
@@ -743,9 +743,9 @@ var Zotero_File_Interface = new function () {
 			name = collections.map(c => c.name).join(', ');
 		}
 		else {
-			let search = ZoteroPane.getSelectedSavedSearch();
-			if (search) {
-				name = search.name;
+			let searches = ZoteroPane.getSelectedSavedSearches();
+			if (searches.length) {
+				name = searches.map(s => s.name).join(', ');
 			}
 		}
 		

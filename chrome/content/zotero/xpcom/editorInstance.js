@@ -23,8 +23,14 @@
     ***** END LICENSE BLOCK *****
 */
 
+(function () {
 var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+
+let lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	generateHTMLFromTemplate: "chrome://zotero/content/modules/templates.mjs",
+});
 
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
@@ -47,6 +53,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
+		this._undoRedoController = null;
 	}
 
 	get itemID() {
@@ -236,6 +243,7 @@ class EditorInstance {
 	}
 
 	async uninit() {
+		this._unregisterUndoRedoController();
 		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		if (this._citationDialogWindow) {
 			this._citationDialogWindow.close();
@@ -246,6 +254,69 @@ class EditorInstance {
 		await Zotero.Notes.unregisterEditorInstance(this);
 		if (!this._item.isAttachment() && !this._filesReadOnly) {
 			await Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
+		}
+	}
+
+	_registerUndoRedoController() {
+		if (this._undoRedoController) {
+			return;
+		}
+
+		try {
+			let editorWindow = this._iframeWindow.wrappedJSObject;
+			let commands = new Map([
+				['cmd_undo', { can: 'canUndo', run: 'doUndo' }],
+				['cmd_redo', { can: 'canRedo', run: 'doRedo' }],
+			]);
+			let invoke = (command, operation) => {
+				let method = commands.get(command)?.[operation];
+				if (!method) {
+					return false;
+				}
+				try {
+					return typeof editorWindow[method] == 'function'
+						? editorWindow[method]()
+						: false;
+				}
+				catch (e) {
+					if (!Components.utils.isDeadWrapper(editorWindow)) {
+						Zotero.logError(e);
+					}
+					return false;
+				}
+			};
+			let controller = {
+				supportsCommand: command => commands.has(command),
+				isCommandEnabled: command => !!invoke(command, 'can'),
+				doCommand: command => invoke(command, 'run'),
+				onEvent() {},
+			};
+
+			this._iframeWindow.controllers.insertControllerAt(0, controller);
+			this._undoRedoController = controller;
+		}
+		catch (e) {
+			if (!Components.utils.isDeadWrapper(this._iframeWindow)) {
+				Zotero.logError(e);
+			}
+		}
+	}
+
+	_unregisterUndoRedoController() {
+		if (!this._undoRedoController) {
+			return;
+		}
+
+		try {
+			this._iframeWindow.controllers.removeController(this._undoRedoController);
+		}
+		catch (e) {
+			if (!Components.utils.isDeadWrapper(this._iframeWindow)) {
+				Zotero.logError(e);
+			}
+		}
+		finally {
+			this._undoRedoController = null;
 		}
 	}
 
@@ -561,6 +632,7 @@ class EditorInstance {
 		try {
 			switch (message.action) {
 				case 'initialized': {
+					this._registerUndoRedoController();
 					this._resolveInitPromise();
 					return;
 				}
@@ -1495,7 +1567,7 @@ class EditorInstance {
 				title: Zotero.getString('reader-annotations'),
 				date: new Date().toLocaleString()
 			};
-			html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+			html = lazy.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
 			// New line is needed for note title parser
 			html += '\n';
 		}
@@ -1730,7 +1802,7 @@ class EditorInstanceUtilities {
 				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
 
-			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			let templateHTML = lazy.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
 			// Remove multiple spaces
@@ -1890,3 +1962,4 @@ class EditorInstanceUtilities {
 
 Zotero.EditorInstance = EditorInstance;
 Zotero.EditorInstanceUtilities = new EditorInstanceUtilities();
+})();

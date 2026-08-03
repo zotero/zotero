@@ -439,15 +439,19 @@ Zotero.Tags = new function () {
 					
 					await this.purge(chunk);
 					
-					// Update internal timestamps on all items that had these tags
+					// Update internal timestamps and versions on all items that had these tags
+					var clientVersion;
+					if (itemIDs.length) {
+						clientVersion = await Zotero.Libraries.get(libraryID).incrementClientVersion();
+					}
 					await Zotero.Utilities.Internal.forEachChunkAsync(
 						Zotero.Utilities.arrayUnique(itemIDs),
-						Zotero.DB.MAX_BOUND_PARAMETERS - 1,
+						Zotero.DB.MAX_BOUND_PARAMETERS - 2,
 						async function (chunk) {
-							var sql = 'UPDATE items SET synced=0, clientDateModified=? '
+							var sql = 'UPDATE items SET synced=0, clientDateModified=?, clientVersion=? '
 								+ 'WHERE itemID IN (' + Array(chunk.length).fill('?').join(',') + ')';
 							await Zotero.DB.queryAsync(
-								sql, [Zotero.DB.transactionDateTime].concat(chunk), { noCache: true }
+								sql, [Zotero.DB.transactionDateTime, clientVersion].concat(chunk), { noCache: true }
 							);
 							
 							await Zotero.Items.reload(itemIDs, ['primaryData', 'tags'], true);
@@ -860,8 +864,10 @@ Zotero.Tags = new function () {
 	
 	// Return the first sequence of emojis from a string
 	this.extractEmojiForItemsList = function (str) {
-		// Either match RGI_Emoji (which includes country flags) or any character followed by the Variation Selector-16
-		let re = /(?:(?:\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]])(?!\uFE0F)|.\uFE0F)+/gv;
+		// Either match RGI_Emoji (which includes country flags), a pictographic symbol (see
+		// Zotero.Utilities.Internal.containsEmoji()), or any character followed by the Variation
+		// Selector-16
+		let re = /(?:(?:\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]])(?!\uFE0F)|.\uFE0F)+/gv;
 		return str.match(re)?.[0] || null;
 	};
 

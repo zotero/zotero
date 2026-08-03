@@ -25,6 +25,7 @@
 
 {
 	const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+	const { isTemplateValid } = ChromeUtils.importESModule("chrome://zotero/content/modules/templates.mjs");
 	const DEFAULT_EXT = 'pdf';
 	class FileRenameSettings extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
@@ -102,14 +103,21 @@
 						id="file-renaming-format-template"
 						rows="8"
 					/>
-					<html:label id="file-renaming-format-preview-label">
-						<html:h2
-							data-l10n-id="file-renaming-format-preview"
+					<html:div id="file-renaming-format-preview-section">
+						<html:label id="file-renaming-format-preview-label">
+							<html:h2
+								data-l10n-id="file-renaming-format-preview"
+							/>
+						</html:label>
+						<html:label
+							aria-labelledby="file-renaming-format-preview-label"
+							id="file-renaming-format-preview"
 						/>
-					</html:label>
-					<html:label
-						aria-labelledby="file-renaming-format-preview-label"
-						id="file-renaming-format-preview"
+					</html:div>
+					<label
+						id="file-renaming-template-invalid"
+						class="is-hidden"
+						data-l10n-id="file-renaming-template-invalid"
 					/>
 				</groupbox>
 			</vbox>
@@ -176,6 +184,27 @@
 			this.formatTemplateTextarea.value = val;
 		}
 
+		get templateValid() {
+			return this._isTemplateValid(this.formatTemplate);
+		}
+
+		// Validate `template`, memoizing the last result. Normalize first so the dialog judges the
+		// same string the rename engine validates and renders (see Zotero.Attachments.normalizeRenameTemplate)
+		_isTemplateValid(template) {
+			let normalized = Zotero.Attachments.normalizeRenameTemplate(template);
+			if (normalized !== this._validatedTemplate) {
+				this._validatedTemplate = normalized;
+				this._validatedResult = this._validateTemplate(normalized);
+			}
+			return this._validatedResult;
+		}
+
+		// Engine parse behind an instance method, so tests can count parses (a frozen ESM
+		// namespace export cannot be spied directly)
+		_validateTemplate(normalized) {
+			return isTemplateValid(normalized);
+		}
+
 		handleChange = () => {
 			let autoRenameEnabled = this.autoRenameEnabled;
 			let enabledFileTypes = this.enabledFileTypes;
@@ -195,11 +224,17 @@
 
 		handleTemplateInput = () => {
 			let formatString = this.formatTemplateTextarea.value;
-			// Ignore the empty value, which we'll reset in handleInputBlur() if necessary
+			// A whitespace-only value will be reset to the default on blur; preview the default
+			// (so any stale syntax-error message clears) but don't propagate the change yet
 			if (formatString.replace(/\s/g, '') === '') {
+				this._renderPreview(DEFAULT_ATTACHMENT_RENAME_TEMPLATE);
 				return;
 			}
-			this.updatePreview();
+			// Keep showing the previous preview while the user types through an invalid state.
+			// If the template is still invalid on blur, handleTemplateBlur() will show the error.
+			if (this.templateValid) {
+				this.updatePreview();
+			}
 			this.handleChange();
 		};
 
@@ -209,6 +244,9 @@
 				this.formatTemplateTextarea.value = DEFAULT_ATTACHMENT_RENAME_TEMPLATE;
 				this.updatePreview();
 				this.handleChange();
+			}
+			else {
+				this.updatePreview();
 			}
 		};
 
@@ -227,9 +265,20 @@
 			this.formatTemplateTextarea.readOnly = readonly;
 		};
 
+		// Note: also used as an onSelect listener, so it must take no positional arguments
 		updatePreview = () => {
+			this._renderPreview(this.formatTemplate);
+		};
+
+		_renderPreview = (formatString) => {
+			let valid = this._isTemplateValid(formatString);
+			this.previewSection.classList.toggle('is-hidden', !valid);
+			this.invalidMessage.classList.toggle('is-hidden', valid);
+			if (!valid) {
+				return;
+			}
+
 			let [item, ext, attachmentTitle] = this.getActiveItem() ?? [this.mockItem ?? this.makeMockItem(), DEFAULT_EXT, ''];
-			let formatString = this.formatTemplate;
 			let preview = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString, attachmentTitle });
 			this.querySelector('#file-renaming-format-preview').innerText = `${preview}.${ext}`;
 		};
@@ -242,6 +291,8 @@
 			this.fileTypesCheckboxes = this.querySelector('#file-renaming-file-types-box');
 			this.renameLinkedCheckbox = this.querySelector('#rename-linked-files');
 			this.formatTemplateTextarea = this.querySelector('#file-renaming-format-template');
+			this.previewSection = this.querySelector('#file-renaming-format-preview-section');
+			this.invalidMessage = this.querySelector('#file-renaming-template-invalid');
 			this.enabledFileTypes = this.getAttribute('file-types') ?? '';
 			this.autoRenameEnabled = this.getAttribute('auto-rename-enabled') === 'true';
 			this.renameLinkedCheckbox.checked = this.getAttribute('rename-linked-enabled') === 'true';

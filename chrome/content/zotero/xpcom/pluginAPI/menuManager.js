@@ -632,8 +632,16 @@
 					_menuElem.style.setProperty("--custom-menu-icon-dark", `url(${darkIcon || icon})`);
 				},
 			};
+			// ZoteroPane's menu contexts define a collectionTreeRow property that
+			// throws when read, so copy descriptors rather than values, which would
+			// evaluate it every time a menu is built
 			let wrappedGetContext = () => {
-				return Object.assign({}, defaultContext, getContext ? getContext() : {});
+				let context = {};
+				Object.defineProperties(context, Object.getOwnPropertyDescriptors(defaultContext));
+				if (getContext) {
+					Object.defineProperties(context, Object.getOwnPropertyDescriptors(getContext()));
+				}
+				return context;
 			};
 
 			// Add hooks

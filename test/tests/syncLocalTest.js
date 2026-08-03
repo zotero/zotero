@@ -2881,5 +2881,58 @@ describe("Zotero.Sync.Data.Local", function () {
 			assert.lengthOf(result.conflicts, 0);
 			assert.isFalse(result.localChanged);
 		});
+		
+		it("should automatically use more recent remote lastRead value", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				itemType: "attachment",
+				lastRead: 1700000100
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				itemType: "attachment",
+				lastRead: 1700000200
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.sameDeepMembers(
+				result.changes,
+				[
+					{
+						field: "lastRead",
+						op: "modify",
+						value: 1700000200
+					}
+				]
+			);
+			assert.lengthOf(result.conflicts, 0);
+			assert.isFalse(result.localChanged);
+		});
+		
+		it("should automatically use more recent local lastRead value", function () {
+			var json1 = {
+				key: "AAAAAAAA",
+				version: 1234,
+				itemType: "attachment",
+				lastRead: 1700000200
+			};
+			var json2 = {
+				key: "AAAAAAAA",
+				version: 1235,
+				itemType: "attachment",
+				lastRead: 1700000100
+			};
+			var ignoreFields = ['dateAdded', 'dateModified'];
+			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
+				'item', json1, json2, ignoreFields
+			);
+			assert.lengthOf(result.changes, 0);
+			assert.lengthOf(result.conflicts, 0);
+			assert.isTrue(result.localChanged);
+		});
 	})
 })

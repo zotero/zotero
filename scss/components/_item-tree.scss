@@ -128,7 +128,9 @@
 			.icon-item-type + .tag-swatch,
 			.icon-item-type + .colored-tag-swatches,
 			.annotation-icon + .tag-swatch,
-			.annotation-icon + .colored-tag-swatches {
+			.annotation-icon + .colored-tag-swatches,
+			.retracted + .tag-swatch,
+			.retracted + .colored-tag-swatches {
 				margin-inline-end: 4px;
 			}
 
@@ -216,6 +218,7 @@
 			.retracted {
 				width: 12px;
 				margin-inline-start: 3px;
+				margin-inline-end: 4px;
 			}
 		}
 		

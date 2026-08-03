@@ -259,6 +259,63 @@ class TreeSelection {
 	}
 
 	/**
+	 * Adjusts selection indexes after a row is removed. A removed selected row is
+	 * dropped from the selection, or remapped to the previous row when remapToPrevious
+	 * is true (e.g., when collapsing a container remaps removed descendants to the
+	 * container row, which precedes them). If the removal leaves nothing selected, the
+	 * previous row is selected. If the focused or pivot row is removed, it moves to
+	 * the previous row.
+	 *
+	 * @param {Number} index Removed row index
+	 * @param {Boolean} [remapToPrevious=false] Select the previous row in place of a
+	 * 		removed selected row instead of dropping it from the selection
+	 */
+	adjustForRowRemoval(index, remapToPrevious = false) {
+		let previousIndex = Math.max(index - 1, 0);
+		let selected = new Set();
+		for (let selectedIndex of this.selected) {
+			if (selectedIndex == index) {
+				if (remapToPrevious) {
+					selected.add(previousIndex);
+				}
+			}
+			else {
+				selected.add(selectedIndex > index ? selectedIndex - 1 : selectedIndex);
+			}
+		}
+		if (this.selected.size && !selected.size) {
+			selected.add(previousIndex);
+		}
+		this.selected = selected;
+		this.focused = this.focused == index
+			? previousIndex
+			: this.focused > index ? this.focused - 1 : this.focused;
+		this.pivot = this.pivot == index
+			? previousIndex
+			: this.pivot > index ? this.pivot - 1 : this.pivot;
+	}
+
+	/**
+	 * Adjusts selection indexes after rows are inserted after a given row.
+	 *
+	 * @param {Number} index Row after which rows were inserted
+	 * @param {Number} count Number of inserted rows
+	 */
+	adjustForRowInsertion(index, count) {
+		let selected = new Set();
+		for (let selectedIndex of this.selected) {
+			selected.add(selectedIndex > index ? selectedIndex + count : selectedIndex);
+		}
+		this.selected = selected;
+		if (this.focused > index) {
+			this.focused += count;
+		}
+		if (this.pivot > index) {
+			this.pivot += count;
+		}
+	}
+
+	/**
 	 * Calls the onSelectionChange prop on the tree
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 * @private
@@ -569,7 +626,7 @@ class VirtualizedTable extends React.Component {
 	 *
 	 * @param {Event} e
 	 */
-	_onKeyDown = (e) => {
+	_onKeyDown = async (e) => {
 		if (this.props.onKeyDown && this.props.onKeyDown(e) === false) return;
 
 		this._preventKeyboardScrolling(e);
@@ -663,6 +720,25 @@ class VirtualizedTable extends React.Component {
 		}
 		
 		if (shiftSelect || moveFocused) return;
+
+		// If selection count is greater than 1 and the focused row wasn't
+		// moved out of the selection - toggle open/closed all rows in that selection
+		// Otherwise if the focused row has moved out of the selection, toggle state
+		// of the focused row (handled below)
+		if (this.selection.count > 1
+				&& this.selection.isSelected(this.selection.focused)
+				&& [Zotero.arrowPreviousKey, Zotero.arrowNextKey].includes(e.key)) {
+			let open = e.key == Zotero.arrowNextKey;
+			let rows = Array.from(this.selection.selected)
+				.filter(index => this.props.isContainer(index)
+					&& !this.props.isContainerEmpty(index)
+					&& (open ? !this.props.isContainerOpen(index) : this.props.isContainerOpen(index)))
+				.sort((a, b) => b - a);
+			for (let index of rows) {
+				await this.toggleOpenState(index);
+			}
+			return;
+		}
 		
 		switch (e.key) {
 		case Zotero.arrowPreviousKey:

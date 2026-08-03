@@ -1428,7 +1428,7 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = async function (objectType, i
 						// in batches and we only get the final version, but it will guarantee that
 						// the object won't be redownloaded unnecessarily in the case of a full sync,
 						// because the version will be higher than whatever version is on the server.
-						let hasCacheObject = !!Zotero.Sync.Data.Local.getCacheObject(
+						let hasCacheObject = !!await Zotero.Sync.Data.Local.getCacheObject(
 							objectType, obj.libraryID, obj.key, obj.version
 						);
 						if (!hasCacheObject) {

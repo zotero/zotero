@@ -55,7 +55,7 @@ describe("Advanced Search", function () {
 	it("shouldn't invalidate the collection tree row when clearing an unset advanced search", async function () {
 		// setAdvancedSearch() returns whether the row's filter changed, which
 		// setFilter() uses to decide whether to refresh the items list
-		let row = zp.getCollectionTreeRow();
+		let row = zp.getCollectionTreeRows()[0];
 		// Nothing to clear
 		assert.isFalse(row.setAdvancedSearch(null));
 		

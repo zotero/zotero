@@ -681,13 +681,19 @@ class LibraryLayout extends Layout {
 				let icon = getCSSIcon('plus-circle');
 				iconWrapper.append(icon);
 				// add aria-label for screen readers to announce if this item is added
+				let count = this._getItemsViewIconClickItems(index).length;
 				if (inCitation) {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added", { count });
 				}
 				else {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table", { count });
 				}
 				iconWrapper.append(icon);
+				// refresh the tooltip's item count, since the selection can change
+				// without this row re-rendering
+				cell.addEventListener("mouseenter", () => {
+					doc.l10n.setArgs(cell, { count: this._getItemsViewIconClickItems(index).length });
+				});
 				iconWrapper.addEventListener("click", () => {
 					this._handleItemsViewIconClick(index);
 				});
@@ -952,16 +958,33 @@ class LibraryLayout extends Layout {
 		}
 	}
 
-	// click on + icon will add the item to the citation
+	// click on + icon will add the item(s) to the citation
 	_handleItemsViewIconClick(index) {
 		let rowNode = doc.getElementById(`${this.itemsView.id}-row-${index}`);
 		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
+		let items = this._getItemsViewIconClickItems(index);
 		this.itemsView.selection.clearSelection();
-		let row = this.itemsView.getRow(index);
-		// after adding the item, try to keep the mouse over it even if the bubble-input gets taller
-		IOManager.addItemsToCitation([row.ref]).then(() => {
+		// after adding the items, try to keep the mouse over the clicked row
+		// even if the bubble-input gets taller
+		IOManager.addItemsToCitation(items).then(() => {
 			this._scrollItemTreeToRow(rowNode.id, rowTopBeforeRefresh);
 		});
+	}
+
+	// items that a click on the + icon of the given row will add: all selected
+	// items if the row is part of the current selection, otherwise just this row's item
+	_getItemsViewIconClickItems(index) {
+		let items;
+		if (this.itemsView.selection.isSelected(index)) {
+			items = this.itemsView.getSelectedItems();
+		}
+		else {
+			items = [this.itemsView.getRow(index).ref];
+		}
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			items = items.filter(item => item.isAnnotation());
+		}
+		return items;
 	}
 
 	_handleSelectionChangeWithAnnotation() {
@@ -1018,7 +1041,9 @@ class LibraryLayout extends Layout {
 		// If the itemTree is still loading, wait for it to finish
 		await this.itemsView.waitForLoad();
 		// Scroll to the first cited item
-		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
+		let firstCitedRow = this.itemsView._rows.findIndex(
+			row => row.isObjectRow && CitationDataManager.itemAddedCache.has(row.ref.id)
+		);
 		if (firstCitedRow == -1) return;
 		this.itemsView.ensureRowsAreVisible([firstCitedRow]);
 	}
@@ -1027,10 +1052,11 @@ class LibraryLayout extends Layout {
 	// scroll it back up so that the mouse remains over the same row as before click
 	// do not do it on click of the first row, since then the mouse will be on a header
 	_scrollItemTreeToRow(rowID, rowTopBeforeRefresh) {
-		let rowIndex = rowID.split("-")[4];
+		let rowIndex = parseInt(rowID.split("-").at(-1));
 		if (rowIndex === 0) return;
 		this.itemsView.ensureRowIsVisible(rowIndex);
 		let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${rowID}`);
+		if (!rowAfterRefresh) return;
 		let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
 		let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
 		if (delta > 0.1) {
@@ -1416,14 +1442,19 @@ const IOManager = {
 			// Do not record just-added bubbles if locator is already provided
 			this._clearJustAddedBubbles();
 		}
-		else {
-			// If no locator is provided, record which bubbles were just added.
-			// If a locator is typed next, these bubbles will receive it.
+		else if (bubbleItems.length == 1) {
+			// If no locator is provided, record the just-added bubble.
+			// If a locator is typed next, that bubble will receive it.
 			this._justAddedBubbles = bubbleItems;
 			// Only show the placeholder guidance on the first add -- after
 			// that, the user presumably knows about the shortcut
 			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
 				&& this._timesItemsAdded < 1;
+		}
+		else {
+			// A multi-item add doesn't enter locator-typing mode, so typed text
+			// starts a new search instead of setting a page number on every added item
+			this._clearJustAddedBubbles();
 		}
 		this._timesItemsAdded++;
 		await CitationDataManager.addItems({ bubbleItems, index });
@@ -2050,19 +2081,19 @@ const CitationPreview = {
 		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
 		let isCitingItems = DIALOG_STATE.isCitingItems();
 		let hasPreview = !!io.preview;
-		let shouldShow = isCitingItems && prefShown && hasPreview;
-		_id("citation-preview").hidden = !shouldShow;
 		let isEmpty = !CitationDataManager.items.length;
-		_id("citation-preview-empty").hidden = !isEmpty;
-		_id("citation-preview-content").hidden = isEmpty;
+		// The preview pane appears when citing at least one item and the caller has
+		// provided a preview function
+		let isRelevant = isCitingItems && hasPreview && !isEmpty;
+		_id("citation-preview").hidden = !(isRelevant && prefShown);
 		if (isEmpty) {
 			_id("citation-preview-content").innerHTML = "";
 			_id("citation-preview-error").hidden = true;
 		}
-		// The toggle button only makes sense while citing items with a backing
-		// preview function. It reflects the pref directly.
+		// The toggle button is hidden when there's no preview and is restored to its last
+		// state when the preview pane appears
 		let toggleBtn = _id("display-preview-button");
-		toggleBtn.hidden = !(isCitingItems && hasPreview);
+		toggleBtn.hidden = !isRelevant;
 		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
 		if (!isEmpty) {
 			CitationPreview._renderDebounced();

@@ -1052,7 +1052,7 @@ describe("Zotero.Attachments", function () {
 			]);
 		});
 
-		it("should include a PubMed Central resolver before DOI OA resolvers", async function () {
+		it("should include a PubMed Central resolver after DOI OA resolvers", async function () {
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
 			item.setField('title', 'Test');
 			item.setField('DOI', '10.1093/nar/gkac173');
@@ -1062,11 +1062,11 @@ describe("Zotero.Attachments", function () {
 			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
 
 			assert.lengthOf(resolvers, 2);
-			assert.deepEqual(resolvers[0], {
+			assert.isFunction(resolvers[0]);
+			assert.deepEqual(resolvers[1], {
 				pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9262588/',
 				accessMethod: 'oa'
 			});
-			assert.isFunction(resolvers[1]);
 		});
 
 		it("should allow finding files for an item with a PMCID", async function () {
@@ -2069,6 +2069,53 @@ describe("Zotero.Attachments", function () {
 			var str = Zotero.Attachments.getFileBaseNameFromItem(item);
 			assert.equal(str, Zotero.getString('general.andJoiner', ['Foo', 'Bar']) + ' - ');
 		});
+
+		it("should fall back to the default template when the synced template is invalid", async function () {
+			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			let libraryID = Zotero.Libraries.userLibraryID;
+			let expected = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: DEFAULT_ATTACHMENT_RENAME_TEMPLATE });
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', '{{ title');
+			try {
+				assert.equal(Zotero.Attachments.getFileBaseNameFromItem(item), expected);
+			}
+			finally {
+				await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+			}
+		});
+
+		it("should fall back to the default template when the synced template is empty", async function () {
+			const { DEFAULT_ATTACHMENT_RENAME_TEMPLATE } = ChromeUtils.importESModule("chrome://zotero/content/renameFiles.mjs");
+			let libraryID = Zotero.Libraries.userLibraryID;
+			let expected = Zotero.Attachments.getFileBaseNameFromItem(item, { formatString: DEFAULT_ATTACHMENT_RENAME_TEMPLATE });
+			for (let empty of ['', '   ', '\n\t']) {
+				await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', empty);
+				try {
+					assert.equal(
+						Zotero.Attachments.getAttachmentRenameTemplate(libraryID),
+						DEFAULT_ATTACHMENT_RENAME_TEMPLATE,
+						`empty synced template ${JSON.stringify(empty)} must resolve to the default`
+					);
+					// A non-empty basename proves the empty template never reached the engine
+					assert.equal(Zotero.Attachments.getFileBaseNameFromItem(item), expected);
+				}
+				finally {
+					await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+				}
+			}
+		});
+
+		it("should validate the synced template as the engine renders it, ignoring newlines inside a tag", async function () {
+			// The engine strips newlines before rendering, so a newline inside a tag (here splitting
+			// `endif`) must be validated against the stripped form and not force the default template
+			let libraryID = Zotero.Libraries.userLibraryID;
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', '{{if title}}a{{end\nif}}');
+			try {
+				assert.equal(Zotero.Attachments.getFileBaseNameFromItem(item), 'a');
+			}
+			finally {
+				await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+			}
+		});
 	});
 	
 	describe("#getBaseDirectoryRelativePath()", function () {
@@ -2520,6 +2567,31 @@ describe("Zotero.Attachments", function () {
 			await attachment1.eraseTx();
 			await attachment2.eraseTx();
 			await item.eraseTx();
+		});
+
+		it("should validate the rename template only once for the whole batch", async function () {
+			let item1 = createUnsavedDataObject('item');
+			item1.setField('title', 'Lorem');
+			await item1.saveTx();
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+
+			let item2 = createUnsavedDataObject('item');
+			item2.setField('title', 'Ipsum');
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('test.pdf', { parentItemID: item2.id });
+
+			let spy = sinon.spy(Zotero.Attachments, 'getAttachmentRenameTemplate');
+			try {
+				await renameFilesFromParent({ pretend: true });
+				assert.isAtMost(spy.callCount, 1, 'template should be resolved and validated once for the batch, not per item');
+			}
+			finally {
+				spy.restore();
+				await attachment1.eraseTx();
+				await attachment2.eraseTx();
+				await item1.eraseTx();
+				await item2.eraseTx();
+			}
 		});
 
 		it('should restore missing extension when renaming a primary attachment with a file present locally', async function () {

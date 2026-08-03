@@ -75,6 +75,9 @@ general-more-information = More Information
 general-warning = Warning
 general-type-to-continue = Type “{ $text }” to continue.
 general-continue = Continue
+general-allow = Allow
+general-always-allow = Always Allow
+general-deny = Deny
 
 general-red = Red
 general-orange = Orange
@@ -1258,3 +1261,6 @@ undo-action-merge-items = { $count ->
 }
 menu-edit-undo-action = Undo { $action }
 menu-edit-redo-action = Redo { $action }
+
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.

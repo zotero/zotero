@@ -235,7 +235,7 @@ describe("Connector Server", function () {
 			// My Library be selected, and the item should be in it
 			var ids = await promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			assert.lengthOf(ids, 1);
@@ -549,7 +549,7 @@ describe("Connector Server", function () {
 			// My Library be selected, and the item should be in it
 			var ids = await promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			assert.lengthOf(ids, 1);
@@ -1859,7 +1859,7 @@ describe("Connector Server", function () {
 			
 			assert.equal(req.status, 201);
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			

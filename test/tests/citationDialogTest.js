@@ -376,11 +376,8 @@ describe("Citation Dialog", function () {
 			let itemTwo = await createDataObject('item');
 			await IOManager.addItemsToCitation([itemOne, itemTwo]);
 
-			// Both items should be counted as just-added
-			assert.sameMembers(CitationDataManager.items.map(i => i.dialogReferenceID), IOManager._justAddedBubbles.map(b => b.dialogReferenceID));
-
-			// Clear just-added bubbles, as if the user did it themselves
-			IOManager._clearJustAddedBubbles();
+			// A multi-item add does not record just-added bubbles
+			assert.notOk(IOManager._justAddedBubbles);
 
 			// Type a locator and press Enter
 			let currentInput = dialog.document.getElementById("bubble-input").getCurrentInput();
@@ -451,6 +448,24 @@ describe("Citation Dialog", function () {
 			assert.isTrue(dialog.document.getElementById("list-layout").hidden);
 		});
 
+		it("should show the citation preview only when the citation has items", async function () {
+			let prefWas = Zotero.Prefs.get("integration.citationPreviewShown");
+			Zotero.Prefs.set("integration.citationPreviewShown", true);
+			try {
+				IOManager.updateBubbleInput();
+				assert.isTrue(dialog.document.getElementById("citation-preview").hidden);
+				assert.isTrue(dialog.document.getElementById("display-preview-button").hidden);
+
+				let item = await createDataObject('item');
+				await IOManager.addItemsToCitation([item]);
+				assert.isFalse(dialog.document.getElementById("citation-preview").hidden);
+				assert.isFalse(dialog.document.getElementById("display-preview-button").hidden);
+			}
+			finally {
+				Zotero.Prefs.set("integration.citationPreviewShown", prefWas);
+			}
+		});
+
 		it("should highlight bubbles whose items are selected", async function () {
 			let itemOne = await createDataObject('item');
 			let itemTwo = await createDataObject('item');
@@ -483,6 +498,86 @@ describe("Citation Dialog", function () {
 			let rowID = `${dialog.libraryLayout.itemsView.id}-row-${rowIndex}`;
 			let rowNode = dialog.document.getElementById(rowID);
 			assert.isTrue(rowNode.classList.contains("highlighted"));
+		});
+
+		it("should add all selected items when clicking + on a selected row", async function () {
+			let collection = await createDataObject('collection');
+			let itemOne = await createDataObject('item', { collections: [collection.id] });
+			let itemTwo = await createDataObject('item', { collections: [collection.id] });
+
+			await IOManager.toggleDialogMode("library");
+			let cv = dialog.libraryLayout.collectionsView;
+			let itemsView = dialog.libraryLayout.itemsView;
+			await cv.selectByID("C" + collection.id);
+			await itemsView.waitForLoad();
+
+			await itemsView.selectItems([itemOne.id, itemTwo.id]);
+			IOManager.focusItemTree();
+			dialog.libraryLayout._handleItemsViewIconClick(itemsView.getRowIndexByID(itemOne.id));
+			// the add is done once focus returns to the input
+			while (!dialog.document.activeElement.closest("bubble-input")) {
+				await Zotero.Promise.delay(10);
+			}
+
+			assert.sameMembers(CitationDataManager.items.map(item => item.id), [itemOne.id, itemTwo.id]);
+
+			// a number typed after a multi-item add is not applied as a page locator
+			let input = dialog.document.querySelector("bubble-input").refocusInput();
+			input.value = "123";
+			IOManager._handleInputEnter(input);
+			assert.isTrue(CitationDataManager.items.every(item => !item.locator));
+			input.value = "";
+
+			await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+			await itemsView.waitForLoad();
+		});
+
+		it("should add only the clicked item when clicking + on an unselected row", async function () {
+			let collection = await createDataObject('collection');
+			let itemOne = await createDataObject('item', { collections: [collection.id] });
+			let itemTwo = await createDataObject('item', { collections: [collection.id] });
+
+			await IOManager.toggleDialogMode("library");
+			let cv = dialog.libraryLayout.collectionsView;
+			let itemsView = dialog.libraryLayout.itemsView;
+			await cv.selectByID("C" + collection.id);
+			await itemsView.waitForLoad();
+
+			await itemsView.selectItem(itemTwo.id);
+			IOManager.focusItemTree();
+			dialog.libraryLayout._handleItemsViewIconClick(itemsView.getRowIndexByID(itemOne.id));
+			// the add is done once focus returns to the input
+			while (!dialog.document.activeElement.closest("bubble-input")) {
+				await Zotero.Promise.delay(10);
+			}
+
+			assert.sameMembers(CitationDataManager.items.map(item => item.id), [itemOne.id]);
+
+			await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+			await itemsView.waitForLoad();
+		});
+
+		it("should focus the input after adding an item with Enter in the items list", async function () {
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item', { collections: [collection.id] });
+
+			await IOManager.toggleDialogMode("library");
+			let cv = dialog.libraryLayout.collectionsView;
+			let itemsView = dialog.libraryLayout.itemsView;
+			await cv.selectByID("C" + collection.id);
+			await itemsView.waitForLoad();
+
+			await itemsView.selectItem(item.id);
+			IOManager.focusItemTree();
+			let treeElem = dialog.document.querySelector("#zotero-items-tree [tabindex]");
+			treeElem.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+			// the post-add handling returns focus to the input
+			while (!dialog.document.activeElement.closest("bubble-input")) {
+				await Zotero.Promise.delay(10);
+			}
+
+			await cv.selectByID("L" + Zotero.Libraries.userLibraryID);
+			await itemsView.waitForLoad();
 		});
 
 		it("should show the union of items from multiple selected collections", async function () {
