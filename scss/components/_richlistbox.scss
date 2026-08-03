@@ -1,3 +1,10 @@
+// An autocomplete popup keeps focus in the field it completes, so its selected
+// row is the active one, rather than the platform's unfocused selection
+panel[type="autocomplete-richlistbox"] .autocomplete-richlistitem[selected] {
+	background-color: var(--color-accent);
+	color: var(--color-accent-text);
+}
+
 richlistbox {
 	background: var(--material-background);
 	border: var(--material-panedivider);
