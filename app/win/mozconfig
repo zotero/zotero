@@ -30,11 +30,10 @@ ac_add_options --disable-update-agent
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
 
-# source-repo.h generation only auto-detects Mercurial; derive the git repo
-# and changeset here so official-build packaging can stamp the source
-# (otherwise source-repo.h is empty and packaging fails).
-export MOZ_SOURCE_REPO=$(git config --get remote.origin.url)
-export MOZ_SOURCE_CHANGESET=$(git rev-parse HEAD)
+# We don't need source-repo info embedded, and generating it would require a
+# source-repo.h that Firefox only auto-populates for Mercurial, not our git
+# checkout, which breaks packaging. Turn it off.
+ac_add_options MOZ_INCLUDE_SOURCE_INFO=
 MOZ_REQUIRE_SIGNING=
 
 # Build updater without MAR signature verification
