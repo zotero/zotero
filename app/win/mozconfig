@@ -29,6 +29,12 @@ ac_add_options --disable-update-agent
 
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
+
+# source-repo.h generation only auto-detects Mercurial; derive the git repo
+# and changeset here so official-build packaging can stamp the source
+# (otherwise source-repo.h is empty and packaging fails).
+export MOZ_SOURCE_REPO=$(git config --get remote.origin.url)
+export MOZ_SOURCE_CHANGESET=$(git rev-parse HEAD)
 MOZ_REQUIRE_SIGNING=
 
 # Build updater without MAR signature verification
