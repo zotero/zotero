@@ -1890,7 +1890,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 						// "séance" and vice versa
 						var useNormalized = condition.normalizedField
 							&& typeof condition.value == 'string'
-							&& ['contains', 'doesNotContain', 'beginsWith']
+							&& ['contains', 'doesNotContain', 'beginsWith', 'is', 'isNot']
 								.includes(condition.operator);
 						var searchValue = useNormalized
 							? Zotero.Utilities.Internal.normalizeForSearch(condition.value)
@@ -1968,9 +1968,12 @@ Zotero.Search.prototype._buildQuery = async function () {
 										break;
 									}
 									else {
-										condSQL += '=?';
+										// Searching is case-insensitive
+										// everywhere else, so an exact match is
+										// too
+										condSQL += '=? COLLATE NOCASE';
 									}
-									condSQLParams.push(condition['value']);
+									condSQLParams.push(searchValue);
 								}
 								break;
 							

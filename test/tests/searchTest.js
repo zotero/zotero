@@ -1027,6 +1027,30 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("is", function () {
+				it("should match a value in a different case", async function () {
+					var item = await createDataObject('item', { itemType: 'journalArticle' });
+					item.setField('publicationTitle', 'Review of Finance');
+					await item.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('publicationTitle', 'is', 'review of finance');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+				
+				it("should match a value with different accents", async function () {
+					var item = await createDataObject('item', { itemType: 'journalArticle' });
+					item.setField('publicationTitle', 'Revue de Séance');
+					await item.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('publicationTitle', 'is', 'revue de seance');
+					assert.sameMembers(await s.search(), [item.id]);
+				});
+			});
+			
 			describe("isEmpty/isNotEmpty", function () {
 				it("should match items with an empty or non-empty text field", async function () {
 					var item1 = await createDataObject('item');
