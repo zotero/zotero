@@ -92,6 +92,9 @@
 	"general-update": {
 		"string": "Update"
 	},
+	"general-reset-to-default": {
+		"string": "Reset to Default"
+	},
 	"general-back": {
 		"string": "Back"
 	},
@@ -143,6 +146,15 @@
 	"general-continue": {
 		"string": "Continue"
 	},
+	"general-allow": {
+		"string": "Allow"
+	},
+	"general-always-allow": {
+		"string": "Always Allow"
+	},
+	"general-deny": {
+		"string": "Deny"
+	},
 	"general-red": {
 		"string": "Red"
 	},
@@ -181,6 +193,12 @@
 	},
 	"general-loading": {
 		"string": "Loading…"
+	},
+	"db-checking-integrity": {
+		"string": "Checking database integrity…"
+	},
+	"db-repairing": {
+		"string": "Repairing database…"
 	},
 	"citation-style-label": {
 		"string": "Citation Style:"
@@ -295,6 +313,12 @@
 	},
 	"item-menu-remove-from-recently-read.label": {
 		"string": "Remove from { recently-read }…"
+	},
+	"collections-menu-clear-all-last-read.label": {
+		"string": "Clear All Last Read Dates…"
+	},
+	"recently-read-clear-all-confirm": {
+		"string": "All Last Read dates in this library will be erased."
 	},
 	"items-section-collections-selected": {
 		"string": "{count, plural, one {{ count } collection selected} other {{ count } collections selected}}"
@@ -1178,6 +1202,12 @@
 	"advanced-search-condition-input.aria-label": {
 		"string": "Value"
 	},
+	"search-operator-isEmpty": {
+		"string": "is empty"
+	},
+	"search-operator-isNotEmpty": {
+		"string": "is not empty"
+	},
 	"search-conditions-tooltip-fields": {
 		"string": "Fields:"
 	},
@@ -1192,6 +1222,18 @@
 	},
 	"search-conditions-tag": {
 		"string": "Tag"
+	},
+	"search-conditions-numTags": {
+		"string": "# of Tags"
+	},
+	"search-conditions-numNotes": {
+		"string": "# of Notes"
+	},
+	"search-conditions-numAttachments": {
+		"string": "# of Attachments"
+	},
+	"search-conditions-numAnnotations": {
+		"string": "# of Annotations"
 	},
 	"search-conditions-note": {
 		"string": "Note"
@@ -1285,6 +1327,9 @@
 	},
 	"search-conditions-short-fileTypeID": {
 		"string": "File Type"
+	},
+	"search-conditions-short-attachmentStorageType": {
+		"string": "Storage Type"
 	},
 	"search-conditions-short-lastRead": {
 		"string": "Last Read"
@@ -1388,8 +1433,17 @@
 	"userjs-pref-warning": {
 		"string": "Some { app-name } settings have been overridden using an unsupported method. { app-name } will revert them and restart."
 	},
+	"migrate-extra-fields-progress-headline": {
+		"string": "Updating Items…"
+	},
 	"migrate-extra-fields-progress-message": {
 		"string": "Migrating new fields from Extra field"
+	},
+	"fulltext-indexing-progress-title": {
+		"string": "Indexing"
+	},
+	"fulltext-indexing-progress-message": {
+		"string": "Full-text search results may be incomplete until indexing finishes."
 	},
 	"long-tag-fixer-window-title.title": {
 		"string": "Split Tags"
@@ -1559,6 +1613,12 @@
 	"menu-edit-redo-action": {
 		"string": "Redo { action }"
 	},
+	"local-api-authorize-title": {
+		"string": "Local API Authorization"
+	},
+	"local-api-authorize-text": {
+		"string": "“{ appName }”, an application running on your computer, wants to modify your { app-name } library."
+	},
 	"preferences-window.title": {
 		"string": "{ app-name } Settings"
 	},
@@ -1606,6 +1666,21 @@
 	},
 	"preferences-reader-ebook-hyphenate.label": {
 		"string": "Enable automatic hyphenation"
+	},
+	"preferences-read-aloud-title": {
+		"string": "Read Aloud"
+	},
+	"preferences-read-aloud-highlight-granularity": {
+		"string": "Highlight current"
+	},
+	"preferences-read-aloud-highlight-granularity-paragraph.label": {
+		"string": "paragraph"
+	},
+	"preferences-read-aloud-highlight-granularity-sentence.label": {
+		"string": "sentence"
+	},
+	"preferences-read-aloud-highlight-granularity-word.label": {
+		"string": "word"
 	},
 	"preferences-note-title": {
 		"string": "Notes"
@@ -1684,6 +1759,9 @@
 	},
 	"preferences-advanced-local-api-available": {
 		"string": "Available at <code data-l10n-name=\"url\">{ url }</span>"
+	},
+	"preferences-advanced-local-api-clear-authorizations.label": {
+		"string": "Clear Write Authorizations"
 	},
 	"preferences-advanced-server-disabled": {
 		"string": "The { app-name } HTTP server is disabled."
@@ -1780,6 +1858,24 @@
 	},
 	"preferences-account-switch-accept": {
 		"string": "Remove Data and Restart"
+	},
+	"fulltext-index-status-indexing": {
+		"string": "Indexing { indexed } of { total }…"
+	},
+	"fulltext-index-status-complete": {
+		"string": "Search index is up to date"
+	},
+	"fulltext-stats-attachments-indexed": {
+		"string": "Attachments indexed:"
+	},
+	"fulltext-stats-partially-indexed": {
+		"string": "Partially indexed:"
+	},
+	"fulltext-stats-not-available": {
+		"string": "Full-text content or file not available:"
+	},
+	"fulltext-stats-notes-indexed": {
+		"string": "Notes indexed:"
 	},
 	"scaffold-translator-output.aria-label": {
 		"string": "Console"
@@ -2232,16 +2328,16 @@
 		"string": "Options"
 	},
 	"reader-read-aloud-skip-back": {
-		"string": "Skip Back"
+		"string": "Skip to Previous Paragraph"
 	},
 	"reader-read-aloud-skip-back-sentence": {
-		"string": "Skip Back by Sentence"
+		"string": "Skip to Previous Sentence"
 	},
 	"reader-read-aloud-skip-ahead": {
-		"string": "Skip Ahead"
+		"string": "Skip to Next Paragraph"
 	},
 	"reader-read-aloud-skip-ahead-sentence": {
-		"string": "Skip Ahead by Sentence"
+		"string": "Skip to Next Sentence"
 	},
 	"reader-read-aloud-add-annotation": {
 		"string": "Annotate Sentence ({ key1 }/{ key2 })"
@@ -2466,16 +2562,13 @@
 		"string": "{search, select, true {No selected, open, or cited items match the current search} other {No selected or open items}}"
 	},
 	"integration-citationDialog-lib-message-add-note": {
-		"string": "{search, select, true {No selected notes match the current search} other {No notes are selected}}"
+		"string": "{search, select, true {No selected or open notes match the current search} other {No selected or open notes}}"
 	},
 	"integration-citationDialog-lib-message-annotations": {
 		"string": "{search, select, true {No items with annotations match the current search} other {No selected or open items with annotations}}"
 	},
 	"integration-citationDialog-settings-keepSorted": {
 		"string": "Keep sources sorted"
-	},
-	"integration-citationDialog-preview-empty": {
-		"string": "Preview"
 	},
 	"integration-citationDialog-preview-error": {
 		"string": "Preview unavailable"
@@ -2536,6 +2629,9 @@
 	},
 	"integration-citationDialog-items-table-added.aria-label": {
 		"string": "This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it."
+	},
+	"integration-citationDialog-add-to-citation-tooltip": {
+		"string": "{count, plural, one {Add to Citation} other {Add { count } Items to Citation}}"
 	},
 	"integration-citationDialog-add-all": {
 		"string": "Add all"
@@ -2888,6 +2984,9 @@
 	"file-renaming-format-preview": {
 		"string": "Preview:"
 	},
+	"file-renaming-template-invalid": {
+		"string": "This filename template contains a syntax error and won’t be used."
+	},
 	"file-renaming-preview-changes": {
 		"string": "Preview Changes…"
 	},
@@ -2905,6 +3004,15 @@
 	},
 	"file-renaming-auto-rename-prompt-no": {
 		"string": "Keep Existing Filenames"
+	},
+	"file-renaming-invalid-template-prompt-title": {
+		"string": "Invalid Filename Template"
+	},
+	"file-renaming-invalid-template-prompt-body": {
+		"string": "The filename template contains a syntax error and cannot be saved. Would you like to reset it to the default template?"
+	},
+	"file-renaming-invalid-template-prompt-body-library": {
+		"string": "The filename template for “{ library }” contains a syntax error and cannot be saved. Would you like to reset it to the default template?"
 	},
 	"file-renaming-preview-window.title": {
 		"string": "Rename Files"
