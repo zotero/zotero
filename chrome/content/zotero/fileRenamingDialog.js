@@ -315,8 +315,8 @@ var FileRenamingDialog = { // eslint-disable-line no-unused-vars
 		let [title, description, reset, cancel] = await document.l10n.formatValues([
 			'file-renaming-invalid-template-prompt-title',
 			bodyID,
-			'file-renaming-invalid-template-prompt-reset',
-			'file-renaming-invalid-template-prompt-cancel'
+			'general-reset-to-default',
+			'general-go-back'
 		]);
 		let index = Zotero.Prompt.confirm({
 			title,

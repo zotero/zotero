@@ -58,6 +58,7 @@ general-clear = Clear
 clear-button =
     .label = { general-clear }
 general-update = Update
+general-reset-to-default = Reset to Default
 general-back = Back
 general-edit = Edit
 general-cut = Cut
