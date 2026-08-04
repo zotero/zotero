@@ -1148,7 +1148,7 @@ const WindowScopeVariables = {
 			if (prop === "ownerDocument") {
 				return WindowScopeVariables.createSafeDocument(getActual().ownerDocument, pluginID, { rootNode });
 			}
-			if (prop === "ownerGlobal" || prop === "defaultView") {
+			if (prop === "documentGlobal" || prop === "defaultView") {
 				let win = Reflect.get(getActual(), prop);
 				if (!win) return null;
 				return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
