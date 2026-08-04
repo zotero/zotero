@@ -3912,11 +3912,12 @@ describe("Plugin Sandbox", function () {
 		});
 
 		describe("ZoteroPane API", function () {
-			it("should return the selected library ID matching host", function () {
-				let expected = win.ZoteroPane.getSelectedLibraryID();
-				let actual = evalInScope("_win.ZoteroPane.getSelectedLibraryID()");
-				assert.isNumber(actual);
-				assert.equal(actual, expected);
+			it("should return the selected library IDs matching host", function () {
+				let expected = win.ZoteroPane.getSelectedLibraryIDs();
+				assert.isNotEmpty(expected);
+				evalInScope("var _libraryIDs = _win.ZoteroPane.getSelectedLibraryIDs()");
+				assert.equal(evalInScope("_libraryIDs.length"), expected.length);
+				assert.equal(evalInScope("_libraryIDs[0]"), expected[0]);
 			});
 
 			it("should return selected items as IDs and wrapped facades", async function () {
@@ -4005,8 +4006,8 @@ describe("Plugin Sandbox", function () {
 				// Data-accessing methods should not be available
 				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedItems === 'undefined'"),
 					"getSelectedItems should not be exposed without dataRead");
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedCollection === 'undefined'"),
-					"getSelectedCollection should not be exposed without dataRead");
+				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedCollections === 'undefined'"),
+					"getSelectedCollections should not be exposed without dataRead");
 				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.selectItem === 'undefined'"),
 					"selectItem should not be exposed without dataRead");
 				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.canEdit === 'undefined'"),
