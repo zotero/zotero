@@ -26,7 +26,7 @@ menupopup {
 }
 
 menuitem:is([checked]):is([type="radio"]) > .menu-icon {
-	list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+	content: url("chrome://zotero/skin/win/menu-radio.svg");
 }
 
 menulist {
@@ -45,10 +45,11 @@ menulist {
 	
 			& > .menu-icon {
 				display: revert;
+				visibility: inherit;
 				-moz-context-properties: fill, fill-opacity;
 				fill: currentColor;
-				fill-opacity: var(--menu-icon-opacity);
-				list-style-image: url("chrome://zotero/skin/win/menu-radio.svg");
+				fill-opacity: var(--menu-arrow-opacity);
+				content: url("chrome://zotero/skin/win/menu-radio.svg");
 				width: 16px;
 				margin-inline-end: 8px;
 			}

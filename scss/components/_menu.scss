@@ -89,7 +89,7 @@ $menu-icons: (
 	@include macOS-hide-menu-icons;
 }
 
-menupopup image {
+menupopup :is(image, .menu-icon) {
 	-moz-context-properties: fill, fill-opacity;
 	fill: var(--fill-secondary);
 	
@@ -103,9 +103,11 @@ menu {
 	&.zotero-custom-menu-item {
 		@media (prefers-color-scheme: light) {
 			list-style-image: var(--custom-menu-icon-light, none);
+			--menuitem-icon: var(--custom-menu-icon-light, none);
 		}
 		@media (prefers-color-scheme: dark) {
 			list-style-image: var(--custom-menu-icon-dark, none);
+			--menuitem-icon: var(--custom-menu-icon-dark, none);
 		}
 	}
 }

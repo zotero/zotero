@@ -24,7 +24,9 @@
 
 @mixin svgicon-menu($icon, $color, $size: "16", $prefix: false, $has2x: false, $light-dark: false) {
     // Disable 2x because list-style-image doesn't support image-set
+    // list-style-image is used by native macOS menus, --menuitem-icon by in-content menus
     list-style-image: -make-icon-background($icon, $color, $size, $prefix, false);
+    --menuitem-icon: #{-make-icon-background($icon, $color, $size, $prefix, false)};
     @if ($color == 'universal') {
         @if ($light-dark) {
             @include light-dark(fill, nth($light-dark, 1), nth($light-dark, 2));
