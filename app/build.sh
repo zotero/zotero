@@ -676,7 +676,7 @@ if [ $BUILD_MAC == 1 ]; then
 	
 	# Merge relevant assets from Firefox
 	mkdir "$CONTENTSDIR/MacOS"
-	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashreporter.app|minidump-analyzer|nmhproxy|pingsender|updater.app) "$CONTENTSDIR/MacOS"
+	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashhelper|crashreporter.app|minidump-analyzer|nmhproxy|pingsender|updater.app) "$CONTENTSDIR/MacOS"
 	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|Assets.car|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
 	
 	# Add our custom ChannelPrefs.framework and change channel if not a source build
@@ -944,7 +944,7 @@ if [ $BUILD_WIN == 1 ]; then
 		#
 		# 'i686' is a huge directory containing x86 versions of xul.dll and other files in
 		# Firefox ARM64 builds for use with the EME DRM plugins
-		cp -R "$runtime_path"/!(application.ini|browser|crashreporter*|default-browser-agent.exe|defaultagent*|defaults|devtools-files|firefox*|i686|maintenanceservice*|minidump-analyzer.exe|pingsender.exe|private_browsing*|precomplete|removed-files|uninstall|update*) "$APPDIR"
+		cp -R "$runtime_path"/!(application.ini|browser|crashhelper.exe|crashreporter*|default-browser-agent.exe|defaultagent*|defaults|desktop-launcher|devtools-files|dxcompiler.dll|firefox*|i686|maintenanceservice*|minidump-analyzer.exe|nmhproxy.exe|pingsender.exe|private_browsing*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
@@ -1129,7 +1129,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		mkdir "$APPDIR"
 		
 		# Merge relevant assets from Firefox
-		cp -r "$runtime_path/"!(application.ini|browser|defaults|devtools-files|crashreporter|crashreporter.ini|firefox|pingsender|precomplete|removed-files|run-mozilla.sh|update-settings.ini|updater|updater.ini) "$APPDIR"
+		cp -r "$runtime_path/"!(application.ini|browser|crashhelper|crashreporter|crashreporter.ini|defaults|devtools-files|firefox|pingsender|precomplete|removed-files|run-mozilla.sh|update-settings.ini|updater|updater.ini) "$APPDIR"
 		
 		# Use our own launcher that calls the original Firefox executable with -app
 		mv "$APPDIR"/firefox-bin "$APPDIR"/zotero-bin
