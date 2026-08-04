@@ -138,17 +138,28 @@
 	appearance: none;
 	border: none;
 	margin: 0;
-	padding: 8px 17px;
-	-moz-context-properties: stroke;
-	stroke: currentColor;
+	padding: 8px 18px;
+	color: inherit;
+
+	/* Segoe Fluent Icons is the preferred font for Windows 11, and
+	 * Segoe MDL2 Assets is there for windows 10. Luckily, the relevant glyphs
+	 * are the same, so we can just fall back.
+	 * See: https://learn.microsoft.com/en-us/windows/apps/design/style/segoe-fluent-icons-font */
+	font-family: "Segoe Fluent Icons", "Segoe MDL2 Assets";
+	font-size: round(10px, env(hairline));
+	line-height: 1;
 
 	:root[tabletmode] & {
 	display: none;
 	}
 
 	> .toolbarbutton-icon {
-	width: 12px;
-	height: 12px;
+	display: none;
+	}
+
+	&::before {
+	display: inline-block;
+	content: inherit;
 
 	&:-moz-locale-dir(rtl) {
 		transform: scaleX(-1);
@@ -161,83 +172,33 @@
 	 * for Windows 11's "snap layouts" feature, see
 	 * DealWithWindowsAppearanceHacks */
 	-moz-default-appearance: -moz-window-button-minimize;
-	list-style-image: url(chrome://browser/skin/window-controls/minimize.svg);
+	content: "\e921"; /* ChromeMinimize */
+	@media (prefers-contrast) {
+		content: "\ef2d"; /* ChromeMinimizeContrast */
+	}
 }
 
 .titlebar-max {
 	-moz-default-appearance: -moz-window-button-maximize;
-	list-style-image: url(chrome://browser/skin/window-controls/maximize.svg);
+	content: "\e922"; /* ChromeMaximize */
+	@media (prefers-contrast) {
+		content: "\ef2e"; /* ChromeMaximizeContrast */
+	}
 }
 
 .titlebar-restore {
 	-moz-default-appearance: -moz-window-button-restore;
-	list-style-image: url(chrome://browser/skin/window-controls/restore.svg);
+	content: "\e923"; /* ChromeRestore */
+	@media (prefers-contrast) {
+		content: "\ef2f"; /* ChromeRestoreContrast */
+	}
 }
 
 .titlebar-close {
 	-moz-default-appearance: -moz-window-button-close;
-	list-style-image: url(chrome://browser/skin/window-controls/close.svg);
-}
-
-:root[lwtheme-image] {
-	.titlebar-button {
-	-moz-context-properties: unset;
-	}
-	.titlebar-min {
-	list-style-image: url(chrome://browser/skin/window-controls/minimize-themes.svg);
-	}
-	.titlebar-max {
-	list-style-image: url(chrome://browser/skin/window-controls/maximize-themes.svg);
-	}
-	.titlebar-restore {
-	list-style-image: url(chrome://browser/skin/window-controls/restore-themes.svg);
-	}
-	.titlebar-close {
-	list-style-image: url(chrome://browser/skin/window-controls/close-themes.svg);
-	}
-}
-
-/* the 12px image renders a 10px icon, and the 10px upscaled gets rounded to 12.5, which
- * rounds up to 13px, which makes the icon one pixel too big on 1.25dppx. Fix: */
-@media (1.20dppx <= resolution <= 1.45dppx) {
-	.titlebar-button > .toolbarbutton-icon {
-	width: 11.5px;
-	height: 11.5px;
-	}
-}
-
-/* 175% dpi should result in the same device pixel sizes as 150% dpi. */
-@media (1.70dppx <= resolution <= 1.95dppx) {
-	.titlebar-button {
-	padding-inline: 14.1px;
-
-	> .toolbarbutton-icon {
-		width: 10.8px;
-		height: 10.8px;
-	}
-	}
-}
-
-/* 225% dpi should result in the same device pixel sizes as 200% dpi. */
-@media (2.20dppx <= resolution <= 2.45dppx) {
-	.titlebar-button {
-	padding-inline: 15.3333px;
-
-	> .toolbarbutton-icon {
-		width: 10.8px;
-		height: 10.8px;
-	}
-	}
-}
-
-/* 275% dpi should result in the same device pixel sizes as 250% dpi. */
-@media (2.70dppx <= resolution <= 2.95dppx) {
-	/* NB: todo: this should also change padding on the buttons
-	 * themselves, but without a device to test this on, it's
-	 * impossible to know by how much. */
-	.titlebar-button > .toolbarbutton-icon {
-	width: 10.8px;
-	height: 10.8px;
+	content: "\e8bb"; /* ChromeClose */
+	@media (prefers-contrast) {
+		content: "\ef2c"; /* ChromeCloseContrast */
 	}
 }
 
@@ -252,13 +213,13 @@
 }
 
 .titlebar-close:hover {
-	stroke: white;
+	color: white;
 	background-color: hsl(355,86%,49%);
 }
 .titlebar-close:hover:active {
 	background-color: hsl(355,82%,69%);
 }
 
-.titlebar-button:not(:hover) > .toolbarbutton-icon:-moz-window-inactive {
+.titlebar-button:not(:hover):-moz-window-inactive::before {
 	opacity: 0.5;
 }

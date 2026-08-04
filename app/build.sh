@@ -353,10 +353,6 @@ browser_keep=(
 	# instantiated as a command-line handler at startup
 	content/browser/backup/backup-constants.mjs
 )
-if [ $BUILD_WIN == 1 ]; then
-	# Windows window controls
-	browser_keep+=(skin/classic/browser/window-controls)
-fi
 for file in "${browser_keep[@]}"; do
 	mkdir -p "$(dirname "chrome/browser-fx/$file")"
 	mv "chrome/browser/$file" "chrome/browser-fx/$file"
