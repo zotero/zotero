@@ -460,10 +460,9 @@ const MAIN_WINDOW_SCHEMAS = {
 	},
 	"mainWindow,dataRead": {
 		ZoteroPane: {
-			getSelectedLibraryID: true,
-			getSelectedCollection: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			getSelectedSavedSearch: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			getSelectedGroup: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSelectedLibraryIDs: true,
+			getSelectedCollections: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
+			getSelectedSavedSearches: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			getSelectedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			getSortedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 			canEdit: true,
