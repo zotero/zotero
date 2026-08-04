@@ -828,7 +828,6 @@ const WindowScopeVariables = {
 
 					let browser = actualDoc.createXULElement("browser");
 					browser.setAttribute("type", "content");
-					browser.setAttribute("remote", "false");
 					browser.setAttribute("disableglobalhistory", "true");
 
 					// Defer loading until the element is connected to the document.
