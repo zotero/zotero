@@ -3428,12 +3428,12 @@ describe("Plugin Sandbox", function () {
 							_sectionResults.bodyTag = body.tagName;
 							// parentNode is outside rootNode subtree -- should be null
 							_sectionResults.parentNode = body.parentNode;
-							// ownerGlobal is blocked
+							// documentGlobal is blocked
 							try {
-								body.ownerGlobal;
-								_sectionResults.ownerGlobal = 'accessible';
+								body.documentGlobal;
+								_sectionResults.documentGlobal = 'accessible';
 							} catch(e) {
-								_sectionResults.ownerGlobal = 'blocked';
+								_sectionResults.documentGlobal = 'blocked';
 							}
 							// ownerDocument returns a safe document
 							_sectionResults.hasDocument = typeof body.ownerDocument === 'object';
@@ -3479,8 +3479,8 @@ describe("Plugin Sandbox", function () {
 					assert.equal(evalInScope("_sectionResults.bodyTag"), "div");
 					assert.isNull(evalInScope("_sectionResults.parentNode"),
 						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_sectionResults.ownerGlobal"), "accessible",
-						"ownerGlobal should be accessible");
+					assert.equal(evalInScope("_sectionResults.documentGlobal"), "accessible",
+						"documentGlobal should be accessible");
 					assert.isTrue(evalInScope("_sectionResults.hasDocument"),
 						"ownerDocument should be a safe document");
 					assert.equal(evalInScope("_sectionResults.childCount"), 1,
@@ -3550,12 +3550,12 @@ describe("Plugin Sandbox", function () {
 								_restrictResults.tagName = elem.tagName;
 								// parentNode is outside rootNode subtree -- should be null
 								_restrictResults.parentNode = elem.parentNode;
-								// ownerGlobal is blocked
+								// documentGlobal is blocked
 								try {
-									elem.ownerGlobal;
-									_restrictResults.ownerGlobal = 'accessible';
+									elem.documentGlobal;
+									_restrictResults.documentGlobal = 'accessible';
 								} catch(e) {
-									_restrictResults.ownerGlobal = 'blocked';
+									_restrictResults.documentGlobal = 'blocked';
 								}
 								// ownerDocument returns a safe document
 								_restrictResults.hasDocument = typeof elem.ownerDocument === 'object';
@@ -3589,8 +3589,8 @@ describe("Plugin Sandbox", function () {
 					assert.equal(evalInScope("_restrictResults.tagName"), "menuitem");
 					assert.isNull(evalInScope("_restrictResults.parentNode"),
 						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_restrictResults.ownerGlobal"), "accessible",
-						"ownerGlobal should be accessible");
+					assert.equal(evalInScope("_restrictResults.documentGlobal"), "accessible",
+						"documentGlobal should be accessible");
 					assert.isTrue(evalInScope("_restrictResults.hasDocument"),
 						"ownerDocument should be a safe document");
 					assert.equal(evalInScope("_restrictResults.childCount"), 1,
