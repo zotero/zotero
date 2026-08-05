@@ -34,7 +34,7 @@ Zotero.Plugins = new function () {
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
 		aomStartup: [
 			"@mozilla.org/addons/addon-manager-startup;1",
-			"amIAddonManagerStartup",
+			Ci.amIAddonManagerStartup,
 		],
 	});
 	var scopes = new Map();
