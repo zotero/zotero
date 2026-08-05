@@ -1817,7 +1817,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					itemProgress.setProgress(100);
 				}
 			}
-			await this.optimizeContentIndex();
+			if (done > 0) {
+				await this.optimizeContentIndex();
+			}
 			// Reclaim the space freed by a rebuild (e.g., an index-format change dropping the old
 			// tables), which can be most of the file; the freelist gate makes this a no-op on
 			// ordinary startups
