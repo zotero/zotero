@@ -96,9 +96,6 @@ pref("datareporting.policy.dataSubmissionEnabled", false);
 pref("toolkit.crashreporter.enabled", false);
 pref("extensions.remoteSettings.disabled", true);
 
-// Disable WebGPU -- nothing uses it, and it lets us skip bundling dxcompiler.dll on Windows
-pref("dom.webgpu.enabled", false);
-
 pref("extensions.update.url", "");
 
 // Don't try to load the "Get Add-ons" tab on first load of Add-ons window
