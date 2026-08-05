@@ -1258,7 +1258,7 @@
 						['ink', Zotero.Annotations.ANNOTATION_TYPE_INK],
 					];
 					let rows = types.map(([name, value]) => ({
-						name: Zotero.getString('reader-' + name + '-annotation'),
+						name: Zotero.getString('reader-' + name + '-annotation-short'),
 						value
 					}));
 					this.createValueMenu(rows);
