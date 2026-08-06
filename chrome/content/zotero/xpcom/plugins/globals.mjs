@@ -717,17 +717,21 @@ function setupPluginDB(scope) {
 	Cu.exportFunction(function (dbName) {
 		if (!dbName || typeof dbName !== "string") return false;
 		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
-		return IOUtils.exists(dbPath);
+		return ScopeUtils.ensurePromiseVarInScope(IOUtils.exists(dbPath), scope, {});
 	}, statics, { defineAs: "hasDatabase" });
-	Cu.exportFunction(async function (dbName) {
+	Cu.exportFunction(function (dbName) {
 		if (!dbName || typeof dbName !== "string") {
 			throw new Error("deleteDatabase requires a database name");
 		}
 		let dbPath = PathUtils.join(pluginDir, dbName + ".sqlite");
-		await IOUtils.remove(dbPath, { ignoreAbsent: true });
+		return ScopeUtils.ensurePromiseVarInScope(
+			IOUtils.remove(dbPath, { ignoreAbsent: true }), scope, {}
+		);
 	}, statics, { defineAs: "deleteDatabase" });
-	Cu.exportFunction(async function () {
-		await IOUtils.remove(pluginDir, { recursive: true, ignoreAbsent: true });
+	Cu.exportFunction(function () {
+		return ScopeUtils.ensurePromiseVarInScope(
+			IOUtils.remove(pluginDir, { recursive: true, ignoreAbsent: true }), scope, {}
+		);
 	}, statics, { defineAs: "deleteAllDatabases" });
 
 	Object.defineProperty(wrapped, "hasDatabase", {
