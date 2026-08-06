@@ -1952,14 +1952,26 @@
 	"reader-note-annotation": {
 		"string": "Note Annotation"
 	},
+	"reader-note-annotation-short": {
+		"string": "Note"
+	},
 	"reader-text-annotation": {
 		"string": "Text Annotation"
+	},
+	"reader-text-annotation-short": {
+		"string": "Text"
 	},
 	"reader-image-annotation": {
 		"string": "Image Annotation"
 	},
+	"reader-image-annotation-short": {
+		"string": "Image"
+	},
 	"reader-ink-annotation": {
 		"string": "Ink Annotation"
+	},
+	"reader-ink-annotation-short": {
+		"string": "Ink"
 	},
 	"reader-search-result-index": {
 		"string": "Search result"
