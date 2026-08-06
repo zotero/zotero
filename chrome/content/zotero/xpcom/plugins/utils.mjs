@@ -604,12 +604,66 @@ const ScopeUtils = {
 		if (VarCheck.isPromise(maybePromise)) {
 			return new scope.Promise((resolve, reject) => {
 				maybePromise.then(
-					v => resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable, strong, instanceSchema })),
-					e => reject(e)
+					(v) => {
+						// If the resolved value can't be mirrored into the scope,
+						// reject rather than leaving the scope promise pending forever
+						try {
+							resolve(ScopeUtils._ensureVarInScope(v, scope, { mutable, strong, instanceSchema }));
+						}
+						catch (e) {
+							reject(ScopeUtils.ensureErrorInScope(e, scope));
+						}
+					},
+					e => reject(ScopeUtils.ensureErrorInScope(e, scope))
 				);
 			});
 		}
 		return ScopeUtils._ensureVarInScope(maybePromise, scope, { mutable, strong, instanceSchema });
+	},
+
+	/**
+	 * Ensure a rejection value can cross into the scope. Chrome-side Error
+	 * objects would otherwise reach unprivileged scopes as non-unwrappable
+	 * opaque wrappers, so re-create the error in the target scope.
+	 */
+	ensureErrorInScope(e, scope) {
+		if (!VarCheck.isObjectLike(e)) {
+			return e;
+		}
+		if (VarCheck.isInScope(e, scope)) {
+			return e;
+		}
+		let message;
+		try {
+			if (e.message || e.name) {
+				message = `${e.name && e.name !== "Error" ? e.name + ": " : ""}${e.message || ""}`;
+			}
+			// Non-Error rejection values (e.g. plain data objects) would
+			// otherwise stringify to a useless "[object Object]"
+			else {
+				try {
+					message = JSON.stringify(e);
+				}
+				catch {}
+				if (!message || message === "{}") {
+					message = String(e);
+				}
+			}
+		}
+		catch {
+			message = "Unknown error";
+		}
+		try {
+			// Structured clone supports Error objects and preserves the message
+			return Cu.cloneInto(new Error(message), scope);
+		}
+		catch {}
+		try {
+			let makeError = Cu.evalInSandbox("(msg => new Error(msg))", scope);
+			return makeError(message);
+		}
+		catch {}
+		return message;
 	},
 
 	/**

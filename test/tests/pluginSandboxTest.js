@@ -1114,6 +1114,37 @@ describe("Plugin Sandbox", function () {
 				"plugin data directory should be removed");
 		});
 
+		it("should return sandbox-usable promises from static database helpers", async function () {
+			// Raw chrome promises would be opaque (and truthy) in the sandbox,
+			// so await and compare inside the sandbox
+			assert.isTrue(await evalInScope(
+				"Zotero.DBConnection.hasDatabase('promtest') instanceof Promise"
+			));
+			assert.isTrue(await evalInScope(
+				"(async () => (await Zotero.DBConnection.hasDatabase('promtest')) === false)()"
+			));
+			assert.isTrue(await evalInScope(
+				"Zotero.DBConnection.deleteDatabase('promtest') instanceof Promise"
+			));
+			assert.isTrue(await evalInScope(
+				"Zotero.DBConnection.deleteAllDatabases() instanceof Promise"
+			));
+		});
+
+		it("should deliver rejections as catchable Errors inside the sandbox", async function () {
+			let message = await evalInScope(`
+				var _db = new Zotero.DBConnection('errtest');
+				_db.queryAsync('NOT VALID SQL').then(
+					() => "resolved",
+					e => (e instanceof Error ? e.message : "not-an-error")
+				)
+			`);
+			assert.isString(message);
+			assert.notEqual(message, "resolved", "invalid SQL should reject");
+			assert.notEqual(message, "not-an-error",
+				"rejection should arrive as an Error created in the sandbox");
+		});
+
 		it("should reject path separators in database name", function () {
 			assert.throws(() => evalInScope("new Zotero.DBConnection('../escape')"));
 			assert.throws(() => evalInScope("new Zotero.DBConnection('sub/db')"));
