@@ -5,6 +5,17 @@ describe("Zotero.Embeddings", function () {
 		Zotero.Embeddings.Indexing.init();
 	});
 
+	// Stands in for a model's tokenizer, which the test environment has no
+	// downloaded model to provide: one token per whitespace-separated word, plus
+	// the two special tokens a real tokenizer wraps every input in, so counts
+	// here mean what they mean in production
+	function wordTokenizer() {
+		return {
+			encode: text => ['<s>', ...text.split(/\s+/).filter(Boolean), '</s>'],
+			decode: ids => ids.filter(id => id !== '<s>' && id !== '</s>').join(' ')
+		};
+	}
+
 	describe("#initDB()", function () {
 		it("should attach the embeddings database and create its tables", async function () {
 			await Zotero.Embeddings.initDB();
@@ -56,8 +67,8 @@ describe("Zotero.Embeddings", function () {
 			let store = async (item, vector) => {
 				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
-						+ "VALUES (?, ?, 'hash')",
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, 0, ?, 'hash')",
 					[item.id, blob], { debugParams: false }
 				);
 			};
@@ -103,8 +114,8 @@ describe("Zotero.Embeddings", function () {
 			let store = async (item, vector) => {
 				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
-						+ "VALUES (?, ?, 'hash')",
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, 0, ?, 'hash')",
 					[item.id, blob], { debugParams: false }
 				);
 			};
@@ -150,6 +161,231 @@ describe("Zotero.Embeddings", function () {
 				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
+
+		it("shouldn't match a note's wrapper markup in the text fallback", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.initDB();
+			let mean = Zotero.Embeddings.getMeanVector();
+
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(mean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, 0, ?, 'hash')",
+					[item.id, blob], { debugParams: false }
+				);
+			};
+			// Neither note is close to the query. One says the word; the other
+			// contains it only in the '<div class="zotero-note znv1">' wrapper
+			// every stored note carries, which mustn't count as saying it.
+			let saying = new Zotero.Item('note');
+			saying.setNote('<p>Field notes on shorebirds</p>');
+			await saying.saveTx();
+			await store(saying, axis(1));
+			let silent = new Zotero.Item('note');
+			silent.setNote('<p>Guild regulation in Nuremberg</p>');
+			await silent.saveTx();
+			await store(silent, axis(2));
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('note',
+					[saying.id, silent.id]);
+				assert.isTrue(scores.has(saying.id));
+				assert.isFalse(scores.has(silent.id));
+
+				// The wrapper's own vocabulary matches nothing at all
+				scores = await Zotero.Embeddings.scoreItemIDs('znv1',
+					[saying.id, silent.id]);
+				assert.equal(scores.size, 0);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+			}
+		});
+	});
+
+	describe("#scoreItemIDs() chunks", function () {
+		it("should score an item by its best chunk", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.initDB();
+			let mean = Zotero.Embeddings.getMeanVector();
+
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(mean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, chunkIndex, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, ?, ?, 'hash')",
+					[item.id, chunkIndex, blob], { debugParams: false }
+				);
+			};
+			// A long text whose first chunk says nothing about the query but
+			// whose second chunk matches it, and a single-chunk distractor
+			let chunked = await createDataObject('item');
+			await store(chunked, 0, axis(1));
+			await store(chunked, 1, axis(0));
+			let distant = await createDataObject('item');
+			await store(distant, 0, axis(2));
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+					[chunked.id, distant.id]);
+				// The item scores as its best chunk, not an average, so the
+				// unrelated first chunk doesn't dilute the match
+				assert.isAbove(scores.get(chunked.id), 0.9);
+				assert.isFalse(scores.has(distant.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+			}
+		});
+	});
+
+	describe("#chunkText()", function () {
+		// bge has no passage prefix, so the window less the two special tokens
+		// that wrap every input is what a chunk's own text gets (see MODELS)
+		const BUDGET = 512 - 2;
+		var fakeTokenizer = wordTokenizer();
+		// A chunk's own tokens, the way chunking counts them
+		var contentTokens = chunk => fakeTokenizer.encode(chunk).length - 2;
+		var stubs = [];
+
+		beforeEach(function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'));
+		});
+
+		afterEach(function () {
+			stubs.forEach(stub => stub.restore());
+			stubs = [];
+		});
+
+		it("should return text that fits the window as a single chunk", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			assert.deepEqual(
+				await Zotero.Embeddings.Chunking.chunkText('A short title'),
+				['A short title']
+			);
+			// Right up to the budget it's still one chunk, and one token past it
+			// splits -- the budget being the window less the special tokens that
+			// wrap every input and the model's passage prefix
+			let words = n => Array.from({ length: n }, (x, i) => `word${i}`).join(' ');
+			assert.lengthOf(await Zotero.Embeddings.Chunking.chunkText(words(BUDGET)), 1);
+			assert.isAbove((await Zotero.Embeddings.Chunking.chunkText(words(BUDGET + 1))).length, 1);
+		});
+
+		it("shouldn't put two substantial paragraphs in one chunk", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			// Two paragraphs on different subjects, each well under the
+			// window but together over it. Packing them by size alone would
+			// leave a chunk straddling both.
+			let a = Array.from({ length: 300 }, (x, i) => `alpha${i}`).join(' ');
+			let b = Array.from({ length: 300 }, (x, i) => `bravo${i}`).join(' ');
+			let chunks = await Zotero.Embeddings.Chunking.chunkText(`${a}\n\n${b}`);
+			assert.lengthOf(chunks, 2);
+			// Neither chunk mixes the two subjects
+			assert.include(chunks[0], 'alpha0');
+			assert.include(chunks[0], 'alpha299');
+			assert.notInclude(chunks[0], 'bravo');
+			assert.include(chunks[1], 'bravo0');
+			assert.notInclude(chunks[1], 'alpha');
+		});
+
+		it("should combine paragraphs too small to embed on their own", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			// A heading and a date, then a substantial paragraph, then a second
+			// substantial paragraph -- the shape of an annotations note
+			let big1 = Array.from({ length: 300 }, (x, i) => `alpha${i}`).join(' ');
+			let big2 = Array.from({ length: 300 }, (x, i) => `bravo${i}`).join(' ');
+			let chunks = await Zotero.Embeddings.Chunking.chunkText(
+				`Annotations\n(11/12/2024)\n${big1}\n\n${big2}`
+			);
+			assert.lengthOf(chunks, 2);
+			// The tiny paragraphs never become chunks of their own -- they ride
+			// along with the paragraph that follows them
+			assert.include(chunks[0], 'Annotations');
+			assert.include(chunks[0], '11/12/2024');
+			assert.include(chunks[0], 'alpha0');
+			assert.notInclude(chunks[1], 'Annotations');
+			// And the second subject still gets a chunk to itself
+			assert.include(chunks[1], 'bravo0');
+			assert.notInclude(chunks[1], 'alpha');
+		});
+
+		it("should split an oversized paragraph into even pieces at sentence boundaries", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			// One paragraph of 60 ten-token sentences -- 600 tokens, over the
+			// window, with no paragraph breaks to split at
+			let sentences = Array.from({ length: 60 },
+				(x, i) => `Sentence ${i} has some words about subject number ${i}.`);
+			let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
+			assert.lengthOf(chunks, 2);
+			let sizes = chunks.map(contentTokens);
+			for (let size of sizes) {
+				assert.isAtMost(size, BUDGET);
+				// Filling the first piece to the budget would leave a short
+				// remainder; even pieces are ~300 plus the overlap
+				assert.isAbove(size, 250);
+			}
+			// No sentence was dropped
+			let joined = chunks.join('\n');
+			for (let sentence of sentences) {
+				assert.include(joined, sentence);
+			}
+			// Adjacent pieces of one paragraph still overlap
+			assert.include(chunks[1], sentences[29]);
+		});
+
+		it("shouldn't leave an undersized piece at the end of a split", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			// A block only ever closes on a sentence boundary, so each piece
+			// lands a little under its target. Without spreading that slack over
+			// the pieces still to come, it accumulates into an extra runt piece
+			// -- which is what CHUNK_MIN_TOKENS exists to prevent.
+			for (let count of [45, 64, 83, 97, 140]) {
+				let sentences = Array.from({ length: count },
+					(x, i) => `Sentence ${i} has a few more words in it about subject ${i}.`);
+				let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
+				let sizes = chunks.map(contentTokens);
+				let total = contentTokens(sentences.join(' '));
+				// No more pieces than the window requires
+				assert.equal(chunks.length, Math.ceil(total / (BUDGET - 48)),
+					`piece count for ${count} sentences (sizes ${sizes.join(', ')})`);
+				for (let size of sizes) {
+					assert.isAtMost(size, BUDGET, `piece over the window (sizes ${sizes.join(', ')})`);
+					assert.isAtLeast(size, 120, `runt piece (sizes ${sizes.join(', ')})`);
+				}
+			}
+		});
+
 	});
 
 	describe("#getScoreFraction()", function () {
@@ -261,7 +497,7 @@ describe("Zotero.Embeddings", function () {
 			try {
 				await Zotero.Embeddings.initDB();
 				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings VALUES (?, ?, ?)",
+					"REPLACE INTO embeddings.itemEmbeddings VALUES (?, 0, ?, ?)",
 					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
 				);
 				// The model switch clears the old vectors and announces the
@@ -292,7 +528,7 @@ describe("Zotero.Embeddings", function () {
 			try {
 				let item = await createDataObject('item');
 				await Zotero.DB.queryAsync(
-					"INSERT INTO embeddings.itemEmbeddings VALUES (?, ?, ?)",
+					"INSERT INTO embeddings.itemEmbeddings VALUES (?, 0, ?, ?)",
 					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
 				);
 				await item.eraseTx();
@@ -325,7 +561,9 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves()
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -338,6 +576,154 @@ describe("Zotero.Embeddings", function () {
 			// A single ideograph is a word; a single letter isn't
 			assert.include(texts, '猫');
 			assert.notInclude(texts, 'C');
+		});
+
+		it("should index notes and annotations on their own text", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of indexed children' });
+			let note = new Zotero.Item('note');
+			note.parentID = item.id;
+			note.setNote('<p>First paragraph about owls.</p><p>Second paragraph about migration.</p>');
+			await note.saveTx();
+			let attachment = await importPDFAttachment(item);
+			let annotation = await createAnnotation('highlight', attachment,
+				{ comment: 'A comment on the passage' });
+
+			let vector = new Float32Array(4).fill(0.5);
+			let texts = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					texts.push(...passages);
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				// These fake an active model rather than selecting one (which
+				// would kick off a model switch), so name one to keep the
+				// window and passage prefix chunking reads consistent with it
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
+			];
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+
+			// The note is embedded on its own text, stripped of markup, with
+			// all of its paragraphs
+			let noteText = texts.find(text => text.includes('First paragraph about owls.'));
+			assert.ok(noteText);
+			assert.include(noteText, 'Second paragraph about migration.');
+			assert.notInclude(noteText, '<p>');
+			// The annotation is embedded on the passage it marks together
+			// with its comment
+			let annotationText = texts.find(text => text.includes(annotation.annotationText));
+			assert.ok(annotationText);
+			assert.include(annotationText, 'A comment on the passage');
+			// Both have stored embeddings of their own; the attachment has none
+			assert.ok(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", note.id));
+			assert.ok(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", annotation.id));
+			assert.equal(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", attachment.id), 0);
+		});
+
+		it("should judge a note by its full text when its first line says nothing", async function () {
+			this.timeout(60000);
+			// The derived title is only the first line, so this note's title
+			// fails the embeddable-text test while its body sails past it
+			let body = 'The body below the trivial first line has plenty to say about owl migration.';
+			let indexed = new Zotero.Item('note');
+			indexed.setNote(`<p>X</p><p>${body}</p>`);
+			await indexed.saveTx();
+			// A note that is its trivial first line and nothing else stays out
+			let skipped = new Zotero.Item('note');
+			skipped.setNote('<p>X</p>');
+			await skipped.saveTx();
+
+			let vector = new Float32Array(4).fill(0.5);
+			let texts = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					texts.push(...passages);
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
+			];
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+
+			assert.ok(texts.find(text => text.includes(body)));
+			assert.ok(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", indexed.id));
+			assert.equal(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", skipped.id), 0);
+		});
+
+		it("should store a long note as multiple chunk rows sharing one source hash", async function () {
+			this.timeout(60000);
+			// Well over the model window under the fallback estimate (~3
+			// characters per token), split across paragraphs
+			let paragraphs = [];
+			for (let i = 0; i < 12; i++) {
+				paragraphs.push(`<p>Paragraph ${i}: ${'chunked note text '.repeat(40)}</p>`);
+			}
+			let note = new Zotero.Item('note');
+			note.setNote(paragraphs.join(''));
+			await note.saveTx();
+			// Only notes are chunked -- an annotation of the same length is
+			// embedded as a single chunk
+			let item = await createDataObject('item', { title: 'Unchunked annotation parent' });
+			let attachment = await importPDFAttachment(item);
+			let annotation = await createAnnotation('highlight', attachment,
+				{ comment: 'long annotation comment '.repeat(300) });
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
+			];
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+
+			let rows = await Zotero.DB.queryAsync(
+				"SELECT chunkIndex, sourceHash FROM embeddings.itemEmbeddings "
+					+ "WHERE itemID=? ORDER BY chunkIndex",
+				note.id
+			);
+			assert.isAbove(rows.length, 1);
+			// Contiguous chunk indexes and a single hash for the whole note
+			assert.deepEqual(rows.map(row => row.chunkIndex), rows.map((row, i) => i));
+			assert.equal(new Set(rows.map(row => row.sourceHash)).size, 1);
+			// The equally long annotation stayed a single chunk
+			assert.equal(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+				annotation.id
+			), 1);
 		});
 
 		it("should look up stored hashes without a query per item", async function () {
@@ -421,6 +807,28 @@ describe("Zotero.Embeddings", function () {
 			// Pruning with the model still selected has to keep it
 			await Zotero.Embeddings.pruneModels();
 			assert.isTrue(await Zotero.Embeddings.isDownloaded());
+		});
+
+		it("should chunk with the model's own tokenizer", async function () {
+			this.timeout(1800000);
+			await loadZoteroPane();
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			await Zotero.Embeddings.download();
+
+			let tokenizer = await Zotero.Embeddings.Chunking.getTokenizer();
+			assert.ok(tokenizer);
+			assert.isAbove(tokenizer.encode('a passage about owls').length, 3);
+
+			// A long text splits into chunks that each fit the real window
+			let sentences = [];
+			for (let i = 0; i < 100; i++) {
+				sentences.push(`Sentence number ${i} concerns the ecology of temperate wetlands.`);
+			}
+			let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
+			assert.isAbove(chunks.length, 1);
+			for (let chunk of chunks) {
+				assert.isAtMost(tokenizer.encode(chunk).length, 512);
+			}
 		});
 	});
 
@@ -562,8 +970,8 @@ describe("Zotero.Embeddings", function () {
 			let store = async (item, vector) => {
 				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
-						+ "VALUES (?, ?, 'hash')",
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, 0, ?, 'hash')",
 					[item.id, blob], { debugParams: false }
 				);
 			};

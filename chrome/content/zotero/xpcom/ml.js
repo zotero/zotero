@@ -179,13 +179,42 @@ Zotero.ML = new function () {
 		await _getModelHub().deleteModels({ taskName, model, revision, deletedBy: 'zotero' });
 	};
 
+	/**
+	 * Read a single file of a model (e.g. its tokenizer) from the runtime's
+	 * model cache, fetching it from the model hub if it isn't cached yet.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.taskName - Task the model is cached for, as
+	 *     passed to createEngine() -- the cache registers every file under it
+	 * @param {String} options.modelId - The model id, as passed to createEngine()
+	 * @param {String} options.file - File path within the model repository
+	 *     (e.g. 'tokenizer.json')
+	 * @param {String} [options.engineId]
+	 * @param {String} [options.revision='main']
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	this.getModelFile = async function ({ taskName, modelId, file, engineId, revision = 'main' }) {
+		let [buffer] = await _getModelHub().getModelFileAsArrayBuffer({
+			engineId,
+			taskName,
+			model: modelId,
+			revision,
+			file
+		});
+		return buffer;
+	};
+
 	function _getModelHub() {
 		let { ModelHub } = ChromeUtils.importESModule(
 			"chrome://global/content/ml/ModelHub.sys.mjs"
 		);
 		return new ModelHub({
 			rootUrl: MODEL_HUB_ROOT_URL,
-			urlTemplate: MODEL_HUB_URL_TEMPLATE
+			urlTemplate: MODEL_HUB_URL_TEMPLATE,
+			// A hub constructed without a list denies every external host --
+			// the engine's own hub gets this same policy from the Remote
+			// Settings mock (see _configureRuntime())
+			allowDenyList: ALLOWED_MODEL_HOSTS
 		});
 	}
 

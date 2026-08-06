@@ -47,6 +47,10 @@ Zotero.Embeddings = new function () {
 			// bge prepends a retrieval instruction to queries; passages get none.
 			queryPrefix: 'Represent this sentence for searching relevant passages: ',
 			passagePrefix: '',
+			// Context window in tokens. Text longer than this is split into
+			// chunks (see Zotero.Embeddings.Chunking); the pipeline truncates
+			// anything over.
+			maxTokens: 512,
 			// Scores below this aren't matches at all: for a query with nothing
 			// to match, short or generic text scores a little above zero against
 			// anything, and ranking that is worse than returning nothing.
@@ -104,6 +108,10 @@ Zotero.Embeddings = new function () {
 			pooling: 'mean',
 			queryPrefix: 'query: ',
 			passagePrefix: 'passage: ',
+			// Context window in tokens. Text longer than this is split into
+			// chunks (see Zotero.Embeddings.Chunking); the pipeline truncates
+			// anything over.
+			maxTokens: 512,
 			// Fitted as above. This model scores short, generic text around 0.3
 			// against any query, so its floor sits high enough to cut some weak
 			// but genuine matches -- the price of not ranking noise.
@@ -154,6 +162,9 @@ Zotero.Embeddings = new function () {
 	};
 
 	const TASK_NAME = 'feature-extraction';
+	// Identifies our engine to the inference runtime, and the model files it
+	// caches for us (see getModelFile())
+	const ENGINE_ID = 'zotero-embeddings';
 
 	const MODEL_HUB_ROOT_URL = 'https://huggingface.co';
 	const MODEL_HUB_URL_TEMPLATE = '{model}/resolve/{revision}';
@@ -294,12 +305,18 @@ Zotero.Embeddings = new function () {
 			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
 			// No foreign key on itemID -- references across attached databases
 			// aren't possible, so item deletions are handled by the indexing
-			// notifier and eligibility pruning instead
+			// notifier and eligibility pruning instead.
+			// An item's text is stored as one or more chunks (see
+			// Zotero.Embeddings.Chunking);
+			// every chunk row carries the hash of the item's full source text,
+			// and scoring takes the item's best chunk.
 			await Zotero.DB.queryAsync(
 				"CREATE TABLE embeddings.itemEmbeddings (\n"
-				+ "    itemID INTEGER PRIMARY KEY,\n"
+				+ "    itemID INTEGER NOT NULL,\n"
+				+ "    chunkIndex INTEGER NOT NULL,\n"
 				+ "    embedding BLOB NOT NULL,\n"
-				+ "    sourceHash TEXT NOT NULL\n"
+				+ "    sourceHash TEXT NOT NULL,\n"
+				+ "    PRIMARY KEY (itemID, chunkIndex)\n"
 				+ ")"
 			);
 			// Database metadata: the localUserKey the vectors were built
@@ -518,7 +535,7 @@ Zotero.Embeddings = new function () {
 				Zotero.debug(`Embeddings: creating engine for '${model.modelId}' `
 					+ `(dtype ${model.dtype}, pooling ${model.pooling})`);
 				_engine = await Zotero.ML.createEngine({
-					engineId: 'zotero-embeddings',
+					engineId: ENGINE_ID,
 					taskName: TASK_NAME,
 					backend: 'onnx-native',
 					modelId: model.modelId,
@@ -744,6 +761,45 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
+	 * The active model's context window, in tokens. Text longer than this is
+	 * split into chunks before embedding (see Zotero.Embeddings.Chunking).
+	 * Throws with no model selected, as the other model accessors do -- there's
+	 * nothing to embed for, so there's nothing to chunk for either.
+	 *
+	 * @return {Number}
+	 */
+	this.getModelMaxTokens = function () {
+		return _getModel().maxTokens;
+	};
+
+	/**
+	 * The string embedPassages() prepends to every passage. Chunking has to
+	 * keep room for it, since chunks are built from bare text.
+	 *
+	 * @return {String}
+	 */
+	this.getPassagePrefix = function () {
+		return _getModel().passagePrefix;
+	};
+
+	/**
+	 * Read one of the active model's files (e.g. its tokenizer) from the
+	 * runtime's model cache, fetching it from the model hub if the runtime
+	 * doesn't have it yet.
+	 *
+	 * @param {String} file - File path within the model repository
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	this.getModelFile = function (file) {
+		return Zotero.ML.getModelFile({
+			engineId: ENGINE_ID,
+			taskName: TASK_NAME,
+			modelId: _getModel().modelId,
+			file
+		});
+	};
+
+	/**
 	 * Map a raw similarity score onto the active model's display range, for
 	 * the Relevance column's bar. The band runs from the model's minimum score,
 	 * the weakest match shown, to an empirical ceiling (see MODELS): scores at
@@ -778,7 +834,9 @@ Zotero.Embeddings = new function () {
 	};
 
 	// Items among the given ones whose indexed text contains every word of the
-	// query, matched as substrings the way quick search matches them.
+	// query, matched as substrings the way quick search matches them. Covers
+	// everything the index embeds: item fields, note text, and annotation
+	// text and comments.
 	async function _findLiteralMatches(queryText, itemIDs) {
 		let terms = Zotero.Embeddings.normalizeQuery(queryText).split(/\s+/).filter(Boolean);
 		if (!terms.length || !itemIDs.length) {
@@ -788,19 +846,46 @@ Zotero.Embeddings = new function () {
 		let matched = null;
 		for (let term of terms) {
 			let ids = new Set();
+			let pattern = '%' + term.replace(/[\\%_]/g, '\\$&') + '%';
 			let chunkSize = 500;
 			for (let i = 0; i < itemIDs.length; i += chunkSize) {
 				let chunk = itemIDs.slice(i, i + chunkSize);
-				let rows = await Zotero.DB.columnQueryAsync(
-					"SELECT DISTINCT itemID FROM itemData "
-						+ "JOIN itemDataValues USING (valueID) "
-						+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
-						+ "AND itemID IN (" + chunk.map(() => '?').join(',') + ") "
-						+ "AND value LIKE ? ESCAPE '\\'",
-					[...chunk, '%' + term.replace(/[\\%_]/g, '\\$&') + '%']
-				);
-				for (let id of rows || []) {
-					ids.add(id);
+				let placeholders = chunk.map(() => '?').join(',');
+				let queries = [
+					[
+						"SELECT DISTINCT itemID FROM itemData "
+							+ "JOIN itemDataValues USING (valueID) "
+							+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
+							+ "AND itemID IN (" + placeholders + ") "
+							+ "AND value LIKE ? ESCAPE '\\'",
+						[...chunk, pattern]
+					],
+					[
+						// Match inside the stored note the way the quick
+						// search note condition does: with the standard
+						// wrapper element trimmed off, so its markup
+						// ('zotero-note znv1') doesn't match every note
+						"SELECT itemID FROM itemNotes "
+							+ "WHERE itemID IN (" + placeholders + ") "
+							+ "AND SUBSTR(note, "
+								+ (1 + Zotero.Notes.notePrefix.length) + ", "
+								+ "LENGTH(note) - "
+								+ (Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length)
+							+ ") LIKE ? ESCAPE '\\'",
+						[...chunk, pattern]
+					],
+					[
+						"SELECT itemID FROM itemAnnotations "
+							+ "WHERE itemID IN (" + placeholders + ") "
+							+ "AND (text LIKE ? ESCAPE '\\' OR comment LIKE ? ESCAPE '\\')",
+						[...chunk, pattern, pattern]
+					]
+				];
+				for (let [sql, params] of queries) {
+					let rows = await Zotero.DB.columnQueryAsync(sql, params);
+					for (let id of rows || []) {
+						ids.add(id);
+					}
 				}
 			}
 			matched = matched ? new Set([...matched].filter(id => ids.has(id))) : ids;
@@ -865,7 +950,11 @@ Zotero.Embeddings = new function () {
 		let minScore = _getModel().minScore;
 
 		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
-		// parameter limit for large collections), scoring each as we go.
+		// parameter limit for large collections), scoring each as we go. An
+		// item stored as multiple text chunks scores as its best chunk, not an
+		// average, so a long note that addresses the query in one paragraph
+		// isn't diluted by the rest.
+		let best = new Map();
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			if (shouldCancel && shouldCancel()) {
@@ -888,12 +977,18 @@ Zotero.Embeddings = new function () {
 				for (let d = 0; d < dim; d++) {
 					dot += query[d] * vec[d];
 				}
-				if (dot >= minScore) {
-					scores.set(row.itemID, dot);
+				let prev = best.get(row.itemID);
+				if (prev === undefined || dot > prev) {
+					best.set(row.itemID, dot);
 				}
-				else {
-					belowFloor.set(row.itemID, dot);
-				}
+			}
+		}
+		for (let [itemID, dot] of best) {
+			if (dot >= minScore) {
+				scores.set(itemID, dot);
+			}
+			else {
+				belowFloor.set(itemID, dot);
 			}
 		}
 		// Nothing was similar enough to the query to be a match, so fall back to
@@ -910,7 +1005,282 @@ Zotero.Embeddings = new function () {
 		}
 		return scores;
 	};
+};
 
+
+/**
+ * Zotero.Embeddings.Chunking -- splitting a text into passages that each fit
+ * the model's context window, so a long text's later paragraphs are searchable
+ * instead of being silently truncated away by the pipeline. The indexer applies
+ * this only to notes. Splitting is budgeted in the model's own tokens.
+ */
+Zotero.Embeddings.Chunking = new function () {
+	// Tokens carried over from the end of one chunk into the start of the
+	// next, so a thought spanning a boundary is searchable in both. Carried
+	// only between pieces of the same paragraph block.
+	const CHUNK_OVERLAP_TOKENS = 48;
+	// Fewest tokens worth embedding on their own. An item scores as its best
+	// chunk, so every chunk is another draw at that maximum: splitting text
+	// into fragments inflates the score without adding information, and a
+	// fragment loses the context that gave it meaning. Paragraphs below this
+	// (headings, dates, list items) are combined with their neighbors rather
+	// than becoming chunks of their own.
+	const CHUNK_MIN_TOKENS = 120;
+
+	// Tokenizer instances by model name. Failures aren't cached, so a later
+	// indexing run retries the load.
+	let _tokenizers = new Map();
+
+	/**
+	 * The active model's tokenizer, constructed from the tokenizer files in
+	 * the runtime's model cache using the transformers.js implementation
+	 * Firefox ships -- the same code, over the same files, that the inference
+	 * process tokenizes with.
+	 *
+	 * The tokenizer files are part of the downloaded model, so with the model
+	 * present this can't fail short of a broken download -- and then inference
+	 * couldn't tokenize either, so nothing would embed anyway. A failure
+	 * therefore throws, aborting the indexing run and surfacing as its error,
+	 * rather than falling back to an approximate count: an approximation would
+	 * only produce chunks that then fail to embed, and chunk boundaries are
+	 * persistent -- an item's source hash covers its text, not the chunker, so
+	 * a run that guessed at them would never be corrected.
+	 *
+	 * @return {Promise<Object>}
+	 */
+	this.getTokenizer = function () {
+		let name = Zotero.Embeddings.getModelName();
+		if (!_tokenizers.has(name)) {
+			let promise = (async () => {
+				let { PreTrainedTokenizer } = ChromeUtils.importESModule(
+					'chrome://global/content/ml/transformers.js'
+				);
+				let decoder = new TextDecoder();
+				let [tokenizerJSON, tokenizerConfig] = await Promise.all(
+					['tokenizer.json', 'tokenizer_config.json'].map(
+						async file => JSON.parse(decoder.decode(
+							await Zotero.Embeddings.getModelFile(file)
+						))
+					)
+				);
+				return new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig);
+			})();
+			// Allow a later run to retry after a failed load
+			promise.catch(() => {
+				if (_tokenizers.get(name) === promise) {
+					_tokenizers.delete(name);
+				}
+			});
+			_tokenizers.set(name, promise);
+		}
+		return _tokenizers.get(name);
+	};
+
+	// How to measure text against the active model, and how much of its window a
+	// chunk's own text may use.
+	//
+	// Counts leave out the special tokens the tokenizer wraps every input in, so
+	// that the counts of several sentences add up to the count of those sentences
+	// joined. The even split in _splitBlockEvenly() depends on that: counting
+	// them per sentence would inflate a piece's measured size in proportion to
+	// how many sentences it holds, while a block is measured in one call, and the
+	// pieces would come out lopsided.
+	//
+	// Those special tokens come off the window instead, together with the
+	// passage prefix embedPassages() prepends -- neither is part of the text this
+	// code sees, but both take up room once the chunk is embedded.
+	function _getMetrics(tokenizer) {
+		let specialTokens = tokenizer.encode('').length;
+		let count = text => tokenizer.encode(text).length - specialTokens;
+		let prefix = Zotero.Embeddings.getPassagePrefix();
+		return {
+			count,
+			budget: Zotero.Embeddings.getModelMaxTokens() - specialTokens
+				- (prefix ? count(prefix) : 0)
+		};
+	}
+
+	// Last resort for text with no sentence boundary inside the budget: window
+	// it by tokens.
+	function _hardSplit(text, budget, tokenizer) {
+		let pieces = [];
+		let ids = tokenizer.encode(text);
+		let step = Math.max(1, budget - CHUNK_OVERLAP_TOKENS);
+		for (let start = 0; start < ids.length; start += step) {
+			let piece = tokenizer
+				// eslint-disable-next-line camelcase
+				.decode(ids.slice(start, start + budget), { skip_special_tokens: true })
+				.trim();
+			if (piece) {
+				pieces.push(piece);
+			}
+		}
+		return pieces;
+	}
+
+	// The sentence units of a block, each within the budget. Sentence
+	// boundaries come from Intl.Segmenter, which is locale-aware, so scripts
+	// without Western punctuation still split at real boundaries.
+	function _splitToSentences(text, budget, count, tokenizer) {
+		let units = [];
+		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+		for (let { segment } of segmenter.segment(text)) {
+			let sentence = segment.trim();
+			if (!sentence) {
+				continue;
+			}
+			let tokens = count(sentence);
+			if (tokens <= budget) {
+				units.push({ text: sentence, tokens });
+				continue;
+			}
+			for (let piece of _hardSplit(sentence, budget, tokenizer)) {
+				units.push({ text: piece, tokens: count(piece) });
+			}
+		}
+		return units;
+	}
+
+	// Split a block that outgrew the budget into as few pieces as possible and
+	// as evenly as possible. Filling each piece to the budget instead would
+	// leave a short, low-information remainder at the end, which is the same
+	// thing CHUNK_MIN_TOKENS exists to prevent.
+	function _splitBlockEvenly(block, budget, count, tokenizer) {
+		// Each piece carries overlap from the previous one, so its own content
+		// has that much less room
+		let pieceCount = Math.ceil(block.tokens / (budget - CHUNK_OVERLAP_TOKENS));
+		let sentences = _splitToSentences(block.text, budget, count, tokenizer);
+		let chunks = [];
+		// Sentences in the current piece, the carried-over tokens among them
+		// (which don't count toward the target, since they're a repeat of the
+		// previous piece's content), and the piece's total size
+		let current = [];
+		let carriedTokens = 0;
+		let totalTokens = 0;
+		// Content and pieces still to place. A piece can only close on a
+		// sentence boundary, so it usually lands a little under its target;
+		// recomputing the target from what's left spreads that slack over the
+		// pieces that follow, instead of letting it accumulate into an extra
+		// undersized piece at the end.
+		let remainingTokens = block.tokens;
+		let remainingPieces = pieceCount;
+		for (let sentence of sentences) {
+			let contentTokens = totalTokens - carriedTokens;
+			// Close the piece at whichever boundary lands nearer the target, so
+			// the pieces come out even rather than full-then-short. On the last
+			// piece there's nothing left to balance against, so only the window
+			// closes it.
+			let closeHere = false;
+			if (current.length) {
+				if (totalTokens + sentence.tokens > budget) {
+					closeHere = true;
+				}
+				else if (remainingPieces > 1) {
+					let target = Math.ceil(remainingTokens / remainingPieces);
+					closeHere = Math.abs(contentTokens + sentence.tokens - target)
+						> Math.abs(contentTokens - target);
+				}
+			}
+			if (closeHere) {
+				chunks.push(current.map(s => s.text).join(' '));
+				remainingTokens -= contentTokens;
+				remainingPieces = Math.max(1, remainingPieces - 1);
+				// Carry the trailing sentences that fit the overlap allowance
+				// alongside the incoming sentence
+				let carry = [];
+				carriedTokens = 0;
+				let allowance = Math.min(CHUNK_OVERLAP_TOKENS, budget - sentence.tokens);
+				for (let i = current.length - 1; i >= 0; i--) {
+					if (carriedTokens + current[i].tokens > allowance) {
+						break;
+					}
+					carry.unshift(current[i]);
+					carriedTokens += current[i].tokens;
+				}
+				current = carry;
+				totalTokens = carriedTokens;
+			}
+			current.push(sentence);
+			totalTokens += sentence.tokens;
+		}
+		if (current.length) {
+			chunks.push(current.map(s => s.text).join(' '));
+		}
+		return chunks;
+	}
+
+	/**
+	 * Split a text into chunks that each fit the active model's context
+	 * window. Text that fits the window -- the vast majority -- comes back as
+	 * a single chunk.
+	 *
+	 * Paragraphs are the topic units, so two of them never share a chunk
+	 * unless one was too small to embed on its own: a chunk spanning two
+	 * subjects represents neither of them well, and since an item scores as
+	 * its best chunk, that dilution is what decides whether it matches at all.
+	 * Paragraphs below CHUNK_MIN_TOKENS are therefore combined with their
+	 * neighbors into a block, and a block over the window is split into even
+	 * pieces at sentence boundaries.
+	 *
+	 * @param {String} text
+	 * @return {Promise<String[]>}
+	 */
+	this.chunkText = async function (text) {
+		let tokenizer = await this.getTokenizer();
+		let { count, budget } = _getMetrics(tokenizer);
+		// Text that fits the window as it stands, which is most of it
+		if (count(text) <= budget) {
+			return [text];
+		}
+
+		let paragraphs = text.split(/\n+/)
+			.map(paragraph => paragraph.trim())
+			.filter(Boolean)
+			.map(paragraph => ({ text: paragraph, tokens: count(paragraph) }));
+
+		// Group paragraphs into blocks, combining any that are too small to
+		// stand alone with the paragraphs that follow them. A paragraph that
+		// reaches the minimum on its own becomes its own block, which is what
+		// keeps distinct subjects out of each other's chunks.
+		let groups = [];
+		let pending = [];
+		let pendingTokens = 0;
+		for (let paragraph of paragraphs) {
+			pending.push(paragraph.text);
+			pendingTokens += paragraph.tokens;
+			if (pendingTokens >= CHUNK_MIN_TOKENS) {
+				groups.push(pending);
+				pending = [];
+				pendingTokens = 0;
+			}
+		}
+		// A trailing group still under the minimum joins the previous block
+		// rather than standing alone as a runt chunk; the block is split evenly
+		// below, so absorbing it costs nothing
+		if (pending.length) {
+			if (groups.length) {
+				groups[groups.length - 1].push(...pending);
+			}
+			else {
+				groups.push(pending);
+			}
+		}
+
+		let chunks = [];
+		for (let group of groups) {
+			// Recount rather than summing the paragraphs, so the joins between
+			// them are part of the block's size
+			let blockText = group.join('\n\n');
+			let block = { text: blockText, tokens: count(blockText) };
+			if (block.tokens <= budget) {
+				chunks.push(block.text);
+			}
+			else {
+				chunks.push(..._splitBlockEvenly(block, budget, count, tokenizer));
+			}
+		}
+		return chunks.length ? chunks : [text];
+	};
 };
 
 
@@ -1160,28 +1530,28 @@ Zotero.Embeddings.Indexing = new function () {
 		return _indexingPromise;
 	}
 
-	// The single definition of an eligible item: a regular item with a
-	// non-empty title (including type-specific title fields -- caseName,
-	// subject, nameOfAct) or abstract, in any library.
+	// The single definition of an eligible item, in any library:
+	// - a regular item with a non-empty title (including type-specific title
+	//   fields -- caseName, subject, nameOfAct) or abstract
+	// - a note whose plain text has something to say. Usually its derived
+	//   title -- the note's first line as plain text -- settles that without
+	//   stripping the note's HTML; a title that says nothing can still sit on
+	//   top of a body that says plenty, so only those notes are stripped and
+	//   judged on their full text.
+	// - an annotation with text or a comment
 	// Everything that needs to know what's eligible -- enqueueing, pruning,
-	// progress counts -- works from this result.
+	// progress counts -- works from this result, and _indexItems() skips items
+	// by the same per-type tests (see _hasIndexableText()), so the counts and
+	// the index stay in agreement.
 	//
 	// @return {Promise<Map>} - libraryID -> [itemID, ...]
 	async function _getEligibleItemIDs() {
 		let fieldIDs = Zotero.Embeddings.getIndexedFieldIDs();
-		let rows = await Zotero.DB.queryAsync(
-			"SELECT libraryID, itemID, value FROM itemData "
-				+ "JOIN itemDataValues USING (valueID) "
-				+ "JOIN items USING (itemID) "
-				+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
-				+ "AND TRIM(value)!='' AND itemTypeID!=?",
-			Zotero.ItemTypes.getID('attachment')
-		);
 		let byLibrary = new Map();
 		let seen = new Set();
-		for (let row of rows) {
+		let add = (row) => {
 			if (seen.has(row.itemID) || !_hasEmbeddableText(row.value)) {
-				continue;
+				return;
 			}
 			seen.add(row.itemID);
 			let ids = byLibrary.get(row.libraryID);
@@ -1190,8 +1560,50 @@ Zotero.Embeddings.Indexing = new function () {
 				byLibrary.set(row.libraryID, ids);
 			}
 			ids.push(row.itemID);
+		};
+		let rows = await Zotero.DB.queryAsync(
+			"SELECT libraryID, itemID, value FROM itemData "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "JOIN items USING (itemID) "
+				+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
+				+ "AND TRIM(value)!='' AND itemTypeID!=?",
+			Zotero.ItemTypes.getID('attachment')
+		);
+		for (let row of rows) {
+			add(row);
+		}
+		rows = await Zotero.DB.queryAsync(
+			"SELECT libraryID, itemID, title, note FROM itemNotes "
+				+ "JOIN items USING (itemID) WHERE itemTypeID=?",
+			Zotero.ItemTypes.getID('note')
+		);
+		for (let row of rows) {
+			// The title is the note's first line, so a title with embeddable
+			// text settles it without stripping the body's HTML
+			let value = _hasEmbeddableText(row.title)
+				? row.title
+				: _htmlToText(row.note, true);
+			add({ libraryID: row.libraryID, itemID: row.itemID, value });
+		}
+		rows = await Zotero.DB.queryAsync(
+			"SELECT libraryID, itemID, text, comment FROM itemAnnotations "
+				+ "JOIN items USING (itemID)"
+		);
+		for (let row of rows) {
+			add({
+				libraryID: row.libraryID,
+				itemID: row.itemID,
+				value: _getAnnotationRawText(row.text, row.comment)
+			});
 		}
 		return byLibrary;
+	}
+
+	// The raw stored text an annotation's eligibility is judged by, before any
+	// HTML stripping, so the SQL-side eligibility pass and _indexItems() test
+	// the same thing
+	function _getAnnotationRawText(text, comment) {
+		return [text, comment].filter(Boolean).join(' ');
 	}
 
 	// Enqueue every eligible item, library by library, so the queue drains
@@ -1216,7 +1628,9 @@ Zotero.Embeddings.Indexing = new function () {
 				eligible.add(id);
 			}
 		}
-		let stored = await Zotero.DB.columnQueryAsync("SELECT itemID FROM embeddings.itemEmbeddings");
+		let stored = await Zotero.DB.columnQueryAsync(
+			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings"
+		);
 		await _deleteEmbeddings(stored.filter(id => !eligible.has(id)));
 	}
 
@@ -1243,7 +1657,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// notification's coalescing delay (e.g. after disabling or a model
 		// switch)
 		let cleared = await Zotero.DB.columnQueryAsync(
-			"SELECT itemID FROM embeddings.itemEmbeddings"
+			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings"
 		);
 		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings");
 		if (cleared.length) {
@@ -1252,10 +1666,11 @@ Zotero.Embeddings.Indexing = new function () {
 	}
 
 	// Number of items in a library that have a stored embedding -- the
-	// numerator for indexing progress
+	// numerator for indexing progress. An item's chunks count as one item.
 	function _getIndexedCount(libraryID) {
 		return Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM embeddings.itemEmbeddings JOIN items USING (itemID) WHERE libraryID=?",
+			"SELECT COUNT(DISTINCT itemID) FROM embeddings.itemEmbeddings "
+				+ "JOIN items USING (itemID) WHERE libraryID=?",
 			libraryID
 		);
 	}
@@ -1274,10 +1689,42 @@ Zotero.Embeddings.Indexing = new function () {
 		return [...text].length > 1;
 	}
 
-	// Text we embed for an item: its title and abstract. A title alone is
-	// enough -- it's useful signal even without an abstract. Returns null only
-	// for items with neither.
+	// Convert stored HTML to plain text. Notes keep their block structure as
+	// line breaks, so the chunker can split at paragraph boundaries;
+	// annotation text and comments are inline and stripped flat, the same way
+	// their display titles are built.
+	function _htmlToText(html, blockBreaks = false) {
+		if (!html) {
+			return '';
+		}
+		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+		return parserUtils.convertToPlainText(
+			html,
+			blockBreaks
+				? Ci.nsIDocumentEncoder.OutputLFLineBreak
+				: Ci.nsIDocumentEncoder.OutputRaw,
+			0
+		).trim();
+	}
+
+	// Text we embed for an item:
+	// - regular item: its title and abstract -- a title alone is enough, since
+	//   it's useful signal even without an abstract
+	// - note: its full text
+	// - annotation: the passage it marks together with its comment
+	// Returns null for items with nothing to embed.
 	function _getItemText(item) {
+		if (item.isNote()) {
+			return _htmlToText(item.getNote(), true) || null;
+		}
+		if (item.isAnnotation()) {
+			let text = _htmlToText(item.annotationText);
+			let comment = _htmlToText(item.annotationComment);
+			if (text && comment) {
+				return `${text}\n\n${comment}`;
+			}
+			return text || comment || null;
+		}
 		// Include type-specific title fields (caseName, subject, nameOfAct)
 		let title = item.getField('title', false, true);
 		let abstract = item.getField('abstractNote');
@@ -1285,6 +1732,23 @@ Zotero.Embeddings.Indexing = new function () {
 			return `${title}\n\n${abstract}`;
 		}
 		return title || abstract || null;
+	}
+
+	// Whether an item has enough text to index -- the same per-type tests
+	// _getEligibleItemIDs() applies to its SQL rows, so an item is skipped
+	// here exactly when the eligibility counts exclude it. Notes and regular
+	// items are judged on the text that would be embedded; the eligibility
+	// pass's title shortcut is just a cheaper route to the same answer.
+	function _hasIndexableText(item, text) {
+		if (!text) {
+			return false;
+		}
+		if (item.isAnnotation()) {
+			return _hasEmbeddableText(
+				_getAnnotationRawText(item.annotationText, item.annotationComment)
+			);
+		}
+		return _hasEmbeddableText(text);
 	}
 
 	// Compute and store embeddings for the given items, skipping any whose
@@ -1309,18 +1773,18 @@ Zotero.Embeddings.Indexing = new function () {
 		batchCharBudget = 12000,
 		shouldStop
 	} = {}) {
-		await Zotero.Items.loadDataTypes(items, ['itemData']);
+		await Zotero.Items.loadDataTypes(items, ['itemData', 'note', 'annotation']);
 
 		// Every start re-enqueues the whole library to find what changed, so
 		// read the stored hashes in one query per chunk rather than one per
-		// item
+		// item. Every chunk row of an item carries the same hash.
 		let storedHashes = new Map();
 		let itemIDs = items.map(item => item.id);
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			let chunk = itemIDs.slice(i, i + chunkSize);
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
+				"SELECT DISTINCT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
 					+ chunk.map(() => '?').join(',') + ")",
 				chunk
 			);
@@ -1333,7 +1797,7 @@ Zotero.Embeddings.Indexing = new function () {
 		let toDelete = [];
 		for (let item of items) {
 			let text = _getItemText(item);
-			if (!_hasEmbeddableText(text)) {
+			if (!_hasIndexableText(item, text)) {
 				if (storedHashes.has(item.id)) {
 					toDelete.push(item.id);
 				}
@@ -1348,53 +1812,111 @@ Zotero.Embeddings.Indexing = new function () {
 			await _deleteEmbeddings(toDelete);
 		}
 
-		// Process one library at a time
+		// Split note text into chunks that fit the model's context window --
+		// only notes run long enough to need it. A title and abstract, or an
+		// annotation's passage and comment, fit the window in almost all
+		// cases, so they're embedded as a single chunk and the pipeline
+		// truncates the rare outlier.
+		for (let entry of toEmbed) {
+			// Tokenizing a chunk's worth of long notes takes real time, and a
+			// stop request can be a model switch that's about to clear the
+			// vectors -- so bail out here as well, rather than only between
+			// batches. No embeddings have been written yet at this point,
+			// only the stale-item deletions above, which hold regardless.
+			if (shouldStop && shouldStop()) {
+				return 0;
+			}
+			entry.chunks = entry.item.isNote()
+				? await Zotero.Embeddings.Chunking.chunkText(entry.text)
+				: [entry.text];
+			entry.vectors = new Array(entry.chunks.length);
+			entry.remaining = entry.chunks.length;
+		}
+
+		// Process one library at a time; within it, order by chunk length so
+		// batches pack texts of similar (padded) size
+		let longestChunk = entry => entry.chunks.reduce((max, c) => Math.max(max, c.length), 0);
 		toEmbed.sort((a, b) => (a.item.libraryID - b.item.libraryID)
-			|| (a.text.length - b.text.length));
+			|| (longestChunk(a) - longestChunk(b)));
+
+		// Batches are packed from the flattened chunks, so an item's chunks
+		// can span batches; its rows are written only once every chunk's
+		// vector is in, as one transaction, so a stop mid-item never leaves a
+		// partial set that the source hash would report as complete
+		let units = [];
+		for (let entry of toEmbed) {
+			for (let chunkIndex = 0; chunkIndex < entry.chunks.length; chunkIndex++) {
+				units.push({ entry, chunkIndex });
+			}
+		}
 
 		let done = 0;
-		for (let i = 0; i < toEmbed.length; ) {
+		for (let i = 0; i < units.length;) {
 			if (shouldStop && shouldStop()) {
 				break;
 			}
-			// Take as many of the next (length-sorted) texts as fit the budget,
-			// always at least one
+			// Take as many of the next texts as fit the budget, always at
+			// least one
 			let longest = 0;
 			let count = 0;
-			while (i + count < toEmbed.length && count < maxBatchItems) {
-				let length = Math.max(longest, toEmbed[i + count].text.length);
+			while (i + count < units.length && count < maxBatchItems) {
+				let unit = units[i + count];
+				let length = Math.max(longest, unit.entry.chunks[unit.chunkIndex].length);
 				if (count && length * (count + 1) > batchCharBudget) {
 					break;
 				}
 				longest = length;
 				count++;
 			}
-			let batch = toEmbed.slice(i, i + count);
+			let batch = units.slice(i, i + count);
 			i += count;
-			let vectors = await Zotero.Embeddings.embedPassages(batch.map(b => b.text));
-			await Zotero.DB.executeTransaction(async function () {
-				for (let j = 0; j < batch.length; j++) {
-					// The item may have been deleted while the batch was
-					// embedding -- don't write its vector back after the
-					// delete notifier removed it
-					if (!Zotero.Items.get(batch[j].item.id)) {
-						continue;
-					}
-					let vector = vectors[j];
-					let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
-					// Keep the embedding blobs out of debug output
-					await Zotero.DB.queryAsync(
-						"REPLACE INTO embeddings.itemEmbeddings (itemID, embedding, sourceHash) "
-							+ "VALUES (?, ?, ?)",
-						[batch[j].item.id, blob, batch[j].hash],
-						{ debugParams: false }
-					);
+			let vectors = await Zotero.Embeddings.embedPassages(
+				batch.map(unit => unit.entry.chunks[unit.chunkIndex])
+			);
+			let completed = [];
+			for (let j = 0; j < batch.length; j++) {
+				let { entry, chunkIndex } = batch[j];
+				entry.vectors[chunkIndex] = vectors[j];
+				if (--entry.remaining === 0) {
+					completed.push(entry);
 				}
-			});
-			_notifyIndexed(batch.map(b => b.item.id));
-			done += batch.length;
-			if (onProgress) {
-				onProgress({ done, total: toEmbed.length });
+			}
+			if (completed.length) {
+				await Zotero.DB.executeTransaction(async function () {
+					for (let entry of completed) {
+						// The item may have been deleted while the batch was
+						// embedding -- don't write its vectors back after the
+						// delete notifier removed them
+						if (!Zotero.Items.get(entry.item.id)) {
+							continue;
+						}
+						// Replace the item's rows as a unit, so a previously
+						// longer text never leaves stale chunks behind
+						await Zotero.DB.queryAsync(
+							"DELETE FROM embeddings.itemEmbeddings WHERE itemID=?",
+							entry.item.id
+						);
+						for (let k = 0; k < entry.vectors.length; k++) {
+							let vector = entry.vectors[k];
+							let blob = new Uint8Array(
+								vector.buffer, vector.byteOffset, vector.byteLength
+							);
+							// Keep the embedding blobs out of debug output
+							await Zotero.DB.queryAsync(
+								"INSERT INTO embeddings.itemEmbeddings "
+									+ "(itemID, chunkIndex, embedding, sourceHash) "
+									+ "VALUES (?, ?, ?, ?)",
+								[entry.item.id, k, blob, entry.hash],
+								{ debugParams: false }
+							);
+						}
+					}
+				});
+				_notifyIndexed(completed.map(entry => entry.item.id));
+				done += completed.length;
+				if (onProgress) {
+					onProgress({ done, total: toEmbed.length });
+				}
 			}
 			// Yield so the UI thread stays responsive between batches
 			await Zotero.Promise.delay(0);
@@ -1495,11 +2017,11 @@ Zotero.Embeddings.Indexing = new function () {
 
 	/**
 	 * Start (or resume) indexing: clear a previous stopIndexing(), drop stored
-	 * embeddings for items that no longer have an abstract, re-enqueue every
-	 * eligible item across all libraries (already-indexed items are skipped
-	 * via their source hash, so this is cheap), and run the consumer. Safe to
-	 * call while the consumer is already running -- the new work is just
-	 * picked up by the existing loop.
+	 * embeddings for items that no longer have indexable text, re-enqueue
+	 * every eligible item across all libraries (already-indexed items are
+	 * skipped via their source hash, so this is cheap), and run the consumer.
+	 * Safe to call while the consumer is already running -- the new work is
+	 * just picked up by the existing loop.
 	 *
 	 * @return {Promise} - Resolves when the queue has been drained or indexing
 	 *     was stopped
@@ -1624,7 +2146,7 @@ Zotero.Embeddings.Indexing = new function () {
 				// Deleted items simply aren't returned; their embeddings are
 				// removed by the delete notifier
 				let items = (await Zotero.Items.getAsync(ids))
-					.filter(item => item.isRegularItem());
+					.filter(item => item.isRegularItem() || item.isNote() || item.isAnnotation());
 				if (!items.length) {
 					continue;
 				}

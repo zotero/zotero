@@ -2774,6 +2774,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				col.hidden = false;
 				col.sortDirection = -1;
+				// Far right, so the bar lines up across item, note, attachment,
+				// and annotation rows -- annotation rows use a custom layout
+				// that puts their bar at the row's end
+				col.ordinal = Math.max(...this._columns.map(c => c.ordinal ?? 0)) + 1;
 				this._sortedColumn = col;
 			}
 		}

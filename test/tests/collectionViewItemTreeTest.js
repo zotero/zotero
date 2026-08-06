@@ -295,6 +295,107 @@ describe("CollectionViewItemTree", function () {
 				);
 			});
 
+			it("should rank a row by the best match beneath it, with the bar reporting only its own score", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "liftrank paper", collections: [col.id] });
+				let attachment = await importPDFAttachment(item);
+				let annotation = await createAnnotation('highlight', attachment,
+					{ comment: 'lift comment' });
+				let other = await createDataObject('item', { title: "liftrank other", collections: [col.id] });
+				// Only the annotation and the unrelated peer match on their own
+				// text -- the paper's own abstract says nothing about the query
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async (query, itemIDs) => {
+					let scores = new Map();
+					if (itemIDs.includes(annotation.id)) {
+						scores.set(annotation.id, 0.9);
+					}
+					if (itemIDs.includes(other.id)) {
+						scores.set(other.id, 0.5);
+					}
+					return scores;
+				}));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// The annotation lifts its paper above the peer that matched
+				// on its own text
+				assert.deepEqual(
+					itemsView._rows.filter(row => row.level == 0).map(row => row.id),
+					[item.id, other.id]
+				);
+				// The whole chain under the annotation carries its rank
+				let ranks = itemsView.rowProvider.getBestMatchRanks();
+				assert.equal(ranks.get(annotation.id), 1);
+				assert.equal(ranks.get(attachment.id), 1);
+				assert.equal(ranks.get(item.id), 1);
+				assert.equal(ranks.get(other.id), 2);
+				// The bar reports only the row's own score: the annotation gets
+				// its match, the rows ranked by it get an empty bar
+				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
+				assert.equal(fractions.get(annotation.id), 0.9);
+				assert.equal(fractions.get(attachment.id), 0);
+				assert.equal(fractions.get(item.id), 0);
+				assert.equal(fractions.get(other.id), 0.5);
+
+				// The matched annotation's ancestors auto-expand, and its row
+				// renders a relevance bar of its own. Row painting is async, so
+				// poll (the test times out on failure).
+				let annotationRow = itemsView.getRowIndexByID(annotation.id);
+				assert.notEqual(annotationRow, false);
+				let bar;
+				while (!bar) {
+					bar = itemsView.tree._jsWindow.getElementByIndex(annotationRow)
+						?.querySelector('.cell.relevance .relevance-bar');
+					if (!bar) {
+						await Zotero.Promise.delay(10);
+					}
+				}
+				assert.equal(bar.firstChild.style.width, '90%');
+
+				// An annotation row's bar has to be the same width as every
+				// other row's. The tight annotation layout drops cell padding,
+				// and the bar fills its cell's content box, so without an
+				// exception for this cell the bar would render wider.
+				let peerRow = itemsView.getRowIndexByID(other.id);
+				let peerBar = itemsView.tree._jsWindow.getElementByIndex(peerRow)
+					.querySelector('.cell.relevance .relevance-bar');
+				assert.isTrue(bar.closest('.row').classList.contains('tight'),
+					"annotation row should use the tight layout for this to be meaningful");
+				assert.equal(
+					bar.getBoundingClientRect().width,
+					peerBar.getBoundingClientRect().width
+				);
+			});
+
+			it("should move the Relevance column to the far right and restore it when cleared", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "farright A", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, 0.5]))
+				));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				let visibleBefore = itemsView._getColumns()
+					.filter(column => !column.hidden).map(column => column.dataKey);
+
+				await itemsView.setFilter('search', 'some query');
+				let visible = itemsView._getColumns().filter(column => !column.hidden);
+				assert.equal(visible[visible.length - 1].dataKey, 'relevance');
+				// The rendered header agrees
+				let headerCells = [...win.document.querySelectorAll('.virtualized-table-header .cell')];
+				assert.isTrue(headerCells[headerCells.length - 1].classList.contains('relevance'));
+
+				// Clearing the search puts the columns back
+				await itemsView.setFilter('search', '');
+				assert.deepEqual(
+					itemsView._getColumns().filter(column => !column.hidden).map(column => column.dataKey),
+					visibleBefore
+				);
+			});
+
 			it("should override a persisted column sort while a best-match search is active", async function () {
 				let col = await createDataObject('collection');
 				let itemA = await createDataObject('item', { title: "persistsort A", collections: [col.id] });

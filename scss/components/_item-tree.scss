@@ -357,8 +357,19 @@
 					flex-grow: 2;
 					flex-basis: 0;
 				}
+				// The text cells size to their content, so push the relevance
+				// bar to the row's end, where the Relevance column sits while
+				// a best-match search is active (the column's width rules
+				// still apply -- they're injected with !important)
+				&.relevance {
+					margin-inline-start: auto;
+				}
 			}
-			&.tight .cell {
+			// The tight annotation layout trades cell padding for text room, but
+			// the relevance bar fills its cell's content box, so dropping the
+			// padding would render a wider bar than every other row's. Keep the
+			// standard padding on that one cell so the bars match.
+			&.tight .cell:not(.relevance) {
 				padding: 0 2px 0 0;
 			}
 		}

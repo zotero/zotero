@@ -230,15 +230,17 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	/**
 	 * The semantic stage of a best-match search: score the merged,
 	 * deduplicated results from all selected rows against the query in a
-	 * single call, and keep the scoreable items ranked globally across the
-	 * selection. Child items (attachments, notes, annotations) are scored via
-	 * their top-level item, so result sets at other levels (e.g. a saved
-	 * search returning annotations) rank by their parent item. Equal scores
+	 * single call, and keep the matching items ranked globally across the
+	 * selection. Every item is scored on its own text,
+	 * an item's rank reflects the best match anywhere beneath it, so a
+	 * strongly matching annotation lifts its attachment and its paper to the
+	 * top. The relevance bar reports only the row's own score, so a row
+	 * ranked by a descendant shows its rank over an empty bar. Equal scores
 	 * get equal ranks, so tied rows (including a child and its parent) order
 	 * deterministically via the secondary sort fields.
 	 *
 	 * @param {Zotero.Item[]} items - Merged results from all selected rows
-	 * @return {Promise<Zotero.Item[]>} - The scoreable items
+	 * @return {Promise<Zotero.Item[]>} - The matching items
 	 */
 	async _applyBestMatch(items) {
 		// With multiple selected rows carrying different best-match sources,
@@ -258,21 +260,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// searches, so keep unscoreable items -- they sort after the ranked
 		// ones. (A uniform top-K set contains no unscoreable items anyway.)
 		let keepUnscored = !!source;
-		// Map each item to the item whose embedding scores it
-		let sourceIDByItem = new Map();
-		for (let item of items) {
-			if (!(item instanceof Zotero.Item)) {
-				continue;
-			}
-			let source = item.isRegularItem() ? item : item.topLevelItem;
-			if (source) {
-				sourceIDByItem.set(item, source.id);
-			}
-		}
+		let candidates = items.filter(item => item instanceof Zotero.Item);
+		let itemsByID = new Map(candidates.map(item => [item.id, item]));
 		let scores;
 		let generation = this._bestMatchGeneration;
 		try {
-			scores = await Zotero.Embeddings.scoreItemIDs(query, [...new Set(sourceIDByItem.values())], {
+			scores = await Zotero.Embeddings.scoreItemIDs(query, [...itemsByID.keys()], {
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
 				shouldCancel: () => generation !== this._bestMatchGeneration
@@ -308,26 +301,53 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					.slice(0, topK)
 			);
 		}
+		// Lift each scored item's score onto its ancestors (annotation ->
+		// attachment -> top-level item), so an item's effective score -- and
+		// so its rank -- is the best match anywhere beneath it
+		let effectiveScores = new Map(scores);
+		for (let [itemID, score] of scores) {
+			let item = itemsByID.get(itemID) || Zotero.Items.get(itemID);
+			let parentItemID = item && item.parentItemID;
+			while (parentItemID) {
+				let current = effectiveScores.get(parentItemID);
+				if (current === undefined || score > current) {
+					effectiveScores.set(parentItemID, score);
+				}
+				parentItemID = Zotero.Items.get(parentItemID)?.parentItemID;
+			}
+		}
 		let rankOfScore = new Map(
-			[...new Set(scores.values())].sort((a, b) => b - a).map((score, i) => [score, i + 1])
+			[...new Set(effectiveScores.values())].sort((a, b) => b - a)
+				.map((score, i) => [score, i + 1])
 		);
-		let kept = [];
+		// Ranks cover every row with a match beneath it, including ancestors
+		// the selected rows' results didn't return themselves; the bar
+		// fraction is the row's own score alone, with an empty bar for a row
+		// that only inherited its rank
 		let ranks = new Map();
 		let fractions = new Map();
+		for (let [itemID, score] of effectiveScores) {
+			let item = itemsByID.get(itemID) || Zotero.Items.get(itemID);
+			if (!item) {
+				continue;
+			}
+			ranks.set(item.treeViewID, rankOfScore.get(score));
+			fractions.set(
+				item.treeViewID,
+				scores.has(itemID)
+					? Zotero.Embeddings.getScoreFraction(scores.get(itemID))
+					: 0
+			);
+		}
+		let kept = [];
 		for (let item of items) {
-			let sourceID = sourceIDByItem.get(item);
-			if (sourceID === undefined || !scores.has(sourceID)) {
+			if (!(item instanceof Zotero.Item) || !effectiveScores.has(item.id)) {
 				if (keepUnscored) {
 					kept.push(item);
 				}
 				continue;
 			}
 			kept.push(item);
-			ranks.set(item.treeViewID, rankOfScore.get(scores.get(sourceID)));
-			fractions.set(
-				item.treeViewID,
-				Zotero.Embeddings.getScoreFraction(scores.get(sourceID))
-			);
 		}
 		this._bestMatchRanks = ranks;
 		this._bestMatchBarFractions = fractions;
