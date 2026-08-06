@@ -24,6 +24,7 @@ file-renaming-format-instructions-example = Par exemple, "{ $example }" dans ce 
 file-renaming-format-instructions-more = Consulter la <label data-l10n-name="file-renaming-format-help-link">documentation</label> pour plus d'information.
 file-renaming-format-template = Modèle de nom de fichier :
 file-renaming-format-preview = Aperçu :
+file-renaming-template-invalid = Le modèle de nom de fichier comporte une erreur de syntaxe et ne sera pas utilisé.
 file-renaming-preview-changes = Aperçu des changements...
 file-renaming-rename-files =
     .label = Renommer les fichiers
@@ -36,6 +37,9 @@ file-renaming-auto-rename-prompt-body = Souhaitez-vous renommer les fichiers exi
 file-renaming-auto-rename-prompt-body-library = Souhaitez-vous renommer les fichiers existants dans la bibliothèque  "{ $library }" pour qu'ils correspondent aux nouveaux paramètres?
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = Garder les noms de fichiers existants
+file-renaming-invalid-template-prompt-title = Invalid Filename Template
+file-renaming-invalid-template-prompt-body = The filename template contains a syntax error and cannot be saved. Would you like to reset it to the default template?
+file-renaming-invalid-template-prompt-body-library = The filename template for “{ $library }” contains a syntax error and cannot be saved. Would you like to reset it to the default template?
 file-renaming-preview-window =
     .title = Renommer les fichiers
 file-renaming-preview-window-loading = Chargement...

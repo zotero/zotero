@@ -148,7 +148,7 @@
 
 <!ENTITY zotero.preferences.proxies.multiSite "Flere nettsteder">
 <!ENTITY zotero.preferences.proxies.autoAssociate "Automatisk tilknytt nye verter">
-<!ENTITY zotero.preferences.proxies.variables "Du kan bruker følgende variabler i dine innstillinger for mellomtjener:">
+<!ENTITY zotero.preferences.proxies.variables "Du kan bruke følgende variabler i dine innstillinger for mellomtjener:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - vertsnavnet til omdirigert mellomtjener nettside (f.eks., www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - sti til omdirigert mellomtjener side ekskludert ledende skråstrek (f.eks., about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Sti til mappe (f.eks., about/)">

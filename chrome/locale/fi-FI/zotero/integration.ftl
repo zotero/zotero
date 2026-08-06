@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] Yksikään valituista muistiinpanoista ei täsmää tämänhetkiseen hakuun
-       *[other] Ei muistiinpanoja valittuna
+        [true] No selected or open notes match the current search
+       *[other] No selected or open notes
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,7 +55,6 @@ integration-citationDialog-lib-message-annotations =
        *[other] Ei valittuja eikä avoimia nimikkeitä joissa on huomautuksia
     }
 integration-citationDialog-settings-keepSorted = Pidä lähteet lajiteltuna
-integration-citationDialog-preview-empty = Esikatselu
 integration-citationDialog-preview-error = Preview unavailable
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
@@ -101,9 +100,16 @@ integration-citationDialog-collections-table =
     .aria-label = Kokoelmat.
     .aria-description = Valitse kokoelma ja paina sarkainnäppäintä selataksesi nimikkeitä.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Tämä nimike on lisätty viittaukseen. Paina { return-or-enter } lisätäksesi sen uudestaan tai { delete-or-backspace } poistaaksesi sen.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Add to Citation
+       *[other] Add { $count } Items to Citation
+    }
 integration-citationDialog-add-all = Lisää kaikki
 integration-citationDialog-collapse-section =
     .title = Kutista osa

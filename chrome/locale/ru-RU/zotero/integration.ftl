@@ -46,15 +46,14 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] Ни одна выбранная заметка не соответствует текущему поиску.
-       *[other] Заметки не выбраны
+        [true] No selected or open notes match the current search
+       *[other] No selected or open notes
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
        *[true] Нет элементов с аннотациями, которые совпадают с текущим поиском
     }
 integration-citationDialog-settings-keepSorted = Удерживать источники отсортированными
-integration-citationDialog-preview-empty = Предпросмотр
 integration-citationDialog-preview-error = Preview unavailable
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
@@ -100,9 +99,16 @@ integration-citationDialog-collections-table =
     .aria-label = Коллекции.
     .aria-description = Выберите коллекцию и нажмите Tab для навигации по её записям.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Этот элемент был добавлен в цитату. Нажмите { return-or-enter }, чтобы добавить его снова, или { delete-or-backspace }, чтобы удалить его.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Add to Citation
+       *[other] Add { $count } Items to Citation
+    }
 integration-citationDialog-add-all = Добавить все
 integration-citationDialog-collapse-section =
     .title = Свернуть секцию

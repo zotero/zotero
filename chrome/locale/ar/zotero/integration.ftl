@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No selected notes match the current search
-       *[other] No notes are selected
+        [true] No selected or open notes match the current search
+       *[other] No selected or open notes
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,7 +55,6 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = الحفاظ على ترتيب المصادر
-integration-citationDialog-preview-empty = معاينة
 integration-citationDialog-preview-error = Preview unavailable
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
@@ -101,9 +100,16 @@ integration-citationDialog-collections-table =
     .aria-label = المجموعات.
     .aria-description = حدد مجموعة واضغط على Tab للتنقل بين عناصرها.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = تمت إضافة هذا العنصر إلى الاستشهاد. اضغط على { return-or-enter } لإضافته مرة أخرى أو { delete-or-backspace } لإزالته.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Add to Citation
+       *[other] Add { $count } Items to Citation
+    }
 integration-citationDialog-add-all = إضافة الكل
 integration-citationDialog-collapse-section =
     .title = طي القسم

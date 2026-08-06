@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] 无匹配的笔记
-       *[other] 未选中笔记
+        [true] 没有已选中或已打开的笔记与当前搜索匹配
+       *[other] 没有已选中或已打开的笔记
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,7 +55,6 @@ integration-citationDialog-lib-message-annotations =
        *[other] 没有已选中或已打开的带注释条目
     }
 integration-citationDialog-settings-keepSorted = 保持文献自动排序
-integration-citationDialog-preview-empty = 预览
 integration-citationDialog-preview-error = 预览不可用
 integration-citationDialog-btn-displayPreview =
     .title = 显示引注预览
@@ -101,9 +100,15 @@ integration-citationDialog-collections-table =
     .aria-label = 分类。
     .aria-description = 选择一个分类并按Tab键浏览其中的条目。
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = 此条目已添加到引注中。按 { return-or-enter } 重新添加，或按 { delete-or-backspace } 删除。
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+       *[other] 添加 { $count } 条目到引注
+    }
 integration-citationDialog-add-all = 添加所有
 integration-citationDialog-collapse-section =
     .title = 折叠此栏

@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No hay notas seleccionadas que coincidan con la búsqueda actual
-       *[other] No hay notas seleccionadas
+        [true] No hay notas seleccionadas ni abiertas que coincidan con la búsqueda actual
+       *[other] No hay notas seleccionadas ni abiertas
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,7 +55,6 @@ integration-citationDialog-lib-message-annotations =
        *[other] No hay elementos seleccionados ni abiertos con anotaciones
     }
 integration-citationDialog-settings-keepSorted = Mantener las fuentes ordenadas.
-integration-citationDialog-preview-empty = Previsualizar
 integration-citationDialog-preview-error = Vista previa no disponible
 integration-citationDialog-btn-displayPreview =
     .title = Mostrar vista previa de la cita
@@ -101,9 +100,17 @@ integration-citationDialog-collections-table =
     .aria-label = Colecciones.
     .aria-description = Seleccione una colección y pulse la tecla Tab para navegar por sus elementos.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Este elemento se ha añadido a la cita. Pulse { return-or-enter } para añadirlo de nuevo o { delete-or-backspace } para eliminarlo.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Añadir a la bibliografía
+        [many] Añadir { $count } elementos a la bibliografía
+       *[other] Añadir { $count } elementos a la bibliografía
+    }
 integration-citationDialog-add-all = Añadir todo
 integration-citationDialog-collapse-section =
     .title = Contraer sección

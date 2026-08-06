@@ -24,6 +24,7 @@ file-renaming-format-instructions-example = Por ejemplo, «{ $example }» en est
 file-renaming-format-instructions-more = Consulte la <label data-l10n-name="file-renaming-format-help-link">documentación</label> para obtener más información.
 file-renaming-format-template = Plantilla de nombre de archivo:
 file-renaming-format-preview = Vista previa:
+file-renaming-template-invalid = Esta plantilla de nombre de archivo contiene un error de sintaxis y no se utilizará.
 file-renaming-preview-changes = Previsualizar cambios...
 file-renaming-rename-files =
     .label = Renombrar archivos
@@ -36,6 +37,9 @@ file-renaming-auto-rename-prompt-body = ¿Desea cambiar el nombre de los archivo
 file-renaming-auto-rename-prompt-body-library = ¿Desea cambiar el nombre de los archivos existentes en la biblioteca «{ $library }» para que se ajusten a la nueva configuración?
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = Mantener los nombres de archivo existentes
+file-renaming-invalid-template-prompt-title = Plantilla de nombre de archivo no válida
+file-renaming-invalid-template-prompt-body = La plantilla del nombre de archivo contiene un error de sintaxis y no se puede guardar. ¿Desea restablecerla a la plantilla predeterminada?
+file-renaming-invalid-template-prompt-body-library = La plantilla de nombre de archivo «{ $library }» contiene un error de sintaxis y no se puede guardar. ¿Desea restablecerla a la plantilla predeterminada?
 file-renaming-preview-window =
     .title = Renombrar archivos
 file-renaming-preview-window-loading = Cargando...

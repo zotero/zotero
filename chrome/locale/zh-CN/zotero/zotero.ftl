@@ -56,6 +56,7 @@ general-clear = 清空
 clear-button =
     .label = { general-clear }
 general-update = 更新
+general-reset-to-default = 重置为默认值
 general-back = 后退
 general-edit = 编辑
 general-cut = 剪切
@@ -73,6 +74,9 @@ general-more-information = 更多信息
 general-warning = 警告
 general-type-to-continue = 输入 “{ $text }” 以继续
 general-continue = 继续
+general-allow = 允许
+general-always-allow = 始终允许
+general-deny = 拒绝
 general-red = 红色
 general-orange = 橙色
 general-yellow = 黄色
@@ -86,8 +90,8 @@ general-maroon = 深红色
 general-gray = 灰色
 general-black = 黑色
 general-loading = 加载中…
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = 正在检查数据库完整性…
+db-repairing = 正在修复数据库…
 citation-style-label = 参考文献样式:
 language-label = 语言：
 menu-custom-group-submenu =
@@ -173,6 +177,9 @@ collections-menu-show-recently-read =
     .label = 显示 { recently-read }
 item-menu-remove-from-recently-read =
     .label = 从 { recently-read } 中移除…
+collections-menu-clear-all-last-read =
+    .label = 清除所有最后阅读时间…
+recently-read-clear-all-confirm = 此文库中的所有最后阅读时间都将被删除。
 items-section-collections-selected =
     { $count ->
        *[other] 已选择 { $count } 个分类
@@ -802,7 +809,7 @@ advanced-search-result-level-annotation =
 advanced-search-binding-menu =
     .aria-label = 与同一条目匹配
 advanced-search-binding-separate =
-    .label = separately
+    .label = 单独地
 advanced-search-binding-same-attachment =
     .label = 在同一附件中
 advanced-search-binding-same-note =
@@ -817,15 +824,15 @@ advanced-search-binding-hint-note =
     .value = 这些条件可以匹配不同的笔记。
 advanced-search-binding-hint-annotation =
     .value = 这些条件可以匹配不同的注释。
-advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
-advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+advanced-search-level-warning-mixed = 这些条件无法全部匹配同一条目，因此此搜索将永远不会返回结果。请尝试匹配其中的“{ $matchAny }”项，或将结果类型设置为“{ $topLevelItems }”。
+advanced-search-level-warning-unreachable = 此搜索包含一个无法应用于所选结果类型的条件。请将结果类型设置为“{ $topLevelItems }”，或移除不兼容的条件。
 advanced-search-group-warning-unreachable =
-    A condition here cannot be in the same { $entity ->
-        [attachment] attachment
-        [note] note
-       *[annotation] annotation
-    }. Match these separately or remove the incompatible condition.
-advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+    这里的某个条件不能与同一 { $entity ->
+        [attachment] 附件
+        [note] 笔记
+       *[annotation] 注释
+    }共存。请分别匹配这些条件，或移除不兼容的条件。
+advanced-search-group-warning-mixed = 这些条件无法同时匹配同一个条目，因此该组永远不会匹配。请尝试匹配其中的“{ $matchAny }”项，或将结果类型设置为“{ $topLevelItems }”。
 advanced-search-bind-same-attachment =
     .label = 匹配相同的附件
 advanced-search-bind-same-note =
@@ -841,17 +848,17 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = 值
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = 为空
+search-operator-isNotEmpty = 不为空
 search-conditions-tooltip-fields = 字段：
 search-conditions-collection = 分类
 search-conditions-savedSearch = 保存的搜索
 search-conditions-itemTypeID = 条目类型
 search-conditions-tag = 标签
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = 标签数量
+search-conditions-numNotes = 笔记数量
+search-conditions-numAttachments = 附件数量
+search-conditions-numAnnotations = 注释数量
 search-conditions-note = 笔记
 search-conditions-childNote = 子笔记
 search-conditions-creator = 创建者
@@ -870,7 +877,7 @@ search-conditions-dateModified = 修改日期
 search-conditions-fulltextContent = 附件内容
 search-conditions-programmingLanguage = 编程语言
 search-conditions-fileTypeID = 附件类型
-search-conditions-attachmentStorageType = Attachment Storage Type
+search-conditions-attachmentStorageType = 附件存储类型
 search-conditions-lastRead = 附件最后阅读时间
 search-conditions-annotationText = 文本注释
 search-conditions-annotationComment = 注释评论
@@ -883,7 +890,7 @@ search-conditions-submenu-attachment = 附件
 search-conditions-submenu-annotation = 注释
 search-conditions-short-fulltextContent = 内容
 search-conditions-short-fileTypeID = 音频文件类型
-search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-attachmentStorageType = 存储类型
 search-conditions-short-lastRead = 最后阅读时间
 search-conditions-short-annotationText = 文本
 search-conditions-short-annotationComment = 评论
@@ -918,9 +925,9 @@ file-type-video = 视频
 file-type-presentation = 演示文档
 file-type-document = 文档
 file-type-ebook = 电子书
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = 存储文件
+attachment-storage-type-linkedFile = 链接的文件
+attachment-storage-type-webLink = 网页链接
 post-upgrade-message = 你已升级到 <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version } </span>！了解一下<a data-l10n-name="new-features-link">新特性</a>。
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -944,8 +951,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } Connector 必须更新才能与该版本的 { -app-name } 兼容。
 userjs-pref-warning = 某些 { -app-name } 设置已通过不支持的方法被覆盖。{ -app-name } 将恢复这些设置并重新启动。
+migrate-extra-fields-progress-headline = 更新条目…
 migrate-extra-fields-progress-message = 从其他字段迁移至新字段
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = 正在索引
+fulltext-indexing-progress-message = 全文搜索结果在索引完成之前可能不完整。
 long-tag-fixer-window-title =
     .title = 拆分标签
 long-tag-fixer-button-dont-split =
@@ -967,15 +976,15 @@ data-dir-unsupported-storage = 如果 { -app-name } 的数据目录位于云存�
 login-manager-reset = { -app-name } 无法读取您保存的登录信息，因此已重置。请在 { -app-name } 设置的 { preferences-pane-account } 窗格中重新登录。
 os-keystore-save-failed =
     { PLATFORM() ->
-        [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [macos] { -app-name } 无法访问 { -os-name } 钥匙串来安全保存您的凭据。请确保您的钥匙串可访问，然后重试。
+        [windows] { -app-name } 无法安全保存您的凭据。请重试或重启 { -app-name }。
+       *[other] { -app-name } 无法访问您的 { -os-name } 密钥环来安全保存您的凭据。请确保密钥环服务正在运行，然后重试。
     }
 os-keystore-migrate-failed =
     { PLATFORM() ->
-        [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
-        [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+        [macos] { -app-name } 无法访问 { -os-name } 钥匙串来加密您存储的凭据。您的凭据仍以未加密形式存储在磁盘上。请确保您的钥匙串可访问，然后重启 { -app-name }。
+        [windows] { -app-name } 无法加密您存储的凭据。您的凭据仍以未加密形式存储在磁盘上。请重启 { -app-name } 并重试。
+       *[other] { -app-name } 无法访问您的 { -os-name } 密钥环来加密您存储的凭据。您的凭据仍以未加密形式存储在磁盘上。请确保密钥环服务正在运行，然后重启 { -app-name }。
     }
 search-button =
     .label = 搜索
@@ -1030,8 +1039,7 @@ undo-action-restore-collection =
     }
 undo-action-restore-objects =
     { $count ->
-        [one] Restore Object
-       *[other] Restore { $count } Objects
+       *[other] 恢复 { $count } 个对象
     }
 undo-action-add-to-collection =
     { $count ->
@@ -1084,3 +1092,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = 撤销 { $action }
 menu-edit-redo-action = 重做 { $action }
+local-api-authorize-title = 本地 API 授权
+local-api-authorize-text = 正在您计算机上运行的应用程序“{ $appName }”想要修改您的{ -app-name } 文库。

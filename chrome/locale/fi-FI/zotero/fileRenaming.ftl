@@ -24,6 +24,7 @@ file-renaming-format-instructions-example = Esimerkiksi “{ $example }” täss
 file-renaming-format-instructions-more = Lisää tietoa saat tutustumalla <label data-l10n-name="file-renaming-format-help-link">ohjeisiin </label>.
 file-renaming-format-template = Tiedostonimen pohja:
 file-renaming-format-preview = Esikatselu:
+file-renaming-template-invalid = This filename template contains a syntax error and won’t be used.
 file-renaming-preview-changes = Esikatsele muutoksia…
 file-renaming-rename-files =
     .label = Nimeä tiedostot uudelleen
@@ -36,6 +37,9 @@ file-renaming-auto-rename-prompt-body = Haluatko uudelleennimetä olemassaolevat
 file-renaming-auto-rename-prompt-body-library = Haluatko uudelleennimetä olemassaolevat tiedostot kirjastossasi "{ $library }" täsmäämään uusiin asetuksiin?
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = Pidä olemassaolevat tiedostonnimet
+file-renaming-invalid-template-prompt-title = Invalid Filename Template
+file-renaming-invalid-template-prompt-body = The filename template contains a syntax error and cannot be saved. Would you like to reset it to the default template?
+file-renaming-invalid-template-prompt-body-library = The filename template for “{ $library }” contains a syntax error and cannot be saved. Would you like to reset it to the default template?
 file-renaming-preview-window =
     .title = Nimeä tiedostot uudelleen
 file-renaming-preview-window-loading = Ladataan...

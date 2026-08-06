@@ -24,6 +24,7 @@ file-renaming-format-instructions-example = 例如，此模板中的 "{ $example
 file-renaming-format-instructions-more = 请参阅<label data-l10n-name="file-renaming-format-help-link">文档</label>了解更多信息。
 file-renaming-format-template = 文件名模板：
 file-renaming-format-preview = 预览：
+file-renaming-template-invalid = 此文件名模板包含语法错误，将不会使用。
 file-renaming-preview-changes = 预览修改…
 file-renaming-rename-files =
     .label = 重命名文件
@@ -36,6 +37,9 @@ file-renaming-auto-rename-prompt-body = 是否要重命名你的文库中的现�
 file-renaming-auto-rename-prompt-body-library = 您是否要将文库 "{ $library }" 中的现有文件重命名，以匹配新的设置？
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = 保留现有的文件名
+file-renaming-invalid-template-prompt-title = 无效的文件名模板
+file-renaming-invalid-template-prompt-body = 文件名模板包含语法错误，无法保存。是否要将其重置为默认模板？
+file-renaming-invalid-template-prompt-body-library = “{ $library }” 的文件名模板包含语法错误，无法保存。是否要将其重置为默认模板
 file-renaming-preview-window =
     .title = 重命名文件
 file-renaming-preview-window-loading = 加载中…

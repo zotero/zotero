@@ -56,6 +56,7 @@ general-clear = Effacer
 clear-button =
     .label = { general-clear }
 general-update = Mettre à jour
+general-reset-to-default = Reset to Default
 general-back = Page précédente
 general-edit = Modifier
 general-cut = Couper
@@ -73,6 +74,9 @@ general-more-information = Plus d'informations
 general-warning = Avertissement
 general-type-to-continue = Tapez “{ $text }” pour continuer.
 general-continue = Continuer
+general-allow = Autoriser
+general-always-allow = Toujours autoriser
+general-deny = Refuser
 general-red = Rouge
 general-orange = Orange
 general-yellow = Jaune
@@ -86,8 +90,8 @@ general-maroon = Bordeaux
 general-gray = Gris
 general-black = Noir
 general-loading = Chargement...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Vérification de l'intégrité de la base de données...
+db-repairing = Réparation de la base de données...
 citation-style-label = Style de citation :
 language-label = Langue :
 menu-custom-group-submenu =
@@ -175,6 +179,9 @@ collections-menu-show-recently-read =
     .label = Afficher { recently-read }
 item-menu-remove-from-recently-read =
     .label = Retirer de { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Effacer toutes les dates de dernière lecture...
+recently-read-clear-all-confirm = Toutes les dates de dernière lecture de cette bibliothèque vont être effacées.
 items-section-collections-selected =
     { $count ->
         [one] { $count } collection sélectionnée
@@ -261,9 +268,9 @@ collections-delete-title =
     }
 collections-delete-message =
     { $count ->
-        [one] Voulez-vous vraiment supprimer cette collection?
-        [many] Voulez-vous vraiment supprimer { $count } collections?
-       *[other] Voulez-vous vraiment supprimer { $count } collections?
+        [one] Voulez-vous vraiment supprimer cette collection ?
+        [many] Voulez-vous vraiment supprimer { $count } collections ?
+       *[other] Voulez-vous vraiment supprimer { $count } collections ?
     }
 collections-delete-keep-items =
     { $count ->
@@ -291,8 +298,9 @@ collections-delete-search-title =
     }
 collections-delete-search-message =
     { $count ->
-        [one] Are you sure you want to delete this search?
-       *[other] Are you sure you want to delete { $count } searches?
+        [one] Voulez-vous vraiment supprimer cette recherche ?
+        [many] Voulez-vous vraiment supprimer { $count } recherches ?
+       *[other] Voulez-vous vraiment supprimer { $count } recherches ?
     }
 item-creator-moveDown =
     .label = Descendre
@@ -406,7 +414,7 @@ import-online-relink-only =
     .label = Lier à nouveau les citations de Mendeley Desktop
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } n'a pas pu se connecter à { $targetApp }. Veuillez vérifier votre connexion Internet et réessayer.
-tab-title-multiple-collections = Multiple
+tab-title-multiple-collections = Multiples
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -837,11 +845,11 @@ advanced-search-remove-group-btn =
 advanced-search-ungroup-btn =
     .tooltiptext = Dégrouper les conditions
 advanced-search-result-level-menu =
-    .aria-label = Result type
+    .aria-label = Type de résultats
 advanced-search-result-level-prefix-root =
     .value = Rechercher
 advanced-search-join-prefix-root =
-    .value = matching
+    .value = correspondant à
 advanced-search-result-level-any =
     .label = tous les documents
 advanced-search-result-level-item =
@@ -853,7 +861,7 @@ advanced-search-result-level-note =
 advanced-search-result-level-annotation =
     .label = annotations
 advanced-search-binding-menu =
-    .aria-label = Match against the same item
+    .aria-label = Correspondre au même document
 advanced-search-binding-separate =
     .label = séparément
 advanced-search-binding-same-attachment =
@@ -863,7 +871,7 @@ advanced-search-binding-same-note =
 advanced-search-binding-same-annotation =
     .label = dans la même annotation
 advanced-search-of-the-following =
-    .value = of the following
+    .value = condition(s) suivante(s)
 advanced-search-binding-hint-attachment =
     .value = Ces conditions peuvent correspondre à des fichiers joints distincts.
 advanced-search-binding-hint-note =
@@ -873,12 +881,12 @@ advanced-search-binding-hint-annotation =
 advanced-search-level-warning-mixed = Ces conditions ne peuvent pas toutes correspondre au même document, cette recherche ne trouvera donc jamais aucun résultat. Essayez de faire correspondre “{ $matchAny }” de ces conditions, ou choisissez le type de résultat “{ $topLevelItems }”.
 advanced-search-level-warning-unreachable = Cette recherche contient une condition incompatible avec le type de résultat choisi. Sélectionnez le type de résultat “{ $topLevelItems }” ou supprimez la condition incompatible.
 advanced-search-group-warning-unreachable =
-    A condition here cannot be in the same { $entity ->
-        [attachment] attachment
+    Une condition à cet endroit ne peut pas correspondre à la même { $entity ->
+        [attachment] pièce jointe
         [note] note
        *[annotation] annotation
-    }. Match these separately or remove the incompatible condition.
-advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+    }. Faites-les correspondre séparément ou supprimez la condition incompatible.
+advanced-search-group-warning-mixed = Ces conditions ne peuvent pas toutes correspondre au même document, ce groupe ne trouvera donc jamais aucun résultat. Essayez de faire correspondre “{ $matchAny }” de ces conditions, ou choisissez le type de résultat “{ $topLevelItems }”.
 advanced-search-bind-same-attachment =
     .label = Correspondre au même fichier joint
 advanced-search-bind-same-note =
@@ -894,17 +902,17 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valeur
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = est vide
+search-operator-isNotEmpty = n'est pas vide
 search-conditions-tooltip-fields = Champs :
 search-conditions-collection = Collection (de Zotero)
 search-conditions-savedSearch = Recherche enregistrée
 search-conditions-itemTypeID = Type de document
 search-conditions-tag = Marqueur
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = # de marqueurs
+search-conditions-numNotes = # de notes
+search-conditions-numAttachments = # de pièces jointes
+search-conditions-numAnnotations = # d'annotations
 search-conditions-note = Note
 search-conditions-childNote = Note fille
 search-conditions-creator = Créateur
@@ -978,8 +986,8 @@ file-type-presentation = Présentation
 file-type-document = Document
 file-type-ebook = Livre numérique
 attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-linkedFile = Fichier lié
+attachment-storage-type-webLink = Lien Web
 post-upgrade-message = Vous avez été mis à niveau vers <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Découvrez <a data-l10n-name="new-features-link">les nouveautés</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -1003,8 +1011,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = Le connecteur { -app-name } doit être mis à jour pour fonctionner avec cette version de { -app-name }.
 userjs-pref-warning = Certains paramètres de { -app-name } ont été modifiés à l'aide d'une méthode non prise en charge. { -app-name } va les rétablir et redémarrer.
+migrate-extra-fields-progress-headline = Updating Items…
 migrate-extra-fields-progress-message = Migration des nouveaux champs depuis le champ Extra
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indexing
+fulltext-indexing-progress-message = Les résultats de la recherche dans le texte intégral peuvent être incomplets tant que l'indextion n'est pas finie.
 long-tag-fixer-window-title =
     .title = Scinder les marqueurs
 long-tag-fixer-button-dont-split =
@@ -1018,18 +1028,18 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = Cette extension a été désactivée par { -app-name }.
 data-dir-unsupported-storage = Cela peut se produire si le répertoire de données de { -app-name } se trouve dans un dossier de stockage en nuage (OneDrive, Dropbox, etc.) ou sur un partage réseau.
-login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+login-manager-reset = { -app-name } n'a pas pu lire vos informations de connexion enregistrées, elles ont donc été réinitialisées. Veuillez vous ré-identifier dans le panneau { preferences-pane-account } des préférences de { -app-name }.
 os-keystore-save-failed =
     { PLATFORM() ->
-        [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [macos] { -app-name } n'a pas pu accéder à la Keychain de { -os-name } pour enregistrer vos informations de connexion de façon sécurisée. Assurez-vous que votre Keychain est accessible et réessayez.
+        [windows] { -app-name } n'a pas pu enregistrer vos informations de connexion de façon sécurisée. Réessayez ou redémarrez { -app-name }.
+       *[other] { -app-name } n'a pas pu accéder à votre keyring { -os-name } pour enregisrer vos informations de connexion de façon sécurisée. Assurez-vous qu'un service keyring est en cours d'exécution et réessayez.
     }
 os-keystore-migrate-failed =
     { PLATFORM() ->
-        [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
-        [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+        [macos] { -app-name } n'a pas pu accéder à la Keychain { -os-name } pour chiffrer vos informations de connexion enregistrées. Vos informations de connexion sont enregistrées en clair sur le disque. Assurez-vous que votre Keychain est accessible et redémarrez { -app-name }.
+        [windows] { -app-name } n'a pas pu chiffrer vos informations de connexion. Vos informations de connexion sont enregistrées en clair sur le disque. Redémarrez { -app-name } et réessayez.
+       *[other] { -app-name } n'a pas pu accéder à votre keyring { -os-name } pour chiffrer vos informations de connexion. Vos informations de connexion sont enregistrées en clair sur le disque. Assurez-vous qu'un service keyring est en cours d'exécution et redémarrez { -app-name }.
     }
 search-button =
     .label = Rechercher
@@ -1045,12 +1055,13 @@ item-pane-batch-editing-prompt =
     .aria-label = Modification groupée
 item-pane-batch-editing-enable =
     .label = Modifier plusieurs documents...
-item-pane-batch-editing-multiple-values-placeholder = Multiple
+item-pane-batch-editing-multiple-values-placeholder = Multiples valeurs
 item-pane-batch-editing-clear-values = Effacer toutes les valeurs
 item-pane-batch-editing-header =
     { $count ->
-        [one] Editing { $count } item
-       *[other] Editing { $count } items
+        [one] Edition de { $count } document
+        [many] Edition de { $count } documents
+       *[other] Edition de { $count } documents
     }
 item-pane-batch-editing-done =
     .label = { general-done }
@@ -1062,8 +1073,9 @@ undo-action-edit-metadata =
     }
 undo-action-edit-field =
     { $count ->
-        [one] Edit of “{ $field }”
-       *[other] Edit of “{ $field }” for { $count } Items
+        [one] Ediion du champ “{ $field }”
+        [many] Edition du champ “{ $field }” pour { $count } documents
+       *[other] Edition du champ “{ $field }” pour { $count } documents
     }
 undo-action-normalize-attachment-titles = Normaliser le titre de la pièce jointe
 undo-action-trash =
@@ -1128,7 +1140,7 @@ undo-action-add-tag =
         [many] Ajouter le marqueur à { $count } documents
        *[other] Ajouter le marqueur à { $count } documents
     }
-undo-action-change-tag = Change Tag
+undo-action-change-tag = Changer le marqueur
 undo-action-split-tag = Scinder le marqueur
 undo-action-remove-tag =
     { $count ->
@@ -1147,12 +1159,13 @@ undo-action-edit-note = Modifier la note
 undo-action-add-creator = Ajouter un auteur
 undo-action-remove-creator = Supprimer un auteur
 undo-action-edit-creator = Editer un auteur
-undo-action-reorder-creator = Reorder Creator
+undo-action-reorder-creator = Changer l'ordre des créateurs
 undo-action-change-type = Changer le type du document
 undo-action-change-parent-item =
     { $count ->
-        [one] Change Parent Item
-       *[other] Change Parent for { $count } Items
+        [one] Changer le document parent
+        [many] Changer le document parent pour { $count } documents
+       *[other] Changer le document parent pour { $count } documents
     }
 undo-action-convert-to-standalone =
     { $count ->
@@ -1160,8 +1173,8 @@ undo-action-convert-to-standalone =
         [many] Convertir { $count } éléments en document indépendants
        *[other] Convertir { $count } éléments en documents indépendants
     }
-undo-action-add-related = Add Related
-undo-action-remove-related = Remove Related
+undo-action-add-related = Définir une relation connexe
+undo-action-remove-related = Annuler une relation connexe
 undo-action-merge-items =
     { $count ->
         [one] Fusionner le document
@@ -1170,3 +1183,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Annuler { $action }
 menu-edit-redo-action = Répéter { $action }
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.

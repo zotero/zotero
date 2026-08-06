@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] Nenhuma nota selecionada corresponde a busca
-       *[other] Nenhuma nota selecionada
+        [true] No selected or open notes match the current search
+       *[other] No selected or open notes
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,7 +55,6 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = Manter as fontes ordenadas
-integration-citationDialog-preview-empty = Visualização
 integration-citationDialog-preview-error = Preview unavailable
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
@@ -101,9 +100,16 @@ integration-citationDialog-collections-table =
     .aria-label = Coleções.
     .aria-description = Selecione uma coleção e pressione Tab para navegar entre seus itens.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Este item foi adicionado a citação. Pressione { return-or-enter } para adicioná-lo novamente ou { delete-or-backspace } para removê-lo.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Add to Citation
+       *[other] Add { $count } Items to Citation
+    }
 integration-citationDialog-add-all = Adicionar tudo
 integration-citationDialog-collapse-section =
     .title = Comprimir seção
