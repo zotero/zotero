@@ -101,8 +101,10 @@ ZoteroAutoComplete.prototype.startSearch = async function (searchString, searchP
 			// 		1 == search single-field creators
 			// 		2 == search both
 			if (searchParams.fieldMode == 2) {
+				// TRIM() so that a two-field creator with an empty first name
+				// doesn't produce a value with a leading space
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
-					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS id "
+					+ "WHEN 0 THEN TRIM(firstName || ' ' || lastName) END AS val, NULL AS id "
 					+ "FROM creators ";
 				if (fieldName != 'creator' || libraryIDs.length) {
 					sql += "JOIN itemCreators USING (creatorID) ";
