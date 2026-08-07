@@ -427,33 +427,33 @@ describe("Advanced Search", function () {
 		
 		await zp.setAdvancedSearchState('closed');
 		await selectLibrary(win);
-
+		
 		await feed.eraseTx();
 	});
-
-	it("should scope value autocomplete to the given libraries", async function () {
-		// Run the 'zotero' autocomplete provider directly with given params
-		function autocomplete(searchString, params) {
-			return new Promise((resolve) => {
-				let search = Cc["@mozilla.org/autocomplete/search;1?name=zotero"]
-					.createInstance(Ci.nsIAutoCompleteSearch);
-				let listener = {
-					onSearchResult(_search, result) {
-						// Ignore intermediate (ongoing) updates
-						if (result.searchResult == Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING) {
-							return;
-						}
-						let values = [];
-						for (let i = 0; i < result.matchCount; i++) {
-							values.push(result.getValueAt(i));
-						}
-						resolve(values);
+	
+	// Run the 'zotero' autocomplete provider directly with given params
+	function autocomplete(searchString, params) {
+		return new Promise((resolve) => {
+			let search = Cc["@mozilla.org/autocomplete/search;1?name=zotero"]
+				.createInstance(Ci.nsIAutoCompleteSearch);
+			let listener = {
+				onSearchResult(_search, result) {
+					// Ignore intermediate (ongoing) updates
+					if (result.searchResult == Ci.nsIAutoCompleteResult.RESULT_SUCCESS_ONGOING) {
+						return;
 					}
-				};
-				search.startSearch(searchString, JSON.stringify(params), null, listener);
-			});
-		}
-		
+					let values = [];
+					for (let i = 0; i < result.matchCount; i++) {
+						values.push(result.getValueAt(i));
+					}
+					resolve(values);
+				}
+			};
+			search.startSearch(searchString, JSON.stringify(params), null, listener);
+		});
+	}
+	
+	it("should scope value autocomplete to the given libraries", async function () {
 		var group = await getGroup();
 		var groupLibraryID = group.libraryID;
 		// Autocomplete matches a value prefix, so both values start with the token
@@ -479,6 +479,17 @@ describe("Advanced Search", function () {
 		assert.includeMembers(both, [userPublisher, groupPublisher]);
 		
 		await Zotero.Items.erase([userItem.id, groupItem.id]);
+	});
+	
+	it("should not autocomplete a two-field creator without a first name as a leading space", async function () {
+		var item = createUnsavedDataObject('item');
+		item.setCreators([{ firstName: '', lastName: 'Solodova', creatorType: 'author' }]);
+		await item.saveTx();
+		
+		var values = await autocomplete('solodova', { fieldName: 'creator', fieldMode: 2 });
+		assert.deepEqual(values, ['Solodova']);
+		
+		await item.eraseTx();
 	});
 	
 	it("should save a search in an editable group library root but not the trash", async function () {
