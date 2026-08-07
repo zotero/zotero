@@ -3171,13 +3171,6 @@ var ZoteroPane = new function () {
 	}
 	
 	
-	this.handleSearchInput = function (textbox, event) {
-		if (textbox.searchTextbox.value.indexOf('"') != -1) {
-			this.setItemsPaneMessage(Zotero.getString('advancedSearchMode'));
-		}
-	}
-	
-	
 	/**
 	 * @return {Promise}
 	 */
@@ -3187,7 +3180,9 @@ var ZoteroPane = new function () {
 		}
 		var search = document.getElementById('zotero-tb-search');
 		var searchVal = search.searchTextbox.value;
-		if (!runAdvanced && searchVal.indexOf('"') != -1) {
+		// An unclosed quotation mark means a phrase is still being typed, so
+		// wait for the closing quote, or an explicit Enter, to search
+		if (!runAdvanced && (searchVal.match(/"/g) || []).length % 2) {
 			return;
 		}
 		var spinner = document.getElementById('zotero-tb-search-spinner');
@@ -3196,9 +3191,6 @@ var ZoteroPane = new function () {
 		await this.itemsView.setFilter('search', searchVal);
 		spinner.style.removeProperty("visibility");
 		spinner.removeAttribute("status");
-		if (runAdvanced) {
-			this.clearItemsPaneMessage();
-		}
 	};
 	
 	
