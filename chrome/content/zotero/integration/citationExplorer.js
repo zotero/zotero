@@ -691,10 +691,10 @@ window.ZoteroCitationExplorer = {
 		let isItemRow = focusedRow instanceof CitationExplorerItemTreeRow;
 		let isUnlinked = isItemRow && !focusedRow.isLinked;
 		let noneItemsSelected = selectedRows.length === 0;
-		let anyUnlinkedSelected = selectedRows.some(row => !row.isLinked);
+		let canRelink = selectedRows.length === 1 && selectedRows[0] === focusedRow && isUnlinked;
 
 		document.querySelector('#button-show-in-zotero').disabled = noneItemsSelected || !isItemRow || isUnlinked;
-		document.querySelector('#button-relink-item').disabled = noneItemsSelected || !anyUnlinkedSelected;
+		document.querySelector('#button-relink-item').disabled = !canRelink;
 		document.querySelector('#button-addTo-library').disabled = noneItemsSelected;
 		
 		await this.refreshCitationList();
@@ -704,7 +704,7 @@ window.ZoteroCitationExplorer = {
 		let focusedRow = itemList.getRow(itemList.selection.focused);
 		if (focusedRow instanceof LibraryItemTreeRow) return;
 
-		if (!focusedRow.isLinked) {
+		if (!focusedRow.isLinked && itemList.selection.count === 1) {
 			this.onItemRelink();
 		}
 		else {
@@ -718,7 +718,6 @@ window.ZoteroCitationExplorer = {
 
 	onItemRelink: async function () {
 		let treeRow = itemList.getRow(itemList.selection.focused);
-		if (!(treeRow instanceof CitationExplorerItemTreeRow) || treeRow.isLinked) return;
 		let oldItemID = treeRow.id;
 
 		let io = { dataIn: null, dataOut: null, multiSelect: false, deferred: Zotero.Promise.defer() };
