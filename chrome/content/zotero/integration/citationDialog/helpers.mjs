@@ -506,4 +506,31 @@ export class CitationDialogHelpers {
 			resolve();
 		}, delay);
 	}
+
+
+	// Get the page currently displayed by a reader tab with an attachment of the given
+	// top-level item. If the item is open in multiple tabs, the selected tab wins.
+	// Returns null if the item is not open in any reader tab or if the reader has no
+	// pages (e.g. a snapshot).
+	getOpenTabPage(item) {
+		if (!item) return null;
+		let win = Zotero.getMainWindow();
+		if (!win) return null;
+		let tabIDs = item.getAttachments()
+			.map(attachmentID => win.Zotero_Tabs.getTabIDByItemID(attachmentID))
+			.filter(Boolean);
+		// Look at the selected tab first
+		tabIDs.sort((a, b) => {
+			if (a === win.Zotero_Tabs.selectedID) return -1;
+			if (b === win.Zotero_Tabs.selectedID) return 1;
+			return 0;
+		});
+		for (let tabID of tabIDs) {
+			let reader = Zotero.Reader.getByTabID(tabID);
+			if (!reader) continue;
+			let page = reader.getCurrentPage();
+			if (page) return page;
+		}
+		return null;
+	}
 }
