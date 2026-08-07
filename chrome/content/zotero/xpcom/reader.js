@@ -115,6 +115,19 @@ class ReaderInstance {
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
 
+	/**
+	 * Get the page currently displayed in the active view, as shown in the reader's toolbar.
+	 *
+	 * @returns {String|null} - Page, or null if the reader has no pages.
+	 */
+	getCurrentPage() {
+		let state = this._internalReader?._state;
+		if (!state) return null;
+		let stats = state.primary ? state.primaryViewStats : state.secondaryViewStats;
+		if (!stats || stats.pageIndex === undefined) return null;
+		return stats.pageLabel || String(stats.pageIndex + 1);
+	}
+
 	async migrateMendeleyColors(libraryID, annotations) {
 		let colorMap = new Map();
 		colorMap.set('#fff5ad', '#ffd400');
