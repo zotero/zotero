@@ -179,6 +179,7 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
 		this._unlinkedItems = [];
 		this._citedInByID = new Map();
 		this._cslItemIDByID = new Map();
+		this._containerOpenState = new Map();
 	}
 
 	/**
@@ -235,6 +236,12 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
 	 * multiple libraries OR any unlinked items.
 	 */
 	_rebuildRows() {
+		for (let row of this._rows) {
+			if (row instanceof LibraryItemTreeRow) {
+				this._containerOpenState.set(row.id, row.isContainerOpen());
+			}
+		}
+
 		const byLibrary = new Map();
 		this._unlinkedItems = [];
 
@@ -255,11 +262,13 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
 		this._rows = [];
 		if (showContainers) {
 			if (this._unlinkedItems.length) {
-				this._rows.push(this.createRow({ treeViewID: UNLINKED_ITEMS_ID }, 0, true));
+				let isOpen = this._containerOpenState.get(UNLINKED_ITEMS_ID) ?? true;
+				this._rows.push(this.createRow({ treeViewID: UNLINKED_ITEMS_ID }, 0, isOpen));
 			}
 			for (const libID of sortedLibIDs) {
 				let library = Zotero.Libraries.get(libID);
-				this._rows.push(this.createRow(library, 0, true));
+				let isOpen = this._containerOpenState.get(library.treeViewID) ?? true;
+				this._rows.push(this.createRow(library, 0, isOpen));
 				// Children will be added by _sort() → _restoreOpenState() →
 				// _toggleOpenState(), which sorts them using the cached comparator
 			}
