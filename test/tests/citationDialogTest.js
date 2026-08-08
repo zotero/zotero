@@ -490,7 +490,7 @@ describe("Citation Dialog", function () {
 			while (SearchHandler.searching) {
 				await Zotero.Promise.delay(10);
 			}
-			assert.equal(Helpers.getOpenTabPage(item), "1");
+			assert.equal(await Helpers.getOpenTabPage(item), "1");
 
 			await IOManager.addItemsToCitation([item]);
 			await waitForCallback(() => panel.state == "open");
@@ -499,6 +499,46 @@ describe("Citation Dialog", function () {
 			// Cleanup
 			panel.hidePopup();
 			win.Zotero_Tabs.close(win.Zotero_Tabs.selectedID);
+			SearchHandler.clearNonLibraryItemsCache();
+		});
+
+		it("should suggest the last saved page of an item opened in an unloaded tab", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			await Zotero.Reader.open(attachment.id);
+			let tabID = win.Zotero_Tabs.selectedID;
+			let reader = Zotero.Reader.getByTabID(tabID);
+			await reader._waitForReader();
+			await waitForCallback(() => reader.getCurrentPage());
+			// The reader saves its state on a debounce, and there is nothing to flush
+			// until it has done so at least once
+			await waitForCallback(() => Number.isInteger(attachment.getAttachmentLastPageIndex()));
+
+			// Only an unselected tab can be unloaded. Unloading closes the reader,
+			// which flushes its state -- including the page -- to disk.
+			win.Zotero_Tabs.select("zotero-pane");
+			win.Zotero_Tabs.unload(tabID);
+			// The reader is discarded once the tab close notification is processed
+			await waitForCallback(() => !Zotero.Reader.getByTabID(tabID));
+			// The state is written asynchronously
+			let savedPage;
+			for (let i = 0; i < 100 && !savedPage; i++) {
+				savedPage = await Zotero.Reader.getSavedPageLabel(attachment.id);
+				await Zotero.Promise.delay(10);
+			}
+			assert.equal(savedPage, "1");
+			assert.equal(await Helpers.getOpenTabPage(item), "1");
+
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			await IOManager.addItemsToCitation([item]);
+			await waitForCallback(() => panel.state == "open");
+			assert.equal(option.textContent, Zotero.Cite.getLocatorString("page", "short").toLowerCase() + " 1");
+
+			// Cleanup
+			panel.hidePopup();
+			win.Zotero_Tabs.close(tabID);
 			SearchHandler.clearNonLibraryItemsCache();
 		});
 

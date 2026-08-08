@@ -1436,9 +1436,9 @@ const IOManager = {
 
 		// Add entries into the citation with the current locator if specified
 		let bubbleItems = items.map(item => BubbleItem.fromItem(item));
-		// Page of a reader tab with an attachment of the added item to be
-		// suggested as a locator once the bubble is added
-		let pageSuggestion = null;
+		// Whether to suggest the page of a reader tab with an attachment of the
+		// added item as a locator once the bubble is added
+		let suggestPage = false;
 		if (locator) {
 			for (let bubbleItem of bubbleItems) {
 				bubbleItem.locator = locator.locator;
@@ -1455,10 +1455,8 @@ const IOManager = {
 			// that, the user presumably knows about the shortcut
 			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
 				&& this._timesItemsAdded < 1;
-			// If the item is opened in a reader tab, suggest its current page as a locator
-			if (DIALOG_STATE.isCitingItems()) {
-				pageSuggestion = Helpers.getOpenTabPage(items[0]);
-			}
+			// If the item is opened in a reader tab, its page is suggested as a locator
+			suggestPage = DIALOG_STATE.isCitingItems();
 		}
 		else {
 			// A multi-item add doesn't enter locator-typing mode, so typed text
@@ -1494,11 +1492,15 @@ const IOManager = {
 		}
 		// Suggest the page of the opened document, unless the first run guidance panel
 		// is already displayed next to the same bubble
-		if (pageSuggestion && !guidanceShown) {
-			PopupsHandler.openPageSuggestion({
-				page: pageSuggestion,
-				anchor: _id("bubble-input").getCurrentInput()
-			});
+		if (suggestPage && !guidanceShown) {
+			let page = await Helpers.getOpenTabPage(items[0]);
+			// The bubble the locator would be added to may be gone by now
+			if (page && this._justAddedBubbles) {
+				PopupsHandler.openPageSuggestion({
+					page,
+					anchor: _id("bubble-input").getCurrentInput()
+				});
+			}
 		}
 		dialogNotPristine();
 	},

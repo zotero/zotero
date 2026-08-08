@@ -510,25 +510,28 @@ export class CitationDialogHelpers {
 
 	// Get the page currently displayed by a reader tab with an attachment of the given
 	// top-level item. If the item is open in multiple tabs, the selected tab wins.
+	// An unloaded tab has no reader, so the page saved by the reader before the tab was
+	// unloaded is used for it.
 	// Returns null if the item is not open in any reader tab or if the reader has no
 	// pages (e.g. a snapshot).
-	getOpenTabPage(item) {
+	async getOpenTabPage(item) {
 		if (!item) return null;
 		let win = Zotero.getMainWindow();
 		if (!win) return null;
-		let tabIDs = item.getAttachments()
-			.map(attachmentID => win.Zotero_Tabs.getTabIDByItemID(attachmentID))
-			.filter(Boolean);
+		let tabs = item.getAttachments()
+			.map(attachmentID => ({ attachmentID, tabID: win.Zotero_Tabs.getTabIDByItemID(attachmentID) }))
+			.filter(({ tabID }) => tabID);
 		// Look at the selected tab first
-		tabIDs.sort((a, b) => {
-			if (a === win.Zotero_Tabs.selectedID) return -1;
-			if (b === win.Zotero_Tabs.selectedID) return 1;
+		tabs.sort((a, b) => {
+			if (a.tabID === win.Zotero_Tabs.selectedID) return -1;
+			if (b.tabID === win.Zotero_Tabs.selectedID) return 1;
 			return 0;
 		});
-		for (let tabID of tabIDs) {
+		for (let { attachmentID, tabID } of tabs) {
 			let reader = Zotero.Reader.getByTabID(tabID);
-			if (!reader) continue;
-			let page = reader.getCurrentPage();
+			let page = reader
+				? reader.getCurrentPage()
+				: await Zotero.Reader.getSavedPageLabel(attachmentID);
 			if (page) return page;
 		}
 		return null;
