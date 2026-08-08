@@ -114,6 +114,11 @@ pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 pref("extensions.zotero.search.useLeftBound", true);
 
+// Semantic search embeddings - disabled when "";
+pref("extensions.zotero.embeddings.model", "");
+// Set when the user stops indexing; nothing is indexed until indexing is started again
+pref("extensions.zotero.embeddings.indexingPaused", false);
+
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");
 pref("extensions.zotero.note.fontSize", "14");

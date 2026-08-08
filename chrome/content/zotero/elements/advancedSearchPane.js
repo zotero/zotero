@@ -284,7 +284,7 @@
 			// position-independent and stay at the top level, and the rest, which may get
 			// wrapped in a group below. The search always comes from updateSearch(), so
 			// these are the only markers/flags that can appear at the top level.
-			const FLAGS = ['resultLevel', 'recursive', 'includeParentsAndChildren'];
+			const FLAGS = ['resultLevel', 'bestMatch', 'recursive', 'includeParentsAndChildren'];
 			let joinMode = 'all';
 			let flags = [];
 			let rest = [];

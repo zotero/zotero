@@ -45,11 +45,17 @@
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 
-		_searchModes = {
-			titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
-			fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
-			everything: Zotero.getString('quickSearch.mode.everything')
-		};
+		get _searchModes() {
+			let modes = {
+				titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
+				fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
+				everything: Zotero.getString('quickSearch.mode.everything')
+			};
+			if (Zotero.Embeddings.isEnabled()) {
+				modes.bestMatch = Zotero.getString('quickSearch-mode-best-match');
+			}
+			return modes;
+		}
 
 		_searchModePopup = null;
 
@@ -59,6 +65,13 @@
 
 		set value(val) {
 			this.searchTextbox.value = val;
+		}
+
+		disconnectedCallback() {
+			if (this._modelPrefObserverID) {
+				Zotero.Prefs.unregisterObserver(this._modelPrefObserverID);
+				this._modelPrefObserverID = null;
+			}
 		}
 
 		connectedCallback() {
@@ -122,10 +135,25 @@
 					}
 				});
 				wrapper.appendChild(advancedButton);
+				this._advancedButton = advancedButton;
 			}
-			
+
+			// Disabling semantic search in the preferences invalidates an active
+			// best-match mode: fall back to Fields & Tags and rerun any active
+			// search under the new mode
+			this._modelPrefObserverID = Zotero.Prefs.registerObserver('embeddings.model', () => {
+				if (Zotero.Prefs.get('search.quicksearch-mode') === 'bestMatch'
+						&& !Zotero.Embeddings.isEnabled()) {
+					Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+					this.updateMode();
+					if (this.value) {
+						this.dispatchEvent(new Event('command'));
+					}
+				}
+			});
+
 			this.deck = this.firstElementChild;
-			
+
 			this.querySelector('.advanced-collapse-button').addEventListener('command', (event) => {
 				event.stopPropagation();
 				ZoteroPane.toggleAdvancedSearchState('collapsed');
@@ -158,6 +186,15 @@
 			popup.id = "search-mode-popup";
 			popup.toggleAttribute("needsgutter", true);
 
+			this._populateSearchModePopup(popup);
+			// Rebuild the menu if the available modes changed since it was built
+			// (e.g. semantic search was enabled or disabled in the preferences)
+			popup.addEventListener('popupshowing', () => this._syncSearchModePopup());
+
+			return this._searchModePopup = popup;
+		}
+
+		_populateSearchModePopup(popup) {
 			for (let [mode, label] of Object.entries(this._searchModes)) {
 				let item = document.createXULElement('menuitem');
 				item.setAttribute('type', 'radio');
@@ -175,8 +212,22 @@
 
 				popup.append(item);
 			}
-			
-			return this._searchModePopup = popup;
+		}
+
+		_syncSearchModePopup() {
+			let popup = this._searchModePopup;
+			if (!popup) {
+				return;
+			}
+			let modes = Object.keys(this._searchModes);
+			let current = [...popup.children].map(item => item.value);
+			if (current.length === modes.length && current.every((mode, i) => mode === modes[i])) {
+				return;
+			}
+			popup.replaceChildren();
+			this._populateSearchModePopup(popup);
+			let active = Zotero.Prefs.get('search.quicksearch-mode');
+			popup.querySelector(`menuitem[value="${active}"]`)?.setAttribute('checked', 'true');
 		}
 		
 		onCollectionSelected() {
@@ -192,6 +243,7 @@
 				mode = 'fields';
 			}
 
+			this._syncSearchModePopup();
 			this.searchModePopup.querySelector(`menuitem[value="${mode}"]`)
 				.setAttribute('checked', 'true');
 			document.l10n.setAttributes(this.searchTextbox.inputField, "quicksearch-input", { placeholder: this._searchModes[mode] });

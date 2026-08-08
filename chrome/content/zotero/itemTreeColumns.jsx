@@ -38,6 +38,8 @@ const Icons = require('components/icons');
  * @property {string[]} [defaultIn] - Types of collectionTreeRow the column is default in. See itemTree.js#_matchesViewType()
  * @property {boolean} [dependsOnChildren=false] - Set to true if the column depends on child item data (e.g. numNotes, lastRead)
  * @property {boolean} [sortReverse=false] - Default: false. Set to true to reverse the sort order
+ * @property {boolean} [fixedSortDirection=false] - Default: false. Set to true to prevent clicks from reversing the sort direction
+ * @property {boolean} [transient=false] - Default: false. Set to true for columns whose visibility and sort are derived at runtime, so persisted settings are never applied
  * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * @property {string} [width] - A column width instead of flex ratio. See above.
  * @property {boolean} [fixedWidth] - Default: false. Set to true to disable column resizing
@@ -373,6 +375,45 @@ const COLUMNS = [
 		minWidth: 26,
 		staticWidth: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
+	},
+	{
+		dataKey: "relevance",
+		label: "items-column-relevance",
+		// Shown and sorted on automatically while a best-match search is
+		// active (see ItemTree#_getColumns()); not user-toggleable or persisted
+		showInColumnPicker: false,
+		iconLabel: <Icons.IconRelevanceSmall />,
+		width: "60",
+		staticWidth: true,
+		// Most similar first; "least similar first" isn't a useful view
+		sortReverse: true,
+		fixedSortDirection: true,
+		// Visibility and sort are derived from the best-match-search state, so
+		// persisted settings are never applied
+		transient: true,
+		zoteroPersist: [],
+		// A bar showing the score's fraction of the model's display range.
+		// `data` is the rank, which drives the sort.
+		renderCell(index, data, column, isFirstColumn, doc) {
+			let cell = doc.createElement('span');
+			cell.className = `cell ${column.className}`;
+			let fraction = this.rowProvider.getBestMatchBarFractions()
+				.get(this.getRow(index).id);
+			if (fraction !== undefined) {
+				let bar = doc.createElement('span');
+				bar.className = 'relevance-bar';
+				let fill = doc.createElement('span');
+				fill.className = 'relevance-bar-fill';
+				fill.style.width = Math.round(fraction * 100) + '%';
+				bar.append(fill);
+				cell.append(bar);
+				// The rank reaches assistive technology via the row label; show
+				// it visually as a tooltip
+				doc.l10n.formatValue('items-column-relevance-rank', { rank: data })
+					.then(label => cell.title = label);
+			}
+			return cell;
+		}
 	},
 	{
 		dataKey: "addedBy",
