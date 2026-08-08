@@ -1,0 +1,49 @@
+/* The colored copy of a search query, drawn behind the input (see
+   queryTextbox.js). The input's own text is transparent while a condition is
+   recognized, so what's read on screen is this layer. */
+
+:host {
+	position: relative;
+}
+
+.query-highlight {
+	position: absolute;
+	overflow: hidden;
+	pointer-events: none;
+	box-sizing: border-box;
+	color: FieldText;
+	/* An input centers its line in its content box, so the layer has to too */
+	display: flex;
+	align-items: center;
+	white-space: pre;
+}
+
+:host([highlighted]) input {
+	color: transparent;
+	caret-color: FieldText;
+}
+
+/* A translucent selection lets the layer show through, since the text painted
+   over it is transparent */
+:host([highlighted]) input::selection {
+	background-color: color-mix(in srgb, Highlight 35%, transparent);
+	color: transparent;
+}
+
+.query-token-field {
+	color: var(--accent-blue, #2ea8e5);
+}
+
+.query-token-operator {
+	color: var(--fill-secondary, #6b6b6b);
+}
+
+.query-token-value {
+	color: var(--accent-green, #5fb236);
+}
+
+.query-token-join,
+.query-token-paren {
+	color: var(--fill-secondary, #6b6b6b);
+	font-weight: 600;
+}

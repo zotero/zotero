@@ -129,6 +129,7 @@ const xpcomFilesLocal = [
 	'retractions',
 	'router',
 	'schema',
+	'searchQuery',
 	'server/server',
 	'server/server_integration',
 	'server/server_connector',
