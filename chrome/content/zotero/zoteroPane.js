@@ -1613,6 +1613,20 @@ var ZoteroPane = new function () {
 			ZoteroPane.itemsView.onRefresh.addListener(async () => {
 				await ZoteroPane.itemSelected();
 			});
+			// Also update the count when rows are added or removed by notifier events with
+			// nothing selected (e.g., items downloaded during a sync). Debounced so that the
+			// item pane doesn't re-render within the notifier dispatch or once per event in
+			// a burst of changes.
+			let updateUnselectedCount = Zotero.Utilities.debounce(() => {
+				if (!ZoteroPane.itemsView.selection.count) {
+					ZoteroPane.itemSelected();
+				}
+			}, 100);
+			ZoteroPane.itemsView.onRowCountChange.addListener(() => {
+				if (!ZoteroPane.itemsView.selection.count) {
+					updateUnselectedCount();
+				}
+			});
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());
 
 			ItemTreeMenuBar.setItemTreeSortKeys(ZoteroPane.itemsView);

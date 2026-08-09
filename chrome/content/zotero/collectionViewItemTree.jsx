@@ -732,6 +732,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					this._removeRows(rows);
 					rowsToInvalidate = true; // all rows
 					this.runListeners('update', true);
+					this.itemTree.runListeners('rowCountChange');
 				}
 			}
 
@@ -1084,6 +1085,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				selection: rowsToSelect
 			});
 		}
+
+		if (madeChanges || refresh) {
+			this.itemTree.runListeners('rowCountChange');
+		}
 	}
 }
 
@@ -1102,8 +1107,10 @@ class CollectionViewItemTree extends ItemTree {
 		// Triggered when the item tree is refreshed:
 		// - Collection/view changed (changeCollectionTreeRow)
 		// - Search/filter updated (setFilter)
-		// - Items added/removed/modified (notify -> refresh)
 		this.onRefresh = this.createEventBinding('refresh');
+		// Triggered when notifier events change the rows in the view without a full refresh
+		// (e.g., items added during a sync)
+		this.onRowCountChange = this.createEventBinding('rowCountChange');
 	}
 
 	get viewMode() { return this.rowProvider.viewMode; }

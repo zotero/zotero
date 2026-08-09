@@ -250,6 +250,57 @@ describe("Item pane", function () {
 		});
 	});
 	
+	describe("Message pane", function () {
+		it("should update items-in-view count when an item is added with no selection", async function () {
+			var collection = await createDataObject('collection');
+			await ZoteroPane.collectionsView.selectCollection(collection.id);
+			await waitForItemsLoad(win);
+			
+			var messageBox = doc.querySelector('#zotero-item-pane-message-box');
+			var emptyMessage = await doc.l10n.formatValue('item-pane-message-unselected', { count: 0 });
+			var oneItemMessage = await doc.l10n.formatValue('item-pane-message-unselected', { count: 1 });
+			for (let i = 0; i < 100 && !messageBox.textContent.includes(emptyMessage); i++) {
+				await Zotero.Promise.delay(10);
+			}
+			assert.include(messageBox.textContent, emptyMessage);
+			
+			await createDataObject('item', { collections: [collection.id] }, { skipSelect: true });
+			
+			for (let i = 0; i < 100 && !messageBox.textContent.includes(oneItemMessage); i++) {
+				await Zotero.Promise.delay(10);
+			}
+			assert.include(messageBox.textContent, oneItemMessage);
+		});
+		
+		it("should update items-in-view count when a restored item is removed from the trash with no selection", async function () {
+			var group = await createGroup();
+			var item = await createDataObject('item', { libraryID: group.libraryID, deleted: true }, { skipSelect: true });
+			await selectTrash(win, group.libraryID);
+			
+			var messageBox = doc.querySelector('#zotero-item-pane-message-box');
+			var emptyMessage = await doc.l10n.formatValue('item-pane-message-unselected', { count: 0 });
+			var oneItemMessage = await doc.l10n.formatValue('item-pane-message-unselected', { count: 1 });
+			for (let i = 0; i < 100 && !messageBox.textContent.includes(oneItemMessage); i++) {
+				await Zotero.Promise.delay(10);
+			}
+			assert.include(messageBox.textContent, oneItemMessage);
+			
+			// Restore the item without notifications, so that the row remains until a
+			// 'refresh' notification arrives (e.g., from retractions or full-text
+			// indexing) and the tree notices that the item is no longer deleted
+			item.deleted = false;
+			await item.saveTx({ skipNotifier: true });
+			assert.include(messageBox.textContent, oneItemMessage);
+			
+			await Zotero.Notifier.trigger('refresh', 'item', [item.id]);
+			
+			for (let i = 0; i < 100 && !messageBox.textContent.includes(emptyMessage); i++) {
+				await Zotero.Promise.delay(10);
+			}
+			assert.include(messageBox.textContent, emptyMessage);
+		});
+	});
+	
 	describe("Info pane", function () {
 		before(async () => {
 			await activateZoteroPane();
