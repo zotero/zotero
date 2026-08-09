@@ -228,14 +228,18 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Get the MD5 hash of a file, reading it via an off-main-thread stream and hashing it
+	 * a segment at a time so that the main thread is never blocked for the whole file
+	 *
 	 * @param {nsIFile|String} file  File or file path
+	 * @return {Promise<String|false>}  Lowercase hex string, or false if the file doesn't exist
 	 */
 	md5Async: async function (file) {
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
 		}
 		
-		var file = Zotero.File.pathToFile(file);
+		file = Zotero.File.pathToFile(file);
 		try {
 			let { size } = await IOUtils.stat(file.path);
 			if (size === 0) {
@@ -257,29 +261,45 @@ Zotero.Utilities.Internal = {
 		
 		var is = Cc["@mozilla.org/network/file-input-stream;1"]
 			.createInstance(Ci.nsIFileInputStream);
-		try {
-			is.init(Zotero.File.pathToFile(file), -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
-			ch.updateFromStream(is, -1);
-			// Get binary string and convert to hex string
-			let hash = ch.finish(false);
-			let hexStr = "";
-			for (let i = 0; i < hash.length; i++) {
-				hexStr += toHexString(hash.charCodeAt(i));
-			}
-			return hexStr;
-		}
-		catch (e) {
-			try {
-				ch.finish(false);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-			throw e;
-		}
-		finally {
-			is.close();
-		}
+		// DEFER_OPEN so that the file is opened on the pump's background thread rather than
+		// synchronously here
+		is.init(file, -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF | Ci.nsIFileInputStream.DEFER_OPEN);
+		
+		var pump = Cc["@mozilla.org/network/input-stream-pump;1"]
+			.createInstance(Ci.nsIInputStreamPump);
+		pump.init(is, 0, 0, true);
+		
+		return new Promise((resolve, reject) => {
+			pump.asyncRead({
+				onStartRequest: function (_request) {},
+				
+				onDataAvailable: function (request, inputStream, offset, count) {
+					ch.updateFromStream(inputStream, count);
+				},
+				
+				onStopRequest: function (_request, status) {
+					if (!Components.isSuccessCode(status)) {
+						try {
+							ch.finish(false);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+						reject(new Components.Exception("Error reading " + file.path, status));
+						return;
+					}
+					// Get binary string and convert to hex string
+					let hash = ch.finish(false);
+					let hexStr = "";
+					for (let i = 0; i < hash.length; i++) {
+						hexStr += toHexString(hash.charCodeAt(i));
+					}
+					resolve(hexStr);
+				},
+				
+				QueryInterface: ChromeUtils.generateQI(["nsIStreamListener", "nsIRequestObserver"])
+			});
+		});
 	},
 	
 	
