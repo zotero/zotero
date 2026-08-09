@@ -943,9 +943,7 @@ Zotero.Sync.Data.Local = {
 	 *         {Object[]} [conflicts] - An array of conflicting fields that can't be resolved automatically
 	 */
 	processObjectsFromJSON: async function (objectType, libraryID, json, options = {}) {
-		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-		var ObjectType = Zotero.Utilities.capitalize(objectType);
 		var libraryName = Zotero.Libraries.get(libraryID).name;
 		
 		var knownErrors = new Set([
@@ -979,360 +977,134 @@ Zotero.Sync.Data.Local = {
 			});
 		}
 		
-		var batchSize = options.getNotifierBatchSize ? options.getNotifierBatchSize() : json.length;
 		var notifierQueues = [];
 		
 		try {
-			for (let i = 0; i < json.length; i++) {
-				// Batch notifier updates
-				if (notifierQueues.length == batchSize) {
-					await Zotero.Notifier.commit(notifierQueues);
-					notifierQueues = [];
-					// Get the current batch size, which might have increased
-					if (options.getNotifierBatchSize) {
-						batchSize = options.getNotifierBatchSize()
-					}
-				}
-				let notifierQueue = new Zotero.Notifier.Queue({
-					skipAutoSync: true
-				});
+			for (let i = 0; i < json.length;) {
+				// Batch size for the save transaction and notifier updates, increased as processing
+				// progresses so that new objects start coming in one by one but then switch to
+				// larger chunks
+				let batchSize = options.getNotifierBatchSize ? options.getNotifierBatchSize() : json.length;
+				let batch = json.slice(i, i + batchSize);
+				i += batch.length;
 				
-				let jsonObject = json[i];
-				let jsonData = jsonObject.data;
-				let objectKey = jsonObject.key;
-				
-				let saveOptions = {};
-				Object.assign(saveOptions, options);
-				saveOptions.isNewObject = false;
-				saveOptions.skipCache = false;
-				saveOptions.storageDetailsChanged = false;
-				saveOptions.notifierQueue = notifierQueue;
-				
-				Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
-				Zotero.debug(jsonObject);
-				
-				// Skip objects with unmet dependencies
-				if (objectType == 'item' || objectType == 'collection') {
-					// Missing parent collection or item
-					let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
-					let parentKey = jsonData[parentProp];
-					if (parentKey) {
-						let parentObj = await objectsClass.getByLibraryAndKeyAsync(
-							libraryID, parentKey, { noCache: true }
-						);
-						if (!parentObj) {
-							let error = new Error("Parent of " + objectType + " "
-								+ libraryID + "/" + jsonData.key + " not found -- skipping");
-							error.name = "ZoteroMissingObjectError";
-							Zotero.debug(error.message);
-							results.push({
-								key: objectKey,
-								processed: false,
-								error,
-								retry: true
-							});
-							continue;
-						}
-					}
-					
-					// Missing collection -- this could happen if the collection was deleted
-					// locally and an item in it was modified remotely
-					if (objectType == 'item' && jsonData.collections) {
-						let error;
-						for (let key of jsonData.collections) {
-							let collection = Zotero.Collections.getByLibraryAndKey(libraryID, key);
-							if (!collection) {
-								error = new Error(`Collection ${libraryID}/${key} not found `
-									+ `-- skipping item`);
-								error.name = "ZoteroMissingObjectError";
-								Zotero.debug(error.message);
-								results.push({
-									key: objectKey,
-									processed: false,
-									error,
-									retry: false
+				// Try to process the batch in a single transaction
+				let batchSaved = false;
+				if (batch.length > 1) {
+					let batchResults = [];
+					let batchQueues = [];
+					try {
+						await Zotero.DB.executeTransaction(async function () {
+							for (let jsonObject of batch) {
+								let notifierQueue = new Zotero.Notifier.Queue({
+									skipAutoSync: true
 								});
-								
-								// If the collection is in the delete log, the deletion will upload
-								// after downloads are done. Otherwise, we somehow missed
-								// downloading it and should add it to the queue to try again.
-								if (!((await this.getDateDeleted('collection', libraryID, key)))) {
-									await this.addObjectsToSyncQueue('collection', libraryID, [key]);
+								// Pass a deep copy, since the object can be modified during
+								// processing and a failed batch is reprocessed with the
+								// original data
+								await this._processObjectFromJSON(
+									objectType,
+									libraryID,
+									JSON.parse(JSON.stringify(jsonObject)),
+									options,
+									notifierQueue,
+									batchResults
+								);
+								if (notifierQueue.size) {
+									batchQueues.push(notifierQueue);
 								}
-								break;
 							}
-						}
-						if (error) {
-							continue;
-						}
+						}.bind(this));
+						results.push(...batchResults);
+						notifierQueues.push(...batchQueues);
+						batchSaved = true;
+					}
+					catch (e) {
+						Zotero.debug(`Batch save of ${batch.length} ${objectTypePlural} failed `
+							+ "-- reprocessing individually", 2);
+						Zotero.debug(e, 2);
 					}
 				}
 				
-				// Errors have to be thrown in order to roll back the transaction, so catch those here
-				// and continue
-				try {
-					await Zotero.DB.executeTransaction(async function () {
-						let obj = await objectsClass.getByLibraryAndKeyAsync(
-							libraryID, objectKey, { noCache: true }
-						);
-						let restored = false;
-						if (obj) {
-							Zotero.debug("Matching local " + objectType + " exists", 4);
-							
-							let jsonDataLocal = obj.toJSON();
-							
-							// For items, check if mtime or file hash changed in metadata,
-							// which would indicate that a remote storage sync took place and
-							// a download is needed
-							if (objectType == 'item' && obj.isStoredFileAttachment()) {
-								if (jsonDataLocal.mtime != jsonData.mtime
-										|| jsonDataLocal.md5 != jsonData.md5) {
-									saveOptions.storageDetailsChanged = true;
-								}
-								if (jsonDataLocal.filename != jsonData.filename) {
-									saveOptions.renameFile = true;
-									saveOptions.previousFilename = obj.attachmentFilename;
-								}
-							}
-							
-							// Local object has been modified since last sync
-							if (!obj.synced) {
-								Zotero.debug("Local " + objectType + " " + obj.libraryKey
-										+ " has been modified since last sync", 4);
-								
-								let cachedJSON = await this.getCacheObject(
-									objectType, obj.libraryID, obj.key, obj.version
-								);
-								let result = this._reconcileChanges(
-									objectType,
-									cachedJSON.data,
-									jsonDataLocal,
-									jsonData,
-									['mtime', 'md5', 'dateAdded', 'dateModified']
-								);
-								
-								// If local object became a child item and remote was added to any
-								// collections, we need to remove the 'collections' changes and add
-								// the parent item to those collections instead
-								if (objectType == 'item'
-										&& !obj.isTopLevelItem()
-										&& (obj.isNote() || obj.isAttachment())) {
-									let collections = result.changes
-										.filter(x => x.field == 'collections' && x.op == 'member-add')
-										.map(x => x.value);
-									if (collections.length) {
-										result.changes = result.changes
-											.filter(x => !(x.field == 'collections' && x.op == 'member-add'));
-										saveOptions.newParentItemCollections = collections;
-									}
-								}
-								
-								// If no changes, just update local version number and mark as synced
-								if (!result.changes.length && !result.conflicts.length) {
-									Zotero.debug("No remote changes to apply to local "
-										+ objectType + " " + obj.libraryKey);
-									saveOptions.skipData = true;
-									// If either there were additional local changes after cancelling
-									// out equivalent changes on both sides or the local object was
-									// different but we ignored the changes (e.g., ISBN hyphenation),
-									// keep as unsynced. In the latter case, since we're skipping
-									// data, the local fields won't be overwritten.
-									if (result.localChanged) {
-										saveOptions.saveAsUnsynced = true;
-									}
-									let saveResults = await this._saveObjectFromJSON(
-										obj,
-										jsonObject,
-										saveOptions
-									);
-									results.push(saveResults);
-									if (!saveResults.processed) {
-										throw saveResults.error;
-									}
-									return;
-								}
-								
-								if (result.conflicts.length) {
-									if (objectType != 'item') {
-										throw new Error(`Unexpected conflict on ${objectType} object`);
-									}
-									
-									// Skip conflict resolution if there are invalid fields
-									try {
-										let testObj = obj.clone();
-										testObj.fromJSON(jsonData, { strict: true });
-									}
-									catch (e) {
-										results.push({
-											key: objectKey,
-											processed: false,
-											error: e,
-											retry: false
-										});
-										throw e;
-									}
-									
-									Zotero.debug("Conflict!", 2);
-									Zotero.debug(jsonDataLocal);
-									Zotero.debug(jsonData);
-									Zotero.debug(result);
-									results.push({
-										libraryID,
-										key: objectKey,
-										processed: false,
-										conflict: true,
-										left: jsonDataLocal,
-										right: jsonData,
-										changes: result.changes,
-										conflicts: result.conflicts
-									});
-									return;
-								}
-								
-								// If no conflicts, apply remote changes automatically
-								Zotero.debug(`Applying remote changes to ${objectType} `
-									+ obj.libraryKey);
-								Zotero.debug(result.changes);
-								// If there were local changes as well, keep object as unsynced and
-								// save the remote version to the sync cache rather than the merged
-								// version
-								if (result.localChanged) {
-									saveOptions.saveAsUnsynced = true;
-									saveOptions.cacheObject = jsonObject.data;
-								}
-								Zotero.DataObjectUtilities.applyChanges(
-									jsonDataLocal, result.changes
-								);
-								// Transfer properties that aren't in the changeset
-								['version', 'dateAdded', 'dateModified'].forEach(x => {
-									if (jsonData[x] === undefined) return;
-									if (jsonDataLocal[x] !== jsonData[x]) {
-										Zotero.debug(`Applying remote '${x}' value`);
-									}
-									jsonDataLocal[x] = jsonData[x];
-								})
-								jsonObject.data = jsonDataLocal;
-							}
-						}
-						// Object doesn't exist locally
-						else {
-							Zotero.debug(ObjectType + " doesn't exist locally");
-							
-							saveOptions.isNewObject = true;
-							
-							// Check if object has been deleted locally
-							let dateDeleted = await this.getDateDeleted(
-								objectType, libraryID, objectKey
-							);
-							if (dateDeleted) {
-								Zotero.debug(ObjectType + " was deleted locally");
-								
-								switch (objectType) {
-									case 'item':
-										if (jsonData.deleted) {
-											Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
-											results.push({
-												libraryID,
-												key: objectKey,
-												processed: true
-											});
-											return;
-										}
-										
-										results.push({
-											libraryID,
-											key: objectKey,
-											processed: false,
-											conflict: true,
-											left: {
-												deleted: true,
-												dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
-											},
-											right: jsonData
-										});
-										return;
-									
-									// Auto-restore some locally deleted objects that have changed remotely
-									case 'collection':
-									case 'search':
-										Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
-											+ '-- restoring');
-										await this.removeObjectsFromDeleteLog(
-											objectType,
-											libraryID,
-											[objectKey]
-										);
-										restored = true;
-										break;
-									
-									default:
-										throw new Error("Unknown object type '" + objectType + "'");
-								}
-							}
-							
-							// Create new object
-							obj = new Zotero[ObjectType];
-							obj.libraryID = libraryID;
-							obj.key = objectKey;
-							await obj.loadPrimaryData();
-							
-							// Don't cache new items immediately, which skips reloading after save
-							saveOptions.skipCache = true;
-						}
-						
-						let saveResults = await this._saveObjectFromJSON(obj, jsonObject, saveOptions);
-						if (restored) {
-							saveResults.restored = true;
-						}
-						results.push(saveResults);
-						if (!saveResults.processed) {
-							throw saveResults.error;
-						}
-					}.bind(this));
-					
-					if (notifierQueue.size) {
-						notifierQueues.push(notifierQueue);
-					}
-				}
-				catch (e) {
-					// This allows errors handled by syncRunner to know the library in question
-					e.libraryID = libraryID;
-					
-					// Display nicer debug line for known errors
-					if (knownErrors.has(e.name)) {
-						let desc = e.name
-							.replace(/^Zotero/, "")
-							// Convert "MissingObjectError" to "missing object error"
-							.split(/([a-z]+)/).join(' ').trim()
-							.replace(/([A-Z]) ([a-z]+)/g, "$1$2").toLowerCase();
-						let msg = Zotero.Utilities.capitalize(desc) + " for "
-							+ `${objectType} ${jsonObject.key} in ${Zotero.Libraries.get(libraryID).name}`;
-						Zotero.debug(msg, 2);
-						Zotero.debug(e, 2);
-						Components.utils.reportError(msg + ": " + e.message);
-					}
-					else {
-						Zotero.logError(e);
-					}
-					
-					if (options.onError) {
-						options.onError(e);
-					}
-					
-					if (Zotero.DB.closed) {
-						e.fatal = true;
-					}
-					if (options.stopOnError || e.fatal) {
-						throw e;
-					}
-				}
-				finally {
+				if (batchSaved) {
 					if (options.onObjectProcessed) {
-						options.onObjectProcessed();
+						for (let j = 0; j < batch.length; j++) {
+							options.onObjectProcessed();
+						}
+					}
+				}
+				// Process objects individually if the batch was a single object or the batch
+				// transaction failed, so that an error rolls back only that object's save
+				else {
+					for (let jsonObject of batch) {
+						let notifierQueue = new Zotero.Notifier.Queue({
+							skipAutoSync: true
+						});
+						
+						// Errors have to be thrown in order to roll back the transaction, so catch
+						// those here and continue
+						try {
+							await Zotero.DB.executeTransaction(async function () {
+								await this._processObjectFromJSON(
+									objectType,
+									libraryID,
+									jsonObject,
+									options,
+									notifierQueue,
+									results
+								);
+							}.bind(this));
+							
+							if (notifierQueue.size) {
+								notifierQueues.push(notifierQueue);
+							}
+						}
+						catch (e) {
+							// This allows errors handled by syncRunner to know the library in question
+							e.libraryID = libraryID;
+							
+							// Display nicer debug line for known errors
+							if (knownErrors.has(e.name)) {
+								let desc = e.name
+									.replace(/^Zotero/, "")
+									// Convert "MissingObjectError" to "missing object error"
+									.split(/([a-z]+)/).join(' ').trim()
+									.replace(/([A-Z]) ([a-z]+)/g, "$1$2").toLowerCase();
+								let msg = Zotero.Utilities.capitalize(desc) + " for "
+									+ `${objectType} ${jsonObject.key} in ${Zotero.Libraries.get(libraryID).name}`;
+								Zotero.debug(msg, 2);
+								Zotero.debug(e, 2);
+								Components.utils.reportError(msg + ": " + e.message);
+							}
+							else {
+								Zotero.logError(e);
+							}
+							
+							if (options.onError) {
+								options.onError(e);
+							}
+							
+							if (Zotero.DB.closed) {
+								e.fatal = true;
+							}
+							if (options.stopOnError || e.fatal) {
+								throw e;
+							}
+						}
+						finally {
+							if (options.onObjectProcessed) {
+								options.onObjectProcessed();
+							}
+						}
 					}
 				}
 				
 				await Zotero.Promise.delay(10);
+				
+				if (notifierQueues.length) {
+					await Zotero.Notifier.commit(notifierQueues);
+					notifierQueues = [];
+				}
 			}
 		}
 		finally {
@@ -1351,6 +1123,314 @@ Zotero.Sync.Data.Local = {
 			+ " in " + libraryName);
 		
 		return results;
+	},
+	
+	
+	/**
+	 * Process a single downloaded object and update or create the local object
+	 *
+	 * Must be called within a transaction. Errors are thrown so that the transaction can be
+	 * rolled back.
+	 *
+	 * @param {String} objectType
+	 * @param {Integer} libraryID
+	 * @param {Object} jsonObject - Downloaded JSON API object
+	 * @param {Object} options - Options passed to processObjectsFromJSON()
+	 * @param {Zotero.Notifier.Queue} notifierQueue
+	 * @param {Object[]} results - Array to add a result object to
+	 */
+	_processObjectFromJSON: async function (objectType, libraryID, jsonObject, options, notifierQueue, results) {
+		Zotero.DB.requireTransaction();
+		
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		var ObjectType = Zotero.Utilities.capitalize(objectType);
+		
+		var jsonData = jsonObject.data;
+		var objectKey = jsonObject.key;
+		
+		var saveOptions = {};
+		Object.assign(saveOptions, options);
+		saveOptions.isNewObject = false;
+		saveOptions.skipCache = false;
+		saveOptions.storageDetailsChanged = false;
+		saveOptions.notifierQueue = notifierQueue;
+		
+		Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
+		Zotero.debug(jsonObject);
+		
+		// Skip objects with unmet dependencies
+		if (objectType == 'item' || objectType == 'collection') {
+			// Missing parent collection or item
+			let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
+			let parentKey = jsonData[parentProp];
+			if (parentKey) {
+				let parentObj = await objectsClass.getByLibraryAndKeyAsync(
+					libraryID, parentKey, { noCache: true }
+				);
+				if (!parentObj) {
+					let error = new Error("Parent of " + objectType + " "
+						+ libraryID + "/" + jsonData.key + " not found -- skipping");
+					error.name = "ZoteroMissingObjectError";
+					Zotero.debug(error.message);
+					results.push({
+						key: objectKey,
+						processed: false,
+						error,
+						retry: true
+					});
+					return;
+				}
+			}
+			
+			// Missing collection -- this could happen if the collection was deleted
+			// locally and an item in it was modified remotely
+			if (objectType == 'item' && jsonData.collections) {
+				let error;
+				for (let key of jsonData.collections) {
+					let collection = Zotero.Collections.getByLibraryAndKey(libraryID, key);
+					if (!collection) {
+						error = new Error(`Collection ${libraryID}/${key} not found `
+							+ `-- skipping item`);
+						error.name = "ZoteroMissingObjectError";
+						Zotero.debug(error.message);
+						results.push({
+							key: objectKey,
+							processed: false,
+							error,
+							retry: false
+						});
+						
+						// If the collection is in the delete log, the deletion will upload
+						// after downloads are done. Otherwise, we somehow missed
+						// downloading it and should add it to the queue to try again.
+						if (!((await this.getDateDeleted('collection', libraryID, key)))) {
+							await this.addObjectsToSyncQueue('collection', libraryID, [key]);
+						}
+						break;
+					}
+				}
+				if (error) {
+					return;
+				}
+			}
+		}
+		
+		let obj = await objectsClass.getByLibraryAndKeyAsync(
+			libraryID, objectKey, { noCache: true }
+		);
+		let restored = false;
+		if (obj) {
+			Zotero.debug("Matching local " + objectType + " exists", 4);
+			
+			let jsonDataLocal = obj.toJSON();
+			
+			// For items, check if mtime or file hash changed in metadata,
+			// which would indicate that a remote storage sync took place and
+			// a download is needed
+			if (objectType == 'item' && obj.isStoredFileAttachment()) {
+				if (jsonDataLocal.mtime != jsonData.mtime
+						|| jsonDataLocal.md5 != jsonData.md5) {
+					saveOptions.storageDetailsChanged = true;
+				}
+				if (jsonDataLocal.filename != jsonData.filename) {
+					saveOptions.renameFile = true;
+					saveOptions.previousFilename = obj.attachmentFilename;
+				}
+			}
+			
+			// Local object has been modified since last sync
+			if (!obj.synced) {
+				Zotero.debug("Local " + objectType + " " + obj.libraryKey
+						+ " has been modified since last sync", 4);
+				
+				let cachedJSON = await this.getCacheObject(
+					objectType, obj.libraryID, obj.key, obj.version
+				);
+				let result = this._reconcileChanges(
+					objectType,
+					cachedJSON.data,
+					jsonDataLocal,
+					jsonData,
+					['mtime', 'md5', 'dateAdded', 'dateModified']
+				);
+				
+				// If local object became a child item and remote was added to any
+				// collections, we need to remove the 'collections' changes and add
+				// the parent item to those collections instead
+				if (objectType == 'item'
+						&& !obj.isTopLevelItem()
+						&& (obj.isNote() || obj.isAttachment())) {
+					let collections = result.changes
+						.filter(x => x.field == 'collections' && x.op == 'member-add')
+						.map(x => x.value);
+					if (collections.length) {
+						result.changes = result.changes
+							.filter(x => !(x.field == 'collections' && x.op == 'member-add'));
+						saveOptions.newParentItemCollections = collections;
+					}
+				}
+				
+				// If no changes, just update local version number and mark as synced
+				if (!result.changes.length && !result.conflicts.length) {
+					Zotero.debug("No remote changes to apply to local "
+						+ objectType + " " + obj.libraryKey);
+					saveOptions.skipData = true;
+					// If either there were additional local changes after cancelling
+					// out equivalent changes on both sides or the local object was
+					// different but we ignored the changes (e.g., ISBN hyphenation),
+					// keep as unsynced. In the latter case, since we're skipping
+					// data, the local fields won't be overwritten.
+					if (result.localChanged) {
+						saveOptions.saveAsUnsynced = true;
+					}
+					let saveResults = await this._saveObjectFromJSON(
+						obj,
+						jsonObject,
+						saveOptions
+					);
+					results.push(saveResults);
+					if (!saveResults.processed) {
+						throw saveResults.error;
+					}
+					return;
+				}
+				
+				if (result.conflicts.length) {
+					if (objectType != 'item') {
+						throw new Error(`Unexpected conflict on ${objectType} object`);
+					}
+					
+					// Skip conflict resolution if there are invalid fields
+					try {
+						let testObj = obj.clone();
+						testObj.fromJSON(jsonData, { strict: true });
+					}
+					catch (e) {
+						results.push({
+							key: objectKey,
+							processed: false,
+							error: e,
+							retry: false
+						});
+						throw e;
+					}
+					
+					Zotero.debug("Conflict!", 2);
+					Zotero.debug(jsonDataLocal);
+					Zotero.debug(jsonData);
+					Zotero.debug(result);
+					results.push({
+						libraryID,
+						key: objectKey,
+						processed: false,
+						conflict: true,
+						left: jsonDataLocal,
+						right: jsonData,
+						changes: result.changes,
+						conflicts: result.conflicts
+					});
+					return;
+				}
+				
+				// If no conflicts, apply remote changes automatically
+				Zotero.debug(`Applying remote changes to ${objectType} `
+					+ obj.libraryKey);
+				Zotero.debug(result.changes);
+				// If there were local changes as well, keep object as unsynced and
+				// save the remote version to the sync cache rather than the merged
+				// version
+				if (result.localChanged) {
+					saveOptions.saveAsUnsynced = true;
+					saveOptions.cacheObject = jsonObject.data;
+				}
+				Zotero.DataObjectUtilities.applyChanges(
+					jsonDataLocal, result.changes
+				);
+				// Transfer properties that aren't in the changeset
+				['version', 'dateAdded', 'dateModified'].forEach(x => {
+					if (jsonData[x] === undefined) return;
+					if (jsonDataLocal[x] !== jsonData[x]) {
+						Zotero.debug(`Applying remote '${x}' value`);
+					}
+					jsonDataLocal[x] = jsonData[x];
+				})
+				jsonObject.data = jsonDataLocal;
+			}
+		}
+		// Object doesn't exist locally
+		else {
+			Zotero.debug(ObjectType + " doesn't exist locally");
+			
+			saveOptions.isNewObject = true;
+			
+			// Check if object has been deleted locally
+			let dateDeleted = await this.getDateDeleted(
+				objectType, libraryID, objectKey
+			);
+			if (dateDeleted) {
+				Zotero.debug(ObjectType + " was deleted locally");
+				
+				switch (objectType) {
+					case 'item':
+						if (jsonData.deleted) {
+							Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
+							results.push({
+								libraryID,
+								key: objectKey,
+								processed: true
+							});
+							return;
+						}
+						
+						results.push({
+							libraryID,
+							key: objectKey,
+							processed: false,
+							conflict: true,
+							left: {
+								deleted: true,
+								dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
+							},
+							right: jsonData
+						});
+						return;
+					
+					// Auto-restore some locally deleted objects that have changed remotely
+					case 'collection':
+					case 'search':
+						Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
+							+ '-- restoring');
+						await this.removeObjectsFromDeleteLog(
+							objectType,
+							libraryID,
+							[objectKey]
+						);
+						restored = true;
+						break;
+					
+					default:
+						throw new Error("Unknown object type '" + objectType + "'");
+				}
+			}
+			
+			// Create new object
+			obj = new Zotero[ObjectType];
+			obj.libraryID = libraryID;
+			obj.key = objectKey;
+			await obj.loadPrimaryData();
+			
+			// Don't cache new items immediately, which skips reloading after save
+			saveOptions.skipCache = true;
+		}
+		
+		let saveResults = await this._saveObjectFromJSON(obj, jsonObject, saveOptions);
+		if (restored) {
+			saveResults.restored = true;
+		}
+		results.push(saveResults);
+		if (!saveResults.processed) {
+			throw saveResults.error;
+		}
 	},
 	
 	
@@ -1762,13 +1842,18 @@ Zotero.Sync.Data.Local = {
 				}
 			}
 			
-			// See explanation in processObjectsFromJSON()
+			// See explanation in _processObjectFromJSON()
 			if (options.newParentItemCollections) {
 				let parentItem = obj.parentItem;
 				for (let c of options.newParentItemCollections) {
 					parentItem.addToCollection(c);
 				}
 				await parentItem.save(saveOptions);
+				// The cached parent item keeps the added collections in memory if the
+				// transaction is rolled back, so reload it
+				Zotero.DB.addCurrentCallback("rollback", function () {
+					return parentItem.reload(['primaryData', 'collections'], true);
+				});
 			}
 		}
 		catch (e) {
