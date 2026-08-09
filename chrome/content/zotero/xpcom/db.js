@@ -439,6 +439,7 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 	var resolve;
 	
 	var startedTransaction = false;
+	var committed = false;
 	var id = Zotero.Utilities.randomString();
 	
 	try {
@@ -488,6 +489,7 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 			}
 			
 			result = await conn.executeTransaction(func);
+			committed = true;
 			this._commitCount++;
 			Zotero.debug(`Committed DB transaction ${id}`, 4);
 		}
@@ -516,15 +518,28 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		this._callbacks.current.rollback = [];
 		
 		// Run temporary commit callbacks
+		//
+		// The transaction is already committed, so errors in commit callbacks are logged
+		// rather than being treated as transaction failures
 		var f;
 		while (f = this._callbacks.current.commit.shift()) {
-			await Promise.resolve(f(id));
+			try {
+				await Promise.resolve(f(id));
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		
 		// Run commit callbacks
 		for (var i=0; i<this._callbacks.commit.length; i++) {
 			if (this._callbacks.commit[i]) {
-				await this._callbacks.commit[i](id);
+				try {
+					await this._callbacks.commit[i](id);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 		}
 		
@@ -534,12 +549,25 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		if (e instanceof Zotero.DBConnection.TimeoutError) {
 			Zotero.debug(`Timed out waiting for transaction ${id}`, 1);
 		}
+		else if (committed) {
+			Zotero.debug(`Error after committing DB transaction ${id}`, 1);
+			Zotero.debug(e.message, 1);
+		}
 		else {
 			Zotero.debug(`Rolled back DB transaction ${id}`, 1);
 			Zotero.debug(e.message, 1);
 		}
 		if (startedTransaction) {
 			this._transactionID = null;
+		}
+		
+		// If the transaction was committed before the error, don't run rollback
+		// callbacks, since the data was saved
+		if (committed) {
+			e.committed = true;
+			this._callbacks.current.commit = [];
+			this._callbacks.current.rollback = [];
+			throw e;
 		}
 		
 		// Discard commit callbacks from the rolled-back transaction

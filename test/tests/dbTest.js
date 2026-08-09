@@ -297,6 +297,24 @@ describe("Zotero.DB", function () {
 			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
+		it("shouldn't reject or roll back on an error in a commit callback", async function () {
+			var laterCallbackRan = false;
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+				Zotero.DB.addCurrentCallback('commit', function () {
+					throw new Error("Commit callback error -- ignore");
+				});
+				Zotero.DB.addCurrentCallback('commit', function () {
+					laterCallbackRan = true;
+				});
+			});
+			var count = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable);
+			assert.equal(count, 1);
+			assert.ok(laterCallbackRan);
+			
+			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+		});
+		
 		it("should discard commit callbacks from a rolled-back transaction", async function () {
 			var callbackRan = false;
 			await executeTransactionWithForcedRollback(async function () {
