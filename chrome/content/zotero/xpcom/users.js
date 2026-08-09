@@ -139,6 +139,18 @@ Zotero.Users = new function () {
 			return;
 		}
 		await Zotero.DB.queryAsync("REPLACE INTO users VALUES (?, ?)", [userID, name]);
+		// Restore the cached name if the transaction is rolled back
+		if (Zotero.DB.inTransaction()) {
+			let previous = _users[userID];
+			Zotero.DB.addCurrentCallback("rollback", () => {
+				if (previous === undefined) {
+					delete _users[userID];
+				}
+				else {
+					_users[userID] = previous;
+				}
+			});
+		}
 		_users[userID] = name;
 	}
 };
