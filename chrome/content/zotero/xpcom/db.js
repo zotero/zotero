@@ -288,6 +288,19 @@ Zotero.DBConnection.prototype.addCallback = function (type, cb) {
 }
 
 
+/**
+ * Add a callback to run when the current transaction is committed or rolled back
+ *
+ * A rollback reverts the database but not JS state, and a transaction can contain many
+ * objects' saves (e.g., sync download batches), so one object's failure rolls back other
+ * objects' already-completed side effects. In-memory state (caches, properties of cached
+ * data objects) must therefore either be updated only in a 'commit' callback or restored
+ * to its previous state in a 'rollback' callback.
+ *
+ * @param {String} type - 'commit' or 'rollback'
+ * @param {Function} cb - Called with the transaction id after the transaction is
+ *     committed or rolled back
+ */
 Zotero.DBConnection.prototype.addCurrentCallback = function (type, cb) {
 	this.requireTransaction();
 	this._callbacks.current[type].push(cb);
@@ -426,6 +439,10 @@ Zotero.DBConnection.prototype.getNextName = async function (libraryID, table, fi
 // });
 //
 /**
+ * In-memory state (caches, properties of cached data objects) modified within the
+ * transaction must be updated in a commit callback or restored in a rollback callback so
+ * that it doesn't reflect rolled-back changes -- see addCurrentCallback()
+ *
  * @param {Function} func - Async function containing `await Zotero.DB.queryAsync()` and similar
  * @param {Object} [options]
  * @param {Boolean} [options.disableForeignKeys] - Disable foreign key checks before the
