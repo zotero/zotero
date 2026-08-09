@@ -297,6 +297,23 @@ describe("Zotero.DB", function () {
 			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
+		it("should discard commit callbacks from a rolled-back transaction", async function () {
+			var callbackRan = false;
+			await executeTransactionWithForcedRollback(async function () {
+				await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+				Zotero.DB.addCurrentCallback('commit', function () {
+					callbackRan = true;
+				});
+			});
+			
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
+			});
+			assert.isFalse(callbackRan);
+			
+			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+		});
+		
 		it("should time out on nested transactions", async function () {
 			var e;
 			await Zotero.DB.executeTransaction(async function () {

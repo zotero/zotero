@@ -542,7 +542,10 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 			this._transactionID = null;
 		}
 		
-		// Function to run once transaction has been committed but before any
+		// Discard commit callbacks from the rolled-back transaction
+		this._callbacks.current.commit = [];
+		
+		// Function to run once transaction has been rolled back but before any
 		// permanent callbacks
 		if (options.onRollback) {
 			this._callbacks.current.rollback.push(options.onRollback);
