@@ -667,6 +667,33 @@ async function getPromiseError(promise) {
 }
 
 /**
+ * Run the given function within a DB transaction that is rolled back at the end,
+ * for testing rollback handling
+ *
+ * The function runs within the transaction, so it must use save() rather than saveTx().
+ *
+ * @param {Function} fn
+ * @param {Object} [options] - Options to pass to Zotero.DB.executeTransaction()
+ * @return {Promise} - Return value of the passed function
+ */
+async function executeTransactionWithForcedRollback(fn, options) {
+	var result;
+	var forcedError = new Error("Forced rollback");
+	try {
+		await Zotero.DB.executeTransaction(async function () {
+			result = await fn();
+			throw forcedError;
+		}, options);
+	}
+	catch (e) {
+		if (e !== forcedError) {
+			throw e;
+		}
+	}
+	return result;
+}
+
+/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */

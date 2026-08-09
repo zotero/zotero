@@ -268,15 +268,9 @@ describe("Zotero.DB", function () {
 		
 		it("should roll back on error", async function () {
 			await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
-			try {
-				await Zotero.DB.executeTransaction(async function () {
-					await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
-					throw 'Aborting transaction -- ignore';
-				});
-			}
-			catch (e) {
-				if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
-			}
+			await executeTransactionWithForcedRollback(async function () {
+				await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (2)");
+			});
 			var count = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM " + tmpTable + "");
 			assert.equal(count, 1);
 			
@@ -288,22 +282,16 @@ describe("Zotero.DB", function () {
 		
 		it("should run onRollback callbacks", async function () {
 			var callbackRan = false;
-			try {
-				await Zotero.DB.executeTransaction(
-					async function () {
-						await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
-						throw 'Aborting transaction -- ignore';
-					},
-					{
-						onRollback: function () {
-							callbackRan = true;
-						}
+			await executeTransactionWithForcedRollback(
+				async function () {
+					await Zotero.DB.queryAsync("INSERT INTO " + tmpTable + " VALUES (1)");
+				},
+				{
+					onRollback: function () {
+						callbackRan = true;
 					}
-				);
-			}
-			catch (e) {
-				if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
-			}
+				}
+			);
 			assert.ok(callbackRan);
 			
 			await Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
