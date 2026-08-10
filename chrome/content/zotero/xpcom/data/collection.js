@@ -140,6 +140,7 @@ Zotero.Collection.prototype.loadFromRow = function (row) {
 		
 		// Integer or 0
 		case 'version':
+		case 'clientVersion':
 			val = val ? parseInt(val) : 0;
 			break;
 		
