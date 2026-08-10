@@ -729,7 +729,18 @@ window.ZoteroCitationExplorer = {
 		let treeRow = itemList.getRow(itemList.selection.focused);
 		let oldItemID = treeRow.id;
 
-		let io = { dataIn: null, dataOut: null, multiSelect: false, deferred: Zotero.Promise.defer() };
+		let libraryIDs = Zotero.Libraries.getAll()
+			.filter(library => library.libraryType != 'feed')
+			.map(library => library.libraryID);
+		let itemIDs = await new Zotero.Duplicates(libraryIDs).findDuplicatesOf(treeRow.ref);
+		let io = {
+			dataIn: null,
+			dataOut: null,
+			itemIDs: itemIDs.length ? itemIDs : undefined,
+			multiSelect: false,
+			onlyRegularItems: true,
+			deferred: Zotero.Promise.defer()
+		};
 		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 			'chrome,dialog=no,centerscreen,resizable=yes', io);
 
@@ -748,6 +759,7 @@ window.ZoteroCitationExplorer = {
 		await this._initMappings();
 		await this.refreshCitationList();
 		await this.refreshItemList();
+		await itemList.selectItem(items[0].id);
 	},
 
 	async addToLibraryAndLink() {
