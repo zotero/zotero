@@ -47,6 +47,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	static defaultProps = {
+		customRows: [],
 		dragAndDrop: false,
 		filterLibraryIDs: false,
 		hideSources: [],
@@ -57,6 +58,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	static propTypes = {
 		onSelectionChange: PropTypes.func.isRequired,
 		
+		customRows: PropTypes.array,
 		dragAndDrop: PropTypes.bool,
 		filterLibraryIDs: PropTypes.array,
 		hideSources: PropTypes.array,
@@ -597,6 +599,26 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					new Zotero.CollectionTreeRow(this, 'feeds', feeds)
 				);
 				added += await this._expandRow(newRows, added - 1);
+			}
+
+			// Custom rows, e.g. Suggested Items in select dialog
+			let customRows = this.props.customRows.map((customRow) => {
+				let row = new Zotero.CollectionTreeRow(
+					this,
+					customRow.type,
+					customRow.ref,
+					customRow.level,
+					customRow.isOpen
+				);
+				row._id = customRow.id;
+				return Object.assign(row, customRow.properties);
+			});
+			let addedCustomRows = customRows.length;
+			if (addedCustomRows) {
+				customRows.push(new Zotero.CollectionTreeRow(this, 'separator', false, 0));
+				addedCustomRows++;
+				newRows.unshift(...customRows);
+				added += addedCustomRows;
 			}
 			
 			this.selection.selectEventsSuppressed = true;
@@ -1467,6 +1489,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	getIconName(index) {
 		const treeRow = this.getRow(index);
+		// Custom row icons
+		if (treeRow.iconName) {
+			return treeRow.iconName;
+		}
 		let collectionType = treeRow.type;
 		let icon = collectionType;
 
