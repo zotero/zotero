@@ -1283,14 +1283,20 @@ var Zotero_Tabs = new function () {
 			"main/tab",
 			{
 				getContext: () => {
-					let item = Zotero.Items.get(tab.data.itemID);
-					let ret = {
-						items: [item],
-						tabType: tab.type,
+					let { type, subType, data } = this.getTabInfo(id);
+					let context = {
+						tabType: type,
+						tabSubType: subType,
 						tabID: id,
-						tabSubType: item.attachmentReaderType,
 					};
-					return ret;
+					if (type === 'library') {
+						context.items = ZoteroPane.getSelectedItems();
+					}
+					else {
+						let item = data?.itemID ? Zotero.Items.get(data.itemID) : null;
+						context.items = item ? [item] : [];
+					}
+					return context;
 				}
 			}
 		);
@@ -1341,6 +1347,10 @@ var Zotero_Tabs = new function () {
 		}
 		let { tab } = this._getTab(tabID);
 		let info = Object.assign({}, tab);
+		if (info.type) {
+			// Parsed content type without the state suffix (e.g. "reader" instead of "reader-loading")
+			info.type = this.parseTabType(info.type).tabContentType;
+		}
 		if (info.type !== 'library') {
 			let item = Zotero.Items.get(info.data?.itemID);
 			if (item && item.isAttachment()) {
