@@ -1602,7 +1602,7 @@ class CollectionViewItemTree extends ItemTree {
 			row = 0;
 			orient = -1;
 		}
-		this._dropRow = null;
+		this._clearDropIndicator();
 		Zotero.DragDrop.currentDragSource = null;
 		// Use the effect set in onDragOver(), which the drop event's dropEffect may not reflect
 		// (see LibraryTreeView::setDropEffect())

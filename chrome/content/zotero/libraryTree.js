@@ -66,11 +66,28 @@ var LibraryTree = class LibraryTree extends React.Component {
 		elem.style.top = "-10000px";
 		elem.className = "drag-image-container";
 		this.domEl.appendChild(elem);
+		// Normal mousemove events are suppressed during native drag-and-drop, so a mousemove
+		// with a drop row still set means the drag ended without a dragleave/drop/dragend
+		// reaching the tree (e.g., a drag that left the window). Clear the leftover drop
+		// indicator when mouse movement resumes.
+		this.domEl.addEventListener('mousemove', this._clearDropIndicator, { passive: true });
 	}
 
 	componentWillUnmount() {
 		this.domEl.removeChild(this._dragImageContainer);
+		this.domEl.removeEventListener('mousemove', this._clearDropIndicator);
 	}
+
+	_clearDropIndicator = () => {
+		let dropRow = this._dropRow;
+		if (dropRow === null || dropRow === undefined) return;
+		this._dropRow = null;
+		// The row may no longer exist if rows were removed, in which case the next full
+		// render drops it
+		if (this.tree && dropRow < this.rowCount) {
+			this.tree.invalidateRow(dropRow);
+		}
+	};
 
 	componentDidCatch(error, info) {
 		// Async operations might attempt to update the react components

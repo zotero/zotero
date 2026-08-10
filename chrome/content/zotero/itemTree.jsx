@@ -1150,22 +1150,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	componentDidMount() {
+		super.componentDidMount();
 		this._initialized = true;
 		this._loadingDeferredResolved = true;
 		this._itemTreeLoadingDeferred.resolve();
-		// Create an element where we can create drag images to be displayed next to the cursor while dragging
-		// since for multiple item drags we need to display all the elements
-		let elem = this._dragImageContainer = document.createElement("div");
-		elem.style.width = "100%";
-		elem.style.height = "2000px";
-		elem.style.position = "absolute";
-		elem.style.top = "-10000px";
-		elem.className = "drag-image-container";
-		this.domEl.appendChild(elem);
-	}
-	
-	componentWillUnmount() {
-		this.domEl.removeChild(this._dragImageContainer);
 	}
 	
 	
@@ -1259,6 +1247,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		loading: false,
 		message: null,
 	}) {
+		// Row indexes are changing, so clear any drop highlight, which is index-based
+		this._clearDropIndicator();
+
 		// Handle loading/message state
 		if (options.loading) {
 			options.message ||= Zotero.getString('pane.items.loading');
