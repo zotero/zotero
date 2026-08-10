@@ -318,6 +318,7 @@ describe("Item pane", function () {
 		it("should refresh on item update", async function () {
 			var item = new Zotero.Item('book');
 			var id = await item.saveTx();
+			await ZoteroPane.selectItem(id);
 			
 			var itemBox = doc.getElementById('zotero-editpane-info-box');
 			var label = itemBox.querySelectorAll('[fieldname="series"]')[1];
