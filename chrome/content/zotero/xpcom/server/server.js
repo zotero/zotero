@@ -581,7 +581,7 @@ Zotero.Server.RequestHandler.prototype._decodeMultipartData = function (data) {
 	let boundary = /boundary=([^\s]*)/i.exec(this.headers['content-type']);
 	if (!boundary) {
 		Zotero.debug('Invalid boundary: ' + this.headers['content-type'], 1);
-		return this._requestFinished(this._generateResponse(400, "text/plain", "Invalid multipart/form-data provided\n"));
+		throw new Error('Invalid multipart/form-data boundary');
 	}
 	boundary = '--' + boundary[1];
 	

@@ -325,6 +325,39 @@ describe("Zotero.Server", function () {
 					assert.ok(called);
 					assert.equal(req.status, 204);
 				});
+
+				it("should reject a missing boundary without processing the endpoint", async function () {
+					let called = false;
+					let endpoint = "/test/" + Zotero.Utilities.randomString();
+
+					Zotero.Server.Endpoints[endpoint] = function () {};
+					Zotero.Server.Endpoints[endpoint].prototype = {
+						supportedMethods: ["POST"],
+						supportedDataTypes: ["multipart/form-data"],
+
+						init: function () {
+							called = true;
+							return 204;
+						}
+					};
+
+					let req = await Zotero.HTTP.request(
+						"POST",
+						serverPath + endpoint,
+						{
+							headers: {
+								"Content-Type": "multipart/form-data;charset=utf-8"
+							},
+							body: "invalid multipart data",
+							responseType: "text",
+							successCodes: [400]
+						}
+					);
+
+					assert.equal(req.status, 400);
+					assert.equal(req.responseText, "Invalid multipart/form-data provided\n");
+					assert.isFalse(called);
+				});
 			});
 			describe("application/pdf", function () {
 				it('should provide a stream', async function () {
