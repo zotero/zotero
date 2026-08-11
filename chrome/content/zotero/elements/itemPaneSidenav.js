@@ -292,16 +292,18 @@
 						Zotero.MenuManager.updateMenuPopup(menu, "sidenav/locate", {
 							event: undefined,
 							getContext: () => {
+								let container = this.container;
 								let ret = {
-									items: [],
+									get items() {
+										return container ? [container.item] : [];
+									},
 									tabType: undefined,
 									tabID: undefined,
 									tabSubType: undefined
 								};
-								if (this.container) {
-									ret.items = [this.container.item];
-									ret.tabType = this.container.tabType;
-									ret.tabID = this.container.tabID;
+								if (container) {
+									ret.tabType = container.tabType;
+									ret.tabID = container.tabID;
 								}
 								if (typeof Zotero_Tabs !== 'undefined') {
 									let { subType: tabSubType } = Zotero_Tabs.getTabInfo();
