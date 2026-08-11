@@ -2389,11 +2389,16 @@ class ReaderWindow extends ReaderInstance {
 			tabType,
 			tabSubType,
 			tabID: undefined,
-			getContext: () => ({
-				items: this._item ? [this._item] : [],
-				tabType,
-				tabSubType,
-			})
+			getContext: () => {
+				let item = this._item;
+				return {
+					get items() {
+						return item ? [item] : [];
+					},
+					tabType,
+					tabSubType,
+				};
+			}
 		});
 	};
 }

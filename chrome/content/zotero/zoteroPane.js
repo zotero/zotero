@@ -2338,7 +2338,9 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
-					items,
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -2365,7 +2367,9 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
-					items,
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -4224,7 +4228,9 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
-					collectionTreeRows,
+					get collectionTreeRows() {
+						return collectionTreeRows;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -4784,8 +4790,12 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
-					collectionTreeRows,
-					items,
+					get collectionTreeRows() {
+						return collectionTreeRows;
+					},
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
