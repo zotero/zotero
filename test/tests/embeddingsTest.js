@@ -89,7 +89,6 @@ describe("Zotero.Embeddings", function () {
 
 	describe("#scoreItemIDs() floor", function () {
 		it("should not return items scoring below the model's minimum", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			// Centering subtracts the mean, so an item stored as the mean plus
 			// one axis scores against the query by that axis's share of it
 			let axis = (index, scale = 1) => {
@@ -130,12 +129,10 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 
 		it("should fall back to text matches when nothing clears the minimum", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			let axis = (index, scale = 1) => {
 				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
@@ -188,12 +185,10 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 
 		it("shouldn't match a note's wrapper markup in the text fallback", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			let axis = (index, scale = 1) => {
 				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
@@ -241,12 +236,10 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 
 		it("should surface unindexed items in the text fallback", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			let axis = (index, scale = 1) => {
 				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
@@ -292,14 +285,12 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 	});
 
 	describe("#scoreItemIDs() chunks", function () {
 		it("should score an item by its best chunk", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			let axis = (index, scale = 1) => {
 				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
@@ -340,7 +331,6 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 	});
@@ -1210,7 +1200,6 @@ describe("Zotero.Embeddings", function () {
 	});
 	describe("#scoreItemIDs() centering", function () {
 		it("should score text with nothing to say near zero", async function () {
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			let store = async (item, vector) => {
 				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 				await Zotero.DB.queryAsync(
@@ -1270,7 +1259,6 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
 	});
