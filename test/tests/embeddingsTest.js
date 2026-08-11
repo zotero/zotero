@@ -532,6 +532,99 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#embedMany()", function () {
+		// Stands in for the wrapper Zotero.ML.createEngine() resolves to. The
+		// runtime destroys an idle engine in place: the retained wrapper's
+		// engineStatus leaves 'ready' and run() throws, and the runtime
+		// expects the caller to create a fresh engine.
+		function fakeEngine(run) {
+			let engine = {
+				engineStatus: 'ready',
+				run: (...args) => run(engine, ...args),
+				terminate: async () => {}
+			};
+			return engine;
+		}
+
+		function stubModel(createEngine) {
+			return [
+				createEngine,
+				sinon.stub(Zotero.ML, 'shutdown').resolves(),
+				sinon.stub(Zotero.ML, 'getOptimalConcurrency').returns(2),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1')
+			];
+		}
+
+		let liveRun = async (engine, { args: [texts] }) => texts.map(() => new Array(4).fill(0.5));
+
+		it("should replace an engine the runtime destroyed mid-call and retry once", async function () {
+			// The idle timer fires between _getEngine()'s liveness check and
+			// the run: the wrapper reports closed and the run throws
+			let dead = fakeEngine(async (engine) => {
+				engine.engineStatus = 'closed';
+				throw new Error('Port does not exist');
+			});
+			let live = fakeEngine(liveRun);
+			let createEngine = sinon.stub(Zotero.ML, 'createEngine')
+				.onFirstCall().resolves(dead)
+				.onSecondCall().resolves(live);
+			let stubs = stubModel(createEngine);
+			try {
+				let vectors = await Zotero.Embeddings.embedMany(['some text']);
+				assert.lengthOf(vectors, 1);
+				assert.equal(vectors[0].constructor.name, 'Float32Array');
+				// [0.5, 0.5, 0.5, 0.5] is already unit length, so
+				// normalization returns it unchanged
+				assert.approximately(vectors[0][0], 0.5, 1e-6);
+				assert.equal(createEngine.callCount, 2);
+			}
+			finally {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should replace a cached engine the runtime destroyed while idle", async function () {
+			let first = fakeEngine(liveRun);
+			let second = fakeEngine(liveRun);
+			let createEngine = sinon.stub(Zotero.ML, 'createEngine')
+				.onFirstCall().resolves(first)
+				.onSecondCall().resolves(second);
+			let stubs = stubModel(createEngine);
+			try {
+				await Zotero.Embeddings.embedMany(['first call']);
+				assert.equal(createEngine.callCount, 1);
+				// The idle timeout destroyed the engine between calls
+				first.engineStatus = 'closed';
+				let vectors = await Zotero.Embeddings.embedMany(['second call']);
+				assert.lengthOf(vectors, 1);
+				assert.equal(createEngine.callCount, 2);
+			}
+			finally {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("shouldn't retry a failure from a live engine", async function () {
+			let engine = fakeEngine(async () => {
+				throw new Error('inference failed');
+			});
+			let createEngine = sinon.stub(Zotero.ML, 'createEngine').resolves(engine);
+			let stubs = stubModel(createEngine);
+			try {
+				let e = await getPromiseError(Zotero.Embeddings.embedMany(['some text']));
+				assert.equal(e.message, 'inference failed');
+				assert.equal(createEngine.callCount, 1);
+			}
+			finally {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
 	describe("#pruneModels()", function () {
 		it("should drop calibration for the models it no longer keeps", async function () {
 			await calibrateTestModel({ modelVersion: 'kept-model/1' });

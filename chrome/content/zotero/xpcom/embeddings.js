@@ -607,6 +607,11 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
+
+	function _isEngineUsable(engine) {
+		return !['closed', 'crashed', 'error'].includes(engine.engineStatus);
+	}
+
 	// Create the inference engine if needed. The engine reads the model files
 	// from the model directory, so the model must already be downloaded.
 	async function _getEngine(onProgress) {
@@ -615,6 +620,14 @@ Zotero.Embeddings = new function () {
 		if (_engine && _engineModelVersion
 				&& _engineModelVersion !== Zotero.Embeddings.getModelVersion()) {
 			await Zotero.Embeddings.shutdownEngine();
+		}
+		// The runtime destroys an engine left idle past its timeout, releasing
+		// the model's memory, and expects the next run to create a new engine
+		// -- a retained wrapper isn't revived, its run() only throws. The
+		// replacement runs the same model, so vectors and scoring are
+		// unaffected.
+		if (_engine && !_isEngineUsable(_engine)) {
+			await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
 		}
 		if (!_engineReady) {
 			let modelVersion = Zotero.Embeddings.getModelVersion();
@@ -863,15 +876,33 @@ Zotero.Embeddings = new function () {
 		if (!texts.length) {
 			return [];
 		}
-		let engine = await _getEngine();
-		let model = _getModel();
-		Zotero.debug(`Embeddings: embedding batch of ${texts.length}`);
-		// The runtime spreads `args` into the pipeline call, so the batch of
-		// texts is a single argument
-		let vectors = await engine.run({
-			args: [texts],
-			options: { pooling: model.pooling }
-		});
+		let engine;
+		let run = async () => {
+			engine = await _getEngine();
+			Zotero.debug(`Embeddings: embedding batch of ${texts.length}`);
+			// The runtime spreads `args` into the pipeline call, so the batch
+			// of texts is a single argument
+			return engine.run({
+				args: [texts],
+				options: { pooling: _getModel().pooling }
+			});
+		};
+		let vectors;
+		try {
+			vectors = await run();
+		}
+		catch (e) {
+			// The engine's idle timer is the runtime's own, so it can destroy
+			// the engine between _getEngine()'s liveness check and the run.
+			// One fresh engine gets one more try; a failure from a live
+			// engine, or from the replacement, propagates.
+			if (!engine || _isEngineUsable(engine)) {
+				throw e;
+			}
+			Zotero.debug("Embeddings: engine died mid-call -- replacing it");
+			await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+			vectors = await run();
+		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
 		// Scoring compares vectors with a plain dot product, which only
 		// measures how closely two of them point in the same direction when
