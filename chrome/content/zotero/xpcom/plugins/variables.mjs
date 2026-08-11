@@ -752,6 +752,8 @@ const WindowScopeVariables = {
 		return wrapper;
 	},
 
+	_safeDocumentCache: new WeakMap(),
+
 	/**
 	 * Wrap a Document object that only exposes allowed properties and methods based on the schema
 	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
@@ -760,6 +762,26 @@ const WindowScopeVariables = {
 		let scope = PluginSandbox.getScope(pluginID);
 		if (VarCheck.isPrivilegedScope(scope)) {
 			return doc;
+		}
+
+		let root = WindowScopeVariables.resolveRoot(rootNode) || null;
+		let cacheable = !(rootNode?.deref && !root) && !(root && Cu.isDeadWrapper(root));
+		let perScope;
+		if (cacheable) {
+			let perDoc = WindowScopeVariables._safeDocumentCache.get(doc);
+			if (!perDoc) {
+				perDoc = new WeakMap();
+				WindowScopeVariables._safeDocumentCache.set(doc, perDoc);
+			}
+			perScope = perDoc.get(scope);
+			if (!perScope) {
+				perScope = { noRoot: null, byRoot: new WeakMap() };
+				perDoc.set(scope, perScope);
+			}
+			let cached = root ? perScope.byRoot.get(root) : perScope.noRoot;
+			if (cached && !Cu.isDeadWrapper(cached)) {
+				return cached;
+			}
 		}
 
 		let docRef = new WeakRef(doc);
@@ -941,6 +963,14 @@ const WindowScopeVariables = {
 		}
 
 		Object.preventExtensions(wrapper);
+		if (cacheable) {
+			if (root) {
+				perScope.byRoot.set(root, wrapper);
+			}
+			else {
+				perScope.noRoot = wrapper;
+			}
+		}
 		return wrapper;
 	},
 
@@ -1026,7 +1056,6 @@ const WindowScopeVariables = {
 		}
 
 		let DOMProps = new Set(["target", "currentTarget", "relatedTarget"]);
-		let allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(event));
 
 		// WeakRef so the wrapper doesn't pin the event (which references the DOM).
 		let eventRef = new WeakRef(event);
@@ -1037,13 +1066,21 @@ const WindowScopeVariables = {
 			}
 			return e;
 		}
+		// Defer the prototype-chain key walk until the wrapper is actually used
+		let allowed = null;
+		function getAllowed(op, prop) {
+			if (!allowed) {
+				allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(derefOrThrow(op, prop)));
+			}
+			return allowed;
+		}
 		let origRef = () => eventRef.deref();
 
 		let traps = Cu.createObjectIn(scope);
 
 		Cu.exportFunction((_facade, prop) => {
 			if (prop === ORIGINAL_REF_KEY) return origRef;
-			if (!allowed.has(prop)) return undefined;
+			if (!getAllowed("access", prop).has(prop)) return undefined;
 			let ev = derefOrThrow("access", prop);
 			if (DOMProps.has(prop)) {
 				let node = Reflect.get(ev, prop);
@@ -1069,7 +1106,7 @@ const WindowScopeVariables = {
 		}, traps, { defineAs: "get" });
 
 		Cu.exportFunction((_facade, prop, value) => {
-			if (DOMProps.has(prop) || prop === "composedPath" || !allowed.has(prop)) {
+			if (DOMProps.has(prop) || prop === "composedPath" || !getAllowed("set", prop).has(prop)) {
 				return false;
 			}
 			Reflect.set(derefOrThrow("set", prop), prop, value);
@@ -1077,11 +1114,11 @@ const WindowScopeVariables = {
 		}, traps, { defineAs: "set" });
 
 		Cu.exportFunction((_facade, prop) => {
-			return prop === ORIGINAL_REF_KEY || allowed.has(prop);
+			return prop === ORIGINAL_REF_KEY || getAllowed("access", prop).has(prop);
 		}, traps, { defineAs: "has" });
 
 		Cu.exportFunction(() => {
-			let keys = Array.from(allowed);
+			let keys = Array.from(getAllowed("access", "event"));
 			keys.push(ORIGINAL_REF_KEY);
 			return Cu.cloneInto(keys, scope);
 		}, traps, { defineAs: "ownKeys" });
@@ -1092,7 +1129,7 @@ const WindowScopeVariables = {
 				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
 				return d;
 			}
-			if (!allowed.has(prop)) return undefined;
+			if (!getAllowed("access", prop).has(prop)) return undefined;
 			let d = Cu.createObjectIn(scope);
 			d.enumerable = true;
 			d.configurable = true;
@@ -1102,7 +1139,7 @@ const WindowScopeVariables = {
 		}, traps, { defineAs: "getOwnPropertyDescriptor" });
 
 		Cu.exportFunction((_facade, prop) => {
-			return !(allowed.has(prop) || prop === ORIGINAL_REF_KEY);
+			return !(getAllowed("access", prop).has(prop) || prop === ORIGINAL_REF_KEY);
 		}, traps, { defineAs: "deleteProperty" });
 
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
@@ -1133,8 +1170,15 @@ const WindowScopeVariables = {
 		// Sandbox should not hold long-term references to DOM nodes anyway.
 		let getActual = () => elem;
 
-		// Own + prototype chain, excluding Object.prototype
-		let allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(elem));
+		// Own + prototype chain, excluding Object.prototype.
+		// Deferred until first use -- hooks often receive elements they never touch
+		let allowed = null;
+		function getAllowed() {
+			if (!allowed) {
+				allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(getActual()));
+			}
+			return allowed;
+		}
 
 		// For fromScope unwrapping callable by chrome via Cu.waiveXrays.
 		let origRef = () => getActual();
@@ -1143,7 +1187,7 @@ const WindowScopeVariables = {
 
 		Cu.exportFunction((_facade, prop) => {
 			if (prop === ORIGINAL_REF_KEY) return origRef;
-			if (!allowed.has(prop)) return undefined;
+			if (!getAllowed().has(prop)) return undefined;
 			if (prop === "ownerDocument") {
 				return WindowScopeVariables.createSafeDocument(getActual().ownerDocument, pluginID, { rootNode });
 			}
@@ -1373,7 +1417,7 @@ const WindowScopeVariables = {
 				WindowScopeVariables.activateWhenConnected(actual, pluginID);
 				return true;
 			}
-			if (!allowed.has(prop)) {
+			if (!getAllowed().has(prop)) {
 				VarCheck.throwPropError("set", prop);
 			}
 			// Restrict URL/style properties to declared resources.
@@ -1386,11 +1430,11 @@ const WindowScopeVariables = {
 		}, traps, { defineAs: "set" });
 
 		Cu.exportFunction((_facade, prop) => {
-			return prop === ORIGINAL_REF_KEY || allowed.has(prop);
+			return prop === ORIGINAL_REF_KEY || getAllowed().has(prop);
 		}, traps, { defineAs: "has" });
 
 		Cu.exportFunction(() => {
-			let keys = Array.from(allowed);
+			let keys = Array.from(getAllowed());
 			keys.push(ORIGINAL_REF_KEY);
 			return Cu.cloneInto(keys, scope);
 		}, traps, { defineAs: "ownKeys" });
@@ -1401,14 +1445,14 @@ const WindowScopeVariables = {
 				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
 				return d;
 			}
-			if (!allowed.has(prop)) return undefined;
+			if (!getAllowed().has(prop)) return undefined;
 			let d = Cu.createObjectIn(scope);
 			d.enumerable = true; d.configurable = true; d.writable = true; d.value = undefined;
 			return d;
 		}, traps, { defineAs: "getOwnPropertyDescriptor" });
 
 		Cu.exportFunction((_facade, prop) => {
-			return !(allowed.has(prop) || prop === ORIGINAL_REF_KEY);
+			return !(getAllowed().has(prop) || prop === ORIGINAL_REF_KEY);
 		}, traps, { defineAs: "deleteProperty" });
 
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
