@@ -596,17 +596,18 @@ const ZoteroStandalone = new function () {
 			tabID,
 			tabType,
 			tabSubType,
-			getContext: () => {
-				let items;
-				if (tabType === 'library') {
-					items = ZoteroPane.getSelectedItems();
-				}
-				else {
+			getContext: () => ({
+				get items() {
+					if (tabType === 'library') {
+						return ZoteroPane.getSelectedItems();
+					}
 					let item = data?.itemID ? Zotero.Items.get(data.itemID) : null;
-					items = item ? [item] : [];
-				}
-				return { items, tabType, tabSubType, tabID };
-			}
+					return item ? [item] : [];
+				},
+				tabType,
+				tabSubType,
+				tabID
+			})
 		});
 	};
 	
