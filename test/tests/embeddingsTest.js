@@ -673,25 +673,35 @@ describe("Zotero.Embeddings", function () {
 			let measured = () => Zotero.DB.columnQueryAsync(
 				"SELECT modelVersion FROM embeddings.modelCalibration"
 			);
-			// No cached files to prune -- this is only about what we measured
+			// No cached files to prune -- this is only about what we measured --
+			// and no real indexing run from the model switches the pref writes
+			// below kick off
 			let stubs = [
 				sinon.stub(Zotero.ML, 'listModels').resolves([]),
-				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('kept-model/1')
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('kept-model/1'),
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves()
 			];
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
 			try {
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				await Zotero.Embeddings.pruneModels();
 				assert.sameMembers(await measured(), ['kept-model/1']);
 
 				// Disabling keeps nothing, so re-enabling measures afresh
 				// rather than reusing numbers taken against an older corpus
 				Zotero.Prefs.clear('embeddings.model');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				await Zotero.Embeddings.pruneModels();
 				assert.isEmpty(await measured());
 			}
 			finally {
-				stubs.forEach(stub => stub.restore());
 				Zotero.Prefs.clear('embeddings.model');
+				// Wait out the switches the pref writes kicked off, so a
+				// straggling disabled-model prune can't delete the calibration
+				// again after it's restored below
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexingPaused');
 				// Pruning cleared the row the rest of the file scores against
 				testMean = await calibrateTestModel();
 			}
@@ -826,6 +836,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
 			];
@@ -867,6 +878,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				// These fake an active model rather than selecting one (which
 				// would kick off a model switch), so name one to keep the
 				// window and passage prefix chunking reads consistent with it
@@ -924,6 +936,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
 			];
@@ -979,6 +992,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
 			];
@@ -1031,6 +1045,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
 			];
@@ -1071,7 +1086,8 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves()
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves()
 			];
 			let queries = [];
 			let queryStub = sinon.stub(Zotero.DB, 'queryAsync')
