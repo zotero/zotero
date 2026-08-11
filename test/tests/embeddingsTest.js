@@ -1,8 +1,13 @@
 "use strict";
 
 describe("Zotero.Embeddings", function () {
-	before(function () {
+	// The mean vector of the stand-in calibration below, which tests build
+	// their stored vectors around
+	var testMean;
+
+	before(async function () {
 		Zotero.Embeddings.Indexing.init();
+		testMean = await calibrateTestModel();
 	});
 
 	// Stands in for a model's tokenizer, which the test environment has no
@@ -14,6 +19,37 @@ describe("Zotero.Embeddings", function () {
 			encode: text => ['<s>', ...text.split(/\s+/).filter(Boolean), '</s>'],
 			decode: ids => ids.filter(id => id !== '<s>' && id !== '</s>').join(' ')
 		};
+	}
+
+	// Stands in for a measured model (see Zotero.Embeddings.ensureCalibration()),
+	// which the test environment has no downloaded model to measure. The mean
+	// is shaped like a real one -- mixed signs, and shorter than unit length,
+	// since it averages vectors that don't all point the same way -- so that
+	// centering behaves here as it does in production.
+	//
+	// Written once for the whole file: nothing here resets the embeddings
+	// database, and a model switch clears only the stored vectors.
+	async function calibrateTestModel(
+		{ modelVersion = 'test-model/1', minScore = 0.2, maxDisplayScore = 0.6,
+			dimensions = 384 } = {}
+	) {
+		await Zotero.Embeddings.initDB();
+		let mean = new Float32Array(dimensions);
+		for (let i = 0; i < dimensions; i++) {
+			mean[i] = i % 4 < 2 ? 0.03 : -0.03;
+		}
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.modelCalibration "
+				+ "(modelVersion, meanVector, minScore, maxDisplayScore) VALUES (?, ?, ?, ?)",
+			[
+				modelVersion,
+				new Uint8Array(mean.buffer, mean.byteOffset, mean.byteLength),
+				minScore,
+				maxDisplayScore
+			],
+			{ debugParams: false }
+		);
+		return mean;
 	}
 
 	describe("#initDB()", function () {
@@ -54,13 +90,10 @@ describe("Zotero.Embeddings", function () {
 	describe("#scoreItemIDs() floor", function () {
 		it("should not return items scoring below the model's minimum", async function () {
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-			await Zotero.Embeddings.initDB();
-			let mean = Zotero.Embeddings.getMeanVector();
-
 			// Centering subtracts the mean, so an item stored as the mean plus
 			// one axis scores against the query by that axis's share of it
 			let axis = (index, scale = 1) => {
-				let vector = Float32Array.from(mean);
+				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
 				return vector;
 			};
@@ -103,11 +136,8 @@ describe("Zotero.Embeddings", function () {
 
 		it("should fall back to text matches when nothing clears the minimum", async function () {
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-			await Zotero.Embeddings.initDB();
-			let mean = Zotero.Embeddings.getMeanVector();
-
 			let axis = (index, scale = 1) => {
-				let vector = Float32Array.from(mean);
+				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
 				return vector;
 			};
@@ -164,11 +194,8 @@ describe("Zotero.Embeddings", function () {
 
 		it("shouldn't match a note's wrapper markup in the text fallback", async function () {
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-			await Zotero.Embeddings.initDB();
-			let mean = Zotero.Embeddings.getMeanVector();
-
 			let axis = (index, scale = 1) => {
-				let vector = Float32Array.from(mean);
+				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
 				return vector;
 			};
@@ -222,11 +249,8 @@ describe("Zotero.Embeddings", function () {
 	describe("#scoreItemIDs() chunks", function () {
 		it("should score an item by its best chunk", async function () {
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-			await Zotero.Embeddings.initDB();
-			let mean = Zotero.Embeddings.getMeanVector();
-
 			let axis = (index, scale = 1) => {
-				let vector = Float32Array.from(mean);
+				let vector = Float32Array.from(testMean);
 				vector[index] += scale;
 				return vector;
 			};
@@ -272,8 +296,11 @@ describe("Zotero.Embeddings", function () {
 
 	describe("#chunkText()", function () {
 		// bge has no passage prefix, so the window less the two special tokens
-		// that wrap every input is what a chunk's own text gets (see MODELS)
+		// that wrap every input is what a chunk's own text gets (see MODELS).
+		// bge's window is under the chunking ceiling, so the window governs here.
 		const BUDGET = 512 - 2;
+		// CHUNK_MAX_TOKENS less those same special tokens
+		const CEILING = 768 - 2;
 		var fakeTokenizer = wordTokenizer();
 		// A chunk's own tokens, the way chunking counts them
 		var contentTokens = chunk => fakeTokenizer.encode(chunk).length - 2;
@@ -300,6 +327,23 @@ describe("Zotero.Embeddings", function () {
 			let words = n => Array.from({ length: n }, (x, i) => `word${i}`).join(' ');
 			assert.lengthOf(await Zotero.Embeddings.Chunking.chunkText(words(BUDGET)), 1);
 			assert.isAbove((await Zotero.Embeddings.Chunking.chunkText(words(BUDGET + 1))).length, 1);
+		});
+
+		it("should bound a chunk by the chunking ceiling, not the model's window", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+			// A model that accepts far more at once doesn't get one vector per
+			// note: that would average a note's subjects together, which is
+			// what scoring an item by its best chunk exists to avoid
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelMaxTokens').returns(8192));
+			let words = (tag, n) => Array.from({ length: n }, (x, i) => `${tag}${i}`).join(' ');
+			// 2100 tokens: comfortably inside the window, past the ceiling
+			let chunks = await Zotero.Embeddings.Chunking.chunkText(
+				[words('alpha', 700), words('bravo', 700), words('charlie', 700)].join('\n\n')
+			);
+			assert.isAbove(chunks.length, 1);
+			for (let chunk of chunks) {
+				assert.isAtMost(contentTokens(chunk), CEILING);
+			}
 		});
 
 		it("shouldn't put two substantial paragraphs in one chunk", async function () {
@@ -389,17 +433,18 @@ describe("Zotero.Embeddings", function () {
 	});
 
 	describe("#getScoreFraction()", function () {
-		it("should clamp scores into the active model's display range", function () {
-			// bge-small-en-v1.5's band runs from 0.2 to 0.6
-			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5');
+		it("should clamp scores into the measured display range", async function () {
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1');
 			try {
+				await Zotero.Embeddings.loadCalibration();
 				assert.equal(Zotero.Embeddings.getScoreFraction(0), 0);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.2), 0);
 				assert.approximately(Zotero.Embeddings.getScoreFraction(0.4), 0.5, 0.001);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.6), 1);
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
-				// No known model -> empty bar
-				stub.returns('');
+				// An unmeasured model has no band to place a score in -> empty bar
+				stub.returns('unmeasured-model/1');
+				await Zotero.Embeddings.loadCalibration();
 				assert.equal(Zotero.Embeddings.getScoreFraction(0.9), 0);
 			}
 			finally {
@@ -483,6 +528,89 @@ describe("Zotero.Embeddings", function () {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				Zotero.Prefs.clear('embeddings.indexingPaused');
 				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
+	describe("#pruneModels()", function () {
+		it("should drop calibration for the models it no longer keeps", async function () {
+			await calibrateTestModel({ modelVersion: 'kept-model/1' });
+			await calibrateTestModel({ modelVersion: 'dropped-model/1' });
+			let measured = () => Zotero.DB.columnQueryAsync(
+				"SELECT modelVersion FROM embeddings.modelCalibration"
+			);
+			// No cached files to prune -- this is only about what we measured
+			let stubs = [
+				sinon.stub(Zotero.ML, 'listModels').resolves([]),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('kept-model/1')
+			];
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			try {
+				await Zotero.Embeddings.pruneModels();
+				assert.sameMembers(await measured(), ['kept-model/1']);
+
+				// Disabling keeps nothing, so re-enabling measures afresh
+				// rather than reusing numbers taken against an older corpus
+				Zotero.Prefs.clear('embeddings.model');
+				await Zotero.Embeddings.pruneModels();
+				assert.isEmpty(await measured());
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+				// Pruning cleared the row the rest of the file scores against
+				testMean = await calibrateTestModel();
+			}
+		});
+	});
+
+	describe("Calibration", function () {
+		// Stub the model rather than setting the pref: writing embeddings.model
+		// kicks off a real model switch, which clears the index and the stored
+		// calibration out from under the tests that follow
+		let corpusFor = (model) => {
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns(model);
+			try {
+				return Zotero.Embeddings.Calibration.getCorpus();
+			}
+			finally {
+				stub.restore();
+			}
+		};
+
+		it("should measure each model against the pairs it can read", function () {
+			let en = corpusFor('bge-small-en-v1.5');
+			let zh = corpusFor('bge-small-zh-v1.5');
+			// A model that claims no language of its own is measured on all of them
+			let all = corpusFor('multilingual-e5-small');
+			assert.isAbove(en.length, 0);
+			assert.isAbove(zh.length, 0);
+			assert.isAbove(all.length, en.length + zh.length);
+
+			// Text a model can't tokenize has to stay out of its corpus: it
+			// can't tell two such passages apart, so they score highly against
+			// each other and crowd out the tail that sets the floor
+			let han = /[一-鿿]/;
+			assert.isFalse(en.some(pair => han.test(pair.query) || han.test(pair.passage)));
+			assert.isTrue(zh.every(pair => han.test(pair.query) && han.test(pair.passage)));
+		});
+
+		it("should only let models claim a language the corpus is written in", function () {
+			let codes = Object.keys(Zotero.Embeddings.Calibration.languages);
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelName');
+			try {
+				for (let { name } of Zotero.Embeddings.getAvailableModels()) {
+					stub.returns(name);
+					let language = Zotero.Embeddings.getModelLanguage();
+					if (language !== null) {
+						assert.include(codes, language, name);
+					}
+					// Whichever it claims, there are pairs to measure it against
+					assert.isAbove(Zotero.Embeddings.Calibration.getCorpus().length, 0, name);
+				}
+			}
+			finally {
+				stub.restore();
 			}
 		});
 	});
@@ -867,106 +995,9 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 	});
-	describe("TEMP mean computation", function () {
-		before(function () {
-			if (!Services.env.get("ZOTERO_TEST_EMBEDDINGS_INFERENCE")) {
-				this.skip();
-			}
-		});
-
-		it("should compute a mean vector for each model", async function () {
-			this.timeout(1800000);
-			await loadZoteroPane();
-
-			// Titles and abstract fragments across fields and languages, so the
-			// mean captures the direction every embedding shares rather than
-			// any one subject
-			let corpus = [
-				'Grounded theory methodology in qualitative sociology',
-				'The gut microbiome influences host metabolism through short-chain fatty acid production',
-				'A transformer architecture for protein structure prediction from sequence alone',
-				'Sleep deprivation impairs hippocampal memory consolidation in rodents',
-				'Does peer review improve manuscript quality? Evidence from a randomized trial',
-				'Dopaminergic neurons in the ventral tegmental area encode reward prediction error',
-				'Bilingualism and the onset of dementia: a population-based cohort study',
-				'The amyloid cascade hypothesis of Alzheimer disease revisited',
-				'Critiques of the serotonin hypothesis of depression',
-				'Machine learning emulation of atmospheric convection',
-				'The colonial history of the French Atlantic world, 1660-1800',
-				'CRISPR screens identify regulators of T cell exhaustion',
-				'Measurement of the Higgs boson mass in the four-lepton channel',
-				'Ocean acidification reduces coral reef calcification rates',
-				'Urban heat islands and heat-related mortality in European cities',
-				'Patronage and the economics of eighteenth-century opera',
-				'Quantum error correction with surface codes on superconducting qubits',
-				'Wage inequality and the decline of labor market institutions',
-				'Antibiotic resistance in hospital-acquired Klebsiella infections',
-				'Neural correlates of decision making under uncertainty',
-				'Land use change and pollinator decline in temperate agriculture',
-				'A grammar of evidentiality in Amazonian languages',
-				'Constitutional courts and democratic backsliding',
-				'Stellar nucleosynthesis in asymptotic giant branch stars',
-				'Tectonic controls on Himalayan river incision',
-				'The reception of Ovid in medieval French romance',
-				'Randomized trial of cognitive behavioral therapy for insomnia',
-				'Supply chain resilience after the 2020 disruption',
-				'Photocatalytic water splitting with earth-abundant catalysts',
-				'Archaeological evidence for early dairying in Neolithic Europe',
-				'Social media use and adolescent wellbeing: a longitudinal analysis',
-				'Numerical methods for stiff differential equations',
-				'The epidemiology of long COVID in primary care',
-				'Rhetoric and citizenship in the Roman republic',
-				'Deep learning for medical image segmentation',
-				'Monetary policy transmission in emerging markets',
-				'Gene flow between domestic and wild populations of Atlantic salmon',
-				'Phenomenology of embodiment in twentieth-century philosophy',
-				'Nanoparticle drug delivery across the blood-brain barrier',
-				'Historical demography of the Black Death in England',
-				'Étude sur la transition énergétique dans les villes européennes',
-				'Die Rolle des Gedächtnisses in der deutschen Nachkriegsliteratur',
-				'Un estudio sobre la biodiversidad en los bosques tropicales',
-				'気候変動が海洋生態系に与える影響についての研究',
-				'Исследование структуры белков методом криоэлектронной микроскопии',
-				'城市化进程中的社会流动性研究',
-				'Uno studio sulla conservazione dei manoscritti medievali',
-				'Estudo sobre políticas públicas de saúde no Brasil',
-				'Onderzoek naar waterbeheer in laaggelegen gebieden',
-				'Badania nad historią gospodarczą Europy Środkowej'
-			];
-
-			for (let modelName of Zotero.Embeddings.getAvailableModels().map(m => m.name)) {
-				Zotero.Prefs.set('embeddings.model', modelName);
-				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
-				await Zotero.Embeddings.preloadModel();
-
-				let vectors = [];
-				for (let i = 0; i < corpus.length; i += 10) {
-					vectors.push(...await Zotero.Embeddings.embedPassages(corpus.slice(i, i + 10)));
-				}
-				let mean = new Float32Array(vectors[0].length);
-				for (let vector of vectors) {
-					for (let d = 0; d < mean.length; d++) {
-						mean[d] += vector[d] / vectors.length;
-					}
-				}
-				let bytes = new Uint8Array(mean.buffer);
-				let binary = '';
-				for (let byte of bytes) {
-					binary += String.fromCharCode(byte);
-				}
-				Zotero.debug('MEAN ' + modelName + ' dim=' + mean.length + ' '
-					+ btoa(binary));
-			}
-			await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
-		});
-	});
 	describe("#scoreItemIDs() centering", function () {
 		it("should score text with nothing to say near zero", async function () {
 			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-			await Zotero.Embeddings.initDB();
-			let mean = Zotero.Embeddings.getMeanVector();
-			assert.isNotNull(mean);
-
 			let store = async (item, vector) => {
 				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
 				await Zotero.DB.queryAsync(
@@ -990,9 +1021,9 @@ describe("Zotero.Embeddings", function () {
 			// One item whose vector is the direction every embedding shares,
 			// and one that differs from it
 			let empty = await createDataObject('item');
-			await store(empty, normalized(mean));
+			await store(empty, normalized(testMean));
 			let distinct = await createDataObject('item');
-			let other = Float32Array.from(mean);
+			let other = Float32Array.from(testMean);
 			for (let i = 0; i < other.length; i += 2) {
 				other[i] += 0.05;
 			}
@@ -1013,7 +1044,7 @@ describe("Zotero.Embeddings", function () {
 				// Without centering the two would be nearly indistinguishable,
 				// since both consist mostly of the shared direction
 				let raw = 0;
-				let a = normalized(mean);
+				let a = normalized(testMean);
 				let b = normalized(other);
 				for (let i = 0; i < a.length; i++) {
 					raw += a[i] * b[i];

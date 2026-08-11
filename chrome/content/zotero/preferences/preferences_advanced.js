@@ -68,10 +68,17 @@ Zotero_Preferences.Advanced = {
 		// before the pref -- and with it the stored index -- is touched.
 		let modelMenu = document.getElementById('semantic-search-model');
 		let modelPopup = modelMenu.querySelector('menupopup');
-		for (let { name, l10nID } of Zotero.Embeddings.getAvailableModels()) {
+		for (let { name, modelId, label, l10nID } of Zotero.Embeddings.getAvailableModels()) {
 			let menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('value', name);
-			document.l10n.setAttributes(menuitem, l10nID);
+			if (l10nID) {
+				document.l10n.setAttributes(menuitem, l10nID);
+			}
+			else {
+				// A model with no string of its own is one being tried out, so
+				// show whatever identifies it rather than an empty row
+				menuitem.setAttribute('label', label || modelId);
+			}
 			modelPopup.append(menuitem);
 		}
 		modelMenu.value = Zotero.Embeddings.getModelName();

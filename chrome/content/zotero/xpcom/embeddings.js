@@ -35,71 +35,59 @@
  *
  */
 Zotero.Embeddings = new function () {
-	// Key order is the display order in the preferences model menu
+	//
+	// The models
+	//
+	// Everything about the active model -- which one it is, what it expects,
+	// where its files come from -- is answered here.
+	//
+
+	// Key order is the display order in the preferences model menu.
+	//
+	// Every field is a fact about the model, read off its model card or its
+	// config. Anything that can only be learned by running it -- the mean vector
+	// its embeddings share, the score below which nothing is a match, the score
+	// at which the Relevance bar fills -- is measured instead, on first use (see
+	// Zotero.Embeddings.Calibration). Adding a model fits nothing by hand.
+	//
+	// What each field is for, documented here:
+	//
+	// 'menu-key': {                      // also the value of the embeddings.model pref
+	//     revision: 1,                   // bump when a change alters the vectors, to force a reindex
+	//     modelId: 'Org/repo',           // HF repo id, and the transformers.js pipeline id
+	//     language: 'en',                // optional: a code from Calibration.languages, and the only
+	//                                    //   pairs it's calibrated against. Omit to use all of them.
+	//     dtype: 'q8',                   // weights variant; 'q8' is onnx/model_quantized.onnx
+	//     pooling: 'cls',                // how token vectors combine: 'cls' or 'mean'
+	//     queryPrefix: '...',            // prepended to every query (see embedQuery())
+	//     passagePrefix: '...',          // prepended to every passage (see embedPassages())
+	//     maxTokens: 512,                // context window; longer text is chunked to fit
+	//     l10nID: '...',                 // optional Fluent id for the menu
+	//     label: '...'                   // optional plain-English menu label, for a model that isn't
+	//                                    //   shipped. The menu prefers l10nID, then label, then modelId.
+	// }
 	const MODELS = {
 		'bge-small-en-v1.5': {
 			revision: 1,
-			// HF repo id -- also the transformers.js pipeline id and download URL basis.
 			modelId: 'Xenova/bge-small-en-v1.5',
-			// int8 dynamic quantization ('q8' -> onnx/model_quantized.onnx)
+			language: 'en',
 			dtype: 'q8',
 			pooling: 'cls',
-			// bge prepends a retrieval instruction to queries; passages get none.
 			queryPrefix: 'Represent this sentence for searching relevant passages: ',
 			passagePrefix: '',
-			// Context window in tokens. Text longer than this is split into
-			// chunks (see Zotero.Embeddings.Chunking); the pipeline truncates
-			// anything over.
 			maxTokens: 512,
-			// Scores below this aren't matches at all: for a query with nothing
-			// to match, short or generic text scores a little above zero against
-			// anything, and ranking that is worse than returning nothing.
-			// Fitted to observed distributions, as is the ceiling that scales the
-			// Relevance column's bar (see getScoreFraction()); neither affects
-			// stored vectors, so retuning them doesn't require a revision bump.
-			minScore: 0.2,
-			maxDisplayScore: 0.6,
-			// The direction every embedding from this model shares, which carries
-			// no meaning: subtracting it before comparing (see _center()) keeps
-			// text with little content from scoring as a moderate match against
-			// everything. Computed over a corpus of titles and abstracts across
-			// fields and languages; a change to it needs a displayScoreRange
-			// refit but not a revision bump, since stored vectors are unaffected.
-			meanVector: '5NSKvCDFIjwxsGo85T2FuN5DAzwJvTI8MNqGO7jCAD0Ty4g8MVeDvD+NeTvZLwy9ZIBAPDaCAjys'
-					+ 'UjA8bidWPKzdVbz9nME8//TMvGLbHjx5uIY8BS8TvX3nQjw8oqa8oDkXvNq1RzxgoLO7bUNQvFb/'
-					+ 'Qb0Lxh++C31zOzb+PbzXLvM8pUDUutLFILr2Nx28ajKhvI1/NjwVQRm8TFaRPHN4ejzHm4k8u6cG'
-					+ 'u+wBu7xwXuu77AzlvIlFpbw8L5E60T5iuyIUoLwJUxm9Uf4xvFlAibmhcAY9qImuPHIa6zyczeY8'
-					+ 'fr/ePITTdDzow4Y8YiDwPNWTwTwtzCi+1jRGPV4lEj2n35k8vV/UvHpiobvCW6O75tb6uTHn7bwZ'
-					+ '7Dc8ZtCxPAJS1Tzvuug8lQpWPMc0xzpw1Ja8ykchvP74LrzzuFw8iXy3PKISljuk/468fPYkvB57'
-					+ 'obwCnqe7jq+hvJvJlDw/+c+6IBn9u4VHBLxyA7u7gsZYO6Ukxbz8I4+7ZrumPA1Dczyh+Ww8ASO3'
-					+ 'PiZa5rxcSXo8oITTOzRKXLv4HXo8rxabvASZDbzakwW9h7tgvHsxozzTaqC7DDqyvPzLAz1dGGe8'
-					+ 'qe5EPBP/kztGPwM94IagOg0BtDvWqQQ8dUfWvJShCDxG1KQ8DIhIvG617Dz21dK8N7sDO3KsuT2Y'
-					+ 'YFE8rwmgu68BaDzuW/k8LxfCvNfvEDxH2+g52lnYu0f/pbvHfaC7L5TGu8aTmTyMsAO5cqEJvRdy'
-					+ 'GzvY6Xm9G5wqvURfhj0m+i08uOdWPKcB07ytppO7lv2EugS16DyO8L27A56Auwt1CzwG6ng8rBWK'
-					+ 'O6+FuDy8e6e8fV4ovDnyLrzDls68ftSEvNFXtj0SzlW7VakZvbuU/js29Io74S6DOzjL8bvEg248'
-					+ 'm7eIOxaB/DeNHxI4vMLgPDHmvjvWr9O8Fg6Au5KOC7yuW4Y89LiTPMq3ObwLWqW8ft3cPIKfkDwE'
-					+ 'ukq8Y9swvCohvbwzxz48ytKYPHxft7zFaQc7emdNvHA6BTzD2wa8XwADvXlCkby3QIC8g2KavJTQ'
-					+ 'ILz0FtY80kwfPD49yLw0+CY8WU7RPOyrLTwQs5A8ZORUu4pSAT3Dxrw8eNNFvPg1xLgLnCk9Es93'
-					+ 'O+tmLrtFJ948Cjy2PHNVfjzlMBs8x9+PPP4G4jx/YV28UOsfvUkwlr5OAzq85E6eu2ORvrxfuDk8'
-					+ 'fRcEveB2oTyR57y8jQLCPDR6VDyUkdo8XPVjOxpzAL1FIcU8NqayO+vMIzz3nNg7zXPgOUEs1rxE'
-					+ 'MYM5PXdOvOHcXDx4ygY8PYD1vCzYhjwQz0y8HVgSPllAIrzSTIm8zrMfPLu61Trg0bg80PFKvH3c'
-					+ 'g73dHsw8kcTXPLeT5DzKdRC8pXuKvMlCeLyN2nM7/YI1POekF7xVW8C8R9QLvbC6k7y0b+O7tyK7'
-					+ 'u34BlLyf2S676t5XPJuEwTvKCQE9ChB7Os6MGLz7/oC8Gk8hvQaAVTx6Hqq82ZJOPHqOZzsrgnW7'
-					+ 'WvOQO8ivzbwaTHk8lWmgu7oBdLxLQ4i80oxPPAtXSbuxTiq8YapZPYzzEb05iWG88/zmPAZPkTyC'
-					+ 'rqQ83wmIvGElyrzH9ym8H11APVHkjbxzK9E8bYu8PDi1izszpfo6u/xyPEU8xrxE5ds8r250uxwa'
-					+ '2ru3i8870dUZvd3zprznUuE7FGi6PEfQh764F0w8YkuRO2PLDTyf56C7e5K6PLksZjyQVWE5eK1t'
-					+ 'vLAevDsSyLi7GrikPNw04Txb0qK7l2ROO004Czzepuc8oiQYvalltDx6qCm9eQKROyjnnDzinhc+'
-					+ 'raHHvGkXi7tcEGk81fOmOw6w9TuKTAe7Wb/7u5gY8rsFDui6JPJ4PchYfbxBfZw6qWRvPU4g9bwr'
-					+ 'l1W82JiFOpbAe7xiKR+8HUhCPD+bQDg9sS68GvOGPZ8BMryhBnS8ynM8vRg30TusOC87+7EyvDOZ'
-					+ '6rtgymA8HYWdO7f//jvRq+27hUCIvDMMYryzYxm8VqKWvMNyLrsyLlG8xw8jvBMAezwvj4I8',
-			l10nID: 'preferences-advanced-semantic-search-english',
-			files: [
-				'config.json',
-				'tokenizer.json',
-				'tokenizer_config.json',
-				'special_tokens_map.json',
-				'onnx/model_quantized.onnx',
-			]
+			l10nID: 'preferences-advanced-semantic-search-english'
+		},
+		'bge-small-zh-v1.5': {
+			revision: 1,
+			modelId: 'Xenova/bge-small-zh-v1.5',
+			language: 'zh',
+			dtype: 'q8',
+			pooling: 'cls',
+			queryPrefix: '为这个句子生成表示以用于检索相关文章：',
+			passagePrefix: '',
+			maxTokens: 512,
+			l10nID: 'preferences-advanced-semantic-search-chinese'
 		},
 		'multilingual-e5-small': {
 			revision: 1,
@@ -108,57 +96,63 @@ Zotero.Embeddings = new function () {
 			pooling: 'mean',
 			queryPrefix: 'query: ',
 			passagePrefix: 'passage: ',
-			// Context window in tokens. Text longer than this is split into
-			// chunks (see Zotero.Embeddings.Chunking); the pipeline truncates
-			// anything over.
 			maxTokens: 512,
-			// Fitted as above. This model scores short, generic text around 0.3
-			// against any query, so its floor sits high enough to cut some weak
-			// but genuine matches -- the price of not ranking noise.
-			minScore: 0.35,
-			maxDisplayScore: 0.6,
-			// The direction every embedding from this model shares, which carries
-			// no meaning: subtracting it before comparing (see _center()) keeps
-			// text with little content from scoring as a moderate match against
-			// everything. Computed over a corpus of titles and abstracts across
-			// fields and languages; a change to it needs a displayScoreRange
-			// refit but not a revision bump, since stored vectors are unaffected.
-			meanVector: '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',
-			l10nID: 'preferences-advanced-semantic-search-multilingual',
-			files: [
-				'config.json',
-				'tokenizer.json',
-				'tokenizer_config.json',
-				'special_tokens_map.json',
-				'onnx/model_quantized.onnx',
-			]
-		}
+			l10nID: 'preferences-advanced-semantic-search-multilingual'
+		},
+		// Models for testing
+		'all-MiniLM-L6-v2': {
+			revision: 1,
+			modelId: 'Xenova/all-MiniLM-L6-v2',
+			dtype: 'q8',
+			pooling: 'mean',
+			queryPrefix: '',
+			passagePrefix: '',
+			maxTokens: 512,
+			language: 'en',
+			label: 'test: English (lightest, fast)'
+		},
+		'bge-base-en-v1.5': {
+			revision: 1,
+			modelId: 'Xenova/bge-base-en-v1.5',
+			language: 'en',
+			dtype: 'q8',
+			pooling: 'cls',
+			queryPrefix: 'Represent this sentence for searching relevant passages: ',
+			passagePrefix: '',
+			maxTokens: 512,
+			label: 'test: English (bge mid-weight)'
+		},
+		'jina-embeddings-v2-small-en': {
+			revision: 1,
+			modelId: 'Xenova/jina-embeddings-v2-small-en',
+			dtype: 'q8',
+			pooling: 'mean',
+			queryPrefix: '',
+			passagePrefix: '',
+			maxTokens: 8192,
+			language: 'en',
+			label: 'test: English (jina mid-weight, large window)'
+		},
+		'multilingual-e5-base': {
+			revision: 1,
+			modelId: 'Xenova/multilingual-e5-base',
+			dtype: 'q8',
+			pooling: 'mean',
+			queryPrefix: 'query: ',
+			passagePrefix: 'passage: ',
+			maxTokens: 512,
+			label: "test: multilingual (mid-weight)"
+		},
+		'bge-m3': {
+			revision: 1,
+			modelId: 'Xenova/bge-m3',
+			dtype: 'q8',
+			pooling: 'cls',
+			queryPrefix: '',
+			passagePrefix: '',
+			maxTokens: 8192,
+			label: 'test: multilingual (very heavy)'
+		},
 	};
 
 	const TASK_NAME = 'feature-extraction';
@@ -189,10 +183,18 @@ Zotero.Embeddings = new function () {
 	/**
 	 * Available models, in display order, for the preferences UI.
 	 *
-	 * @return {Object[]} - [{ name, l10nID }]
+	 * A model added to try out rather than to ship may have no `l10nID`; the
+	 * menu falls back to its `label`, and then to `modelId`.
+	 *
+	 * @return {Object[]} - [{ name, modelId, label, l10nID }]
 	 */
 	this.getAvailableModels = function () {
-		return Object.entries(MODELS).map(([name, model]) => ({ name, l10nID: model.l10nID }));
+		return Object.entries(MODELS).map(([name, model]) => ({
+			name,
+			modelId: model.modelId,
+			label: model.label,
+			l10nID: model.l10nID
+		}));
 	};
 
 	/**
@@ -205,6 +207,71 @@ Zotero.Embeddings = new function () {
 	 */
 	this.getModelVersion = function () {
 		return this.getModelName() + '/' + _getModel().revision;
+	};
+
+	// The active model's entry in MODELS. Throws when no model is selected:
+	// every fact about the model is unanswerable then, and callers reach this
+	// only after isEnabled().
+	function _getModel() {
+		let name = Zotero.Embeddings.getModelName();
+		let model = MODELS[name];
+		if (!model) {
+			throw new Error(`Unknown embeddings model '${name}'`);
+		}
+		return model;
+	}
+
+	/**
+	 * The active model's context window, in tokens.
+	 *
+	 * @return {Number}
+	 */
+	this.getModelMaxTokens = function () {
+		return _getModel().maxTokens;
+	};
+
+	/**
+	 * The language code the active model is for, or null when it handles every language.
+	 *
+	 * @return {String|null}
+	 */
+	this.getModelLanguage = function () {
+		return _getModel().language || null;
+	};
+
+	/**
+	 * The string embedQuery() prepends to every query.
+	 *
+	 * @return {String}
+	 */
+	this.getQueryPrefix = function () {
+		return _getModel().queryPrefix;
+	};
+
+	/**
+	 * The string embedPassages() prepends to every passage.
+	 *
+	 * @return {String}
+	 */
+	this.getPassagePrefix = function () {
+		return _getModel().passagePrefix;
+	};
+
+	/**
+	 * Read one of the active model's files (e.g. its tokenizer) from the
+	 * runtime's model cache, fetching it from the model hub if the runtime
+	 * doesn't have it yet.
+	 *
+	 * @param {String} file - File path within the model repository
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	this.getModelFile = function (file) {
+		return Zotero.ML.getModelFile({
+			engineId: ENGINE_ID,
+			taskName: TASK_NAME,
+			modelId: _getModel().modelId,
+			file
+		});
 	};
 
 	//
@@ -303,6 +370,7 @@ Zotero.Embeddings = new function () {
 		if (version < _dbVersion || storedUserKey != localUserKey) {
 			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
 			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
+			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
 			// No foreign key on itemID -- references across attached databases
 			// aren't possible, so item deletions are handled by the indexing
 			// notifier and eligibility pruning instead.
@@ -326,6 +394,18 @@ Zotero.Embeddings = new function () {
 				"CREATE TABLE embeddings.itemEmbeddingsMeta (\n"
 				+ "    key TEXT PRIMARY KEY,\n"
 				+ "    value NOT NULL\n"
+				+ ")"
+			);
+			// What running the model taught us about it, measured once per
+			// model version (see Zotero.Embeddings.ensureCalibration()). Keyed
+			// by version rather than name, so a `revision` bump measures again
+			// alongside the reindex it already forces.
+			await Zotero.DB.queryAsync(
+				"CREATE TABLE embeddings.modelCalibration (\n"
+				+ "    modelVersion TEXT PRIMARY KEY,\n"
+				+ "    meanVector BLOB NOT NULL,\n"
+				+ "    minScore REAL NOT NULL,\n"
+				+ "    maxDisplayScore REAL NOT NULL\n"
 				+ ")"
 			);
 			await Zotero.DB.queryAsync(
@@ -418,15 +498,6 @@ Zotero.Embeddings = new function () {
 		return true;
 	};
 
-	function _getModel() {
-		let name = Zotero.Embeddings.getModelName();
-		let model = MODELS[name];
-		if (!model) {
-			throw new Error(`Unknown embeddings model '${name}'`);
-		}
-		return model;
-	}
-
 	/**
 	 * Whether the active model has been fully downloaded and is ready to use.
 	 *
@@ -461,21 +532,38 @@ Zotero.Embeddings = new function () {
 
 
 	/**
-	 * Delete cached model files other than the active model's (all of them when
-	 * disabled), freeing disk space after a model switch.
+	 * Delete everything we hold for models other than the active one (for all of
+	 * them when disabled): their cached files, freeing disk space after a model
+	 * switch, and what calibration measured about them.
 	 *
 	 * @return {Promise}
 	 */
 	this.pruneModels = async function () {
-		let keep = this.isEnabled() ? _getModel().modelId : null;
+		let enabled = this.isEnabled();
+		let keepModelId = enabled ? _getModel().modelId : null;
+		let keepVersion = enabled ? this.getModelVersion() : null;
 		for (let model of await Zotero.ML.listModels({ taskName: TASK_NAME })) {
-			if (model.modelId !== keep) {
+			if (model.modelId !== keepModelId) {
 				await Zotero.ML.deleteModels({
 					taskName: TASK_NAME,
 					model: model.name,
 					revision: model.revision
 				});
 			}
+		}
+		await this.initDB();
+		if (keepVersion) {
+			// Clean calibration records
+			await Zotero.DB.queryAsync(
+				"DELETE FROM embeddings.modelCalibration WHERE modelVersion!=?",
+				[keepVersion]
+			);
+		}
+		else {
+			// Semantic search is off, so there's no model to keep anything for
+			await Zotero.DB.queryAsync("DELETE FROM embeddings.modelCalibration");
+			// ...and nothing should render a relevance band
+			_calibration = null;
 		}
 	};
 
@@ -586,6 +674,9 @@ Zotero.Embeddings = new function () {
 		// unusable, so a shutdown to release memory leaves scoring alone
 		if (modelChanged) {
 			_modelGeneration++;
+			// The old model's measurements don't describe the new one, and the
+			// bar renders straight off them
+			_calibration = null;
 		}
 		if (engine) {
 			await engine.terminate();
@@ -593,45 +684,17 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
-	/**
-	 * Embed an arbitrary string, returning the model's vector. Task prefixes
-	 * ("query: ", "passage: ") are NOT added here -- add them at the call site
-	 * if the model expects them.
-	 *
-	 * @param {String} text
-	 * @return {Promise<Float32Array>}
-	 */
-	var _meanVectors = new Map();
+	//
+	// Vector math
+	//
+	// Shared by scoring and by calibration, which has to measure exactly what
+	// scoring computes -- if the two ever centered or compared differently, the
+	// calibrated bounds would describe a quantity nothing else produces. Public
+	// so Zotero.Embeddings.Calibration uses these rather than its own copies.
+	//
 
 	/**
-	 * The active model's mean vector, decoded once (see meanVector in MODELS)
-	 *
-	 * @return {Float32Array|null}
-	 */
-	this.getMeanVector = function () {
-		return _getMeanVector();
-	};
-
-	function _getMeanVector() {
-		let name = Zotero.Embeddings.getModelName();
-		if (!_meanVectors.has(name)) {
-			let encoded = _getModel().meanVector;
-			let mean = null;
-			if (encoded) {
-				let binary = atob(encoded);
-				let bytes = new Uint8Array(binary.length);
-				for (let i = 0; i < binary.length; i++) {
-					bytes[i] = binary.charCodeAt(i);
-				}
-				mean = new Float32Array(bytes.buffer);
-			}
-			_meanVectors.set(name, mean);
-		}
-		return _meanVectors.get(name);
-	}
-
-	/**
-	 * Subtract the model's mean vector and scale back to unit length.
+	 * Subtract a mean vector and scale back to unit length.
 	 *
 	 * Every embedding a model produces shares a large common direction that
 	 * says nothing about the text, which leaves unrelated items looking
@@ -640,18 +703,41 @@ Zotero.Embeddings = new function () {
 	 * that no relevance reads as no score rather than as a middling one.
 	 *
 	 * @param {Float32Array} vector
+	 * @param {Float32Array} mean
 	 * @return {Float32Array}
 	 */
-	function _center(vector) {
-		let mean = _getMeanVector();
-		if (!mean || mean.length !== vector.length) {
-			return vector;
-		}
+	this.center = function (vector, mean) {
 		let out = new Float32Array(vector.length);
 		for (let i = 0; i < vector.length; i++) {
 			out[i] = vector[i] - mean[i];
 		}
 		return _normalize(out);
+	};
+
+	/**
+	 * Similarity between two vectors that are already centered and of unit
+	 * length, which for those is the cosine between them.
+	 *
+	 * @param {Float32Array} a
+	 * @param {Float32Array} b
+	 * @return {Number}
+	 */
+	this.dot = function (a, b) {
+		let sum = 0;
+		for (let i = 0; i < a.length; i++) {
+			sum += a[i] * b[i];
+		}
+		return sum;
+	};
+
+	// Center against the active model's measured mean, leaving the vector
+	// alone if there's nothing to center against
+	function _center(vector) {
+		let mean = _calibration && _calibration.mean;
+		if (!mean || mean.length !== vector.length) {
+			return vector;
+		}
+		return Zotero.Embeddings.center(vector, mean);
 	}
 
 	function _normalize(vector) {
@@ -668,7 +754,100 @@ Zotero.Embeddings = new function () {
 		return vector;
 	}
 
+	//
+	// Model calibration
+	//
+	// Three numbers govern scoring, and none of them can be read off a model
+	// card: the mean vector its embeddings share, the score below which nothing
+	// counts as a match, and the score at which the Relevance bar fills. They
+	// aren't choices so much as properties of the model, so they're measured
+	// rather than configured -- once per model version, against a fixed corpus
+	// of query/passage pairs written to resemble real searches over a library.
+	//
+	// Measuring takes a few seconds of inference, so it runs from the indexing
+	// pass, which has the engine loaded anyway, and the result is cached in the
+	// database. Keying the cache by model version means switching models and
+	// back doesn't measure again, while a `revision` bump does -- the same
+	// signal that invalidates the stored vectors.
+	//
+	// How the numbers are derived, and the corpus they're derived from, live in
+	// Zotero.Embeddings.Calibration. What's here is where they're kept and how
+	// they're applied.
+	//
 
+	// Measured calibration for the active model, or null if it hasn't been
+	// measured or loaded yet.
+	let _calibration = null;
+
+	/**
+	 * The active model's calibration, read from the database and kept in memory
+	 * for getScoreFraction(), or null if the model hasn't been measured yet. A
+	 * single row read with no engine involved, so it's safe on the search path.
+	 *
+	 * @return {Promise<Object|null>} - { mean, minScore, maxDisplayScore }
+	 */
+	this.loadCalibration = async function () {
+		let modelVersion = Zotero.Embeddings.getModelVersion();
+		if (_calibration && _calibration.modelVersion === modelVersion) {
+			return _calibration;
+		}
+		let row = await Zotero.DB.rowQueryAsync(
+			"SELECT meanVector, minScore, maxDisplayScore FROM embeddings.modelCalibration "
+				+ "WHERE modelVersion=?",
+			[modelVersion]
+		);
+		_calibration = row
+			? {
+				modelVersion,
+				mean: _blobToVector(row.meanVector),
+				minScore: row.minScore,
+				maxDisplayScore: row.maxDisplayScore
+			}
+			: null;
+		return _calibration;
+	};
+
+	/**
+	 * Measure the active model's calibration unless it's already been measured.
+	 * Needs the engine, so this belongs to the indexing pass rather than to
+	 * database setup: the search path only ever reads the cached result.
+	 *
+	 * @return {Promise}
+	 */
+	this.ensureCalibration = async function () {
+		if (await this.loadCalibration()) {
+			return;
+		}
+		let modelVersion = this.getModelVersion();
+		Zotero.debug(`Embeddings: calibrating ${modelVersion}`);
+		let measured = await Zotero.Embeddings.Calibration.measure();
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.modelCalibration "
+				+ "(modelVersion, meanVector, minScore, maxDisplayScore) VALUES (?, ?, ?, ?)",
+			[
+				modelVersion,
+				new Uint8Array(measured.mean.buffer, measured.mean.byteOffset,
+					measured.mean.byteLength),
+				measured.minScore,
+				measured.maxDisplayScore
+			],
+			{ debugParams: false }
+		);
+		_calibration = { modelVersion, ...measured };
+		Zotero.debug(`Embeddings: calibrated ${modelVersion} -- matches start at `
+			+ `${measured.minScore.toFixed(4)}, the bar fills at `
+			+ `${measured.maxDisplayScore.toFixed(4)}`);
+	};
+
+
+	/**
+	 * Embed an arbitrary string, returning the model's vector. Task prefixes
+	 * ("query: ", "passage: ") are NOT added here -- add them at the call site
+	 * if the model expects them.
+	 *
+	 * @param {String} text
+	 * @return {Promise<Float32Array>}
+	 */
 	this.embed = async function (text) {
 		let vectors = await this.embedMany([text]);
 		return vectors[0];
@@ -761,60 +940,22 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * The active model's context window, in tokens. Text longer than this is
-	 * split into chunks before embedding (see Zotero.Embeddings.Chunking).
-	 * Throws with no model selected, as the other model accessors do -- there's
-	 * nothing to embed for, so there's nothing to chunk for either.
-	 *
-	 * @return {Number}
-	 */
-	this.getModelMaxTokens = function () {
-		return _getModel().maxTokens;
-	};
-
-	/**
-	 * The string embedPassages() prepends to every passage. Chunking has to
-	 * keep room for it, since chunks are built from bare text.
-	 *
-	 * @return {String}
-	 */
-	this.getPassagePrefix = function () {
-		return _getModel().passagePrefix;
-	};
-
-	/**
-	 * Read one of the active model's files (e.g. its tokenizer) from the
-	 * runtime's model cache, fetching it from the model hub if the runtime
-	 * doesn't have it yet.
-	 *
-	 * @param {String} file - File path within the model repository
-	 * @return {Promise<ArrayBuffer>}
-	 */
-	this.getModelFile = function (file) {
-		return Zotero.ML.getModelFile({
-			engineId: ENGINE_ID,
-			taskName: TASK_NAME,
-			modelId: _getModel().modelId,
-			file
-		});
-	};
-
-	/**
 	 * Map a raw similarity score onto the active model's display range, for
-	 * the Relevance column's bar. The band runs from the model's minimum score,
-	 * the weakest match shown, to an empirical ceiling (see MODELS): scores at
-	 * or below the floor render as an empty bar, at or above the ceiling as a
-	 * full one.
+	 * the Relevance column's bar. The band runs from the score where matches
+	 * begin to the score where they're as good as this model gets, both
+	 * measured (see the calibration section): scores at or below the floor
+	 * render as an empty bar, at or above the ceiling as a full one. Nothing to
+	 * render before the model has been calibrated, which is also before there
+	 * are any scores.
 	 *
 	 * @param {Number} score
 	 * @return {Number} - 0-1
 	 */
 	this.getScoreFraction = function (score) {
-		let model = MODELS[this.getModelName()];
-		if (!model) {
+		if (!_calibration) {
 			return 0;
 		}
-		let { minScore, maxDisplayScore } = model;
+		let { minScore, maxDisplayScore } = _calibration;
 		return Math.min(1, Math.max(0,
 			(score - minScore) / (maxDisplayScore - minScore)));
 	};
@@ -944,10 +1085,20 @@ Zotero.Embeddings = new function () {
 					+ `but the active model is '${modelVersion}'`
 			);
 		}
+		// Indexing calibrates the model before it writes a single vector, so a
+		// database stamped for this model always has a calibration to go with
+		// it -- but the numbers still have to be read into memory, since
+		// getScoreFraction() reads them synchronously while rendering.
+		let calibration = await this.loadCalibration();
+		if (!calibration) {
+			throw new this.IndexNotReadyError(
+				`Embeddings index is stamped for '${modelVersion}' but the model `
+					+ `has no calibration`
+			);
+		}
 		let generation = _modelGeneration;
 		let query = _center(await this.embedQuery(queryText));
-		let dim = query.length;
-		let minScore = _getModel().minScore;
+		let minScore = calibration.minScore;
 
 		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
 		// parameter limit for large collections), scoring each as we go. An
@@ -972,11 +1123,7 @@ Zotero.Embeddings = new function () {
 				chunk
 			);
 			for (let row of rows) {
-				let vec = _center(_blobToVector(row.embedding));
-				let dot = 0;
-				for (let d = 0; d < dim; d++) {
-					dot += query[d] * vec[d];
-				}
+				let dot = this.dot(query, _center(_blobToVector(row.embedding)));
 				let prev = best.get(row.itemID);
 				if (prev === undefined || dot > prev) {
 					best.set(row.itemID, dot);
@@ -1009,10 +1156,12 @@ Zotero.Embeddings = new function () {
 
 
 /**
- * Zotero.Embeddings.Chunking -- splitting a text into passages that each fit
- * the model's context window, so a long text's later paragraphs are searchable
- * instead of being silently truncated away by the pipeline. The indexer applies
- * this only to notes. Splitting is budgeted in the model's own tokens.
+ * Zotero.Embeddings.Chunking -- splitting a text into passages small enough to
+ * each be embedded on their own, so a long text's later paragraphs are
+ * searchable instead of being averaged into one vector or truncated away by the
+ * pipeline. The indexer applies this only to notes. Chunk size is bounded by
+ * CHUNK_MAX_TOKENS, capped by the model's window, and counted in the model's
+ * own tokens.
  */
 Zotero.Embeddings.Chunking = new function () {
 	// Tokens carried over from the end of one chunk into the start of the
@@ -1026,6 +1175,10 @@ Zotero.Embeddings.Chunking = new function () {
 	// (headings, dates, list items) are combined with their neighbors rather
 	// than becoming chunks of their own.
 	const CHUNK_MIN_TOKENS = 120;
+	// Most tokens a chunk may reach. A ceiling rather than a target: chunks come
+	// out paragraph-sized, so this decides only how long a text has to be before
+	// it's split at all, and how far a single oversized paragraph is split.
+	const CHUNK_MAX_TOKENS = 768;
 
 	// Tokenizer instances by model name. Failures aren't cached, so a later
 	// indexing run retries the load.
@@ -1095,8 +1248,8 @@ Zotero.Embeddings.Chunking = new function () {
 		let prefix = Zotero.Embeddings.getPassagePrefix();
 		return {
 			count,
-			budget: Zotero.Embeddings.getModelMaxTokens() - specialTokens
-				- (prefix ? count(prefix) : 0)
+			budget: Math.min(CHUNK_MAX_TOKENS, Zotero.Embeddings.getModelMaxTokens())
+				- specialTokens - (prefix ? count(prefix) : 0)
 		};
 	}
 
@@ -2125,6 +2278,10 @@ Zotero.Embeddings.Indexing = new function () {
 			_emitProgress();
 			await Zotero.Embeddings.Indexing.refreshStatus();
 			await Zotero.Embeddings.preloadModel(_onDownloadProgress);
+			// Measure the model before storing anything scored against it. Only
+			// the first run for a given model version pays for this; every
+			// later one finds the numbers already in the database.
+			await Zotero.Embeddings.ensureCalibration();
 
 			_phase = 'indexing';
 			_downloadProgress = null;
@@ -2204,4 +2361,489 @@ Zotero.Embeddings.Indexing = new function () {
 		Zotero.Prefs.set('embeddings.indexingPaused', true);
 		_emitProgress();
 	};
+};
+
+/**
+ * Zotero.Embeddings.Calibration -- how a model's scoring numbers are derived.
+ *
+ * A model can't tell you the mean vector its embeddings share, the score below
+ * which nothing is a match, or the score at which the Relevance bar fills.
+ * Those are measured, by running the model over a fixed corpus of query/passage
+ * pairs and reading the answers off the resulting distributions.
+ *
+ * For a corpus of N pairs, measure() does this:
+ *
+ *   1. Embed all N queries and all N passages, with the model's own prefixes.
+ *   2. Average the passage vectors into the mean, then center all 2N by it --
+ *      the same centering scoring uses.
+ *   3. Score every query against every passage: an N x N grid.
+ *   4. The diagonal holds the N matched pairs, each query with the passage it
+ *      was written for; the N*(N-1) cells off it are unrelated text.
+ *   5. minScore is NULL_PERCENTILE of those off-diagonal scores, and
+ *      maxDisplayScore is MATCH_PERCENTILE of the diagonal.
+ *
+ * Zotero.Embeddings calls this once per model version, then stores the result
+ * and applies it while scoring.
+ */
+Zotero.Embeddings.Calibration = new function () {
+	// Where the score floor goes, as a percentile of the null distribution --
+	// what this model scores between texts with nothing to do with each other
+	// (`mismatched` in measure()). At 0.99 only the top 1% of unrelated pairs
+	// reach it; raising it cuts more noise and more weak-but-real matches along
+	// with it, lowering it keeps both.
+	const NULL_PERCENTILE = 0.99;
+	// Where the Relevance bar fills, as a percentile of the other distribution
+	// measure() collects -- `matched`, each query against its own passage. At
+	// 0.5 a full bar means "as good as this model's typical real match".
+	const MATCH_PERCENTILE = 0.5;
+	// Texts per engine call while calibrating, matching the indexer's default
+	// batch (see Indexing._indexItems())
+	const BATCH_SIZE = 20;
+
+	/**
+	 * The languages the corpus is written in, and so the values a model's
+	 * `language` may take (see MODELS). `other` collects languages with no code
+	 * of their own, measured only by a model that claims no single language.
+	 */
+	this.languages = Object.freeze({ en: 'en', zh: 'zh', other: 'other' });
+
+	// Query/passage pairs spanning fields, languages, and lengths: the titles
+	// and abstracts, note paragraphs, and annotation-style passages that
+	// indexing stores. Each query is what someone might plausibly type to find
+	// its passage, and no two pairs anywhere in the corpus share a subject --
+	// not even as translations of each other, since a model measured on several
+	// languages at once scores a passage's translation like the passage itself,
+	// and a real match sitting in the null distribution raises the floor
+	// against exactly the cross-language searches such a model is for. That
+	// disjointness is what makes a query paired with any *other* passage an
+	// honest example of two texts that have nothing to do with each other. A
+	// language wants enough pairs for the floor to land on a settled stretch of
+	// the unrelated-score tail rather than on its few highest values (see
+	// NULL_PERCENTILE).
+	const CORPUS = {
+		// English. Also the largest set, since it's the one an English-only
+		// model is measured against.
+		en: [
+			{
+				query: 'qualitative research methods',
+				passage: 'Grounded theory methodology in qualitative sociology'
+			},
+			{
+				query: 'gut bacteria and metabolism',
+				passage: 'The gut microbiome influences host metabolism through short-chain fatty acid production'
+			},
+			{
+				query: 'predicting protein structure with deep learning',
+				passage: 'A transformer architecture for protein structure prediction from sequence alone'
+			},
+			{
+				query: 'lack of sleep and memory',
+				passage: 'Sleep deprivation impairs hippocampal memory consolidation in rodents'
+			},
+			{
+				query: 'does peer review work',
+				passage: 'Does peer review improve manuscript quality? Evidence from a randomized trial'
+			},
+			{
+				query: 'reward prediction error dopamine',
+				passage: 'Dopaminergic neurons in the ventral tegmental area encode reward prediction error'
+			},
+			{
+				query: 'speaking two languages and dementia risk',
+				passage: 'Bilingualism and the onset of dementia: a population-based cohort study'
+			},
+			{
+				query: 'amyloid hypothesis alzheimer',
+				passage: 'The amyloid cascade hypothesis of Alzheimer disease revisited'
+			},
+			{
+				query: 'is depression caused by low serotonin',
+				passage: 'Critiques of the serotonin hypothesis of depression'
+			},
+			{
+				query: 'machine learning weather models',
+				passage: 'Machine learning emulation of atmospheric convection'
+			},
+			{
+				query: 'french colonial atlantic history',
+				passage: 'The colonial history of the French Atlantic world, 1660-1800'
+			},
+			{
+				query: 't cell exhaustion crispr screen',
+				passage: 'CRISPR screens identify regulators of T cell exhaustion'
+			},
+			{
+				query: 'higgs boson mass measurement',
+				passage: 'Measurement of the Higgs boson mass in the four-lepton channel'
+			},
+			{
+				query: 'coral reefs and acidifying oceans',
+				passage: 'Ocean acidification reduces coral reef calcification rates'
+			},
+			{
+				query: 'heat deaths in cities',
+				passage: 'Urban heat islands and heat-related mortality in European cities'
+			},
+			{
+				query: 'economics of baroque opera',
+				passage: 'Patronage and the economics of eighteenth-century opera'
+			},
+			{
+				query: 'quantum error correction',
+				passage: 'Quantum error correction with surface codes on superconducting qubits'
+			},
+			{
+				query: 'unions and wage inequality',
+				passage: 'Wage inequality and the decline of labor market institutions'
+			},
+			{
+				query: 'hospital antibiotic resistance',
+				passage: 'Antibiotic resistance in hospital-acquired Klebsiella infections'
+			},
+			{
+				query: 'how the brain handles uncertainty',
+				passage: 'Neural correlates of decision making under uncertainty'
+			},
+			{
+				query: 'farming and declining bees',
+				passage: 'Land use change and pollinator decline in temperate agriculture'
+			},
+			{
+				query: 'evidentiality in indigenous languages',
+				passage: 'A grammar of evidentiality in Amazonian languages'
+			},
+			{
+				query: 'courts and the erosion of democracy',
+				passage: 'Constitutional courts and democratic backsliding'
+			},
+			{
+				query: 'how heavy elements form in stars',
+				passage: 'Stellar nucleosynthesis in asymptotic giant branch stars'
+			},
+			{
+				query: 'himalayan river erosion',
+				passage: 'Tectonic controls on Himalayan river incision'
+			},
+			{
+				query: 'ovid in medieval literature',
+				passage: 'The reception of Ovid in medieval French romance'
+			},
+			{
+				query: 'therapy for insomnia trial',
+				passage: 'Randomized trial of cognitive behavioral therapy for insomnia'
+			},
+			{
+				query: 'supply chains after the pandemic',
+				passage: 'Supply chain resilience after the 2020 disruption'
+			},
+			{
+				query: 'splitting water with sunlight',
+				passage: 'Photocatalytic water splitting with earth-abundant catalysts'
+			},
+			{
+				query: 'neolithic dairy farming',
+				passage: 'Archaeological evidence for early dairying in Neolithic Europe'
+			},
+			{
+				query: 'social media and teenage mental health',
+				passage: 'Social media use and adolescent wellbeing: a longitudinal analysis'
+			},
+			{
+				query: 'solving stiff ODEs numerically',
+				passage: 'Numerical methods for stiff differential equations'
+			},
+			{
+				query: 'long covid prevalence',
+				passage: 'The epidemiology of long COVID in primary care'
+			},
+			{
+				query: 'roman political oratory',
+				passage: 'Rhetoric and citizenship in the Roman republic'
+			},
+			{
+				query: 'segmenting medical images',
+				passage: 'Deep learning for medical image segmentation'
+			},
+			{
+				query: 'interest rates in developing economies',
+				passage: 'Monetary policy transmission in emerging markets'
+			},
+			{
+				query: 'farmed salmon escaping into the wild',
+				passage: 'Gene flow between domestic and wild populations of Atlantic salmon'
+			},
+			{
+				query: 'philosophy of the body',
+				passage: 'Phenomenology of embodiment in twentieth-century philosophy'
+			},
+			{
+				query: 'getting drugs into the brain',
+				passage: 'Nanoparticle drug delivery across the blood-brain barrier'
+			},
+			{
+				query: 'plague mortality in medieval england',
+				passage: 'Historical demography of the Black Death in England'
+			},
+			{
+				query: 'why replication attempts fail',
+				passage: 'The replication attempts collected here differ from the originals in ways '
+					+ 'that are easy to overlook. Sample sizes were larger, but recruitment moved '
+					+ 'online, and the populations are not the same ones the original authors drew '
+					+ 'from. Where an effect failed to replicate, it is rarely possible to say '
+					+ 'whether the original was a false positive or the replication was run under '
+					+ 'conditions that suppress a real effect. Both explanations predict the same '
+					+ 'null result, which is why the debate has not been settled by more data alone.'
+			},
+			{
+				query: 'cost effectiveness of preventive care',
+				passage: 'A recurring finding is that prevention saves lives without saving money. '
+					+ 'Screening programs catch disease earlier and extend life, and the additional '
+					+ 'years carry their own costs of care. The programs that do pay for themselves '
+					+ 'tend to be the narrow ones aimed at populations with high baseline risk, '
+					+ 'where the number needed to screen is small. Broad screening of low-risk '
+					+ 'populations improves outcomes at considerable expense, which is a defensible '
+					+ 'thing to buy but should not be defended on the grounds that it is cheap.'
+			},
+			{
+				query: 'archival silence and colonial records',
+				passage: 'The archive records what the administration found worth recording, which '
+					+ 'means the people it governed appear mostly at moments of friction: tax '
+					+ 'disputes, criminal proceedings, petitions. Reading these documents for '
+					+ 'ordinary life means reading against their purpose, and the silences are not '
+					+ 'random. Whole categories of activity went unwritten precisely because they '
+					+ 'were unremarkable to the clerk, and their absence from the record has been '
+					+ 'mistaken more than once for absence from the world.'
+			},
+			{
+				query: 'attention mechanism computational cost',
+				passage: 'Self-attention compares every position against every other, so its cost '
+					+ 'grows with the square of the sequence length. For short inputs this is '
+					+ 'irrelevant next to the cost of the feedforward layers, but it dominates '
+					+ 'once sequences reach the thousands. The approximations proposed since -- '
+					+ 'sparse patterns, low-rank projections, kernel methods -- all trade some '
+					+ 'exactness for a lower asymptotic cost, and which trade is acceptable '
+					+ 'depends on whether the task needs long-range precision or merely long context.'
+			},
+			{
+				query: 'measurement error in survey research',
+				passage: 'Respondents answer the question they understood, which is not always the '
+					+ 'question that was asked. Small changes in wording move responses by margins '
+					+ 'comparable to the effects under study, and the direction of the shift is '
+					+ 'often predictable from the order of the response options alone. Treating '
+					+ 'these as noise understates the problem: the error is systematic, correlated '
+					+ 'with the characteristics being measured, and does not average out with a '
+					+ 'larger sample.'
+			},
+			{
+				query: 'this assumes stationarity which seems unwarranted',
+				passage: 'The model assumes the underlying distribution is stable over the study '
+					+ 'period. Given the intervening policy change, that seems hard to defend -- '
+					+ 'and the authors never test it.'
+			},
+			{
+				query: 'sample size justification missing',
+				passage: 'No power analysis is reported anywhere in the methods. With n=24 per '
+					+ 'group, the study is only powered to detect effects far larger than the '
+					+ 'literature suggests are plausible.'
+			}
+		],
+		// Chinese.
+		zh: [
+			{
+				query: '青蒿素的抗疟机制',
+				passage: '青蒿素及其衍生物抗疟原虫作用机制的研究进展'
+			},
+			{
+				query: '高铁对区域经济的影响',
+				passage: '高速铁路开通对沿线城市经济发展的影响研究'
+			},
+			{
+				query: '汉语方言的声调差异',
+				passage: '吴语方言声调系统的实验语音学分析'
+			},
+			{
+				query: '稻田的甲烷排放',
+				passage: '水稻田甲烷排放的季节变化及其调控因素'
+			},
+			{
+				query: '大熊猫种群的遗传多样性',
+				passage: '野生大熊猫种群的遗传多样性与栖息地破碎化'
+			},
+			{
+				query: '固态锂电池的界面问题',
+				passage: '固态锂电池电极与电解质界面稳定性研究'
+			},
+			{
+				query: '青藏高原冻土退化',
+				passage: '青藏高原多年冻土退化及其碳释放效应'
+			},
+			{
+				query: '宋代科举与社会流动',
+				passage: '宋代科举制度与士人阶层的社会流动研究'
+			},
+			{
+				query: '明清白话小说的叙事',
+				passage: '明清白话小说叙事视角的演变研究'
+			},
+			{
+				query: '青少年近视与户外活动',
+				passage: '学龄儿童近视患病率上升与户外活动时间的关系'
+			},
+			{
+				query: '敦煌文献整理',
+				passage: '敦煌藏经洞出土文献的整理与断代研究'
+			},
+			{
+				query: '人口老龄化与养老金',
+				passage: '人口老龄化背景下养老保险制度的可持续性分析'
+			},
+			{
+				query: '绿茶多酚的抗氧化作用',
+				passage: '绿茶儿茶素类化合物清除自由基的构效关系研究'
+			},
+			{
+				query: '垃圾分类政策为什么难以推行',
+				passage: '垃圾分类政策的执行效果在不同城市之间差异很大，而这种差异很难用宣传力度来解释。'
+					+ '居民是否坚持分类，更多取决于投放点的便利程度、监督是否持续，'
+					+ '以及分类后的垃圾是否被混装混运——一旦居民发现分好的垃圾被混在一起运走，'
+					+ '参与率会迅速下降，且很难恢复。把执行失败归结为居民素质，'
+					+ '会掩盖收运体系本身的问题，而后者恰恰是政策设计中最容易被忽视的环节。'
+			},
+			{
+				query: '对照组的选择存在偏倚',
+				passage: '对照组全部来自另一家医院，两组患者的基线特征并不可比。'
+					+ '观察到的组间差异有多少来自干预本身，无从判断。'
+			}
+		],
+		// Languages without a code of their own. Only models that claim no
+		// single language -- the multilingual one -- are measured on these,
+		// together with everything above.
+		other: [
+			{
+				query: 'transition énergétique des villes',
+				passage: 'Étude sur la transition énergétique dans les villes européennes'
+			},
+			{
+				query: 'Erinnerung in der Nachkriegsliteratur',
+				passage: 'Die Rolle des Gedächtnisses in der deutschen Nachkriegsliteratur'
+			},
+			{
+				query: 'biodiversidad en bosques tropicales',
+				passage: 'Un estudio sobre la biodiversidad en los bosques tropicales'
+			},
+			{
+				query: '地震の早期警報システム',
+				passage: '地震早期警報システムの精度と即時性に関する研究'
+			},
+			{
+				query: 'деградация чернозёмов',
+				passage: 'Исследование деградации чернозёмных почв при интенсивном земледелии'
+			},
+			{
+				query: 'necropoli etrusche',
+				passage: 'Uno studio archeologico sulle necropoli etrusche in Italia centrale'
+			},
+			{
+				query: 'políticas de saúde no Brasil',
+				passage: 'Estudo sobre políticas públicas de saúde no Brasil'
+			},
+			{
+				query: 'waterbeheer in laaggelegen gebieden',
+				passage: 'Onderzoek naar waterbeheer in laaggelegen gebieden'
+			},
+			{
+				query: 'historia gospodarcza Europy Środkowej',
+				passage: 'Badania nad historią gospodarczą Europy Środkowej'
+			}
+		]
+	};
+
+	/**
+	 * The pairs the active model is measured against: its own language's, or
+	 * every language when it claims none (see `language` in MODELS).
+	 *
+	 * A model is never measured on text it can't read. An English model shown
+	 * Chinese passages doesn't merely waste them -- it can't tell two of them
+	 * apart, so they score highly against each other and crowd out the tail
+	 * that sets the floor, raising it against the English results the model is
+	 * actually there to rank.
+	 *
+	 * @return {Object[]} - [{ query, passage }]
+	 */
+	this.getCorpus = function () {
+		let language = Zotero.Embeddings.getModelLanguage();
+		if (!language) {
+			return Object.values(CORPUS).flat();
+		}
+		if (!Object.prototype.hasOwnProperty.call(CORPUS, language)) {
+			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' claims language `
+				+ `'${language}', which isn't one the corpus is written in `
+				+ `(${Object.keys(this.languages).join(', ')})`);
+		}
+		return CORPUS[language];
+	};
+
+	/**
+	 * Run the active model over its corpus and derive its three numbers: the
+	 * mean of the passage embeddings, and the two ends of the score band, read
+	 * off the distributions of matched and mismatched pairs.
+	 *
+	 * @return {Promise<Object>} - { mean, minScore, maxDisplayScore }
+	 */
+	this.measure = async function () {
+		let corpus = this.getCorpus();
+		let queryPrefix = Zotero.Embeddings.getQueryPrefix();
+		let passagePrefix = Zotero.Embeddings.getPassagePrefix();
+		Zotero.debug(`Embeddings: measuring against ${corpus.length} query/passage pairs`);
+		let queries = await _embedAll(corpus.map(pair => queryPrefix + pair.query));
+		let passages = await _embedAll(corpus.map(pair => passagePrefix + pair.passage));
+
+		// The direction every embedding shares, which says nothing about the
+		// text. Taken over the passages, since those are what gets stored.
+		let mean = new Float32Array(passages[0].length);
+		for (let vector of passages) {
+			for (let d = 0; d < mean.length; d++) {
+				mean[d] += vector[d] / passages.length;
+			}
+		}
+
+		// Scoring compares centered vectors, so calibrate on centered scores,
+		// using the same centering and comparison the search path uses
+		queries = queries.map(vector => Zotero.Embeddings.center(vector, mean));
+		passages = passages.map(vector => Zotero.Embeddings.center(vector, mean));
+		let matched = [];
+		let mismatched = [];
+		for (let i = 0; i < queries.length; i++) {
+			for (let j = 0; j < passages.length; j++) {
+				(i === j ? matched : mismatched)
+					.push(Zotero.Embeddings.dot(queries[i], passages[j]));
+			}
+		}
+		let minScore = _percentile(mismatched, NULL_PERCENTILE);
+		let maxDisplayScore = _percentile(matched, MATCH_PERCENTILE);
+		// A model that rates its own matches no higher than unrelated text
+		// can't rank anything, and every score it produced would clamp to a
+		// full or empty bar. Better to fail loudly than to index with it.
+		if (maxDisplayScore <= minScore) {
+			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' scores matched text `
+				+ `(${maxDisplayScore.toFixed(4)}) no higher than unrelated text `
+				+ `(${minScore.toFixed(4)}) -- it can't rank search results`);
+		}
+		return { mean, minScore, maxDisplayScore };
+	};
+
+	async function _embedAll(texts) {
+		let vectors = [];
+		for (let i = 0; i < texts.length; i += BATCH_SIZE) {
+			vectors.push(...await Zotero.Embeddings.embedMany(texts.slice(i, i + BATCH_SIZE)));
+		}
+		return vectors;
+	}
+
+	// The value a given fraction of the way through a distribution, with 0 the
+	// smallest value and 1 the largest
+	function _percentile(values, fraction) {
+		let sorted = Float64Array.from(values).sort();
+		return sorted[Math.round(fraction * (sorted.length - 1))];
+	}
 };
