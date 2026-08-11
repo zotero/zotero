@@ -244,6 +244,57 @@ describe("Zotero.Embeddings", function () {
 				Zotero.Prefs.clear('embeddings.model');
 			}
 		});
+
+		it("should surface unindexed items in the text fallback", async function () {
+			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(testMean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, vector) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+						+ "VALUES (?, 0, ?, 'hash')",
+					[item.id, blob], { debugParams: false }
+				);
+			};
+			// An indexed item unrelated to the query, and a note too short to
+			// be indexed -- no stored embedding at all -- that says the
+			// query's word. The note's only findable content is literal, so
+			// the fallback has to reach it.
+			let unrelated = await createDataObject('item',
+				{ title: 'Guild regulation in early modern Nuremberg' });
+			await store(unrelated, axis(1));
+			let note = new Zotero.Item('note');
+			note.setNote('<p>testing</p>');
+			await note.saveTx();
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let scores = await Zotero.Embeddings.scoreItemIDs('testing',
+					[unrelated.id, note.id]);
+				assert.isTrue(scores.has(note.id));
+				// With nothing to rank it by, the note sits at the floor,
+				// where the relevance bar is empty
+				assert.equal(scores.get(note.id), 0.2);
+				assert.equal(Zotero.Embeddings.getScoreFraction(scores.get(note.id)), 0);
+				assert.isFalse(scores.has(unrelated.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.model');
+			}
+		});
 	});
 
 	describe("#scoreItemIDs() chunks", function () {
@@ -769,8 +820,10 @@ describe("Zotero.Embeddings", function () {
 		it("should skip items with too little text to say anything", async function () {
 			this.timeout(60000);
 			await createDataObject('item', { title: 'C' });
+			await createDataObject('item', { title: 'Influenza' });
 			await createDataObject('item', { title: '猫' });
 			await createDataObject('item', { title: 'A study of feline behavior' });
+			await createDataObject('item', { title: '猫行为研究' });
 
 			let vector = new Float32Array(4).fill(0.5);
 			let texts = [];
@@ -794,8 +847,11 @@ describe("Zotero.Embeddings", function () {
 			}
 
 			assert.include(texts, 'A study of feline behavior');
-			// A single ideograph is a word; a single letter isn't
-			assert.include(texts, '猫');
+			// Scripts without spaces are counted at their real word boundaries
+			assert.include(texts, '猫行为研究');
+			// A title needs two words in any script
+			assert.notInclude(texts, 'Influenza');
+			assert.notInclude(texts, '猫');
 			assert.notInclude(texts, 'C');
 		});
 
@@ -893,6 +949,70 @@ describe("Zotero.Embeddings", function () {
 				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", indexed.id));
 			assert.equal(await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", skipped.id), 0);
+		});
+
+		it("should skip notes and annotations with fewer than three words", async function () {
+			this.timeout(60000);
+			let makeNote = async (html) => {
+				let note = new Zotero.Item('note');
+				note.setNote(html);
+				await note.saveTx();
+				return note;
+			};
+			// One- and two-word placeholders give the model nothing to rank by
+			// meaning, so they stay out of the index no matter what they say
+			let oneWord = await makeNote('<p>testing</p>');
+			let twoWords = await makeNote('<p>meeting notes</p>');
+			// Numbers and dates aren't words
+			let numbers = await makeNote('<p>2024-03-15 12345</p>');
+			let enoughWords = await makeNote('<p>Enough words to index</p>');
+			// Scripts without spaces are counted at their real word
+			// boundaries, so a short phrase still reaches the minimum while a
+			// single word doesn't
+			let chinese = await makeNote('<p>青蒿素的抗疟机制研究</p>');
+			let chineseWord = await makeNote('<p>测试</p>');
+			// An annotation is judged on its passage and comment together
+			let item = await createDataObject('item',
+				{ title: 'Parent of a short annotation' });
+			let attachment = await importPDFAttachment(item);
+			let shortAnnotation = await createAnnotation('highlight', attachment,
+				{ comment: 'ok' });
+
+			let vector = new Float32Array(4).fill(0.5);
+			let texts = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					texts.push(...passages);
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
+			];
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+
+			assert.include(texts, 'Enough words to index');
+			assert.include(texts, '青蒿素的抗疟机制研究');
+			for (let skipped of [oneWord, twoWords, numbers, chineseWord, shortAnnotation]) {
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+					skipped.id
+				), 0, skipped.id);
+			}
+			for (let indexed of [enoughWords, chinese]) {
+				assert.ok(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+					indexed.id
+				), indexed.id);
+			}
 		});
 
 		it("should store a long note as multiple chunk rows sharing one source hash", async function () {

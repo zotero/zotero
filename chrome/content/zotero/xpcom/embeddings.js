@@ -971,6 +971,26 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
+	 * Similarity between an arbitrary query and passage, computed the way
+	 * scoring computes it.
+	 *
+	 *
+	 * @param {Object} pair
+	 * @param {String} pair.query
+	 * @param {String} pair.passage
+	 * @return {Promise<Number>}
+	 */
+	this.compare = async function ({ query, passage }) {
+		await this.initDB();
+		// Pull the measured mean into memory, so _center() centers with it
+		await this.loadCalibration();
+		let queryVector = await this.embedQuery(query);
+		let [passageVector] = await this.embedPassages([passage]);
+		return this.dot(_center(queryVector), _center(passageVector));
+	};
+
+
+	/**
 	 * Map a raw similarity score onto the active model's display range, for
 	 * the Relevance column's bar. The band runs from the score where matches
 	 * begin to the score where they're as good as this model gets, both
@@ -1076,14 +1096,15 @@ Zotero.Embeddings = new function () {
 	}
 
 	/**
-	 * Score a given set of items by similarity to a query. Items without a
-	 * stored embedding aren't scored, and neither are items scoring below the
-	 * model's minimum, which aren't matches (see minScore in MODELS) -- unless
-	 * nothing clears it, in which case items whose text contains the query's
-	 * words are scored, since the model missing what an item says literally
-	 * shouldn't leave the search with nothing to show. Used to apply semantic
-	 * ranking within an existing result scope (e.g. the current collection)
-	 * rather than the whole library.
+	 * Score a given set of items by similarity to a query. Items scoring below
+	 * the model's measured minimum aren't matches and aren't returned (see
+	 * Zotero.Embeddings.Calibration), and items without a stored embedding
+	 * can't be scored at all -- unless nothing clears the minimum, in which
+	 * case candidates whose text contains the query's words are returned
+	 * instead, indexed or not, since the model missing what an item says
+	 * literally shouldn't leave the search with nothing to show. Used to apply
+	 * semantic ranking within an existing result scope (e.g. the current
+	 * collection) rather than the whole library.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -1170,12 +1191,15 @@ Zotero.Embeddings = new function () {
 			}
 		}
 		// Nothing was similar enough to the query to be a match, so fall back to
-		// the items that use its words, ranked by their own scores, which leave
-		// the relevance bar empty
-		if (!scores.size && belowFloor.size) {
-			let literal = await _findLiteralMatches(queryText, [...belowFloor.keys()]);
+		// the items that use its words, which leave the relevance bar empty:
+		// indexed items ranked by their own scores, and unindexed ones -- too
+		// little text to embed, so nothing to rank them by -- placed at the
+		// floor
+		if (!scores.size) {
+			let literal = await _findLiteralMatches(queryText, itemIDs);
 			for (let itemID of literal) {
-				scores.set(itemID, belowFloor.get(itemID));
+				scores.set(itemID,
+					belowFloor.has(itemID) ? belowFloor.get(itemID) : minScore);
 			}
 		}
 		if (generation !== _modelGeneration) {
@@ -1715,17 +1739,15 @@ Zotero.Embeddings.Indexing = new function () {
 	}
 
 	// The single definition of an eligible item, in any library:
-	// - a regular item with a non-empty title (including type-specific title
-	//   fields -- caseName, subject, nameOfAct) or abstract
-	// - a note whose plain text has something to say. Usually its derived
-	//   title -- the note's first line as plain text -- settles that without
-	//   stripping the note's HTML; a title that says nothing can still sit on
-	//   top of a body that says plenty, so only those notes are stripped and
-	//   judged on their full text.
-	// - an annotation with text or a comment
+	// - a regular item with at least two words in its title (including
+	//   type-specific title fields -- caseName, subject, nameOfAct) or in its
+	//   abstract
+	// - a note with at least three words in its plain text
+	// - an annotation with at least three words across the passage it marks
+	//   and its comment
 	// Everything that needs to know what's eligible -- enqueueing, pruning,
 	// progress counts -- works from this result, and _indexItems() skips items
-	// by the same per-type tests (see _hasIndexableText()), so the counts and
+	// by the same per-type tests (see _getIndexableText()), so the counts and
 	// the index stay in agreement.
 	//
 	// @return {Promise<Map>} - libraryID -> [itemID, ...]
@@ -1734,7 +1756,7 @@ Zotero.Embeddings.Indexing = new function () {
 		let byLibrary = new Map();
 		let seen = new Set();
 		let add = (row) => {
-			if (seen.has(row.itemID) || !_hasEmbeddableText(row.value)) {
+			if (seen.has(row.itemID)) {
 				return;
 			}
 			seen.add(row.itemID);
@@ -1754,7 +1776,9 @@ Zotero.Embeddings.Indexing = new function () {
 			Zotero.ItemTypes.getID('attachment')
 		);
 		for (let row of rows) {
-			add(row);
+			if (_hasEmbeddableText(row.value, 2)) {
+				add(row);
+			}
 		}
 		rows = await Zotero.DB.queryAsync(
 			"SELECT libraryID, itemID, title, note FROM itemNotes "
@@ -1762,32 +1786,32 @@ Zotero.Embeddings.Indexing = new function () {
 			Zotero.ItemTypes.getID('note')
 		);
 		for (let row of rows) {
-			// The title is the note's first line, so a title with embeddable
-			// text settles it without stripping the body's HTML
-			let value = _hasEmbeddableText(row.title)
-				? row.title
-				: _htmlToText(row.note, true);
-			add({ libraryID: row.libraryID, itemID: row.itemID, value });
+			// The title is the note's first line, so its words are among the
+			// note's own -- a title with enough of them settles it without
+			// stripping the body's HTML
+			if (_hasEmbeddableText(row.title)
+					|| _hasEmbeddableText(_htmlToText(row.note, true))) {
+				add(row);
+			}
 		}
 		rows = await Zotero.DB.queryAsync(
 			"SELECT libraryID, itemID, text, comment FROM itemAnnotations "
 				+ "JOIN items USING (itemID)"
 		);
 		for (let row of rows) {
-			add({
-				libraryID: row.libraryID,
-				itemID: row.itemID,
-				value: _getAnnotationRawText(row.text, row.comment)
-			});
+			if (_hasEmbeddableText(_getAnnotationRawText(row.text, row.comment))) {
+				add(row);
+			}
 		}
 		return byLibrary;
 	}
 
-	// The raw stored text an annotation's eligibility is judged by, before any
-	// HTML stripping, so the SQL-side eligibility pass and _indexItems() test
-	// the same thing
+	// The stored text an annotation's eligibility is judged by, shared by the
+	// SQL-side eligibility pass and _indexItems() so both test the same thing.
+	// A cheap tag strip -- annotation text and comments carry only simple
+	// inline markup.
 	function _getAnnotationRawText(text, comment) {
-		return [text, comment].filter(Boolean).join(' ');
+		return [text, comment].filter(Boolean).join(' ').replace(/<\/?[a-z][^>]*>/gi, ' ');
 	}
 
 	// Enqueue every eligible item, library by library, so the queue drains
@@ -1859,18 +1883,33 @@ Zotero.Embeddings.Indexing = new function () {
 		);
 	}
 
-	// Text with too little in it to say anything: a one-character title is
-	// noise in an alphabetic script, while a single ideograph can be a whole
-	// word, so those count.
-	function _hasEmbeddableText(text) {
+
+	// Built once: for scripts without spaces the segmenter is dictionary-backed
+	let _wordSegmenter = null;
+
+	// Whether text has at least minWords words, counted with the locale-aware
+	// segmenter so scripts that don't separate words with spaces (Chinese,
+	// Japanese, Thai) are counted at their real word boundaries rather than by
+	// whitespace. Only segments with a letter in them count as words: bare
+	// numbers and dates ("2024-03-15") are placeholders, not content.
+	function _hasEmbeddableText(text, minWords = 3) {
 		text = (text || '').trim();
 		if (!text) {
 			return false;
 		}
-		if (/[\p{Ideographic}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u.test(text)) {
-			return true;
+		if (!_wordSegmenter) {
+			_wordSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' });
 		}
-		return [...text].length > 1;
+		let count = 0;
+		for (let { segment, isWordLike } of _wordSegmenter.segment(text)) {
+			if (isWordLike && /\p{L}/u.test(segment)) {
+				count++;
+				if (count >= minWords) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	// Convert stored HTML to plain text. Notes keep their block structure as
@@ -1891,17 +1930,28 @@ Zotero.Embeddings.Indexing = new function () {
 		).trim();
 	}
 
-	// Text we embed for an item:
-	// - regular item: its title and abstract -- a title alone is enough, since
-	//   it's useful signal even without an abstract
-	// - note: its full text
-	// - annotation: the passage it marks together with its comment
-	// Returns null for items with nothing to embed.
-	function _getItemText(item) {
+	// The text we embed for an item, or null when the item doesn't have enough
+	// to index. The per-type word tests are the same ones
+	// _getEligibleItemIDs() applies to its SQL rows, so an item comes back
+	// null here exactly when the eligibility counts exclude it:
+	// - regular item: its title and abstract, each judged on its own words the
+	//   way the eligibility pass sees its rows -- a title alone is enough,
+	//   since it's useful signal even without an abstract
+	// - note: its full plain text (the eligibility pass's title shortcut is
+	//   just a cheaper route to the same answer, since the title's words are
+	//   among the note's own)
+	// - annotation: the passage it marks together with its comment, judged on
+	//   the same raw fields the eligibility pass reads
+	function _getIndexableText(item) {
 		if (item.isNote()) {
-			return _htmlToText(item.getNote(), true) || null;
+			let text = _htmlToText(item.getNote(), true);
+			return _hasEmbeddableText(text) ? text : null;
 		}
 		if (item.isAnnotation()) {
+			let raw = _getAnnotationRawText(item.annotationText, item.annotationComment);
+			if (!_hasEmbeddableText(raw)) {
+				return null;
+			}
 			let text = _htmlToText(item.annotationText);
 			let comment = _htmlToText(item.annotationComment);
 			if (text && comment) {
@@ -1912,27 +1962,13 @@ Zotero.Embeddings.Indexing = new function () {
 		// Include type-specific title fields (caseName, subject, nameOfAct)
 		let title = item.getField('title', false, true);
 		let abstract = item.getField('abstractNote');
+		if (!_hasEmbeddableText(title, 2) && !_hasEmbeddableText(abstract, 2)) {
+			return null;
+		}
 		if (title && abstract) {
 			return `${title}\n\n${abstract}`;
 		}
-		return title || abstract || null;
-	}
-
-	// Whether an item has enough text to index -- the same per-type tests
-	// _getEligibleItemIDs() applies to its SQL rows, so an item is skipped
-	// here exactly when the eligibility counts exclude it. Notes and regular
-	// items are judged on the text that would be embedded; the eligibility
-	// pass's title shortcut is just a cheaper route to the same answer.
-	function _hasIndexableText(item, text) {
-		if (!text) {
-			return false;
-		}
-		if (item.isAnnotation()) {
-			return _hasEmbeddableText(
-				_getAnnotationRawText(item.annotationText, item.annotationComment)
-			);
-		}
-		return _hasEmbeddableText(text);
+		return title || abstract;
 	}
 
 	// Compute and store embeddings for the given items, skipping any whose
@@ -1980,8 +2016,8 @@ Zotero.Embeddings.Indexing = new function () {
 		let toEmbed = [];
 		let toDelete = [];
 		for (let item of items) {
-			let text = _getItemText(item);
-			if (!_hasIndexableText(item, text)) {
+			let text = _getIndexableText(item);
+			if (!text) {
 				if (storedHashes.has(item.id)) {
 					toDelete.push(item.id);
 				}
