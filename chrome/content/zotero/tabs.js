@@ -1284,19 +1284,18 @@ var Zotero_Tabs = new function () {
 			{
 				getContext: () => {
 					let { type, subType, data } = this.getTabInfo(id);
-					let context = {
+					return {
 						tabType: type,
 						tabSubType: subType,
 						tabID: id,
+						get items() {
+							if (type === 'library') {
+								return ZoteroPane.getSelectedItems();
+							}
+							let item = data?.itemID ? Zotero.Items.get(data.itemID) : null;
+							return item ? [item] : [];
+						}
 					};
-					if (type === 'library') {
-						context.items = ZoteroPane.getSelectedItems();
-					}
-					else {
-						let item = data?.itemID ? Zotero.Items.get(data.itemID) : null;
-						context.items = item ? [item] : [];
-					}
-					return context;
 				}
 			}
 		);
