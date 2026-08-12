@@ -60,6 +60,12 @@ describe("Zotero.Cite", function () {
 			assert.match(await makeBibliography({ date: '-429' }), /429\s?BC/);
 		});
 
+		it("should render a spelled-out BCE date", async function () {
+			let output = await makeBibliography({ date: 'January 10, 200 BCE' });
+			assert.match(output, /200\s?BC/);
+			assert.notMatch(output, /\bAD\b/);
+		});
+
 		it("should render an EDTF range in Extra, overriding the Date field", async function () {
 			let output = await makeBibliography({ date: '1999', extra: 'issued: 2021/2026' });
 			assert.include(output, '2021–2026');
