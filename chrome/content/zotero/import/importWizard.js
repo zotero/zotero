@@ -215,6 +215,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 		const rv = await fp.show();
 		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
+			// Re-enable "continue", disabled while the file picker was up
+			this.wizard.canAdvance = true;
 			return;
 		}
 
@@ -231,6 +233,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 		const rv = await fp.show();
 		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
+			// Re-enable "continue", disabled while the file picker was up
+			this.wizard.canAdvance = true;
 			return;
 		}
 
