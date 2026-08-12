@@ -31,6 +31,9 @@
 		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 	});
 
+	// https://searchfox.org/mozilla-central/source/dom/base/nsSandboxFlags.h
+	const SANDBOXED_AUXILIARY_NAVIGATION = 0x2;
+
 	window.Zotero_Preferences = {
 		panes: new Map(),
 		
@@ -240,9 +243,11 @@
 		 * @param {String} [options.label] A DTD/.properties key (optional for panes with parents)
 		 * @param {String} [options.rawLabel] A raw string to use as the label if options.label is not provided
 		 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
-		 * @param {String} options.src URI of an XHTML fragment
+		 * @param {String} options.src URI of an XHTML fragment, or of a full document if options.embedded is set
 		 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
 		 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
+		 * @param {Boolean} [options.embedded] If true, show `src` in an embedded content browser
+		 * 		instead of inserting it into this document (panes of unprivileged plugins)
 		 * @param {Boolean} [options.defaultXUL] If true, parse the markup at `src` as XUL instead of XHTML:
 		 * 		whitespace-only text nodes are ignored, XUL is the default namespace, and HTML tags are
 		 * 		namespaced under `html:`. Default behavior is the opposite: whitespace nodes are preserved,
@@ -316,7 +321,13 @@
 			let rest = async () => {
 				// Hack - make sure the following code does not run synchronously so we can set loadPromise immediately
 				await Zotero.Promise.delay();
-				
+
+				if (pane.embedded) {
+					await this._loadEmbeddedPane(pane);
+					pane.loaded = true;
+					return;
+				}
+
 				if (pane.scripts) {
 					pane.scope = new Cu.Sandbox(window, {
 						sandboxPrototype: window,
@@ -382,6 +393,118 @@
 			};
 			pane.loadPromise = rest();
 			await pane.loadPromise;
+		},
+
+		/**
+		 * Load an embedded pane: `src` is a full document shown in a content
+		 * browser instead of being inserted into the preferences document.
+		 *
+		 * @param {Object} pane
+		 */
+		async _loadEmbeddedPane(pane) {
+			pane.container.classList.add('embedded');
+			let heading = document.createElement('h1');
+			heading.textContent = pane.rawLabel;
+			pane.container.append(heading);
+
+			// Must be non-remote so moz-extension: pages can load in the parent
+			// process (see plugins/protocol.mjs)
+			let browser = document.createXULElement('browser');
+			browser.setAttribute('type', 'content');
+			browser.setAttribute('disableglobalhistory', 'true');
+			browser.classList.add('plugin-pane-browser');
+			pane.container.append(browser);
+			// Block popups and new windows from the embedded page
+			browser.browsingContext.sandboxFlags |= SANDBOXED_AUXILIARY_NAVIGATION;
+
+			// Expose the pane API before any page script runs
+			browser.addEventListener('DOMWindowCreated', (event) => {
+				if (event.target === browser.contentDocument) {
+					this._exposeEmbeddedPaneAPI(browser, pane);
+				}
+			});
+
+			let deferred = Zotero.Promise.defer();
+			// Keep a reference so the weakly held listener isn't garbage-collected
+			pane.progressListener = {
+				onStateChange(webProgress, request, stateFlags, status) {
+					if (!webProgress.isTopLevel) {
+						return;
+					}
+					let uri;
+					try {
+						let channel = request.QueryInterface(Ci.nsIChannel);
+						// moz-extension: loads redirect internally to the underlying
+						// file: channel, so check the original URI
+						uri = channel.originalURI || channel.URI;
+					}
+					catch {
+						return;
+					}
+					if (stateFlags & Ci.nsIWebProgressListener.STATE_START) {
+						if (uri.spec === 'about:blank' || uri.spec === pane.src) {
+							return;
+						}
+						// The pane is single-page: web links open in the system
+						// browser and everything else is blocked. Pages switch
+						// panes via Zotero_Preferences.navigateToPane().
+						request.cancel(Cr.NS_BINDING_ABORTED);
+						if (/^https?$/.test(uri.scheme)) {
+							Zotero.launchURL(uri.spec);
+						}
+					}
+					else if ((stateFlags & Ci.nsIWebProgressListener.STATE_STOP)
+							&& (stateFlags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
+							&& uri.spec === pane.src) {
+						if (Components.isSuccessCode(status)) {
+							// Fluent via <link rel="localization"> in the page
+							lazy.WindowScopeVariables.setupContentL10n(browser)
+								.then(() => deferred.resolve());
+						}
+						else {
+							deferred.resolve();
+						}
+					}
+				},
+				QueryInterface: ChromeUtils.generateQI(['nsIWebProgressListener', 'nsISupportsWeakReference']),
+			};
+			browser.browsingContext.webProgress.addProgressListener(
+				pane.progressListener,
+				Ci.nsIWebProgress.NOTIFY_STATE_ALL
+			);
+			let nsURI = Services.io.newURI(pane.src);
+			browser.loadURI(nsURI, {
+				triggeringPrincipal: Services.scriptSecurityManager.createContentPrincipal(nsURI, {}),
+			});
+			await deferred.promise;
+
+			// If this is the first pane to be loaded, notify anyone waiting
+			// (for tests)
+			this._firstPaneLoadDeferred.resolve();
+		},
+
+		/**
+		 * Expose a minimal Zotero_Preferences facade to an embedded pane page:
+		 * navigateToPane(), restricted to panes registered by the same plugin.
+		 *
+		 * @param {XULElement} browser
+		 * @param {Object} pane
+		 */
+		_exposeEmbeddedPaneAPI(browser, pane) {
+			let contentWin = browser.contentWindow;
+			let facade = Cu.createObjectIn(contentWin, { defineAs: 'Zotero_Preferences' });
+			Cu.exportFunction(
+				(paneID) => {
+					paneID = String(paneID);
+					let targetPane = this.panes.get(paneID);
+					if (!targetPane || targetPane.pluginID !== pane.pluginID) {
+						throw new contentWin.Error(`Pane ${paneID} was not registered by this plugin`);
+					}
+					this.navigateToPane(paneID).catch(e => Zotero.logError(e));
+				},
+				facade,
+				{ defineAs: 'navigateToPane' }
+			);
 		},
 
 		/**

@@ -4970,6 +4970,177 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("PreferencePanes", function () {
+		var tmpDir;
+
+		function loadPrefPaneTestScope() {
+			mockAddon = createMockPlugin({
+				id: ADDON_ID,
+				name: "Test Sandbox Plugin",
+				syncGUID: "{00000000-0000-0000-0000-00000000000a}",
+				permissions: ["default", "preferencePane"],
+				resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+			});
+			PluginSandbox.loadScope(mockAddon);
+			scope = PluginSandbox.getScope(ADDON_ID);
+		}
+
+		function registerTestPane(options = {}) {
+			return Zotero.PreferencePanes.register({
+				pluginID: ADDON_ID,
+				label: "Embedded Pane",
+				image: "chrome://zotero/skin/20/universal/cog.svg",
+				src: "prefs.html",
+				...options,
+			});
+		}
+
+		before(async function () {
+			tmpDir = await getTempDirectory();
+			await IOUtils.writeUTF8(
+				PathUtils.join(tmpDir, "pane-script.js"),
+				"document.getElementById('embedded-pane-marker').setAttribute('data-script-ran', 'true');\n"
+			);
+			await IOUtils.writeUTF8(
+				PathUtils.join(tmpDir, "prefs.html"),
+				"<!DOCTYPE html><html><head><title>Pane</title></head><body>"
+				+ "<div id='embedded-pane-marker'>Embedded</div>"
+				+ '<script src="pane-script.js"></script></body></html>'
+			);
+		});
+
+		after(async function () {
+			await IOUtils.remove(tmpDir, { recursive: true });
+		});
+
+		afterEach(function () {
+			for (let pane of [...Zotero.PreferencePanes.pluginPanes]) {
+				Zotero.PreferencePanes.unregister(pane.id);
+			}
+		});
+
+		it("should register an unprivileged plugin pane as embedded and drop privileged options", async function () {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane({
+				scripts: ["pane-script.js"],
+				stylesheets: ["style.css"],
+				l10nFiles: ["pane.ftl"],
+				onLoad: () => {},
+			});
+			let pane = Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID);
+			assert.isTrue(pane.embedded, "pane should be embedded");
+			assert.equal(pane.src, Zotero.Plugins.getBaseURI(ADDON_ID) + "prefs.html");
+			assert.lengthOf(pane.scripts, 0, "scripts should be dropped");
+			assert.lengthOf(pane.stylesheets, 0, "stylesheets should be dropped");
+			assert.lengthOf(pane.l10nResourceIDs, 0, "l10nFiles should be dropped");
+			assert.isNull(pane.onLoad, "onLoad should be dropped");
+		});
+
+		it("should reject src outside the plugin or non-HTML src for an unprivileged plugin", async function () {
+			loadPrefPaneTestScope();
+			let e = await getPromiseError(registerTestPane({ src: "https://example.com/prefs.html" }));
+			assert.ok(e, "external src should be rejected");
+			e = await getPromiseError(registerTestPane({
+				src: "chrome://zotero/content/preferences/preferences_general.xhtml",
+			}));
+			assert.ok(e, "chrome src should be rejected");
+			e = await getPromiseError(registerTestPane({ src: "prefs.xhtml" }));
+			assert.ok(e, "non-.html src should be rejected");
+		});
+
+		it("should show the pane page in an embedded browser without inserting it into the document", async function () {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane();
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				let container = win.document.querySelector(".pane-container.embedded");
+				assert.ok(container, "embedded pane container should exist");
+				assert.isNull(container.querySelector("#embedded-pane-marker"),
+					"pane markup should not be inserted into the preferences document");
+				let browser = container.querySelector("browser.plugin-pane-browser");
+				assert.ok(browser, "pane should contain a content browser");
+				assert.equal(browser.currentURI.spec, Zotero.Plugins.getBaseURI(ADDON_ID) + "prefs.html");
+				let marker = browser.contentDocument.getElementById("embedded-pane-marker");
+				assert.ok(marker, "plugin page should be loaded in the browser");
+				for (let i = 0; i < 100 && !marker.getAttribute("data-script-ran"); i++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.equal(marker.getAttribute("data-script-ran"), "true",
+					"page scripts should run inside the embedded page");
+			}
+			finally {
+				win.close();
+			}
+		});
+
+		it("should block navigation away from the pane page and open web URLs externally", async function () {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane();
+			let stub = sinon.stub(Zotero, "launchURL");
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				let browser = win.document.querySelector(".pane-container.embedded browser");
+				let src = Zotero.Plugins.getBaseURI(ADDON_ID) + "prefs.html";
+				browser.contentWindow.location.href = "https://example.com/";
+				for (let i = 0; i < 100 && !stub.called; i++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.isTrue(stub.calledWith("https://example.com/"),
+					"web URL should open in the system browser");
+				assert.equal(browser.currentURI.spec, src, "browser should stay on the plugin page");
+
+				// The pane is single-page -- other pages within the plugin are blocked too
+				browser.contentWindow.location.href = Zotero.Plugins.getBaseURI(ADDON_ID) + "other.html";
+				for (let i = 0; i < 15; i++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.equal(browser.currentURI.spec, src,
+					"browser should not navigate to other plugin pages");
+				assert.isTrue(stub.calledOnce, "non-web navigation should not open the system browser");
+			}
+			finally {
+				stub.restore();
+				win.close();
+			}
+		});
+
+		it("should let the pane page navigate between the plugin's own panes", async function () {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane({ id: "test-embedded-main" });
+			let subpaneID = await registerTestPane({ id: "test-embedded-subpane", parent: "test-embedded-main" });
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				let browser = win.document.querySelector(".pane-container.embedded browser");
+				let api = browser.contentWindow.wrappedJSObject.Zotero_Preferences;
+				assert.isDefined(api, "pane page should get a Zotero_Preferences facade");
+
+				// Only panes registered by the same plugin can be targeted
+				assert.throws(() => api.navigateToPane("zotero-prefpane-general"));
+
+				api.navigateToPane(subpaneID);
+				// The subpane loads asynchronously after the select
+				let backButton = win.document.getElementById("prefs-subpane-back-button");
+				let containers = [];
+				for (let i = 0; i < 100; i++) {
+					containers = win.document.querySelectorAll(".pane-container.embedded");
+					if (containers.length >= 2 && !backButton.hidden) {
+						break;
+					}
+					await Zotero.Promise.delay(20);
+				}
+				assert.equal(win.Zotero_Preferences.navigation.value, subpaneID);
+				assert.lengthOf(containers, 2, "subpane should load its own embedded browser");
+				assert.isFalse(backButton.hidden, "back button should show for the subpane");
+			}
+			finally {
+				win.close();
+			}
+		});
+	});
+
 	describe("XHTML sanitization", function () {
 		it("should remove unsafe elements from a fragment", function () {
 			loadTestScope(["default"]);
