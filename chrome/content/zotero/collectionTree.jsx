@@ -2014,158 +2014,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
-	 * Copy a given item into another library. Used when we need to create a copy of a collection
-	 * in another library if collection is drag-dropped into a group it is not a part of.
-	 */
-	async _copyItem({ item, targetLibraryID, targetTreeRow, options }) {
-		// Check if there's already a copy of this item in the library
-		var linkedItem = await item.getLinkedItem(targetLibraryID, true);
-		if (linkedItem) {
-			return linkedItem.id;
-			
-			/*
-			// TODO: support tags, related, attachments, etc.
-			
-			// Overlay source item fields on unsaved clone of linked item
-			var newItem = item.clone(false, linkedItem.clone(true));
-			newItem.setField('dateAdded', item.dateAdded);
-			newItem.setField('dateModified', item.dateModified);
-			
-			var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
-			if (!diff) {
-				// Check if creators changed
-				var creatorsChanged = false;
-				
-				var creators = item.getCreators();
-				var linkedCreators = linkedItem.getCreators();
-				if (creators.length != linkedCreators.length) {
-					Zotero.debug('Creators have changed');
-					creatorsChanged = true;
-				}
-				else {
-					for (var i=0; i<creators.length; i++) {
-						if (!creators[i].ref.equals(linkedCreators[i].ref)) {
-							Zotero.debug('changed');
-							creatorsChanged = true;
-							break;
-						}
-					}
-				}
-				if (!creatorsChanged) {
-					Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
-					continue;
-				}
-			}
-			toReconcile.push([newItem, linkedItem]);
-			continue;
-			*/
-		}
-		
-		// Standalone attachment
-		if (item.isAttachment()) {
-			var linkMode = item.attachmentLinkMode;
-			
-			// Skip linked files
-			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				Zotero.debug("Skipping standalone linked file attachment on drag");
-				return false;
-			}
-			
-			if (!targetTreeRow.filesEditable) {
-				Zotero.debug("Skipping standalone file attachment on drag");
-				return false;
-			}
-			
-			let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
-			if (options.annotations) {
-				await Zotero.Items.copyChildItems(item, newAttachment);
-			}
-			
-			return newAttachment.id;
-		}
-		
-		// Create new clone item in target library
-		var newItem = item.clone(targetLibraryID, { skipTags: !options.tags });
-		
-		var newItemID = await newItem.save({
-			skipSelect: true
-		});
-		
-		// Record link
-		await newItem.addLinkedItem(item);
-		
-		if (item.isNote()) {
-			if (Zotero.Libraries.get(newItem.libraryID).filesEditable) {
-				await Zotero.Notes.copyEmbeddedImages(item, newItem);
-			}
-			return newItemID;
-		}
-		
-		// For regular items, add child items if prefs and permissions allow
-		
-		// Child notes
-		if (options.childNotes) {
-			var noteIDs = item.getNotes();
-			var notes = Zotero.Items.get(noteIDs);
-			for (let note of notes) {
-				let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
-				newNote.parentID = newItemID;
-				await newNote.save({
-					skipSelect: true
-				})
-
-				if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
-					await Zotero.Notes.copyEmbeddedImages(note, newNote);
-				}
-				await newNote.addLinkedItem(note);
-			}
-		}
-		
-		// Child attachments
-		if (options.childLinks || options.childFileAttachments) {
-			var attachmentIDs = item.getAttachments();
-			var attachments = Zotero.Items.get(attachmentIDs);
-			for (let attachment of attachments) {
-				var linkMode = attachment.attachmentLinkMode;
-				
-				// Skip linked files
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					Zotero.debug("Skipping child linked file attachment on drag");
-					continue;
-				}
-				
-				// Skip imported files if we don't have pref and permissions
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-					if (!options.childLinks) {
-						Zotero.debug("Skipping child link attachment on drag");
-						continue;
-					}
-				}
-				else {
-					if (!options.childFileAttachments
-							|| (!targetTreeRow.filesEditable && !targetTreeRow.isPublications())) {
-						Zotero.debug("Skipping child file attachment on drag");
-						continue;
-					}
-				}
-				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
-					attachment, targetLibraryID, newItemID
-				);
-				
-				if (options.annotations) {
-					await Zotero.Items.copyChildItems(attachment, newAttachment);
-				}
-			}
-		}
-		
-		return newItemID;
-	}
-	
-	/**
 	 * Helper function used by executeCollectionCopy to recursively copy collections from one library
 	 * into another, or from one collection to another within the same library.
 	 */
-	async _copyCollections({ descendents, parentID, addItems, targetLibraryID, targetTreeRow, copyOptions }) {
+	async _copyCollections({ descendents, parentID, addItems, targetLibraryID, copyOptions }) {
 		for (var desc of descendents) {
 			// Collections
 			if (desc.type == 'collection') {
@@ -2187,7 +2039,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						parentID: collectionID,
 						addItems,
 						targetLibraryID,
-						targetTreeRow,
 						copyOptions
 					});
 				}
@@ -2198,12 +2049,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				let id = desc.id;
 				// Actually copy items only if moving to another library
 				if (item.libraryID !== targetLibraryID) {
-					id = await this._copyItem({
-						item,
-						targetLibraryID,
-						targetTreeRow,
-						options: copyOptions
-					});
+					let copiedItem = await Zotero.Items.copyToLibrary(
+						item, targetLibraryID, copyOptions
+					);
+					id = copiedItem && copiedItem.id;
 					// Standalone attachments might not get copied
 					if (!id) {
 						continue;
@@ -2242,10 +2091,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param {Zotero.Collection} collection - collection to copy
 	 * @param {String} targetCollectionID - id of the collection to copy to
 	 * @param {String} targetLibraryID - id of the library to copy to
-	 * @param {Zotero.CollectionTreeRow } targetTreeRow - tree row of the target
 	 * @param {Object} copyOptions - options how to perform the copy - see onDrop for an example
 	*/
-	async executeCollectionCopy({ collection, targetCollectionID, targetLibraryID, targetTreeRow, copyOptions }) {
+	async executeCollectionCopy({ collection, targetCollectionID, targetLibraryID, copyOptions }) {
 		await Zotero.DB.executeTransaction(async () => {
 			var collections = [{
 				id: collection.id,
@@ -2259,7 +2107,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				parentID: targetCollectionID,
 				addItems,
 				targetLibraryID,
-				targetTreeRow,
 				copyOptions
 			});
 			for (let [collectionID, items] of addItems.entries()) {
@@ -2352,7 +2199,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						collection: droppedCollection,
 						targetCollectionID,
 						targetLibraryID,
-						targetTreeRow,
 						copyOptions
 					});
 				}
@@ -2471,12 +2317,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						return Zotero.DB.executeTransaction(async () => {
 							let copiedItemIDs = [];
 							for (let item of chunk) {
-								var id = await this._copyItem({
-									item,
-									targetLibraryID,
-									targetTreeRow,
-									options: copyOptions
-								});
+								let copiedItem = await Zotero.Items.copyToLibrary(
+									item, targetLibraryID, copyOptions
+								);
+								let id = copiedItem && copiedItem.id;
 								// Standalone attachments might not get copied
 								if (!id) {
 									continue;
