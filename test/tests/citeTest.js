@@ -38,6 +38,35 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("EDTF dates", function () {
+		async function makeBibliography(fields) {
+			let item = new Zotero.Item;
+			item.fromJSON(Object.assign({
+				itemType: "book",
+				title: "Test Book"
+			}, fields));
+			await item.saveTx();
+
+			let style = Zotero.Styles.get('http://www.zotero.org/styles/chicago-notes-bibliography');
+			let cslEngine = style.getCiteProc('en-US');
+			return Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+		}
+
+		it("should render a date range", async function () {
+			assert.include(await makeBibliography({ date: '2021/2026' }), '2021–2026');
+		});
+
+		it("should render a BCE date", async function () {
+			assert.match(await makeBibliography({ date: '-429' }), /429\s?BC/);
+		});
+
+		it("should render an EDTF range in Extra, overriding the Date field", async function () {
+			let output = await makeBibliography({ date: '1999', extra: 'issued: 2021/2026' });
+			assert.include(output, '2021–2026');
+			assert.notInclude(output, '1999');
+		});
+	});
+
 	describe("#retrieveLocale()", function () {
 		it("should handle locale with script code", async function () {
 			var item = new Zotero.Item;

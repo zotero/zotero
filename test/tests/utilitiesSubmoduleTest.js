@@ -29,5 +29,23 @@ describe("Zotero.Utilities.Item", function () {
 	
 			assert.deepEqual(fromZoteroItem, fromExportItem, 'conversion from Zotero Item and from export item are the same');
 		});
+
+		it("should preserve EDTF ranges and circa dates from CSL JSON", function () {
+			let item = new Zotero.Item('book');
+			Zotero.Utilities.Item.itemFromCSLJSON(item, { type: 'book', issued: { "date-parts": [[2021], [2026]] } });
+			assert.equal(item.getField('date'), '2021/2026');
+
+			item = new Zotero.Item('book');
+			Zotero.Utilities.Item.itemFromCSLJSON(item, { type: 'book', issued: { "date-parts": [[-429]], circa: true } });
+			assert.equal(item.getField('date'), '-0429~');
+		});
+
+		it("should convert an EDTF date stored on an item", async function () {
+			let item = new Zotero.Item('book');
+			item.setField('date', '-429?');
+			await item.saveTx();
+			let cslItem = Zotero.Utilities.Item.itemToCSLJSON(item);
+			assert.deepEqual(cslItem.issued, { "date-parts": [[-429]], circa: true });
+		});
 	});
 });
