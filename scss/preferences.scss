@@ -91,6 +91,17 @@
 	& > [hidden] {
 		display: none;
 	}
+
+	// Embedded plugin panes fill the content area; the page scrolls internally
+	& > .pane-container.embedded {
+		flex: 1;
+		min-height: 0;
+
+		.plugin-pane-browser {
+			flex: 1;
+			min-height: 300px;
+		}
+	}
 }
 
 #prefs-search-container {

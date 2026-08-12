@@ -117,16 +117,29 @@
 		pluginPanes: [],
 
 		/**
-		 * Register a pane to be displayed in the preferences. The pane XHTML (`src`)
-		 * is loaded as a fragment, not a full document, with XUL as the default
-		 * namespace and (X)HTML tags available under `html:`.
+		 * Register a pane to be displayed in the preferences.
+		 *
+		 * For privileged plugins, the pane XHTML (`src`) is loaded as a fragment,
+		 * not a full document, with XUL as the default namespace and (X)HTML tags
+		 * available under `html:`.
+		 *
+		 * For unprivileged plugins, `src` must be a full HTML page within the
+		 * plugin, and it's shown in an embedded content browser isolated from the
+		 * preferences window. The page loads its own scripts, styles, and
+		 * localization, and `scripts`/`stylesheets`/`l10nFiles`/`onLoad` are
+		 * ignored. The browser is single-page: links to web pages open in the
+		 * system browser, and all other navigation is blocked. For multi-page
+		 * settings, register additional panes (e.g. subpanes via `parent`) and
+		 * call `Zotero_Preferences.navigateToPane(paneID)` from the page, which
+		 * can only target panes registered by the same plugin.
 		 *
 		 * The pane will be unregistered automatically when the registering plugin
 		 * shuts down.
 		 *
 		 * @param {Object} options
 		 * @param {string} options.pluginID ID of the plugin registering the pane
-		 * @param {string} options.src URI of an XHTML fragment, optionally relative to the plugin's root
+		 * @param {string} options.src URI of an XHTML fragment (privileged plugins) or a full HTML page
+		 * 		(unprivileged plugins), optionally relative to the plugin's root
 		 * @param {string} [options.id] Represents the pane and must be unique. Automatically generated if not provided
 		 * @param {string} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 		 * @param {string} [options.label] Displayed as the pane's label in the sidebar.
@@ -136,11 +149,13 @@
 		 * @param {string[]} [options.scripts] Array of URIs of scripts to load along with the pane, optionally relative to
 		 * 		the plugin's root. Only available for privileged plugins.
 		 * @param {string[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane, optionally
-		 * 		relative to the plugin's root
+		 * 		relative to the plugin's root. Only available for privileged plugins.
 		 * @param {string[]} [options.l10nFiles] Array of Fluent (.ftl) file paths to load for localization.
 		 * 		Registered once via `Zotero.WindowResourceManager` and applied to every preferences window.
+		 * 		Only available for privileged plugins.
 		 * @param {Function} [options.onLoad] Called after the pane content is loaded and inserted into the document.
 		 * 		Receives `{ doc, body }` where `doc` is the preferences document and `body` is the pane container element.
+		 * 		Only available for privileged plugins.
 		 * @param {string} [options.helpURL] If provided, a help button will be displayed under the pane
 		 * 		and the provided URL will open when it is clicked
 		 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
@@ -172,15 +187,36 @@
 			options.stylesheets ||= [];
 			options.l10nFiles ||= [];
 
-			// Scripts require privileged access since they run in a sandbox
-			// with full window access. Unprivileged plugins should use onLoad instead.
+			// Unprivileged plugins can't insert content into the preferences document.
+			// Their pane is a full HTML page shown in an embedded content browser.
 			let scope = lazy.PluginSandbox.getScope(options.pluginID);
-			if (options.scripts.length && scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
-				Zotero.warn(
-					`Plugin ${options.pluginID}: 'scripts' option is only available for privileged plugins. `
-					+ 'Use the onLoad hook instead for unprivileged plugins.'
-				);
-				options.scripts = [];
+			let embedded = !!scope && !lazy.VarCheck.isPrivilegedScope(scope);
+			if (embedded) {
+				let dropped = ['scripts', 'stylesheets', 'l10nFiles'].filter(key => options[key].length);
+				if (typeof options.onLoad === 'function') {
+					dropped.push('onLoad');
+				}
+				if (dropped.length) {
+					Zotero.warn(
+						`Plugin ${options.pluginID}: ${dropped.map(o => `'${o}'`).join(', ')} only available for privileged plugins. `
+						+ 'Load scripts, stylesheets, and localization from the page at src instead.'
+					);
+					options.scripts = [];
+					options.stylesheets = [];
+					options.l10nFiles = [];
+					delete options.onLoad;
+				}
+			}
+
+			let src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
+			if (embedded) {
+				if (!src.startsWith(Zotero.Plugins.getBaseURI(options.pluginID))) {
+					throw new Error(`Plugin ${options.pluginID}: pane src must be a page within the plugin`);
+				}
+				let pathname = new URL(src).pathname.toLowerCase();
+				if (!pathname.endsWith('.html') && !pathname.endsWith('.htm')) {
+					throw new Error(`Plugin ${options.pluginID}: pane src must be an .html file`);
+				}
 			}
 
 			let onLoad = null;
@@ -199,11 +235,12 @@
 				rawLabel: options.label || (await Zotero.Plugins.getName(options.pluginID)),
 				image: options.image && (await Zotero.Plugins.resolveURI(options.pluginID, options.image))
 					|| (await Zotero.Plugins.getIconURI(options.pluginID, 24)),
-				src: await Zotero.Plugins.resolveURI(options.pluginID, options.src),
+				src,
 				scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				onLoad,
 				helpURL: options.helpURL,
+				embedded,
 				defaultXUL: true,
 			};
 
