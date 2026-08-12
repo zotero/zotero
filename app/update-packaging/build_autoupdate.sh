@@ -97,6 +97,8 @@ if [[ $BUILD_MAC == 0 ]] && [[ $BUILD_WIN == 0 ]] && [[ $BUILD_LINUX == 0 ]]; th
 	usage
 fi
 
+TO_MAJOR_VERSION="${TO%%.*}"
+
 rm -rf "$UPDATE_STAGE_DIR"
 mkdir "$UPDATE_STAGE_DIR"
 
@@ -157,15 +159,17 @@ for version in "$FROM" "$TO"; do
 		mkdir "$CACHE_DIR"
 	fi
 	
-	# Build archive list (no Linux arm64 for Zotero 7)
+	# Build archive list (no Linux arm64 before Zotero 8, no Linux i686 from Zotero 11)
 	ARCHIVES=(
 		"$MAC_ARCHIVE"
 		"$WIN32_ARCHIVE"
 		"$WIN_X64_ARCHIVE"
 		"$WIN_ARM64_ARCHIVE"
-		"$LINUX_X86_ARCHIVE"
 		"$LINUX_X86_64_ARCHIVE"
 	)
+	if [ "$TO_MAJOR_VERSION" -lt 11 ]; then
+		ARCHIVES+=("$LINUX_X86_ARCHIVE")
+	fi
 	if [ "$MAJOR_VERSION" -ge 8 ]; then
 		ARCHIVES+=("$LINUX_ARM64_ARCHIVE")
 	fi
@@ -279,8 +283,11 @@ for version in "$FROM" "$TO"; do
 	
 	# Unpack Linux tarballs
 	if [ $BUILD_LINUX == 1 ]; then
-		# Zotero 7 has no Linux arm64 build
-		LINUX_BUILDS_TO_UNPACK=("$LINUX_X86_ARCHIVE" "$LINUX_X86_64_ARCHIVE")
+		# Zotero 7 has no Linux arm64 build; Zotero 11 has no Linux i686 build
+		LINUX_BUILDS_TO_UNPACK=("$LINUX_X86_64_ARCHIVE")
+		if [ "$TO_MAJOR_VERSION" -lt 11 ]; then
+			LINUX_BUILDS_TO_UNPACK+=("$LINUX_X86_ARCHIVE")
+		fi
 		if [ "$MAJOR_VERSION" -ge 8 ]; then
 			LINUX_BUILDS_TO_UNPACK+=("$LINUX_ARM64_ARCHIVE")
 		fi
@@ -325,6 +332,10 @@ CHANGES_MADE=0
 for build in "mac" "win32" "win-x64" "win-arm64" "linux-i686" "linux-x86_64" "linux-arm64"; do
 	# Zotero 7 has no Linux arm64 builds
 	if [[ $build == "linux-arm64" ]] && [[ $FROM == 7.* ]]; then
+		continue
+	fi
+	# Zotero 11 has no Linux i686 builds, so there's nothing to update to
+	if [[ $build == "linux-i686" ]] && [[ $TO_MAJOR_VERSION -ge 11 ]]; then
 		continue
 	fi
 	if [[ $build == "mac" ]]; then
