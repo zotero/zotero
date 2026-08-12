@@ -92,12 +92,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			.addEventListener('keyup', (ev) => {
 				document.getElementById('import-other').checked = ev.currentTarget.value.length > 0;
 			});
-		document
-			.querySelector('a')
-			.addEventListener('click', this.onURLInteract.bind(this));
-		document
-			.querySelector('a')
-			.addEventListener('keydown', this.onURLInteract.bind(this));
+		document.addEventListener('click', this.onURLInteract.bind(this));
+		document.addEventListener('keydown', this.onURLInteract.bind(this));
 		document
 			.querySelector('#page-done-error > button')
 			.addEventListener('click', this.onReportErrorInteract.bind(this));
@@ -412,9 +408,16 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	onURLInteract(ev) {
+		let link = ev.target.closest?.('a[href]');
+		if (!link) {
+			return;
+		}
 		if (ev.type === 'click' || (ev.type === 'keydown' && ev.key === ' ')) {
-			Zotero.launchURL(ev.currentTarget.getAttribute('href'));
-			window.close();
+			Zotero.launchURL(link.getAttribute('href'));
+			// Closing mid-wizard would lose progress, so only close once done
+			if (link.closest('wizardpage')?.getAttribute('pageid') == 'page-done') {
+				window.close();
+			}
 			ev.preventDefault();
 		}
 	},
