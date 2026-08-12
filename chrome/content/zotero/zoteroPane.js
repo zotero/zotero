@@ -1619,7 +1619,7 @@ var ZoteroPane = new function () {
 			// a burst of changes.
 			let updateUnselectedCount = Zotero.Utilities.debounce(() => {
 				if (!ZoteroPane.itemsView.selection.count) {
-					ZoteroPane.itemSelected();
+					ZoteroPane.itemPane.render();
 				}
 			}, 100);
 			ZoteroPane.itemsView.onRowCountChange.addListener(() => {

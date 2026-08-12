@@ -645,6 +645,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		const cachedSelection = this.itemTree._cachedSelection;
 				const collectionTreeRows = this.collectionTreeRows;
 
+		var initialRowCount = this.getRowCount();
 		var madeChanges = false;
 		var refresh = false;
 		var sort = false;
@@ -1086,7 +1087,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			});
 		}
 
-		if (madeChanges || refresh) {
+		if (this.getRowCount() != initialRowCount) {
 			this.itemTree.runListeners('rowCountChange');
 		}
 	}
@@ -1108,7 +1109,7 @@ class CollectionViewItemTree extends ItemTree {
 		// - Collection/view changed (changeCollectionTreeRow)
 		// - Search/filter updated (setFilter)
 		this.onRefresh = this.createEventBinding('refresh');
-		// Triggered when notifier events change the rows in the view without a full refresh
+		// Triggered when notifier events change the number of rows in the view
 		// (e.g., items added during a sync)
 		this.onRowCountChange = this.createEventBinding('rowCountChange');
 	}
