@@ -25,6 +25,7 @@ cd "$SCRIPT_DIR"
 ./check_requirements
 
 hash=`./get_repo_branch_hash $BRANCH`
+./check_app_matches_commit $hash
 source_dir=`./get_commit_files $hash`
 build_dir=`mktemp -d`
 
