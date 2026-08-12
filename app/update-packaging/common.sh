@@ -162,10 +162,10 @@ append_remove_instructions() {
       if [ -n "$f" ]; then
         # Exclude comments
         if [ ! $(echo "$f" | grep -c '^#') = 1 ]; then
-          if [ $(echo "$f" | grep -c '\/$') = 1 ]; then
+          if [ $(echo "$f" | grep -c '/$') = 1 ]; then
             verbose_notice "      rmdir \"$f\""
             echo "rmdir \"$f\"" >> "$filev3"
-          elif [ $(echo "$f" | grep -c '\/\*$') = 1 ]; then
+          elif [ $(echo "$f" | grep -c '/\*$') = 1 ]; then
             # Remove the *
             f=$(echo "$f" | sed -e 's:\*$::')
             verbose_notice "    rmrfdir \"$f\""

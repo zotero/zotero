@@ -118,7 +118,7 @@ olddir="$2"
 newdir="$3"
 # Prevent the workdir from being inside the targetdir so it isn't included in
 # the update mar.
-if [ $(echo "$newdir" | grep -c '\/$') = 1 ]; then
+if [ $(echo "$newdir" | grep -c '/$') = 1 ]; then
   # Remove the /
   newdir=$(echo "$newdir" | sed -e 's:\/$::')
 fi

@@ -56,7 +56,7 @@ archive="$1"
 targetdir="$2"
 # Prevent the workdir from being inside the targetdir so it isn't included in
 # the update mar.
-if [ $(echo "$targetdir" | grep -c '\/$') = 1 ]; then
+if [ $(echo "$targetdir" | grep -c '/$') = 1 ]; then
   # Remove the /
   targetdir=$(echo "$targetdir" | sed -e 's:\/$::')
 fi
