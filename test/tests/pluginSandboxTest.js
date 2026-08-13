@@ -5004,7 +5004,9 @@ describe("Plugin Sandbox", function () {
 			await IOUtils.writeUTF8(
 				PathUtils.join(tmpDir, "prefs.html"),
 				"<!DOCTYPE html><html><head><title>Pane</title></head><body>"
-				+ "<div id='embedded-pane-marker'>Embedded</div>"
+				+ "<div id='embedded-pane-marker'>Frobnicate the widgets</div>"
+				+ "<button data-search-strings-raw='Xyzzy'>Attributed</button>"
+				+ "<select><option>Alpha</option><option>Kumquat marmalade</option></select>"
 				+ '<script src="pane-script.js"></script></body></html>'
 			);
 		});
@@ -5102,6 +5104,72 @@ describe("Plugin Sandbox", function () {
 			}
 			finally {
 				stub.restore();
+				win.close();
+			}
+		});
+
+		it("should match and highlight embedded pane content when searching", async function () {
+			loadPrefPaneTestScope();
+			await registerTestPane();
+			// Open on a built-in pane so the plugin pane loads during the search
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: "zotero-prefpane-general" });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				let searchField = win.document.getElementById("prefs-search");
+				searchField.focus();
+
+				// Text inside the page gets a native find highlight
+				await win.Zotero_Preferences._search("frobnicate");
+				let container = win.document.querySelector(".pane-container.embedded");
+				let browser = container.querySelector("browser");
+				assert.isFalse(container.classList.contains("hidden-by-search"),
+					"pane should stay visible on an embedded text match");
+				let selection = win.Zotero_Preferences._getEmbeddedSearchSelection(browser);
+				assert.ok(selection, "shown pane browser should have a find selection");
+				assert.isAbove(selection.rangeCount, 0,
+					"embedded text match should get a native find highlight");
+				assert.ok(win.document.activeElement.closest("#prefs-search"),
+					"search box should keep focus while embedded panes load and highlight");
+
+				// data-search-strings-raw matches get a tooltip inside the page
+				await win.Zotero_Preferences._search("xyzzy");
+				assert.isFalse(container.classList.contains("hidden-by-search"),
+					"pane should stay visible on an embedded attribute match");
+				assert.ok(browser.contentDocument.querySelector(".search-tooltip-parent .search-tooltip"),
+					"embedded attribute match should get a tooltip in the page");
+				assert.ok(win.document.activeElement.closest("#prefs-search"),
+					"search box should keep focus across repeated searches");
+
+				// Text in dropdown options can't be range-highlighted -- the
+				// closest <select> gets a tooltip instead, like XUL menulists
+				await win.Zotero_Preferences._search("kumquat");
+				assert.isFalse(container.classList.contains("hidden-by-search"),
+					"pane should stay visible on a dropdown option match");
+				let tooltipParent = browser.contentDocument.querySelector(".search-tooltip-parent");
+				assert.ok(tooltipParent, "option match should get a tooltip");
+				assert.ok(tooltipParent.querySelector("select"),
+					"the tooltip should wrap the select element");
+
+				// No match hides the pane and cleans up highlights and tooltips
+				await win.Zotero_Preferences._search("zzznomatch");
+				assert.isTrue(container.classList.contains("hidden-by-search"),
+					"pane should hide when nothing in it matches");
+				// The hidden browser's selection is destroyed with its presentation
+				assert.isNull(win.Zotero_Preferences._getEmbeddedSearchSelection(browser),
+					"hidden pane browser should have no find selection");
+				assert.isNull(browser.contentDocument.querySelector(".search-tooltip-parent"),
+					"tooltips should be removed");
+
+				// Searching again while the pane is hidden must skip the dead
+				// selection and re-highlight once the pane is shown
+				await win.Zotero_Preferences._search("frobnicate");
+				assert.isFalse(container.classList.contains("hidden-by-search"),
+					"pane should show again on a new match");
+				selection = win.Zotero_Preferences._getEmbeddedSearchSelection(browser);
+				assert.isAbove(selection?.rangeCount, 0,
+					"highlights should come back after the pane was hidden");
+			}
+			finally {
 				win.close();
 			}
 		});
