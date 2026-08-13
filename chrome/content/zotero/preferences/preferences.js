@@ -34,6 +34,49 @@
 	// https://searchfox.org/mozilla-central/source/dom/base/nsSandboxFlags.h
 	const SANDBOXED_AUXILIARY_NAVIGATION = 0x2;
 
+	// Search tooltip styles for embedded pane pages, mirroring .search-tooltip
+	// in preferences.scss; loaded as an author sheet so page CSP can't block it
+	const EMBEDDED_SEARCH_SHEET = 'data:text/css,' + encodeURIComponent(`
+		.search-tooltip-parent {
+			position: relative;
+			display: inline-flex;
+		}
+		.search-tooltip {
+			min-width: 20px;
+			max-width: 200px;
+			position: absolute;
+			bottom: 24px;
+			background-color: #ffe900;
+			color: #000;
+			border: 1px solid #d7b600;
+			padding: 2px 8px;
+			text-align: center;
+		}
+		.search-tooltip::before,
+		.search-tooltip::after {
+			content: '';
+			position: absolute;
+			width: 0;
+			height: 0;
+			left: calc(50% - 3px);
+			border-inline: 6px solid transparent;
+		}
+		.search-tooltip::before {
+			top: calc(100% + 1px);
+			border-top: 7px solid #d7b600;
+		}
+		.search-tooltip::after {
+			top: 100%;
+			border-top: 6px solid #ffe900;
+		}
+		.search-tooltip > span {
+			user-select: none;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	`);
+
 	window.Zotero_Preferences = {
 		panes: new Map(),
 		
@@ -42,8 +85,11 @@
 		_paneSelectDeferred: Zotero.Promise.defer(),
 		
 		_observerSymbols: new Map(),
-		
+
 		_mutationObservers: new Map(),
+
+		// Content windows that already have EMBEDDED_SEARCH_SHEET loaded
+		_searchSheetWindows: new WeakSet(),
 
 		init: function () {
 			Zotero.WindowResourceManager.applyAllToWindow(window, "preferencePane");
@@ -787,6 +833,22 @@
 			for (let oldTooltipParent of [...this.content.getElementsByClassName('search-tooltip-parent')]) {
 				oldTooltipParent.replaceWith(oldTooltipParent.firstElementChild);
 			}
+
+			// Clear highlights and tooltips in embedded plugin panes
+			for (let pane of this.panes.values()) {
+				if (!pane.embedded || !pane.loaded) {
+					continue;
+				}
+				let browser = pane.container.querySelector('.plugin-pane-browser');
+				let contentDoc = browser?.contentDocument;
+				if (!contentDoc) {
+					continue;
+				}
+				this._getEmbeddedSearchSelection(browser)?.removeAllRanges();
+				for (let oldTooltipParent of [...contentDoc.getElementsByClassName('search-tooltip-parent')]) {
+					oldTooltipParent.replaceWith(oldTooltipParent.firstElementChild);
+				}
+			}
 	
 			// Show hidden sections
 			for (let hidden of [...this.content.getElementsByClassName('hidden-by-search')]) {
@@ -837,13 +899,25 @@
 
 			let scrolled = false;
 			for (let paneContainer of this.content.querySelectorAll(':scope > .pane-container')) {
+				// Embedded plugin panes: also search the content document
+				let embeddedPane = null;
+				let embeddedMatched = false;
+				if (paneContainer.classList.contains('embedded')) {
+					embeddedPane = [...this.panes.values()].find(p => p.container === paneContainer);
+					if (embeddedPane) {
+						embeddedMatched = await this._searchEmbeddedPane(embeddedPane, term, termForDisplay, !scrolled);
+						scrolled ||= embeddedMatched;
+					}
+				}
 				let roots = paneContainer.children;
 				while (roots.length === 1 && roots[0].childElementCount) {
 					roots = roots[0].children;
 				}
+				let anyRootMatched = false;
 				for (let root of roots) {
 					let matches = await this._findNodesMatching(root, term);
 					if (matches.length) {
+						anyRootMatched = true;
 						let touchedTabPanels = new Set();
 						for (let node of matches) {
 							if (node.nodeType === Node.TEXT_NODE) {
@@ -908,21 +982,105 @@
 						root.ariaHidden = true;
 					}
 				}
+				// An embedded pane is a single unit -- show all of it if anything matched
+				if (embeddedPane && (embeddedMatched || anyRootMatched)) {
+					for (let root of roots) {
+						root.classList.remove('hidden-by-search');
+						root.ariaHidden = false;
+					}
+				}
 				if (Array.from(roots).every(root => root.classList.contains('hidden-by-search'))) {
 					paneContainer.classList.add('hidden-by-search');
 					paneContainer.ariaHidden = true;
 				}
 			}
 		}),
+
+		/**
+		 * Search an embedded pane's content document like _search(): native find
+		 * highlights for text matches, tooltips for data-search-strings(-raw) matches.
+		 *
+		 * @param {Object} pane
+		 * @param {String} term Normalized search term
+		 * @param {String} termForDisplay
+		 * @param {Boolean} scrollToFirst Scroll the first match into view
+		 * @return {Promise<Boolean>} Whether anything in the page matched
+		 */
+		async _searchEmbeddedPane(pane, term, termForDisplay, scrollToFirst) {
+			let browser = pane.container.querySelector('.plugin-pane-browser');
+			let contentDoc = browser?.contentDocument;
+			if (!contentDoc?.body) {
+				return false;
+			}
+
+			let contentWin = browser.contentWindow;
+			if (!this._searchSheetWindows.has(contentWin)) {
+				contentWin.windowUtils.loadSheetUsingURIString(
+					EMBEDDED_SEARCH_SHEET,
+					contentWin.windowUtils.AUTHOR_SHEET
+				);
+				this._searchSheetWindows.add(contentWin);
+			}
+
+			// Flush layout so the just-shown browser has a presentation to select in
+			browser.getBoundingClientRect();
+			let selection = this._getEmbeddedSearchSelection(browser);
+			// Resolve data-search-strings keys against the page's own Fluent context
+			let contentL10n = contentDoc.wrappedJSObject?.l10n || document.l10n;
+			let matched = false;
+			let scrolled = !scrollToFirst;
+			for (let node of await this._findNodesMatching(contentDoc.body, term, contentL10n)) {
+				matched = true;
+				if (node.nodeType === Node.TEXT_NODE) {
+					let value = node.nodeValue.toLowerCase();
+					let index = value.indexOf(term);
+					if (index == -1 || !selection) continue;
+
+					let range = contentDoc.createRange();
+					range.setStart(node, index);
+					range.setEnd(node, index + term.length);
+					selection.addRange(range);
+
+					if (!scrolled) {
+						scrolled = true;
+						pane.container.scrollIntoView({ block: 'nearest' });
+						node.parentElement?.scrollIntoView({ block: 'center' });
+					}
+				}
+				else if (node.nodeType == Node.ELEMENT_NODE) {
+					// Same tooltip structure as _search(), styled by EMBEDDED_SEARCH_SHEET
+					let tooltipParent = contentDoc.createElement('span');
+					tooltipParent.className = 'search-tooltip-parent';
+					node.replaceWith(tooltipParent);
+					let tooltip = contentDoc.createElement('span');
+					tooltip.className = 'search-tooltip';
+					let tooltipText = contentDoc.createElement('span');
+					tooltipText.append(termForDisplay);
+					tooltip.append(tooltipText);
+					tooltipParent.append(node, tooltip);
+
+					let tooltipRect = tooltip.getBoundingClientRect();
+					tooltip.style.left = `calc(50% - ${tooltipRect.width / 2}px)`;
+
+					if (!scrolled) {
+						scrolled = true;
+						pane.container.scrollIntoView({ block: 'nearest' });
+						node.scrollIntoView({ block: 'center' });
+					}
+				}
+			}
+			return matched;
+		},
 	
 		/**
 		 * Search for the given term (case-insensitive) in the tree.
 		 *
 		 * @param {Element} root
 		 * @param {String} term Must be normalized (normalizeSearch())
+		 * @param {DOMLocalization} [l10n] Used to resolve data-search-strings keys
 		 * @return {Promise<Node[]>}
 		 */
-		async _findNodesMatching(root, term) {
+		async _findNodesMatching(root, term, l10n = document.l10n) {
 			const EXCLUDE_SELECTOR = 'input, [hidden], [no-highlight]';
 	
 			let matched = new Set();
@@ -935,7 +1093,8 @@
 					continue;
 				}
 				if (this._normalizeSearch(currentNode.nodeValue).includes(term)) {
-					let unhighlightableParent = this._closest(currentNode, 'menulist');
+					// Ranges can't highlight dropdown contents -- tooltip the dropdown instead
+					let unhighlightableParent = this._closest(currentNode, 'menulist, select');
 					if (unhighlightableParent) {
 						matched.add(unhighlightableParent);
 					}
@@ -969,7 +1128,7 @@
 							.map(s => s.trim())
 							.filter(Boolean);
 						// Get strings from Fluent
-						let localizedStrings = await document.l10n.formatMessages(stringKeys);
+						let localizedStrings = await l10n.formatMessages(stringKeys);
 						localizedStrings = localizedStrings.flatMap((message, i) => {
 							// If we got something from Fluent, use the value and relevant attributes
 							if (message) {
@@ -1020,11 +1179,28 @@
 		},
 	
 		/**
+		 * Get the find selection of an embedded pane browser, or null if it has
+		 * no presentation (a hidden browser's selection is destroyed with it).
+		 *
+		 * @param {XULElement} browser
+		 * @return {Selection | null}
+		 */
+		_getEmbeddedSearchSelection(browser) {
+			// An unrendered browser has no presentation, which owns the selection
+			if (!browser.docShell || !browser.checkVisibility()) {
+				return null;
+			}
+			return this._getSearchSelection(browser.docShell);
+		},
+
+		/**
+		 * @param {nsIDocShell} [docShell] Pass an embedded pane browser's docShell
+		 * 		to highlight in its document
 		 * @return {Selection}
 		 */
-		_getSearchSelection() {
+		_getSearchSelection(docShell = window.docShell) {
 			// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#226-239
-			let controller = window.docShell
+			let controller = docShell
 				.QueryInterface(Ci.nsIInterfaceRequestor)
 				.getInterface(Ci.nsISelectionDisplay)
 				.QueryInterface(Ci.nsISelectionController);
