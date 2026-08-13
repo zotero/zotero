@@ -8,6 +8,11 @@ describe("Zotero.SDT", function () {
 	let testSDTPackBytes;
 	let documentWorkerMetadata;
 
+	// A section without its block detail, for asserting the overall shape
+	function summarize({ blocks, ...section }) {
+		return section;
+	}
+
 	before(async function () {
 		let pako = getTestRequire()('pako');
 		documentWorkerMetadata = JSON.parse(await Zotero.File.getContentsFromURLAsync(
@@ -29,6 +34,218 @@ describe("Zotero.SDT", function () {
 		assert.equal(result.schemaMajorVersion, parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION));
 		assertPackMagic(result);
 		assert.deepEqual(progress, []);
+	});
+
+	it("should return outline-based sections from getSections()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [1] },
+				{ title: 'Methods', ref: [3] },
+			],
+			blocks: [
+				{ content: [{ text: 'Front matter on the title page' }] },
+				{ content: [{ text: 'Introduction' }] },
+				{ content: [{ text: 'Owls are nocturnal birds of prey.' }] },
+				{ content: [{ text: 'Methods' }] },
+				{ content: [{ text: 'We tracked forty owls with GPS loggers.' }] },
+				{ flowClass: 'excluded', content: [{ text: 'Page 3' }] },
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getSections(item.id);
+		assert.isTrue(result.ok);
+		assert.lengthOf(result.sections, 3);
+		// Content before the first heading is a section of its own
+		assert.deepEqual(summarize(result.sections[0]), {
+			text: 'Front matter on the title page',
+			outlinePath: '',
+			startBlock: 0,
+			endBlock: 0,
+		});
+		// A section starting at a heading carries the heading in its path,
+		// not its text, and runs to the next heading
+		assert.deepEqual(summarize(result.sections[1]), {
+			text: 'Owls are nocturnal birds of prey.',
+			outlinePath: 'Introduction',
+			startBlock: 1,
+			endBlock: 2,
+		});
+		assert.deepEqual(result.sections[1].blocks, [
+			{
+				index: 2,
+				text: 'Owls are nocturnal birds of prey.',
+				reference: false,
+			},
+		]);
+		// Excluded blocks (running heads, page numbers) are left out
+		assert.deepEqual(summarize(result.sections[2]), {
+			text: 'We tracked forty owls with GPS loggers.',
+			outlinePath: 'Methods',
+			startBlock: 3,
+			endBlock: 5,
+		});
+	});
+
+	it("should fall back to per-page sections from getSections() when there's no outline", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			pages: [
+				{ contentRange: [[0], [1]] },
+				{ contentRange: [[2], [3]] },
+			],
+			blocks: [
+				{ content: [{ text: 'First page first paragraph.' }] },
+				{ content: [{ text: 'First page second paragraph.' }] },
+				{ content: [{ text: 'Second page first paragraph.' }] },
+				{ content: [{ text: 'Second page second paragraph.' }] },
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getSections(item.id);
+		assert.isTrue(result.ok);
+		assert.lengthOf(result.sections, 2);
+		assert.equal(result.sections[0].text,
+			'First page first paragraph.\nFirst page second paragraph.');
+		assert.equal(result.sections[0].startBlock, 0);
+		assert.equal(result.sections[0].endBlock, 1);
+		assert.equal(result.sections[1].text,
+			'Second page first paragraph.\nSecond page second paragraph.');
+		assert.equal(result.sections[1].outlinePath, '');
+	});
+
+	it("should flag reference entries in getSections()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Discussion', ref: [0] },
+				{ title: 'References', ref: [3] },
+			],
+			blocks: [
+				{ content: [{ text: 'Heading text' }] },
+				{ content: [{ text: 'Prose about owl migration.' }] },
+				// An entry cited inline, footnote-style, inside a body section
+				{ reference: true, content: [{ text: 'Smith, J. (2019). Owls. J. Birds 4, 1-10.' }] },
+				{ content: [{ text: 'References' }] },
+				// A bibliography as a list whose items carry the flag
+				{
+					type: 'list',
+					content: [
+						{
+							type: 'listitem',
+							reference: true,
+							content: [{ text: 'Doe, A. (2020). Migration. Nature 1, 2-3.' }],
+						},
+						{
+							type: 'listitem',
+							reference: true,
+							content: [{ text: 'Roe, B. (2021). Wintering. Science 2, 4-5.' }],
+						},
+					],
+				},
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getSections(item.id);
+		assert.isTrue(result.ok);
+		// Reference entries are reported, not dropped -- it's the caller's
+		// call whether they're worth reading
+		assert.lengthOf(result.sections, 2);
+		assert.equal(result.sections[0].outlinePath, 'Discussion');
+		assert.deepEqual(result.sections[0].blocks.map(block => block.reference),
+			[false, true]);
+		// A list whose items all carry the flag is a reference block itself
+		assert.equal(result.sections[1].outlinePath, 'References');
+		assert.lengthOf(result.sections[1].blocks, 1);
+		assert.isTrue(result.sections[1].blocks[0].reference);
+		assert.include(result.sections[1].blocks[0].text, 'Doe, A. (2020)');
+		assert.include(result.sections[1].blocks[0].text, 'Roe, B. (2021)');
+	});
+
+	it("should report each block's flow class in getSections()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Results', ref: [0] },
+			],
+			blocks: [
+				{ content: [{ text: 'Results' }] },
+				{ content: [{ text: 'Prose before the figure.' }] },
+				{
+					flowClass: 'auxiliary',
+					content: [{ text: 'Figure 3: Owl migration routes across the Baltic.' }],
+				},
+				{ content: [{ text: 'Prose after the figure.' }] },
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getSections(item.id);
+		assert.isTrue(result.ok);
+		// The caption stays where the document put it, marked as auxiliary
+		// flow so a caller can lift it out if that suits them
+		assert.lengthOf(result.sections, 1);
+		assert.equal(result.sections[0].text, 'Prose before the figure.\n'
+			+ 'Figure 3: Owl migration routes across the Baltic.\n'
+			+ 'Prose after the figure.');
+		assert.deepEqual(result.sections[0].blocks.map(block => block.flowClass),
+			[undefined, 'auxiliary', undefined]);
+		assert.deepEqual(result.sections[0].blocks.map(block => block.index), [1, 2, 3]);
+	});
+
+	it("should report page and position info from getSections()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [1] },
+			],
+			pages: [
+				{ label: 'ix', contentRange: [[0], [1]] },
+				{ label: '10', contentRange: [[1], [3]] },
+			],
+			blocks: [
+				{
+					anchor: { pageRects: [[0, 10, 700, 300, 720]] },
+					content: [{ text: 'Front matter on the title page' }],
+				},
+				{
+					anchor: { pageRects: [[1, 10, 700, 300, 720]] },
+					content: [{ text: 'Introduction' }],
+				},
+				{
+					anchor: { pageRects: [[1, 10, 600, 300, 680], [1, 10, 500, 300, 580]] },
+					content: [{ text: 'Owls are nocturnal birds of prey.' }],
+				},
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getSections(item.id);
+		assert.isTrue(result.ok);
+		assert.lengthOf(result.sections, 2);
+		// Page and label come from the section's first anchored block, and
+		// position is that block's page geometry
+		assert.equal(result.sections[0].pageIndex, 0);
+		assert.equal(result.sections[0].pageLabel, 'ix');
+		assert.deepEqual(result.sections[0].position,
+			{ pageIndex: 0, rects: [[10, 700, 300, 720]] });
+		// A heading-started section is anchored at its heading, so the
+		// reader lands on the section start
+		assert.equal(result.sections[1].pageIndex, 1);
+		assert.equal(result.sections[1].pageLabel, '10');
+		assert.deepEqual(result.sections[1].position,
+			{ pageIndex: 1, rects: [[10, 700, 300, 720]] });
+		// Its blocks are located individually, at their own geometry
+		assert.deepEqual(result.sections[1].blocks[0].position,
+			{ pageIndex: 1, rects: [[10, 600, 300, 680], [10, 500, 300, 580]] });
 	});
 
 	it("should generate the pack when missing", async function () {
@@ -447,6 +664,64 @@ describe("Zotero.SDT", function () {
 		// and one empty block-start entry.
 		bytes.set(metadataBytes, payloadOffset);
 		bytes.set(catalogBytes, payloadOffset + metadataBytes.byteLength);
+		return bytes;
+	}
+
+	// A v1 pack with real content blocks and catalog, for section/outline
+	// consumers (see makeEmptyTestSDTPackV1() for the layout)
+	function makeTestSDTPackV1WithContent(metadata, pako, { outline = [], pages = [], blocks = [] } = {}) {
+		if (metadata.SDT_PACK_VERSION !== 1) {
+			throw new Error('Unsupported test SDT pack version');
+		}
+		const HEADER_LENGTH = 16;
+		// Two entries each of chunk byte offsets and chunk block starts, after
+		// the metadata and catalog lengths
+		const INDEX_LENGTH = 8 + 2 * 4 + 2 * 4;
+		let encoder = new TextEncoder();
+		let schemaVersion = metadata.SDT_SCHEMA_VERSION.split('.').map(Number);
+		let metadataBytes = pako.deflateRaw(JSON.stringify({
+			processor: {
+				type: 'pdf',
+				version: metadata.SDT_PROCESSOR_VERSIONS.pdf,
+			},
+			dateCreated: '2026-01-01T00:00:00.000Z',
+			source: { hash: TEST_PDF_HASH },
+		}));
+		let catalogBytes = pako.deflateRaw(JSON.stringify({ pages, outline }));
+		// One content chunk: an offset table, then the block JSON back to back
+		let blockByteArrays = blocks.map(block => encoder.encode(JSON.stringify(block)));
+		let chunkBytes = new Uint8Array(
+			blocks.length * 4 + blockByteArrays.reduce((sum, b) => sum + b.byteLength, 0)
+		);
+		let chunkView = new DataView(chunkBytes.buffer);
+		let blockOffset = 0;
+		let writeOffset = blocks.length * 4;
+		for (let i = 0; i < blockByteArrays.length; i++) {
+			chunkView.setUint32(i * 4, blockOffset, true);
+			blockOffset += blockByteArrays[i].byteLength;
+			chunkBytes.set(blockByteArrays[i], writeOffset);
+			writeOffset += blockByteArrays[i].byteLength;
+		}
+		let compressedChunk = pako.deflateRaw(chunkBytes);
+
+		let payloadOffset = HEADER_LENGTH + INDEX_LENGTH;
+		let bytes = new Uint8Array(
+			payloadOffset + metadataBytes.byteLength + catalogBytes.byteLength
+				+ compressedChunk.byteLength
+		);
+		bytes.set(SDT_PACK_MAGIC, 0);
+		bytes.set([metadata.SDT_PACK_VERSION, ...schemaVersion], 8);
+		let view = new DataView(bytes.buffer);
+		view.setUint32(12, INDEX_LENGTH, true);
+		view.setUint32(HEADER_LENGTH, metadataBytes.byteLength, true);
+		view.setUint32(HEADER_LENGTH + 4, catalogBytes.byteLength, true);
+		// chunkByteOffsets [0, byteLength], chunkBlockStarts [0, blockCount]
+		view.setUint32(HEADER_LENGTH + 12, compressedChunk.byteLength, true);
+		view.setUint32(HEADER_LENGTH + 20, blocks.length, true);
+		bytes.set(metadataBytes, payloadOffset);
+		bytes.set(catalogBytes, payloadOffset + metadataBytes.byteLength);
+		bytes.set(compressedChunk,
+			payloadOffset + metadataBytes.byteLength + catalogBytes.byteLength);
 		return bytes;
 	}
 

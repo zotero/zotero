@@ -21,6 +21,23 @@ describe("Zotero.Embeddings", function () {
 		};
 	}
 
+	// A Zotero.SDT.getSections() section, built from its blocks -- which are
+	// what indexing reads, the section's own text and span being derived.
+	// A block is its text, or an object adding flowClass/reference/location.
+	function sdtSection(outlinePath, start, blocks) {
+		let entries = blocks.map((block, i) => Object.assign(
+			{ index: start + i, reference: false },
+			typeof block == 'string' ? { text: block } : block
+		));
+		return {
+			text: entries.map(entry => entry.text).join('\n'),
+			outlinePath,
+			startBlock: start,
+			endBlock: start + entries.length - 1,
+			blocks: entries
+		};
+	}
+
 	// Stands in for a measured model (see Zotero.Embeddings.ensureCalibration()),
 	// which the test environment has no downloaded model to measure. The mean
 	// is shaped like a real one -- mixed signs, and shorter than unit length,
@@ -335,6 +352,98 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("#getMatchingChunks()", function () {
+		it("should return an item's matching chunks with their locations, best first", async function () {
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(testMean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, chunkIndex, vector, props = {}) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings "
+						+ "(itemID, chunkIndex, embedding, sourceHash, chunkText, outlinePath, "
+						+ "startBlock, endBlock, pageLabel, navPosition, sectionPart, sectionParts) "
+						+ "VALUES (?, ?, ?, 'hash', ?, ?, ?, ?, ?, ?, ?, ?)",
+					[
+						item.id,
+						chunkIndex,
+						blob,
+						props.text ?? null,
+						props.outlinePath ?? null,
+						props.startBlock ?? null,
+						props.endBlock ?? null,
+						props.pageLabel ?? null,
+						props.navPosition ?? null,
+						props.sectionPart ?? null,
+						props.sectionParts ?? null
+					],
+					{ debugParams: false }
+				);
+			};
+			let item = await createDataObject('item');
+			// A weak match, a strong match, and a chunk below the floor
+			let mixed = axis(0, 0.4);
+			mixed[1] += 1;
+			await store(item, 0, mixed, {
+				text: 'The introduction text', outlinePath: 'Introduction', startBlock: 0, endBlock: 4
+			});
+			await store(item, 1, axis(0), {
+				text: 'The sampling text',
+				outlinePath: 'Methods > Sampling',
+				startBlock: 5,
+				endBlock: 11,
+				pageLabel: '7',
+				navPosition: JSON.stringify({ pageIndex: 6, rects: [[10, 20, 300, 40]] }),
+				sectionPart: 2,
+				sectionParts: 3
+			});
+			await store(item, 2, axis(2), {
+				text: 'The references text', outlinePath: 'References', startBlock: 12, endBlock: 20
+			});
+
+			let query = axis(0, 0.9);
+			query[1] += 0.1;
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(query)
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id);
+				// The chunk below the model's floor isn't a match
+				assert.lengthOf(chunks, 2);
+				// Best chunk first, each with its text and where it came from
+				assert.equal(chunks[0].chunkIndex, 1);
+				assert.equal(chunks[0].text, 'The sampling text');
+				assert.equal(chunks[0].outlinePath, 'Methods > Sampling');
+				assert.equal(chunks[0].startBlock, 5);
+				assert.equal(chunks[0].endBlock, 11);
+				assert.equal(chunks[0].pageLabel, '7');
+				assert.deepEqual(chunks[0].position,
+					{ pageIndex: 6, rects: [[10, 20, 300, 40]] });
+				assert.equal(chunks[0].sectionPart, 2);
+				assert.equal(chunks[0].sectionParts, 3);
+				assert.equal(chunks[1].chunkIndex, 0);
+				assert.isNull(chunks[1].position);
+				assert.isAbove(chunks[0].score, chunks[1].score);
+				// The limit caps how many come back
+				let limited = await Zotero.Embeddings.getMatchingChunks('anything', item.id,
+					{ limit: 1 });
+				assert.lengthOf(limited, 1);
+				assert.equal(limited[0].chunkIndex, 1);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
 	describe("#chunkText()", function () {
 		// bge has no passage prefix, so the window less the two special tokens
 		// that wrap every input is what a chunk's own text gets (see MODELS).
@@ -471,6 +580,180 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+	});
+
+	describe("#chunkSections()", function () {
+		var fakeTokenizer = wordTokenizer();
+		var stubs = [];
+
+		beforeEach(function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'));
+			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
+		});
+
+		afterEach(function () {
+			stubs.forEach(stub => stub.restore());
+			stubs = [];
+		});
+
+		var words = (tag, n) => Array.from({ length: n }, (x, i) => `${tag}${i}`).join(' ');
+
+		it("shouldn't put two substantial sections in one chunk", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: words('alpha', 200), outlinePath: 'Introduction', startBlock: 0, endBlock: 4 },
+				{ text: words('bravo', 200), outlinePath: 'Methods', startBlock: 5, endBlock: 9 }
+			]);
+			assert.lengthOf(chunks, 2);
+			// Neither chunk mixes the two sections, and each points back at
+			// the blocks it covers
+			assert.include(chunks[0].text, 'alpha0');
+			assert.notInclude(chunks[0].text, 'bravo');
+			assert.equal(chunks[0].startBlock, 0);
+			assert.equal(chunks[0].endBlock, 4);
+			assert.include(chunks[1].text, 'bravo0');
+			assert.notInclude(chunks[1].text, 'alpha0');
+			assert.equal(chunks[1].startBlock, 5);
+			assert.equal(chunks[1].endBlock, 9);
+		});
+
+		it("should prefix the embedded text with the section's outline path", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: words('alpha', 200), outlinePath: 'Results > Field studies', startBlock: 2, endBlock: 7 }
+			]);
+			assert.lengthOf(chunks, 1);
+			// What gets embedded carries the heading context; the display
+			// text stays the plain piece
+			assert.isTrue(chunks[0].embedText.startsWith('Results > Field studies\n\n'));
+			assert.isTrue(chunks[0].text.startsWith('alpha0'));
+			assert.equal(chunks[0].outlinePath, 'Results > Field studies');
+		});
+
+		it("should combine sections too small to embed on their own", async function () {
+			// Front matter before the first heading rides along with the
+			// section that follows it, the way small paragraphs do in a note
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: 'Title page', outlinePath: '', startBlock: 0, endBlock: 0 },
+				{ text: 'Copyright notice', outlinePath: '', startBlock: 1, endBlock: 1 },
+				{ text: words('alpha', 200), outlinePath: 'Introduction', startBlock: 2, endBlock: 9 },
+				{ text: words('bravo', 200), outlinePath: 'Methods', startBlock: 10, endBlock: 19 }
+			]);
+			assert.lengthOf(chunks, 2);
+			assert.include(chunks[0].text, 'Title page');
+			assert.include(chunks[0].text, 'Copyright notice');
+			assert.include(chunks[0].text, 'alpha0');
+			assert.equal(chunks[0].startBlock, 0);
+			assert.equal(chunks[0].endBlock, 9);
+			// The substantial section that follows still gets a chunk of its own
+			assert.include(chunks[1].text, 'bravo0');
+			assert.notInclude(chunks[1].text, 'alpha0');
+		});
+
+		it("should join a trailing small section to the previous chunk", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: words('alpha', 200), outlinePath: 'Body', startBlock: 0, endBlock: 9 },
+				{ text: 'Short appendix note', outlinePath: 'Appendix', startBlock: 10, endBlock: 11 }
+			]);
+			assert.lengthOf(chunks, 1);
+			assert.include(chunks[0].text, 'Short appendix note');
+			assert.equal(chunks[0].startBlock, 0);
+			assert.equal(chunks[0].endBlock, 11);
+		});
+
+		it("should split an oversized section into numbered pieces sharing its location", async function () {
+			// 60 ten-token sentences: over the window, no paragraph breaks
+			let sentences = Array.from({ length: 60 },
+				(x, i) => `Sentence ${i} has some words about subject number ${i}.`);
+			let position = { pageIndex: 4, rects: [[10, 20, 300, 40]] };
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{
+					text: sentences.join(' '),
+					outlinePath: 'Discussion',
+					startBlock: 3,
+					endBlock: 20,
+					pageIndex: 4,
+					pageLabel: '5',
+					position
+				}
+			]);
+			assert.isAbove(chunks.length, 1);
+			// Every piece keeps its section's heading context and location,
+			// and knows which piece of the section it is
+			for (let i = 0; i < chunks.length; i++) {
+				let chunk = chunks[i];
+				assert.isTrue(chunk.embedText.startsWith('Discussion\n\n'));
+				assert.equal(chunk.outlinePath, 'Discussion');
+				assert.equal(chunk.startBlock, 3);
+				assert.equal(chunk.endBlock, 20);
+				assert.equal(chunk.pageLabel, '5');
+				assert.deepEqual(chunk.position, position);
+				assert.equal(chunk.sectionPart, i + 1);
+				assert.equal(chunk.sectionParts, chunks.length);
+			}
+			// No sentence was dropped
+			let joined = chunks.map(chunk => chunk.text).join('\n');
+			for (let sentence of sentences) {
+				assert.include(joined, sentence);
+			}
+		});
+
+		it("should keep auxiliary sections as standalone chunks", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				// A small body section, a tiny caption, then a substantial
+				// body section
+				{ text: 'A short opening paragraph.', outlinePath: 'Results', startBlock: 0, endBlock: 0 },
+				{
+					text: 'Figure 3: Owl migration routes across the Baltic.',
+					outlinePath: 'Results',
+					startBlock: 1,
+					endBlock: 1,
+					auxiliary: true
+				},
+				{ text: words('alpha', 200), outlinePath: 'Results', startBlock: 2, endBlock: 9 }
+			]);
+			assert.lengthOf(chunks, 2);
+			// The caption is a chunk of its own, however small...
+			let caption = chunks.find(chunk => chunk.auxiliary);
+			assert.ok(caption);
+			assert.equal(caption.text, 'Figure 3: Owl migration routes across the Baltic.');
+			assert.equal(caption.sectionParts, 1);
+			// ...and the small body section still merges with the body that
+			// follows, straight across it
+			let body = chunks.find(chunk => !chunk.auxiliary);
+			assert.include(body.text, 'A short opening paragraph.');
+			assert.include(body.text, 'alpha0');
+			assert.notInclude(body.text, 'Figure 3');
+		});
+
+		it("shouldn't fold a trailing small body section into an auxiliary chunk", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: words('alpha', 200), outlinePath: 'Body', startBlock: 0, endBlock: 9 },
+				{
+					text: 'Figure 1: A caption with enough words to keep.',
+					outlinePath: 'Body',
+					startBlock: 10,
+					endBlock: 10,
+					auxiliary: true
+				},
+				{ text: 'A trailing remnant paragraph.', outlinePath: 'Body', startBlock: 11, endBlock: 11 }
+			]);
+			assert.lengthOf(chunks, 2);
+			// The remnant joins the last body chunk, not the caption
+			let caption = chunks.find(chunk => chunk.auxiliary);
+			assert.equal(caption.text, 'Figure 1: A caption with enough words to keep.');
+			let body = chunks.find(chunk => !chunk.auxiliary);
+			assert.include(body.text, 'A trailing remnant paragraph.');
+		});
+
+		it("should mark an unsplit section as its only piece", async function () {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections([
+				{ text: words('alpha', 200), outlinePath: 'Body', startBlock: 0, endBlock: 9 }
+			]);
+			assert.lengthOf(chunks, 1);
+			assert.equal(chunks[0].sectionPart, 1);
+			assert.equal(chunks[0].sectionParts, 1);
+			assert.isNull(chunks[0].pageLabel);
+			assert.isNull(chunks[0].position);
+		});
 	});
 
 	describe("#getScoreFraction()", function () {
@@ -769,7 +1052,8 @@ describe("Zotero.Embeddings", function () {
 			try {
 				await Zotero.Embeddings.initDB();
 				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings VALUES (?, 0, ?, ?)",
+					"REPLACE INTO embeddings.itemEmbeddings "
+						+ "(itemID, chunkIndex, embedding, sourceHash) VALUES (?, 0, ?, ?)",
 					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
 				);
 				// The model switch clears the old vectors and announces the
@@ -800,7 +1084,8 @@ describe("Zotero.Embeddings", function () {
 			try {
 				let item = await createDataObject('item');
 				await Zotero.DB.queryAsync(
-					"INSERT INTO embeddings.itemEmbeddings VALUES (?, 0, ?, ?)",
+					"INSERT INTO embeddings.itemEmbeddings "
+						+ "(itemID, chunkIndex, embedding, sourceHash) VALUES (?, 0, ?, ?)",
 					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
 				);
 				await item.eraseTx();
@@ -1070,6 +1355,404 @@ describe("Zotero.Embeddings", function () {
 				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
 				annotation.id
 			), 1);
+		});
+
+		it("should index an attachment's sections when fulltext indexing is enabled", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of fulltext attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			let texts = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					texts.push(...passages);
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				// The extraction itself is sdt.js's concern (see sdtTest.js);
+				// what's under test is what indexing does with the sections
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('Introduction', 0, [{
+							text: 'Owls migrate south when the winters turn cold.',
+							pageIndex: 0,
+							pageLabel: '2',
+							position: { pageIndex: 0, rects: [[10, 20, 300, 40]] }
+						}]),
+						sdtSection('Methods', 4, [{
+							text: 'Tracking devices recorded the routes of forty owls.',
+							pageIndex: 1,
+							pageLabel: '3',
+							position: { pageIndex: 1, rects: [[10, 20, 300, 40]] }
+						}])
+					]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				// Both sections are far too small to embed on their own, so
+				// they land in one chunk, prefixed with the first section's
+				// outline path and covering both sections' blocks
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT chunkIndex, chunkText, outlinePath, startBlock, endBlock, "
+						+ "pageLabel, navPosition, sectionPart, sectionParts "
+						+ "FROM embeddings.itemEmbeddings WHERE itemID=?",
+					attachment.id
+				);
+				assert.lengthOf(rows, 1);
+				assert.equal(rows[0].outlinePath, 'Introduction');
+				assert.equal(rows[0].startBlock, 0);
+				assert.equal(rows[0].endBlock, 4);
+				// The merged chunk takes its first section's page and
+				// position, and is its section's only piece
+				assert.equal(rows[0].pageLabel, '2');
+				assert.deepEqual(JSON.parse(rows[0].navPosition),
+					{ pageIndex: 0, rects: [[10, 20, 300, 40]] });
+				assert.equal(rows[0].sectionPart, 1);
+				assert.equal(rows[0].sectionParts, 1);
+				// The stored preview text is the plain chunk, without the
+				// outline-path context the embedded text carries
+				assert.include(rows[0].chunkText, 'Owls migrate south');
+				assert.include(rows[0].chunkText, 'Tracking devices');
+				assert.isFalse(rows[0].chunkText.startsWith('Introduction\n\n'));
+				let text = texts.find(t => t.includes('Owls migrate south'));
+				assert.ok(text);
+				assert.isTrue(text.startsWith('Introduction\n\n'));
+				assert.include(text, 'Tracking devices');
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should drop attachment chunks when fulltext indexing is turned off", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of pruned attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('', 0, ['A section with enough words to be worth indexing.'])
+					]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.ok(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+					attachment.id
+				));
+
+				// Turning the pref off makes attachments ineligible, and the
+				// pref observer prunes their stored chunks. The observer runs
+				// asynchronously, so poll (the test times out on failure).
+				Zotero.Prefs.set('embeddings.indexFulltext', false);
+				while (await Zotero.DB.valueQueryAsync(
+						"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+						attachment.id)) {
+					await Zotero.Promise.delay(10);
+				}
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should index auxiliary chunks with words and drop bare labels", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of captioned attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('Results', 0, [
+							'Body text about owl migration patterns.',
+							{
+								text: 'Figure 3: Owl migration routes across the Baltic.',
+								flowClass: 'auxiliary'
+							},
+							'More body text about the wintering grounds.',
+							// A standalone label with no words to rank by
+							{ text: 'Figure 4', flowClass: 'auxiliary' }
+						])
+					]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT chunkText FROM embeddings.itemEmbeddings WHERE itemID=? "
+						+ "ORDER BY chunkIndex",
+					attachment.id
+				);
+				let texts = rows.map(row => row.chunkText);
+				// The caption is lifted out into its own chunk, and the body
+				// around it reads straight through
+				assert.lengthOf(texts, 2);
+				assert.include(texts[0], 'Body text about owl migration');
+				assert.include(texts[0], 'More body text about the wintering');
+				assert.notInclude(texts[0], 'Figure 3');
+				assert.equal(texts[1], 'Figure 3: Owl migration routes across the Baltic.');
+				// The bare label was dropped
+				assert.notInclude(texts, 'Figure 4');
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should skip an attachment's reference entries", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of cited attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('Discussion', 0, [
+							'Owls migrate south when the winters turn cold.',
+							// An entry cited inline, inside a body section
+							{
+								text: 'Smith, J. (2019). Owls. J. Birds 4, 1-10.',
+								reference: true
+							}
+						]),
+						// A section that's nothing but references
+						sdtSection('References', 2, [
+							{
+								text: 'Doe, A. (2020). Migration. Nature 1, 2-3.',
+								reference: true
+							}
+						])
+					]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				let texts = await Zotero.DB.columnQueryAsync(
+					"SELECT chunkText FROM embeddings.itemEmbeddings WHERE itemID=? "
+						+ "ORDER BY chunkIndex",
+					attachment.id
+				);
+				// Only the prose is indexed; a section left with nothing but
+				// references contributes no chunk at all
+				assert.lengthOf(texts, 1);
+				assert.include(texts[0], 'Owls migrate south');
+				assert.notInclude(texts[0], 'Smith, J.');
+				assert.notInclude(texts[0], 'Doe, A.');
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should index smaller attachments before larger ones", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of sized attachments' });
+			// The big one is created first, so insertion order can't account
+			// for the result on its own
+			let big = await importPDFAttachment(item);
+			let small = await importPDFAttachment(item);
+			// The size the enqueue order goes by comes from Zotero's own
+			// fulltext index
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO fulltextItems (itemID, totalPages) VALUES (?, ?)", [big.id, 800]);
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO fulltextItems (itemID, totalPages) VALUES (?, ?)", [small.id, 2]);
+
+			let extracted = [];
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
+					if (itemID === big.id || itemID === small.id) {
+						extracted.push(itemID);
+					}
+					return {
+						ok: true,
+						sections: [
+							sdtSection('', 0, ['A section with enough words to be worth indexing.'])
+						]
+					};
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				assert.deepEqual(extracted, [small.id, big.id]);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should fall back to an attachment's plain text when structured extraction fails", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of fallback attachment' });
+			let attachment = await importPDFAttachment(item);
+			Object.defineProperty(attachment, 'attachmentText', {
+				get: () => Promise.resolve('A plain paragraph of text about owl migration routes.'),
+				configurable: true
+			});
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: false, reason: 'failed' })
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				// The flat text is chunked like a note: embedded, previewable,
+				// but without section locations
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT embedding, chunkText, outlinePath, startBlock, endBlock "
+						+ "FROM embeddings.itemEmbeddings WHERE itemID=?",
+					attachment.id
+				);
+				assert.lengthOf(rows, 1);
+				assert.isNotNull(rows[0].embedding);
+				assert.include(rows[0].chunkText, 'owl migration routes');
+				assert.isNull(rows[0].outlinePath);
+				assert.isNull(rows[0].startBlock);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				delete attachment.attachmentText;
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should record an attachment with no extractable text as processed", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of empty attachment' });
+			let attachment = await importPDFAttachment(item);
+			Object.defineProperty(attachment, 'attachmentText', {
+				get: () => Promise.resolve(''),
+				configurable: true
+			});
+
+			let vector = new Float32Array(4).fill(0.5);
+			let getSectionsStub = sinon.stub(Zotero.SDT, 'getSections')
+				.resolves({ ok: false, reason: 'failed' });
+			let ourCalls = () => getSectionsStub.getCalls()
+				.filter(call => call.args[0] === attachment.id).length;
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(Float32Array.from(testMean)),
+				getSectionsStub
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				// The attempt is recorded as a single embedding-less row, so
+				// the item counts as processed and the progress counts align
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT embedding, sourceHash FROM embeddings.itemEmbeddings WHERE itemID=?",
+					attachment.id
+				);
+				assert.lengthOf(rows, 1);
+				assert.isNull(rows[0].embedding);
+				assert.ok(rows[0].sourceHash);
+				assert.equal(ourCalls(), 1);
+
+				// A processed-but-empty item can't be scored, and doesn't
+				// break scoring for anything else
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything', [attachment.id]);
+				assert.isFalse(scores.has(attachment.id));
+
+				// The record makes later passes skip the attachment without
+				// re-extracting, until the file changes
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(ourCalls(), 1);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				delete attachment.attachmentText;
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
 		});
 
 		it("should look up stored hashes without a query per item", async function () {

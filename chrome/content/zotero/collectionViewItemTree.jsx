@@ -206,8 +206,13 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			);
 			let libraries = status.libraries
 				.filter(lib => !libraryIDs.size || libraryIDs.has(lib.libraryID));
-			let indexed = libraries.reduce((sum, lib) => sum + lib.indexed, 0);
-			let total = libraries.reduce((sum, lib) => sum + lib.eligible, 0);
+			// Coverage is coverage: attachment fulltext is reported separately
+			// in the preferences, but an incomplete index is incomplete
+			// whichever part of it is still filling in
+			let indexed = libraries.reduce(
+				(sum, lib) => sum + lib.indexed + lib.indexedAttachments, 0);
+			let total = libraries.reduce(
+				(sum, lib) => sum + lib.eligible + lib.eligibleAttachments, 0);
 			if (indexed >= total) {
 				return null;
 			}

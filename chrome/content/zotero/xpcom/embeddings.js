@@ -378,12 +378,34 @@ Zotero.Embeddings = new function () {
 			// Zotero.Embeddings.Chunking);
 			// every chunk row carries the hash of the item's full source text,
 			// and scoring takes the item's best chunk.
+			// An attachment fulltext chunk also records what and where it
+			// came from, so a match can be previewed and located without
+			// re-deriving the chunking: its text, its section's outline path,
+			// the top-level block range it covers, the page it starts on
+			// (pageLabel), a reader-navigable position (navPosition, JSON --
+			// see Zotero.SDT.getSections()), and which piece of a split
+			// section it is (sectionPart of sectionParts). All NULL for
+			// chunks of other item types, which are their own preview and
+			// location.
+			// An attachment that yields no text at all (missing file,
+			// password-protected, no text layer) gets a single row with a
+			// NULL embedding: a record that it was processed, so progress
+			// counts it and later passes skip it (via sourceHash) until the
+			// file changes. Scoring reads only rows with an embedding.
 			await Zotero.DB.queryAsync(
 				"CREATE TABLE embeddings.itemEmbeddings (\n"
 				+ "    itemID INTEGER NOT NULL,\n"
 				+ "    chunkIndex INTEGER NOT NULL,\n"
-				+ "    embedding BLOB NOT NULL,\n"
+				+ "    embedding BLOB,\n"
 				+ "    sourceHash TEXT NOT NULL,\n"
+				+ "    chunkText TEXT,\n"
+				+ "    outlinePath TEXT,\n"
+				+ "    startBlock INTEGER,\n"
+				+ "    endBlock INTEGER,\n"
+				+ "    pageLabel TEXT,\n"
+				+ "    navPosition TEXT,\n"
+				+ "    sectionPart INTEGER,\n"
+				+ "    sectionParts INTEGER,\n"
 				+ "    PRIMARY KEY (itemID, chunkIndex)\n"
 				+ ")"
 			);
@@ -1095,6 +1117,39 @@ Zotero.Embeddings = new function () {
 		return new Float32Array(bytes.buffer);
 	}
 
+	// The shared guards of the scoring paths: wait out any in-progress model
+	// switch, so a query isn't embedded with one model and compared against
+	// another's vectors, and confirm the stored vectors were produced by the
+	// active model -- during a switch, or a reindex after a revision bump,
+	// the database isn't stamped for the new model until the indexer starts
+	// filling it. Returns the model's calibration: indexing calibrates the
+	// model before it writes a single vector, so a database stamped for this
+	// model always has one to go with it -- but the numbers still have to be
+	// read into memory, since getScoreFraction() reads them synchronously
+	// while rendering.
+	async function _requireReadyIndex() {
+		await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+		await Zotero.Embeddings.initDB();
+		let modelVersion = Zotero.Embeddings.getModelVersion();
+		let indexedVersion = await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='modelVersion'"
+		);
+		if (indexedVersion !== modelVersion) {
+			throw new Zotero.Embeddings.IndexNotReadyError(
+				`Embeddings index is for '${indexedVersion || 'no model'}', `
+					+ `but the active model is '${modelVersion}'`
+			);
+		}
+		let calibration = await Zotero.Embeddings.loadCalibration();
+		if (!calibration) {
+			throw new Zotero.Embeddings.IndexNotReadyError(
+				`Embeddings index is stamped for '${modelVersion}' but the model `
+					+ `has no calibration`
+			);
+		}
+		return calibration;
+	}
+
 	/**
 	 * Score a given set of items by similarity to a query. Items scoring below
 	 * the model's measured minimum aren't matches and aren't returned (see
@@ -1120,34 +1175,7 @@ Zotero.Embeddings = new function () {
 		if (!itemIDs.length || !this.isEnabled()) {
 			return scores;
 		}
-		// Wait out any in-progress model switch, so the query isn't embedded
-		// with one model and compared against another's vectors
-		await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
-		await this.initDB();
-		// The stored vectors must have been produced by the active model.
-		// During a switch, or a reindex after a revision bump, the database
-		// isn't stamped for the new model until the indexer starts filling it.
-		let modelVersion = this.getModelVersion();
-		let indexedVersion = await Zotero.DB.valueQueryAsync(
-			"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='modelVersion'"
-		);
-		if (indexedVersion !== modelVersion) {
-			throw new this.IndexNotReadyError(
-				`Embeddings index is for '${indexedVersion || 'no model'}', `
-					+ `but the active model is '${modelVersion}'`
-			);
-		}
-		// Indexing calibrates the model before it writes a single vector, so a
-		// database stamped for this model always has a calibration to go with
-		// it -- but the numbers still have to be read into memory, since
-		// getScoreFraction() reads them synchronously while rendering.
-		let calibration = await this.loadCalibration();
-		if (!calibration) {
-			throw new this.IndexNotReadyError(
-				`Embeddings index is stamped for '${modelVersion}' but the model `
-					+ `has no calibration`
-			);
-		}
+		let calibration = await _requireReadyIndex();
 		let generation = _modelGeneration;
 		let query = _center(await this.embedQuery(queryText));
 		let minScore = calibration.minScore;
@@ -1169,9 +1197,11 @@ Zotero.Embeddings = new function () {
 				throw new this.IndexNotReadyError('Model changed during scoring');
 			}
 			let chunk = itemIDs.slice(i, i + chunkSize);
+			// Rows without an embedding are processed-but-empty markers (see
+			// _setUpDB()), with nothing to score
 			let rows = await Zotero.DB.queryAsync(
 				"SELECT itemID, embedding FROM embeddings.itemEmbeddings WHERE itemID IN ("
-					+ chunk.map(() => '?').join(',') + ")",
+					+ chunk.map(() => '?').join(',') + ") AND embedding IS NOT NULL",
 				chunk
 			);
 			for (let row of rows) {
@@ -1207,6 +1237,55 @@ Zotero.Embeddings = new function () {
 		}
 		return scores;
 	};
+
+	/**
+	 * The chunks of a single item most similar to a query, each with where in
+	 * the item it came from -- for surfacing why an item matched (e.g. which
+	 * section of an attachment's full text). Chunks scoring below the model's
+	 * measured minimum aren't matches and aren't returned.
+	 *
+	 * The text and location fields describe attachment fulltext chunks (see
+	 * the itemEmbeddings table); for other item types they're null, and the
+	 * item itself is the preview and the location.
+	 *
+	 * @param {String} queryText
+	 * @param {Number} itemID
+	 * @param {Object} [options]
+	 * @param {Number} [options.limit=3] - Most chunks to return
+	 * @return {Promise<Object[]>} - [{ chunkIndex, score, text, outlinePath,
+	 *     startBlock, endBlock, pageLabel, position, sectionPart,
+	 *     sectionParts }], best first, ties broken by position in the text.
+	 *     chunkIndex is document order, for callers that want to re-sort.
+	 */
+	this.getMatchingChunks = async function (queryText, itemID, { limit = 3 } = {}) {
+		if (!this.isEnabled()) {
+			return [];
+		}
+		let calibration = await _requireReadyIndex();
+		let query = _center(await this.embedQuery(queryText));
+		let rows = await Zotero.DB.queryAsync(
+			"SELECT chunkIndex, embedding, chunkText, outlinePath, startBlock, endBlock, "
+				+ "pageLabel, navPosition, sectionPart, sectionParts "
+				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL",
+			itemID
+		);
+		return rows
+			.map(row => ({
+				chunkIndex: row.chunkIndex,
+				score: this.dot(query, _center(_blobToVector(row.embedding))),
+				text: row.chunkText,
+				outlinePath: row.outlinePath,
+				startBlock: row.startBlock,
+				endBlock: row.endBlock,
+				pageLabel: row.pageLabel,
+				position: row.navPosition ? JSON.parse(row.navPosition) : null,
+				sectionPart: row.sectionPart,
+				sectionParts: row.sectionParts
+			}))
+			.filter(chunk => chunk.score >= calibration.minScore)
+			.sort((a, b) => (b.score - a.score) || (a.chunkIndex - b.chunkIndex))
+			.slice(0, limit);
+	};
 };
 
 
@@ -1214,9 +1293,9 @@ Zotero.Embeddings = new function () {
  * Zotero.Embeddings.Chunking -- splitting a text into passages small enough to
  * each be embedded on their own, so a long text's later paragraphs are
  * searchable instead of being averaged into one vector or truncated away by the
- * pipeline. The indexer applies this only to notes. Chunk size is bounded by
- * CHUNK_MAX_TOKENS, capped by the model's window, and counted in the model's
- * own tokens.
+ * pipeline. The indexer applies this to notes (chunkText()) and to attachment
+ * full text (chunkSections()). Chunk size is bounded by CHUNK_MAX_TOKENS,
+ * capped by the model's window, and counted in the model's own tokens.
  */
 Zotero.Embeddings.Chunking = new function () {
 	// Tokens carried over from the end of one chunk into the start of the
@@ -1234,6 +1313,14 @@ Zotero.Embeddings.Chunking = new function () {
 	// out paragraph-sized, so this decides only how long a text has to be before
 	// it's split at all, and how far a single oversized paragraph is split.
 	const CHUNK_MAX_TOKENS = 768;
+	// Most characters to feed the tokenizer in one encode() call. The
+	// multilingual models' SentencePiece Unigram tokenizer is quadratic in
+	// input length -- its Metaspace pre-tokenizer doesn't split at whitespace,
+	// so the whole input goes through the Viterbi lattice as one string, and a
+	// single long encode can take seconds. Segments this size keep every call
+	// in the tokenizer's linear regime, and token counts are additive across
+	// whitespace boundaries, so the segmented measurement is exact.
+	const TOKENIZER_SEGMENT_CHARS = 1000;
 
 	// Tokenizer instances by model name. Failures aren't cached, so a later
 	// indexing run retries the load.
@@ -1288,31 +1375,94 @@ Zotero.Embeddings.Chunking = new function () {
 	// chunk's own text may use.
 	//
 	// Counts leave out the special tokens the tokenizer wraps every input in, so
-	// that the counts of several sentences add up to the count of those sentences
-	// joined. The even split in _splitBlockEvenly() depends on that: counting
-	// them per sentence would inflate a piece's measured size in proportion to
-	// how many sentences it holds, while a block is measured in one call, and the
-	// pieces would come out lopsided.
+	// that the counts of several pieces of text add up to the count of those
+	// pieces joined. That additivity is what the whole chunking flow leans on:
+	// a text is tokenized exactly once, at paragraph granularity
+	// (_measureParagraphs()), and every level above -- blocks, sections, groups
+	// of sections -- is sized by summing those counts (_sumTokens()) instead of
+	// re-tokenizing the same text. `joinTokens` is what one '\n\n' join adds
+	// once paragraphs are put back together, measured rather than assumed
+	// (a SentencePiece model can spend a token on collapsed whitespace), so
+	// sums charge it per join.
 	//
 	// Those special tokens come off the window instead, together with the
 	// passage prefix embedPassages() prepends -- neither is part of the text this
 	// code sees, but both take up room once the chunk is embedded.
 	function _getMetrics(tokenizer) {
 		let specialTokens = tokenizer.encode('').length;
-		let count = text => tokenizer.encode(text).length - specialTokens;
+		// Measured in segments (see _splitForTokenizer()), so a long paragraph
+		// never hits the tokenizer's quadratic regime in a single call
+		let count = text => _splitForTokenizer(text).reduce(
+			(sum, segment) => sum + tokenizer.encode(segment).length - specialTokens,
+			0
+		);
 		let prefix = Zotero.Embeddings.getPassagePrefix();
 		return {
 			count,
+			joinTokens: Math.max(0, count('a\n\na') - 2 * count('a')),
 			budget: Math.min(CHUNK_MAX_TOKENS, Zotero.Embeddings.getModelMaxTokens())
 				- specialTokens - (prefix ? count(prefix) : 0)
 		};
+	}
+
+	// The paragraphs of a text, each counted exactly once -- the single place
+	// chunking pays for tokenization
+	function _measureParagraphs(text, count) {
+		return text.split(/\n+/)
+			.map(paragraph => paragraph.trim())
+			.filter(Boolean)
+			.map(paragraph => ({ text: paragraph, tokens: count(paragraph) }));
+	}
+
+	// Tokens of the given paragraphs once joined back together, charging
+	// joinTokens per join (see _getMetrics())
+	function _sumTokens(paragraphs, joinTokens) {
+		if (!paragraphs.length) {
+			return 0;
+		}
+		return paragraphs.reduce((sum, paragraph) => sum + paragraph.tokens, 0)
+			+ joinTokens * (paragraphs.length - 1);
+	}
+
+	// A text in segments of at most TOKENIZER_SEGMENT_CHARS, each ending
+	// right before a whitespace character, so the next segment carries it and
+	// the tokenizer sees every word with its leading space. Text with no
+	// whitespace in a whole window (e.g., unsegmented CJK) is cut mid-run,
+	// which can miscount by a token per boundary -- noise against the budget.
+	function _splitForTokenizer(text) {
+		if (text.length <= TOKENIZER_SEGMENT_CHARS) {
+			return [text];
+		}
+		let segments = [];
+		let start = 0;
+		while (start < text.length) {
+			let end = Math.min(start + TOKENIZER_SEGMENT_CHARS, text.length);
+			if (end < text.length) {
+				for (let i = end; i > start; i--) {
+					if (/\s/.test(text[i])) {
+						end = i;
+						break;
+					}
+				}
+			}
+			segments.push(text.slice(start, end));
+			start = end;
+		}
+		return segments;
 	}
 
 	// Last resort for text with no sentence boundary inside the budget: window
 	// it by tokens.
 	function _hardSplit(text, budget, tokenizer) {
 		let pieces = [];
-		let ids = tokenizer.encode(text);
+		// Encoded in segments for the same reason count() measures in them
+		// (see _splitForTokenizer()). Each segment keeps its special-token
+		// wrapper -- stripping it would mean knowing how the tokenizer splits
+		// it between start and end -- so a window can hold a few interior
+		// special tokens; decode skips them, and a piece just lands a few
+		// tokens under the budget.
+		let ids = _splitForTokenizer(text)
+			.flatMap(segment => [...tokenizer.encode(segment)]);
 		let step = Math.max(1, budget - CHUNK_OVERLAP_TOKENS);
 		for (let start = 0; start < ids.length; start += step) {
 			let piece = tokenizer
@@ -1435,16 +1585,23 @@ Zotero.Embeddings.Chunking = new function () {
 	 */
 	this.chunkText = async function (text) {
 		let tokenizer = await this.getTokenizer();
-		let { count, budget } = _getMetrics(tokenizer);
+		let metrics = _getMetrics(tokenizer);
+		let paragraphs = _measureParagraphs(text, metrics.count);
+		return _chunkParagraphs(text, paragraphs, metrics.budget, metrics, tokenizer);
+	};
+
+	// The paragraph-level chunker behind chunkText(), over paragraphs already
+	// measured by _measureParagraphs() -- everything here is sized by summing
+	// their counts, so no text is tokenized a second time. The budget is the
+	// caller's, so chunkSections() can reserve part of the window for a
+	// section's outline-path prefix. `text` is what a fitting result returns
+	// as its single chunk, joins and all.
+	function _chunkParagraphs(text, paragraphs, budget, metrics, tokenizer) {
+		let { count, joinTokens } = metrics;
 		// Text that fits the window as it stands, which is most of it
-		if (count(text) <= budget) {
+		if (_sumTokens(paragraphs, joinTokens) <= budget) {
 			return [text];
 		}
-
-		let paragraphs = text.split(/\n+/)
-			.map(paragraph => paragraph.trim())
-			.filter(Boolean)
-			.map(paragraph => ({ text: paragraph, tokens: count(paragraph) }));
 
 		// Group paragraphs into blocks, combining any that are too small to
 		// stand alone with the paragraphs that follow them. A paragraph that
@@ -1454,7 +1611,7 @@ Zotero.Embeddings.Chunking = new function () {
 		let pending = [];
 		let pendingTokens = 0;
 		for (let paragraph of paragraphs) {
-			pending.push(paragraph.text);
+			pending.push(paragraph);
 			pendingTokens += paragraph.tokens;
 			if (pendingTokens >= CHUNK_MIN_TOKENS) {
 				groups.push(pending);
@@ -1476,10 +1633,10 @@ Zotero.Embeddings.Chunking = new function () {
 
 		let chunks = [];
 		for (let group of groups) {
-			// Recount rather than summing the paragraphs, so the joins between
-			// them are part of the block's size
-			let blockText = group.join('\n\n');
-			let block = { text: blockText, tokens: count(blockText) };
+			let block = {
+				text: group.map(paragraph => paragraph.text).join('\n\n'),
+				tokens: _sumTokens(group, joinTokens)
+			};
 			if (block.tokens <= budget) {
 				chunks.push(block.text);
 			}
@@ -1488,6 +1645,137 @@ Zotero.Embeddings.Chunking = new function () {
 			}
 		}
 		return chunks.length ? chunks : [text];
+	}
+
+	/**
+	 * Split a document's outline sections (see Zotero.SDT.getSections()) into
+	 * chunks that each fit the active model's context window. Sections play
+	 * the role paragraphs play in chunkText(), one level up: a section is the
+	 * topic unit, so two of them never share a chunk unless one was too small
+	 * to embed on its own, and a section over the window is split by the
+	 * paragraph machinery. Each chunk points back at the section blocks it
+	 * covers, so a match can be located in the document later.
+	 *
+	 * Sections marked `auxiliary` (captions, image descriptions) are exempt
+	 * from the too-small merging in both directions: each becomes exactly
+	 * one chunk (flagged `auxiliary`), so it can surface on its own without
+	 * ever mixing into the running text.
+	 *
+	 * A chunk's `embedText` -- what actually gets embedded -- is its text
+	 * prefixed with its section's outline path (e.g. "Methods >
+	 * Participants"), giving a section fragment the context of its headings;
+	 * the prefix comes out of the chunk's token budget. `text` stays the
+	 * plain piece, for display.
+	 *
+	 * Each chunk carries its section's location (pageIndex, pageLabel,
+	 * position -- see Zotero.SDT.getSections()), and its place within the
+	 * section: sectionPart / sectionParts say which piece of a split section
+	 * this is, so a match can be read as coming from the middle or the end
+	 * of its section. Splitting happens at sentence granularity, blind to
+	 * blocks, so the pieces of one section share its location.
+	 *
+	 * @param {Object[]} sections - [{ text, outlinePath, startBlock, endBlock,
+	 *     pageIndex, pageLabel, position }]
+	 * @return {Promise<Object[]>} - [{ text, embedText, outlinePath,
+	 *     startBlock, endBlock, pageIndex, pageLabel, position,
+	 *     sectionPart, sectionParts }]
+	 */
+	this.chunkSections = async function (sections) {
+		let tokenizer = await this.getTokenizer();
+		let metrics = _getMetrics(tokenizer);
+		let { count, joinTokens, budget } = metrics;
+
+		// Group sections into chunk-worthy units, combining any too small to
+		// stand alone with the sections that follow them -- same policy as
+		// chunkText()'s paragraph grouping. Each section is measured once, at
+		// paragraph granularity, and carries its paragraphs forward, so no
+		// later stage tokenizes the same text again.
+		let groups = [];
+		let pending = null;
+		// Index of the last body group, for the trailing merge below
+		let lastBodyGroup = -1;
+		for (let section of sections) {
+			if (!section.text) {
+				continue;
+			}
+			let paragraphs = _measureParagraphs(section.text, count);
+			let tokens = _sumTokens(paragraphs, joinTokens);
+			// An auxiliary section (caption, image description) is its own
+			// chunk no matter how small: indexed and searchable on its own,
+			// never mixed into the running text. The body sections around it
+			// still merge with each other -- `pending` just carries across.
+			if (section.auxiliary) {
+				groups.push({ sections: [section], paragraphs, auxiliary: true });
+				continue;
+			}
+			if (pending) {
+				pending.sections.push(section);
+				pending.paragraphs.push(...paragraphs);
+				pending.tokens += tokens;
+			}
+			else {
+				pending = { sections: [section], paragraphs, tokens };
+			}
+			if (pending.tokens >= CHUNK_MIN_TOKENS) {
+				lastBodyGroup = groups.length;
+				groups.push(pending);
+				pending = null;
+			}
+		}
+		// A trailing group still under the minimum joins the previous body
+		// group rather than standing alone as a runt chunk -- never an
+		// auxiliary group, which stays exactly its own text
+		if (pending) {
+			if (lastBodyGroup >= 0) {
+				let last = groups[lastBodyGroup];
+				last.sections.push(...pending.sections);
+				last.paragraphs.push(...pending.paragraphs);
+			}
+			else {
+				groups.push(pending);
+			}
+		}
+		// Body sections merge across the auxiliary sections between them, so
+		// a group can close after an auxiliary group whose blocks it
+		// precedes. Chunk indexes are document order (the UI sorts by them),
+		// so restore it here.
+		groups.sort((a, b) => (a.sections[0].startBlock ?? 0) - (b.sections[0].startBlock ?? 0));
+
+		let chunks = [];
+		for (let group of groups) {
+			// A merged group takes its first section's outline path -- the
+			// heading its text starts under
+			let outlinePath = group.sections[0].outlinePath || '';
+			let startBlock = group.sections[0].startBlock;
+			let endBlock = group.sections[group.sections.length - 1].endBlock;
+			let prefix = outlinePath ? outlinePath + '\n\n' : '';
+			let prefixTokens = prefix ? count(prefix) : 0;
+			// A pathological outline path that would eat a real share of the
+			// window hurts more than it helps
+			if (prefixTokens > budget / 4) {
+				prefix = '';
+				prefixTokens = 0;
+			}
+			let text = group.sections.map(section => section.text).join('\n\n');
+			let first = group.sections[0];
+			let pieces = _chunkParagraphs(text, group.paragraphs, budget - prefixTokens, metrics, tokenizer);
+			for (let i = 0; i < pieces.length; i++) {
+				chunks.push({
+					text: pieces[i],
+					embedText: prefix + pieces[i],
+					outlinePath,
+					startBlock,
+					endBlock,
+					pageIndex: first.pageIndex ?? null,
+					pageLabel: first.pageLabel ?? null,
+					position: first.position ?? null,
+					sectionPart: i + 1,
+					sectionParts: pieces.length,
+					auxiliary: !!group.auxiliary
+				});
+			}
+		}
+		return chunks;
 	};
 };
 
@@ -1532,6 +1820,9 @@ Zotero.Embeddings.Indexing = new function () {
 	// Wait longer than the usual debounce before retrying a run that was held
 	// off for memory
 	const LOW_MEMORY_RETRY_DELAY = 5 * 60 * 1000;
+	// Most often the per-library status counts are recomputed during a run,
+	// since each refresh is a pass over the database
+	const STATUS_REFRESH_INTERVAL = 5000;
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass
 	const KICK_DELAY = 3000;
@@ -1564,6 +1855,14 @@ Zotero.Embeddings.Indexing = new function () {
 		// models: clear old embeddings + files and re-index with the new one.
 		Zotero.Prefs.registerObserver('embeddings.model', () => {
 			_switchModel();
+		});
+
+		// Toggling fulltext indexing changes what's eligible: on, the newly
+		// eligible attachments get indexed; off, their stored chunks are
+		// pruned. Unlike a model switch, nothing already stored goes stale,
+		// so the rest of the index is left alone.
+		Zotero.Prefs.registerObserver('embeddings.indexFulltext', () => {
+			_onIndexFulltextChange().catch(e => Zotero.logError(e));
 		});
 
 		Zotero.Notifier.registerObserver({
@@ -1658,6 +1957,24 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 	}
 
+	async function _onIndexFulltextChange() {
+		if (!Zotero.Embeddings.isEnabled()) {
+			return;
+		}
+		if (_indexFulltextEnabled()) {
+			// Turning fulltext indexing on is a request to index the
+			// attachments, so it also resumes a stopped indexer
+			await Zotero.Embeddings.Indexing.startIndexing();
+		}
+		else {
+			// The attachments are no longer eligible, so the ordinary orphan
+			// pruning drops their chunks -- without restarting a paused indexer
+			await Zotero.Embeddings.initDB();
+			await _pruneOrphanedEmbeddings(await _getEligibleItemIDs());
+			await Zotero.Embeddings.Indexing.refreshStatus();
+		}
+	}
+
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass. Enqueued ids just sit in the queue
 	// until the consumer runs.
@@ -1745,27 +2062,37 @@ Zotero.Embeddings.Indexing = new function () {
 	// - a note with at least three words in its plain text
 	// - an annotation with at least three words across the passage it marks
 	//   and its comment
+	// - with fulltext indexing enabled, a PDF/EPUB/snapshot attachment. Its
+	//   text lives in a file, so there's no cheap word test here: one that
+	//   yields no text at indexing time is recorded as processed instead
+	//   (see _indexItems()), so the progress counts still converge.
 	// Everything that needs to know what's eligible -- enqueueing, pruning,
 	// progress counts -- works from this result, and _indexItems() skips items
 	// by the same per-type tests (see _getIndexableText()), so the counts and
 	// the index stay in agreement.
 	//
-	// @return {Promise<Map>} - libraryID -> [itemID, ...]
+	// Attachments are kept apart from the rest: their text costs orders of
+	// magnitude more to index, so they're enqueued last, ordered smallest
+	// first, and reported on their own line rather than buried in one total
+	// that barely moves.
+	//
+	// @return {Promise<Map>} - libraryID -> { items: [itemID, ...],
+	//     attachments: [itemID, ...] }
 	async function _getEligibleItemIDs() {
 		let fieldIDs = Zotero.Embeddings.getIndexedFieldIDs();
 		let byLibrary = new Map();
 		let seen = new Set();
-		let add = (row) => {
+		let add = (row, kind = 'items') => {
 			if (seen.has(row.itemID)) {
 				return;
 			}
 			seen.add(row.itemID);
-			let ids = byLibrary.get(row.libraryID);
-			if (!ids) {
-				ids = [];
-				byLibrary.set(row.libraryID, ids);
+			let eligible = byLibrary.get(row.libraryID);
+			if (!eligible) {
+				eligible = { items: [], attachments: [] };
+				byLibrary.set(row.libraryID, eligible);
 			}
-			ids.push(row.itemID);
+			eligible[kind].push(row.itemID);
 		};
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT libraryID, itemID, value FROM itemData "
@@ -1803,7 +2130,53 @@ Zotero.Embeddings.Indexing = new function () {
 				add(row);
 			}
 		}
+		if (_indexFulltextEnabled()) {
+			// Ordering attachments by size compares the
+			// two things the fulltext index records -- characters for EPUBs and
+			// snapshots, pages for PDFs -- so page counts are scaled to roughly the
+			// characters they stand for.
+			const CHARS_PER_PAGE = 3000;
+			const UNKNOWN_ATTACHMENT_SIZE = 99999999;
+			// The SQL mirror of _isIndexableAttachment(): stored or linked
+			// PDFs and EPUBs, and snapshots (which are always stored),
+			// smallest first so that one enormous book doesn't sit at the
+			// head of the queue while the rest of the library waits behind
+			// it. Size is taken from Zotero's own fulltext index, which
+			// already knows it for virtually every attachment -- unlike
+			// measuring the files, which would mean a filesystem call per
+			// attachment every time this runs.
+			rows = await Zotero.DB.queryAsync(
+				"SELECT libraryID, itemID FROM itemAttachments "
+					+ "JOIN items USING (itemID) "
+					+ "LEFT JOIN fulltextItems USING (itemID) "
+					+ "WHERE (contentType IN ('application/pdf', 'application/epub+zip') "
+						+ "AND linkMode!=?) "
+					+ "OR (contentType='text/html' AND linkMode=?) "
+					+ "ORDER BY COALESCE(totalChars, totalPages * ?, ?), itemID",
+				[
+					Zotero.Attachments.LINK_MODE_LINKED_URL,
+					Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+					CHARS_PER_PAGE,
+					UNKNOWN_ATTACHMENT_SIZE
+				]
+			);
+			for (let row of rows) {
+				add(row, 'attachments');
+			}
+		}
 		return byLibrary;
+	}
+
+	// Whether attachment full text is part of the index (see the
+	// embeddings.indexFulltext pref)
+	function _indexFulltextEnabled() {
+		return !!Zotero.Prefs.get('embeddings.indexFulltext');
+	}
+
+	// Whether an item is an attachment whose full text can be indexed --
+	// the types Zotero.SDT can extract structured text from
+	function _isIndexableAttachment(item) {
+		return item.isPDFAttachment() || item.isEPUBAttachment() || item.isSnapshotAttachment();
 	}
 
 	// The stored text an annotation's eligibility is judged by, shared by the
@@ -1814,14 +2187,25 @@ Zotero.Embeddings.Indexing = new function () {
 		return [text, comment].filter(Boolean).join(' ').replace(/<\/?[a-z][^>]*>/gi, ' ');
 	}
 
-	// Enqueue every eligible item, library by library, so the queue drains
-	// one library at a time. indexItems() skips items whose stored embedding
-	// is already current (via sourceHash), so re-enqueueing everything on
-	// each start is cheap for already-indexed items.
+	// Enqueue every eligible item in two passes: first every library's items,
+	// notes, and annotations, then every library's attachments. That index is
+	// cheap and immediately useful, so it fills in across all libraries
+	// before the far slower fulltext extraction starts anywhere -- no
+	// library's metadata waits behind another library's documents.
+	//
+	// This governs full passes only. Items the notifier enqueues as they
+	// change go in on arrival, so editing a huge PDF still indexes it now
+	// rather than deferring it behind everything else.
 	function _enqueueAllLibraries(eligibleByLibrary) {
-		for (let library of _indexableLibraries()) {
-			for (let id of eligibleByLibrary.get(library.libraryID) || []) {
-				_queue.add(id);
+		for (let kind of ['items', 'attachments']) {
+			for (let library of _indexableLibraries()) {
+				let eligible = eligibleByLibrary.get(library.libraryID);
+				if (!eligible) {
+					continue;
+				}
+				for (let id of eligible[kind]) {
+					_queue.add(id);
+				}
 			}
 		}
 	}
@@ -1831,8 +2215,11 @@ Zotero.Embeddings.Indexing = new function () {
 	async function _pruneOrphanedEmbeddings(eligibleByLibrary) {
 		await Zotero.Embeddings.initDB();
 		let eligible = new Set();
-		for (let ids of eligibleByLibrary.values()) {
-			for (let id of ids) {
+		for (let { items, attachments } of eligibleByLibrary.values()) {
+			for (let id of items) {
+				eligible.add(id);
+			}
+			for (let id of attachments) {
 				eligible.add(id);
 			}
 		}
@@ -1873,14 +2260,21 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 	}
 
-	// Number of items in a library that have a stored embedding -- the
-	// numerator for indexing progress. An item's chunks count as one item.
-	function _getIndexedCount(libraryID) {
-		return Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(DISTINCT itemID) FROM embeddings.itemEmbeddings "
-				+ "JOIN items USING (itemID) WHERE libraryID=?",
-			libraryID
+	// Items in a library that have a stored embedding -- the numerators for
+	// indexing progress, split the way _getEligibleItemIDs() splits the
+	// denominators. An item's chunks count as one item, and an attachment
+	// recorded as processed-but-empty counts as done (see _indexItems()).
+	async function _getIndexedCounts(libraryID) {
+		let attachmentTypeID = Zotero.ItemTypes.getID('attachment');
+		let row = await Zotero.DB.rowQueryAsync(
+			"SELECT "
+				+ "COUNT(DISTINCT CASE WHEN itemTypeID!=? THEN itemID END) AS items, "
+				+ "COUNT(DISTINCT CASE WHEN itemTypeID=? THEN itemID END) AS attachments "
+				+ "FROM embeddings.itemEmbeddings JOIN items USING (itemID) "
+				+ "WHERE libraryID=?",
+			[attachmentTypeID, attachmentTypeID, libraryID]
 		);
+		return { items: row.items, attachments: row.attachments };
 	}
 
 
@@ -1971,6 +2365,123 @@ Zotero.Embeddings.Indexing = new function () {
 		return title || abstract;
 	}
 
+	// The staleness key for an attachment's stored chunks, standing in for
+	// the text hash other item types use. Derived from the file's identity
+	// (path, size, mtime) rather than its extracted text, so the skip check
+	// every indexing pass runs costs a stat rather than an extraction. A
+	// change to the extraction or chunking logic isn't detected -- rebuild
+	// the index after one. (Nor is a pack regenerated for a processor bump
+	// without the file changing -- the vectors stay derived from the older
+	// extraction until the file changes or the index is rebuilt.)
+	// Returns null when the attachment has no readable file, which also
+	// means there's nothing to extract.
+	async function _getAttachmentSourceHash(item) {
+		try {
+			let path = await item.getFilePathAsync();
+			if (!path) {
+				return null;
+			}
+			let { size, lastModified } = await IOUtils.stat(path);
+			return Zotero.Utilities.Internal.md5([path, size, lastModified].join('|'));
+		}
+		catch (e) {
+			if (e.name !== 'NotFoundError') {
+				Zotero.logError(e);
+			}
+			return null;
+		}
+	}
+
+	// The document's sections (see Zotero.SDT.getSections()) as things to
+	// index. Reference entries are dropped: a bibliography is keyword-dense
+	// but says nothing, so it crowds out real matches, and literal search
+	// still covers it via the fulltext index. Auxiliary blocks (captions,
+	// image descriptions) are lifted out into standalone sections: each is
+	// worth finding on its own, but isn't part of the running text it sits in.
+	function _toIndexableSections(sections) {
+		let indexable = [];
+		for (let section of sections) {
+			let body = [];
+			for (let block of section.blocks) {
+				if (block.reference) {
+					continue;
+				}
+				if (block.flowClass === 'auxiliary') {
+					indexable.push(_toIndexableSection(section, [block], true));
+				}
+				else {
+					body.push(block);
+				}
+			}
+			if (body.length) {
+				indexable.push(_toIndexableSection(section, body, false));
+			}
+		}
+		// A body section is emitted after the auxiliary blocks it surrounds,
+		// and chunk indexes are document order
+		return indexable.sort((a, b) => a.startBlock - b.startBlock);
+	}
+
+	// One run of blocks as a section for the chunker, located where the run
+	// starts
+	function _toIndexableSection(section, blocks, auxiliary) {
+		let first = blocks[0];
+		return {
+			text: blocks.map(block => block.text).join('\n'),
+			outlinePath: section.outlinePath,
+			startBlock: first.index,
+			endBlock: blocks[blocks.length - 1].index,
+			pageIndex: first.pageIndex ?? null,
+			pageLabel: first.pageLabel ?? null,
+			position: first.position ?? null,
+			auxiliary
+		};
+	}
+
+	// The embeddable chunks of an attachment's full text: its outline
+	// sections (extracted and cached by Zotero.SDT), split to fit the model
+	// window. When structured extraction yields nothing, the flat text falls
+	// back to note-style paragraph chunking -- searchable, just without
+	// section locations. Null when there's no embeddable text at all.
+	async function _getAttachmentChunks(item) {
+		let result = await Zotero.SDT.getSections(item.id);
+		let sections = result.ok ? _toIndexableSections(result.sections) : [];
+		// The word minimum applies to the document as a whole, not each
+		// section: short sections are real content that the chunker merges,
+		// but a document without three words anywhere gives the model nothing
+		// to rank
+		if (sections.length
+				&& _hasEmbeddableText(sections.map(section => section.text).join(' '))) {
+			let chunks = await Zotero.Embeddings.Chunking.chunkSections(sections);
+			// An auxiliary chunk stands alone, so it's held to the same word
+			// minimum as any standalone text -- a bare "Figure 1" gives the
+			// model nothing to rank
+			return chunks.filter(chunk => !chunk.auxiliary || _hasEmbeddableText(chunk.text));
+		}
+		Zotero.debug(`Embeddings: no structured text for ${item.libraryKey}`
+			+ (result.ok ? '' : ` (${result.reason})`)
+			+ ' -- falling back to plain text');
+		let text;
+		try {
+			text = await item.attachmentText;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+		if (!text || !_hasEmbeddableText(text)) {
+			return null;
+		}
+		// Flat text has no sections, so the whole document plays that role:
+		// the part numbering says where in it a chunk falls
+		let chunks = await Zotero.Embeddings.Chunking.chunkText(text);
+		return chunks.map((chunkText, index) => ({
+			text: chunkText,
+			sectionPart: index + 1,
+			sectionParts: chunks.length
+		}));
+	}
+
 	// Compute and store embeddings for the given items, skipping any whose
 	// stored embedding is already up to date (via sourceHash). Items with no
 	// embeddable text have any existing embedding removed.
@@ -1982,7 +2493,7 @@ Zotero.Embeddings.Indexing = new function () {
 	// @param {Number} [options.batchCharBudget=12000] - Most characters per
 	//     engine call, counting every text in the batch as long as its longest
 	//     one, since they're padded to that length. Attention memory grows with
-	//     the square of the padded length, so a batch of long abstracts uses
+	//     the square of the padded length, so a batch of long texts uses
 	//     far more memory than the same number of short ones.
 	// @param {Function} [options.shouldStop] - Called before each batch;
 	//     return true to stop early
@@ -2016,6 +2527,23 @@ Zotero.Embeddings.Indexing = new function () {
 		let toEmbed = [];
 		let toDelete = [];
 		for (let item of items) {
+			// An attachment's text lives in a file, so its staleness check is
+			// a file-identity hash rather than a text hash -- reading and
+			// sectioning every attachment on every pass would defeat the
+			// check's purpose
+			if (item.isAttachment()) {
+				let hash = await _getAttachmentSourceHash(item);
+				if (!hash) {
+					if (storedHashes.has(item.id)) {
+						toDelete.push(item.id);
+					}
+					continue;
+				}
+				if (storedHashes.get(item.id) !== hash) {
+					toEmbed.push({ item, hash });
+				}
+				continue;
+			}
 			let text = _getIndexableText(item);
 			if (!text) {
 				if (storedHashes.has(item.id)) {
@@ -2032,32 +2560,75 @@ Zotero.Embeddings.Indexing = new function () {
 			await _deleteEmbeddings(toDelete);
 		}
 
-		// Split note text into chunks that fit the model's context window --
-		// only notes run long enough to need it. A title and abstract, or an
-		// annotation's passage and comment, fit the window in almost all
-		// cases, so they're embedded as a single chunk and the pipeline
-		// truncates the rare outlier.
+		// Derive each entry's chunks. Notes are split to fit the model's
+		// context window; attachments are extracted (see
+		// _getAttachmentChunks()) and split section by section. A title and
+		// abstract, or an annotation's passage and comment, fit the window in
+		// almost all cases, so they're embedded as a single chunk and the
+		// pipeline truncates the rare outlier.
+		let emptyAttachments = [];
 		for (let entry of toEmbed) {
-			// Tokenizing a chunk's worth of long notes takes real time, and a
-			// stop request can be a model switch that's about to clear the
-			// vectors -- so bail out here as well, rather than only between
-			// batches. No embeddings have been written yet at this point,
-			// only the stale-item deletions above, which hold regardless.
+			// Extracting an attachment and tokenizing a chunk's worth of long
+			// notes take real time, and a stop request can be a model switch
+			// that's about to clear the vectors -- so bail out here as well,
+			// rather than only between batches. No embeddings have been
+			// written yet at this point, only the stale-item deletions above,
+			// which hold regardless.
 			if (shouldStop && shouldStop()) {
 				return 0;
 			}
-			entry.chunks = entry.item.isNote()
-				? await Zotero.Embeddings.Chunking.chunkText(entry.text)
-				: [entry.text];
+			if (entry.item.isAttachment()) {
+				entry.chunks = await _getAttachmentChunks(entry.item);
+				// Nothing embeddable anywhere in the attachment (missing
+				// file, password-protected, no text layer). Record the
+				// attempt anyway, so the item counts as processed and isn't
+				// looked at again until the file changes.
+				if (!entry.chunks || !entry.chunks.length) {
+					entry.chunks = [];
+					emptyAttachments.push(entry);
+					continue;
+				}
+			}
+			else if (entry.item.isNote()) {
+				entry.chunks = (await Zotero.Embeddings.Chunking.chunkText(entry.text))
+					.map(text => ({ text }));
+			}
+			else {
+				entry.chunks = [{ text: entry.text }];
+			}
 			entry.vectors = new Array(entry.chunks.length);
 			entry.remaining = entry.chunks.length;
 		}
+		// An attachment with nothing to embed is still processed: replace
+		// whatever an older file left with a single embedding-less row
+		// carrying the current source hash, so the indexed count converges on
+		// the eligible count instead of these items reading as forever
+		// unindexed (see _setUpDB())
+		if (emptyAttachments.length) {
+			await Zotero.DB.executeTransaction(async function () {
+				for (let entry of emptyAttachments) {
+					// The item may have been deleted while we were extracting
+					if (!Zotero.Items.get(entry.item.id)) {
+						continue;
+					}
+					await Zotero.DB.queryAsync(
+						"DELETE FROM embeddings.itemEmbeddings WHERE itemID=?",
+						entry.item.id
+					);
+					await Zotero.DB.queryAsync(
+						"INSERT INTO embeddings.itemEmbeddings "
+							+ "(itemID, chunkIndex, embedding, sourceHash) "
+							+ "VALUES (?, 0, NULL, ?)",
+						[entry.item.id, entry.hash]
+					);
+				}
+			});
+		}
+		toEmbed = toEmbed.filter(entry => entry.chunks.length);
 
-		// Process one library at a time; within it, order by chunk length so
-		// batches pack texts of similar (padded) size
-		let longestChunk = entry => entry.chunks.reduce((max, c) => Math.max(max, c.length), 0);
-		toEmbed.sort((a, b) => (a.item.libraryID - b.item.libraryID)
-			|| (longestChunk(a) - longestChunk(b)));
+		// What gets embedded is the chunk's embedText (its text plus any
+		// outline-path context); plain chunks embed their text as is.
+		let embedText = chunk => chunk.embedText || chunk.text;
 
 		// Batches are packed from the flattened chunks, so an item's chunks
 		// can span batches; its rows are written only once every chunk's
@@ -2069,6 +2640,14 @@ Zotero.Embeddings.Indexing = new function () {
 				units.push({ entry, chunkIndex });
 			}
 		}
+		// Pack batches from chunks of similar size: the engine pads every
+		// text in a batch to its longest one and compute scales with the
+		// padded length, so one long chunk makes a whole mixed batch pay
+		// long-chunk price. Sorting the individual chunks (an item's chunks
+		// legitimately range from captions to window-sized body text) roughly
+		// halves fulltext indexing time versus item-level ordering.
+		units.sort((a, b) => embedText(a.entry.chunks[a.chunkIndex]).length
+			- embedText(b.entry.chunks[b.chunkIndex]).length);
 
 		let done = 0;
 		for (let i = 0; i < units.length;) {
@@ -2081,7 +2660,7 @@ Zotero.Embeddings.Indexing = new function () {
 			let count = 0;
 			while (i + count < units.length && count < maxBatchItems) {
 				let unit = units[i + count];
-				let length = Math.max(longest, unit.entry.chunks[unit.chunkIndex].length);
+				let length = Math.max(longest, embedText(unit.entry.chunks[unit.chunkIndex]).length);
 				if (count && length * (count + 1) > batchCharBudget) {
 					break;
 				}
@@ -2091,7 +2670,7 @@ Zotero.Embeddings.Indexing = new function () {
 			let batch = units.slice(i, i + count);
 			i += count;
 			let vectors = await Zotero.Embeddings.embedPassages(
-				batch.map(unit => unit.entry.chunks[unit.chunkIndex])
+				batch.map(unit => embedText(unit.entry.chunks[unit.chunkIndex]))
 			);
 			let completed = [];
 			for (let j = 0; j < batch.length; j++) {
@@ -2118,15 +2697,35 @@ Zotero.Embeddings.Indexing = new function () {
 						);
 						for (let k = 0; k < entry.vectors.length; k++) {
 							let vector = entry.vectors[k];
+							let chunk = entry.chunks[k];
 							let blob = new Uint8Array(
 								vector.buffer, vector.byteOffset, vector.byteLength
 							);
-							// Keep the embedding blobs out of debug output
+							// The chunk text is stored only for attachments,
+							// whose text lives in a file: it's what the
+							// search-results section previews. Other item
+							// types are their own preview.
+							// Keep the embedding blobs out of debug output.
 							await Zotero.DB.queryAsync(
 								"INSERT INTO embeddings.itemEmbeddings "
-									+ "(itemID, chunkIndex, embedding, sourceHash) "
-									+ "VALUES (?, ?, ?, ?)",
-								[entry.item.id, k, blob, entry.hash],
+									+ "(itemID, chunkIndex, embedding, sourceHash, "
+									+ "chunkText, outlinePath, startBlock, endBlock, "
+									+ "pageLabel, navPosition, sectionPart, sectionParts) "
+									+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+								[
+									entry.item.id,
+									k,
+									blob,
+									entry.hash,
+									entry.item.isAttachment() ? chunk.text : null,
+									chunk.outlinePath || null,
+									chunk.startBlock ?? null,
+									chunk.endBlock ?? null,
+									chunk.pageLabel ?? null,
+									chunk.position ? JSON.stringify(chunk.position) : null,
+									chunk.sectionPart ?? null,
+									chunk.sectionParts ?? null
+								],
 								{ debugParams: false }
 							);
 						}
@@ -2173,6 +2772,11 @@ Zotero.Embeddings.Indexing = new function () {
 
 	/**
 	 * Current runner state, for the preferences UI.
+	 *
+	 * Each library's counts come in two disjoint pairs: `indexed`/`eligible`
+	 * for items, notes, and annotations, and `indexedAttachments`/
+	 * `eligibleAttachments` for attachment fulltext, which is a far bigger and
+	 * slower job. Callers that want whole-library coverage add them up.
 	 */
 	this.getStatus = function () {
 		return {
@@ -2225,10 +2829,18 @@ Zotero.Embeddings.Indexing = new function () {
 		await Zotero.Embeddings.initDB();
 		let eligibleByLibrary = await _getEligibleItemIDs();
 		for (let library of _indexableLibraries()) {
+			let eligible = eligibleByLibrary.get(library.libraryID)
+				|| { items: [], attachments: [] };
+			let indexed = await _getIndexedCounts(library.libraryID);
+			// Attachments are counted separately from everything else, not
+			// included in it -- the two pairs are disjoint, and consumers sum
+			// them when they want the whole library
 			_status.set(library.libraryID, {
 				name: library.name,
-				indexed: await _getIndexedCount(library.libraryID),
-				eligible: (eligibleByLibrary.get(library.libraryID) || []).length
+				indexed: indexed.items,
+				eligible: eligible.items.length,
+				indexedAttachments: indexed.attachments,
+				eligibleAttachments: eligible.attachments.length
 			});
 		}
 		_emitProgress();
@@ -2370,7 +2982,8 @@ Zotero.Embeddings.Indexing = new function () {
 				// Deleted items simply aren't returned; their embeddings are
 				// removed by the delete notifier
 				let items = (await Zotero.Items.getAsync(ids))
-					.filter(item => item.isRegularItem() || item.isNote() || item.isAnnotation());
+					.filter(item => item.isRegularItem() || item.isNote() || item.isAnnotation()
+						|| (_indexFulltextEnabled() && _isIndexableAttachment(item)));
 				if (!items.length) {
 					continue;
 				}
@@ -2411,7 +3024,7 @@ Zotero.Embeddings.Indexing = new function () {
 
 	function _refreshStatusThrottled() {
 		let now = Date.now();
-		if (now - _lastStatusRefresh < 5000) {
+		if (now - _lastStatusRefresh < STATUS_REFRESH_INTERVAL) {
 			return;
 		}
 		_lastStatusRefresh = now;

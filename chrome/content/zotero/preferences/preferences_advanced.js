@@ -152,13 +152,17 @@ Zotero_Preferences.Advanced = {
 	updateSemanticSearchUI: function (status) {
 		let statusBox = document.getElementById('semantic-search-status');
 		statusBox.hidden = !status.enabled;
+		// Fulltext indexing only means something with a model selected
+		document.getElementById('semantic-search-index-fulltext').disabled = !status.enabled;
 		if (!status.enabled) {
 			return;
 		}
 
 		// Phase / status message
 		let phaseLabel = document.getElementById('semantic-search-phase');
-		let hasRemaining = status.libraries.some(lib => lib.indexed < lib.eligible);
+		let hasRemaining = status.libraries.some(
+			lib => lib.indexed < lib.eligible
+				|| lib.indexedAttachments < lib.eligibleAttachments);
 		if (status.error) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
 		}
@@ -214,10 +218,18 @@ Zotero_Preferences.Advanced = {
 				'value',
 				Zotero.Utilities.Internal.stringWithColon(lib.name)
 			);
-			grid.children[i * 2 + 1].setAttribute(
-				'value',
-				`${lib.indexed.toLocaleString()} / ${lib.eligible.toLocaleString()}`
-			);
+			// Attachment fulltext is reported on its own, since it's a much
+			// larger and much slower job than the rest -- one combined count
+			// would look stalled. With fulltext indexing off, none are
+			// eligible and only the item count is shown.
+			let counts = `${lib.indexed.toLocaleString()} / ${lib.eligible.toLocaleString()}`;
+			if (lib.eligibleAttachments) {
+				counts += ` ${Zotero.getString('general.and')} `
+					+ `${lib.indexedAttachments.toLocaleString()} / `
+					+ `${lib.eligibleAttachments.toLocaleString()} `
+					+ Zotero.getString('itemTypes.attachment');
+			}
+			grid.children[i * 2 + 1].setAttribute('value', counts);
 		});
 	},
 	
