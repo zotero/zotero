@@ -36,7 +36,7 @@
 	id="zotero-citation-explorer-dialog"
 	class="zotero-dialog-window"
 	orient="vertical"
-	title="Citation Explorer"
+	data-l10n-id="integration-citationExplorer-window"
 	width="800" height="600"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -54,6 +54,7 @@
 		<link rel="localization" href="browser/browserSets.ftl"/>
 		<link rel="localization" href="zotero.ftl"/>
 		<link rel="localization" href="reader.ftl"/>
+		<link rel="localization" href="integration.ftl"/>
 	</linkset>
 	
 	<script>
@@ -67,10 +68,10 @@
 	<div class="citation-explorer-grid">
 	
 		<!-- Left Column -->
-		<div class="citation-explorer-grid-left grid-padded-section" id="citations-label">Citations</div>
+		<div class="citation-explorer-grid-left grid-padded-section" id="citations-label" data-l10n-id="integration-citationExplorer-citations"></div>
 
 		<div class="searchbox-container citation-explorer-grid-left grid-padded-section">
-			<xul:search-textbox id="citation-search" placeholder="Citation Content" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onCitationFilter()" dir="reverse"/>
+			<xul:search-textbox id="citation-search" data-l10n-id="integration-citationExplorer-citation-search" data-l10n-attrs="placeholder" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onCitationFilter()" dir="reverse"/>
 		</div>
 	
 		<div class="virtualized-table-container citation-explorer-grid-left">
@@ -78,15 +79,15 @@
 		</div>
 
 		<div class="button-container citation-explorer-grid-left grid-padded-section">
-			<input type="button" id="button-show-in-document" value="Show in Document" disabled="true"/>
-			<input type="button" id="button-edit-citation" class="right" value="Edit Citation" disabled="true"/>
+			<input type="button" id="button-show-in-document" data-l10n-id="integration-citationExplorer-show-in-document" disabled="true"/>
+			<input type="button" id="button-edit-citation" class="right" data-l10n-id="integration-citationExplorer-edit-citation" disabled="true"/>
 		</div>
 
 		<!-- Right Column -->
-		<div class="grid-padded-section" id="items-in-bibliography-label">Items in Bibliography</div>
+		<div class="grid-padded-section" id="items-in-bibliography-label" data-l10n-id="integration-citationExplorer-items-in-bibliography"></div>
 
 		<div class="searchbox-container grid-padded-section">
-			<xul:search-textbox id="item-search" placeholder="Title, Creator, Year" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onItemFilter()" dir="reverse"/>
+			<xul:search-textbox id="item-search" data-l10n-id="integration-citationExplorer-item-search" data-l10n-attrs="placeholder" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onItemFilter()" dir="reverse"/>
 		</div>
 		
 		<div class="virtualized-table-container">
@@ -94,8 +95,8 @@
 		</div>
 
 		<div class="button-container grid-padded-section">
-			<input type="button" id="button-show-in-zotero" value="Show in Zotero" disabled="true"/>
-			<input type="button" id="button-manage-items" class="right" value="Add/Link to Library…"/>
+			<input type="button" id="button-show-in-zotero" data-l10n-id="integration-citationExplorer-show-in-zotero" disabled="true"/>
+			<input type="button" id="button-manage-items" class="right" data-l10n-id="integration-citationExplorer-manage-items"/>
 		</div>
 	</div>
 </xul:dialog>

@@ -19,8 +19,27 @@ integration-editBibliography-wrapper =
     { -integration-editBibliography-exclude-cited }
     { -integration-editBibliography-edit-reference }
 
+integration-citationExplorer-window =
+    .title = Citation Explorer
+integration-citationExplorer-citations = Citations
+integration-citationExplorer-citation-search =
+    .placeholder = Citation Content
+integration-citationExplorer-citation-column = Citation
+integration-citationExplorer-linked-column = Is Linked
+integration-citationExplorer-show-in-document =
+    .value = Show in Document
+integration-citationExplorer-edit-citation =
+    .value = Edit Citation
+integration-citationExplorer-items-in-bibliography = Items in Bibliography
+integration-citationExplorer-item-search =
+    .placeholder = Title, Creator, Year
+integration-citationExplorer-show-in-zotero =
+    .value = Show in Zotero
+integration-citationExplorer-manage-items =
+    .value = Add/Link to Collection
+
 integration-citationExplorerWizard-window =
-    .title = Add/Link Document Items
+    .title = Add/Link to Collection
 integration-citationExplorerWizard-choose-header = Choose an Action and Destination
 integration-citationExplorerWizard-choose-description = Choose how to handle items used in this document and where to place them.
 integration-citationExplorerWizard-operation-relink =

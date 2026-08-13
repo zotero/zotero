@@ -52,12 +52,12 @@ let disableCitationActivate;
 const citationColumns = [
 	{
 		dataKey: 'title',
-		label: "Citation",
+		label: 'integration-citationExplorer-citation-column',
 		type: 'html'
 	},
 	{
 		dataKey: 'isLinked',
-		label: 'Is Linked',
+		label: 'integration-citationExplorer-linked-column',
 		iconLabel: <CSSIcon name="link" className="icon-16"/>,
 		width: 26,
 		staticWidth: true,
