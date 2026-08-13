@@ -412,6 +412,7 @@ var Zotero_File_Interface = new function () {
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
+	 * @param {AbortSignal} [options.signal] - Signal to cancel the import before it begins
 	 */
 	this.importFile = async function (options = {}) {
 		if (!options) {
@@ -430,6 +431,7 @@ var Zotero_File_Interface = new function () {
 		var addToLibraryRoot = options.addToLibraryRoot;
 		var linkFiles = options.linkFiles;
 		var onBeforeImport = options.onBeforeImport;
+		var signal = options.signal;
 		
 		if (createNewCollection === undefined && !addToLibraryRoot) {
 			createNewCollection = true;
@@ -449,6 +451,7 @@ var Zotero_File_Interface = new function () {
 		var defaultNewCollectionPrefix = Zotero.getString("fileInterface.imported");
 		
 		var translation;
+		var tmpDirectory;
 		
 		if (options.mendeleyAuth || options.mendeleyCode) {
 			translation = await _getMendeleyTranslation();
@@ -484,8 +487,16 @@ var Zotero_File_Interface = new function () {
 			}
 			else if (file.path.endsWith('@www.mendeley.com.sqlite')
 					|| file.path.endsWith('online.sqlite')) {
-				// Keep in sync with importWizard.js
-				throw new Error('Encrypted Mendeley database');
+				let decrypted = await _decryptMendeleyDatabase(file.path);
+				tmpDirectory = decrypted.tmpDirectory;
+				translation = await _getMendeleyTranslation();
+				translation.createNewCollection = createNewCollection;
+				defaultNewCollectionPrefix = Zotero.getString(
+					'fileInterface.appImportCollection', 'Mendeley'
+				);
+				// Attachments are looked for beside the selected database, not the copy
+				translation.sourceDirectory = PathUtils.parent(file.path);
+				file = Zotero.File.pathToFile(decrypted.path);
 			}
 			
 			if (!translation) {
@@ -494,14 +505,33 @@ var Zotero_File_Interface = new function () {
 			translation.setLocation(file);
 		}
 
-		return _finishImport({
-			translation,
-			createNewCollection,
-			addToLibraryRoot,
-			linkFiles,
-			defaultNewCollectionPrefix,
-			onBeforeImport
-		});
+		try {
+			// Cancelled while the file was being prepared, before there was a
+			// translation to interrupt
+			if (signal?.aborted) {
+				return false;
+			}
+			
+			return await _finishImport({
+				translation,
+				createNewCollection,
+				addToLibraryRoot,
+				linkFiles,
+				defaultNewCollectionPrefix,
+				onBeforeImport
+			});
+		}
+		finally {
+			if (tmpDirectory) {
+				try {
+					Zotero.debug(`Removing decrypted Mendeley database in ${tmpDirectory}`);
+					await IOUtils.remove(tmpDirectory, { recursive: true, ignoreAbsent: true });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		}
 	};
 	
 	
@@ -710,22 +740,46 @@ var Zotero_File_Interface = new function () {
 	};
 	
 	
+	/**
+	 * Decrypt a Mendeley database into a temporary directory
+	 *
+	 * importFile() removes the directory once the import has ended, so that an
+	 * unencrypted copy of the user's library isn't left behind.
+	 *
+	 * @param {String} path - Encrypted Mendeley database
+	 * @return {Promise<Object>} - Path of the decrypted database and of the
+	 *     temporary directory containing it
+	 */
+	var _decryptMendeleyDatabase = async function (path) {
+		let { decryptDatabase, isDatabaseInUse } = ChromeUtils.importESModule(
+			"chrome://zotero/content/import/mendeley/mendeleyDecrypt.mjs"
+		);
+		// The database can only be read once Mendeley has written out its
+		// write-ahead log, which it does when it closes
+		if (await isDatabaseInUse(path)) {
+			// Keep in sync with importWizard.js
+			throw new Error('Mendeley database in use');
+		}
+		let tmpDirectory = PathUtils.join(
+			Zotero.getTempDirectory().path, 'mendeley-' + Zotero.Utilities.randomString()
+		);
+		// The decrypted database is readable without a password, so on Unix keep it
+		// out of reach of other users on the machine
+		await Zotero.File.createDirectoryIfMissingAsync(tmpDirectory, { unixMode: 0o700 });
+		try {
+			let decryptedPath = PathUtils.join(tmpDirectory, PathUtils.filename(path));
+			await decryptDatabase(path, decryptedPath);
+			return { path: decryptedPath, tmpDirectory };
+		}
+		catch (e) {
+			await IOUtils.remove(tmpDirectory, { recursive: true, ignoreAbsent: true });
+			throw e;
+		}
+	};
+	
+	
 	var _getMendeleyTranslation = async function () {
-		let Zotero_Import_Mendeley;
-		if (true) {
-			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.mjs"));
-		}
-		// TEMP: Load uncached from ~/zotero-client for development
-		else {
-			const { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
-			let file = FileUtils.getDir("Home", []);
-			file = OS.Path.join(
-				file.path,
-				'zotero-client', 'chrome', 'content', 'zotero', 'import', 'mendeley', 'mendeleyImport.mjs'
-			);
-			let fileURI = OS.Path.toFileURI(file);
-			({ Zotero_Import_Mendeley } = ChromeUtils.importESModule(fileURI));
-		}
+		let { Zotero_Import_Mendeley } = ChromeUtils.importESModule("chrome://zotero/content/import/mendeley/mendeleyImport.mjs");
 		return new Zotero_Import_Mendeley();
 	};
 	
