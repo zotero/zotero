@@ -35,14 +35,6 @@
 		padding-inline-start: 8px;
 		padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
 		box-sizing: border-box;
-		// A clear divider below the column headers (the default faint border is lost
-		// against the white section-header/spacer rows below it). The header already
-		// carries a second 1px line via ::after, so drop that one to avoid doubling.
-		border-bottom: var(--material-panedivider);
-
-		&::after {
-			border-bottom: none;
-		}
 
 		.cell.hasAttachment,
 		.cell.numNotes {
