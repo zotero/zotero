@@ -287,7 +287,7 @@ Zotero.Embeddings = new function () {
 	// Schema version of the attached embeddings database. The tables are only
 	// created when this is bumped (_setUpDB() drops and recreates everything),
 	// so any schema change needs a bump.
-	const _dbVersion = 1;
+	const _dbVersion = 2;
 
 	let _dbInitPromise = null;
 	let _dbHooksRegistered = false;

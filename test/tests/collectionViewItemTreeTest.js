@@ -213,7 +213,13 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 0, eligible: 0 }]
+					libraries: [{
+						libraryID: Zotero.Libraries.userLibraryID,
+						indexed: 0,
+						eligible: 0,
+						indexedAttachments: 0,
+						eligibleAttachments: 0
+					}]
 				}));
 				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
 			});
@@ -443,11 +449,19 @@ describe("CollectionViewItemTree", function () {
 				let item = await createDataObject('item', { title: "A", collections: [col.id] });
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.resolves(new Map([[item.id, 0.7]])));
+				// The counts are split between the item and attachment pairs, so
+				// the banner's totals prove the two are summed
 				Zotero.Embeddings.Indexing.getStatus.returns({
 					enabled: true,
 					indexing: true,
 					paused: false,
-					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+					libraries: [{
+						libraryID: Zotero.Libraries.userLibraryID,
+						indexed: 700,
+						eligible: 9000,
+						indexedAttachments: 52,
+						eligibleAttachments: 553
+					}]
 				});
 
 				await select(win, col);
@@ -469,7 +483,13 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+					libraries: [{
+						libraryID: Zotero.Libraries.userLibraryID,
+						indexed: 700,
+						eligible: 9000,
+						indexedAttachments: 52,
+						eligibleAttachments: 553
+					}]
 				});
 				await itemsView.setFilter('search', 'between runs query');
 				banner = win.document.querySelector('.best-match-index-banner');
@@ -478,7 +498,13 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: true,
-					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 752, eligible: 9553 }]
+					libraries: [{
+						libraryID: Zotero.Libraries.userLibraryID,
+						indexed: 700,
+						eligible: 9000,
+						indexedAttachments: 52,
+						eligibleAttachments: 553
+					}]
 				});
 				await itemsView.setFilter('search', 'paused query');
 				banner = win.document.querySelector('.best-match-index-banner');
@@ -489,7 +515,13 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{ libraryID: Zotero.Libraries.userLibraryID, indexed: 9553, eligible: 9553 }]
+					libraries: [{
+						libraryID: Zotero.Libraries.userLibraryID,
+						indexed: 9000,
+						eligible: 9000,
+						indexedAttachments: 553,
+						eligibleAttachments: 553
+					}]
 				});
 				await itemsView.setFilter('search', 'another query');
 				assert.notOk(win.document.querySelector('.best-match-index-banner'));
