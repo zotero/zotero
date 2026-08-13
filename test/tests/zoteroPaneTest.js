@@ -1702,15 +1702,19 @@ describe("ZoteroPane", function () {
 			"zotero-tb-sync",
 			"zotero-tb-tabs-menu"
 		];
-		beforeEach(async function () {
-			// The focus traversal relies on focus/blur events, which only fire when
-			// the window is active. It's normally active, but can intermittently lose
-			// activation in CI, so try to restore it if needed. (This may not work.)
+		// The focus traversal relies on focus/blur events, which only fire when the
+		// window is active. It's normally active, but can lose activation --
+		// intermittently in CI, or when another app is focused during a local run --
+		// so restore it if necessary and report whether that worked.
+		async function activatePaneWindow() {
 			if (Services.focus.activeWindow !== win) {
 				win.focus();
 				await Zotero.Promise.delay(100);
 			}
+			return Services.focus.activeWindow === win;
+		}
 
+		beforeEach(async function () {
 			// Reset collection search field state
 			let collectionSearchField = doc.getElementById("zotero-collections-search");
 			let collectionSearchButton = doc.getElementById("zotero-tb-collections-search");
@@ -1723,6 +1727,12 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should shift-tab across the zotero pane", async function () {
+			// Without an active window, the traversal waits for events that never come
+			if (!await activatePaneWindow()) {
+				Zotero.debug("Skipping test -- pane window isn't active");
+				this.skip();
+			}
+
 			// Start from the Advanced Search button (the last focusable element in the
 			// search field) so the first shift-tab exercises advanced button -> search field
 			let advancedButton = doc.getElementById('zotero-tb-search-advanced-button');
@@ -1773,6 +1783,12 @@ describe("ZoteroPane", function () {
 		});
 
 		it("should tab across the zotero pane", async function () {
+			// Without an active window, the traversal waits for events that never come
+			if (!await activatePaneWindow()) {
+				Zotero.debug("Skipping test -- pane window isn't active");
+				this.skip();
+			}
+
 			win.Zotero_Tabs.moveFocus("current");
 			let reversed = [...sequence].reverse();
 			for (let id of reversed) {
