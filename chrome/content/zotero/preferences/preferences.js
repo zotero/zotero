@@ -471,6 +471,17 @@
 			});
 
 			let deferred = Zotero.Promise.defer();
+			// Sync the browser height with the page root's height, so the pane
+			// scrolls in the content area like native panes
+			let startHeightSync = () => {
+				let contentWin = browser.contentWindow;
+				let root = browser.contentDocument.documentElement;
+				let observer = new contentWin.ResizeObserver(Cu.exportFunction(() => {
+					// Ceil so a fractional height can't leave 1px of overflow
+					browser.style.height = Math.ceil(root.getBoundingClientRect().height) + 'px';
+				}, contentWin));
+				observer.observe(root);
+			};
 			// Keep a reference so the weakly held listener isn't garbage-collected
 			pane.progressListener = {
 				onStateChange(webProgress, request, stateFlags, status) {
@@ -503,6 +514,7 @@
 							&& (stateFlags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
 							&& uri.spec === pane.src) {
 						if (Components.isSuccessCode(status)) {
+							startHeightSync();
 							// Fluent via <link rel="localization"> in the page
 							lazy.WindowScopeVariables.setupContentL10n(browser)
 								.then(() => deferred.resolve());
