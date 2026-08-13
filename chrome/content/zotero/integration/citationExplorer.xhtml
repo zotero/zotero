@@ -90,18 +90,12 @@
 		</div>
 		
 		<div class="virtualized-table-container">
-			<div id="zotero-items-tree"></div>
+			<div id="zotero-items-tree" class="citation-explorer-item-tree"></div>
 		</div>
 
 		<div class="button-container grid-padded-section">
 			<input type="button" id="button-show-in-zotero" value="Show in Zotero" disabled="true"/>
-			<input type="button" id="button-relink-item" class="right" value="Relink Item" disabled="true"/>
-			<button is="split-menu-button" id="button-addTo-library"
-					onclick="ZoteroCitationExplorer.addToLibraryAndLink()"
-					popup="item-addTo-menu" disabled="true"/>
-			<xul:popupset>
-				<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroCitationExplorer.buildAddToLibraryContextMenu(event);"/>
-			</xul:popupset>
+			<input type="button" id="button-manage-items" class="right" value="Add/Link to Library…"/>
 		</div>
 	</div>
 </xul:dialog>

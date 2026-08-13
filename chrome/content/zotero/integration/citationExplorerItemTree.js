@@ -37,6 +37,21 @@ const { ItemTreeRow, ZoteroItemTreeRow } = require('zotero/itemTreeRow');
 const UNLINKED_ITEMS_ID = 'UNLINKED_ITEMS';
 
 /**
+ * Sort unlinked items first, then libraries by libraryID.
+ * Used as CitationExplorerItemTree's default compareItems().
+ */
+function getLibraryGroupOrder(row) {
+	if (row.ref?.treeViewID === UNLINKED_ITEMS_ID
+			|| (row.ref?.cslItemID && !row.ref?.id)) {
+		return -1;
+	}
+	if (row.ref instanceof Zotero.Library) {
+		return row.ref.libraryID ?? Zotero.Libraries.userLibraryID;
+	}
+	return row.ref?.libraryID ?? Zotero.Libraries.userLibraryID;
+}
+
+/**
  * Container row wrapping a Zotero.Library.
  */
 class LibraryItemTreeRow extends ItemTreeRow {
@@ -66,7 +81,7 @@ class LibraryItemTreeRow extends ItemTreeRow {
 	}
 
 	getField(field) {
-		if (field === 'title') return this.ref.name;
+		if (field === 'title') return this.getDisplayTitle();
 		return '';
 	}
 
@@ -107,11 +122,6 @@ class UnlinkedItemsTreeRow extends LibraryItemTreeRow {
 		return Zotero.getString('integration.citationExplorer.unlinkedItems');
 	}
 
-	getField(field) {
-		if (field === 'title') return this.getDisplayTitle();
-		return '';
-	}
-
 	getIcon() {
 		let icon = getCSSIcon('cross');
 		icon.classList.add('icon-item-type');
@@ -130,6 +140,11 @@ class CitationExplorerItemTreeRow extends ZoteroItemTreeRow {
 		this.cslItemID = cslItemID;
 	}
 
+	getField(field) {
+		if (field === 'action') return '';
+		return super.getField(field);
+	}
+
 	get isLinked() {
 		return !this.cslItemID;
 	}
@@ -144,10 +159,10 @@ class CitationExplorerItemTreeRow extends ZoteroItemTreeRow {
 
 	renderPrimaryCell(index, data, column) {
 		let cell = super.renderPrimaryCell(index, data, column);
-		if (this.citedIn.length === 0) {
+		if (!this.citedIn.length) {
 			let badge = document.createElement('span');
 			badge.classList.add('badge', 'badge-uncited');
-			badge.textContent = 'Uncited';
+			badge.textContent = Zotero.getString('integration.citationExplorer.uncited');
 			let textSpan = cell.querySelector('.cell-text');
 			if (textSpan) textSpan.after(badge);
 			else cell.appendChild(badge);
@@ -286,6 +301,11 @@ class CitationExplorerRowProvider extends ItemTreeRowProvider {
  * ItemTree subclass that uses CitationExplorerRowProvider.
  */
 class CitationExplorerItemTree extends ItemTree {
+	static defaultProps = {
+		...ItemTree.defaultProps,
+		compareItems: (a, b) => getLibraryGroupOrder(a) - getLibraryGroupOrder(b),
+	};
+
 	constructor(props) {
 		super(props);
 		this.rowProvider = new CitationExplorerRowProvider(this);
@@ -299,6 +319,15 @@ class CitationExplorerItemTree extends ItemTree {
 
 	isSelectable(index, _selectAll = false) {
 		return !!this.getRow(index);
+	}
+
+	handleKeyDown(event) {
+		if (!super.handleKeyDown(event)) return false;
+		if (event.key === ' '
+				&& this.props.onActionMenuOpen?.()) {
+			return false;
+		}
+		return true;
 	}
 
 	_renderItem(index, selection, oldDiv = null, columns = []) {
@@ -315,5 +344,6 @@ module.exports = {
 	LibraryItemTreeRow,
 	UnlinkedItemsTreeRow,
 	UNLINKED_ITEMS_ID,
+	getLibraryGroupOrder,
 };
 

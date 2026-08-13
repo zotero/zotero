@@ -1,3 +1,19 @@
+.citation-explorer-item-tree .virtualized-table .row {
+	.cell .badge {
+		font-size: 11px;
+		padding: 1px 4px;
+		border-radius: 5px;
+		display: inline-block;
+		background: #59ADC44D;
+		margin-left: 4px;
+	}
+
+	&.selected .cell .badge {
+		background: rgba(255, 255, 255, 0.2);
+		color: var(--accent-white);
+	}
+}
+
 #zotero-citation-explorer-dialog {
 	min-height: 500px;
 	min-width: 600px;
@@ -53,22 +69,6 @@
 
 	.virtualized-table:focus-within .row.highlighted:not(.selected) {
 		background: initial !important;
-	}
-
-	.virtualized-table .row {
-		.cell .badge {
-			font-size: 11px;
-			padding: 1px 4px;
-			border-radius: 5px;
-			display: inline-block;
-			background: #59ADC44D;
-			margin-left: 4px;
-		}
-
-		&.selected .cell .badge {
-			background: rgba(255, 255, 255, 0.2);
-			color: --var(accent-white);
-		}
 	}
 
 	.button-container {
