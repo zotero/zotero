@@ -47,7 +47,6 @@ const {
 let io, citations, items, uncitedItems, citationList, itemList;
 let citationRows = [];
 let itemRows = [];
-let _addToTarget;
 let disableCitationActivate;
 
 const citationColumns = [
@@ -96,22 +95,7 @@ window.ZoteroCitationExplorer = {
 		document.querySelector('#button-edit-citation').addEventListener('click', this.onCitationEdit.bind(this));
 
 		document.querySelector('#button-show-in-zotero').addEventListener('click', this.onItemActivate.bind(this));
-		document.querySelector('#button-relink-item').addEventListener('click', this.onItemRelink.bind(this));
-		
-		let lastTranslationTarget = Zotero.Prefs.get('citationExplorer.lastAddToTarget');
-		if (lastTranslationTarget) {
-			let id = parseInt(lastTranslationTarget.substr(1));
-			if (lastTranslationTarget[0] == "L") {
-				_addToTarget = Zotero.Libraries.get(id);
-			}
-			else if (lastTranslationTarget[0] == "C") {
-				_addToTarget = Zotero.Collections.get(id);
-			}
-		}
-		if (!_addToTarget) {
-			_addToTarget = Zotero.Libraries.userLibrary;
-		}
-		this.setAddToButton();
+		document.querySelector('#button-manage-items').addEventListener('click', this.onManageItems.bind(this));
 		
 		io = window.arguments[0].wrappedJSObject;
 		citations = Object.values(io.citations);
@@ -188,19 +172,6 @@ window.ZoteroCitationExplorer = {
 				onSelectionChange: this.onItemSelectionChange.bind(this),
 				onActivate: this.onItemActivate.bind(this),
 				emptyMessage: Zotero.getString('pane.items.loading'),
-				compareItems: (a, b) => {
-					let getGroupOrder = (row) => {
-						if (row.ref?.treeViewID === UNLINKED_ITEMS_ID
-							|| (row.ref?.cslItemID && !row.ref?.id)) {
-							return -1;
-						}
-						if (row.ref instanceof Zotero.Library) {
-							return row.ref.libraryID ?? Zotero.Libraries.userLibraryID;
-						}
-						return row.ref?.libraryID ?? Zotero.Libraries.userLibraryID;
-					};
-					return getGroupOrder(a) - getGroupOrder(b);
-				},
 			});
 			await itemList.waitForLoad();
 			// Remove focus from citationList if focus is on itemList
@@ -423,11 +394,8 @@ window.ZoteroCitationExplorer = {
 		let isItemRow = focusedRow instanceof CitationExplorerItemTreeRow;
 		let isUnlinked = isItemRow && !focusedRow.isLinked;
 		let noneItemsSelected = selectedRows.length === 0;
-		let canRelink = selectedRows.length === 1 && selectedRows[0] === focusedRow && isUnlinked;
 
 		document.querySelector('#button-show-in-zotero').disabled = noneItemsSelected || !isItemRow || isUnlinked;
-		document.querySelector('#button-relink-item').disabled = !canRelink;
-		document.querySelector('#button-addTo-library').disabled = noneItemsSelected;
 		
 		await this.refreshCitationList();
 	},
@@ -437,7 +405,7 @@ window.ZoteroCitationExplorer = {
 		if (focusedRow instanceof LibraryItemTreeRow) return;
 
 		if (!focusedRow.isLinked && itemList.selection.count === 1) {
-			this.onItemRelink();
+			this.onManageItems();
 		}
 		else {
 			let selectedItems = [...itemList.selection.selected]
@@ -448,153 +416,22 @@ window.ZoteroCitationExplorer = {
 		}
 	},
 
-	onItemRelink: async function () {
-		let treeRow = itemList.getRow(itemList.selection.focused);
-		let oldItemID = treeRow.id;
-
-		let libraryIDs = Zotero.Libraries.getAll()
-			.filter(library => library.libraryType != 'feed')
-			.map(library => library.libraryID);
-		let itemIDs = await new Zotero.Duplicates(libraryIDs).findDuplicatesOf(treeRow.ref);
-		let io = {
-			dataIn: null,
-			dataOut: null,
-			itemIDs: itemIDs.length ? itemIDs : undefined,
-			multiSelect: false,
-			onlyRegularItems: true,
-			deferred: Zotero.Promise.defer()
-		};
-		window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
-			'chrome,dialog=no,centerscreen,resizable=yes', io);
-
-		await io.deferred.promise;
-		if (!io.dataOut || !io.dataOut.length) {
-			return;
+	onManageItems: async function () {
+		let wizardIO = Object.assign({}, io, {
+			completed: false,
+			deferred: Zotero.Promise.defer(),
+		});
+		wizardIO.wrappedJSObject = wizardIO;
+		window.openDialog(
+			'chrome://zotero/content/integration/citationExplorerWizard.xhtml',
+			'',
+			'chrome,dialog=no,centerscreen,resizable=yes',
+			wizardIO
+		);
+		await wizardIO.deferred.promise;
+		if (wizardIO.completed) {
+			window.close();
 		}
-
-		let items = await Zotero.Items.getAsync(io.dataOut);
-		if (!items.length) {
-			return;
-		}
-		const itemIdx = itemRows.findIndex(row => row.id === oldItemID);
-		this._linkItem(items[0], oldItemID, itemIdx);
-
-		await this._initMappings();
-		await this.refreshCitationList();
-		await this.refreshItemList();
-		await itemList.selectItem(items[0].id);
-	},
-
-	async addToLibraryAndLink() {
-		var collectionID = _addToTarget.objectType == 'collection' ? _addToTarget.id : undefined;
-		
-		// Load library data
-		let targetLibraryID = _addToTarget.libraryID || _addToTarget.library.libraryID;
-		let library = Zotero.Libraries.get(targetLibraryID);
-		if (!library.getDataLoaded('item')) {
-			Zotero.debug("Waiting for items to load for library " + library.libraryID);
-			await library.waitForDataLoad('item');
-		}
-		
-		for (let index of itemList.selection.selected) {
-			let treeRow = itemList.getRow(index);
-			if (treeRow instanceof LibraryItemTreeRow) continue;
-			const oldItemID = treeRow.id;
-			const itemIdx = itemRows.findIndex(row => row.id === oldItemID);
-			
-			// Save item
-			let item = treeRow.ref.clone(_addToTarget.libraryID);
-			if (collectionID) {
-				item.addToCollection(collectionID);
-			}
-			await item.saveTx();
-			this._linkItem(item, oldItemID, itemIdx);
-		}
-		await this._initMappings();
-		await this.refreshCitationList();
-		await this.refreshItemList();
-	},
-	
-	_linkItem(item, oldItemID, itemIdx) {
-		// For all citations where the item is cited
-		for (let citationIndex of itemRows[itemIdx].citedIn) {
-			let citation = citations[citationIndex];
-			let citationItemIdx = citation.citationItems.findIndex(i => i.id == oldItemID);
-			let citationItem = citation.citationItems[citationItemIdx];
-			// Update the citation with the new item
-			citationItem.id = item.id;
-			citationItem.uris = Zotero.Integration.currentSession.uriMap.getURIsForItemID(citationItem.id);
-			// Mark citation for an update with citeproc and write changes to doc
-			io.updateIndex(citationIndex);
-		}
-		items[itemIdx] = item;
-	},
-			
-	buildAddToLibraryContextMenu(event) {
-		var menu = document.querySelector('#item-addTo-menu');
-		// Don't trigger rebuilding on nested popupmenu open/close
-		if (event.target != menu) {
-			return;
-		}
-		// Clear previous items
-		while (menu.firstChild) {
-			menu.removeChild(menu.firstChild);
-		}
-		
-		let target = Zotero.Prefs.get('citationExplorer.lastAddToTarget');
-		if (!target) {
-			target = "L" + Zotero.Libraries.userLibraryID;
-		}
-		
-		var libraries = Zotero.Libraries.getAll();
-		for (let library of libraries) {
-			if (!library.editable || library.libraryType == 'publications') {
-				continue;
-			}
-			Zotero.Utilities.Internal.createMenuForTarget(
-				library,
-				menu,
-				target,
-				function(event, libraryOrCollection) {
-					if (event.target.tagName == 'menu') {
-						Zotero.Promise.coroutine(function* () {
-							// Simulate menuitem flash on OS X
-							if (Zotero.isMac) {
-								event.target.setAttribute('_moz-menuactive', false);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', false);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
-							}
-							menu.hidePopup();
-							
-							ZoteroCitationExplorer.setAddToTarget(libraryOrCollection);
-							event.stopPropagation();
-						})();
-					}
-					else {
-						ZoteroCitationExplorer.setAddToTarget(libraryOrCollection);
-						event.stopPropagation();
-					}
-				}
-			);
-		}
-	},
-	
-	setAddToTarget(translationTarget) {
-		_addToTarget = translationTarget;
-		Zotero.Prefs.set('citationExplorer.lastAddToTarget', translationTarget.treeViewID);
-		this.setAddToButton();
-	},
-	
-	setAddToButton() {
-		var label = Zotero.getString('pane.item.addTo', _addToTarget.name);
-		var elem = document.querySelector('#button-addTo-library');
-		elem.label = label;
-		elem.title = label;
-		elem.image = _addToTarget.treeViewImage;
 	},
 	
 	
