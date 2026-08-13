@@ -61,6 +61,21 @@ describe("Zotero.DataObject", function () {
 			}
 		});
 
+		it("should load 0 as a number", async function () {
+			for (let type of types) {
+				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+				let obj = await createDataObject(type);
+				let id = obj.id;
+				await Zotero.DB.queryAsync(
+					`UPDATE ${objectsClass.table} SET clientVersion=0 WHERE ${objectsClass.idColumn}=?`,
+					id
+				);
+				objectsClass.unload(id);
+				obj = await objectsClass.getAsync(id);
+				assert.strictEqual(obj.clientVersion, 0, type + " clientVersion mismatch");
+			}
+		});
+
 		it("should increase after modifying object", async function () {
 			for (let type of types) {
 				let obj = await createDataObject(type);
