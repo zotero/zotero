@@ -5108,6 +5108,48 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
+		it("should sync the embedded browser height with the page height", async function () {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane();
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				let browser = win.document.querySelector(".pane-container.embedded browser");
+				let initialHeight = 0;
+				for (let i = 0; i < 100; i++) {
+					initialHeight = browser.getBoundingClientRect().height;
+					if (initialHeight > 0) break;
+					await Zotero.Promise.delay(20);
+				}
+				assert.isAbove(initialHeight, 0, "browser should get the page height after load");
+				assert.equal(browser.contentWindow.scrollMaxY, 0,
+					"page should not scroll vertically after sync");
+
+				let filler = browser.contentDocument.createElement("div");
+				filler.style.height = "2000px";
+				browser.contentDocument.body.appendChild(filler);
+				let grownHeight = initialHeight;
+				for (let i = 0; i < 100 && grownHeight < initialHeight + 1900; i++) {
+					await Zotero.Promise.delay(20);
+					grownHeight = browser.getBoundingClientRect().height;
+				}
+				assert.isAtLeast(grownHeight, initialHeight + 1900, "browser should grow with the page");
+				assert.equal(browser.contentWindow.scrollMaxY, 0,
+					"page should not scroll vertically after growing");
+
+				filler.remove();
+				let shrunkHeight = grownHeight;
+				for (let i = 0; i < 100 && shrunkHeight > initialHeight + 100; i++) {
+					await Zotero.Promise.delay(20);
+					shrunkHeight = browser.getBoundingClientRect().height;
+				}
+				assert.isBelow(shrunkHeight, initialHeight + 100, "browser should shrink when the page shrinks");
+			}
+			finally {
+				win.close();
+			}
+		});
+
 		it("should match and highlight embedded pane content when searching", async function () {
 			loadPrefPaneTestScope();
 			await registerTestPane();
