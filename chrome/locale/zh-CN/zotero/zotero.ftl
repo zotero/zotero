@@ -386,7 +386,7 @@ items-table-cell-notes =
         { $count ->
            *[other] { $count } 个笔记
         }
-items-column-added-by = 创建人
+items-column-added-by = 添加人
 items-column-modified-by = 修改人
 items-column-last-read = 最后阅读时间
 report-error =
@@ -733,7 +733,7 @@ item-pane-header-none =
 item-pane-header-title =
     .label = 标题
 item-pane-header-titleCreatorYear =
-    .label = 标题、创建者、年份
+    .label = 标题、创作者、年份
 item-pane-header-bibEntry =
     .label = 参考文献表条目
 item-pane-header-more-options =
@@ -861,7 +861,7 @@ search-conditions-numAttachments = 附件数量
 search-conditions-numAnnotations = 注释数量
 search-conditions-note = 笔记
 search-conditions-childNote = 子笔记
-search-conditions-creator = 创建者
+search-conditions-creator = 创作者
 search-conditions-thesisType = 论文类型
 search-conditions-reportType = 报告类型
 search-conditions-videoRecordingFormat = 视频格式
@@ -885,7 +885,7 @@ search-conditions-annotationType = 注释类型
 search-conditions-annotationColor = 注释颜色
 search-conditions-annotationAuthor = 注释作者
 search-conditions-anyField = 任何字段
-search-conditions-titleCreatorYear = 标题、创建者、年份
+search-conditions-titleCreatorYear = 标题、创作者、年份
 search-conditions-submenu-attachment = 附件
 search-conditions-submenu-annotation = 注释
 search-conditions-short-fulltextContent = 内容
@@ -1071,10 +1071,10 @@ undo-action-remove-tags-from-item =
     }
 undo-action-remove-all-tags = 删除所有标签
 undo-action-edit-note = 编辑笔记
-undo-action-add-creator = 添加创建者
-undo-action-remove-creator = 移除创建者
-undo-action-edit-creator = 编辑创建者
-undo-action-reorder-creator = 重新排序创建者
+undo-action-add-creator = 添加创作者
+undo-action-remove-creator = 移除创作者
+undo-action-edit-creator = 编辑创作者
+undo-action-reorder-creator = 重新排序创作者
 undo-action-change-type = 更改条目类型
 undo-action-change-parent-item =
     { $count ->

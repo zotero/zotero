@@ -107,8 +107,9 @@ integration-citationDialog-items-table-added =
     .aria-label = Ce document a été ajouté à la citation. Appuyer sur { return-or-enter } pour l'ajouter à nouveau ou sur { delete-or-backspace } pour le retirer.
 integration-citationDialog-add-to-citation-tooltip =
     { $count ->
-        [one] Add to Citation
-       *[other] Add { $count } Items to Citation
+        [one] Ajouter à la citation
+        [many] Ajouter { $count } documents à la citation
+       *[other] Ajouter { $count } documents à la citation
     }
 integration-citationDialog-add-all = Ajouter tout
 integration-citationDialog-collapse-section =

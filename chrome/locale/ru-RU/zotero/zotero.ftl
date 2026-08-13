@@ -56,7 +56,7 @@ general-clear = Очистить
 clear-button =
     .label = { general-clear }
 general-update = Обновить
-general-reset-to-default = Reset to Default
+general-reset-to-default = Сбросить настройки к умолчаниям
 general-back = Назад
 general-edit = Редактировать
 general-cut = Вырезать
@@ -74,9 +74,9 @@ general-more-information = Дополнительные сведения
 general-warning = Внимание
 general-type-to-continue = Введите “{ $text }”, чтобы продолжить.
 general-continue = Продолжить
-general-allow = Allow
-general-always-allow = Always Allow
-general-deny = Deny
+general-allow = Разрешить
+general-always-allow = Всегда разрешать
+general-deny = Запретить
 general-red = Красный
 general-orange = Оранжевый
 general-yellow = Жёлтый
@@ -90,8 +90,8 @@ general-maroon = Тёмно-бордовый
 general-gray = Серый
 general-black = Чёрный
 general-loading = Загрузка...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Проверка целостности базы данных…
+db-repairing = Восстановление базы данных…
 citation-style-label = Стиль цитирования:
 language-label = Язык:
 menu-custom-group-submenu =
@@ -181,8 +181,8 @@ collections-menu-show-recently-read =
 item-menu-remove-from-recently-read =
     .label = Удалить из { recently-read }…
 collections-menu-clear-all-last-read =
-    .label = Clear All Last Read Dates…
-recently-read-clear-all-confirm = All Last Read dates in this library will be erased.
+    .label = Очистить все даты последнего чтения…
+recently-read-clear-all-confirm = Все даты последнего чтения в этой библиотеке будут удалены.
 items-section-collections-selected =
     { $count ->
         [one] { $count } коллекция выбрана
@@ -192,38 +192,48 @@ items-section-collections-selected =
     }
 items-section-searches-selected =
     { $count ->
-        [one] { $count } saved search selected
-       *[other] { $count } saved searches selected
+        [one] { $count } сохраненный поисковый запрос выбран
+        [few] { $count } сохраненных поисковых запроса выбраны
+        [many] { $count } сохраненных поисковых запросов выбраны
+       *[other] { $count } сохраненных поисковых запросов выбраны
     }
 items-section-sources-selected =
     { $count ->
-        [one] { $count } source selected
-       *[other] { $count } sources selected
+        [one] { $count } выбранный источник
+        [few] { $count } выбранных источника
+        [many] { $count } выбранных источников
+       *[other] { $count } выбранных источников
     }
 items-section-library-collections =
     { $count ->
-        [one] { $library } ({ $count } collection selected)
-       *[other] { $library } ({ $count } collections selected)
+        [one] { $library } ({ $count } коллекция выбрана)
+        [few] { $library } ({ $count } коллекции выбраны)
+        [many] { $library } ({ $count } коллекций выбраны)
+       *[other] { $library } ({ $count } коллекций выбраны)
     }
 items-section-library-searches =
     { $count ->
-        [one] { $library } ({ $count } saved search selected)
-       *[other] { $library } ({ $count } saved searches selected)
+        [one] { $library } ({ $count } сохранённый поиск выбран)
+        [few] { $library } ({ $count } сохранённых поиска выбраны)
+        [many] { $library } ({ $count } сохранённых поисков выбраны)
+       *[other] { $library } ({ $count } сохранённых поисков выбраны)
     }
 items-section-library-sources =
     { $count ->
-        [one] { $library } ({ $count } source selected)
-       *[other] { $library } ({ $count } sources selected)
+        [one] { $library } ({ $count } источник выбран)
+        [few] { $library } ({ $count } источника выбраны)
+        [many] { $library } ({ $count } источников выбраны)
+       *[other] { $library } ({ $count } источников выбраны)
     }
 items-section-library-recently-read = { $library } ({ recently-read })
 items-section-library = { $library }
 collections-menu-rename =
-    .label = Rename
+    .label = Переименовать
 edit-saved-search = Редактировать сохранённый поиск
 collections-menu-edit-search =
-    .label = Edit Search
+    .label = Редактировать поисковый запрос
 collections-menu-duplicate-search =
-    .label = Duplicate Search
+    .label = Дублировать поисковый запрос
 collections-menu-move-collection =
     .label = Переместить в
 collections-menu-copy-collection =
@@ -231,63 +241,83 @@ collections-menu-copy-collection =
 collections-menu-export =
     .label = Экспорт…
 collections-menu-generate-report =
-    .label = Generate Report…
+    .label = Создать отчёт…
 collections-menu-create-bibliography =
-    .label = Create Bibliography…
+    .label = Создать библиографию…
 collections-menu-unsubscribe =
-    .label = Unsubscribe…
+    .label = Отписаться…
 collections-menu-delete =
     .label =
         { $count ->
-            [one] Delete Collection…
-           *[other] Delete Collections…
+            [one] Удалить коллекцию…
+            [few] Удалить коллекции…
+            [many] Удалить коллекции…
+           *[other] Удалить коллекции…
         }
 collections-menu-delete-with-items =
     .label =
         { $count ->
-            [one] Delete Collection and Items…
-           *[other] Delete Collections and Items…
+            [one] Удалить коллекцию и элементы…
+            [few] Удалить коллекции и элементы…
+            [many] Удалить коллекции и элементы…
+           *[other] Удалить коллекции и элементы…
         }
 collections-menu-delete-search =
     .label =
         { $count ->
-            [one] Delete Search…
-           *[other] Delete Searches…
+            [one] Удалить поисковый запрос…
+            [few] Удалить поисковые запросы…
+            [many] Удалить поисковые запросы…
+           *[other] Удалить поисковые запросы…
         }
 collections-delete-title =
     { $count ->
-        [one] Delete Collection
-       *[other] Delete Collections
+        [one] Удалить коллекцию
+        [few] Удалить коллекции
+        [many] Удалить коллекции
+       *[other] Удалить коллекции
     }
 collections-delete-message =
     { $count ->
-        [one] Are you sure you want to delete this collection?
-       *[other] Are you sure you want to delete { $count } collections?
+        [one] Вы уверены, что хотите удалить эту коллекцию?
+        [few] Вы уверены, что хотите удалить { $count } коллекции?
+        [many] Вы уверены, что хотите удалить { $count } коллекций?
+       *[other] Вы уверены, что хотите удалить { $count } коллекций?
     }
 collections-delete-keep-items =
     { $count ->
-        [one] Items within this collection will not be deleted.
-       *[other] Items within these collections will not be deleted.
+        [one] Элементы в этой коллекции не будут удалены.
+        [few] Элементы в этих коллекциях не будут удалены.
+        [many] Элементы в этих коллекциях не будут удалены.
+       *[other] Элементы в этих коллекциях не будут удалены.
     }
 collections-delete-with-items-title =
     { $count ->
-        [one] Delete Collection and Items
-       *[other] Delete Collections and Items
+        [one] Удалить коллекцию и элементы
+        [few] Удалить коллекции и элементы
+        [many] Удалить коллекции и элементы
+       *[other] Удалить коллекции и элементы
     }
 collections-delete-with-items-message =
     { $count ->
-        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
-       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+        [one] Вы уверены, что хотите удалить эту коллекцию и переместить все элементы из неё в корзину?
+        [few] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
+        [many] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
+       *[other] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
     }
 collections-delete-search-title =
     { $count ->
-        [one] Delete Search
-       *[other] Delete Searches
+        [one] Удалить поисковый запрос
+        [few] Удалить поисковые запросы
+        [many] Удалить поисковые запросы
+       *[other] Удалить поисковые запросы
     }
 collections-delete-search-message =
     { $count ->
-        [one] Are you sure you want to delete this search?
-       *[other] Are you sure you want to delete { $count } searches?
+        [one] Вы уверены, что хотите удалить этот поисковый запрос?
+        [few] Вы уверены, что хотите удалить { $count } поисковых запросов?
+        [many] Вы уверены, что хотите удалить { $count } поисковых запросов?
+       *[other] Вы уверены, что хотите удалить { $count } поисковых запросов?
     }
 item-creator-moveDown =
     .label = Переместить вниз
@@ -401,7 +431,7 @@ import-online-relink-only =
     .label = Заменить ссылки на цитирования из Mendeley Desktop
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } не смог подсоединиться к { $targetApp }. Пожалуйста, проверьте своё подключение к интернету и попробуйте снова.
-tab-title-multiple-collections = Multiple
+tab-title-multiple-collections = Множественный
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -1062,7 +1092,7 @@ item-pane-batch-editing-prompt =
     .aria-label = Batch editing
 item-pane-batch-editing-enable =
     .label = Edit Multiple Items…
-item-pane-batch-editing-multiple-values-placeholder = Multiple
+item-pane-batch-editing-multiple-values-placeholder = Множественный
 item-pane-batch-editing-clear-values = Clear all values
 item-pane-batch-editing-header =
     { $count ->

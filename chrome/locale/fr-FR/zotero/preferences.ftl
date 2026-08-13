@@ -73,7 +73,7 @@ preferences-advanced-enable-local-api =
     .label = Autoriser d'autres applications sur cet ordinateur à communiquer avec { -app-name }
 preferences-advanced-local-api-available = Disponible à l'adresse <code data-l10n-name="url">{ $url }</span>
 preferences-advanced-local-api-clear-authorizations =
-    .label = Clear Write Authorizations
+    .label = Révoquer les autorisations d'écriture
 preferences-advanced-server-disabled = Le serveur HTTP { -app-name } est désactivé.
 preferences-advanced-server-enable-and-restart =
     .label = Activer et redémarrer

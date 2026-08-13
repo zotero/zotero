@@ -56,7 +56,7 @@ general-clear = Effacer
 clear-button =
     .label = { general-clear }
 general-update = Mettre à jour
-general-reset-to-default = Reset to Default
+general-reset-to-default = Rétablir les valeurs par défaut
 general-back = Page précédente
 general-edit = Modifier
 general-cut = Couper
@@ -1183,5 +1183,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Annuler { $action }
 menu-edit-redo-action = Répéter { $action }
-local-api-authorize-title = Local API Authorization
+local-api-authorize-title = Autorisation de l'API locale
 local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.
