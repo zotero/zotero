@@ -237,7 +237,7 @@
 	background: var(--material-background);
 	height: 1.83333333em; // 22px @ 12px font size
 	overflow: hidden;
-	border-bottom: 1px solid var(--material-border-quarternary);
+	border-bottom: var(--material-panedivider);
 	padding-inline: 8px;
 	box-sizing: border-box;
 	padding-inline-end: calc(8px + var(--scrollbar-width, 0px));
@@ -256,23 +256,6 @@
 		}
 		[title] {
 			pointer-events: auto;
-		}
-	}
-
-	&::after {
-		content: "";
-		display: block;
-		border-bottom: var(--material-border-quarternary);
-		height: 1px;
-		width: 100%;
-		position: absolute;
-		top: calc(1.83333333em - 1px);
-		left: 0;
-		right: 0;
-		z-index: 1;
-
-		@include comfortable {
-			top: calc(2.33333333em - 1px);
 		}
 	}
 
