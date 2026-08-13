@@ -73,8 +73,6 @@ describe("Zotero.DataObject", function () {
 				objectsClass.unload(id);
 				obj = await objectsClass.getAsync(id);
 				assert.strictEqual(obj.clientVersion, 0, type + " clientVersion mismatch");
-				await obj.loadAllData();
-				await obj.eraseTx();
 			}
 		});
 
