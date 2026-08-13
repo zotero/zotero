@@ -92,15 +92,9 @@
 		display: none;
 	}
 
-	// Embedded plugin panes fill the content area; the page scrolls internally
-	& > .pane-container.embedded {
-		flex: 1;
-		min-height: 0;
-
-		.plugin-pane-browser {
-			flex: 1;
-			min-height: 300px;
-		}
+	// Embedded plugin pane browsers are sized to their page's root height
+	& > .pane-container.embedded .plugin-pane-browser {
+		flex-shrink: 0;
 	}
 }
 
