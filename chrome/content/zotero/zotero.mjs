@@ -38,7 +38,6 @@ const xpcomFilesAll = [
 	'dataDirectory',
 	'debug',
 	'error',
-	'utilities/edtf',
 	'utilities/date',
 	'utilities/utilities',
 	'utilities/utilities_item',
