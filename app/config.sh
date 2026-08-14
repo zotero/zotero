@@ -1,17 +1,17 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Version of Gecko to build with
-GECKO_VERSION_MAC="140.12.0esr"
-GECKO_VERSION_LINUX="140.12.0esr"
-GECKO_VERSION_WIN="140.12.0esr"
+GECKO_VERSION_MAC="140.13.0esr"
+GECKO_VERSION_LINUX="140.13.0esr"
+GECKO_VERSION_WIN="140.13.0esr"
 RUST_VERSION=1.86.0
 
 # URL prefix for custom builds of Firefox components
 custom_components_url="https://download.zotero.org/dev/firefox-components/"
 custom_components_hash_mac=""
-custom_components_hash_win_x64="de075a96b3fba226382d9625ff0ad755b1baa41fff1c3307cc4c9d0d98720c87"
-custom_components_hash_win_arm64="105d20e38a03eed6e86e4eba54ae5907f904c4688ed6832950842152bc22153a"
-custom_components_hash_win32="69ec0b87ae48143b6985fa2ba33d8ceff851bd9a92587fa609a38e817d895bbe"
+custom_components_hash_win_x64="37804490f7348ff2989d4a36a9bc7e6365e5ef43673251e9d6b8b3bdcde92820"
+custom_components_hash_win_arm64="71a415af80bdf2716b6861f3daf5c99d5d61f20d7af2aaf0dbb07265e14cff2b"
+custom_components_hash_win32="e45b18e8a5fc65bfccffec5b8b7805f1943460e594a9792816a5744877a6a6d1"
 
 APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"
