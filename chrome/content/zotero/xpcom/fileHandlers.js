@@ -283,7 +283,18 @@ Zotero.FileHandlers = {
 	_handlersWin: {
 		pdf: [
 			{
-				name: new RegExp(''), // Match any handler
+				name: /chrome\.exe|msedge\.exe|firefox\.exe/i,
+				async open(appPath, { filePath, page }) {
+					let args = [Zotero.File.pathToFileURI(filePath)];
+					if (page !== undefined) {
+						// Chrome/Edge/Firefox uses URL fragment for page number
+						args[0] += '#page=' + page;
+					}
+					await Zotero.FileHandlers._checkAndExecWithoutBlocking(appPath, args);
+				}
+			},
+			{
+				name: new RegExp(''), // Fallback for other handlers
 				async open(appPath, { filePath, page }) {
 					let args = [filePath];
 					if (page !== undefined) {
