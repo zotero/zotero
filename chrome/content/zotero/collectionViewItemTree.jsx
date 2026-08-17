@@ -537,6 +537,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// applied to rows carried over from the previous view
 			this._sort(options.forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
 			
+			// Set the new search state before refreshing open containers, so that
+			// getChildItems() filters child rows (e.g. non-matching annotations)
+			// against the new search results rather than the previous view's
+			this._searchMode = newSearchMode;
+			this._searchItemIDs = newSearchItemIDs; // items matching the search
+
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
 			for (let i = this.rows.length - 1; i >= 0; i--) {
@@ -552,8 +558,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				this.refreshRowMap();
 			}
 
-			this._searchMode = newSearchMode;
-			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this.itemTree.invalidateRowCache(true);
 				
 			if (this.viewMode != 'publications') {
@@ -709,28 +713,29 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 			// For a refresh on an item in the trash, check if the item hadn't been restored
 			if (type == 'item' && this.viewMode == 'trash') {
-				let rows = [];
+				let rows = new Set();
 				for (let id of ids) {
 					let row = this.getRowIndexByID(id);
 					if (row === false) continue;
 					let item = Zotero.Items.get(id);
-					let isParentTrashed = item.parentItemID
-						? Zotero.Items.get(item.parentItemID).deleted
-						: false;
-					// Remove parent row if it isn't deleted, its parent isn't deleted, and it
-					// doesn't have any deleted children (shown by numChildren including deleted
-					// being the same as numChildren not including deleted)
-					if (!item.deleted && !isParentTrashed
-							&& (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
-						rows.push(row);
+					if (!item) continue;
+					let topLevelItem = item.topLevelItem;
+					let isAnythingDeleted = topLevelItem.deleted
+						|| topLevelItem.getAllDescendents(true).length > topLevelItem.getAllDescendents(false).length;
+					// Remove the top-level item's row if neither it nor any of its
+					// descendents remain trashed
+					if (!isAnythingDeleted) {
+						let topLevelRow = this.getRowIndexByID(topLevelItem.treeViewID);
+						if (topLevelRow === false) continue;
+						rows.add(topLevelRow);
 						// And all its children in the tree
-						for (let child = row + 1; child < this.getRowCount() && this.itemTree.getLevel(child) > this.itemTree.getLevel(row); child++) {
-							rows.push(child);
+						for (let child = topLevelRow + 1; child < this.getRowCount() && this.itemTree.getLevel(child) > this.itemTree.getLevel(topLevelRow); child++) {
+							rows.add(child);
 						}
 					}
 				}
-				if (rows.length) {
-					this._removeRows(rows);
+				if (rows.size) {
+					this._removeRows([...rows]);
 					rowsToInvalidate = true; // all rows
 					this.runListeners('update', true);
 					this.itemTree.runListeners('rowCountChange');
@@ -766,9 +771,30 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				// Row might already be gone (e.g. if this is a child and
 				// 'modify' was sent to parent)
 				let row = this._rowMap[ids[i]];
+				// A hidden child (e.g. an annotation of a collapsed attachment) can
+				// still change how its parent renders when trashed -- an attachment
+				// whose only annotation is trashed stops being an expandable
+				// container -- so re-render the parent's row
+				if (push && row === undefined && action == 'trash') {
+					let trashedItem = Zotero.Items.get(ids[i]);
+					if (trashedItem && trashedItem.parentItemID) {
+						let parentRowIndex = this._rowMap[trashedItem.parentItemID];
+						if (parentRowIndex !== undefined) {
+							this.itemTree.invalidateRowCache([trashedItem.parentItemID]);
+							this.itemTree.tree?.invalidateRow(parentRowIndex);
+						}
+					}
+				}
 				if (push && row !== undefined) {
 					// Don't remove child items from collections, because it's handled by 'modify'
 					if (action == 'remove' && this.itemTree.getParentIndex(row) != -1) {
+						continue;
+					}
+					// When viewing the trash, a trashed item belongs in the view, so
+					// don't remove its rows (which can be visible as context rows).
+					// The accompanying 'modify' event triggers a refresh that
+					// re-renders them as regular trash rows.
+					if (action == 'trash' && this.viewMode == 'trash') {
 						continue;
 					}
 					rows.push(row);
@@ -900,6 +926,15 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					if (parentItemRowIndex === undefined) continue;
 					if (this.isContainerOpen(parentItemRowIndex)) {
 						this._refreshContainer(parentItemRowIndex);
+						madeChanges = true;
+					}
+					// If the parent is collapsed, the restored child can still change how
+					// its row renders -- e.g. a restored annotation makes an attachment
+					// with no other visible children an expandable container again --
+					// so re-render the parent's row
+					else {
+						this.itemTree.invalidateRowCache([item.parentItemID]);
+						this.itemTree.tree?.invalidateRow(parentItemRowIndex);
 					}
 				}
 
@@ -2050,12 +2085,8 @@ class CollectionViewItemTree extends ItemTree {
 
 			let collectionTreeRows = this.collectionTreeRows;
 
-			// If all selected items are annotations, for now erase them skipping trash
-			if (selectedItems.length && selectedItems.every(item => item.isAnnotation())) {
-				await Zotero.Items.erase(selectedItemIDs);
-			}
-			else if (this.viewMode == 'bucket') {
-				collectionTreeRows[0].ref.deleteItems(ids);
+			if (this.viewMode == 'bucket') {
+				collectionTreeRows[0].ref.deleteItems(selectedItemIDs);
 			}
 			else if (this.viewMode == 'trash') {
 				let [trashedCollectionIDs, trashedSearches] = [[], []];

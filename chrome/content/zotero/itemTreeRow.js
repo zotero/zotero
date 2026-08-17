@@ -461,12 +461,12 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 		return true;
 	}
 
-	isContainerEmpty() {
-		return this.ref.numAnnotations() == 0;
+	isContainerEmpty({ includeTrashed } = {}) {
+		return this.ref.numAnnotations(includeTrashed) == 0;
 	}
 
-	getChildItems({ searchMode, searchItemIDs } = {}) {
-		let annotations = this.ref.getAnnotations();
+	getChildItems({ searchMode, searchItemIDs, includeTrashed } = {}) {
+		let annotations = this.ref.getAnnotations(includeTrashed);
 		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
 		// annotations match a search, show only those and hide the rest. If none match,
 		// show them all, since otherwise the attachment couldn't be expanded to browse its

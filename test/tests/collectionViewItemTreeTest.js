@@ -2080,6 +2080,222 @@ describe("CollectionViewItemTree", function () {
 					assert.isFalse(zp.itemsView.getRowIndexByID(o3.treeViewID));
 				})
 			}
+
+			describe("Annotations", function () {
+				async function createItemWithAnnotation() {
+					let item = await createDataObject('item');
+					let attachment = await importFileAttachment('test.pdf', { parentItemID: item.id });
+					let annotation = await createAnnotation('highlight', attachment);
+					return { item, attachment, annotation };
+				}
+
+				it("should trash annotation row on delete in library view", async function () {
+					let { item, attachment, annotation } = await createItemWithAnnotation();
+
+					await selectLibrary(win);
+					await waitForItemsLoad(win);
+					itemsView = zp.itemsView;
+					await itemsView.selectItems([annotation.id]);
+					await itemsView.deleteSelection();
+
+					// The annotation is trashed, not erased, and its row is gone
+					assert.isTrue(annotation.deleted);
+					assert.isFalse(itemsView.getRowIndexByID(annotation.id));
+					assert.isNumber(itemsView.getRowIndexByID(attachment.id));
+					assert.isNumber(itemsView.getRowIndexByID(item.id));
+				});
+
+				it("should show trashed annotation under context rows in the trash", async function () {
+					let { item, attachment, annotation } = await createItemWithAnnotation();
+					annotation.deleted = true;
+					await annotation.saveTx();
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+
+					// Untrashed ancestors are shown as context rows
+					assert.isNumber(itemsView.getRowIndexByID(item.id));
+					itemsView.expandAllRows(true);
+					let annotationRow = itemsView.getRowIndexByID(annotation.id);
+					assert.isNumber(annotationRow);
+					assert.equal(itemsView.getRow(annotationRow).type, 'annotation');
+					assert.isNumber(itemsView.getRowIndexByID(attachment.id));
+				});
+
+				it("should remove context rows when the last trashed annotation is restored", async function () {
+					let { item, attachment, annotation } = await createItemWithAnnotation();
+					annotation.deleted = true;
+					await annotation.saveTx();
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+					await zp.selectItems([annotation.id]);
+					await zp.restoreSelectedItems();
+
+					assert.isFalse(annotation.deleted);
+					assert.isFalse(itemsView.getRowIndexByID(annotation.id));
+					assert.isFalse(itemsView.getRowIndexByID(attachment.id));
+					assert.isFalse(itemsView.getRowIndexByID(item.id));
+				});
+
+				it("should keep context rows when other trashed annotations remain", async function () {
+					let { item, attachment, annotation } = await createItemWithAnnotation();
+					let annotation2 = await createAnnotation('highlight', attachment);
+					annotation.deleted = true;
+					await annotation.saveTx();
+					annotation2.deleted = true;
+					await annotation2.saveTx();
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+					await zp.selectItems([annotation.id]);
+					await zp.restoreSelectedItems();
+
+					assert.isFalse(annotation.deleted);
+					assert.isTrue(annotation2.deleted);
+					assert.isNumber(itemsView.getRowIndexByID(item.id));
+					itemsView.expandAllRows(true);
+					assert.isNumber(itemsView.getRowIndexByID(annotation2.id));
+				});
+
+				it("shouldn't remove context annotation row when it is trashed while viewing the trash", async function () {
+					// Show non-matching annotations so the untrashed annotation
+					// appears as a context row
+					Zotero.Prefs.set("hideContextAnnotationRows", false);
+
+					let { attachment, annotation } = await createItemWithAnnotation();
+					let annotation2 = await createAnnotation('highlight', attachment);
+					annotation.deleted = true;
+					await annotation.saveTx();
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+					itemsView.expandAllRows(true);
+					// The untrashed annotation is visible as a context row
+					assert.isNumber(itemsView.getRowIndexByID(annotation2.id));
+
+					// Trash it from outside the view (e.g. the reader or another window)
+					annotation2.deleted = true;
+					await annotation2.saveTx();
+
+					// The row remains, now as a regular trash row
+					assert.isTrue(annotation2.deleted);
+					assert.isNumber(itemsView.getRowIndexByID(annotation2.id));
+
+					Zotero.Prefs.clear("hideContextAnnotationRows");
+				});
+
+				it("should erase annotation permanently when deleted from the trash", async function () {
+					let { annotation } = await createItemWithAnnotation();
+					annotation.deleted = true;
+					await annotation.saveTx();
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+					await itemsView.selectItems([annotation.id]);
+					await itemsView.deleteSelection();
+
+					assert.isFalse(Zotero.Items.get(annotation.id));
+				});
+
+				it("should hide non-matching context annotations on first render of the trash", async function () {
+					Zotero.Prefs.set("hideContextAnnotationRows", true);
+
+					let attachment = await importFileAttachment('test.pdf');
+					let annotation1 = await createAnnotation('highlight', attachment);
+					let annotation2 = await createAnnotation('highlight', attachment);
+
+					// Expand the standalone attachment in the library view, so its
+					// open row is carried over into the trash view's row rebuild
+					await waitForItemsLoad(win);
+					itemsView = zp.itemsView;
+					itemsView.expandAllRows(true);
+					assert.isNumber(itemsView.getRowIndexByID(annotation1.id));
+
+					await Zotero.Items.trashTx([annotation1.id]);
+
+					await selectTrash(win);
+					itemsView = zp.itemsView;
+					// Only the trashed annotation is shown; the non-matching context
+					// annotation is hidden from the very first render
+					assert.isNumber(itemsView.getRowIndexByID(annotation1.id));
+					assert.isFalse(itemsView.getRowIndexByID(annotation2.id));
+
+					Zotero.Prefs.clear("hideContextAnnotationRows");
+				});
+
+				it("should render restored annotation row after undoing trash", async function () {
+					let collection = await createDataObject('collection');
+					await select(win, collection);
+					itemsView = zp.itemsView;
+					let item = await createDataObject('item', { collections: [collection.id] });
+					let attachment = await importFileAttachment('test.pdf', { parentItemID: item.id });
+					let annotation = await createAnnotation('highlight', attachment, { comment: "undoTrashUniqueComment" });
+					// A second annotation keeps the attachment container non-empty (and
+					// so expanded) while the first annotation is in the trash
+					await createAnnotation('highlight', attachment);
+					await waitForItemsLoad(win);
+
+					itemsView.expandAllRows(true);
+					assert.isNumber(itemsView.getRowIndexByID(annotation.id));
+
+					await Zotero.Items.trashTx([annotation.id]);
+					assert.isFalse(itemsView.getRowIndexByID(annotation.id));
+
+					// Undo (as via Cmd-Z)
+					await Zotero.UndoHistory.undo();
+					assert.isFalse(annotation.deleted);
+					assert.isNumber(itemsView.getRowIndexByID(annotation.id));
+					// The row is rendered again without any further interaction
+					await waitForCallback(
+						() => [...win.document.querySelectorAll('#zotero-items-tree .annotation-comment')]
+							.some(el => el.textContent.includes("undoTrashUniqueComment")),
+						50, 3
+					);
+				});
+
+				it("should re-render collapsed attachment's twisty when its annotation is restored", async function () {
+					let collection = await createDataObject('collection');
+					await select(win, collection);
+					itemsView = zp.itemsView;
+					let item = await createDataObject('item', { collections: [collection.id] });
+					let attachment = await importFileAttachment('test.pdf', {
+						title: 'twistyRestoreUnique.pdf', parentItemID: item.id
+					});
+					let annotation = await createAnnotation('highlight', attachment);
+					// A note keeps the item's container non-empty (and so expanded)
+					// while the attachment is in the trash
+					await createDataObject('item', { itemType: 'note', parentID: item.id });
+					await waitForItemsLoad(win);
+
+					itemsView.expandAllRows(true);
+					assert.isNumber(itemsView.getRowIndexByID(annotation.id));
+
+					await Zotero.Items.trashTx([annotation.id]);
+					await Zotero.Items.trashTx([attachment.id]);
+					assert.isFalse(itemsView.getRowIndexByID(attachment.id));
+
+					// Undo trashing the attachment: its row is back, rendered as a
+					// non-container since its only annotation is still trashed
+					await Zotero.UndoHistory.undo();
+					assert.isFalse(attachment.deleted);
+					let attachmentRowIndex = itemsView.getRowIndexByID(attachment.id);
+					assert.isNumber(attachmentRowIndex);
+					assert.isTrue(itemsView.isContainerEmpty(attachmentRowIndex));
+
+					// Undo trashing the annotation: the attachment is a container
+					// again and its row gets a twisty without further interaction
+					await Zotero.UndoHistory.undo();
+					assert.isFalse(annotation.deleted);
+					assert.isFalse(itemsView.isContainerEmpty(itemsView.getRowIndexByID(attachment.id)));
+					await waitForCallback(
+						() => [...win.document.querySelectorAll('#zotero-items-tree .row')]
+							.some(rowEl => rowEl.textContent.includes('twistyRestoreUnique')
+								&& rowEl.querySelector('.twisty')),
+						50, 3
+					);
+				});
+			});
 		});
 		
 		describe("My Publications", function () {
@@ -3373,6 +3589,23 @@ describe("CollectionViewItemTree", function () {
 			assert.isFalse(itemsView.getRowIndexByID(childAttachment.id));
 			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
 		});
+
+		it("should keep collapsed parent selected when a missing child precedes it in the selection", async function () {
+			let parentItem = await createDataObject('item', { title: 'Parent Item' });
+			let childAttachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await waitForItemsLoad(win);
+
+			let parentRow = itemsView.getRowIndexByID(parentItem.id);
+			itemsView.rowProvider._closeContainer(parentRow);
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+
+			itemsView.selection.clearSelection();
+			// The missing child selects the parent as a fallback; the parent
+			// itself must not toggle that selection back off
+			await itemsView._restoreSelection([childAttachment, parentItem], false, false);
+
+			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
+		});
 	});
 
 	describe("primary cell rendering", function () {
@@ -3503,17 +3736,18 @@ describe("CollectionViewItemTree", function () {
 			assert.deepEqual(rowIDs, zp.itemsView._rows.map(row => row.id));
 		});
 
-		it("should erase annotation on escape when row is selected", async () => {
+		it("should trash annotation row on forced delete", async () => {
 			zp.itemsView.expandAllRows(true);
 
-			// Select and delete ink annotation
+			// Select and trash ink annotation
 			let inkID = ink.id;
 			await zp.itemsView.selectItems([inkID]);
 
-			await zp.itemsView.deleteSelection();
+			await zp.itemsView.deleteSelection(true);
 
-			// Make sure it is deleted and the row is gone
-			assert.isFalse(Zotero.Items.get(inkID));
+			// Make sure it is trashed, not erased, and the row is gone
+			let inkItem = Zotero.Items.get(inkID);
+			assert.isTrue(inkItem.deleted);
 			assert.isFalse(zp.itemsView.getRowIndexByID(inkID));
 		});
 

@@ -50,7 +50,7 @@ let readAloudCachePruned = false;
 const UNDO_ACTIONS = {
 	'add-annotations': 'undo-action-add-annotation',
 	'update-annotations': 'undo-action-edit-annotation',
-	'delete-annotations': 'undo-action-delete-annotation',
+	'delete-annotations': 'undo-action-trash-annotation',
 	'convert-annotations': 'undo-action-convert-annotation',
 	'merge-annotations': 'undo-action-merge-annotations',
 };
@@ -250,6 +250,8 @@ class ReaderInstance {
 			location,
 			readOnly: this._isReadOnly(),
 			preview,
+			// Deleted annotations are sent to the trash rather than erased
+			trashesAnnotations: true,
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
 			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,
@@ -319,6 +321,12 @@ class ReaderInstance {
 						}
 						// Save annotation, and save image to cache
 						else {
+							// Trashed annotations never appear in the reader's annotations array,
+							// so a save for a trashed item can only mean the reader undid the
+							// trashing (see onDeleteAnnotations), and the item should be restored
+							if (item && item.deleted) {
+								item.deleted = false;
+							}
 							// Delete authorName to prevent setting annotationAuthorName unnecessarily
 							delete annotation.authorName;
 							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
@@ -348,14 +356,18 @@ class ReaderInstance {
 				let libraryID = attachment.libraryID;
 				let notifierQueue = new Zotero.Notifier.Queue();
 				try {
-					for (let key of keys) {
-						let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
-						// Make sure the annotation actually belongs to the current PDF
-						if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
-							this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
-							await annotation.eraseTx({ notifierQueue });
+					// Deleted annotations are sent to the trash
+					await Zotero.DB.executeTransaction(async () => {
+						for (let key of keys) {
+							let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
+							// Make sure the annotation actually belongs to the current PDF
+							if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
+								this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
+								annotation.deleted = true;
+								await annotation.save({ notifierQueue });
+							}
 						}
-					}
+					});
 				}
 				catch (e) {
 					this.displayError(e);
@@ -814,6 +826,12 @@ class ReaderInstance {
 
 	unsetAnnotations(keys) {
 		this._internalReader.unsetAnnotations(Components.utils.cloneInto(keys, this._iframeWindow));
+	}
+
+	// Drop reader history points referencing permanently deleted annotations,
+	// so they can't be recreated with the same keys by undo/redo
+	clearAnnotationsHistory(keys) {
+		this._internalReader.clearAnnotationsHistory?.(Components.utils.cloneInto(keys, this._iframeWindow));
 	}
 
 	async navigate(location) {
@@ -2923,11 +2941,30 @@ class Reader {
 					if (event === 'trash' && (ids.includes(item.id) || ids.includes(item.parentItemID))) {
 						reader.close();
 					}
+					else if (event === 'trash') {
+						// Trashed annotations are removed from the reader
+						let trashedKeys = item.getAnnotations(true)
+							.filter(annotation => ids.includes(annotation.id))
+							.map(annotation => annotation.key);
+						if (trashedKeys.length) {
+							reader.annotationItemIDs = item.getAnnotations().map(x => x.id);
+							reader.unsetAnnotations(trashedKeys);
+						}
+					}
 					else if (event === 'delete') {
 						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
 						if (disappearedIDs.length) {
 							let keys = disappearedIDs.map(id => extraData[id].key);
 							reader.unsetAnnotations(keys);
+						}
+						// Permanently deleted annotations must not be recreatable by
+						// replaying reader history.
+						let erasedKeys = ids
+							.map(id => extraData?.[id])
+							.filter(data => data && data.libraryID === item.libraryID)
+							.map(data => data.key);
+						if (erasedKeys.length) {
+							reader.clearAnnotationsHistory(erasedKeys);
 						}
 					}
 					else {

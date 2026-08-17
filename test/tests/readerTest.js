@@ -242,15 +242,17 @@ describe("Reader", function () {
 					Zotero.UndoHistory.getUndoAction().action, 'undo-action-add-annotation'
 				);
 
-				// Undoing from outside the reader should remove the annotation
+				// Undoing from outside the reader should move the annotation to the trash
 				assert.isTrue(await Zotero.UndoHistory.undo());
-				await waitForItemEvent('delete');
+				await waitForItemEvent('trash');
 				assert.lengthOf(attachment.getAnnotations(), 0);
+				assert.lengthOf(attachment.getAnnotations(true), 1);
 
-				// Redoing should bring it back (with a new key, to avoid sync conflicts)
+				// Redoing should restore it from the trash with the same key
 				assert.isTrue(await Zotero.UndoHistory.redo());
-				await waitForItemEvent('add');
+				await waitForItemEvent('modify');
 				assert.lengthOf(attachment.getAnnotations(), 1);
+				assert.equal(attachment.getAnnotations()[0].key, annotation.id);
 
 				// An edit should be undoable as its own step
 				annotationManager.updateAnnotations(
@@ -301,7 +303,7 @@ describe("Reader", function () {
 
 				win.Zotero_Tabs.select('zotero-pane');
 				assert.isTrue(await Zotero.UndoHistory.undo());
-				await waitForItemEvent('delete');
+				await waitForItemEvent('trash');
 				assert.equal(win.Zotero_Tabs.selectedID, reader.tabID);
 			}
 			finally {
@@ -368,7 +370,7 @@ describe("Reader", function () {
 				assert.isFalse(Zotero.UndoHistory.hasNativeUndo(win.document));
 				// As the Edit menu and key_undo do
 				win.goDoCommand('cmd_undo');
-				await waitForItemEvent('delete');
+				await waitForItemEvent('trash');
 				assert.lengthOf(attachment.getAnnotations(), 0);
 			}
 			finally {
@@ -571,6 +573,144 @@ describe("Reader", function () {
 						action: Zotero.ftl.formatValueSync('undo-action-add-annotation', { count: 1 })
 					})
 				);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should trash annotation deleted in the reader and restore it on reader undo', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let highlight = await createAnnotation('highlight', attachment);
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+
+				// Delete annotation from the reader
+				annotationManager.deleteAnnotations(
+					Components.utils.cloneInto([highlight.key], reader._iframeWindow)
+				);
+				await waitForItemEvent('trash');
+
+				// The item is trashed, not erased, and removed from the reader
+				assert.isTrue(highlight.deleted);
+				assert.notInclude(annotationManager._annotations.map(x => x.id), highlight.key);
+
+				// Undoing in the reader restores the same item from the trash
+				annotationManager.undo();
+				await waitForItemEvent('modify');
+				assert.isFalse(highlight.deleted);
+				assert.include(annotationManager._annotations.map(x => x.id), highlight.key);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should restore annotation trashed in the reader when undoing from the library', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let highlight = await createAnnotation('highlight', attachment);
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				annotationManager.deleteAnnotations(
+					Components.utils.cloneInto([highlight.key], reader._iframeWindow)
+				);
+				await waitForItemEvent('trash');
+				assert.isTrue(highlight.deleted);
+
+				// The reader's delete step is mirrored into the app-wide history
+				// as a single entry
+				assert.equal(
+					Zotero.UndoHistory.getUndoAction().action, 'undo-action-trash-annotation'
+				);
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('modify');
+				assert.isFalse(highlight.deleted);
+				assert.isFalse(Zotero.UndoHistory.canUndo());
+				assert.include(annotationManager._annotations.map(x => x.id), highlight.key);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should remove annotation from the reader when trashed from the library', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let highlight = await createAnnotation('highlight', attachment);
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				assert.include(annotationManager._annotations.map(x => x.id), highlight.key);
+
+				await Zotero.Items.trashTx([highlight.id]);
+
+				assert.notInclude(annotationManager._annotations.map(x => x.id), highlight.key);
+				assert.notInclude(reader.annotationItemIDs, highlight.id);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should re-add annotation to the reader when restored from the trash', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let highlight = await createAnnotation('highlight', attachment);
+			highlight.deleted = true;
+			await highlight.saveTx();
+
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				// Trashed annotations aren't loaded
+				assert.notInclude(annotationManager._annotations.map(x => x.id), highlight.key);
+
+				highlight.deleted = false;
+				await highlight.saveTx();
+
+				// setAnnotations() conversion is async, so poll for the row to appear
+				await waitForCallback(
+					() => annotationManager._annotations.map(x => x.id).includes(highlight.key),
+					50, 3
+				);
+				assert.include(reader.annotationItemIDs, highlight.id);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should not restore annotation from reader history after it is erased from the trash', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let highlight = await createAnnotation('highlight', attachment);
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+
+				// Trash from the reader, leaving a delete point in its history
+				annotationManager.deleteAnnotations(
+					Components.utils.cloneInto([highlight.key], reader._iframeWindow)
+				);
+				await waitForItemEvent('trash');
+				assert.isTrue(annotationManager.canUndo);
+
+				// Permanently delete from the trash
+				await Zotero.Items.erase([highlight.id]);
+
+				// The reader history points referencing the annotation are dropped,
+				// so it can't be recreated with the same key
+				assert.isFalse(annotationManager.canUndo);
+				assert.isFalse(Zotero.Items.getByLibraryAndKey(attachment.libraryID, highlight.key));
 			}
 			finally {
 				await cleanupReaders(reader);

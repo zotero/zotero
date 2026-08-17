@@ -1270,9 +1270,9 @@ undo-action-edit-annotation = { $count ->
     [one] Edit Annotation
    *[other] Edit { $count } Annotations
 }
-undo-action-delete-annotation = { $count ->
-    [one] Delete Annotation
-   *[other] Delete { $count } Annotations
+undo-action-trash-annotation = { $count ->
+    [one] Trash Annotation
+   *[other] Trash { $count } Annotations
 }
 undo-action-convert-annotation = { $count ->
     [one] Convert Annotation

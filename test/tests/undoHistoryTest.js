@@ -92,6 +92,38 @@ describe("Zotero.UndoHistory", function () {
 			assert.isFalse(item2.deleted);
 			assert.isFalse(Zotero.UndoHistory.canUndo());
 		});
+
+		it("should undo and redo trashing an annotation", async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let annotation = await createAnnotation('highlight', attachment);
+			Zotero.UndoHistory.clear();
+
+			await Zotero.Items.trashTx([annotation.id]);
+			assert.isTrue(annotation.deleted);
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			await Zotero.UndoHistory.undo();
+			assert.isFalse(annotation.deleted);
+
+			await Zotero.UndoHistory.redo();
+			assert.isTrue(annotation.deleted);
+		});
+
+		it("should undo trashing multiple annotations as a single step", async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let annotation1 = await createAnnotation('highlight', attachment);
+			let annotation2 = await createAnnotation('note', attachment);
+			Zotero.UndoHistory.clear();
+
+			await Zotero.Items.trashTx([annotation1.id, annotation2.id]);
+			assert.isTrue(annotation1.deleted);
+			assert.isTrue(annotation2.deleted);
+
+			await Zotero.UndoHistory.undo();
+			assert.isFalse(annotation1.deleted);
+			assert.isFalse(annotation2.deleted);
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+		});
 	});
 
 	describe("item metadata field edit", function () {
