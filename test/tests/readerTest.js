@@ -276,6 +276,58 @@ describe("Reader", function () {
 			assert.isFalse(Zotero.UndoHistory.canRedo());
 		});
 
+		it('should keep recording annotation edits after the undo history is cleared', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				let annotation = annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				let editComment = async (comment) => {
+					annotationManager.updateAnnotations(
+						Components.utils.cloneInto([{ id: annotation.id, comment }], reader._iframeWindow)
+					);
+					await waitForItemEvent('modify');
+				};
+				// The second edit is joined into the first one's history step,
+				// as continued typing in a comment is
+				await editComment('a');
+				await editComment('ab');
+
+				// A sync applying remote changes discards the history
+				Zotero.UndoHistory.clear();
+				assert.isFalse(Zotero.UndoHistory.canUndo());
+
+				// Typing in the same comment is joined into that step again, but
+				// it's still a change we haven't recorded, so it has to be undoable
+				await editComment('abc');
+				assert.isTrue(Zotero.UndoHistory.canUndo());
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('modify');
+				// The reader's step reverts the last change joined into it
+				assert.equal(attachment.getAnnotations()[0].annotationComment, 'ab');
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
 		it('should select the reader tab when undoing an annotation change from the library', async function () {
 			let attachment = await importFileAttachment('test.pdf');
 			let reader = await Zotero.Reader.open(attachment.itemID);
@@ -394,6 +446,37 @@ describe("Reader", function () {
 				}
 
 				assert.isTrue(Zotero.UndoHistory.hasNativeUndo(win.document));
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should not leave undo to text editing while a reader checkbox has focus', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+				reader._internalReader.toggleFindPopup(
+					Components.utils.cloneInto({ open: true }, reader._iframeWindow)
+				);
+				let doc = reader._iframeWindow.document;
+				// The find popup focuses its own text box when it opens
+				let checkbox = await waitForCallback(() => doc.getElementById('highlight-all'));
+				await Zotero.Promise.delay(200);
+				checkbox.focus();
+				await Zotero.Promise.delay(100);
+				// Focus only moves into the reader while its window is active
+				if (win.document.commandDispatcher.focusedWindow !== reader._iframeWindow
+						|| doc.activeElement !== checkbox) {
+					Zotero.debug("Skipping test -- reader checkbox couldn't be focused");
+					this.skip();
+				}
+
+				// A checkbox has no text editing component, so there's nothing
+				// for native text editing to undo
+				assert.isFalse(Zotero.UndoHistory.hasNativeUndo(win.document));
 			}
 			finally {
 				await cleanupReaders(reader);

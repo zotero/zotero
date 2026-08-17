@@ -106,7 +106,7 @@ Zotero.UndoHistory = {
 	 */
 	registerProvider(providerID, { libraryID, undo, redo, reveal, window }) {
 		this._providers.set(providerID,
-			{ libraryID, undo, redo, reveal, window, lastStepID: 0 });
+			{ libraryID, undo, redo, reveal, window, seenSteps: new Map() });
 	},
 
 	/**
@@ -124,12 +124,14 @@ Zotero.UndoHistory = {
 	/**
 	 * Bring a provider's entries in line with the provider's own history.
 	 *
-	 * Steps are ordered oldest first and identified by an id that increases
+	 * Steps are ordered oldest first and identified by an ID that increases
 	 * monotonically, plus a revision that changes when a step absorbs a later
 	 * change (e.g., continued typing in an annotation comment). Steps the
-	 * provider no longer has are dropped; steps newer than any we've seen are
-	 * pushed onto the undo stack; and a step whose revision changed moves back
-	 * to the top of the stack, since it now covers the most recent change.
+	 * provider no longer has are dropped. A step we haven't seen, or one whose
+	 * revision changed since we last saw it, covers a new change, so it goes
+	 * to the top of the undo stack. A step reported with a revision we've
+	 * already seen is left alone, so entries discarded in the meantime (e.g.
+	 * by a clear()) aren't brought back.
 	 *
 	 * @param {String} providerID
 	 * @param {Object} history
@@ -141,34 +143,36 @@ Zotero.UndoHistory = {
 		if (!provider || !this.isEnabled()) {
 			return;
 		}
-		let stepIDs = new Set([...undoSteps, ...redoSteps].map(step => step.id));
+		let steps = [...undoSteps, ...redoSteps];
+		let stepIDs = new Set(steps.map(step => step.id));
 		this._filterEntries(
 			entry => entry.providerID !== providerID || stepIDs.has(entry.stepID)
 		);
-		let added = false;
+		let changed = false;
 		for (let step of undoSteps) {
-			if (step.id > provider.lastStepID) {
-				this._undoStack.push({
-					providerID,
-					stepID: step.id,
-					revision: step.revision,
-					libraryID: provider.libraryID,
-					action: step.action,
-					actionArgs: step.actionArgs || null
-				});
-				added = true;
+			if (provider.seenSteps.get(step.id) === step.revision) {
 				continue;
 			}
 			let index = this._undoStack.findIndex(
 				entry => entry.providerID === providerID && entry.stepID === step.id);
-			if (index !== -1 && this._undoStack[index].revision !== step.revision) {
-				let [entry] = this._undoStack.splice(index, 1);
-				entry.revision = step.revision;
-				this._undoStack.push(entry);
+			if (index === -1) {
+				this._undoStack.push({
+					providerID,
+					stepID: step.id,
+					libraryID: provider.libraryID,
+					action: step.action,
+					actionArgs: step.actionArgs || null
+				});
 			}
+			else {
+				this._undoStack.push(...this._undoStack.splice(index, 1));
+			}
+			changed = true;
 		}
-		provider.lastStepID = Math.max(provider.lastStepID, ...stepIDs);
-		if (added) {
+		provider.seenSteps = new Map(steps.map(step => [step.id, step.revision]));
+		if (changed) {
+			// Any new change invalidates redo, including one absorbed into a
+			// step we already had an entry for
 			this._redoStack = [];
 			this._trimUndoStack();
 		}
@@ -306,7 +310,7 @@ Zotero.UndoHistory = {
 			if (!this._getProviderForWindow(focusedWindow)) {
 				return true;
 			}
-			return this._isTextBoxFocused(focusedWindow);
+			return this._isTextBoxFocused(focusedWindow, cmd);
 		}
 		let el = doc.commandDispatcher.focusedElement;
 		if (!el) return false;
@@ -314,6 +318,15 @@ Zotero.UndoHistory = {
 				&& !this._getProviderForWindow(el.contentWindow)) {
 			return true;
 		}
+		return this._elementSupportsCommand(el, cmd);
+	},
+
+	/**
+	 * @param {Element} el
+	 * @param {String} cmd
+	 * @return {Boolean}
+	 */
+	_elementSupportsCommand(el, cmd) {
 		let controllers;
 		try {
 			controllers = el.controllers;
@@ -357,12 +370,17 @@ Zotero.UndoHistory = {
 	 * editing owns undo/redo for it
 	 *
 	 * @param {Window} win
+	 * @param {String} cmd
 	 * @return {Boolean}
 	 */
-	_isTextBoxFocused(win) {
+	_isTextBoxFocused(win, cmd) {
 		let el = win.document.activeElement;
-		return !!el
-			&& (el.isContentEditable || ['input', 'textarea'].includes(el.localName));
+		if (!el) {
+			return false;
+		}
+		// A contenteditable's undo/redo is handled by an editing controller on
+		// the window rather than one of its own
+		return el.isContentEditable || this._elementSupportsCommand(el, cmd);
 	},
 
 	/**
