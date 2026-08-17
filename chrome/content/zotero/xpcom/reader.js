@@ -824,14 +824,14 @@ class ReaderInstance {
 		}
 	}
 
-	unsetAnnotations(keys) {
-		this._internalReader.unsetAnnotations(Components.utils.cloneInto(keys, this._iframeWindow));
-	}
-
-	// Drop reader history points referencing permanently deleted annotations,
-	// so they can't be recreated with the same keys by undo/redo
-	clearAnnotationsHistory(keys) {
-		this._internalReader.clearAnnotationsHistory?.(Components.utils.cloneInto(keys, this._iframeWindow));
+	// Pass permanentlyDeleted for annotations that were erased rather than
+	// trashed, so the reader also drops its history points referencing them
+	// and undo/redo can't recreate them with the same keys
+	unsetAnnotations(keys, permanentlyDeleted) {
+		this._internalReader.unsetAnnotations(
+			Components.utils.cloneInto(keys, this._iframeWindow),
+			permanentlyDeleted
+		);
 	}
 
 	async navigate(location) {
@@ -2952,19 +2952,14 @@ class Reader {
 						}
 					}
 					else if (event === 'delete') {
-						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
-						if (disappearedIDs.length) {
-							let keys = disappearedIDs.map(id => extraData[id].key);
-							reader.unsetAnnotations(keys);
-						}
-						// Permanently deleted annotations must not be recreatable by
-						// replaying reader history.
+						// Erased non-annotation keys can't match anything in the reader,
+						// so all keys deleted from the library can be passed as is
 						let erasedKeys = ids
 							.map(id => extraData?.[id])
 							.filter(data => data && data.libraryID === item.libraryID)
 							.map(data => data.key);
 						if (erasedKeys.length) {
-							reader.clearAnnotationsHistory(erasedKeys);
+							reader.unsetAnnotations(erasedKeys, true);
 						}
 					}
 					else {
