@@ -25,7 +25,7 @@
 <!ENTITY zotero.general.reset "Сбросить">
 
 
-<!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
+<!ENTITY zotero.errorReport.title "Отчёт об ошибке Zotero">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчёт об ошибке будет отправлен.">
 <!ENTITY zotero.errorReport.submitted "Отчёт об ошибке отправлен.">
 <!ENTITY zotero.errorReport.reportID "Номер отчёта:">
@@ -37,12 +37,12 @@
 <!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Zotero должна быть обновлена для работы с новой версией.">
 <!ENTITY zotero.upgrade.autoBackup "Резервная копия вашей базы данных Zotero будет сделана автоматически до каких-либо изменений.">
 <!ENTITY zotero.upgrade.majorUpgrade "Это крупное обновление.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Пожалуйста, посмотрите">
-<!ENTITY zotero.upgrade.majorUpgradeLink "инструкцию к обновлению">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Пожалуйста, просмотрите">
+<!ENTITY zotero.upgrade.majorUpgradeLink "инструкции к обновлению">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "прежде чем продолжить.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Дождитесь окончания процесса обновления. Это займёт некоторое время.">
 <!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база данных Zotero была успешно обновлена.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Пожалуйста, посмотрите">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "Пожалуйста, просмотрите">
 <!ENTITY zotero.upgrade.changeLogLink "журнал изменений">
 <!ENTITY zotero.upgrade.changeLogAfterLink "чтобы узнать что нового.">
 
@@ -50,10 +50,10 @@
 <!ENTITY zotero.tabs.attachments.label "Вложения">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показать дубликаты">
-<!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые записи">
-<!ENTITY zotero.collections.showRetractedItems "Показать отозванные записи">
+<!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые элементы">
+<!ENTITY zotero.collections.showRetractedItems "Показать отозванные элементы">
 
-<!ENTITY zotero.items.itemType "Тип записи">
+<!ENTITY zotero.items.itemType "Тип элемента">
 <!ENTITY zotero.items.creator_column "Автор">
 <!ENTITY zotero.items.year_column "Год">
 <!ENTITY zotero.items.dateModified_column "Изменён">
@@ -68,17 +68,17 @@
 <!ENTITY zotero.items.menu.attach.fileLink "Вложить ссылку на файл…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Восстановить в библиотеке">
-<!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранной записи">
-<!ENTITY zotero.items.menu.mergeItems "Объединить записи...">
+<!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранного элемента">
+<!ENTITY zotero.items.menu.mergeItems "Объединить элементы...">
 <!ENTITY zotero.items.menu.unrecognize "Отменить получение метаданных">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Выберите версию записи для использования в качестве главной:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий записи:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "Выберите версию элемента для использования в качестве главной:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий элемента:">
 
-<!ENTITY zotero.toolbar.newItem.label "Новая запись">
+<!ENTITY zotero.toolbar.newItem.label "Новый элемент">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Прочие типы публикаций">
-<!ENTITY zotero.toolbar.lookup.label "Добавить запись(-и) по идентификатору">
-<!ENTITY zotero.toolbar.removeItem.label "Удалить запись...">
+<!ENTITY zotero.toolbar.lookup.label "Добавить элемент(-ы) по идентификатору">
+<!ENTITY zotero.toolbar.removeItem.label "Удалить элемент...">
 <!ENTITY zotero.toolbar.newGroup "Новая группа…">
 <!ENTITY zotero.toolbar.newSubcollection.label "Новая вложенная коллекция…">
 <!ENTITY zotero.toolbar.emptyTrash.label "Очистить корзину">
@@ -119,14 +119,14 @@
 <!ENTITY zotero.toolbar.attachment.add "Сохранить копию файла…">
 <!ENTITY zotero.toolbar.attachment.weblink "Сохранить ссылку на текущую страницу">
 <!ENTITY zotero.toolbar.attachment.snapshot "Сделать снимок текущей страницы">
-<!ENTITY zotero.toolbar.context.item "Запись">
+<!ENTITY zotero.toolbar.context.item "Элемент">
 <!ENTITY zotero.toolbar.context.notes "Заметки">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нет тегов для отображения">
 <!ENTITY zotero.tagSelector.loadingTags "Загрузка тегов...">
-<!ENTITY zotero.tagSelector.showAutomatic "Показывать автоматически">
+<!ENTITY zotero.tagSelector.showAutomatic "Показывать автотеги">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Показать все теги в библиотеке">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Удалить автоматические теги в этой библиотеке…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Удалить автотеги в этой библиотеке…">
 <!ENTITY zotero.tagSelector.clearAll "Отменить выбор">
 <!ENTITY zotero.tagSelector.assignColor "Назначить цвет…">
 <!ENTITY zotero.tagSelector.renameTag "Переименовать тег…">
@@ -139,14 +139,14 @@
 <!ENTITY zotero.tagColorChooser.setColor "Задать цвет">
 <!ENTITY zotero.tagColorChooser.removeColor "Удалить цвет">
 
-<!ENTITY zotero.lookup.description "Введите ISBN, DOI, PMID, arXiv ID, или ADS Bibcode чтобы пополнить вашу ими библиотеку:">
+<!ENTITY zotero.lookup.description "Введите ISBN, DOI, PMID, arXiv ID или ADS Bibcode чтобы пополнить ими вашу библиотеку:">
 <!ENTITY zotero.lookup.button.search "Поиск">
 
-<!ENTITY zotero.createParent.title "Создать родительскую запись">
+<!ENTITY zotero.createParent.title "Создать родительский элемент">
 <!ENTITY zotero.createParent.button.manual "Ввести вручную">
 
-<!ENTITY zotero.selectitems.title "Выбрать записи">
-<!ENTITY zotero.selectitems.intro.label "Выбрать, какие записи вы хотите добавить в свою библиотеку">
+<!ENTITY zotero.selectitems.title "Выбрать элементы">
+<!ENTITY zotero.selectitems.intro.label "Выбрать, какие элементы вы хотите добавить в свою библиотеку">
 <!ENTITY zotero.selectitems.cancel.label "Отменить">
 <!ENTITY zotero.selectitems.select.label "ОК">
 
@@ -171,15 +171,15 @@
 <!ENTITY zotero.import "Импорт">
 <!ENTITY zotero.import.whereToImportFrom "Откуда вы хотите импортировать?">
 <!ENTITY zotero.import.source.file "Файл (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "Каталог файлов PDF и прочих">
+<!ENTITY zotero.import.source.folder "Каталог PDF и прочих файлов">
 <!ENTITY zotero.import.onlineImport "Импорт из сетевого ресурса">
 <!ENTITY zotero.import.importing "Идёт импортирование…">
 <!ENTITY zotero.import.database "База данных">
 <!ENTITY zotero.import.lastModified "Последний раз изменено">
 <!ENTITY zotero.import.size "Размер (объём)">
-<!ENTITY zotero.import.createCollection "Поместить импортированные коллекции и записи в новую коллекцию">
+<!ENTITY zotero.import.createCollection "Поместить импортированные коллекции и элементы в новую коллекцию">
 <!ENTITY zotero.import.fileHandling "Обработка файлов">
-<!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые записи; не обновлять ранее импортированные записи">
+<!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые элементы; не обновлять ранее импортированные элементы">
 
 <!ENTITY zotero.exportOptions.title "Экспорт…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -243,7 +243,7 @@
 <!ENTITY zotero.sync.longTagFixer.character "символу">
 <!ENTITY zotero.sync.longTagFixer.characters "символам">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Неотмеченные теги не будут сохранены.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Тег будет удалён из всех записей.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Тег будет удалён из всех элементов.">
 
 <!ENTITY zotero.merge.title "Разрешение конфликтов">
 <!ENTITY zotero.merge.of "для">
@@ -308,7 +308,7 @@
 <!ENTITY zotero.pdfReader.handTool "Инструмент-рука">
 <!ENTITY zotero.pdfReader.verticalScrolling "Вертикальная прокрутка">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Горизонтальная прокрутка">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Завернутая прокрутка">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Завёрнутая прокрутка">
 <!ENTITY zotero.pdfReader.noSpreads "Нет Разворота">
 <!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечётных номеров">
 <!ENTITY zotero.pdfReader.evenSpreads "Развороты с чётных номеров">
@@ -317,7 +317,7 @@
 <!ENTITY zotero.pdfReader.zoomIn "Увеличить">
 <!ENTITY zotero.pdfReader.zoomOut "Уменьшить">
 <!ENTITY zotero.pdfReader.zoomReset "Масштаб 100&#37;">
-<!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
+<!ENTITY zotero.pdfReader.zoomAuto "АвтоМасштаб">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
 <!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
 <!ENTITY zotero.pdfReader.splitVertically "Разделить вертикально">
