@@ -16,17 +16,15 @@ cp -R $LOCALES_DIR/en-US/zotero/* en-US-new
 cp -R $LOCALES_DIR/ locales/
 rm -rf locales/en-US
 # Correct various errors
-find locales -name '*.dtd' -exec perl -pi -e "s/&amp;([^\s])/&\$1/g" {} \;
-find locales -name '*.properties' -exec rpl 'S%' '%S' {} \;
-find locales -name '*.properties' -exec rpl '/n' '\\n' {} \;
-find locales -name '*.properties' -exec rpl '\\\\' '\\' {} \;
-find locales -name '*.properties' -exec rpl '\\n\\n\\(?!n)' '\\n\\n' {} \;
+find locales -name '*.dtd' -exec perl -pi -e "s/&amp;([^\s])/&\$1/g" {} +
+find locales -name '*.properties' -exec rpl --encoding=UTF-8 'S%' '%S' {} +
+find locales -name '*.properties' -exec rpl --encoding=UTF-8 '/n' '\\n' {} +
+find locales -name '*.properties' -exec rpl --encoding=UTF-8 '\\\\' '\\' {} +
+find locales -name '*.properties' -exec rpl --encoding=UTF-8 '\\n\\n\\(?!n)' '\\n\\n' {} +
 
 # Run merge script
 $SCRIPT_DIR/localizer
 rsync -a --progress --verbose $WORK_DIR/output/locale/ $LOCALES_DIR/
-
-rpl -R ⏎ '\n' "$LOCALES_DIR"
 
 rm -rf en-US-new locales content-locales output
 
