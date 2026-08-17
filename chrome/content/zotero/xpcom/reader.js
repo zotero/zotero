@@ -360,7 +360,7 @@ class ReaderInstance {
 					await Zotero.DB.executeTransaction(async () => {
 						for (let key of keys) {
 							let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
-							// Make sure the annotation actually belongs to the current PDF
+							// Make sure the annotation actually belongs to the current attachment
 							if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
 								this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
 								annotation.deleted = true;
