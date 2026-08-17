@@ -144,7 +144,7 @@ chmod g+ws "$TEMP_DIR/version_info"
 cp "$DIST_DIR"/files-* "$TEMP_DIR/version_info"
 chmod g+w "$TEMP_DIR"/version_info/files-*
 # Generate build-{os}.json for each platform
-SHORT_VERSION="${VERSION:0:3}"
+SHORT_VERSION=$(echo "$VERSION" | grep -oE '^[0-9]+\.[0-9]+')
 DETAILS_URL="https://www.zotero.org/support/${SHORT_VERSION}_changelog"
 for i in `seq 0 1 $((${#PLATFORMS}-1))`
 do
