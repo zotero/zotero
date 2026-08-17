@@ -721,7 +721,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					if (!item) continue;
 					let topLevelItem = item.topLevelItem;
 					let isAnythingDeleted = topLevelItem.deleted
-						|| topLevelItem.getAllDescendents(true).length > topLevelItem.getAllDescendents(false).length;
+						|| topLevelItem.getDescendantItems({ includeTrashed: true }).length > topLevelItem.getDescendantItems().length;
 					// Remove the top-level item's row if neither it nor any of its
 					// descendents remain trashed
 					if (!isAnythingDeleted) {

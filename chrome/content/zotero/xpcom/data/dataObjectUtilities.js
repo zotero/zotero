@@ -741,6 +741,7 @@ Zotero.DataObjectUtilities = {
 		isRegularItem: () => false, // Should be false to prevent items dropped into deleted searches
 		getNotes: () => [],
 		getAttachments: () => [],
+		getDescendantItems: () => [],
 		isFileAttachment: () => false,
 		isTopLevelItem: () => false,
 		getField: function (field, _) {

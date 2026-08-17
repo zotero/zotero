@@ -2859,7 +2859,7 @@ var ZoteroPane = new function () {
 				}
 
 				let parent = this.itemsView.getRow(row).ref;
-				let childIDs = [];
+				let childItems = [];
 				let subcollections = [];
 				if (parent instanceof Zotero.Collection) {
 					// If the restored item is a collection, restore its subcollections too
@@ -2868,26 +2868,8 @@ var ZoteroPane = new function () {
 					}
 				}
 				else {
-					if (!parent.isNote()) {
-						childIDs.push(...parent.getNotes(true));
-					}
-					// Include annotations of the item's file attachments, or of the item
-					// itself for a standalone file attachment
-					let fileAttachments = [];
-					if (parent.isRegularItem()) {
-						let attachmentIDs = parent.getAttachments(true);
-						childIDs.push(...attachmentIDs);
-						fileAttachments = Zotero.Items.get(attachmentIDs)
-							.filter(attachment => attachment.isFileAttachment());
-					}
-					else if (parent.isFileAttachment()) {
-						fileAttachments = [parent];
-					}
-					for (let attachment of fileAttachments) {
-						childIDs.push(...attachment.getAnnotations(true).map(a => a.id));
-					}
+					childItems = parent.getDescendantItems({ includeTrashed: true });
 				}
-				let childItems = Zotero.Items.get(childIDs);
 				if (isSelected(parent)) {
 					if (parent.deleted) {
 						parent.deleted = false;

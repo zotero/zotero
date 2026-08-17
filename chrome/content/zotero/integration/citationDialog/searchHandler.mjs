@@ -260,12 +260,7 @@ export class CitationDialogSearchHandler {
 	
 	isItemWithAnnotations(item) {
 		if (item.isAnnotation()) return true;
-		if (item.isFileAttachment() && item.getAnnotations().length) return true;
-		if (item.isRegularItem()) {
-			let attachments = Zotero.Items.get(item.getAttachments());
-			return attachments.some(att => att.isFileAttachment() && att.getAnnotations().length);
-		}
-		return false;
+		return item.getDescendantItems().some(descendent => descendent.isAnnotation());
 	}
 
 	isItemWithNotes(item) {
@@ -279,10 +274,7 @@ export class CitationDialogSearchHandler {
 
 	getAllAnnotations(item) {
 		if (item.isAnnotation()) return [item];
-		if (item.isFileAttachment()) return item.getAnnotations();
-		let attachmentIDs = item.getAttachments();
-		let attachments = Zotero.Items.get(attachmentIDs).filter(item => item.isFileAttachment());
-		let annotations = attachments.flatMap(attachment => attachment.getAnnotations());
+		let annotations = item.getDescendantItems().filter(descendent => descendent.isAnnotation());
 		annotations.sort((a, b) => {
 			if (a.parentItemID !== b.parentItemID) return 0;
 			return (a.annotationSortIndex > b.annotationSortIndex) - (a.annotationSortIndex < b.annotationSortIndex);

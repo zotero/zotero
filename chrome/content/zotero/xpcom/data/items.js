@@ -1336,7 +1336,7 @@ Zotero.Items = function () {
 				
 				// Remove all child items too
 				if (item.isRegularItem()) {
-					allItems.push(...this.get(item.getNotes(true).concat(item.getAttachments(true))));
+					allItems.push(...item.getDescendantItems({ includeTrashed: true, includeAnnotations: false }));
 				}
 				
 				allItems.push(item);

@@ -2460,28 +2460,30 @@ Zotero.Item.prototype.numChildren = function (includeTrashed) {
 
 
 /**
- * Get all descendents of an item -- child notes and attachments of a regular item,
- * annotations of its file attachments, and annotations of a standalone file attachment
+ * Get descendant items -- child notes and attachments of a regular item, plus
+ * annotations of its file attachments; annotations of a standalone file attachment
  *
- * @param	{Boolean}	includeTrashed		Include trashed items
- * @return	{Zotero.Item[]}
+ * @param {Object} [options]
+ * @param {Boolean} [options.includeTrashed=false] Include trashed items
+ * @param {Boolean} [options.includeAnnotations=true] Include annotations of file attachments
+ * @return {Zotero.Item[]}
  */
-Zotero.Item.prototype.getAllDescendents = function (includeTrashed) {
-	let attachments = [];
-	let notes = [];
-	let annotations = [];
+Zotero.Item.prototype.getDescendantItems = function ({ includeTrashed = false, includeAnnotations = true } = {}) {
+	let descendents = [];
 	if (this.isRegularItem()) {
-		attachments = Zotero.Items.get(this.getAttachments(includeTrashed));
-		notes = Zotero.Items.get(this.getNotes(includeTrashed));
-		for (let attachment of attachments) {
-			if (!attachment.isFileAttachment()) continue;
-			annotations.push(...attachment.getAnnotations(includeTrashed));
+		let attachments = Zotero.Items.get(this.getAttachments(includeTrashed));
+		descendents.push(...attachments, ...Zotero.Items.get(this.getNotes(includeTrashed)));
+		if (includeAnnotations) {
+			for (let attachment of attachments) {
+				if (!attachment.isFileAttachment()) continue;
+				descendents.push(...attachment.getAnnotations(includeTrashed));
+			}
 		}
 	}
-	else if (this.isFileAttachment()) {
-		annotations = this.getAnnotations(includeTrashed);
+	else if (includeAnnotations && this.isFileAttachment()) {
+		descendents.push(...this.getAnnotations(includeTrashed));
 	}
-	return [...attachments, ...notes, ...annotations];
+	return descendents;
 };
 
 
