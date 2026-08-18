@@ -391,10 +391,10 @@ Zotero_Preferences.Advanced = {
 		}
 
 		let stats = await Zotero.FullText.getIndexStats();
-		document.getElementById('fulltext-stats-indexed').setAttribute('value', stats.indexed.toLocaleString());
-		document.getElementById('fulltext-stats-partial').setAttribute('value', stats.partial.toLocaleString());
-		document.getElementById('fulltext-stats-notes').setAttribute('value', stats.notesIndexed.toLocaleString());
-		document.getElementById('fulltext-stats-not-available').setAttribute('value', stats.notAvailable.toLocaleString());
+		document.getElementById('fulltext-stats-indexed').textContent = stats.indexed.toLocaleString();
+		document.getElementById('fulltext-stats-partial').textContent = stats.partial.toLocaleString();
+		document.getElementById('fulltext-stats-notes').textContent = stats.notesIndexed.toLocaleString();
+		document.getElementById('fulltext-stats-not-available').textContent = stats.notAvailable.toLocaleString();
 
 		// Indexed + Partial + indexed notes are already what's in the search index, so they're the
 		// bar's numerator. Pending work across the auto-draining queues: extracted content not yet
