@@ -568,17 +568,19 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('fulltext-stats-indexed').setAttribute('value', stats.indexed.toLocaleString());
 		document.getElementById('fulltext-stats-partial').setAttribute('value', stats.partial.toLocaleString());
 		document.getElementById('fulltext-stats-notes').setAttribute('value', stats.notesIndexed.toLocaleString());
+		document.getElementById('fulltext-stats-items').setAttribute('value', stats.itemTextIndexed.toLocaleString());
 		document.getElementById('fulltext-stats-not-available').setAttribute('value', stats.notAvailable.toLocaleString());
 
-		// Indexed + Partial + indexed notes are already what's in the search index, so they're the
-		// bar's numerator. Pending work across the auto-draining queues: extracted content not yet
-		// in the index (remaining), indexable attachments not yet extracted (unindexedQueue), and
-		// notes not yet indexed or edited since their last index update (noteQueue). Show the bar
-		// while anything's pending; otherwise "up to date". Items with no local file or content
-		// aren't counted here -- nothing local can index them -- so "up to date" can sit next to a
-		// nonzero "not available".
-		let inIndex = stats.indexed + stats.partial + stats.notesIndexed;
-		let pending = stats.remaining + stats.unindexedQueue + stats.noteQueue;
+		// Indexed + Partial + indexed notes + indexed item text are already what's in the search
+		// index, so they're the bar's numerator. Pending work across the auto-draining queues:
+		// extracted content not yet in the index (remaining), indexable attachments not yet
+		// extracted (unindexedQueue), notes not yet indexed or edited since their last index update
+		// (noteQueue), and items and annotations not yet in the item-text index (itemTextQueue).
+		// Show the bar while anything's pending; otherwise "up to date". Items with no local file
+		// or content aren't counted here -- nothing local can index them -- so "up to date" can sit
+		// next to a nonzero "not available".
+		let inIndex = stats.indexed + stats.partial + stats.notesIndexed + stats.itemTextIndexed;
+		let pending = stats.remaining + stats.unindexedQueue + stats.noteQueue + stats.itemTextQueue;
 		let total = inIndex + pending;
 		let complete = document.getElementById('fulltext-stats-complete');
 		if (pending > 0 && total > 0) {
@@ -597,6 +599,7 @@ Zotero_Preferences.Advanced = {
 			await Zotero.FullText.processAttachmentIndexQueue({ maxTime: 500 });
 			await Zotero.FullText.processAttachmentExtractionQueue({ maxTime: 500 });
 			await Zotero.FullText.processNoteIndexQueue({ maxTime: 500 });
+			await Zotero.FullText.processItemTextIndexQueue({ maxTime: 500 });
 			this._indexStatsTimeoutID = setTimeout(() => this.updateIndexStats(), 250);
 		}
 		else {

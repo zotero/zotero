@@ -44,7 +44,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	// content and note tables. The tables are only created when this is bumped (setUpContentDB()
 	// drops and recreates everything), so any schema change -- a new table or a changed FTS5
 	// table definition, including its tokenizer -- needs a bump.
-	const _indexDBVersion = 2;
+	const _indexDBVersion = 3;
 	// Version of the index format. Bump to force a rebuild of the index from the cached text
 	// (e.g., after a normalization change) -- items recorded at a lower version in
 	// fulltextIndexState/fulltextNoteIndexState reenter the queue and are re-indexed at startup,
@@ -81,6 +81,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	var _attachmentIndexQueueCursor = 0;
 	var _attachmentExtractionQueueCursor = 0;
 	var _noteIndexQueueCursor = 0;
+	var _itemTextIndexQueueCursor = 0;
 	// Flush a content batch to the index once it reaches this many characters, so peak memory stays
 	// bounded by the budget rather than by item size (each up to fulltext.textMaxLength)
 	const _maxContentBatchChars = 2000000;
@@ -134,6 +135,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexState");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextNoteIndexState");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.noteText");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextItemText");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextItemTextCJK");
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextItemTextState");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextIndexMeta");
 				// Non-CJK scripts: word index over the normalized text. Searches match words by
 				// prefix (see getWordMatchClause); multi-token terms match adjacent tokens as
@@ -198,6 +202,37 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					"CREATE TABLE ftindex.noteText (\n"
 					+ "    itemID INTEGER PRIMARY KEY,\n"
 					+ "    text TEXT\n"
+					+ ")"
+				);
+				// Word-level index over the items' own searchable text, one row per item
+				// (rowid = itemID), each row filling only the columns its item type has:
+				// title and abstract for regular items, note for note items (the plain text
+				// the note tables index), annotation for annotation items (the marked
+				// passage plus the comment). Item types never share an itemID, so one table
+				// holds them all, and column filters ('title: owl') tell the sources apart.
+				// Unlike the trigram note tables, which answer substring searches, this one
+				// answers word searches: whole-token and prefix matching, and per-word
+				// document counts.
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextItemText USING fts5("
+					+ "title, abstract, note, annotation, "
+					+ "tokenize='unicode61', content='', contentless_delete=1)"
+				);
+				// CJK 2-grams of the same columns (see fulltextContentCJK)
+				await Zotero.DB.queryAsync(
+					"CREATE VIRTUAL TABLE ftindex.fulltextItemTextCJK USING fts5("
+					+ "title, abstract, note, annotation, "
+					+ "tokenize='ascii', content='', contentless_delete=1)"
+				);
+				// Which regular items and annotations are in the item-text index, and at
+				// what format version, making their backfill queue a countable, resumable
+				// query. Notes aren't tracked here: their item-text row is written in the
+				// same step that indexes them into the note tables, so the note index state
+				// already covers it.
+				await Zotero.DB.queryAsync(
+					"CREATE TABLE ftindex.fulltextItemTextState (\n"
+					+ "    itemID INTEGER PRIMARY KEY,\n"
+					+ "    version INT NOT NULL\n"
 					+ ")"
 				);
 				// Index metadata, including the localUserKey the index was built against (above)
@@ -1609,6 +1644,146 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 
 	/**
+	 * Number of regular items and annotations not yet in the item-text index at the current
+	 * format version -- the item-text backfill queue. Ordinary saves index inline (see
+	 * indexItemText()), so this queue only holds pre-existing items after an index rebuild or
+	 * a format-version bump. Feed items aren't indexed: their libraries churn wholesale and
+	 * aren't part of item search.
+	 *
+	 * @return {Promise<Integer>}
+	 */
+	this.getItemTextIndexQueueCount = async function () {
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM items I "
+			+ "JOIN libraries L USING (libraryID) "
+			+ "LEFT JOIN ftindex.fulltextItemTextState S USING (itemID) "
+			+ "WHERE I.itemTypeID NOT IN (?, ?) "
+			+ "AND L.type IN ('user', 'group') "
+			+ "AND (S.itemID IS NULL OR S.version<?)",
+			[
+				Zotero.ItemTypes.getID('attachment'),
+				Zotero.ItemTypes.getID('note'),
+				_contentIndexVersion
+			]
+		);
+	};
+
+
+	/**
+	 * Process the item-text index queue (see getItemTextIndexQueueCount()), indexing the
+	 * searchable text of regular items and annotations that aren't in the item-text index yet.
+	 *
+	 * @param {Object} [options]
+	 * @param {Integer} [options.maxTime] - Stop after roughly this many ms
+	 * @param {Boolean} [options.checkIdle] - Stop as soon as the user is no longer idle
+	 * @return {Promise<Integer>} The number of items processed
+	 */
+	this.processItemTextIndexQueue = async function ({ maxTime = null, checkIdle = false, onProgress = null } = {}) {
+		if (_indexingInProgress) {
+			return 0;
+		}
+		_indexingInProgress = true;
+		let start = Date.now();
+		let processed = 0;
+		let attachmentTypeID = Zotero.ItemTypes.getID('attachment');
+		let noteTypeID = Zotero.ItemTypes.getID('note');
+		let titleFieldIDs = new Set([
+			Zotero.ItemFields.getID('title'),
+			...Zotero.ItemFields.getTypeFieldsFromBase('title')
+		]);
+		let abstractFieldID = Zotero.ItemFields.getID('abstractNote');
+		try {
+			while (true) {
+				if (Zotero.Sync.Runner.syncInProgress) {
+					return processed;
+				}
+				if (checkIdle && !_canDrainIndex()) {
+					return processed;
+				}
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT I.itemID FROM items I "
+					+ "JOIN libraries L USING (libraryID) "
+					+ "LEFT JOIN ftindex.fulltextItemTextState S USING (itemID) "
+					+ "WHERE I.itemTypeID NOT IN (?, ?) "
+					+ "AND L.type IN ('user', 'group') "
+					+ "AND (S.itemID IS NULL OR S.version<?) AND I.itemID>? "
+					+ "ORDER BY I.itemID LIMIT 100",
+					[attachmentTypeID, noteTypeID, _contentIndexVersion, _itemTextIndexQueueCursor]
+				);
+				if (!rows.length) {
+					// Nothing left above the cursor; restart from the beginning to catch anything
+					// re-queued below it
+					if (_itemTextIndexQueueCursor) {
+						_itemTextIndexQueueCursor = 0;
+						continue;
+					}
+					Zotero.debug("No queued items to index for item-text search");
+					return processed;
+				}
+				Zotero.debug("Indexing item text for " + rows.length + " "
+					+ Zotero.Utilities.pluralize(rows.length, 'item'));
+				// Read and index each item in one transaction, so a save can't land between
+				// reading its text and marking it indexed at the current version
+				await Zotero.DB.executeTransaction(async function () {
+					let itemIDs = rows.map(row => row.itemID);
+					let placeholders = itemIDs.join(',');
+					let fieldRows = await Zotero.DB.queryAsync(
+						"SELECT itemID, fieldID, value FROM itemData "
+						+ "JOIN itemDataValues USING (valueID) "
+						+ "WHERE itemID IN (" + placeholders + ") "
+						+ "AND fieldID IN ("
+							+ [...titleFieldIDs, abstractFieldID].join(',') + ")"
+					);
+					let fieldsByItem = new Map();
+					for (let row of fieldRows) {
+						let fields = fieldsByItem.get(row.itemID) || {};
+						let column = titleFieldIDs.has(row.fieldID) ? 'title' : 'abstract';
+						fields[column] = fields[column]
+							? fields[column] + ' ' + row.value
+							: row.value;
+						fieldsByItem.set(row.itemID, fields);
+					}
+					let annotationRows = await Zotero.DB.queryAsync(
+						"SELECT itemID, text, comment FROM itemAnnotations "
+						+ "WHERE itemID IN (" + placeholders + ")"
+					);
+					for (let row of annotationRows) {
+						fieldsByItem.set(row.itemID, {
+							annotation: [row.text, row.comment].filter(Boolean).join(' ')
+						});
+					}
+					// Confirm the items still exist inside the transaction, so one deleted
+					// since it was queued is cleared rather than re-recorded
+					let liveIDs = new Set(await Zotero.DB.columnQueryAsync(
+						"SELECT itemID FROM items WHERE itemID IN (" + placeholders + ")"
+					));
+					for (let row of rows) {
+						if (!liveIDs.has(row.itemID)) {
+							await clearItemTextEntries(row.itemID);
+							continue;
+						}
+						// An item with no text at all still gets a state row, so the
+						// queue converges
+						await setItemTextIndex(row.itemID, fieldsByItem.get(row.itemID) || {});
+					}
+				});
+				processed += rows.length;
+				_itemTextIndexQueueCursor = rows[rows.length - 1].itemID;
+				if (onProgress) {
+					onProgress(processed);
+				}
+				if (maxTime && (Date.now() - start) >= maxTime) {
+					return processed;
+				}
+			}
+		}
+		finally {
+			_indexingInProgress = false;
+		}
+	};
+
+
+	/**
 	 * Process the note index queue, indexing the text content of notes that aren't in the note
 	 * index yet or were edited since their last index update. Note saves only mark the note stale
 	 * (so a note isn't re-indexed on every auto-save while typing); this does the actual indexing.
@@ -1737,7 +1912,9 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			// search is incomplete. Pause for syncs so it doesn't compete with full-text content
 			// downloads.
 			let queueCount = async () => {
-				return (await this.getAttachmentIndexQueueCount()) + (await this.getNoteIndexQueueCount());
+				return (await this.getAttachmentIndexQueueCount())
+					+ (await this.getNoteIndexQueueCount())
+					+ (await this.getItemTextIndexQueueCount());
 			};
 			let total = await queueCount();
 			// Items drained so far, tracked across processor calls so the bar can advance after each
@@ -1808,6 +1985,10 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				done = base + await this.processNoteIndexQueue(
 					{ maxTime: 1000, onProgress: n => updateProgress(base + n) }
 				);
+				base = done;
+				done = base + await this.processItemTextIndexQueue(
+					{ maxTime: 1000, onProgress: n => updateProgress(base + n) }
+				);
 			}
 			if (itemProgress) {
 				if (stalled) {
@@ -1857,7 +2038,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 */
 	this.optimizeContentIndex = async function () {
 		try {
-			for (let tables of [_contentTables, _noteTables]) {
+			let itemTextTables = { main: 'fulltextItemText', cjk: 'fulltextItemTextCJK' };
+			for (let tables of [_contentTables, _noteTables, itemTextTables]) {
 				await Zotero.DB.queryAsync(
 					`INSERT INTO ftindex.${tables.main}(${tables.main}) VALUES('optimize')`
 				);
@@ -1945,7 +2127,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				}
 				let remaining = (await self.getAttachmentIndexQueueCount())
 					+ (await self.getAttachmentExtractionQueueCount())
-					+ (await self.getNoteIndexQueueCount());
+					+ (await self.getNoteIndexQueueCount())
+					+ (await self.getItemTextIndexQueueCount());
 				if (remaining == 0) {
 					// Drained -- compact the index and stop
 					await self.optimizeContentIndex();
@@ -1969,6 +2152,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 				await self.processAttachmentIndexQueue({ maxTime: 1000, checkIdle: true });
 				await self.processAttachmentExtractionQueue({ maxTime: 1000, checkIdle: true });
 				await self.processNoteIndexQueue({ maxTime: 1000, checkIdle: true });
+				await self.processItemTextIndexQueue({ maxTime: 1000, checkIdle: true });
 				// Back off after a run that made no progress, so contention (e.g., another
 				// caller holding _indexingInProgress) can clear before the next check
 				_scheduleQueueDrain(_queueDrainStalledRuns ? _drainIdleDelay * 1000 : 250);
@@ -2232,9 +2416,118 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 	async function setNoteIndex(itemID, text) {
 		await setIndexEntries(itemID, text, _noteTables);
+		// The note's text is also word-indexed. Its currency is tracked by the note index
+		// state written above, so no item-text state row of its own.
+		await setItemTextIndex(itemID, { note: text }, { recordState: false });
 		// Now indexed at the current version, so it's no longer stale
 		_staleNoteText.delete(itemID);
 	}
+
+
+	// The item-text index's columns, in table order (see setUpContentDB)
+	const _itemTextColumns = ['title', 'abstract', 'note', 'annotation'];
+
+	/**
+	 * Index an item's searchable text into the item-text FTS5 tables, replacing any existing
+	 * entries. `fields` maps column names (see _itemTextColumns) to raw text, normalized here;
+	 * missing and empty columns are indexed as nothing. Recording the item in the item-text
+	 * state table is the caller's choice: regular items and annotations are tracked there,
+	 * while a note's currency is tracked by the note index state it shares with the note
+	 * tables.
+	 *
+	 * Must be called within a transaction.
+	 */
+	async function setItemTextIndex(itemID, fields, { recordState = true } = {}) {
+		await Zotero.DB.queryAsync(
+			"DELETE FROM ftindex.fulltextItemText WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync(
+			"DELETE FROM ftindex.fulltextItemTextCJK WHERE rowid=?", itemID);
+		let values = [];
+		let cjkValues = [];
+		for (let column of _itemTextColumns) {
+			let normalized = Zotero.Utilities.Internal.normalizeForSearch(fields[column] || '') || '';
+			values.push(normalized);
+			cjkValues.push(normalized ? getCJKBigrams(normalized) : '');
+		}
+		let columnSQL = _itemTextColumns.join(', ');
+		let placeholders = _itemTextColumns.map(() => '?').join(', ');
+		if (values.some(Boolean)) {
+			await Zotero.DB.queryAsync(
+				"INSERT INTO ftindex.fulltextItemText (rowid, " + columnSQL + ") "
+					+ "VALUES (?, " + placeholders + ")",
+				[itemID, ...values],
+				{ debugParams: false }
+			);
+		}
+		if (cjkValues.some(Boolean)) {
+			await Zotero.DB.queryAsync(
+				"INSERT INTO ftindex.fulltextItemTextCJK (rowid, " + columnSQL + ") "
+					+ "VALUES (?, " + placeholders + ")",
+				[itemID, ...cjkValues],
+				{ debugParams: false }
+			);
+		}
+		if (recordState) {
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO ftindex.fulltextItemTextState (itemID, version) VALUES (?, ?)",
+				[itemID, _contentIndexVersion]
+			);
+		}
+	}
+
+
+	// Remove an item's entries from the item-text tables and its state row (a no-op for
+	// notes, which have none).
+	//
+	// Must be called within a transaction.
+	async function clearItemTextEntries(itemID) {
+		await Zotero.DB.queryAsync(
+			"DELETE FROM ftindex.fulltextItemText WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync(
+			"DELETE FROM ftindex.fulltextItemTextCJK WHERE rowid=?", itemID);
+		await Zotero.DB.queryAsync(
+			"DELETE FROM ftindex.fulltextItemTextState WHERE itemID=?", itemID);
+	}
+
+
+	/**
+	 * Index an item's searchable text into the item-text index: title fields (including
+	 * type-specific ones) and abstract for a regular item, the marked passage and comment for
+	 * an annotation. Called from the item's own save, within its transaction, so the index is
+	 * current the moment the save commits -- these texts are small enough to index inline,
+	 * unlike note content, which is flagged and indexed in the background (see
+	 * flagNoteStale()).
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise}
+	 */
+	this.indexItemText = async function (item) {
+		if (item.isAnnotation()) {
+			await setItemTextIndex(item.id, {
+				annotation: [item.annotationText, item.annotationComment]
+					.filter(Boolean).join(' ')
+			});
+			return;
+		}
+		await setItemTextIndex(item.id, {
+			title: item.getField('title', false, true),
+			abstract: item.getField('abstractNote')
+		});
+	};
+
+
+	/**
+	 * Remove an item's entries from the item-text index, e.g., when the item is erased (the
+	 * index database can't FK-cascade to zotero.sqlite).
+	 *
+	 * Must be called within a transaction.
+	 *
+	 * @param {Number} itemID
+	 * @return {Promise}
+	 */
+	this.clearItemTextIndex = async function (itemID) {
+		await clearItemTextEntries(itemID);
+	};
 
 
 	/**
@@ -2301,6 +2594,8 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	 */
 	this.clearNoteIndex = async function (itemID) {
 		await clearIndexEntries(itemID, _noteTables);
+		// The note's word-indexed text lives in the item-text tables (see setNoteIndex())
+		await clearItemTextEntries(itemID);
 		_staleNoteText.delete(itemID);
 	};
 
@@ -2899,14 +3194,24 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			+ "WHERE S.version >= ?";
 		var notesIndexed = await Zotero.DB.valueQueryAsync(sql, _contentIndexVersion);
 
+		// Regular items and annotations in the item-text index at the current version (their
+		// titles, abstracts, and annotation text -- notes are counted above)
+		var sql = "SELECT COUNT(*) FROM ftindex.fulltextItemTextState WHERE version >= ?";
+		var itemTextIndexed = await Zotero.DB.valueQueryAsync(sql, _contentIndexVersion);
+
 		// Pending work, all auto-draining: items with extracted content not yet in the search index
-		// (remaining), indexable attachments not yet extracted (unindexedQueue), and notes not yet
-		// indexed or edited since their last index update (noteQueue)
+		// (remaining), indexable attachments not yet extracted (unindexedQueue), notes not yet
+		// indexed or edited since their last index update (noteQueue), and items and annotations
+		// not yet in the item-text index (itemTextQueue)
 		var remaining = await this.getAttachmentIndexQueueCount();
 		var unindexedQueue = await this.getAttachmentExtractionQueueCount();
 		var noteQueue = await this.getNoteIndexQueueCount();
+		var itemTextQueue = await this.getItemTextIndexQueueCount();
 
-		return { indexed, partial, notAvailable, notesIndexed, remaining, unindexedQueue, noteQueue };
+		return {
+			indexed, partial, notAvailable, notesIndexed, itemTextIndexed,
+			remaining, unindexedQueue, noteQueue, itemTextQueue
+		};
 	};
 	
 	

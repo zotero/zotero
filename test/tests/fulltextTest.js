@@ -875,4 +875,91 @@ describe("Zotero.FullText", function () {
 			);
 		});
 	});
+
+	describe("Item-text indexing", function () {
+		function itemTextMatch(match, cjk = false) {
+			let table = cjk ? 'fulltextItemTextCJK' : 'fulltextItemText';
+			return Zotero.DB.columnQueryAsync(
+				`SELECT rowid FROM ftindex.${table} WHERE ${table} MATCH ?`,
+				[match]
+			);
+		}
+
+		it("should index a regular item's title and abstract on save", async function () {
+			let item = await createDataObject('item', { title: 'Owl Migrátion Atlas' });
+			item.setField('abstractNote', 'Ztracking methods overview');
+			await item.saveTx();
+			// Words match diacritic-insensitively, in their own column
+			assert.include(await itemTextMatch('title:"migration"'), item.id);
+			assert.include(await itemTextMatch('abstract:"ztracking"'), item.id);
+			assert.notInclude(await itemTextMatch('title:"ztracking"'), item.id);
+			assert.ok(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM ftindex.fulltextItemTextState WHERE itemID=?",
+				item.id
+			));
+		});
+
+		it("should replace the indexed text when the item changes", async function () {
+			let item = await createDataObject('item', { title: 'Zfirsttitle here' });
+			item.setField('title', 'Zsecondtitle now');
+			await item.saveTx();
+			assert.include(await itemTextMatch('title:"zsecondtitle"'), item.id);
+			assert.notInclude(await itemTextMatch('title:"zfirsttitle"'), item.id);
+		});
+
+		it("should index an annotation's passage and comment on save", async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let annotation = await createAnnotation('highlight', attachment,
+				{ comment: 'zmethodology concern here' });
+			assert.include(await itemTextMatch('annotation:"zmethodology"'), annotation.id);
+			// Editing re-indexes
+			annotation.annotationComment = 'zrevised remark';
+			await annotation.saveTx();
+			assert.include(await itemTextMatch('annotation:"zrevised"'), annotation.id);
+			assert.notInclude(await itemTextMatch('annotation:"zmethodology"'), annotation.id);
+		});
+
+		it("should index a note's text into its note column when the note queue runs", async function () {
+			let note = new Zotero.Item('note');
+			note.setNote('<p>Znotable owl observations</p>');
+			await note.saveTx();
+			await Zotero.FullText.processNoteIndexQueue();
+			assert.include(await itemTextMatch('note:"znotable"'), note.id);
+		});
+
+		it("should index CJK item text as 2-grams", async function () {
+			let item = await createDataObject('item', { title: '疫情控制研究' });
+			assert.include(await itemTextMatch('title:"疫情"', true), item.id);
+		});
+
+		it("should clear an erased item's entries", async function () {
+			let item = await createDataObject('item', { title: 'Zephemeral title' });
+			assert.include(await itemTextMatch('title:"zephemeral"'), item.id);
+			await item.eraseTx();
+			assert.notInclude(await itemTextMatch('title:"zephemeral"'), item.id);
+			assert.equal(await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM ftindex.fulltextItemTextState WHERE itemID=?",
+				item.id
+			), 0);
+		});
+
+		it("should backfill items missing from the index", async function () {
+			let item = await createDataObject('item', { title: 'Zbackfill target item' });
+			// Simulate an item that predates the index (e.g., after a rebuild)
+			await Zotero.DB.queryAsync(
+				"DELETE FROM ftindex.fulltextItemText WHERE rowid=?", item.id);
+			await Zotero.DB.queryAsync(
+				"DELETE FROM ftindex.fulltextItemTextState WHERE itemID=?", item.id);
+			assert.notInclude(await itemTextMatch('title:"zbackfill"'), item.id);
+			assert.isAbove(await Zotero.FullText.getItemTextIndexQueueCount(), 0);
+			await Zotero.FullText.processItemTextIndexQueue();
+			assert.include(await itemTextMatch('title:"zbackfill"'), item.id);
+			// The queue converges: everything eligible is indexed
+			assert.equal(await Zotero.FullText.getItemTextIndexQueueCount(), 0);
+			// The index stats report the same state
+			let stats = await Zotero.FullText.getIndexStats();
+			assert.equal(stats.itemTextQueue, 0);
+			assert.isAbove(stats.itemTextIndexed, 0);
+		});
+	});
 })

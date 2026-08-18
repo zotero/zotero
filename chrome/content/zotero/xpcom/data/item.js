@@ -1788,7 +1788,13 @@ Zotero.Item.prototype._saveData = async function (env) {
 			await Zotero.DB.queryAsync(sql, [itemID].concat(del));
 		}
 	}
-	
+
+	// Keep the item-text search index current with the item's title and abstract. Indexed
+	// inline -- the text is tiny -- so the item is searchable the moment the save commits.
+	if ((isNew || this._changed.itemData) && this.isRegularItem() && !this.isFeedItem) {
+		await Zotero.FullText.indexItemText(this);
+	}
+
 	//
 	// Creators
 	//
@@ -2295,6 +2301,9 @@ Zotero.Item.prototype._saveData = async function (env) {
 		
 		// Clear cached child items of the parent attachment
 		reloadParentChildItems[parentItemID] = true;
+
+		// Keep the item-text search index current with the annotation's passage and comment
+		await Zotero.FullText.indexItemText(this);
 
 		// Reload display title of annotations
 		if (this.isAnnotation()) {
@@ -5604,9 +5613,14 @@ Zotero.Item.prototype._eraseData = async function (env) {
 		await Zotero.Fulltext.clearItemWords(this.id);
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
-	// Clear the note content index (notes and attachments can both have itemNotes rows)
+	// Clear the note content index (notes and attachments can both have itemNotes rows);
+	// this also clears the note's item-text index entries
 	if (this.isNote() || this.isAttachment()) {
 		await Zotero.FullText.clearNoteIndex(this.id);
+	}
+	// Clear the item-text index for everything else (regular items, annotations)
+	else {
+		await Zotero.FullText.clearItemTextIndex(this.id);
 	}
 	
 	await Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
