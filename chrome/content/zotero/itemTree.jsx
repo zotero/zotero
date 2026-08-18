@@ -2774,7 +2774,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.selection.select(this._rowMap[itemID]);
 				focusedSet = true;
 			}
-			else {
+			// If the row is already selected (e.g. a collapsed parent that was
+			// selected as the fallback for a previously restored child), don't
+			// toggle selection on it, since that would un-select it
+			else if (!this.selection.isSelected(this._rowMap[itemID])) {
 				this.selection.toggleSelect(this._rowMap[itemID]);
 			}
 		}).bind(this);
@@ -2791,7 +2794,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// Try selecting the parent (child gone in this view)
 					var parent = selection[i].parentItemID;
 
-					if (parent && this._rowMap[parent] !== undefined && !this.selection.isSelected(this._rowMap[parent])) {
+					if (parent && this._rowMap[parent] !== undefined) {
 						toggleSelect(parent);
 					}
 				}

@@ -46,6 +46,16 @@ const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readA
 // Whether the Read Aloud audio cache has been pruned of stale versions this session
 let readAloudCachePruned = false;
 
+// Fluent messages for the undoable actions the reader reports
+const UNDO_ACTIONS = {
+	'add-annotations': 'undo-action-add-annotation',
+	'update-annotations': 'undo-action-edit-annotation',
+	'delete-annotations': 'undo-action-trash-annotation',
+	'convert-annotations': 'undo-action-convert-annotation',
+	'merge-annotations': 'undo-action-merge-annotations',
+};
+const UNDO_ACTION_FALLBACK = 'undo-action-edit-annotation';
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -240,6 +250,8 @@ class ReaderInstance {
 			location,
 			readOnly: this._isReadOnly(),
 			preview,
+			// Deleted annotations are sent to the trash rather than erased
+			trashesAnnotations: true,
 			authorName: this._item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
 			showContextPaneToggle: this._showContextPaneToggle,
 			sidebarWidth: this._sidebarWidth,
@@ -309,6 +321,12 @@ class ReaderInstance {
 						}
 						// Save annotation, and save image to cache
 						else {
+							// Trashed annotations never appear in the reader's annotations array,
+							// so a save for a trashed item can only mean the reader undid the
+							// trashing (see onDeleteAnnotations), and the item should be restored
+							if (item && item.deleted) {
+								item.deleted = false;
+							}
 							// Delete authorName to prevent setting annotationAuthorName unnecessarily
 							delete annotation.authorName;
 							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
@@ -338,14 +356,18 @@ class ReaderInstance {
 				let libraryID = attachment.libraryID;
 				let notifierQueue = new Zotero.Notifier.Queue();
 				try {
-					for (let key of keys) {
-						let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
-						// Make sure the annotation actually belongs to the current PDF
-						if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
-							this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
-							await annotation.eraseTx({ notifierQueue });
+					// Deleted annotations are sent to the trash
+					await Zotero.DB.executeTransaction(async () => {
+						for (let key of keys) {
+							let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
+							// Make sure the annotation actually belongs to the current attachment
+							if (annotation && annotation.isAnnotation() && annotation.parentID === this._item.id) {
+								this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
+								annotation.deleted = true;
+								await annotation.save({ notifierQueue });
+							}
 						}
-					}
+					});
 				}
 				catch (e) {
 					this.displayError(e);
@@ -404,6 +426,11 @@ class ReaderInstance {
 			onChangeSidebarView: (view) => {
 				Zotero.Prefs.set('reader.lastSidebarTab', view);
 			},
+			// Passing this hands undo/redo over to us, so leave it out when the
+			// undo history is disabled and let the reader keep handling its own
+			onChangeUndoHistory: Zotero.UndoHistory.isEnabled()
+				? history => this._updateUndoHistory(history)
+				: undefined,
 			onSetPopupPosition: (id, position) => {
 				this._setPopupPosition(id, position);
 			},
@@ -647,6 +674,8 @@ class ReaderInstance {
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
+		this._registerUndoHistoryProvider();
+
 		this._resolveInitPromise();
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
@@ -692,11 +721,62 @@ class ReaderInstance {
 		};
 	}
 
+	/**
+	 * Take part in the app-wide undo history, which owns the Undo/Redo commands
+	 * and interleaves the reader's annotation changes with changes made
+	 * elsewhere. The reader keeps its own annotation snapshots, so it does the
+	 * stepping itself and only reports what its history looks like.
+	 */
+	_registerUndoHistoryProvider() {
+		if (this._isTransient() || !Zotero.UndoHistory.isEnabled()) {
+			return;
+		}
+		Zotero.UndoHistory.registerProvider(this._instanceID, {
+			libraryID: this._item.libraryID,
+			window: this._iframeWindow,
+			undo: () => this._internalReader.undo(),
+			redo: () => this._internalReader.redo(),
+			reveal: () => this.reveal()
+		});
+	}
+
+	_updateUndoHistory(history) {
+		if (this._isTransient()) {
+			return;
+		}
+		try {
+			let { undoSteps, redoSteps } = JSON.parse(JSON.stringify(history));
+			Zotero.UndoHistory.setProviderSteps(this._instanceID, {
+				undoSteps: undoSteps.map(step => this._toUndoHistoryStep(step)),
+				redoSteps: redoSteps.map(step => this._toUndoHistoryStep(step))
+			});
+		}
+		catch (e) {
+			// Never let a problem here interfere with annotation editing
+			Zotero.logError(e);
+		}
+	}
+
+	_toUndoHistoryStep({ id, revision, action, count }) {
+		return {
+			id,
+			revision,
+			action: UNDO_ACTIONS[action] || UNDO_ACTION_FALLBACK,
+			actionArgs: { count }
+		};
+	}
+
+	/**
+	 * Bring this reader into view.
+	 */
+	reveal() {}
+
 	uninit() {
 		if (this._isUninitialized) {
 			return;
 		}
 		this._isUninitialized = true;
+		Zotero.UndoHistory.unregisterProvider(this._instanceID);
 		if (this._customEventHandler && this._iframeWindow) {
 			try {
 				this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
@@ -744,8 +824,14 @@ class ReaderInstance {
 		}
 	}
 
-	unsetAnnotations(keys) {
-		this._internalReader.unsetAnnotations(Components.utils.cloneInto(keys, this._iframeWindow));
+	// Pass permanentlyDeleted for annotations that were erased rather than
+	// trashed, so the reader also drops its history points referencing them
+	// and undo/redo can't recreate them with the same keys
+	unsetAnnotations(keys, permanentlyDeleted) {
+		this._internalReader.unsetAnnotations(
+			Components.utils.cloneInto(keys, this._iframeWindow),
+			permanentlyDeleted
+		);
 	}
 
 	async navigate(location) {
@@ -2075,6 +2161,16 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 
+	reveal() {
+		if (this._isTabClosed) {
+			return;
+		}
+		this._window.Zotero_Tabs.select(this.tabID);
+		if (Services.focus.activeWindow !== this._window) {
+			this._window.focus();
+		}
+	}
+
 	_handleLoad = (event) => {
 		if (this._iframe && this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
@@ -2222,6 +2318,12 @@ class ReaderWindow extends ReaderInstance {
 				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
 				this._window.onWindowMenuOpen = this._onWindowMenuOpen.bind(this);
 				this._window.reader = this;
+				// Register a window controller for undo/redo, as the main window
+				// does. Appending (rather than inserting at 0) ensures
+				// text-editing controllers take priority.
+				this._window.controllers.appendController(
+					Zotero.UndoHistory.getController(this._window.document)
+				);
 				this._iframe = this._window.document.getElementById('reader');
 				this._iframe.docShell.windowDraggingAllowed = true;
 			}
@@ -2251,6 +2353,10 @@ class ReaderWindow extends ReaderInstance {
 		this.uninit();
 		this._window.close();
 		this._onClose();
+	}
+
+	reveal() {
+		this._window.focus();
 	}
 
 	_setTitleValue(title) {
@@ -2292,6 +2398,7 @@ class ReaderWindow extends ReaderInstance {
 			return;
 		}
 		this._window.goUpdateGlobalEditMenuItems(true);
+		Zotero.UndoHistory.updateMenuItems(this._window.document);
 
 		this.onUpdateCustomMenus(event, 'edit', popup);
 	}
@@ -2834,11 +2941,25 @@ class Reader {
 					if (event === 'trash' && (ids.includes(item.id) || ids.includes(item.parentItemID))) {
 						reader.close();
 					}
+					else if (event === 'trash') {
+						// Trashed annotations are removed from the reader
+						let trashedKeys = item.getAnnotations(true)
+							.filter(annotation => ids.includes(annotation.id))
+							.map(annotation => annotation.key);
+						if (trashedKeys.length) {
+							reader.annotationItemIDs = item.getAnnotations().map(x => x.id);
+							reader.unsetAnnotations(trashedKeys);
+						}
+					}
 					else if (event === 'delete') {
-						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
-						if (disappearedIDs.length) {
-							let keys = disappearedIDs.map(id => extraData[id].key);
-							reader.unsetAnnotations(keys);
+						// Erased non-annotation keys can't match anything in the reader,
+						// so all keys deleted from the library can be passed as is
+						let erasedKeys = ids
+							.map(id => extraData?.[id])
+							.filter(data => data && data.libraryID === item.libraryID)
+							.map(data => data.key);
+						if (erasedKeys.length) {
+							reader.unsetAnnotations(erasedKeys, true);
 						}
 					}
 					else {
@@ -2882,7 +3003,7 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
-	
+
 	getWindowStates() {
 		return this._readers
 			.filter(r => r instanceof ReaderWindow)

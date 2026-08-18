@@ -2460,6 +2460,34 @@ Zotero.Item.prototype.numChildren = function (includeTrashed) {
 
 
 /**
+ * Get descendant items -- child notes and attachments of a regular item, plus
+ * annotations of its file attachments; annotations of a standalone file attachment
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.includeTrashed=false] Include trashed items
+ * @param {Boolean} [options.includeAnnotations=true] Include annotations of file attachments
+ * @return {Zotero.Item[]}
+ */
+Zotero.Item.prototype.getDescendantItems = function ({ includeTrashed = false, includeAnnotations = true } = {}) {
+	let descendents = [];
+	if (this.isRegularItem()) {
+		let attachments = Zotero.Items.get(this.getAttachments(includeTrashed));
+		descendents.push(...attachments, ...Zotero.Items.get(this.getNotes(includeTrashed)));
+		if (includeAnnotations) {
+			for (let attachment of attachments) {
+				if (!attachment.isFileAttachment()) continue;
+				descendents.push(...attachment.getAnnotations(includeTrashed));
+			}
+		}
+	}
+	else if (includeAnnotations && this.isFileAttachment()) {
+		descendents.push(...this.getAnnotations(includeTrashed));
+	}
+	return descendents;
+};
+
+
+/**
  * @return	{String|FALSE}	 Key of the parent item for an attachment or note, or FALSE if none
  */
 Zotero.Item.prototype.getSourceKey = function () {

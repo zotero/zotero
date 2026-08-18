@@ -1475,6 +1475,92 @@ describe("ZoteroPane", function () {
 			assert.isFalse(attachment2.deleted);
 			assert.isFalse(attachment3.deleted);
 		});
+
+		it("should restore selected trashed annotation", async function () {
+			let item1 = await createDataObject('item');
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			let annotation1 = await createAnnotation('highlight', attachment1);
+			annotation1.deleted = true;
+			await annotation1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([annotation1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(annotation1.deleted);
+		});
+
+		it("should restore selected trashed annotation of a standalone attachment", async function () {
+			let attachment1 = await importFileAttachment('test.pdf');
+			let annotation1 = await createAnnotation('highlight', attachment1);
+			annotation1.deleted = true;
+			await annotation1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([annotation1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(annotation1.deleted);
+			assert.isFalse(attachment1.deleted);
+		});
+
+		it("should restore annotations when trashed standalone attachment is restored", async function () {
+			let attachment1 = await importFileAttachment('test.pdf');
+			let annotation1 = await createAnnotation('highlight', attachment1);
+			annotation1.deleted = true;
+			await annotation1.saveTx();
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([attachment1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(attachment1.deleted);
+			assert.isFalse(annotation1.deleted);
+		});
+
+		it("should restore annotations when trashed top-level item is restored", async function () {
+			let item1 = await createDataObject('item', { deleted: true });
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			let annotation1 = await createAnnotation('highlight', attachment1);
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+			annotation1.deleted = true;
+			await annotation1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.isFalse(annotation1.deleted);
+		});
+
+		it("should restore only selected annotation when it is selected along with its top-level item", async function () {
+			let item1 = await createDataObject('item', { deleted: true });
+			let attachment1 = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			let annotation1 = await createAnnotation('highlight', attachment1);
+			let annotation2 = await createAnnotation('highlight', attachment1);
+			annotation1.deleted = true;
+			await annotation1.saveTx();
+			annotation2.deleted = true;
+			await annotation2.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, annotation1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(annotation1.deleted);
+			assert.isTrue(annotation2.deleted);
+		});
 	});
 
 	describe("#checkForLinkedFilesToRelink()", function () {

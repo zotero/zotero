@@ -2529,12 +2529,14 @@ var ZoteroPane = new function () {
 		else if (collectionTreeRows[0].isShare()) {
 			return false;
 		}
-		// If multiple items are selected and only some are annotations, disallow delete unless we
-		// are in the trash, in which case any selected item can be erased
-		let selected = this.itemsView.getSelectedItems();
-		if (!selected.every(item => item.isAnnotation())
-			&& selected.some(item => item.isAnnotation())) {
-			return collectionTreeRows[0].isTrash();
+		// Outside the trash, disallow if the selection includes annotations that can't be
+		// trashed -- ones made by other users or stored externally in the file
+		if (!collectionTreeRows[0].isTrash()) {
+			let selected = this.itemsView.getSelectedItems();
+			if (selected.some(item => item.isAnnotation()
+					&& (!item.isEditable() || item.annotationIsExternal))) {
+				return false;
+			}
 		}
 		return true;
 	};
@@ -2586,11 +2588,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 		var prompt;
-		// Backspace on annotation items = prompt to erase
-		if (this.itemsView.getSelectedItems().every(item => item.isAnnotation())) {
-			prompt = toDelete;
-		}
-		else if (collectionTreeRows[0].isPublications()) {
+		if (collectionTreeRows[0].isPublications()) {
 			let toRemoveFromPublications = {
 				title: Zotero.getString('pane.items.removeFromPublications.title'),
 				text: Zotero.getString(
@@ -2861,7 +2859,7 @@ var ZoteroPane = new function () {
 				}
 
 				let parent = this.itemsView.getRow(row).ref;
-				let childIDs = [];
+				let childItems = [];
 				let subcollections = [];
 				if (parent instanceof Zotero.Collection) {
 					// If the restored item is a collection, restore its subcollections too
@@ -2870,14 +2868,8 @@ var ZoteroPane = new function () {
 					}
 				}
 				else {
-					if (!parent.isNote()) {
-						childIDs.push(...parent.getNotes(true));
-					}
-					if (!parent.isAttachment()) {
-						childIDs.push(...parent.getAttachments(true));
-					}
+					childItems = parent.getDescendantItems({ includeTrashed: true });
 				}
-				let childItems = Zotero.Items.get(childIDs);
 				if (isSelected(parent)) {
 					if (parent.deleted) {
 						parent.deleted = false;
@@ -4623,15 +4615,21 @@ var ZoteroPane = new function () {
 		}
 
 		// Only keep annotation-specific options if annotations are selected
-		let annotationsSelected = items.some(item => item.isAnnotation());
-		if (annotationsSelected) {
+		let selectedAnnotations = items.filter(item => item.isAnnotation());
+		if (selectedAnnotations.length) {
 			let menuItemsForAnnotations = [
 				'createNoteFromAnnotations',
-				'deleteFromLibrary'
+				'deleteFromLibrary',
+				'restoreToLibrary',
+				'moveToTrash'
 			];
 			for (let i in m) {
 				if (menuItemsForAnnotations.includes(i)) continue;
 				show.delete(m[i]);
+			}
+			// Cannot trash external annotations or annotations made by other users
+			if (selectedAnnotations.some(item => !item.isEditable() || item.annotationIsExternal)) {
+				disable.add(m.moveToTrash);
 			}
 		}
 
@@ -4662,7 +4660,7 @@ var ZoteroPane = new function () {
 		}
 
 		// No locate menu options if annotations are selected
-		if (annotationsSelected) return;
+		if (selectedAnnotations.length) return;
 
 		// add locate menu options
 		await Zotero_LocateMenu.buildContextMenu(menu, true);
