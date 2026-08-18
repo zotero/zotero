@@ -2820,6 +2820,94 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 
 	/**
+	 * IDs of the given notes whose note-index entries can't be relied on to reflect their
+	 * current text: notes edited since their last index update (see flagNoteStale()) and notes
+	 * not in the index at the current format version (e.g., mid-backfill). A caller matching
+	 * against the index should read these notes' current text instead (see
+	 * getNoteSearchTexts()).
+	 *
+	 * @param {Integer[]} itemIDs
+	 * @return {Promise<Integer[]>}
+	 */
+	this.getStaleOrUnindexedNoteIDs = async function (itemIDs) {
+		let result = [];
+		let chunkSize = 500;
+		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			let chunk = itemIDs.slice(i, i + chunkSize);
+			result.push(...await Zotero.DB.columnQueryAsync(
+				"SELECT N.itemID FROM itemNotes N "
+					+ "LEFT JOIN ftindex.fulltextNoteIndexState S USING (itemID) "
+					+ "WHERE N.itemID IN (" + chunk.map(() => '?').join(',') + ") "
+					+ "AND (S.itemID IS NULL OR S.version<?)",
+				[...chunk, _contentIndexVersion]
+			));
+		}
+		return result;
+	};
+
+
+	/**
+	 * Normalized searchable plain text of the given notes, keyed by itemID --
+	 * the same text note searching matches against: the note index's stored
+	 * plain text where the index is current, the in-memory text of notes
+	 * edited since their last index update (see flagNoteStale()), and a fresh
+	 * extraction for notes the index doesn't hold yet (e.g., mid-backfill).
+	 * IDs that aren't notes are simply absent from the result.
+	 *
+	 * @param {Integer[]} itemIDs
+	 * @return {Promise<Map>} - itemID -> text
+	 */
+	this.getNoteSearchTexts = async function (itemIDs) {
+		let texts = new Map();
+		let chunkSize = 500;
+		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			let chunk = itemIDs.slice(i, i + chunkSize);
+			let placeholders = chunk.map(() => '?').join(',');
+			let rows = await Zotero.DB.queryAsync(
+				"SELECT itemID, text FROM ftindex.noteText WHERE itemID IN (" + placeholders + ")",
+				chunk
+			);
+			for (let row of rows) {
+				texts.set(row.itemID, row.text);
+			}
+			// A note edited since its last index update still holds its
+			// pre-edit text in noteText -- its current text is what counts
+			let staleIDs = new Set(await Zotero.DB.columnQueryAsync(
+				"SELECT itemID FROM ftindex.fulltextNoteIndexState "
+					+ "WHERE version=0 AND itemID IN (" + placeholders + ")",
+				chunk
+			));
+			// Stale notes not seen since their edit (e.g., flagged in a
+			// previous session) and notes with no index entry at all are both
+			// extracted from the stored note
+			let fetchIDs = chunk.filter((id) => {
+				return staleIDs.has(id) ? !_staleNoteText.has(id) : !texts.has(id);
+			});
+			if (fetchIDs.length) {
+				let noteRows = await Zotero.DB.queryAsync(
+					"SELECT itemID, note FROM itemNotes WHERE itemID IN ("
+						+ fetchIDs.map(() => '?').join(',') + ")",
+					fetchIDs
+				);
+				for (let row of noteRows) {
+					let text = _normalizeNoteText(row.note);
+					texts.set(row.itemID, text);
+					if (staleIDs.has(row.itemID)) {
+						_staleNoteText.set(row.itemID, text);
+					}
+				}
+			}
+			for (let id of staleIDs) {
+				if (_staleNoteText.has(id)) {
+					texts.set(id, _staleNoteText.get(id));
+				}
+			}
+		}
+		return texts;
+	};
+
+
+	/**
 	 * Return the ids of attachment items in the given library whose full-text content matches
 	 * `searchText` (see getWordMatchClause for the matching semantics). This is the non-regexp
 	 * path for the 'fulltextContent' search condition; callers intersect the result with their
