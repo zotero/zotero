@@ -1109,32 +1109,39 @@ Zotero.File = new function () {
 	};
 	
 	
-	var _isAPFSCache = {};
+	var _fsInfoCache = {};
 
 	/**
-	 * Check if a path is on an APFS volume
+	 * Get information about the filesystem containing a path (macOS only)
+	 *
+	 * statfs() is called on the path itself, following symlinks, so a symlinked file is
+	 * classified by its target's volume. The parent directory is used if the path doesn't
+	 * exist.
 	 *
 	 * @param {String} path
-	 * @return {Boolean}
+	 * @return {Object|null} - { fsType: statfs f_fstypename (e.g., 'apfs', 'smbfs'),
+	 *     readOnly: Boolean }, or null on other platforms or if the check fails
 	 */
-	this.isAPFS = function (path) {
-		if (!Zotero.isMac) return false;
+	this.getFileSystemInfo = function (path) {
+		if (!Zotero.isMac) return null;
 
-		let dir = PathUtils.parent(path);
-		if (dir in _isAPFSCache) {
-			return _isAPFSCache[dir];
+		if (path in _fsInfoCache) {
+			return _fsInfoCache[path];
 		}
 
-		let result = false;
+		let result = null;
 		try {
 			let { ctypes } = ChromeUtils.importESModule(
 				"resource://gre/modules/ctypes.sys.mjs"
 			);
-			// struct statfs -- f_fstypename is a char[16] at byte offset 72
+			// struct statfs -- f_flags is a uint32 at byte offset 64, f_fstypename is a
+			// char[16] at byte offset 72
 			const STATFS_SIZE = 2168;
+			const FLAGS_OFFSET = 64;
 			const FSTYPENAME_OFFSET = 72;
 			const FSTYPENAME_LEN = 16;
-			let buf = new ctypes.ArrayType(ctypes.uint8_t, STATFS_SIZE)();
+			const MNT_RDONLY = 0x1;
+			let buf = new (ctypes.ArrayType(ctypes.uint8_t, STATFS_SIZE))();
 			let lib = ctypes.open("/usr/lib/libSystem.B.dylib");
 			try {
 				let statfs = lib.declare(
@@ -1144,14 +1151,22 @@ Zotero.File = new function () {
 					ctypes.char.ptr,
 					ctypes.voidptr_t
 				);
-				if (statfs(dir, buf.address()) === 0) {
-					let typeName = '';
-					for (let i = FSTYPENAME_OFFSET; i < FSTYPENAME_OFFSET + FSTYPENAME_LEN; i++) {
-						if (buf[i] === 0) break;
-						typeName += String.fromCharCode(buf[i]);
+				if (statfs(path, buf.address()) !== 0) {
+					if (statfs(PathUtils.parent(path), buf.address()) !== 0) {
+						throw new Error("statfs() failed");
 					}
-					result = typeName === 'apfs';
 				}
+				let typeName = '';
+				for (let i = FSTYPENAME_OFFSET; i < FSTYPENAME_OFFSET + FSTYPENAME_LEN; i++) {
+					if (buf[i] === 0) break;
+					typeName += String.fromCharCode(buf[i]);
+				}
+				let flags = buf[FLAGS_OFFSET] | (buf[FLAGS_OFFSET + 1] << 8)
+					| (buf[FLAGS_OFFSET + 2] << 16) | (buf[FLAGS_OFFSET + 3] << 24);
+				result = {
+					fsType: typeName,
+					readOnly: !!(flags & MNT_RDONLY)
+				};
 			}
 			finally {
 				lib.close();
@@ -1161,7 +1176,105 @@ Zotero.File = new function () {
 			Zotero.warn("Failed to check filesystem type: " + e);
 		}
 
-		_isAPFSCache[dir] = result;
+		_fsInfoCache[path] = result;
+		return result;
+	};
+
+
+	/**
+	 * Check if a path is on an APFS volume
+	 *
+	 * @param {String} path
+	 * @return {Boolean}
+	 */
+	this.isAPFS = function (path) {
+		return this.getFileSystemInfo(path)?.fsType === 'apfs';
+	};
+
+
+	/**
+	 * Check whether the filesystem containing a path supports POSIX byte-range locks
+	 * (macOS only)
+	 *
+	 * Performs the same fcntl(F_GETLK) probe SQLite uses to choose its locking methods.
+	 * If the path doesn't exist, a temporary sibling file is probed instead.
+	 *
+	 * @param {String} path
+	 * @return {Promise<Boolean>}
+	 */
+	this.supportsByteRangeLocks = async function (path) {
+		if (!Zotero.isMac) return true;
+
+		let probePath = path;
+		let probeCreated = false;
+		if (!(await IOUtils.exists(path))) {
+			probePath = path + '.' + Zotero.Utilities.randomString() + '.lock-probe';
+			// Exclusive creation, so that an existing file is never overwritten and deleted
+			await IOUtils.write(probePath, new Uint8Array(0), { mode: 'create' });
+			probeCreated = true;
+		}
+
+		let result = false;
+		try {
+			let { ctypes } = ChromeUtils.importESModule(
+				"resource://gre/modules/ctypes.sys.mjs"
+			);
+			let lib = ctypes.open("/usr/lib/libSystem.B.dylib");
+			try {
+				// open() and fcntl() are variadic, which matters for argument passing on ARM64
+				let open = lib.declare(
+					"open", ctypes.default_abi, ctypes.int, ctypes.char.ptr, ctypes.int, "..."
+				);
+				let close = lib.declare(
+					"close", ctypes.default_abi, ctypes.int, ctypes.int
+				);
+				let fcntl = lib.declare(
+					"fcntl", ctypes.default_abi, ctypes.int, ctypes.int, ctypes.int, "..."
+				);
+				let flockType = ctypes.StructType("flock", [
+					{ l_start: ctypes.int64_t },
+					{ l_len: ctypes.int64_t },
+					{ l_pid: ctypes.int32_t },
+					{ l_type: ctypes.int16_t },
+					{ l_whence: ctypes.int16_t }
+				]);
+				const O_RDONLY = 0x0;
+				const F_GETLK = 7;
+				const F_RDLCK = 1;
+				const SEEK_SET = 0;
+				let fd = open(probePath, O_RDONLY);
+				if (fd >= 0) {
+					try {
+						let lock = new flockType();
+						lock.l_start = 0;
+						lock.l_len = 1;
+						lock.l_pid = 0;
+						lock.l_type = F_RDLCK;
+						lock.l_whence = SEEK_SET;
+						result = fcntl(fd, F_GETLK, lock.address()) != -1;
+					}
+					finally {
+						close(fd);
+					}
+				}
+			}
+			finally {
+				lib.close();
+			}
+		}
+		catch (e) {
+			Zotero.warn("Failed to check byte-range lock support: " + e);
+		}
+		finally {
+			if (probeCreated) {
+				try {
+					await IOUtils.remove(probePath, { ignoreAbsent: true });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		}
 		return result;
 	};
 
