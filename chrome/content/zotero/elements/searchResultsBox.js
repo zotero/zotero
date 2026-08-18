@@ -29,13 +29,14 @@
 		{ global: "current" }
 	);
 
-	// Most matching chunks shown for an attachment
+	// Most match excerpts shown for an item
 	const MAX_RESULTS = 5;
 
-	// Why an attachment matched the active best-match search: cards with the
-	// fulltext chunks most similar to the query, so they can be previewed
-	// without opening the file. Shown only while a best-match search is
-	// active, for attachments with matching indexed chunks.
+	// Why the selected item matched the active best-match search: cards with
+	// excerpts of the item's own text around the matches (see
+	// Zotero.BestMatch.getMatchingExcerpts()), so they can be read without
+	// opening anything. Shown only while a best-match search is active, for
+	// items with something to show.
 	class SearchResultsBox extends ItemPaneSectionElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<collapsible-section data-l10n-id="section-search-results" data-pane="search-results">
@@ -49,7 +50,7 @@
 		}
 
 		set item(item) {
-			super.item = (item instanceof Zotero.Item && item.isFileAttachment()) ? item : null;
+			super.item = item instanceof Zotero.Item ? item : null;
 			// A new item's emptiness isn't known until asyncRender scores it
 			this._count = undefined;
 		}
@@ -126,63 +127,59 @@
 				return;
 			}
 
-			let chunks = [];
+			let excerpts = [];
 			try {
-				chunks = await Zotero.Embeddings.getMatchingChunks(query, item.id,
+				excerpts = await Zotero.BestMatch.getMatchingExcerpts(query, item.id,
 					{ limit: MAX_RESULTS });
 			}
 			catch (e) {
-				// Nothing to show while the model is still downloading or the
-				// index is being rebuilt
-				if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
-					Zotero.logError(e);
-				}
+				Zotero.logError(e);
 			}
-			// Only fulltext chunks carry their own text; anything else about
-			// the item is already visible in the pane
-			chunks = chunks.filter(chunk => chunk.text);
 			// The selection may have moved on while scoring
 			if (this.item !== item) {
 				return;
 			}
-			this._count = chunks.length;
-			this._section.setCount(chunks.length);
+			this._count = excerpts.length;
+			this._section.setCount(excerpts.length);
 			this._updateHidden();
-			// Left in the order getMatchingChunks() returns them, strongest
+			// Left in the order getMatchingExcerpts() returns them, strongest
 			// match first: with only a handful of cards shown, the best one
 			// earning the top slot matters more than reading them in
 			// document order
-			for (let chunk of chunks) {
+			for (let excerpt of excerpts) {
 				let row = document.createXULElement('search-result-row');
-				row.chunk = chunk;
+				row.result = excerpt;
 				this._body.append(row);
 			}
 		}
 
-		// Open the attachment where the activated card's chunk is: for a PDF,
-		// scrolled to and highlighting the chunk's section; without a stored
-		// position (EPUB, snapshot, flat-text fallback), just open it
+		// For a file attachment, open it where the activated card's excerpt
+		// is: for a PDF with a stored chunk position, scrolled to and
+		// highlighting the section; without one (EPUB, snapshot, a lexical
+		// excerpt), just open it. Other item types show their matched text in
+		// the pane already, so a card activation has nowhere to go.
 		_handleActivate = (event) => {
 			let row = event.target.closest('search-result-row');
 			// The Show More toggle isn't an activation
-			if (!row || !this.item || event.target.closest('.show-more')) {
+			if (!row || !this.item || !this.item.isFileAttachment()
+					|| event.target.closest('.show-more')) {
 				return;
 			}
 			if (typeof ZoteroPane == 'undefined') {
 				return;
 			}
-			let position = row.chunk?.position;
+			let position = row.result?.position;
 			ZoteroPane.viewAttachment(this.item.id, null, false,
 				position ? { location: { position } } : undefined)
 				.catch(e => Zotero.logError(e));
 		};
 
 		_updateHidden() {
-			// Visible only for a file attachment during a best-match search;
-			// asyncRender hides it again when nothing matched. Deciding
-			// emptiness needs the async scoring, so unlike the annotations
-			// section this one can't know its final state synchronously --
-			// it appears, then empties out, rather than flickering in late.
+			// Visible only during a best-match search; asyncRender hides it
+			// again when nothing matched. Deciding emptiness needs the async
+			// scoring, so unlike the annotations section this one can't know
+			// its final state synchronously -- it appears, then empties out,
+			// rather than flickering in late.
 			this.hidden = !this.item || !this._query || this.tabType == 'reader'
 				|| this._count === 0;
 		}

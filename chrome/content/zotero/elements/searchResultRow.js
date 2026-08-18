@@ -26,11 +26,14 @@
 "use strict";
 
 {
-	// A best-match search result card: one fulltext chunk of an attachment
-	// (see Zotero.Embeddings.getMatchingChunks()), presented like an
-	// annotation-row -- where the chunk sits in the document as the head,
-	// its text as the quote. The two share their styling (see
-	// scss/elements/_annotationRow.scss).
+	// A best-match search result card: one excerpt of an item's text that
+	// matches the query (see Zotero.BestMatch.getMatchingExcerpts()) --
+	// where the excerpt came from as the head, its text as the quote,
+	// presented like an annotation-row (the two share their styling, see
+	// scss/elements/_annotationRow.scss). A semantic chunk heads with its
+	// place in the document (outline path, section part, page); a lexical
+	// excerpt heads with its source's name and marks its matched ranges in
+	// the quote.
 	class SearchResultRow extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<html:div class="head">
@@ -46,14 +49,14 @@
 			</html:div>
 		`);
 
-		_chunk = null;
+		_result = null;
 
-		get chunk() {
-			return this._chunk;
+		get result() {
+			return this._result;
 		}
 
-		set chunk(chunk) {
-			this._chunk = chunk;
+		set result(result) {
+			this._result = result;
 			this.render();
 		}
 
@@ -72,35 +75,57 @@
 			this.render();
 		}
 
-		render() {
-			if (!this.initialized || !this._chunk) return;
+		// The head's label for where a lexical excerpt came from, localized
+		// with the names the rest of the UI gives those parts of an item.
+		// Attachment content ('content') isn't here: it labels with the same
+		// generic fulltext string an outline-less chunk falls back to.
+		_getSourceLabel(source) {
+			switch (source) {
+				case 'title':
+					return Zotero.ItemFields.getLocalizedString('title');
+				case 'abstract':
+					return Zotero.ItemFields.getLocalizedString('abstractNote');
+				case 'note':
+					return Zotero.ItemTypes.getLocalizedString('note');
+				case 'annotation':
+					return Zotero.ItemTypes.getLocalizedString('annotation');
+			}
+			return null;
+		}
 
-			// The chunk's outline path says where in the document it came
-			// from; a chunk from a document without an outline falls back to
-			// a generic label
-			if (this._chunk.outlinePath) {
+		render() {
+			if (!this.initialized || !this._result) return;
+
+			// Where the excerpt came from: a chunk's outline path, a lexical
+			// source's name, or the generic fulltext label
+			let sourceLabel = this._getSourceLabel(this._result.source);
+			if (this._result.outlinePath) {
 				this._path.removeAttribute('data-l10n-id');
-				this._path.textContent = this._chunk.outlinePath;
+				this._path.textContent = this._result.outlinePath;
+			}
+			else if (sourceLabel) {
+				this._path.removeAttribute('data-l10n-id');
+				this._path.textContent = sourceLabel;
 			}
 			else {
 				document.l10n.setAttributes(this._path, 'search-result-row-fulltext');
 			}
 			// Which piece of a split section this is, so a match reads as
 			// coming from the middle or the end of its section
-			let parts = this._chunk.sectionParts;
+			let parts = this._result.sectionParts;
 			this._part.hidden = !(parts > 1);
 			if (parts > 1) {
-				this._part.textContent = `${this._chunk.sectionPart}/${parts}`;
+				this._part.textContent = `${this._result.sectionPart}/${parts}`;
 			}
 			// The page the chunk's section starts on, labeled the way
 			// annotation rows label theirs
-			this._location.hidden = !this._chunk.pageLabel;
-			if (this._chunk.pageLabel) {
+			this._location.hidden = !this._result.pageLabel;
+			if (this._result.pageLabel) {
 				this._location.textContent
-					= Zotero.getString('pdfReader.page') + ' ' + this._chunk.pageLabel;
+					= Zotero.getString('pdfReader.page') + ' ' + this._result.pageLabel;
 			}
 
-			this._quote.textContent = this._chunk.text || '';
+			this._renderQuote();
 
 			// Offer "Show More" only when the quote is actually clamped,
 			// which is only measurable once the card has a layout
@@ -114,10 +139,35 @@
 			// A11y - make focusable and describe the card
 			this.setAttribute('tabindex', 0);
 			this.setAttribute('aria-label', [
-				this._chunk.outlinePath,
+				this._result.outlinePath || sourceLabel,
 				this._location.hidden ? '' : this._location.textContent,
-				this._chunk.text
+				this._result.text
 			].filter(Boolean).join('. '));
+		}
+
+		// The excerpt's text, with any matched ranges wrapped for highlighting
+		_renderQuote() {
+			let text = this._result.text || '';
+			let ranges = this._result.ranges || [];
+			if (!ranges.length) {
+				this._quote.textContent = text;
+				return;
+			}
+			this._quote.replaceChildren();
+			let position = 0;
+			for (let [start, end] of ranges) {
+				if (start > position) {
+					this._quote.append(text.slice(position, start));
+				}
+				let match = document.createElement('span');
+				match.className = 'match';
+				match.textContent = text.slice(start, end);
+				this._quote.append(match);
+				position = end;
+			}
+			if (position < text.length) {
+				this._quote.append(text.slice(position));
+			}
 		}
 
 		_toggleExpanded() {

@@ -202,12 +202,55 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(quicksearch.value, "test");
 		});
 
+		describe("in best-match mode without embeddings", function () {
+			var stubs = [];
+
+			beforeEach(function () {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false));
+				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+			});
+
+			afterEach(async function () {
+				Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+				await zp.itemsView.setFilter('search', '');
+				await selectLibrary(win);
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+			});
+
+			it("should rank items lexically", async function () {
+				let col = await createDataObject('collection');
+				let full = await createDataObject('item',
+					{ title: 'Lexint owl migration patterns', collections: [col.id] });
+				let partial = await createDataObject('item',
+					{ title: 'Lexint owl handbook', collections: [col.id] });
+				await createDataObject('item',
+					{ title: 'Something else entirely', collections: [col.id] });
+
+				await select(win, col);
+				let itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'lexint owl migration ');
+
+				// Scored items only, ranked by coverage, most relevant first
+				assert.deepEqual(itemsView._rows.map(row => row.id), [full.id, partial.id]);
+				assert.equal(itemsView.getSortField(), 'relevance');
+				// The bars carry the lexical scores directly
+				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
+				assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
+				assert.isAtMost(fractions.get(full.id), 1);
+				assert.isAbove(fractions.get(partial.id), 0);
+			});
+		});
+
 		describe("in best-match mode", function () {
 			var stubs = [];
 
 			beforeEach(function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+				// No lexical matches, so the fused ranking and the bars carry
+				// the semantic scores these tests control
+				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves(new Map()));
 				// A fully built index by default, so no indexing banner appears
 				stubs.push(sinon.stub(Zotero.Embeddings.Indexing, 'getStatus').returns({
 					enabled: true,
@@ -264,9 +307,12 @@ describe("CollectionViewItemTree", function () {
 				// The Relevance cells show the ranks
 				assert.equal(itemsView.getCellText(0, 'relevance'), 1);
 				assert.equal(itemsView.getCellText(1, 'relevance'), 2);
-				// Score fractions for the bars
-				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemB.id), 0.9);
-				assert.equal(itemsView.rowProvider.getBestMatchBarFractions().get(itemA.id), 0.5);
+				// The bars carry the fused scores, so they agree with the
+				// ranking: with no lexical matches, a semantic match at rank
+				// 1 fuses to half its fraction, rank 2 to fraction * 61/124
+				let barFractions = itemsView.rowProvider.getBestMatchBarFractions();
+				assert.closeTo(barFractions.get(itemB.id), 0.9 / 2, 1e-12);
+				assert.closeTo(barFractions.get(itemA.id), 0.5 * 61 / 124, 1e-12);
 				assert.isFalse(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
 				// The rendered header shows the column
 				assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
@@ -338,12 +384,13 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(ranks.get(item.id), 1);
 				assert.equal(ranks.get(other.id), 2);
 				// The bar reports only the row's own score: the annotation gets
-				// its match, the rows ranked by it get an empty bar
+				// its match (fused: a rank-1 semantic match at half its
+				// fraction), the rows ranked by it get an empty bar
 				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
-				assert.equal(fractions.get(annotation.id), 0.9);
+				assert.closeTo(fractions.get(annotation.id), 0.45, 1e-12);
 				assert.equal(fractions.get(attachment.id), 0);
 				assert.equal(fractions.get(item.id), 0);
-				assert.equal(fractions.get(other.id), 0.5);
+				assert.closeTo(fractions.get(other.id), 0.5 * 61 / 124, 1e-12);
 
 				// The matched annotation's ancestors auto-expand, and its row
 				// renders a relevance bar of its own. Row painting is async, so
@@ -358,7 +405,7 @@ describe("CollectionViewItemTree", function () {
 						await Zotero.Promise.delay(10);
 					}
 				}
-				assert.equal(bar.firstChild.style.width, '90%');
+				assert.equal(bar.firstChild.style.width, '45%');
 
 				// An annotation row's bar has to be the same width as every
 				// other row's. The tight annotation layout drops cell padding,

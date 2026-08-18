@@ -830,29 +830,18 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 	//Zotero.debug(ids);
 
 	// A root-level 'bestMatch' condition with a top-K cutoff makes membership
-	// semantic: only the K results most similar to the query match, so the
-	// saved search returns the same set when used as a source (scopes, counts,
-	// the API). Without a cutoff, best match is only a ranking in the items
-	// list and membership is untouched. If the index isn't usable (no model,
-	// or mid-switch), a cutoff search matches nothing rather than an arbitrary
-	// set.
+	// relevance-based: only the K results most relevant to the query match,
+	// so the saved search returns the same set when used as a source (scopes,
+	// counts, the API). Without a cutoff, best match is only a ranking in the
+	// items list and membership is untouched.
 	let bestMatch = this.getBestMatchQuery();
 	if (ids && ids.length && bestMatch && bestMatch.topK) {
-		try {
-			let scores = await Zotero.Embeddings.scoreItemIDs(bestMatch.query, ids);
-			ids = [...scores.entries()]
-				// Deterministic order: by score, then by itemID for equal scores
-				.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
-				.slice(0, bestMatch.topK)
-				.map(([itemID]) => itemID);
-		}
-		catch (e) {
-			if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
-				throw e;
-			}
-			Zotero.debug("Embeddings index not ready -- best-match cutoff search matches nothing");
-			ids = [];
-		}
+		let scores = await Zotero.BestMatch.scoreItemIDs(bestMatch.query, ids);
+		ids = [...scores.entries()]
+			// Deterministic order: by score, then by itemID for equal scores
+			.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+			.slice(0, bestMatch.topK)
+			.map(([itemID]) => itemID);
 	}
 
 	if (!ids || !ids.length) {
@@ -882,7 +871,7 @@ Zotero.Search.prototype.getBestMatchQuery = function () {
 			depth--;
 		}
 		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value
-				&& Zotero.Embeddings.normalizeQuery(condition.value)) {
+				&& Zotero.BestMatch.isSearchableQuery(condition.value)) {
 			return {
 				query: condition.value,
 				topK: parseInt(condition.operator) || false

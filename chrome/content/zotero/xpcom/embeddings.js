@@ -1047,69 +1047,6 @@ Zotero.Embeddings = new function () {
 		])];
 	};
 
-	// Items among the given ones whose indexed text contains every word of the
-	// query, matched as substrings the way quick search matches them. Covers
-	// everything the index embeds: item fields, note text, and annotation
-	// text and comments.
-	async function _findLiteralMatches(queryText, itemIDs) {
-		let terms = Zotero.Embeddings.normalizeQuery(queryText).split(/\s+/).filter(Boolean);
-		if (!terms.length || !itemIDs.length) {
-			return new Set();
-		}
-		let fieldIDs = Zotero.Embeddings.getIndexedFieldIDs();
-		let matched = null;
-		for (let term of terms) {
-			let ids = new Set();
-			let pattern = '%' + term.replace(/[\\%_]/g, '\\$&') + '%';
-			let chunkSize = 500;
-			for (let i = 0; i < itemIDs.length; i += chunkSize) {
-				let chunk = itemIDs.slice(i, i + chunkSize);
-				let placeholders = chunk.map(() => '?').join(',');
-				let queries = [
-					[
-						"SELECT DISTINCT itemID FROM itemData "
-							+ "JOIN itemDataValues USING (valueID) "
-							+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
-							+ "AND itemID IN (" + placeholders + ") "
-							+ "AND value LIKE ? ESCAPE '\\'",
-						[...chunk, pattern]
-					],
-					[
-						// Match inside the stored note the way the quick
-						// search note condition does: with the standard
-						// wrapper element trimmed off, so its markup
-						// ('zotero-note znv1') doesn't match every note
-						"SELECT itemID FROM itemNotes "
-							+ "WHERE itemID IN (" + placeholders + ") "
-							+ "AND SUBSTR(note, "
-								+ (1 + Zotero.Notes.notePrefix.length) + ", "
-								+ "LENGTH(note) - "
-								+ (Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length)
-							+ ") LIKE ? ESCAPE '\\'",
-						[...chunk, pattern]
-					],
-					[
-						"SELECT itemID FROM itemAnnotations "
-							+ "WHERE itemID IN (" + placeholders + ") "
-							+ "AND (text LIKE ? ESCAPE '\\' OR comment LIKE ? ESCAPE '\\')",
-						[...chunk, pattern, pattern]
-					]
-				];
-				for (let [sql, params] of queries) {
-					let rows = await Zotero.DB.columnQueryAsync(sql, params);
-					for (let id of rows || []) {
-						ids.add(id);
-					}
-				}
-			}
-			matched = matched ? new Set([...matched].filter(id => ids.has(id))) : ids;
-			if (!matched.size) {
-				break;
-			}
-		}
-		return matched;
-	}
-
 	// mozStorage returns a BLOB as an array of byte values; reinterpret those
 	// bytes as the stored Float32 embedding vector.
 	function _blobToVector(blob) {
@@ -1154,12 +1091,9 @@ Zotero.Embeddings = new function () {
 	 * Score a given set of items by similarity to a query. Items scoring below
 	 * the model's measured minimum aren't matches and aren't returned (see
 	 * Zotero.Embeddings.Calibration), and items without a stored embedding
-	 * can't be scored at all -- unless nothing clears the minimum, in which
-	 * case candidates whose text contains the query's words are returned
-	 * instead, indexed or not, since the model missing what an item says
-	 * literally shouldn't leave the search with nothing to show. Used to apply
-	 * semantic ranking within an existing result scope (e.g. the current
-	 * collection) rather than the whole library.
+	 * can't be scored at all. Used to apply semantic ranking within an
+	 * existing result scope (e.g. the current collection) rather than the
+	 * whole library.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -1171,7 +1105,6 @@ Zotero.Embeddings = new function () {
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		let scores = new Map();
-		let belowFloor = new Map();
 		if (!itemIDs.length || !this.isEnabled()) {
 			return scores;
 		}
@@ -1215,21 +1148,6 @@ Zotero.Embeddings = new function () {
 		for (let [itemID, dot] of best) {
 			if (dot >= minScore) {
 				scores.set(itemID, dot);
-			}
-			else {
-				belowFloor.set(itemID, dot);
-			}
-		}
-		// Nothing was similar enough to the query to be a match, so fall back to
-		// the items that use its words, which leave the relevance bar empty:
-		// indexed items ranked by their own scores, and unindexed ones -- too
-		// little text to embed, so nothing to rank them by -- placed at the
-		// floor
-		if (!scores.size) {
-			let literal = await _findLiteralMatches(queryText, itemIDs);
-			for (let itemID of literal) {
-				scores.set(itemID,
-					belowFloor.has(itemID) ? belowFloor.get(itemID) : minScore);
 			}
 		}
 		if (generation !== _modelGeneration) {

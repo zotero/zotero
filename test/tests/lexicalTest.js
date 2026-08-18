@@ -128,7 +128,48 @@ describe("Zotero.Lexical", function () {
 		it("should look up statistics once per unique unit", async function () {
 			stubStatistics(1000, { owl: 3, migration: 40 });
 			await Zotero.Lexical.analyzeQuery("owl owl migration owl ");
-			assert.equal(Zotero.Lexical.getDocumentFrequency.callCount, 2);
+			// The two deduplicated words, plus their pair
+			assert.equal(Zotero.Lexical.getDocumentFrequency.callCount, 3);
+		});
+
+		it("should form a weighted pair for adjacent informative words", async function () {
+			stubStatistics(1000, { special: 100, education: 150, 'special education': 8 });
+			let units = await Zotero.Lexical.analyzeQuery("special education ");
+			assert.lengthOf(units, 3);
+			let pair = units[2];
+			assert.equal(pair.type, 'pair');
+			assert.equal(pair.text, 'special education');
+			assert.deepEqual(pair.tokens, ['special', 'education']);
+			assert.isFalse(pair.prefix);
+			assert.isTrue(pair.informative);
+			// Weighted by the adjacency's own rarity, which outweighs the words
+			assert.approximately(pair.weight,
+				Math.log(1 + (1000 - 8 + 0.5) / (8 + 0.5)), 1e-12);
+			assert.isAbove(pair.weight, units[0].weight);
+		});
+
+		it("should let a trailing prefix pair match completions", async function () {
+			stubStatistics(1000, { special: 100, education: 150, 'special education': 8 });
+			let units = await Zotero.Lexical.analyzeQuery("special education");
+			let pair = units.find(unit => unit.type == 'pair');
+			assert.isTrue(pair.prefix);
+		});
+
+		it("should drop a pair no document contains", async function () {
+			stubStatistics(1000, { special: 100, education: 150 });
+			let units = await Zotero.Lexical.analyzeQuery("special education ");
+			assert.lengthOf(units, 2);
+			assert.isTrue(units.every(unit => unit.type == 'word'));
+		});
+
+		it("shouldn't pair through an uninformative word", async function () {
+			stubStatistics(1000, {
+				fall: 600, of: 1000, communism: 5,
+				'fall of': 300, 'of communism': 4
+			});
+			let units = await Zotero.Lexical.analyzeQuery("fall of communism ");
+			// "of" is uninformative, so neither word adjacent to it pairs
+			assert.isTrue(units.every(unit => unit.type == 'word'));
 		});
 	});
 
@@ -520,6 +561,28 @@ describe("Zotero.Lexical", function () {
 			assert.isAbove(strengths.get(hyphenated.id).get(phrase), 0);
 			assert.isFalse(strengths.has(punctuated.id));
 		});
+
+		it("should count a pair on adjacent tokens, whatever separates them", async function () {
+			let adjacent = new Zotero.Item('note');
+			adjacent.setNote('<p>The lexpaired, states policy record</p>');
+			await adjacent.saveTx();
+			let apart = new Zotero.Item('note');
+			apart.setNote('<p>The lexpaired policy states record</p>');
+			await apart.saveTx();
+
+			// A pair means the index's adjacency, so unlike a quoted phrase
+			// the comma doesn't disqualify the match
+			let pair = {
+				type: 'pair',
+				text: 'lexpaired states',
+				tokens: ['lexpaired', 'states'],
+				prefix: false
+			};
+			let strengths = await Zotero.Lexical.matchNotes(
+				[pair], [adjacent.id, apart.id]);
+			assert.isAbove(strengths.get(adjacent.id).get(pair), 0);
+			assert.isFalse(strengths.has(apart.id));
+		});
 	});
 
 	describe("#scoreItemIDs()", function () {
@@ -547,6 +610,17 @@ describe("Zotero.Lexical", function () {
 				await Zotero.DB.queryAsync(
 					"DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", rowid);
 			}
+		});
+
+		it("should rank the query's words adjacent above the words scattered", async function () {
+			let adjacent = await createDataObject('item',
+				{ title: 'Lexadjacent special education handbook' });
+			let scattered = await createDataObject('item',
+				{ title: 'Lexadjacent education for the special handbook' });
+
+			let scores = await Zotero.Lexical.scoreItemIDs(
+				'lexadjacent special education ', [adjacent.id, scattered.id]);
+			assert.isAbove(scores.get(adjacent.id), scores.get(scattered.id));
 		});
 
 		it("should rank coverage over partial matches, wherever they land", async function () {
@@ -611,9 +685,9 @@ describe("Zotero.Lexical", function () {
 				]),
 				sinon.stub(Zotero.Lexical, 'matchContent').callsFake(
 					async (units, itemIDs) => new Map([
-						// One item barely touches the small unit; another
-						// matches the big one outright
-						[itemIDs[0], new Map([[units[1], 0.1]])],
+						// One item barely touches both units; another matches
+						// the big one outright
+						[itemIDs[0], new Map([[units[0], 0.05], [units[1], 0.1]])],
 						[itemIDs[1], new Map([[units[0], 1]])]
 					])
 				),
@@ -624,9 +698,46 @@ describe("Zotero.Lexical", function () {
 			];
 			try {
 				let scores = await Zotero.Lexical.scoreItemIDs('anything', [1, 2]);
-				// (1 * 0.1) / 12 is under the floor; (5 * 1) / 12 is well over
+				// (5 * 0.05 + 1 * 0.1) / 12 is under the floor; (5 * 1) / 12 is
+				// well over
 				assert.isFalse(scores.has(1));
 				assert.isAbove(scores.get(2), 0.4);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should drop an item whose only match is a minor unit", async function () {
+			let stubs = [
+				sinon.stub(Zotero.Lexical, 'analyzeQuery').resolves([
+					{ type: 'word', text: 'fall', prefix: false, df: 1000, weight: 2, informative: true },
+					{ type: 'word', text: 'ussr', prefix: false, df: 50, weight: 5, informative: true }
+				]),
+				sinon.stub(Zotero.Lexical, 'matchFields').callsFake(
+					async (units, itemIDs) => ({
+						title: new Map(),
+						abstract: new Map([
+							// Only the minor word; only the dominant word; both
+							[itemIDs[0], new Map([[units[0], 1]])],
+							[itemIDs[1], new Map([[units[1], 1]])],
+							[itemIDs[2], new Map([[units[0], 1], [units[1], 1]])]
+						])
+					})
+				),
+				sinon.stub(Zotero.Lexical, 'matchContent').resolves(new Map()),
+				sinon.stub(Zotero.Lexical, 'matchNotes').resolves(new Map()),
+				sinon.stub(Zotero.Lexical, 'matchAnnotations').resolves(new Map())
+			];
+			try {
+				let scores = await Zotero.Lexical.scoreItemIDs('anything', [1, 2, 3]);
+				// "fall" alone carries 2/7 of the query -- not a match, however
+				// it scores
+				assert.isFalse(scores.has(1));
+				// "ussr" alone dominates the query -- a match
+				assert.isAbove(scores.get(2), 0);
+				// Coverage always qualifies, and outranks the lone match
+				assert.isAbove(scores.get(3), scores.get(2));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -674,6 +785,140 @@ describe("Zotero.Lexical", function () {
 			for (let unit of units) {
 				assert.equal(strengths.get(annotation.id).get(unit), 1);
 			}
+		});
+	});
+
+	describe("#getMatchingExcerpts()", function () {
+		function rangeTexts(excerpt) {
+			return excerpt.ranges.map(([start, end]) => excerpt.text.slice(start, end));
+		}
+
+		it("should excerpt a regular item's title and abstract, marking matches as written", async function () {
+			let item = await createDataObject('item', { title: 'Lexkwic Owl Migrátion Atlas' });
+			// Long enough that the match sits past any excerpt window
+			item.setField('abstractNote',
+				'Filler sentences pad this abstract out well past the window. '.repeat(6)
+					+ 'Here the owl population finally appears.');
+			await item.saveTx();
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('owl migration ', item.id);
+			assert.lengthOf(excerpts, 2);
+
+			// The title covers both words at the title boost, so it leads,
+			// whole and unelided. The words are adjacent, so their ranges and
+			// the pair's span merge into one mark, in the original casing and
+			// diacritics.
+			let title = excerpts[0];
+			assert.equal(title.source, 'title');
+			assert.equal(title.text, 'Lexkwic Owl Migrátion Atlas');
+			assert.deepEqual(rangeTexts(title), ['Owl Migrátion']);
+
+			// The abstract excerpt is a window around its match, elided at
+			// the start but running to the text's end
+			let abstract = excerpts[1];
+			assert.equal(abstract.source, 'abstract');
+			assert.isTrue(abstract.text.startsWith('…'));
+			assert.isFalse(abstract.text.endsWith('…'));
+			assert.deepEqual(rangeTexts(abstract), ['owl']);
+
+			// Strengths are 0-1 fractions of the query's ceiling: the title
+			// shows everything the query asked at the best boost, the
+			// abstract only part of it
+			assert.equal(title.strength, 1);
+			assert.isAbove(abstract.strength, 0);
+			assert.isBelow(abstract.strength, title.strength);
+		});
+
+		it("should highlight the whole word a prefix unit matches", async function () {
+			let item = await createDataObject('item', { title: 'Lexkwic Migration Study' });
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('migr', item.id);
+			assert.lengthOf(excerpts, 1);
+			assert.deepEqual(rangeTexts(excerpts[0]), ['Migration']);
+		});
+
+		it("should excerpt attachment content around a verified phrase", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			await Zotero.Fulltext.indexItems([attachment.id]);
+
+			// "easy-to-use" in the document: the phrase's spaces match its
+			// hyphens, and the range marks the hyphenated original
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('"easy to use"', attachment.id);
+			assert.isNotEmpty(excerpts);
+			assert.equal(excerpts[0].source, 'content');
+			assert.match(rangeTexts(excerpts[0])[0], /^easy[\s-]+to[\s-]+use$/i);
+		});
+
+		it("should excerpt a note's text without its markup", async function () {
+			let note = new Zotero.Item('note');
+			note.setNote('<p>Lexkwic owls fly at <b>night</b> over water</p>');
+			await note.saveTx();
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('lexkwic night ', note.id);
+			assert.lengthOf(excerpts, 1);
+			assert.equal(excerpts[0].source, 'note');
+			assert.notInclude(excerpts[0].text, '<');
+			assert.deepEqual(rangeTexts(excerpts[0]), ['Lexkwic', 'night']);
+		});
+
+		it("should excerpt an annotation's comment", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			let annotation = await createAnnotation('highlight', attachment,
+				{ comment: 'Lexkwic owls in the comment' });
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('lexkwic ', annotation.id);
+			assert.isNotEmpty(excerpts);
+			let comment = excerpts.find(excerpt => rangeTexts(excerpt)[0] == 'Lexkwic');
+			assert.equal(comment.source, 'annotation');
+		});
+
+		it("should cap the excerpts at the limit, strongest first", async function () {
+			let item = await createDataObject('item', { title: 'No match here' });
+			// Five matches, each in its own window's worth of filler
+			item.setField('abstractNote',
+				Array.from({ length: 5 },
+					(_, i) => `lexkwic sighting ${i} ` + 'filler '.repeat(40)).join(''));
+			await item.saveTx();
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('lexkwic ', item.id,
+				{ limit: 2 });
+			assert.lengthOf(excerpts, 2);
+			for (let excerpt of excerpts) {
+				assert.equal(excerpt.source, 'abstract');
+				assert.deepEqual(rangeTexts(excerpt), ['lexkwic']);
+			}
+		});
+
+		it("should return nothing for an empty query or an unmatched item", async function () {
+			let item = await createDataObject('item', { title: 'Lexkwic quiet title' });
+			assert.isEmpty(await Zotero.Lexical.getMatchingExcerpts('', item.id));
+			assert.isEmpty(await Zotero.Lexical.getMatchingExcerpts('absentword ', item.id));
+		});
+	});
+
+	describe("#findMatchRanges()", function () {
+		it("should mark where the query matches in given texts", async function () {
+			// Give the pair a corpus occurrence, so the query analyzes with it
+			await createDataObject('item', { title: 'Lexranges owl migration anchor' });
+			let [first, second, third] = await Zotero.Lexical.findMatchRanges(
+				'owl migration ',
+				['The Owl Migrátion Atlas', 'nothing relevant here', 'an owl alone']
+			);
+			// Adjacent words merge with their pair into one span
+			assert.deepEqual(first, [[4, 17]]);
+			assert.deepEqual(second, []);
+			assert.deepEqual(third, [[3, 6]]);
+		});
+
+		it("should mark nothing for an empty query", async function () {
+			assert.deepEqual(
+				await Zotero.Lexical.findMatchRanges('', ['some text']),
+				[[]]
+			);
 		});
 	});
 });

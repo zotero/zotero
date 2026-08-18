@@ -54,6 +54,11 @@ search-result-row {
 		-webkit-line-clamp: none;
 	}
 
+	// A lexical excerpt's matched ranges
+	.body .quote .match {
+		font-weight: 600;
+	}
+
 	.show-more {
 		align-self: flex-start;
 		margin: 0 8px 4px 16px;

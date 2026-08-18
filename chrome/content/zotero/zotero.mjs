@@ -110,6 +110,7 @@ const xpcomFilesLocal = [
 	'id',
 	'integration',
 	'lexical',
+	'bestMatch',
 	'locale',
 	'locateManager',
 	'mime',

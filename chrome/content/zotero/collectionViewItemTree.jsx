@@ -163,9 +163,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 	/**
 	 * Score fractions for the Relevance column's bars, computed alongside the
-	 * ranks (see Zotero.Embeddings.getScoreFraction())
+	 * ranks: each row's own score (see Zotero.BestMatch.scoreItemIDs()), so
+	 * the bars always agree with the ranking
 	 *
-	 * @returns {Map} - treeViewID -> 0-1 fraction of the model's display range
+	 * @returns {Map} - treeViewID -> 0-1 fraction for the bar
 	 */
 	getBestMatchBarFractions() {
 		return this._bestMatchBarFractions || new Map();
@@ -233,7 +234,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
-	 * The semantic stage of a best-match search: score the merged,
+	 * The ranking stage of a best-match search: score the merged,
 	 * deduplicated results from all selected rows against the query in a
 	 * single call, and keep the matching items ranked globally across the
 	 * selection. Every item is scored on its own text,
@@ -270,27 +271,20 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let scores;
 		let generation = this._bestMatchGeneration;
 		try {
-			scores = await Zotero.Embeddings.scoreItemIDs(query, [...itemsByID.keys()], {
+			scores = await Zotero.BestMatch.scoreItemIDs(query, [...itemsByID.keys()], {
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
 				shouldCancel: () => generation !== this._bestMatchGeneration
 			});
 		}
 		catch (e) {
-			if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+			if (e instanceof Zotero.BestMatch.ScoringCancelledError) {
 				throw e;
 			}
-			// Scoring can fail while the model is still downloading or the
-			// index is being rebuilt
-			if (e instanceof Zotero.Embeddings.IndexNotReadyError) {
-				Zotero.debug("Embeddings: index not ready for best-match search");
-			}
-			else {
-				Zotero.logError(e);
-			}
+			Zotero.logError(e);
 			this._bestMatchRanks = new Map();
 			this._bestMatchIndexState = await this._getBestMatchIndexState();
-			// A rank-only search's membership doesn't depend on the index, so
+			// A rank-only search's membership doesn't depend on scoring, so
 			// show its results unranked; anything else shows no results rather
 			// than an unranked scope
 			return keepUnscored ? items : [];
@@ -337,12 +331,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				continue;
 			}
 			ranks.set(item.treeViewID, rankOfScore.get(score));
-			fractions.set(
-				item.treeViewID,
-				scores.has(itemID)
-					? Zotero.Embeddings.getScoreFraction(scores.get(itemID))
-					: 0
-			);
+			fractions.set(item.treeViewID, scores.get(itemID) || 0);
 		}
 		let kept = [];
 		for (let item of items) {
@@ -662,7 +651,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						|| item.isRegularItem();
 				});
 			}
-			// The semantic stage: one scoring pass over the merged results
+			// The ranking stage: one scoring pass over the merged results
 			if (bestMatchSearch) {
 				try {
 					newSearchItems = await this._applyBestMatch(newSearchItems);
@@ -671,7 +660,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					// A newer filter superseded this one mid-scoring -- leave the
 					// rows as they are and let the newer filter's refresh replace
 					// them
-					if (e instanceof Zotero.Embeddings.ScoringCancelledError) {
+					if (e instanceof Zotero.BestMatch.ScoringCancelledError) {
 						deferred.resolve();
 						return;
 					}
