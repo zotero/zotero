@@ -59,6 +59,17 @@ function cleanup {
 }
 trap cleanup EXIT
 
+# Copy the contents of a directory into another directory, which may already exist,
+# using rsync if it's available (not on Windows)
+function copy_dir {
+	if command -v rsync > /dev/null; then
+		rsync -a "$1/" "$2/"
+	else
+		mkdir -p "$2"
+		cp -a "$1/." "$2/"
+	fi
+}
+
 function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
@@ -374,11 +385,18 @@ if [ -n "$ZIP_FILE" ]; then
 	echo "Building from $ZIP_FILE"
 	unzip -q $ZIP_FILE -d "$omni_dir"
 else
-	rsync_params=""
-	if [ $include_tests -eq 0 ]; then
-		rsync_params="--exclude /test"
+	if command -v rsync > /dev/null; then
+		rsync_params=""
+		if [ $include_tests -eq 0 ]; then
+			rsync_params="--exclude /test"
+		fi
+		rsync -a $rsync_params "$SOURCE_DIR/" ./
+	else
+		copy_dir "$SOURCE_DIR" .
+		if [ $include_tests -eq 0 ]; then
+			rm -rf ./test
+		fi
 	fi
-	rsync -a $rsync_params "$SOURCE_DIR/" ./
 fi
 
 mv defaults defaults-z
@@ -574,11 +592,11 @@ fi
 
 # Copy platform-specific assets
 if [ $BUILD_MAC == 1 ]; then
-	rsync -a "$CALLDIR/assets/mac/" ./
+	copy_dir "$CALLDIR/assets/mac" .
 elif [ $BUILD_WIN == 1 ]; then
-	rsync -a "$CALLDIR/assets/win/" ./
+	copy_dir "$CALLDIR/assets/win" .
 elif [ $BUILD_LINUX == 1 ]; then
-	rsync -a "$CALLDIR/assets/unix/" ./
+	copy_dir "$CALLDIR/assets/unix" .
 fi
 
 # Add word processor plug-ins
@@ -721,7 +739,7 @@ if [ $BUILD_MAC == 1 ]; then
 	echo
 	
 	# Copy app files
-	rsync -a "$base_dir/" "$CONTENTSDIR/Resources/"
+	copy_dir "$base_dir" "$CONTENTSDIR/Resources"
 	
 	# Add word processor plug-ins
 	mkdir "$CONTENTSDIR/Resources/integration"
@@ -969,11 +987,11 @@ if [ $BUILD_WIN == 1 ]; then
 		fi
 		
 		# Copy app files
-		rsync -a "$base_dir/" "$APPDIR/"
+		copy_dir "$base_dir" "$APPDIR"
 		#mv "$APPDIR/app/application.ini" "$APPDIR/"
 		
 		# Copy in common files
-		rsync -a "$COMMON_APPDIR/" "$APPDIR/"
+		copy_dir "$COMMON_APPDIR" "$APPDIR"
 		
 		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
@@ -1145,7 +1163,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		chmod 755 "$APPDIR/updater"
 
 		# Copy app files
-		rsync -a "$base_dir/" "$APPDIR/"
+		copy_dir "$base_dir" "$APPDIR"
 		
 		# Add word processor plug-ins
 		mkdir "$APPDIR/integration"
