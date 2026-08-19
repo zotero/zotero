@@ -1217,6 +1217,10 @@ describe("Zotero.DB", function () {
 			await IOUtils.move(targetPath + '.copy', targetPath);
 			await IOUtils.move(targetPath + '.copy-wal', targetPath + '-wal');
 			await Zotero.Utilities.Internal.subprocess('/bin/ln', ['-s', targetPath, linkPath]);
+			if (!(await IOUtils.exists(linkPath))) {
+				// Filesystem doesn't support symlinks (e.g., CIFS)
+				this.skip();
+			}
 
 			let db2 = new Zotero.DBConnection(linkPath);
 			assert.isTrue(await db2._downgradeDatabaseFromWAL(linkPath));
