@@ -1263,6 +1263,18 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 		online = false;
 	}
 
+	// On Linux, use an offline backup on a network filesystem. The online backup API writes
+	// the backup file through SQLite's default VFS, whose locking can hang there -- its lock
+	// upgrades conflict with the SMB byte-range lock mapping on CIFS mounts. Check the
+	// directory rather than the database file, which could be a symlink to another volume,
+	// since the directory is where the backup files are written.
+	if (online && Zotero.isLinux
+			&& ['cifs', 'smb', 'smb2', 'nfs'].includes(
+				Zotero.File.getFileSystemInfo(PathUtils.parent(this._dbPath))?.fsType
+			)) {
+		online = false;
+	}
+
 	var resolveOfflineBackupPromise;
 	var success = false;
 	if (online) {
