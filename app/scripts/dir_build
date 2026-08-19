@@ -76,10 +76,17 @@ if [[ $platform = "m" ]]; then
 else
 	# Windows / Linux: derive arch if not supplied
 	if [[ -z $arch ]]; then
-		case "$(uname -m)" in
-			arm64|aarch64) arch="arm64" ;;
-			x86_64)         arch="x64"   ;;
-		esac
+		# An x64 build of Git for Windows runs emulated on Windows on ARM, where it
+		# reports x86_64 from `uname -m`, while `uname -s` reports the native
+		# architecture
+		if [[ $platform = "w" && "$(uname -s)" == *ARM64* ]]; then
+			arch="arm64"
+		else
+			case "$(uname -m)" in
+				arm64|aarch64) arch="arm64" ;;
+				x86_64)         arch="x64"   ;;
+			esac
+		fi
 	fi
 fi
 
