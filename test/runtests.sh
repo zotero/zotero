@@ -171,6 +171,13 @@ else
 	Z_ARGS="$Z_ARGS -jsconsole"
 fi
 
+# On Windows, zotero.exe is the Mozilla launcher process, which spawns the browser process
+# and exits, so tell it to wait -- the success check and profile cleanup below otherwise
+# run while the app is still starting
+if [ ! -z $IS_CYGWIN ]; then
+	Z_ARGS="$Z_ARGS --wait-for-browser"
+fi
+
 # Clean up on exit
 trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
