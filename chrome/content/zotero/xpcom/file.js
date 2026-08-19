@@ -1574,9 +1574,13 @@ Zotero.File = new function () {
 				}
 				
 				Zotero.debug("Adding ZIP entry " + entry.path);
+				// Add relative path, with forward slashes as the ZIP format requires
+				let entryName = entry.path.substr(rootPath.length + 1);
+				if (Zotero.isWin) {
+					entryName = entryName.replaceAll('\\', '/');
+				}
 				zipWriter.addEntryFile(
-					// Add relative path
-					entry.path.substr(rootPath.length + 1),
+					entryName,
 					Components.interfaces.nsIZipWriter.COMPRESSION_DEFAULT,
 					Zotero.File.pathToFile(entry.path),
 					true
