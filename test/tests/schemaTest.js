@@ -94,6 +94,42 @@ describe("Zotero.Schema", function () {
 			});
 		});
 		
+		describe("date-type field conversion", function () {
+			it("should convert stored text values of date-type fields to multipart dates", async function () {
+				var item = await createDataObject('item', { itemType: 'patent' });
+				// A value stored while the field was a text field
+				var fieldID = Zotero.ItemFields.getID('priorityDate');
+				var valueID = Zotero.ID.get('itemDataValues');
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES (?, ?, ?)",
+					[valueID, '1969-04-20', null]
+				);
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemData VALUES (?, ?, ?)",
+					[item.id, fieldID, valueID]
+				);
+
+				schema.version++;
+				await Zotero.Schema._updateGlobalSchemaForTest(schema);
+				await item.reload(['itemData'], true);
+
+				var stored = await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM itemData JOIN itemDataValues USING (valueID) "
+						+ "WHERE itemID=? AND fieldID=?",
+					[item.id, fieldID]
+				);
+				assert.isTrue(Zotero.Date.isMultipart(stored));
+				assert.equal(item.getField('priorityDate'), '1969-04-20');
+
+				// The converted value matches a date search on the base field
+				var s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('originalDate', 'isBefore', '1970');
+				var matches = await s.search();
+				assert.include(matches, item.id);
+			});
+		});
+
 		describe("#migrateExtraFields()", function () {
 			async function migrate(options) {
 				schema.version++;

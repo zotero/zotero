@@ -1999,8 +1999,7 @@
 			let tooltipText;
 			if (fieldID && !this._extraItems.length) {
 				// Display the SQL date as a tooltip for date fields
-				// TEMP - filingDate
-				if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
+				if (Zotero.ItemFields.isDate(fieldID)) {
 					tooltipText = Zotero.Date.multipartToSQL(this.item.getField(fieldName, true));
 				}
 			}
@@ -2549,9 +2548,9 @@
 							break;
 						
 						default:
-							// TODO: generalize to all date rows/fields
-							if (Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
-								// Parse 'yesterday'/'today'/'tomorrow'
+							// Parse 'yesterday'/'today'/'tomorrow' for date fields -- not applied to Original Date
+							if (Zotero.ItemFields.isDate(fieldName)
+									&& !Zotero.ItemFields.isFieldOfBase(fieldName, 'originalDate')) {
 								value = Zotero.Date.parseDescriptiveString(value);
 							}
 					}

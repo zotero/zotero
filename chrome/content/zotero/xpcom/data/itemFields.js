@@ -190,11 +190,16 @@ Zotero.ItemFields = new function () {
 	this.isDate = function (field) {
 		var fieldID = this.getID(field);
 		var fieldName = this.getName(field);
-		if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date')) {
-			return true;
-		}
 		if (Zotero.Schema.globalSchemaMeta.fields[fieldName]) {
-			return Zotero.Schema.globalSchemaMeta.fields[fieldName].type == 'date'
+			return Zotero.Schema.globalSchemaMeta.fields[fieldName].type == 'date';
+		}
+		// A type-specific field has the type of the base field it maps to
+		for (let baseFieldID in _typeFieldIDsByBase) {
+			if (_typeFieldIDsByBase[baseFieldID].includes(fieldID)) {
+				let baseName = this.getName(parseInt(baseFieldID));
+				let baseMeta = Zotero.Schema.globalSchemaMeta.fields[baseName];
+				return !!baseMeta && baseMeta.type == 'date';
+			}
 		}
 		return false;
 	};

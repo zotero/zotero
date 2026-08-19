@@ -587,7 +587,40 @@ Zotero.Schema = new function () {
 			+ baseFieldMappingsValueSets.join(", "));
 		await Zotero.DB.queryAsync("INSERT INTO itemTypeCreatorTypes VALUES "
 			+ itemTypeCreatorTypesValueSets.join(", "));
-		
+
+		// Convert stored values of date-type fields to multipart dates, for
+		// values saved while a field was a text field
+		var dateFieldIDs = new Set();
+		for (let [fieldName, meta] of Object.entries(data.meta?.fields || {})) {
+			if (meta.type != 'date') {
+				continue;
+			}
+			let fieldID = postFieldIDsByName.get(fieldName);
+			if (!fieldID) {
+				continue;
+			}
+			dateFieldIDs.add(fieldID);
+			// Type-specific fields mapped to a date-type base field
+			let mappedIDs = await Zotero.DB.columnQueryAsync(
+				"SELECT DISTINCT fieldID FROM baseFieldMappings WHERE baseFieldID=?",
+				fieldID
+			);
+			for (let id of mappedIDs) {
+				dateFieldIDs.add(id);
+			}
+		}
+		if (dateFieldIDs.size) {
+			// strToMultipart() needs the month strings, which aren't loaded
+			// yet this early in startup
+			Zotero.Date.init();
+			await _updateItemDataValues(
+				[...dateFieldIDs],
+				value => (Zotero.Date.isMultipart(value)
+					? false
+					: Zotero.Date.strToMultipart(value))
+			);
+		}
+
 		// Store data in DB as compressed binary string. This lets us use a schema that matches the
 		// DB tables even if the user downgrades to a version with an earlier bundled schema file.
 		var pako = require('pako');
@@ -630,6 +663,51 @@ Zotero.Schema = new function () {
 			await Zotero.DB.queryAsync("PRAGMA foreign_keys=ON");
 		}
 	};
+
+
+	/**
+	 * Rewrite stored itemData values through a transform, reusing or creating
+	 * rows in itemDataValues
+	 *
+	 * @param {Number[]} fieldIDs - Fields whose values to rewrite
+	 * @param {Function} transform - Given a value, returns the new value, or
+	 *     false to leave the value as it is
+	 */
+	async function _updateItemDataValues(fieldIDs, transform) {
+		if (!fieldIDs.length) {
+			return;
+		}
+		var rows = await Zotero.DB.queryAsync(
+			"SELECT itemID, fieldID, value FROM itemData "
+				+ "JOIN itemDataValues USING (valueID) "
+				+ "WHERE fieldID IN (" + fieldIDs.join(", ") + ")"
+		);
+		for (let row of rows) {
+			let value = transform(row.value);
+			if (value === false || value === row.value) {
+				continue;
+			}
+			let valueID = await Zotero.DB.valueQueryAsync(
+				"SELECT valueID FROM itemDataValues WHERE value=?", value
+			);
+			if (!valueID) {
+				valueID = Zotero.ID.get('itemDataValues');
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemDataValues (valueID, value, valueNormalized) "
+						+ "VALUES (?, ?, ?)",
+					[
+						valueID,
+						value,
+						Zotero.Utilities.Internal.normalizeForSearchStorage(value)
+					]
+				);
+			}
+			await Zotero.DB.queryAsync(
+				"UPDATE itemData SET valueID=? WHERE itemID=? AND fieldID=?",
+				[valueID, row.itemID, row.fieldID]
+			);
+		}
+	}
 	
 	
 	
