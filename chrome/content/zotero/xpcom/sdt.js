@@ -152,6 +152,273 @@ Zotero.SDT = new function () {
 		return _openPack(new Uint8Array(result.bytes));
 	};
 
+	/**
+	 * Get an attachment's text as outline-based sections. Each section runs
+	 * from one outline heading to the next; a document without an outline
+	 * falls back to per-page sections, and to a single section when there are
+	 * no pages either.
+	 *
+	 * Blocks the document marks as excluded flow (running heads, page
+	 * numbers) are left out. The rest is reported as the document describes
+	 * it, for callers to filter as their use calls for: a section lists the
+	 * blocks it's made of, each with its flow class and whether it's a
+	 * reference entry, and `text` is simply those blocks joined.
+	 *
+	 * Sections and blocks carry what the document knows about where they are:
+	 * - pageIndex: 0-based index into the document's pages
+	 * - pageLabel: page label ('ix', '15'), or the ordinal page number for a
+	 *   PDF without labels. An EPUB's synthetic locations produce none.
+	 * - position: for PDFs, a reader-navigable { pageIndex, rects }
+	 * A section's location is that of its first block.
+	 *
+	 * @param {Integer} itemID
+	 * @param {Object} [options] - See getPack()
+	 * @returns {Promise<Object>} { ok: true, sections: [{ text, outlinePath,
+	 *     startBlock, endBlock, pageIndex, pageLabel, position, blocks:
+	 *     [{ index, text, flowClass, reference, pageIndex, pageLabel,
+	 *     position }] }] }, or { ok: false, reason } (see getPack())
+	 */
+	this.getSections = async function (itemID, options = {}) {
+		let result = await this.getPack(itemID, options);
+		if (!result.ok) {
+			return { ok: false, reason: result.reason };
+		}
+		try {
+			let reader = await _openPack(new Uint8Array(result.bytes));
+			let structure = await reader.materialize();
+			return { ok: true, sections: _getStructureSections(structure) };
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return { ok: false, reason: 'failed' };
+		}
+	};
+
+	// The section walk over a materialized structure. Mirrors the outline
+	// handling of the document-worker's own section chunker
+	// (structured-document-text/src/chunker.js), which the bundled reader
+	// module doesn't export; switch to that export if it grows one.
+	function _getStructureSections(structure) {
+		let content = Array.isArray(structure?.content) ? structure.content : [];
+		if (!content.length) {
+			return [];
+		}
+		// Section boundaries: the outline's heading blocks, or page starts for
+		// a document without an outline. Block 0 is always a boundary, so
+		// front matter before the first heading forms a section of its own.
+		let headings = _flattenOutline(structure.catalog?.outline, []);
+		let boundaries = headings.length
+			? headings
+			: _getPageBoundaries(structure.catalog, content.length);
+		// A boundary at block 0 emits no section of its own -- it just seeds
+		// the first section's path
+		boundaries = boundaries
+			.filter(b => b.blockIndex < content.length)
+			.sort((a, b) => a.blockIndex - b.blockIndex);
+		let blockPages = _getBlockPages(structure.catalog, content.length);
+
+		let sections = [];
+		let startBlock = 0;
+		let path = [];
+		let isHeading = false;
+		for (let boundary of [...boundaries, { blockIndex: content.length, path }]) {
+			if (boundary.blockIndex > startBlock) {
+				let endBlock = boundary.blockIndex - 1;
+				let blocks = [];
+				let location = null;
+				// A section that starts at an outline heading skips the
+				// heading block's own text: the heading is already the last
+				// component of the section's outline path
+				for (let i = startBlock + (isHeading ? 1 : 0); i <= endBlock; i++) {
+					let block = content[i];
+					if (!block || block.flowClass === 'excluded') {
+						continue;
+					}
+					let text = _getNestedBlockPlainText(block).trim();
+					if (!text) {
+						continue;
+					}
+					let entry = { index: i, text, reference: _isReferenceBlock(block) };
+					if (block.flowClass) {
+						entry.flowClass = block.flowClass;
+					}
+					let blockLocation = _getBlockLocation(structure, blockPages, i);
+					location = location || blockLocation;
+					blocks.push(Object.assign(entry, blockLocation));
+				}
+				if (blocks.length) {
+					// A section is located where it begins -- at its heading
+					// when it has one, since that's where a reader would land
+					// -- falling back to its first reported block
+					let start = _getBlockLocation(structure, blockPages, startBlock);
+					sections.push(Object.assign({
+						text: blocks.map(block => block.text).join('\n'),
+						outlinePath: path.join(' > '),
+						startBlock,
+						endBlock
+					}, start.pageIndex === undefined ? location : start, { blocks }));
+				}
+			}
+			startBlock = boundary.blockIndex;
+			path = boundary.path;
+			isHeading = !!boundary.isHeading;
+		}
+		return sections;
+	}
+
+	// Where a block sits in the source document, as far as the document says.
+	// Only the fields that are actually known are returned.
+	function _getBlockLocation(structure, blockPages, index) {
+		let location = {};
+		// PDF blocks carry page geometry: [pageIndex, x1, y1, x2, y2] rects,
+		// which the reader can scroll to and highlight
+		let pageRects = structure.content[index]?.anchor?.pageRects;
+		let pageIndex = null;
+		if (Array.isArray(pageRects) && pageRects.length
+				&& Number.isInteger(pageRects[0][0])) {
+			pageIndex = pageRects[0][0];
+			let rects = pageRects
+				.filter(rect => rect[0] === pageIndex && rect.length >= 5)
+				.map(rect => rect.slice(1));
+			if (rects.length) {
+				location.position = { pageIndex, rects };
+			}
+		}
+		// Without geometry (EPUB, snapshot), the catalog's per-page content
+		// ranges still say which page a block falls on
+		if (pageIndex === null) {
+			pageIndex = blockPages[index];
+		}
+		if (pageIndex === null) {
+			return location;
+		}
+		location.pageIndex = pageIndex;
+		// An EPUB's synthetic locations aren't page numbers -- a label from
+		// them would read as one
+		if (structure.catalog?.pageMappingType !== 'locations') {
+			let label = structure.catalog?.pages?.[pageIndex]?.label;
+			if (!label && structure.metadata?.processor?.type === 'pdf') {
+				label = String(pageIndex + 1);
+			}
+			if (label) {
+				location.pageLabel = label;
+			}
+		}
+		return location;
+	}
+
+	// blockIndex -> pageIndex, from the catalog's per-page content ranges: the
+	// last page starting at or before the block. Built in one pass up front,
+	// since every block needs it.
+	function _getBlockPages(catalog, blockCount) {
+		let pages = Array.isArray(catalog?.pages) ? catalog.pages : [];
+		let starts = [];
+		for (let i = 0; i < pages.length; i++) {
+			let start = pages[i]?.contentRange?.[0]?.[0];
+			if (Number.isInteger(start) && start >= 0) {
+				starts.push({ start, pageIndex: i });
+			}
+		}
+		starts.sort((a, b) => a.start - b.start);
+		let blockPages = new Array(blockCount).fill(null);
+		let current = null;
+		let next = 0;
+		for (let i = 0; i < blockCount; i++) {
+			while (next < starts.length && starts[next].start <= i) {
+				current = starts[next].pageIndex;
+				next++;
+			}
+			blockPages[i] = current;
+		}
+		return blockPages;
+	}
+
+	// Whether a block is a bibliography entry: flagged as one by the processor
+	// (from entry structure and the in-text citation graph, so
+	// language-independent), or made up entirely of blocks that are, as a
+	// reference list is.
+	function _isReferenceBlock(node) {
+		if (node.reference) {
+			return true;
+		}
+		let children = Array.isArray(node.content)
+			? node.content.filter(child => child.text === undefined)
+			: [];
+		return children.length > 0 && children.every(_isReferenceBlock);
+	}
+
+	// Outline entries flattened to their top-level block indexes, each with
+	// its full heading path
+	function _flattenOutline(items, ancestors) {
+		let result = [];
+		if (!Array.isArray(items)) {
+			return result;
+		}
+		for (let item of items) {
+			if (!item || typeof item !== 'object' || typeof item.title !== 'string') {
+				continue;
+			}
+			let blockIndex = Array.isArray(item.ref) && Number.isInteger(item.ref[0])
+				? item.ref[0]
+				: null;
+			let path = [...ancestors, item.title];
+			if (blockIndex !== null && blockIndex >= 0) {
+				result.push({ blockIndex, path, isHeading: true });
+			}
+			result.push(..._flattenOutline(item.children, path));
+		}
+		return result;
+	}
+
+	// Page-start block indexes, for sectioning a document with no outline.
+	// A page's contentRange starts with a content point whose first component
+	// is the top-level block index.
+	function _getPageBoundaries(catalog, blockCount) {
+		let pages = Array.isArray(catalog?.pages) ? catalog.pages : [];
+		let boundaries = [];
+		let seen = new Set();
+		for (let page of pages) {
+			let start = page?.contentRange?.[0]?.[0];
+			if (Number.isInteger(start) && start >= 0 && start < blockCount && !seen.has(start)) {
+				seen.add(start);
+				boundaries.push({ blockIndex: start, path: [] });
+			}
+		}
+		return boundaries;
+	}
+
+	// Plain text of a block, recursing into nested blocks. A local copy of the
+	// module's un-exported text helper (structured-document-text/src/text.js).
+	function _getNestedBlockPlainText(node) {
+		if (node.text !== undefined) {
+			return node.text;
+		}
+		if (!node.content) {
+			return '';
+		}
+		let hasChildBlock = node.content.some(child => child.text === undefined);
+		if (!hasChildBlock) {
+			let result = '';
+			for (let child of node.content) {
+				if (child.text !== undefined) {
+					result += child.text;
+				}
+			}
+			return result;
+		}
+		let parts = [];
+		for (let child of node.content) {
+			if (child.text !== undefined) {
+				continue;
+			}
+			let text = _getNestedBlockPlainText(child);
+			if (text) {
+				parts.push(text);
+			}
+		}
+		return parts.join('\n');
+	}
+
 	async function _readValidCache({ sourceHash, cachePath, processorType }, options) {
 		let bytes;
 		try {

@@ -27,7 +27,7 @@
 
 Zotero.Notifier = new function () {
 	// Options that apply to an entire event, not a specific object
-	this.EVENT_LEVEL_OPTIONS = ['autoSyncDelay', 'skipAutoSync'];
+	this.EVENT_LEVEL_OPTIONS = ['autoSyncDelay', 'skipAutoSync', 'embeddingsUpdate'];
 	
 	var _observers = {};
 	var _types = [

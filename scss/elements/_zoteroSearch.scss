@@ -165,6 +165,26 @@ zoterosearch {
 		margin-block-end: 6px;
 	}
 
+	.best-match-row {
+		// The semantic ranking modifier: a sentence-styled strip below the root group's
+		// conditions, spaced by the group's own gap
+		gap: 6px;
+
+		// Let the row gap govern the label-to-input spacing instead of adding
+		// the XUL label's default inline-end margin to it
+		label {
+			margin-inline-end: 0;
+		}
+
+		.best-match-input {
+			flex: 1;
+		}
+
+		.best-match-topk-input {
+			width: 60px;
+		}
+	}
+
 	#search-binding-hint {
 		// A distinct suggestion callout under the conditions (not plain body text): a light
 		// blue, rounded block with slightly smaller text, one "[statement] [button]" line per

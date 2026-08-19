@@ -457,6 +457,11 @@ items-table-cell-notes =
 items-column-added-by = Added By
 items-column-modified-by = Modified By
 items-column-last-read = Last Read
+items-column-relevance = Relevance
+items-column-relevance-rank = Rank { $rank }
+
+items-best-match-indexing = Indexing in progress — { $indexed } of { $total } items indexed
+items-best-match-indexing-paused = Indexing is paused — { $indexed } of { $total } items indexed
 
 report-error =
     .label = Report Error…
@@ -640,6 +645,7 @@ pane-related = Related
 pane-attachment-info = Attachment Info
 pane-attachment-preview = Preview
 pane-attachment-annotations = Annotations
+pane-search-results = Search Results
 
 pane-header-attachment-associated =
     .label = Rename associated file
@@ -679,6 +685,14 @@ section-related =
     .label = { $count } Related
 section-attachment-info =
     .label = { pane-attachment-info }
+section-search-results =
+    .label = { $count ->
+                 [one] { $count } Search Result
+                 *[other] { $count } Search Results
+             }
+search-result-row-fulltext = Full Text
+search-result-row-show-more = Show More
+search-result-row-show-less = Show Less
 
 section-button-remove =
     .tooltiptext = { general-remove }
@@ -717,6 +731,8 @@ sidenav-attachment-preview =
     .tooltiptext = { pane-attachment-preview }
 sidenav-attachment-annotations =
     .tooltiptext = { pane-attachment-annotations }
+sidenav-search-results =
+    .tooltiptext = { pane-search-results }
 sidenav-libraries-collections =
     .tooltiptext = { pane-libraries-collections }
 sidenav-tags =
@@ -839,6 +855,7 @@ quicksearch-input =
     .aria-label = Quick Search
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+quickSearch-mode-best-match = Best Match
 
 advanced-search = Advanced Search
 menuitem-advanced-search =
@@ -959,6 +976,16 @@ advanced-search-binding-hint-note =
     .value = These conditions can match separate notes.
 advanced-search-binding-hint-annotation =
     .value = These conditions can match separate annotations.
+advanced-search-best-match-prefix =
+    .value = Sort results by best match for:
+advanced-search-best-match-input =
+    .aria-label = Sort results by best match for
+    .placeholder = Enter a topic or phrase
+advanced-search-best-match-topk-prefix =
+    .value = Keep top:
+advanced-search-best-match-topk-input =
+    .aria-label = Number of results to keep
+    .placeholder = all
 advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
 advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
 advanced-search-group-warning-unreachable =

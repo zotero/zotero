@@ -562,6 +562,15 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 				div.append(cell);
 			}
 		}
+
+		// The relevance bar while a best-match search shows the Relevance column
+		let relevanceColumn = columns.find(column => column.dataKey == 'relevance');
+		if (relevanceColumn && !relevanceColumn.hidden) {
+			let cell = renderCtx.renderCell(index, rowData?.relevance, relevanceColumn, false);
+			if (cell) {
+				div.append(cell);
+			}
+		}
 	}
 }
 

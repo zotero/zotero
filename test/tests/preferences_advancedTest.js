@@ -154,4 +154,44 @@ describe("Advanced Preferences", function () {
 			});
 		})
 	})
+
+	describe("Best-Match Search", function () {
+		it("should confirm mode changes only when leaving an enabled mode", async function () {
+			var stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves()
+			];
+			var win = await loadPrefPane('advanced');
+			var menu = win.document.getElementById('semantic-search-model');
+			try {
+				// Enabling from Disabled prompts nothing (the test would hang on
+				// an unexpected modal prompt)
+				menu.value = 'bge-small-en-v1.5';
+				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
+				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
+
+				// Cancelling a switch restores the menu and leaves the pref alone
+				var promise = waitForDialog(null, 'cancel');
+				menu.value = 'multilingual-e5-small';
+				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
+				await promise;
+				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
+				assert.equal(menu.value, 'bge-small-en-v1.5');
+
+				// Confirming applies the change
+				promise = waitForDialog();
+				menu.value = '';
+				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
+				await promise;
+				assert.equal(Zotero.Prefs.get('embeddings.model'), '');
+			}
+			finally {
+				win.close();
+				Zotero.Prefs.set('embeddings.model', '');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	})
 })
