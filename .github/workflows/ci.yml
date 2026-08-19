@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    name: Test (shard ${{ matrix.shard }})
+    name: Test (${{ matrix.shard }})
     runs-on: ubuntu-latest
     # Same-repo PRs are covered by the push run, so run pull_request jobs only for forks
     if: >
@@ -13,7 +13,11 @@ jobs:
       || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        shard: [1, 2, 3, 4]
+        # Numbered shards split the full suite. 'smb' and 'nfs' run the db and file tests
+        # with the test data directory on a loopback CIFS or NFS mount, so that connection
+        # initialization itself runs against a network filesystem, which is where
+        # network-filesystem failures (startup crashes and hangs) occur.
+        shard: ['1', '2', '3', '4', 'smb', 'nfs']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,8 +85,41 @@ jobs:
           cd build
           unzip ../build.zip
 
+      - name: Set up SMB share
+        if: matrix.shard == 'smb'
+        run: |
+          sudo apt install -y --no-install-recommends samba cifs-utils
+          sudo mkdir -p /srv/zotero-smb /mnt/zotero-smb
+          sudo chown $(whoami) /srv/zotero-smb
+          sudo tee -a /etc/samba/smb.conf > /dev/null <<EOF
+          [ztest]
+          path = /srv/zotero-smb
+          read only = no
+          EOF
+          (echo smbtestpass; echo smbtestpass) | sudo smbpasswd -s -a $(whoami)
+          sudo systemctl restart smbd
+          sudo mount -t cifs //127.0.0.1/ztest /mnt/zotero-smb \
+            -o user=$(whoami),pass=smbtestpass,vers=3.0,uid=$(id -u),gid=$(id -g)
+
+      - name: Set up NFS share
+        if: matrix.shard == 'nfs'
+        run: |
+          sudo apt install -y --no-install-recommends nfs-kernel-server
+          sudo mkdir -p /srv/zotero-nfs /mnt/zotero-nfs
+          sudo chown $(whoami) /srv/zotero-nfs
+          echo "/srv/zotero-nfs localhost(rw,no_subtree_check,insecure)" | sudo tee -a /etc/exports
+          sudo exportfs -ra
+          sudo mount -t nfs4 localhost:/srv/zotero-nfs /mnt/zotero-nfs
+
       - name: Run tests
-        run: xvfb-run test/runtests.sh -f -r 3 -p ${{ matrix.shard }}/${{ strategy.job-total }}
+        if: matrix.shard != 'smb' && matrix.shard != 'nfs'
+        run: xvfb-run test/runtests.sh -f -r 3 -p ${{ matrix.shard }}/4
+
+      # The step timeout turns a startup hang into a failure
+      - name: Run tests on network share
+        if: matrix.shard == 'smb' || matrix.shard == 'nfs'
+        timeout-minutes: 20
+        run: TMPDIR=/mnt/zotero-${{ matrix.shard }} xvfb-run test/runtests.sh -f -r 3 -b db file
 
   utilities:
     name: Utilities Tests
