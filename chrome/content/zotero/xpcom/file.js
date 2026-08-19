@@ -1112,18 +1112,20 @@ Zotero.File = new function () {
 	var _fsInfoCache = {};
 
 	/**
-	 * Get information about the filesystem containing a path (macOS only)
+	 * Get information about the filesystem containing a path (macOS and Linux)
 	 *
 	 * statfs() is called on the path itself, following symlinks, so a symlinked file is
 	 * classified by its target's volume. The parent directory is used if the path doesn't
 	 * exist.
 	 *
 	 * @param {String} path
-	 * @return {Object|null} - { fsType: statfs f_fstypename (e.g., 'apfs', 'smbfs'),
-	 *     readOnly: Boolean }, or null on other platforms or if the check fails
+	 * @return {Object|null} - { fsType: statfs f_fstypename on macOS (e.g., 'apfs', 'smbfs')
+	 *     or a name derived from the statfs f_type magic on Linux (e.g., 'ext4', 'cifs',
+	 *     'nfs', or a hex string if unrecognized), readOnly: Boolean }, or null on other
+	 *     platforms or if the check fails
 	 */
 	this.getFileSystemInfo = function (path) {
-		if (!Zotero.isMac) return null;
+		if (!Zotero.isMac && !Zotero.isLinux) return null;
 
 		if (path in _fsInfoCache) {
 			return _fsInfoCache[path];
@@ -1134,15 +1136,8 @@ Zotero.File = new function () {
 			let { ctypes } = ChromeUtils.importESModule(
 				"resource://gre/modules/ctypes.sys.mjs"
 			);
-			// struct statfs -- f_flags is a uint32 at byte offset 64, f_fstypename is a
-			// char[16] at byte offset 72
-			const STATFS_SIZE = 2168;
-			const FLAGS_OFFSET = 64;
-			const FSTYPENAME_OFFSET = 72;
-			const FSTYPENAME_LEN = 16;
-			const MNT_RDONLY = 0x1;
-			let buf = new (ctypes.ArrayType(ctypes.uint8_t, STATFS_SIZE))();
-			let lib = ctypes.open("/usr/lib/libSystem.B.dylib");
+			let buf = new (ctypes.ArrayType(ctypes.uint8_t, 2168))();
+			let lib = ctypes.open(Zotero.isMac ? "/usr/lib/libSystem.B.dylib" : "libc.so.6");
 			try {
 				let statfs = lib.declare(
 					"statfs",
@@ -1156,17 +1151,47 @@ Zotero.File = new function () {
 						throw new Error("statfs() failed");
 					}
 				}
-				let typeName = '';
-				for (let i = FSTYPENAME_OFFSET; i < FSTYPENAME_OFFSET + FSTYPENAME_LEN; i++) {
-					if (buf[i] === 0) break;
-					typeName += String.fromCharCode(buf[i]);
+				let readUint32 = offset => buf[offset] | (buf[offset + 1] << 8)
+					| (buf[offset + 2] << 16) | (buf[offset + 3] << 24);
+				if (Zotero.isMac) {
+					// struct statfs -- f_flags is a uint32 at byte offset 64, f_fstypename
+					// is a char[16] at byte offset 72
+					const FLAGS_OFFSET = 64;
+					const FSTYPENAME_OFFSET = 72;
+					const FSTYPENAME_LEN = 16;
+					const MNT_RDONLY = 0x1;
+					let typeName = '';
+					for (let i = FSTYPENAME_OFFSET; i < FSTYPENAME_OFFSET + FSTYPENAME_LEN; i++) {
+						if (buf[i] === 0) break;
+						typeName += String.fromCharCode(buf[i]);
+					}
+					result = {
+						fsType: typeName,
+						readOnly: !!(readUint32(FLAGS_OFFSET) & MNT_RDONLY)
+					};
 				}
-				let flags = buf[FLAGS_OFFSET] | (buf[FLAGS_OFFSET + 1] << 8)
-					| (buf[FLAGS_OFFSET + 2] << 16) | (buf[FLAGS_OFFSET + 3] << 24);
-				result = {
-					fsType: typeName,
-					readOnly: !!(flags & MNT_RDONLY)
-				};
+				else {
+					// 64-bit struct statfs -- f_type is a word at byte offset 0 and f_flags
+					// a word at byte offset 80. Filesystem type is a magic number (see
+					// linux/magic.h) rather than a name.
+					const FLAGS_OFFSET = 80;
+					const ST_RDONLY = 0x1;
+					const FS_MAGICS = {
+						0xEF53: 'ext4',
+						0x58465342: 'xfs',
+						0x9123683E: 'btrfs',
+						0xFF534D42: 'cifs',
+						0xFE534D42: 'smb2',
+						0x517B: 'smb',
+						0x6969: 'nfs',
+						0x65735546: 'fuse'
+					};
+					let magic = readUint32(0) >>> 0;
+					result = {
+						fsType: FS_MAGICS[magic] || '0x' + magic.toString(16),
+						readOnly: !!(readUint32(FLAGS_OFFSET) & ST_RDONLY)
+					};
+				}
 			}
 			finally {
 				lib.close();
