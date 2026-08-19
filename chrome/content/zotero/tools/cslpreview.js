@@ -47,14 +47,8 @@ var Zotero_CSL_Preview = new function () {
 			this.updateIframe(Zotero.getString('styles.editor.warning.noItems'), 'warning');
 			return;
 		}
-		var progressWin = new Zotero.ProgressWindow();
-		// XXX needs its own string really!
-		progressWin.changeHeadline(Zotero.getString("pane.items.menu.createBib.multiple"));
-		var icon = 'chrome://zotero/skin/treeitem-attachment-file.png';
-		progressWin.addLines(document.title, icon);
-		progressWin.show();
-		progressWin.startCloseTimer();
-		// Give progress window time to appear
+		this.updateIframe(Zotero.ftl.formatValueSync('stylePreview-generating'));
+		// Let the message paint before generation blocks the main thread
 		setTimeout(() => {
 			var d = new Date();
 			var styles = Zotero.Styles.getVisible();
