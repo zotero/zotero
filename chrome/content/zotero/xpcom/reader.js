@@ -740,11 +740,15 @@ class ReaderInstance {
 			}
 		}
 		if (annotations.length) {
+			// Annotations can be added before the reader finishes initializing -- e.g., when
+			// embedded annotations are imported right after opening a newly added file
+			await this._initPromise;
 			this._internalReader.setAnnotations(Components.utils.cloneInto(annotations, this._iframeWindow));
 		}
 	}
 
-	unsetAnnotations(keys) {
+	async unsetAnnotations(keys) {
+		await this._initPromise;
 		this._internalReader.unsetAnnotations(Components.utils.cloneInto(keys, this._iframeWindow));
 	}
 
