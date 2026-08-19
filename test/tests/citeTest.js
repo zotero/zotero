@@ -38,7 +38,7 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
-	describe("EDTF dates", function () {
+	describe("Dates", function () {
 		async function makeBibliography(fields) {
 			let item = new Zotero.Item;
 			item.fromJSON(Object.assign({
@@ -70,6 +70,10 @@ describe("Zotero.Cite", function () {
 			let output = await makeBibliography({ date: '1999', extra: 'issued: 2021/2026' });
 			assert.include(output, '2021–2026');
 			assert.notInclude(output, '1999');
+		});
+
+		it("should render a quoted date as a literal string", async function () {
+			assert.include(await makeBibliography({ date: '"1637 and 1662"' }), '1637 and 1662');
 		});
 	});
 
