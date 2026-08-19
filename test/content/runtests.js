@@ -10,15 +10,20 @@ chai.config.truncateThreshold = 0
 
 function quit(failed) {
 	// Quit with exit status
+	var promise = Promise.resolve();
 	if(!failed) {
-		IOUtils.write(PathUtils.join(FileUtils.getDir("ProfD", []).path, "success"), new Uint8Array(0));
+		// Wait for the write, which the runner uses to detect success, to finish before
+		// quitting -- on Windows, quitting could otherwise beat it
+		promise = IOUtils.write(PathUtils.join(FileUtils.getDir("ProfD", []).path, "success"), new Uint8Array(0));
 	}
 	if(!TestOptions.noquit) {
-		setTimeout(function () {
-			Components.classes['@mozilla.org/toolkit/app-startup;1']
-				.getService(Components.interfaces.nsIAppStartup)
-				.quit(Components.interfaces.nsIAppStartup.eForceQuit);
-		}, 250);
+		promise.then(function () {
+			setTimeout(function () {
+				Components.classes['@mozilla.org/toolkit/app-startup;1']
+					.getService(Components.interfaces.nsIAppStartup)
+					.quit(Components.interfaces.nsIAppStartup.eForceQuit);
+			}, 250);
+		});
 	}
 }
 
