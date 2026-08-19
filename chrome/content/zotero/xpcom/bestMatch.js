@@ -99,8 +99,20 @@ Zotero.BestMatch = new function () {
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
 		try {
+			// Temporary, for testing: the bestMatchEngine pref pins scoring to
+			// one engine instead of the hybrid default
+			let engine = Zotero.Prefs.get('search.bestMatchEngine');
+			if (engine == 'semantic') {
+				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
+				// On the model's display band, so scores are 0-1 like the
+				// other modes'
+				return new Map([...semantic].map(
+					([itemID, score]) => [itemID, Zotero.Embeddings.getScoreFraction(score)]
+				));
+			}
 			// A query the semantic engine can't embed ranks lexically alone
-			if (!_useSemantic() || !Zotero.Embeddings.normalizeQuery(queryText || '')) {
+			if (engine == 'lexical' || !_useSemantic()
+					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
 				return await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
 			}
 			// Both engines score the same candidates concurrently. allSettled
@@ -160,9 +172,16 @@ Zotero.BestMatch = new function () {
 	 *     `strength`, plus chunk location fields or a lexical `source`
 	 */
 	this.getMatchingExcerpts = async function (queryText, itemID, options = {}) {
+		// Temporary, for testing: the bestMatchEngine pref keeps the pinned
+		// engine's excerpts alone -- no lexical excerpts or highlights when
+		// pinned semantic, no chunks when pinned lexical
+		let engine = Zotero.Prefs.get('search.bestMatchEngine');
 		let limit = options.limit ?? 5;
-		let excerpts = await Zotero.Lexical.getMatchingExcerpts(queryText, itemID, options);
-		if (!_useSemantic() || !Zotero.Embeddings.normalizeQuery(queryText || '')) {
+		let excerpts = engine == 'semantic'
+			? []
+			: await Zotero.Lexical.getMatchingExcerpts(queryText, itemID, options);
+		if (engine == 'lexical' || !_useSemantic()
+				|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
 			return excerpts;
 		}
 		let chunks = [];
@@ -180,8 +199,10 @@ Zotero.BestMatch = new function () {
 		if (!chunks.length) {
 			return excerpts;
 		}
-		let ranges = await Zotero.Lexical.findMatchRanges(
-			queryText, chunks.map(chunk => chunk.text));
+		let ranges = engine == 'semantic'
+			? chunks.map(() => [])
+			: await Zotero.Lexical.findMatchRanges(
+				queryText, chunks.map(chunk => chunk.text));
 		chunks = chunks.map((chunk, i) => ({
 			...chunk,
 			ranges: ranges[i],

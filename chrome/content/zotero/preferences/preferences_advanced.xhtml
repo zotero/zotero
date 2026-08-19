@@ -311,6 +311,23 @@
 			</hbox>
 			<description id="semantic-search-model-description"
 				data-l10n-id="preferences-advanced-semantic-search-model-description"/>
+			<!-- Temporary, for testing: pin best-match search to one engine -->
+			<hbox align="center">
+				<label data-l10n-id="preferences-advanced-best-match-engine"
+					control="best-match-engine"/>
+				<menulist id="best-match-engine"
+						preference="extensions.zotero.search.bestMatchEngine"
+						native="true">
+					<menupopup>
+						<menuitem value="hybrid"
+							data-l10n-id="preferences-advanced-best-match-engine-hybrid"/>
+						<menuitem value="lexical"
+							data-l10n-id="preferences-advanced-best-match-engine-lexical"/>
+						<menuitem value="semantic"
+							data-l10n-id="preferences-advanced-best-match-engine-semantic"/>
+					</menupopup>
+				</menulist>
+			</hbox>
 			<checkbox id="semantic-search-index-fulltext"
 				data-l10n-id="preferences-advanced-semantic-search-index-fulltext"
 				preference="extensions.zotero.embeddings.indexFulltext"

@@ -108,6 +108,9 @@ pref("extensions.zotero.keys.toggleRead", "`");
 pref("extensions.zotero.keys.showTabsMenu", ";");
 
 pref("extensions.zotero.search.quicksearch-mode", "fields");
+// Temporary, for testing: which engine best-match search runs -- 'lexical',
+// 'semantic', or 'hybrid' (both, fused)
+pref("extensions.zotero.search.bestMatchEngine", "hybrid");
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
