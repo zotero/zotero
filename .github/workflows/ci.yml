@@ -238,6 +238,91 @@ jobs:
         timeout-minutes: 10
         run: TMPDIR="$HOME/zotero-nfs" test/runtests.sh -f -r 3 -b db file
 
+  # Boot the Windows build -- which uses custom-built Firefox components (xul.dll) rather
+  # than stock Mozilla binaries -- and run the db and file tests. A Gecko bump commit
+  # updates the custom-component hashes in config.sh along with the version, so this
+  # tests each new set of custom components.
+  test-win:
+    name: Test (Windows ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    needs: changes
+    if: >
+      needs.changes.outputs.network == 'true'
+      && (github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            os: windows-latest
+          - arch: arm64
+            os: windows-11-arm
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # The repository contains symlinks, which Git checks out as plain files on Windows
+      # by default, breaking the build
+      - name: Enable symlinks
+        run: git config --global core.symlinks true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Git Bash has unzip but not zip, which fetch_xulrunner needs to repack omni.ja
+      - name: Install zip
+        run: choco install zip --no-progress -y
+
+      - name: Cache xulrunner
+        id: xulrunner-cache
+        uses: actions/cache@v4
+        with:
+          path: app/xulrunner/firefox-win-${{ matrix.arch }}
+          key: xulrunner-win-${{ matrix.arch }}-${{ hashFiles('app/config.sh', 'app/scripts/fetch_xulrunner') }}
+
+      - name: Fetch xulrunner
+        if: steps.xulrunner-cache.outputs.cache-hit != 'true'
+        run: app/scripts/fetch_xulrunner -p w -a ${{ matrix.arch }}
+
+      - name: Cache Node modules
+        id: node-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-win-24-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      # Committed symlinks point into node_modules, which doesn't exist at checkout time,
+      # so Git creates the directory ones with the wrong symlink type on Windows. Recreate
+      # them now that the targets exist.
+      - name: Recreate symlinks
+        run: |
+          git ls-files -s | awk '$1 == 120000 { print $4 }' | xargs rm
+          git checkout -- .
+
+      - name: Build Zotero
+        run: npm run build
+        # Currently necessary for document-worker Webpack: https://stackoverflow.com/a/69746937
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+
+      # The step timeout turns a startup hang into a failure
+      - name: Run tests
+        timeout-minutes: 15
+        run: test/runtests.sh -f -r 3 -b -x app/staging/Zotero_win-${{ matrix.arch }}/zotero.exe db file
+
   utilities:
     name: Utilities Tests
     runs-on: ubuntu-latest
