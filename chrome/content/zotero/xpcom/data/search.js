@@ -1739,10 +1739,15 @@ Zotero.Search.prototype._buildQuery = async function () {
 					//
 					// Note: We assume full datetimes are already UTC and don't
 					// need to be handled specially
+					//
+					// Text operators on a date field compare the stored value
+					// like any other field, so they skip this
 					else if ((condition.name == 'dateAdded'
 							|| condition.name == 'dateModified'
 							|| condition.name == 'lastRead'
 							|| condition.name == 'datefield')
+							&& ['is', 'isNot', 'isBefore', 'isAfter', 'isInTheLast']
+								.includes(condition.operator)
 							&& !Zotero.Date.isSQLDateTime(condition.value)) {
 						
 						// TODO: document these flags

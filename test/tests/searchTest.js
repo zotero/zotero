@@ -1111,6 +1111,32 @@ describe("Zotero.Search", function () {
 				});
 			});
 			
+			describe("date-type item fields", function () {
+				it("should compare dates and still accept text operators", async function () {
+					let item1 = await createDataObject('item', { itemType: 'patent' });
+					item1.setField('filingDate', '2019-06-08');
+					await item1.saveTx();
+					let item2 = await createDataObject('item', { itemType: 'patent' });
+					item2.setField('filingDate', '2021-01-15');
+					await item2.saveTx();
+
+					let s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('filingDate', 'isBefore', '2020');
+					let matches = await s.search();
+					assert.include(matches, item1.id);
+					assert.notInclude(matches, item2.id);
+
+					// A text operator, as in an existing saved search
+					s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('filingDate', 'contains', '2021');
+					matches = await s.search();
+					assert.include(matches, item2.id);
+					assert.notInclude(matches, item1.id);
+				});
+			});
+
 			describe("fileTypeID", function () {
 				it("should search by attachment file type", async function () {
 					let s = new Zotero.Search();

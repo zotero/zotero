@@ -607,9 +607,10 @@ Zotero.SearchConditions = new function () {
 				table: 'itemData',
 				field: 'value',
 				normalizedField: 'COALESCE(valueNormalized, value)',
-				aliases: await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
-					+ "WHERE fieldName NOT IN ('accessDate', 'date', 'pages', "
-					+ "'section','seriesNumber','issue')"),
+				aliases: (await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
+					+ "WHERE fieldName NOT IN ('accessDate', 'pages', "
+					+ "'section','seriesNumber','issue')"))
+					.filter(field => !Zotero.ItemFields.isDate(field)),
 				template: true // mark for special handling
 			},
 
@@ -650,7 +651,12 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['accessDate', 'date', 'dateDue', 'accepted'], // TEMP - NSF
+				aliases: (await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined"))
+					.filter(field => Zotero.ItemFields.isDate(field))
+					// Stored as an SQL datetime rather than a multipart date, so
+					// isDate() doesn't cover it
+					.concat(['accessDate'])
+					.concat(['dateDue', 'accepted']), // TEMP - NSF
 				template: true // mark for special handling
 			},
 			
@@ -908,7 +914,15 @@ Zotero.SearchConditions = new function () {
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){
 			return true;
 		}
-		
+
+		// Date-type item fields also accept the text operators, which compare
+		// the stored value as text, so saved searches that use them keep
+		// loading -- the operators offered in the UI are just 'operators'
+		if (_conditions[condition].name == 'datefield'
+				&& ['contains', 'doesNotContain', 'beginsWith'].includes(operator)) {
+			return true;
+		}
+
 		return !!_conditions[condition]['operators'][operator];
 	}
 	
