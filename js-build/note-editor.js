@@ -30,9 +30,13 @@ async function getZoteroNoteEditor(signatures) {
 				`cd ${tmpDir}`
 				+ ` && (test -f ${filename} || curl -f ${url} -o ${filename})`
 				+ ` && unzip ${filename} zotero/* -d ${targetDir}`
-				+ ` && mv ${path.join(targetDir, 'zotero', '*')} ${targetDir}`
 			);
 
+			// Move the contents of zotero/ up a level (not in the shell, whose glob
+			// handling breaks on Windows paths)
+			for (let entry of await fs.readdir(path.join(targetDir, 'zotero'))) {
+				await fs.move(path.join(targetDir, 'zotero', entry), path.join(targetDir, entry));
+			}
 			await fs.remove(path.join(targetDir, 'zotero'));
 		}
 		catch (e) {
