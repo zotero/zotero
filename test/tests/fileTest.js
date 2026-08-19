@@ -509,7 +509,7 @@ describe("Zotero.File", function () {
 			var e = {
 				operation: 'open',
 				becauseAccessDenied: true,
-				path: '/tmp/test'
+				path: PathUtils.join(Zotero.getTempDirectory().path, 'test')
 			};
 			try {
 				Zotero.File.checkFileAccessError(e, e.path, 'create');
