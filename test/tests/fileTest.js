@@ -326,7 +326,16 @@ describe("Zotero.File", function () {
 			var tmpPath = await getTempDirectory();
 			var destPath = OS.Path.join(tmpPath, 'missing');
 			var linkPath = OS.Path.join(tmpPath, 'link');
-			await OS.File.unixSymLink(destPath, linkPath);
+			var isSymlink = false;
+			try {
+				await OS.File.unixSymLink(destPath, linkPath);
+				isSymlink = Zotero.File.pathToFile(linkPath).isSymlink();
+			}
+			catch (e) {}
+			if (!isSymlink) {
+				// Symlink couldn't be created or isn't visible as one (e.g., on CIFS)
+				this.skip();
+			}
 			
 			assert.throws(() => Zotero.File.createDirectoryIfMissing(linkPath), /^Broken symlink/);
 		});
@@ -341,7 +350,16 @@ describe("Zotero.File", function () {
 			var tmpPath = await getTempDirectory();
 			var destPath = OS.Path.join(tmpPath, 'missing');
 			var linkPath = OS.Path.join(tmpPath, 'link');
-			await OS.File.unixSymLink(destPath, linkPath);
+			var isSymlink = false;
+			try {
+				await OS.File.unixSymLink(destPath, linkPath);
+				isSymlink = Zotero.File.pathToFile(linkPath).isSymlink();
+			}
+			catch (e) {}
+			if (!isSymlink) {
+				// Symlink couldn't be created or isn't visible as one (e.g., on CIFS)
+				this.skip();
+			}
 			
 			var e = await getPromiseError(Zotero.File.createDirectoryIfMissingAsync(linkPath));
 			assert.ok(e);
