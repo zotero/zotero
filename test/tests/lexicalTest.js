@@ -238,19 +238,30 @@ describe("Zotero.Lexical", function () {
 		});
 
 		it("should count CJK units against the 2-gram index", async function () {
-			await addDoc(4, "lexchinese document", '疫情 情控 控制');
 			let df = unit => Zotero.Lexical.getDocumentFrequency(unit);
-			assert.equal(await df(
-				{ type: 'cjk', text: '疫情控制', bigrams: '疫情 情控 控制' }
-			), 1);
-			assert.equal(await df({ type: 'cjk', text: '疫情', bigrams: '疫情' }), 1);
+			let units = {
+				run: { type: 'cjk', text: '疫情控制', bigrams: '疫情 情控 控制' },
+				pair: { type: 'cjk', text: '疫情', bigrams: '疫情' },
+				reversed: { type: 'cjk', text: '控疫', bigrams: '控疫' },
+				starting: { type: 'cjk', text: '疫', bigrams: null },
+				ending: { type: 'cjk', text: '制', bigrams: null }
+			};
+			// Counts cover every indexed document, so measure what this one
+			// adds rather than assuming it's the library's only Chinese text
+			let before = {};
+			for (let [name, unit] of Object.entries(units)) {
+				before[name] = await df(unit);
+			}
+			await addDoc(4, "lexchinese document", '疫情 情控 控制');
+			assert.equal(await df(units.run), before.run + 1);
+			assert.equal(await df(units.pair), before.pair + 1);
 			// Not adjacent in the document
-			assert.equal(await df({ type: 'cjk', text: '控疫', bigrams: '控疫' }), 0);
+			assert.equal(await df(units.reversed), before.reversed);
 			// A single character approximates by the bigrams it starts...
-			assert.equal(await df({ type: 'cjk', text: '疫', bigrams: null }), 1);
+			assert.equal(await df(units.starting), before.starting + 1);
 			// ...so one that only ever ends a run undercounts -- the
 			// documented blind spot of the approximation
-			assert.equal(await df({ type: 'cjk', text: '制', bigrams: null }), 0);
+			assert.equal(await df(units.ending), before.ending);
 		});
 
 		it("should measure corpus size from the index state", async function () {
