@@ -103,6 +103,11 @@ Zotero.File = new function () {
 		}
 		catch (e) {
 			if (e.becauseNoSuchFile) {}
+			// A path that can't be parsed (e.g., a POSIX-style path on Windows) doesn't
+			// exist either
+			else if (e.message?.includes('NS_ERROR_FILE_UNRECOGNIZED_PATH')) {
+				return false;
+			}
 			else {
 				throw e;
 			}
