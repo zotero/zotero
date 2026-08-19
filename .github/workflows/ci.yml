@@ -1,12 +1,62 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Monthly, to catch runner image and OS changes
+    - cron: '0 6 1 * *'
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  # Decide whether to run the network-filesystem tests: always for manual and scheduled
+  # runs, and otherwise only when the changes touch the Gecko version or the files
+  # responsible for network-filesystem database handling
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository
+    outputs:
+      network: ${{ steps.check.outputs.network }}
+    steps:
+      - name: Check for network-filesystem-related changes
+        id: check
+        env:
+          EVENT: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          network=false
+          if [[ "$EVENT" == "workflow_dispatch" || "$EVENT" == "schedule" ]]; then
+            network=true
+          else
+            base="$BASE"
+            [[ -z "$base" ]] && base="$BEFORE"
+            git init -q repo && cd repo
+            git remote add origin "https://github.com/$REPO"
+            git fetch -q --depth 1 origin "$SHA"
+            # Run the tests if the base of the change can't be determined (e.g., a new
+            # branch or an unfetchable pre-force-push commit)
+            if [[ -z "$base" || "$base" == 0000000000000000000000000000000000000000 ]] \
+                || ! git fetch -q --depth 1 origin "$base" 2>/dev/null; then
+              network=true
+            elif git diff --name-only "$base" "$SHA" \
+                | grep -qE '^(app/config\.sh|chrome/content/zotero/xpcom/(db|file)\.js|\.github/workflows/ci\.yml)$'; then
+              network=true
+            fi
+          fi
+          echo "network=$network" >> "$GITHUB_OUTPUT"
+
   test:
     name: Test (${{ matrix.shard }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: changes
     # Same-repo PRs are covered by the push run, so run pull_request jobs only for forks
     if: >
       github.event_name != 'pull_request'
@@ -16,8 +66,11 @@ jobs:
         # Numbered shards split the full suite. 'smb' and 'nfs' run the db and file tests
         # with the test data directory on a loopback CIFS or NFS mount, so that connection
         # initialization itself runs against a network filesystem, which is where
-        # network-filesystem failures (startup crashes and hangs) occur.
-        shard: ['1', '2', '3', '4', 'smb', 'nfs']
+        # network-filesystem failures (startup crashes and hangs) occur. The network shards
+        # run only when the 'changes' job detects relevant changes.
+        shard: ${{ fromJSON(needs.changes.outputs.network == 'true'
+          && '["1", "2", "3", "4", "smb", "nfs"]'
+          || '["1", "2", "3", "4"]') }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -118,8 +171,77 @@ jobs:
       # The step timeout turns a startup hang into a failure
       - name: Run tests on network share
         if: matrix.shard == 'smb' || matrix.shard == 'nfs'
-        timeout-minutes: 20
+        timeout-minutes: 10
         run: TMPDIR=/mnt/zotero-${{ matrix.shard }} xvfb-run test/runtests.sh -f -r 3 -b db file
+
+  # Run the db and file tests on macOS with the test data directory on a loopback NFS
+  # mount. On macOS, SQLite selects locking methods without shared-memory support on
+  # network filesystems, which is what the network-filesystem database handling has to
+  # detect and handle, so this runs the real code path that crashed on SMB/NFS/sshfs
+  # data directories.
+  test-mac:
+    name: Test (macOS NFS)
+    runs-on: macos-15
+    timeout-minutes: 30
+    needs: changes
+    if: >
+      needs.changes.outputs.network == 'true'
+      && (github.event_name != 'pull_request'
+      || github.event.pull_request.head.repo.full_name != github.repository)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Cache xulrunner
+        id: xulrunner-cache
+        uses: actions/cache@v4
+        with:
+          path: app/xulrunner/Firefox.app
+          key: xulrunner-mac-${{ hashFiles('app/config.sh', 'app/scripts/fetch_xulrunner') }}
+
+      - name: Fetch xulrunner
+        if: steps.xulrunner-cache.outputs.cache-hit != 'true'
+        run: app/scripts/fetch_xulrunner -p m
+
+      - name: Cache Node modules
+        id: node-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-mac-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Build Zotero
+        run: npm run build
+        # Currently necessary for document-worker Webpack: https://stackoverflow.com/a/69746937
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
+
+      - name: Set up NFS share
+        run: |
+          sudo mkdir -p /private/var/zotero-nfs
+          sudo chown $(whoami) /private/var/zotero-nfs
+          echo "/private/var/zotero-nfs -mapall=$(whoami) localhost" | sudo tee /etc/exports
+          sudo nfsd enable || sudo nfsd start
+          sleep 2
+          showmount -e localhost
+          mkdir -p "$HOME/zotero-nfs"
+          sudo mount_nfs -o vers=3 localhost:/private/var/zotero-nfs "$HOME/zotero-nfs"
+
+      # The step timeout turns a startup hang into a failure
+      - name: Run tests on network share
+        timeout-minutes: 10
+        run: TMPDIR="$HOME/zotero-nfs" test/runtests.sh -f -r 3 -b db file
 
   utilities:
     name: Utilities Tests
