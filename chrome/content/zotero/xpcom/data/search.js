@@ -1849,9 +1849,11 @@ Zotero.Search.prototype._buildQuery = async function () {
 										break;
 									
 									case 'isBefore':
+										// A date without a sortable year is stored
+										// as 0000-..., which isn't before anything
 										condSQL += '<?';
-										condSQL += ' AND ' + condition['field'] +
-											">'0000-00-00'";
+										condSQL += ' AND SUBSTR(' + condition['field']
+											+ ", 1, 10)>'0000-00-00'";
 										break;
 										
 									case 'isAfter':

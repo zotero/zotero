@@ -1120,12 +1120,18 @@ describe("Zotero.Search", function () {
 					item2.setField('filingDate', '2021-01-15');
 					await item2.saveTx();
 
+					// A value with no parsable year has nothing to compare
+					let item3 = await createDataObject('item', { itemType: 'patent' });
+					item3.setField('filingDate', 'Foo');
+					await item3.saveTx();
+
 					let s = new Zotero.Search();
 					s.libraryID = userLibraryID;
 					s.addCondition('filingDate', 'isBefore', '2020');
 					let matches = await s.search();
 					assert.include(matches, item1.id);
 					assert.notInclude(matches, item2.id);
+					assert.notInclude(matches, item3.id);
 
 					// A text operator, as in an existing saved search
 					s = new Zotero.Search();
