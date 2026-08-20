@@ -60,7 +60,8 @@
 			padding-inline-end: 4px;
 		}
 
-		&:first-child {
+		&:first-child,
+		&.first-column {
 			--extra-width: var(--first-column-extra-width, 0px);
 			// No padding on the first cell since it's done via twisty and indent
 			padding-inline-start: 0;
@@ -114,6 +115,9 @@
 		width: 100%;
 		box-sizing: border-box;
 		border-radius: 5px;
+		// Positioning context for span.drop-before / span.drop-after. Without this the
+		// 20% line is resolved against the table and leftover flow indents a neighbor.
+		position: relative;
 
 		&.drop:not(.flashing) {
 			color: var(--material-background) !important;
