@@ -95,7 +95,7 @@ Zotero.Lexical = new function () {
 	// Passed to bm25(), which spends them on how fast a match approaches the
 	// ceiling rather than on the ceiling itself, so a weight can favour a
 	// column without letting it score above a full match.
-	const COLUMN_WEIGHTS = { title: 2, abstract: 1.3, note: 1, annotation: 2 };
+	const COLUMN_WEIGHTS = { title: 6, abstract: 4, note: 1, annotation: 2 };
 	// The indexes a query is scored against: the attachment content index and
 	// the item-text index, each with the CJK 2-gram table covering the same
 	// documents, and the item-text tables' columns in declaration order
