@@ -698,6 +698,49 @@ describe("Advanced Search", function () {
 		await selectLibrary(win);
 	});
 
+	it("should close the saved-search editor without prompting when nothing was changed", async function () {
+		var saved = await createDataObject('search', { name: "UnchangedEditing" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+		assert.equal(deck.selectedSearchType, 'saved');
+
+		let stub = sinon.stub().returns(1); // Cancel
+		let promptService = win.Services.prompt;
+		win.Services.prompt = { confirmEx: stub };
+		try {
+			await selectLibrary(win);
+			assert.equal(stub.callCount, 0);
+			assert.equal(deck.state, 'closed');
+		}
+		finally {
+			win.Services.prompt = promptService;
+		}
+
+		await saved.eraseTx();
+	});
+
+	it("should prompt when only the saved search's name was changed", async function () {
+		var saved = await createDataObject('search', { name: "RenameWhileEditing" });
+		await select(win, saved);
+		await zp.setSavedSearchEditorState('open');
+
+		deck.pane.querySelector('#saved-search-name').value = "RenameWhileEditing 2";
+
+		let stub = sinon.stub().returns(0); // Save
+		let promptService = win.Services.prompt;
+		win.Services.prompt = { confirmEx: stub };
+		try {
+			await selectLibrary(win);
+			assert.equal(stub.callCount, 1);
+			assert.equal(saved.name, "RenameWhileEditing 2");
+		}
+		finally {
+			win.Services.prompt = promptService;
+		}
+
+		await saved.eraseTx();
+	});
+
 	it("should revert to the edited search without re-prompting when canceling", async function () {
 		var search1 = await createDataObject('search', { name: "CancelEditing1" });
 		var search2 = await createDataObject('search', { name: "CancelEditing2" });
@@ -706,6 +749,11 @@ describe("Advanced Search", function () {
 		await select(win, search1);
 		await zp.setSavedSearchEditorState('open');
 		assert.equal(deck.selectedSearchType, 'saved');
+
+		// Edit the editor's working copy, so that closing it prompts
+		var searchBox = deck.pane.querySelector('zoterosearch');
+		searchBox.querySelector('.conditions').firstChild.querySelector('#valuefield').value = 'edited';
+		searchBox.updateSearch();
 
 		// zoteroPane.js uses the pane window's Services, so stub there. Set it before
 		// touching the selection so no prompt can reach the real (modal) service.

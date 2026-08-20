@@ -140,6 +140,42 @@
 				this._search.addCondition('title', 'contains', '');
 			}
 			this._searchElem.search = this._search;
+			this._loadedState = this.type === 'saved' ? this._getState() : null;
+		}
+		
+		/**
+		 * The editor's current name and conditions, for comparison against the state the
+		 * search was loaded with
+		 *
+		 * The search is serialized through the editor, since rendering an existing search
+		 * can normalize it (e.g., folding a legacy 'noChildren' condition into the result
+		 * level), and the normalized form is what a save would write.
+		 */
+		_getState() {
+			this._searchElem.updateSearch();
+			return {
+				name: this._nameField.value,
+				conditions: this._search.toJSON().conditions
+			};
+		}
+		
+		/**
+		 * Whether the name or conditions have been edited since the search was loaded,
+		 * for type "saved"
+		 */
+		get hasChanges() {
+			if (this.type !== 'saved') {
+				throw new Error('hasChanges is unsupported for temporary search');
+			}
+			if (!this._loadedState) {
+				return false;
+			}
+			let state = this._getState();
+			return state.name !== this._loadedState.name
+				|| state.conditions.length !== this._loadedState.conditions.length
+				|| state.conditions.some((condition, i) => !Zotero.Searches.conditionEquals(
+					condition, this._loadedState.conditions[i]
+				));
 		}
 		
 		_ensureSearch() {
