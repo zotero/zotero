@@ -40,6 +40,8 @@ const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
 	: Math.pow(2, 32) - 1;
 
+const READER_STATE_FILE_NAME = '.zotero-reader-state';
+
 const READ_ALOUD_ENABLED_VOICES_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudEnabledVoices.json');
 const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudVoiceDefaults.json');
 
@@ -48,7 +50,7 @@ let readAloudCachePruned = false;
 
 class ReaderInstance {
 	constructor(options) {
-		this.stateFileName = '.zotero-reader-state';
+		this.stateFileName = READER_STATE_FILE_NAME;
 		this.annotationItemIDs = [];
 		this._item = options.item;
 		this._instanceID = Zotero.Utilities.randomString();
@@ -113,6 +115,25 @@ class ReaderInstance {
 	getSecondViewState() {
 		let state = this._iframeWindow?.wrappedJSObject?.getSecondViewState?.();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
+	}
+
+	/**
+	 * Get the page currently displayed in the active view, as shown in the reader's toolbar.
+	 *
+	 * @returns {String|null} - Page, or null if the reader has no pages.
+	 */
+	getCurrentPage() {
+		let state = this._internalReader?._state;
+		if (!state) return null;
+		let stats = state.primary ? state.primaryViewStats : state.secondaryViewStats;
+		if (!stats || stats.pageIndex === undefined) return null;
+		if (this._type === 'pdf') {
+			return stats.pageLabel || String(stats.pageIndex + 1);
+		}
+		if (this._type === 'epub' && stats.usePhysicalPageNumbers) {
+			return stats.pageLabel || null;
+		}
+		return null;
 	}
 
 	async migrateMendeleyColors(libraryID, annotations) {
@@ -1041,6 +1062,10 @@ class ReaderInstance {
 					item.setAttachmentLastReadAloudPosition(newPos);
 				}
 			}
+
+			// Save the page displayed at the time of this state, so that it is available
+			// while the reader is not loaded (e.g. for an unloaded tab)
+			state.pageLabel = this.getCurrentPage();
 
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!(await OS.File.exists(file.path))) {
@@ -2886,7 +2911,29 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
-	
+
+	/**
+	 * Get the page that was displayed when the reader for the given attachment last saved
+	 * its state by reading the state file.
+	 * @param {Number} itemID - Attachment item ID
+	 * @returns {Promise<String|null>} - Page, or null if none was saved
+	 */
+	async getSavedPageLabel(itemID) {
+		try {
+			let item = Zotero.Items.get(itemID);
+			if (!item?.isFileAttachment()) return null;
+			let directory = Zotero.Attachments.getStorageDirectory(item);
+			let path = PathUtils.join(directory.path, READER_STATE_FILE_NAME);
+			if (!(await IOUtils.exists(path))) return null;
+			let state = await IOUtils.readJSON(path);
+			return state.pageLabel || null;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	}
+
 	getWindowStates() {
 		return this._readers
 			.filter(r => r instanceof ReaderWindow)

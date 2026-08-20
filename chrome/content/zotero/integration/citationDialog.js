@@ -1274,6 +1274,8 @@ const IOManager = {
 		doc.addEventListener("focus-item-tree", ({ detail }) => this.focusItemTree(detail));
 		// update bubbles after citation item is updated by itemDetails popup
 		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
+		// add the page suggested from an opened reader tab as a locator
+		doc.addEventListener("page-suggestion-accepted", ({ detail: { page } }) => this._applyPageSuggestion(page));
 
 		doc.addEventListener("DOMMenuBarActive", () => this._handleMenuBarAppearance());
 
@@ -1434,6 +1436,9 @@ const IOManager = {
 
 		// Add entries into the citation with the current locator if specified
 		let bubbleItems = items.map(item => BubbleItem.fromItem(item));
+		// Whether to suggest the page of a reader tab with an attachment of the
+		// added item as a locator once the bubble is added
+		let suggestPage = false;
 		if (locator) {
 			for (let bubbleItem of bubbleItems) {
 				bubbleItem.locator = locator.locator;
@@ -1450,6 +1455,8 @@ const IOManager = {
 			// that, the user presumably knows about the shortcut
 			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
 				&& this._timesItemsAdded < 1;
+			// If the item is opened in a reader tab, its page is suggested as a locator
+			suggestPage = DIALOG_STATE.isCitingItems();
 		}
 		else {
 			// A multi-item add doesn't enter locator-typing mode, so typed text
@@ -1466,12 +1473,14 @@ const IOManager = {
 		this.updateBubbleInput();
 
 		// Show guidance panel on the first run
+		let guidanceShown = false;
 		if (DIALOG_STATE.isCitingItems() && !Zotero.Prefs.get("firstRunGuidanceShown.citationDialog")) {
 			doc.querySelector(".bubble").id = "first-bubble";
 			// Center the panel on the first bubble
 			let width = doc.querySelector(".bubble").getBoundingClientRect().width;
 			doc.querySelector("guidance-panel").setAttribute("x", Math.round(width / 2));
 			IOManager.showFirstRunDialog();
+			guidanceShown = true;
 		}
 		// Render the preview before refreshing the list so resizeWindow measures its real height;
 		// otherwise the debounced render lands after the resize and overflows the window.
@@ -1480,6 +1489,18 @@ const IOManager = {
 		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
 			_id("bubble-input").refocusInput();
+		}
+		// Suggest the page of the opened document, unless the first run guidance panel
+		// is already displayed next to the same bubble
+		if (suggestPage && !guidanceShown) {
+			let page = await Helpers.getOpenTabPage(items[0]);
+			// The bubble the locator would be added to may be gone by now
+			if (page && this._justAddedBubbles) {
+				PopupsHandler.openPageSuggestion({
+					page,
+					anchor: _id("bubble-input").getCurrentInput()
+				});
+			}
 		}
 		dialogNotPristine();
 	},
@@ -1910,6 +1931,19 @@ const IOManager = {
 
 	_processNumericLocatorInputDebounced: Zotero.Utilities.debounce(() => IOManager._processNumericLocatorInput(), NUMERIC_LOCATOR_TIMEOUT),
 
+	// Add the page suggested from an opened reader tab as a locator of the just-added bubble
+	_applyPageSuggestion(page) {
+		if (!this._justAddedBubbles) return;
+		for (let bubbleItem of this._justAddedBubbles) {
+			bubbleItem.locator = page;
+			bubbleItem.label = "page";
+		}
+		// Clearing just-added bubbles refreshes bubble-input
+		this._clearJustAddedBubbles();
+		_id("bubble-input").refocusInput();
+		dialogNotPristine();
+	},
+
 	// Clear the record of which bubbles were just added. If a locator is typed
 	// and Enter is presses, just-added bubbles get that locator.
 	_clearJustAddedBubbles(event) {
@@ -1926,6 +1960,8 @@ const IOManager = {
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
 		_id("bubble-input").showJustAddedPlaceholder = false;
+		// the page suggestion has no bubble to apply the locator to anymore
+		PopupsHandler.closePageSuggestion();
 		this.updateBubbleInput();
 	},
 

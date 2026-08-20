@@ -34,6 +34,7 @@ export class CitationDialogPopupsHandler {
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
 		this.itemDetailsTimeOpened = null;
+		this.pageSuggestion = null;
 
 		this.dialogState = dialogState;
 
@@ -44,6 +45,8 @@ export class CitationDialogPopupsHandler {
 		this.doc.addEventListener("popupshown", (event) => {
 			// make sure overlay doesn't appear on tooltips and etc.
 			if (event.target.tagName !== "xul:panel") return;
+			// page suggestion is never focused, so typing can continue uninterrupted
+			if (event.target.id == "page-suggestion") return;
 			// if focus is not in the panel tab into it
 			if (!event.target.contains(this.doc.activeElement)) {
 				Services.focus.moveFocus(this.doc.defaultView, event.target, Services.focus.MOVEFOCUS_FORWARD, 0);
@@ -85,6 +88,75 @@ export class CitationDialogPopupsHandler {
 			if (this._getNode("#itemDetails").state !== "open") return;
 			this.captureItemDetailsKeyDown(event);
 		}, true);
+
+		// Clicking the page suggestion adds it as a locator
+		this._getNode("#page-suggestion-option").addEventListener("click", () => this.acceptPageSuggestion());
+		// Highlight the suggestion as one arrows into and out of it
+		this.doc.addEventListener("page-suggestion-highlight", ({ detail: { highlighted } }) => {
+			this.setPageSuggestionHighlighted(highlighted);
+		});
+		// Any click outside of the page suggestion dismisses it. The click itself is not
+		// consumed, so it still does whatever it would have done otherwise.
+		this.doc.addEventListener("mousedown", (event) => {
+			if (!this.isPageSuggestionOpen()) return;
+			if (event.target.closest("#page-suggestion")) return;
+			this.closePageSuggestion();
+		}, true);
+		// Discard the suggestion if the popup is hidden by any other means
+		this._getNode("#page-suggestion").addEventListener("popuphidden", () => {
+			this.pageSuggestion = null;
+		});
+	}
+
+	// Suggest the page currently opened in a reader tab as a locator for the
+	// just-added bubble. The popup is anchored to the input one is typing in.
+	openPageSuggestion({ page, anchor }) {
+		if (!page || !anchor) return;
+		let panel = this._getNode("#page-suggestion");
+		// A popup that is still hiding cannot be opened again, so wait it out
+		if (panel.state == "hiding") {
+			panel.addEventListener("popuphidden", () => this.openPageSuggestion({ page, anchor }), { once: true });
+			return;
+		}
+		this.pageSuggestion = { page };
+		// Show the page as a localized short locator (e.g. "p.10")
+		this._getNode("#page-suggestion-option").textContent = Zotero.Cite.getLocatorString("page", "short").toLowerCase() + " " + page;
+		this.setPageSuggestionHighlighted(false);
+		if (panel.state == "closed") {
+			panel.openPopup(anchor, "after_start", 0, 4, false, false, null);
+		}
+		else {
+			panel.moveToAnchor(anchor, "after_start", 0, 4);
+		}
+	}
+
+	closePageSuggestion() {
+		if (!this.isPageSuggestionOpen()) return;
+		this._getNode("#page-suggestion").hidePopup();
+		this.pageSuggestion = null;
+	}
+
+	// The popup counts as opened while it is still being shown, so that it can be
+	// dismissed by a keypress or a click that happens right after it appears
+	isPageSuggestionOpen() {
+		return ["open", "showing"].includes(this._getNode("#page-suggestion").state);
+	}
+
+	setPageSuggestionHighlighted(highlighted) {
+		let option = this._getNode("#page-suggestion-option");
+		option.classList.toggle("highlighted", highlighted);
+		option.setAttribute("aria-selected", highlighted);
+	}
+
+	// Tell the citation dialog to add the suggested page as a locator
+	acceptPageSuggestion() {
+		if (!this.pageSuggestion) return;
+		let { page } = this.pageSuggestion;
+		this.closePageSuggestion();
+		this.doc.dispatchEvent(new CustomEvent("page-suggestion-accepted", {
+			bubbles: true,
+			detail: { page }
+		}));
 	}
 
 	openItemDetails(bubbleItem, itemDescription) {
