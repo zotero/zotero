@@ -26,43 +26,42 @@
 /**
  * Zotero.Lexical -- ranked lexical search over the library's own text.
  *
- * Scores how well a text answers a query rather than whether it contains
- * every word of it: any term can match, and a score accumulates the
- * evidence, so a document about owl migration in Norway still scores for
- * "owl migration in the united states" -- below the documents that cover
- * all of it.
+ * Scores how well a text answers a query rather than whether it contains every
+ * word of it: any term can match, and the score accumulates the evidence, so a
+ * document about owl migration in Norway still scores for "owl migration in the
+ * united states" -- below the documents that cover all of it.
  *
- * parseQuery() breaks a query into scoring units (words, quoted phrases,
- * CJK runs), and analyzeQuery() weighs each unit by how rare it is in the
- * user's own corpus, so that in "fall of communism", "communism" is what
- * mostly decides a score, "fall" counts a little, and "of" barely at all --
- * no stoplist, nothing curated by hand. Consecutive informative words also
- * form weighted pair units, so a text saying "special education" outscores
- * one that has the words scattered.
+ * The ranking is FTS5's own BM25, asked one question per index rather than one
+ * per query term. parseQuery() breaks a query into terms, buildExpression()
+ * assembles them into a single OR expression, and the index scores every
+ * document against it in one pass. BM25 already weighs a term by how rare it is
+ * in the corpus it indexes, saturates repetition, and discounts long documents,
+ * so a term filling half the library moves a score barely at all -- no
+ * stoplist, no weights of our own, nothing curated by hand.
  *
- * The statistics behind the weights are document frequencies counted across
- * both of ftindex's word-level corpora (see Zotero.FullText): attachment
- * content and item text (titles, abstracts, notes, annotations). One count
- * per term over everything, so a term's rarity is a property of the library
- * -- a word filling every document stays cheap when it turns up in an
- * annotation, and a library with few attachments still measures rarity from
- * its items' own text.
+ * Two things the query asks for that a bag of words wouldn't:
  *
- * The match side reports which of a set of items contain which units:
- * matchContent() asks the attachment content index, and matchFields(),
- * matchNotes(), and matchAnnotations() ask the item-text index's columns. A
- * match is presence -- strength 1 -- where text is short enough that
- * containing a unit says everything (titles, abstracts, annotations);
- * notes and documents, whose lengths vary too much for that, are graded by
- * saturated, length-normalized term frequency. Quoted phrases are matched
- * literally everywhere: the indexes only prove a phrase's words adjacent,
- * so phrase matches are verified against the stored text.
+ * - Adjacency. Consecutive query words are added to the expression as phrase
+ *   terms, so a text saying "special education" earns above one with the words
+ *   scattered. A phrase is rarer than either of its words, so BM25 would let it
+ *   decide the ranking by itself; the word terms are repeated
+ *   ADJACENCY_REPETITION times to hold it to a share of the score.
+ * - Where the words landed. A title names a work and an abstract summarizes it,
+ *   so the item-text index is scored with per-column weights (see
+ *   COLUMN_WEIGHTS), which is BM25's own mechanism for the same idea.
  *
- * scoreItemIDs() assembles the score: each unit contributes its weight
- * times the best evidence for it across an item's sources, summed and
- * normalized against the query's ceiling -- 1 is a full-strength match on
- * everything the query asked -- with a floor below which an item isn't a
- * match at all.
+ * Raw BM25 is unbounded and its scale shifts with the query, so it can't be
+ * shown or compared as it stands. Every score is divided by the most the
+ * expression could earn, which BM25's shape makes calculable from the terms'
+ * inverse document frequencies alone (see _getCeiling()). What's left is a 0-1
+ * reading of how strongly a document carries the query, weighted toward its
+ * rarer terms: a document missing a term forfeits that term's share, and the
+ * top of the range belongs to a text about nothing else.
+ *
+ * Scores from the two indexes are comparable because both are that same
+ * fraction, and because BM25 normalizes each by its own corpus's typical
+ * document length -- the reason a one-line title and a 400-page PDF can be read
+ * on one scale at all.
  */
 Zotero.Lexical = new function () {
 	// CJK scripts (Han/Hiragana/Katakana/Hangul), the same set the full-text
@@ -79,41 +78,35 @@ Zotero.Lexical = new function () {
 		`(?<cjk>[${CJK_CLASS}]+)|(?<word>(?:(?![${CJK_CLASS}])[\\p{L}\\p{N}])+)`,
 		'gu'
 	);
-	// BM25's term-frequency shape: K1 sets how quickly repetition saturates,
-	// B how much a long text discounts each occurrence (see
-	// _saturatedStrength())
-	const K1 = 1.2;
-	const B = 0.75;
-	// A unit is informative -- worth retrieving by -- when it carries at
-	// least this share of the query's best unit's weight. Relative rather
-	// than absolute, so "of" next to "communism" is dropped while a query of
-	// nothing but common words keeps its best word and still returns results.
-	const INFORMATIVE_WEIGHT_FRACTION = 0.2;
-	// What a full-strength match in each source is worth relative to a
-	// full-strength content match: a title names the work, an abstract
-	// summarizes it, everything else speaks with equal voice
-	const SOURCE_BOOSTS = {
-		title: 2,
-		abstract: 1.3,
-		content: 1,
-		note: 1,
-		annotation: 1
-	};
-	// Normalized scores below this aren't matches and aren't returned: with
-	// scores measured against the query's ceiling, this is the share of what
-	// the query asked for that an item has to show. Provisional until tuned
-	// against a real library.
-	const SCORE_FLOOR = 0.05;
-	// An item whose evidence is a single matched unit is a match only when
-	// that unit carries at least this share of the query's informative
-	// weight. Relative, so it adapts per query: for "fall of ussr", an item
-	// with just the dominant "ussr" is a match, while the crowd of items
-	// with just "fall" -- a minor share of what was asked -- is not.
-	const LONE_UNIT_WEIGHT_FRACTION = 0.5;
-	// An excerpt's width in characters (see getMatchingExcerpts()): wide
-	// enough to read a match in context, narrow enough that several excerpts
-	// fit in a details pane
-	const EXCERPT_WINDOW = 200;
+	// How many times a word term is repeated in the expression, against one
+	// occurrence of each adjacency phrase (see buildExpression()). BM25 sums a
+	// contribution per term in the expression and counts a repeat again, which
+	// is the only way to weigh one term against another in it. A phrase can
+	// only match texts that match both its words, so it is always the rarer
+	// term and BM25 would otherwise let it decide the ranking: unrepeated, an
+	// accidental adjacency straddling two concepts ("change adaptation" in
+	// "climate change adaptation in bangladesh") outweighs what the query is
+	// about. Repetition trades adjacency for coverage smoothly, and this is
+	// the point on that curve where a query's words still decide it.
+	const ADJACENCY_REPETITION = 3;
+	// What a match in each column of the item-text index is worth, in the
+	// order the index declares them (see fulltext.js): a title names the work,
+	// an abstract summarizes it, everything else speaks with equal voice.
+	// Passed to bm25(), which spends them on how fast a match approaches the
+	// ceiling rather than on the ceiling itself, so a weight can favour a
+	// column without letting it score above a full match.
+	const COLUMN_WEIGHTS = { title: 2, abstract: 1.3, note: 1, annotation: 2 };
+	// The indexes a query is scored against: the attachment content index and
+	// the item-text index, each with the CJK 2-gram table covering the same
+	// documents, and the item-text tables' columns in declaration order
+	const SOURCES = [
+		{ word: 'fulltextContent', cjk: 'fulltextContentCJK', columns: null },
+		{
+			word: 'fulltextItemText',
+			cjk: 'fulltextItemTextCJK',
+			columns: ['title', 'abstract', 'note', 'annotation']
+		}
+	];
 
 	/**
 	 * Thrown when scoring is abandoned via the shouldCancel callback -- e.g.
@@ -127,10 +120,9 @@ Zotero.Lexical = new function () {
 	};
 
 	/**
-	 * Parse a query into scoring units.
+	 * Parse a query into terms.
 	 *
-	 * A unit is the thing that matches (or doesn't) in one text and earns
-	 * its weight toward a score:
+	 * A term is the thing that matches (or doesn't) in one text:
 	 * - a word: { type: 'word', text, prefix }. The query's trailing word is
 	 *   flagged `prefix` while it's still being typed (no space or quote
 	 *   after it yet), so it matches its completions.
@@ -139,7 +131,7 @@ Zotero.Lexical = new function () {
 	 * - a CJK run: { type: 'cjk', text, bigrams } -- matched contiguously via
 	 *   the 2-gram index, so quoting adds nothing it doesn't already have.
 	 *   `bigrams` is null for a single character, which has none.
-	 * A part mixing scripts splits into word and run units, and a quoted
+	 * A part mixing scripts splits into word and run terms, and a quoted
 	 * part mixing scripts splits the same way, since neither index side
 	 * covers it whole.
 	 *
@@ -158,7 +150,7 @@ Zotero.Lexical = new function () {
 		// closing quote, or punctuation after the word means it's finished
 		let endsMidWord = /[\p{L}\p{N}]$/u.test(queryText);
 		let parts = Zotero.SearchConditions.parseSearchString(queryText);
-		let units = [];
+		let terms = [];
 		for (let i = 0; i < parts.length; i++) {
 			let part = parts[i];
 			let fromLastPart = i == parts.length - 1;
@@ -173,7 +165,7 @@ Zotero.Lexical = new function () {
 			let words = matches.filter(m => m.groups.word).map(m => m.groups.word);
 			let hasCJK = matches.some(m => m.groups.cjk);
 			if (part.inQuotes && words.length > 1 && !hasCJK) {
-				units.push({
+				terms.push({
 					type: 'phrase',
 					text: words.join(' '),
 					tokens: words,
@@ -184,7 +176,7 @@ Zotero.Lexical = new function () {
 			}
 			for (let match of matches) {
 				if (match.groups.cjk) {
-					units.push({
+					terms.push({
 						type: 'cjk',
 						text: match.groups.cjk,
 						bigrams: _getBigrams(match.groups.cjk),
@@ -193,7 +185,7 @@ Zotero.Lexical = new function () {
 					});
 				}
 				else {
-					units.push({
+					terms.push({
 						type: 'word',
 						text: match.groups.word,
 						prefix: false,
@@ -205,360 +197,130 @@ Zotero.Lexical = new function () {
 		}
 		// The trailing word of an unquoted query is the one still being
 		// typed. A quoted trailing part is exact by declaration.
-		if (units.length && endsMidWord) {
-			let last = units[units.length - 1];
+		if (terms.length && endsMidWord) {
+			let last = terms[terms.length - 1];
 			if (last.type == 'word' && last.fromLastPart && !last.quoted) {
 				last.prefix = true;
 			}
 		}
 		let deduped = new Map();
-		for (let unit of units) {
-			delete unit.fromLastPart;
-			delete unit.quoted;
-			let key = unit.type + '\n' + unit.text;
+		for (let term of terms) {
+			delete term.fromLastPart;
+			delete term.quoted;
+			let key = term.type + '\n' + term.text;
 			let existing = deduped.get(key);
-			if (!existing || (existing.prefix && !unit.prefix)) {
-				deduped.set(key, unit);
+			if (!existing || (existing.prefix && !term.prefix)) {
+				deduped.set(key, term);
 			}
 		}
 		return [...deduped.values()];
 	};
 
 	/**
-	 * The scoring units of a query (see parseQuery()), each weighted by how
-	 * rare it is in the corpus. A score built from these accumulates the
-	 * weights of the units a text matches, so matching "communism" moves a
-	 * score far more than matching "fall".
+	 * The FTS5 expression that scores a query's terms against one index
+	 * family, and the pieces it was built from.
 	 *
-	 * Consecutive informative words additionally form pair units
-	 * ({ type: 'pair', text, tokens, prefix }), matched as the two words
-	 * adjacent in order: "special education" asks for more than its words
-	 * scattered through a text, and a text with the words adjacent earns the
-	 * pair's weight on top of theirs. A pair is weighted by its own rarity --
-	 * an incidental adjacency ("united states") is common and weighs little,
-	 * a meaningful one is rare and can outweigh its words -- and a pair
-	 * matching nothing in the corpus is dropped, since a unit no text can
-	 * earn would only dilute every score. A pair inherits the trailing
-	 * word's prefix matching, so a query still being typed pairs too.
+	 * Every term is joined with OR, so any of them can match and BM25 sums
+	 * what each contributes. The word family additionally carries a phrase
+	 * term for each consecutive pair of query words -- what the query asked
+	 * for beyond the words themselves -- and repeats each word term
+	 * ADJACENCY_REPETITION times to keep those phrases from deciding the
+	 * ranking on their own.
 	 *
-	 * @param {String} queryText
-	 * @return {Promise<Object[]>} - parseQuery()'s units followed by any pair
-	 *     units, each with:
-	 *     df - documents in the corpus matching the unit
-	 *     weight - what a match on this unit contributes to a score
-	 *     informative - whether the unit carries enough of the query's
-	 *         weight to be worth retrieving by (see
-	 *         INFORMATIVE_WEIGHT_FRACTION); the best-weighted unit always
-	 *         is, and pairs always are, being made of informative words
+	 * Terms are all letters and digits (parseQuery tokenized them), so
+	 * quoting them into FTS phrases needs no escaping.
+	 *
+	 * @param {Object[]} terms - Terms from parseQuery()
+	 * @param {String} family - 'word' for the word-tokenized indexes, 'cjk'
+	 *     for the 2-gram indexes
+	 * @return {Object|null} - { expression, pieces }, where pieces are
+	 *     { match, repetitions } for building a ceiling against; null when the
+	 *     query has nothing for this family
 	 */
-	this.analyzeQuery = async function (queryText) {
-		let units = this.parseQuery(queryText);
-		if (!units.length) {
-			return units;
-		}
-		let corpusSize = await this.getCorpusSize();
-		for (let unit of units) {
-			unit.df = await this.getDocumentFrequency(unit);
-			unit.weight = _idf(unit.df, corpusSize);
-		}
-		let maxWeight = Math.max(...units.map(unit => unit.weight));
-		for (let unit of units) {
-			unit.informative = unit.weight >= maxWeight * INFORMATIVE_WEIGHT_FRACTION;
-		}
-		for (let pair of _getAdjacentPairs(units)) {
-			pair.df = await this.getDocumentFrequency(pair);
-			if (!pair.df) {
-				continue;
-			}
-			pair.weight = _idf(pair.df, corpusSize);
-			pair.informative = true;
-			units.push(pair);
-		}
-		return units;
-	};
-
-	/**
-	 * Number of documents the term statistics are measured against: every
-	 * attachment, item, note, and annotation recorded in the full-text
-	 * index's state tables -- including ones indexed with no text, which are
-	 * real documents that happen to contain nothing.
-	 *
-	 * @return {Promise<Number>}
-	 */
-	this.getCorpusSize = async function () {
-		return (await Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM ftindex.fulltextIndexState"
-		)) + (await Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM ftindex.fulltextItemTextState"
-		)) + (await Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM ftindex.fulltextNoteIndexState"
-		));
-	};
-
-	/**
-	 * How many documents match a unit: the `df` behind its weight, counted
-	 * across both word-level corpora -- attachment content and item text --
-	 * whose ID spaces are disjoint, so the sum counts nothing twice. Counted
-	 * the way the unit will be matched: a prefix word against every
-	 * completion, a phrase by adjacent occurrence, a CJK run by its
-	 * contiguous bigrams.
-	 *
-	 * A single-character CJK unit has no bigram of its own, so its count is
-	 * approximated by prefix-matching the bigrams that start with it. That
-	 * undercounts a character that only ends runs, which overstates its
-	 * weight -- rarer reads as more important, the safe direction to be wrong.
-	 *
-	 * @param {Object} unit - A unit from parseQuery()
-	 * @return {Promise<Number>}
-	 */
-	this.getDocumentFrequency = async function (unit) {
-		let clause = _getMatchClause(unit);
-		let df = 0;
-		for (let table of [clause.contentTable, clause.itemTextTable]) {
-			df += await Zotero.DB.valueQueryAsync(
-				"SELECT COUNT(*) FROM ftindex." + table
-					+ " WHERE " + table + " MATCH ?",
-				[clause.match]
-			);
-		}
-		return df;
-	};
-
-	/**
-	 * Which of the given items' indexed attachment content contains which
-	 * units, and how strongly relative to each other. For a one-unit
-	 * expression the index's rank is a constant times BM25's saturated,
-	 * length-normalized term frequency, so ranks compare documents exactly;
-	 * the constant itself is unknowable, so the strongest match anchors 1 and
-	 * the rest scale under it. A document that keeps returning to a term
-	 * outranks one that mentions it once in passing -- but strengths are
-	 * relative to the candidates at hand, so a lone weak match still reads
-	 * as 1.
-	 *
-	 * A phrase's index match only proves its words adjacent -- the index
-	 * ignores what separates them -- so phrase matches are verified against
-	 * the stored document text and only literal occurrences count. A pair
-	 * unit means exactly that adjacency, so it counts as the index answers,
-	 * unverified.
-	 *
-	 * Only items with a row in the content index (indexed attachments) can
-	 * match; everything else is simply absent from the result.
-	 *
-	 * @param {Object[]} units - Units from parseQuery()
-	 * @param {Integer[]} itemIDs
-	 * @return {Promise<Map>} - itemID -> Map(unit -> strength)
-	 */
-	this.matchContent = async function (units, itemIDs) {
-		let strengths = new Map();
-		if (!units.length || !itemIDs.length) {
-			return strengths;
-		}
-		for (let unit of units) {
-			let clause = _getMatchClause(unit);
-			let matched = await _probe(clause.contentTable, clause.match, itemIDs);
-			if (!matched.length) {
-				continue;
-			}
-			if (unit.type == 'phrase') {
-				let verified = new Set(
-					(await Zotero.FullText.findTextInItems(
-						matched.map(row => row.rowid), unit.text
-					)).map(x => x.id)
-				);
-				matched = matched.filter(row => verified.has(row.rowid));
-				if (!matched.length) {
-					continue;
-				}
-			}
-			// rank is negative, better more negative, so the best is the
-			// minimum and every ratio against it lands in (0, 1]
-			let best = Math.min(...matched.map(row => row.rank));
-			for (let row of matched) {
-				_addStrength(strengths, row.rowid, unit,
-					best ? row.rank / best : 1);
-			}
-		}
-		return strengths;
-	};
-
-	/**
-	 * Which of the given items' titles and abstracts contain which units,
-	 * reported per column. A match is presence (strength 1): a title or
-	 * abstract is short enough that containing a unit says everything.
-	 * Titles cover the type-specific title fields (caseName, subject,
-	 * nameOfAct) along with `title` itself. Phrase matches are verified
-	 * literally against the stored field values; pair matches count as the
-	 * index answers, unverified.
-	 *
-	 * Items without a matching title or abstract are simply absent from the
-	 * respective result.
-	 *
-	 * @param {Object[]} units - Units from parseQuery()
-	 * @param {Integer[]} itemIDs
-	 * @return {Promise<Object>} - { title: Map(itemID -> Map(unit ->
-	 *     strength)), abstract: Map(itemID -> Map(unit -> strength)) }
-	 */
-	this.matchFields = async function (units, itemIDs) {
-		let result = { title: new Map(), abstract: new Map() };
-		if (!units.length || !itemIDs.length) {
-			return result;
-		}
-		for (let unit of units) {
-			let clause = _getMatchClause(unit);
-			for (let column of ['title', 'abstract']) {
-				let matched = (await _probe(
-					clause.itemTextTable, column + ':' + clause.match, itemIDs
-				)).map(row => row.rowid);
-				if (!matched.length) {
-					continue;
-				}
-				if (unit.type == 'phrase') {
-					matched = await _verifyFieldPhrase(unit, column, matched);
-				}
-				for (let itemID of matched) {
-					_addStrength(result[column], itemID, unit, 1);
+	this.buildExpression = function (terms, family) {
+		let pieces = [];
+		if (family == 'cjk') {
+			for (let term of terms) {
+				if (term.type == 'cjk') {
+					// A single character has no bigram of its own, so it's
+					// matched against every bigram starting with it
+					pieces.push({
+						match: term.bigrams
+							? '"' + term.bigrams + '"'
+							: '"' + term.text + '"*',
+						repetitions: 1
+					});
 				}
 			}
 		}
-		return result;
-	};
-
-	/**
-	 * Which of the given items' note text contains which units, and how
-	 * strongly. Notes range from a line to a chapter, so strength is BM25's
-	 * saturated, length-normalized term frequency (see _saturatedStrength()):
-	 * a note that keeps returning to a term outranks one that mentions it
-	 * once in passing.
-	 *
-	 * The index answers which notes are worth reading: text is fetched only
-	 * for notes whose note column matches a unit, plus notes whose index
-	 * entries can't be trusted -- edited since their last index update, or
-	 * not indexed yet -- whose current text is always read. Phrases count
-	 * only literally (see _countPhrase()).
-	 *
-	 * Items without matching note text are simply absent from the result.
-	 *
-	 * @param {Object[]} units - Units from parseQuery()
-	 * @param {Integer[]} itemIDs
-	 * @return {Promise<Map>} - itemID -> Map(unit -> strength)
-	 */
-	this.matchNotes = async function (units, itemIDs) {
-		let strengths = new Map();
-		if (!units.length || !itemIDs.length) {
-			return strengths;
-		}
-		let fetchIDs = new Set(await Zotero.FullText.getStaleOrUnindexedNoteIDs(itemIDs));
-		for (let unit of units) {
-			let clause = _getMatchClause(unit);
-			let matched = await _probe(
-				clause.itemTextTable, 'note:' + clause.match, itemIDs);
-			for (let row of matched) {
-				fetchIDs.add(row.rowid);
-			}
-		}
-		if (!fetchIDs.size) {
-			return strengths;
-		}
-		let texts = await Zotero.FullText.getNoteSearchTexts([...fetchIDs]);
-		if (!texts.size) {
-			return strengths;
-		}
-		// Length normalization needs the typical note length. The note index
-		// knows it; without one yet, the notes at hand stand in for the
-		// population.
-		let avgLength = await Zotero.DB.valueQueryAsync(
-			"SELECT AVG(LENGTH(text)) FROM ftindex.noteText"
-		);
-		if (!avgLength) {
-			let lengths = [...texts.values()].map(text => text.length);
-			avgLength = (lengths.reduce((sum, length) => sum + length, 0)
-				/ (lengths.length || 1)) || 1;
-		}
-		for (let [itemID, text] of texts) {
-			if (!text) {
-				continue;
-			}
-			let scan = _scanText(text);
-			for (let unit of units) {
-				let tf = _countUnit(unit, scan);
-				if (tf) {
-					_addStrength(strengths, itemID, unit,
-						_saturatedStrength(tf, text.length, avgLength));
+		else {
+			let words = terms.filter(term => term.type == 'word');
+			for (let term of terms) {
+				if (term.type == 'word') {
+					pieces.push({
+						match: '"' + term.text + '"' + (term.prefix ? '*' : ''),
+						repetitions: ADJACENCY_REPETITION
+					});
+				}
+				else if (term.type == 'phrase') {
+					pieces.push({ match: '"' + term.text + '"', repetitions: 1 });
 				}
 			}
-		}
-		return strengths;
-	};
-
-	/**
-	 * Which of the given items' annotation text -- the passage an annotation
-	 * marks together with its comment -- contains which units. A match is
-	 * presence (strength 1): an annotation is short enough that containing a
-	 * unit says everything. Phrase matches are verified literally against
-	 * the stored annotation text; pair matches count as the index answers,
-	 * unverified.
-	 *
-	 * Items without matching annotation text are simply absent from the
-	 * result.
-	 *
-	 * @param {Object[]} units - Units from parseQuery()
-	 * @param {Integer[]} itemIDs
-	 * @return {Promise<Map>} - itemID -> Map(unit -> strength)
-	 */
-	this.matchAnnotations = async function (units, itemIDs) {
-		let strengths = new Map();
-		if (!units.length || !itemIDs.length) {
-			return strengths;
-		}
-		for (let unit of units) {
-			let clause = _getMatchClause(unit);
-			let matched = (await _probe(
-				clause.itemTextTable, 'annotation:' + clause.match, itemIDs
-			)).map(row => row.rowid);
-			if (!matched.length) {
-				continue;
-			}
-			if (unit.type == 'phrase') {
-				matched = await _verifyAnnotationPhrase(unit, matched);
-			}
-			for (let itemID of matched) {
-				_addStrength(strengths, itemID, unit, 1);
+			// Consecutive query words, as the query wrote them. A pair whose
+			// second word is still being typed matches its completions too.
+			for (let i = 0; i < words.length - 1; i++) {
+				pieces.push({
+					match: '"' + words[i].text + ' ' + words[i + 1].text + '"'
+						+ (words[i + 1].prefix ? '*' : ''),
+					repetitions: 1
+				});
 			}
 		}
-		return strengths;
+		if (!pieces.length) {
+			return null;
+		}
+		let expression = pieces
+			.flatMap(piece => Array(piece.repetitions).fill(piece.match))
+			.join(' OR ');
+		return { expression, pieces };
 	};
 
 	/**
 	 * Score a given set of items by how well their text answers a query.
 	 *
-	 * Any informative unit can match (see analyzeQuery()); each contributes
-	 * its weight times the best evidence for it across the item's sources --
-	 * title, abstract, attachment content, notes, annotations, boosted per
-	 * source (see SOURCE_BOOSTS) -- so the same word in two places counts
-	 * once, at its strongest. The sum is normalized against the query's
-	 * ceiling (every informative unit at full strength in the best-boosted
-	 * source): 1 is a full-strength match on everything the query asked,
-	 * partial coverage lands proportionally lower, dominated by the rare
-	 * units. Items below SCORE_FLOOR aren't matches and aren't returned.
+	 * Each index is asked once, for every document matching any of the query's
+	 * terms, and reports BM25's own ranking. A score is that ranking as a
+	 * fraction of what the query could earn (see _getCeiling()), so it reads
+	 * as the share of the query a document carries: rarer terms move it most,
+	 * a document missing a term forfeits that term's share, and repetition
+	 * beyond the point where a text is clearly about a term adds nothing.
+	 * An item's score is its best across the indexes, and items below
+	 * SCORE_FLOOR aren't matches and aren't returned.
 	 *
-	 * An item matching a single unit of a multi-unit query is a match only
-	 * when that unit dominates the query (see LONE_UNIT_WEIGHT_FRACTION):
-	 * an item with only the query's minor word says little about what was
-	 * asked, however it scores.
-	 *
-	 * Units too common to be informative play no part: they neither gate nor
-	 * move a score.
+	 * Notes edited since their last index update, and notes not indexed yet,
+	 * can't be scored from the index at all; their current text is read and
+	 * read generously (see _scoreUnindexedNotes()), so a note just typed is
+	 * findable.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
 	 * @param {Object} [options]
-	 * @param {Function} [options.shouldCancel] - Checked between matching
-	 *     stages; return true to abandon scoring with a ScoringCancelledError
+	 * @param {Function} [options.shouldCancel] - Checked between indexes;
+	 *     return true to abandon scoring with a ScoringCancelledError
 	 * @return {Promise<Map>} - itemID -> score (0-1, higher is better)
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
+		// Scores below this aren't matches and aren't returned: measured
+		// against what the query could earn, this is the share of it a
+		// document has to carry. Provisional until tuned against a real
+		// library.
+		const SCORE_FLOOR = 0.05;
 		let scores = new Map();
 		if (!itemIDs.length) {
+			return scores;
+		}
+		let terms = this.parseQuery(queryText);
+		if (!terms.length) {
 			return scores;
 		}
 		let checkCancel = () => {
@@ -566,58 +328,65 @@ Zotero.Lexical = new function () {
 				throw new this.ScoringCancelledError();
 			}
 		};
-		let units = (await this.analyzeQuery(queryText))
-			.filter(unit => unit.informative);
-		if (!units.length) {
-			return scores;
-		}
-		checkCancel();
-		let content = await this.matchContent(units, itemIDs);
-		checkCancel();
-		let fields = await this.matchFields(units, itemIDs);
-		checkCancel();
-		let notes = await this.matchNotes(units, itemIDs);
-		checkCancel();
-		let annotations = await this.matchAnnotations(units, itemIDs);
-		checkCancel();
-
-		// Best boosted evidence per item per unit, across all sources
-		let evidence = new Map();
-		let sources = [
-			[fields.title, SOURCE_BOOSTS.title],
-			[fields.abstract, SOURCE_BOOSTS.abstract],
-			[content, SOURCE_BOOSTS.content],
-			[notes, SOURCE_BOOSTS.note],
-			[annotations, SOURCE_BOOSTS.annotation]
-		];
-		for (let [strengths, boost] of sources) {
-			for (let [itemID, unitStrengths] of strengths) {
-				for (let [unit, strength] of unitStrengths) {
-					_addStrength(evidence, itemID, unit, boost * strength);
-				}
+		let candidates = new Set(itemIDs);
+		let best = new Map();
+		let keep = (itemID, fraction) => {
+			if (!(best.get(itemID) >= fraction)) {
+				best.set(itemID, fraction);
 			}
-		}
-
-		let maxBoost = Math.max(...Object.values(SOURCE_BOOSTS));
-		let totalWeight = units.reduce((sum, unit) => sum + unit.weight, 0);
-		let ceiling = totalWeight * maxBoost;
-		if (!ceiling) {
-			return scores;
-		}
-		for (let [itemID, unitStrengths] of evidence) {
-			if (unitStrengths.size == 1) {
-				let [unit] = unitStrengths.keys();
-				if (unit.weight < LONE_UNIT_WEIGHT_FRACTION * totalWeight) {
+		};
+		for (let source of SOURCES) {
+			for (let family of ['word', 'cjk']) {
+				checkCancel();
+				let built = this.buildExpression(terms, family);
+				if (!built) {
 					continue;
 				}
+				let table = source[family];
+				// CJK 2-grams are indexed into the same columns as the words
+				let weights = source.columns
+					? source.columns.map(column => COLUMN_WEIGHTS[column])
+					: null;
+				let bm25 = weights
+					? 'bm25(' + table + ', ' + weights.join(', ') + ')'
+					: 'bm25(' + table + ')';
+				// The MATCH runs unconstrained and the candidate filter is
+				// applied here: a full scan for a common term costs
+				// milliseconds, while constraining the same MATCH to a rowid
+				// set makes FTS5 evaluate the expression per row, which at
+				// library scale costs seconds.
+				let rows = await Zotero.DB.queryAsync(
+					"SELECT rowid, " + bm25 + " AS score FROM ftindex." + table
+						+ " WHERE " + table + " MATCH ?",
+					[built.expression]
+				);
+				rows = rows.map(row => ({ rowid: row.rowid, rank: row.score }))
+					.filter(row => candidates.has(row.rowid));
+				if (!rows.length) {
+					continue;
+				}
+				let ceiling = await _getCeiling(built.pieces, table);
+				// rank is negative, better more negative. The ceiling normally
+				// bounds it, but a query whose every term is past FTS5's idf
+				// floor is scored entirely in clamped units the ceiling can
+				// only approximate, so the strongest document stands in where
+				// it falls short and the fractions stay inside 0-1.
+				let scale = Math.max(ceiling, ...rows.map(row => -row.rank));
+				if (!scale) {
+					continue;
+				}
+				for (let row of rows) {
+					keep(row.rowid, Math.min(1, -row.rank / scale));
+				}
 			}
-			let raw = 0;
-			for (let [unit, strength] of unitStrengths) {
-				raw += unit.weight * strength;
-			}
-			let score = raw / ceiling;
-			if (score >= SCORE_FLOOR) {
-				scores.set(itemID, score);
+		}
+		checkCancel();
+		for (let [itemID, fraction] of await _scoreUnindexedNotes(terms, itemIDs)) {
+			keep(itemID, fraction);
+		}
+		for (let [itemID, fraction] of best) {
+			if (fraction >= SCORE_FLOOR) {
+				scores.set(itemID, fraction);
 			}
 		}
 		return scores;
@@ -629,15 +398,16 @@ Zotero.Lexical = new function () {
 	 * item's type: 'title' and 'abstract' for a regular item, 'content' for a
 	 * file attachment's extracted fulltext, 'note' or 'annotation' -- and
 	 * carries the matched character ranges within its text, for highlighting.
-	 * Long texts are cut to windows around their densest clusters of
-	 * informative matches, marked with ellipses where they cut; excerpts
-	 * covering the most match weight come first. An item whose own text
-	 * matches nothing informative gets no excerpts.
+	 * Long texts are cut to windows around their densest clusters of matches,
+	 * marked with ellipses where they cut; excerpts showing the most of the
+	 * query come first. An item whose own text matches nothing gets no
+	 * excerpts.
 	 *
-	 * Each excerpt's `strength` is the boosted weight of the matches it
-	 * shows as a 0-1 fraction of the query's ceiling -- the same scale
-	 * scoreItemIDs() scores on -- so excerpts can be ordered against other
-	 * relevance evidence for the item.
+	 * Only the terms BM25 can score with are shown (see _getScoringTerms()),
+	 * so an excerpt points at what actually ranked the item rather than at
+	 * every word of the query. Each excerpt's `strength` is the share of those
+	 * terms it shows, so excerpts can be ordered against other relevance
+	 * evidence for the item.
 	 *
 	 * @param {String} queryText
 	 * @param {Number} itemID
@@ -647,9 +417,8 @@ Zotero.Lexical = new function () {
 	 *     with ranges an array of [start, end) pairs into the excerpt's text
 	 */
 	this.getMatchingExcerpts = async function (queryText, itemID, { limit = 5 } = {}) {
-		let units = (await this.analyzeQuery(queryText))
-			.filter(unit => unit.informative);
-		if (!units.length) {
+		let terms = await _getScoringTerms(this.parseQuery(queryText));
+		if (!terms.length) {
 			return [];
 		}
 		let item = await Zotero.Items.getAsync(itemID);
@@ -658,94 +427,161 @@ Zotero.Lexical = new function () {
 		}
 		let excerpts = [];
 		for (let { source, text } of await _getSourceTexts(item)) {
-			excerpts.push(..._excerptSource(source, text, units, limit));
+			excerpts.push(..._excerptSource(source, text, terms, limit));
 		}
-		// The most match weight first, boosted the way scoring boosts the
-		// source, so excerpts explain in the order their matches scored
-		excerpts.sort((a, b) => b.coverage - a.coverage);
-		let maxBoost = Math.max(...Object.values(SOURCE_BOOSTS));
-		let ceiling = units.reduce((sum, unit) => sum + unit.weight, 0) * maxBoost;
-		return excerpts.slice(0, limit).map(({ source, text, ranges, coverage }) => ({
+		// The most of the query first, so excerpts explain in the order the
+		// index would have scored them
+		excerpts.sort((a, b) => b.shown - a.shown);
+		return excerpts.slice(0, limit).map(({ source, text, ranges, shown }) => ({
 			source,
 			text,
 			ranges,
-			strength: ceiling ? Math.min(1, coverage / ceiling) : 0
+			strength: shown / terms.length
 		}));
 	};
 
 	/**
 	 * The character ranges where a query matches within given texts, for
 	 * highlighting matches in text obtained elsewhere -- the same ranges
-	 * getMatchingExcerpts() marks in the excerpts it cuts itself. One entry
-	 * per input text, each an array of merged, non-overlapping [start, end)
-	 * pairs, empty when the text matches nothing informative.
+	 * getMatchingExcerpts() marks in the excerpts it cuts itself, and likewise
+	 * only for the terms BM25 can score with (see _getScoringTerms()). One
+	 * entry per input text, each an array of merged, non-overlapping
+	 * [start, end) pairs, empty when the text matches nothing.
 	 *
 	 * @param {String} queryText
 	 * @param {String[]} texts
 	 * @return {Promise<Array[]>}
 	 */
 	this.findMatchRanges = async function (queryText, texts) {
-		let units = (await this.analyzeQuery(queryText))
-			.filter(unit => unit.informative);
+		let terms = await _getScoringTerms(this.parseQuery(queryText));
 		return texts.map((text) => {
-			if (!units.length || !text) {
+			if (!terms.length || !text) {
 				return [];
 			}
 			return _mergeRanges(
-				_findUnitMatches(text, units).map(m => [m.start, m.end])
+				_findTermMatches(text, terms).map(m => [m.start, m.end])
 			);
 		});
 	};
 
-	// The pair units of a unit list (see analyzeQuery()): one for each
-	// consecutive pair of informative words, matching the two adjacent in
-	// order. A pair whose second word is the query's trailing prefix matches
-	// that word's completions the same way the word itself does.
-	function _getAdjacentPairs(units) {
-		let pairs = [];
-		for (let i = 0; i < units.length - 1; i++) {
-			let a = units[i];
-			let b = units[i + 1];
-			if (a.type != 'word' || b.type != 'word'
-					|| !a.informative || !b.informative) {
-				continue;
-			}
-			pairs.push({
-				type: 'pair',
-				text: a.text + ' ' + b.text,
-				tokens: [a.text, b.text],
-				prefix: b.prefix
-			});
+	/**
+	 * The most an expression could score against an index: the sum of its
+	 * terms' inverse document frequencies, counted the way FTS5 counts them.
+	 *
+	 * BM25 scores a term as its idf times a ratio that climbs toward K1 + 1 as
+	 * a document repeats the term, so (K1 + 1) times the sum of the idfs is
+	 * the score of a document that is about nothing but the query. Dividing by
+	 * it turns an unbounded ranking into the share of the query a document
+	 * carries, on one scale across indexes and queries alike. A repeated term
+	 * counts each time, since BM25 scores it each time.
+	 *
+	 * One occurrence of every term in an average-length document reaches
+	 * 1 / (K1 + 1) of this, so a plain full match reads as somewhat under
+	 * half; the band above it belongs to texts that keep returning to the
+	 * query's terms.
+	 *
+	 * @param {Object[]} pieces - buildExpression()'s pieces
+	 * @param {String} table - The ftindex FTS5 table the expression runs against
+	 * @return {Promise<Number>}
+	 */
+	async function _getCeiling(pieces, table) {
+		// The floor FTS5 puts under an inverse document frequency. Its BM25
+		// uses the unsmoothed idf, ln((N - df + 0.5) / (df + 0.5)), which
+		// turns negative once a term is in more than about half the
+		// documents; FTS5 clamps it here rather than let a term score against
+		// a document for containing it. Mirrored so a ceiling is built from
+		// the same numbers the index scored with.
+		const FTS5_MIN_IDF = 1e-6;
+		// FTS5's BM25 saturation constant, and the (K1 + 1) factor its
+		// numerator carries: a term's contribution is
+		// idf * tf * (K1 + 1) / (tf + K1 * (1 - B + B * D / avgdl)), so it
+		// approaches (K1 + 1) * idf rather than idf as a document repeats the
+		// term. A ceiling that left the factor out would sit below what a
+		// document can actually score, and the strongest documents would all
+		// read as a perfect match.
+		const FTS5_K1 = 1.2;
+		let corpusSize = await Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM ftindex." + table);
+		let ceiling = 0;
+		for (let piece of pieces) {
+			let df = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM ftindex." + table
+					+ " WHERE " + table + " MATCH ?",
+				[piece.match]
+			);
+			df = Math.max(0, Math.min(df, corpusSize));
+			ceiling += piece.repetitions * Math.max(
+				FTS5_MIN_IDF,
+				Math.log((corpusSize - df + 0.5) / (df + 0.5))
+			);
 		}
-		return pairs;
+		return ceiling * (FTS5_K1 + 1);
 	}
 
-	// The MATCH expression that finds a unit, with the content and item-text
-	// tables (word or CJK pair) it runs against. Unit text is all letters
-	// and digits (parseQuery tokenized it), so quoting it into an FTS phrase
-	// needs no escaping.
-	//
-	// A quoted phrase and an adjacency pair probe the same way -- their words
-	// adjacent in order -- but differ downstream: a phrase promises literal
-	// occurrence and is verified against stored text, while a pair means
-	// exactly what the index answers, tokens adjacent whatever separated them.
-	function _getMatchClause(unit) {
-		if (unit.type == 'cjk') {
-			return {
-				match: unit.bigrams
-					? '"' + unit.bigrams + '"'
-					: '"' + unit.text + '"*',
-				contentTable: 'fulltextContentCJK',
-				itemTextTable: 'fulltextItemTextCJK'
-			};
+	// The terms BM25 can score with, of a query's terms. FTS5 floors the
+	// inverse document frequency of a term in more than about half a corpus
+	// (see FTS5_MIN_IDF), which is its way of saying the term separates
+	// nothing there -- so such a term moves no score, and pointing at it as a
+	// reason an item matched would be pointing at nothing. A term still
+	// telling documents apart in either index is kept, since that's the index
+	// its score came from.
+	async function _getScoringTerms(terms) {
+		let scoring = [];
+		for (let term of terms) {
+			let tables = term.type == 'cjk'
+				? SOURCES.map(source => source.cjk)
+				: SOURCES.map(source => source.word);
+			let match = term.type == 'cjk'
+				? (term.bigrams ? '"' + term.bigrams + '"' : '"' + term.text + '"*')
+				: '"' + term.text + '"' + (term.prefix ? '*' : '');
+			for (let table of tables) {
+				let corpusSize = await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM ftindex." + table);
+				if (!corpusSize) {
+					continue;
+				}
+				let df = await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM ftindex." + table
+						+ " WHERE " + table + " MATCH ?",
+					[match]
+				);
+				if (Math.log((corpusSize - Math.min(df, corpusSize) + 0.5)
+						/ (Math.min(df, corpusSize) + 0.5)) > 0) {
+					scoring.push(term);
+					break;
+				}
+			}
 		}
-		return {
-			match: unit.type == 'phrase'
-				? '"' + unit.text + '"'
-				: '"' + unit.text + '"' + (unit.prefix ? '*' : ''),
-			contentTable: 'fulltextContent',
-			itemTextTable: 'fulltextItemText'
-		};
+		// A query of nothing but corpus-filling words separates nothing
+		// anywhere, and has only its own terms to point at
+		return scoring.length ? scoring : terms;
+	}
+
+	// Notes whose index entries can't be trusted -- edited since their last
+	// index update, or not indexed yet -- scored from their current text.
+	// There are no corpus statistics for text the index hasn't seen, so a term
+	// the text contains is read at full strength: the share of the query's
+	// terms a note contains is its score. That reads a just-edited note as
+	// generously as the query allows, which is the right way to be wrong about
+	// the note the user was last working in.
+	async function _scoreUnindexedNotes(terms, itemIDs) {
+		let fractions = new Map();
+		let noteIDs = await Zotero.FullText.getStaleOrUnindexedNoteIDs(itemIDs);
+		if (!noteIDs.length) {
+			return fractions;
+		}
+		let texts = await Zotero.FullText.getNoteSearchTexts(noteIDs);
+		for (let [itemID, text] of texts) {
+			if (!text) {
+				continue;
+			}
+			let scan = _scanText(text);
+			let present = terms.filter(term => _countTerm(term, scan)).length;
+			if (present) {
+				fractions.set(itemID, present / terms.length);
+			}
+		}
+		return fractions;
 	}
 
 	// A CJK run's overlapping 2-grams, joined with spaces -- built the same
@@ -762,100 +598,9 @@ Zotero.Lexical = new function () {
 		return bigrams.join(' ');
 	}
 
-	// Smoothed BM25 inverse document frequency:
-	//
-	//     ln(1 + (N - df + 0.5) / (df + 0.5))
-	//
-	// the standard measure of how much information a term carries, and the
-	// whole term-importance mechanism: no stoplist, just counting.
-	// - df = 0 -- a term in no indexed document (a typo, or a word from text
-	//   we haven't indexed) -- gets the query's maximum: unseen reads as
-	//   rare reads as important
-	// - df = N -- a term in everything ("the") -- approaches zero
-	// - N = 0 -- nothing indexed to measure against -- gives every unit the
-	//   same ln(2), so ranking degrades to term coverage
-	function _idf(df, corpusSize) {
-		// The single-CJK-character approximation and an index mid-write can
-		// disagree slightly with the row count
-		df = Math.max(0, Math.min(df, corpusSize));
-		return Math.log(1 + (corpusSize - df + 0.5) / (df + 0.5));
-	}
-
-	// The requested candidates matching an FTS expression. Each row carries
-	// the index's rank for the expression, for callers that grade matches
-	// against each other; callers that only need membership read the rowids.
-	//
-	// The MATCH runs unconstrained and the candidate filter is applied here:
-	// a full scan for a common term costs milliseconds, while constraining
-	// the same MATCH to a rowid set makes FTS5 evaluate the expression per
-	// row, which at library scale costs seconds.
-	async function _probe(table, match, itemIDs) {
-		let candidates = new Set(itemIDs);
-		let rows = await Zotero.DB.queryAsync(
-			"SELECT rowid, rank FROM ftindex." + table
-				+ " WHERE " + table + " MATCH ?",
-			[match]
-		);
-		return rows.filter(row => candidates.has(row.rowid));
-	}
-
-	// Of the given items, those whose stored field text (title-family fields
-	// or the abstract) literally contains a phrase unit
-	async function _verifyFieldPhrase(unit, column, itemIDs) {
-		let fieldIDs = column == 'title'
-			? [
-				Zotero.ItemFields.getID('title'),
-				...Zotero.ItemFields.getTypeFieldsFromBase('title')
-			]
-			: [Zotero.ItemFields.getID('abstractNote')];
-		let verified = [];
-		let chunkSize = 500;
-		for (let i = 0; i < itemIDs.length; i += chunkSize) {
-			let chunk = itemIDs.slice(i, i + chunkSize);
-			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, value FROM itemData "
-					+ "JOIN itemDataValues USING (valueID) "
-					+ "WHERE fieldID IN (" + fieldIDs.join(',') + ") "
-					+ "AND itemID IN (" + chunk.map(() => '?').join(',') + ")",
-				chunk
-			);
-			for (let row of rows) {
-				let normalized = Zotero.Utilities.Internal.normalizeForSearch(row.value);
-				if (normalized && _countPhrase(normalized, unit.text)) {
-					verified.push(row.itemID);
-				}
-			}
-		}
-		return verified;
-	}
-
-	// Of the given annotations, those whose passage and comment literally
-	// contain a phrase unit
-	async function _verifyAnnotationPhrase(unit, itemIDs) {
-		let verified = [];
-		let chunkSize = 500;
-		for (let i = 0; i < itemIDs.length; i += chunkSize) {
-			let chunk = itemIDs.slice(i, i + chunkSize);
-			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, text, comment FROM itemAnnotations "
-					+ "WHERE itemID IN (" + chunk.map(() => '?').join(',') + ")",
-				chunk
-			);
-			for (let row of rows) {
-				let normalized = Zotero.Utilities.Internal.normalizeForSearch(
-					[row.text, row.comment].filter(Boolean).join(' ')
-				);
-				if (normalized && _countPhrase(normalized, unit.text)) {
-					verified.push(row.itemID);
-				}
-			}
-		}
-		return verified;
-	}
-
-	// A text prepared for unit counting: its token stream (word tokens and
+	// A text prepared for term counting: its token stream (word tokens and
 	// CJK runs, in text order) and the normalized text itself, which is what
-	// CJK units and phrases match against
+	// CJK terms and phrases match against
 	function _scanText(text) {
 		let tokens = [];
 		for (let match of text.matchAll(TOKEN_RE)) {
@@ -864,40 +609,26 @@ Zotero.Lexical = new function () {
 		return { text, tokens };
 	}
 
-	// Occurrences of a unit in a scanned text, counted the way the indexes
-	// match the unit: a word as a whole token (a prefix unit by its
-	// completions), a CJK run contiguously, a phrase literally (see
-	// _countPhrase()), a pair as its words on adjacent tokens -- whatever
-	// separated them, which is all the index's adjacency means
-	function _countUnit(unit, scan) {
-		if (unit.type == 'cjk') {
+	// Occurrences of a term in a scanned text, counted the way the indexes
+	// match it: a word as a whole token (a prefix term by its completions), a
+	// CJK run contiguously, a phrase literally (see _countPhrase())
+	function _countTerm(term, scan) {
+		if (term.type == 'cjk') {
 			let count = 0;
-			let index = scan.text.indexOf(unit.text);
+			let index = scan.text.indexOf(term.text);
 			while (index != -1) {
 				count++;
-				index = scan.text.indexOf(unit.text, index + unit.text.length);
+				index = scan.text.indexOf(term.text, index + term.text.length);
 			}
 			return count;
 		}
-		if (unit.type == 'phrase') {
-			return _countPhrase(scan.text, unit.text);
+		if (term.type == 'phrase') {
+			return _countPhrase(scan.text, term.text);
 		}
-		if (unit.type == 'pair') {
-			let [first, second] = unit.tokens;
-			let count = 0;
-			for (let i = 0; i < scan.tokens.length - 1; i++) {
-				if (scan.tokens[i] === first && (unit.prefix
-					? scan.tokens[i + 1].startsWith(second)
-					: scan.tokens[i + 1] === second)) {
-					count++;
-				}
-			}
-			return count;
+		if (term.prefix) {
+			return scan.tokens.filter(token => token.startsWith(term.text)).length;
 		}
-		if (unit.prefix) {
-			return scan.tokens.filter(token => token.startsWith(unit.text)).length;
-		}
-		return scan.tokens.filter(token => token === unit.text).length;
+		return scan.tokens.filter(token => token === term.text).length;
 	}
 
 	// Occurrences of a phrase in normalized text: literal, except that
@@ -921,36 +652,10 @@ Zotero.Lexical = new function () {
 		return count;
 	}
 
-	// BM25's saturated, length-normalized term frequency, mapped onto (0, 1):
-	//
-	//     tf / (tf + K1 * (1 - B + B * length / avgLength))
-	//
-	// One occurrence in an average-length text lands around 0.45, repetition
-	// approaches 1, and each occurrence counts for less in a longer text.
-	// Lengths are in characters on both sides of the ratio, which is all the
-	// ratio needs.
-	function _saturatedStrength(tf, length, avgLength) {
-		return tf / (tf + K1 * (1 - B + B * (length / avgLength)));
-	}
-
-	// Record a unit's strength for an item, keeping the strongest when the
-	// same unit matches an item more than once (e.g., in two title fields)
-	function _addStrength(strengths, itemID, unit, strength) {
-		let unitStrengths = strengths.get(itemID);
-		if (!unitStrengths) {
-			unitStrengths = new Map();
-			strengths.set(itemID, unitStrengths);
-		}
-		let previous = unitStrengths.get(unit);
-		if (previous === undefined || strength > previous) {
-			unitStrengths.set(unit, strength);
-		}
-	}
-
 	// The texts an item can match a query in, per its type, labeled with the
-	// source names scoring boosts by (see SOURCE_BOOSTS): a regular item's
-	// title and abstract, a note's plain text, an annotation's passage and
-	// comment, a file attachment's extracted fulltext from its cache file
+	// source names excerpts report: a regular item's title and abstract, a
+	// note's plain text, an annotation's passage and comment, a file
+	// attachment's extracted fulltext from its cache file
 	async function _getSourceTexts(item) {
 		let sources = [];
 		if (item.isAnnotation()) {
@@ -999,13 +704,13 @@ Zotero.Lexical = new function () {
 		return sources;
 	}
 
-	// Cut a source text into up to `limit` excerpts around its unit matches,
-	// each window greedily covering the most distinct-unit weight not yet
-	// shown. Returns [{ source, text, ranges, coverage }], where ranges are
-	// [start, end) pairs relative to the excerpt's text and coverage is the
-	// boosted weight the excerpt shows, for ordering excerpts across sources.
-	function _excerptSource(source, text, units, limit) {
-		let matches = _findUnitMatches(text, units);
+	// Cut a source text into up to `limit` excerpts around its term matches,
+	// each window greedily covering the most distinct terms not yet shown.
+	// Returns [{ source, text, ranges, shown }], where ranges are [start, end)
+	// pairs relative to the excerpt's text and shown is how many distinct
+	// terms the excerpt shows, for ordering excerpts across sources.
+	function _excerptSource(source, text, terms, limit) {
+		let matches = _findTermMatches(text, terms);
 		let excerpts = [];
 		let remaining = matches;
 		while (remaining.length && excerpts.length < limit) {
@@ -1015,10 +720,9 @@ Zotero.Lexical = new function () {
 				let inside = matches.filter(
 					m => m.start >= bounds.start && m.end <= bounds.end
 				);
-				let weight = [...new Set(inside.map(m => m.unit))]
-					.reduce((sum, unit) => sum + unit.weight, 0);
-				if (!best || weight > best.weight) {
-					best = { bounds, inside, weight };
+				let shown = new Set(inside.map(m => m.term)).size;
+				if (!best || shown > best.shown) {
+					best = { bounds, inside, shown };
 				}
 			}
 			excerpts.push(_makeExcerpt(source, text, best));
@@ -1040,6 +744,9 @@ Zotero.Lexical = new function () {
 	// following ones as fit, centered on them, clamped to the text, and
 	// nudged outward (a little) so it doesn't cut into a word
 	function _windowBounds(text, matches, first) {
+		// An excerpt's width in characters: wide enough to read a match in
+		// context, narrow enough that several excerpts fit in a details pane
+		const EXCERPT_WINDOW = 200;
 		let anchor = matches[first];
 		let last = anchor;
 		for (let i = first + 1; i < matches.length; i++) {
@@ -1065,7 +772,7 @@ Zotero.Lexical = new function () {
 
 	// One excerpt: the window's text with ellipses where it cuts into the
 	// source, and its matches as merged ranges relative to that text
-	function _makeExcerpt(source, text, { bounds, inside, weight }) {
+	function _makeExcerpt(source, text, { bounds, inside, shown }) {
 		let prefix = bounds.start > 0 ? '…' : '';
 		let suffix = bounds.end < text.length ? '…' : '';
 		let ranges = _mergeRanges(inside.map(
@@ -1075,12 +782,12 @@ Zotero.Lexical = new function () {
 			source,
 			text: prefix + text.slice(bounds.start, bounds.end) + suffix,
 			ranges,
-			coverage: weight * SOURCE_BOOSTS[source]
+			shown
 		};
 	}
 
 	// Sorted, non-overlapping [start, end) ranges: overlapping and touching
-	// input ranges (a word matched by two units, say) merge into one
+	// input ranges (a word matched by two terms, say) merge into one
 	function _mergeRanges(ranges) {
 		ranges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
 		let merged = [];
@@ -1096,66 +803,49 @@ Zotero.Lexical = new function () {
 		return merged;
 	}
 
-	// Where each unit matches in a text, as [{ start, end, unit }] in text
-	// order. Matching mirrors _countUnit() -- whole tokens for words, token
-	// prefixes for prefix units (highlighted as the whole token), adjacent
-	// tokens for pairs (highlighted as one span), contiguous runs for CJK,
-	// literal collapsed phrases -- but runs over a normalized copy that maps
-	// every position back to the original text, so the ranges mark the text
-	// as written (case, diacritics and typographic variants intact).
-	function _findUnitMatches(text, units) {
+	// Where each term matches in a text, as [{ start, end, term }] in text
+	// order. Matching mirrors _countTerm() -- whole tokens for words, token
+	// prefixes for prefix terms (highlighted as the whole token), contiguous
+	// runs for CJK, literal collapsed phrases -- but runs over a normalized
+	// copy that maps every position back to the original text, so the ranges
+	// mark the text as written (case, diacritics and typographic variants
+	// intact).
+	function _findTermMatches(text, terms) {
 		let { normalized, map } = _mapNormalized(text);
 		let matches = [];
-		let words = units.filter(unit => unit.type == 'word');
-		let pairs = units.filter(unit => unit.type == 'pair');
-		if (words.length || pairs.length) {
+		let words = terms.filter(term => term.type == 'word');
+		if (words.length) {
 			let tokens = [...normalized.matchAll(TOKEN_RE)]
 				.map(match => ({ text: match.groups.word, index: match.index }));
 			for (let token of tokens) {
 				if (!token.text) {
 					continue;
 				}
-				for (let unit of words) {
-					if (unit.prefix ? token.text.startsWith(unit.text) : token.text === unit.text) {
+				for (let term of words) {
+					if (term.prefix ? token.text.startsWith(term.text) : token.text === term.text) {
 						matches.push({
 							start: map[token.index],
 							end: map[token.index + token.text.length],
-							unit
-						});
-					}
-				}
-			}
-			for (let unit of pairs) {
-				let [first, second] = unit.tokens;
-				for (let i = 0; i < tokens.length - 1; i++) {
-					let a = tokens[i];
-					let b = tokens[i + 1];
-					if (a.text === first && b.text && (unit.prefix
-						? b.text.startsWith(second)
-						: b.text === second)) {
-						matches.push({
-							start: map[a.index],
-							end: map[b.index + b.text.length],
-							unit
+							term
 						});
 					}
 				}
 			}
 		}
-		for (let unit of units) {
-			if (unit.type == 'cjk') {
-				let index = normalized.indexOf(unit.text);
+		for (let term of terms) {
+			if (term.type == 'cjk') {
+				let index = normalized.indexOf(term.text);
 				while (index != -1) {
 					matches.push({
 						start: map[index],
-						end: map[index + unit.text.length],
-						unit
+						end: map[index + term.text.length],
+						term
 					});
-					index = normalized.indexOf(unit.text, index + unit.text.length);
+					index = normalized.indexOf(term.text, index + term.text.length);
 				}
 			}
-			else if (unit.type == 'phrase') {
-				matches.push(..._findPhraseMatches(normalized, map, unit));
+			else if (term.type == 'phrase') {
+				matches.push(..._findPhraseMatches(normalized, map, term));
 			}
 		}
 		matches.sort((a, b) => a.start - b.start || a.end - b.end);
@@ -1192,7 +882,7 @@ Zotero.Lexical = new function () {
 	// whitespace and hyphen runs interchangeable, word boundaries at both
 	// ends -- with each occurrence mapped from the collapsed text through the
 	// normalized text back to original positions
-	function _findPhraseMatches(normalized, map, unit) {
+	function _findPhraseMatches(normalized, map, term) {
 		let collapsed = '';
 		let collapsedMap = [];
 		let i = 0;
@@ -1212,19 +902,19 @@ Zotero.Lexical = new function () {
 		}
 		collapsedMap.push(normalized.length);
 		let matches = [];
-		let index = collapsed.indexOf(unit.text);
+		let index = collapsed.indexOf(term.text);
 		while (index != -1) {
 			let before = index > 0 ? collapsed[index - 1] : '';
-			let after = collapsed[index + unit.text.length] || '';
+			let after = collapsed[index + term.text.length] || '';
 			if (!/[\p{L}\p{N}]/u.test(before) && !/[\p{L}\p{N}]/u.test(after)) {
 				// A phrase ends on a word character, so the last collapsed
 				// character is a single normalized one and its exclusive end
 				// is the next normalized position
 				let start = map[collapsedMap[index]];
-				let end = map[collapsedMap[index + unit.text.length - 1] + 1];
-				matches.push({ start, end, unit });
+				let end = map[collapsedMap[index + term.text.length - 1] + 1];
+				matches.push({ start, end, term });
 			}
-			index = collapsed.indexOf(unit.text, index + 1);
+			index = collapsed.indexOf(term.text, index + 1);
 		}
 		return matches;
 	}
