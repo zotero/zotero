@@ -1921,15 +1921,15 @@ var ZoteroPane = new function () {
 	/**
 	 * Prompt to save changes in the open saved-search editor and close it
 	 *
-	 * If the search being edited was deleted or trashed, the editor is closed without
-	 * a prompt, since there's nothing left to save the changes to.
+	 * If the editor has no changes to save, or if the search being edited was deleted or
+	 * trashed, leaving nothing to save the changes to, the editor is closed without a prompt.
 	 *
 	 * @return {Promise<Boolean>} - False if the user chose Cancel, leaving the editor open
 	 */
 	this._confirmCloseSavedSearchEditor = async function () {
 		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		let editedSearch = Zotero.Searches.get(deck.pane.editedSearchID);
-		if (!editedSearch || editedSearch.deleted) {
+		if (!editedSearch || editedSearch.deleted || !deck.pane.hasChanges) {
 			await deck.pane.cancel();
 			return true;
 		}
