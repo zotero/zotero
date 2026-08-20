@@ -2249,16 +2249,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.classList.remove('tight');
 		}
 		
-		if (this._dropRow == index) {
-			let span;
-			if (Zotero.DragDrop.currentOrientation != 0) {
-				span = document.createElement('span');
-				span.className = Zotero.DragDrop.currentOrientation < 0 ? 'drop-before' : 'drop-after';
-				div.appendChild(span);
-			}
-			else {
-				div.classList.add('drop');
-			}
+		if (this._dropRow == index && Zotero.DragDrop.currentOrientation == 0) {
+			div.classList.add('drop');
 		}
 
 		let { firstColumn } = columns.reduce((acc, column) => {
@@ -2271,6 +2263,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
 
 		row.renderRow(div, index, columns, rowData, this._renderCtx);
+
+		// After cells -- a leading drop line is treated as the first column and indents the title
+		if (this._dropRow == index && Zotero.DragDrop.currentOrientation != 0) {
+			let span = document.createElement('span');
+			span.className = Zotero.DragDrop.currentOrientation < 0 ? 'drop-before' : 'drop-after';
+			div.appendChild(span);
+		}
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {
