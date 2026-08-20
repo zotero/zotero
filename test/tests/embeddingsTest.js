@@ -297,7 +297,10 @@ describe("Zotero.Embeddings", function () {
 		const CEILING = 768 - 2;
 		var fakeTokenizer = wordTokenizer();
 		// A chunk's own tokens, the way chunking counts them
-		var contentTokens = chunk => fakeTokenizer.encode(chunk).length - 2;
+		var contentTokens = text => fakeTokenizer.encode(text).length - 2;
+		// chunkText() returns { text, tokens }; most assertions here are about
+		// the text
+		var texts = chunks => chunks.map(chunk => chunk.text);
 		var stubs = [];
 
 		beforeEach(function () {
@@ -311,10 +314,10 @@ describe("Zotero.Embeddings", function () {
 
 		it("should return text that fits the window as a single chunk", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(fakeTokenizer));
-			assert.deepEqual(
-				await Zotero.Embeddings.Chunking.chunkText('A short title'),
-				['A short title']
-			);
+			let single = await Zotero.Embeddings.Chunking.chunkText('A short title');
+			assert.deepEqual(texts(single), ['A short title']);
+			// Each chunk carries the count measured on the way
+			assert.equal(single[0].tokens, contentTokens('A short title'));
 			// Right up to the budget it's still one chunk, and one token past it
 			// splits -- the budget being the window less the special tokens that
 			// wrap every input and the model's passage prefix
@@ -336,7 +339,7 @@ describe("Zotero.Embeddings", function () {
 			);
 			assert.isAbove(chunks.length, 1);
 			for (let chunk of chunks) {
-				assert.isAtMost(contentTokens(chunk), CEILING);
+				assert.isAtMost(contentTokens(chunk.text), CEILING);
 			}
 		});
 
@@ -347,7 +350,7 @@ describe("Zotero.Embeddings", function () {
 			// leave a chunk straddling both.
 			let a = Array.from({ length: 300 }, (x, i) => `alpha${i}`).join(' ');
 			let b = Array.from({ length: 300 }, (x, i) => `bravo${i}`).join(' ');
-			let chunks = await Zotero.Embeddings.Chunking.chunkText(`${a}\n\n${b}`);
+			let chunks = texts(await Zotero.Embeddings.Chunking.chunkText(`${a}\n\n${b}`));
 			assert.lengthOf(chunks, 2);
 			// Neither chunk mixes the two subjects
 			assert.include(chunks[0], 'alpha0');
@@ -363,9 +366,9 @@ describe("Zotero.Embeddings", function () {
 			// substantial paragraph -- the shape of an annotations note
 			let big1 = Array.from({ length: 300 }, (x, i) => `alpha${i}`).join(' ');
 			let big2 = Array.from({ length: 300 }, (x, i) => `bravo${i}`).join(' ');
-			let chunks = await Zotero.Embeddings.Chunking.chunkText(
+			let chunks = texts(await Zotero.Embeddings.Chunking.chunkText(
 				`Annotations\n(11/12/2024)\n${big1}\n\n${big2}`
-			);
+			));
 			assert.lengthOf(chunks, 2);
 			// The tiny paragraphs never become chunks of their own -- they ride
 			// along with the paragraph that follows them
@@ -384,7 +387,7 @@ describe("Zotero.Embeddings", function () {
 			// window, with no paragraph breaks to split at
 			let sentences = Array.from({ length: 60 },
 				(x, i) => `Sentence ${i} has some words about subject number ${i}.`);
-			let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
+			let chunks = texts(await Zotero.Embeddings.Chunking.chunkText(sentences.join(' ')));
 			assert.lengthOf(chunks, 2);
 			let sizes = chunks.map(contentTokens);
 			for (let size of sizes) {
@@ -411,7 +414,7 @@ describe("Zotero.Embeddings", function () {
 			for (let count of [45, 64, 83, 97, 140]) {
 				let sentences = Array.from({ length: count },
 					(x, i) => `Sentence ${i} has a few more words in it about subject ${i}.`);
-				let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
+				let chunks = texts(await Zotero.Embeddings.Chunking.chunkText(sentences.join(' ')));
 				let sizes = chunks.map(contentTokens);
 				let total = contentTokens(sentences.join(' '));
 				// No more pieces than the window requires
@@ -1614,7 +1617,9 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves()
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer')
+					.resolves(wordTokenizer())
 			];
 			let queries = [];
 			let queryStub = sinon.stub(Zotero.DB, 'queryAsync')
@@ -1701,7 +1706,11 @@ describe("Zotero.Embeddings", function () {
 			let chunks = await Zotero.Embeddings.Chunking.chunkText(sentences.join(' '));
 			assert.isAbove(chunks.length, 1);
 			for (let chunk of chunks) {
-				assert.isAtMost(tokenizer.encode(chunk).length, 512);
+				assert.isAtMost(tokenizer.encode(chunk.text).length, 512);
+				// The carried count is the model's own, less the special
+				// tokens encode() wraps every input in
+				assert.equal(chunk.tokens,
+					tokenizer.encode(chunk.text).length - tokenizer.encode('').length);
 			}
 		});
 	});

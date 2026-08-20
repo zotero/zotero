@@ -1244,6 +1244,14 @@ Zotero.Embeddings.Chunking = new function () {
 	// indexing run retries the load.
 	let _tokenizers = new Map();
 
+	// Metrics per tokenizer (see _getMetrics()), and the token counter they're
+	// built on (see _getCounter()). Both cost a handful of encode() calls to
+	// derive, which is nothing alongside a long text but real when many short
+	// texts are measured one at a time -- and both depend only on the
+	// tokenizer, so one derivation serves every text measured against it.
+	let _metrics = new WeakMap();
+	let _counters = new WeakMap();
+
 	/**
 	 * The active model's tokenizer, constructed from the tokenizer files in
 	 * the runtime's model cache using the transformers.js implementation
@@ -1306,21 +1314,42 @@ Zotero.Embeddings.Chunking = new function () {
 	// Those special tokens come off the window instead, together with the
 	// passage prefix embedPassages() prepends -- neither is part of the text this
 	// code sees, but both take up room once the chunk is embedded.
+	// Counts a text's tokens the way the chunking flow counts them, leaving out
+	// the special tokens the tokenizer wraps every input in so that counts are
+	// additive. Depends on the tokenizer alone -- not on which model is
+	// configured -- so text can be measured wherever a tokenizer is available.
+	function _getCounter(tokenizer) {
+		let counter = _counters.get(tokenizer);
+		if (!counter) {
+			let specialTokens = tokenizer.encode('').length;
+			// Measured in segments (see _splitForTokenizer()), so a long
+			// paragraph never hits the tokenizer's quadratic regime in a
+			// single call
+			counter = text => _splitForTokenizer(text).reduce(
+				(sum, segment) => sum + tokenizer.encode(segment).length - specialTokens,
+				0
+			);
+			_counters.set(tokenizer, counter);
+		}
+		return counter;
+	}
+
 	function _getMetrics(tokenizer) {
+		let cached = _metrics.get(tokenizer);
+		if (cached) {
+			return cached;
+		}
+		let count = _getCounter(tokenizer);
 		let specialTokens = tokenizer.encode('').length;
-		// Measured in segments (see _splitForTokenizer()), so a long paragraph
-		// never hits the tokenizer's quadratic regime in a single call
-		let count = text => _splitForTokenizer(text).reduce(
-			(sum, segment) => sum + tokenizer.encode(segment).length - specialTokens,
-			0
-		);
 		let prefix = Zotero.Embeddings.getPassagePrefix();
-		return {
+		let metrics = {
 			count,
 			joinTokens: Math.max(0, count('a\n\na') - 2 * count('a')),
 			budget: Math.min(CHUNK_MAX_TOKENS, Zotero.Embeddings.getModelMaxTokens())
 				- specialTokens - (prefix ? count(prefix) : 0)
 		};
+		_metrics.set(tokenizer, metrics);
+		return metrics;
 	}
 
 	// The paragraphs of a text, each counted exactly once -- the single place
@@ -1458,7 +1487,11 @@ Zotero.Embeddings.Chunking = new function () {
 				}
 			}
 			if (closeHere) {
-				chunks.push(current.map(s => s.text).join(' '));
+				// totalTokens is the sum over `current`; the incoming sentence
+				// hasn't been added yet. Sentences are joined with a space,
+				// charged nothing here the same way the budget checks above
+				// don't charge it.
+				chunks.push({ text: current.map(s => s.text).join(' '), tokens: totalTokens });
 				remainingTokens -= contentTokens;
 				remainingPieces = Math.max(1, remainingPieces - 1);
 				// Carry the trailing sentences that fit the overlap allowance
@@ -1480,7 +1513,7 @@ Zotero.Embeddings.Chunking = new function () {
 			totalTokens += sentence.tokens;
 		}
 		if (current.length) {
-			chunks.push(current.map(s => s.text).join(' '));
+			chunks.push({ text: current.map(s => s.text).join(' '), tokens: totalTokens });
 		}
 		return chunks;
 	}
@@ -1498,9 +1531,26 @@ Zotero.Embeddings.Chunking = new function () {
 	 * neighbors into a block, and a block over the window is split into even
 	 * pieces at sentence boundaries.
 	 *
+	 * Each chunk carries the token count of its own text, measured as it's
+	 * chunked (see _getMetrics()).
+	 *
 	 * @param {String} text
-	 * @return {Promise<String[]>}
+	 * @return {Promise<Object[]>} - [{ text, tokens }]
 	 */
+	/**
+	 * Token count of a text against the active model, leaving out the special
+	 * tokens the tokenizer wraps every input in, so that counts of several
+	 * pieces of text add up to the count of those pieces joined -- the same
+	 * measure the chunkers report on the chunks they return.
+	 *
+	 * @param {String} text
+	 * @return {Promise<Number>}
+	 */
+	this.countTokens = async function (text) {
+		let tokenizer = await this.getTokenizer();
+		return _getCounter(tokenizer)(text);
+	};
+
 	this.chunkText = async function (text) {
 		let tokenizer = await this.getTokenizer();
 		let metrics = _getMetrics(tokenizer);
@@ -1517,8 +1567,9 @@ Zotero.Embeddings.Chunking = new function () {
 	function _chunkParagraphs(text, paragraphs, budget, metrics, tokenizer) {
 		let { count, joinTokens } = metrics;
 		// Text that fits the window as it stands, which is most of it
-		if (_sumTokens(paragraphs, joinTokens) <= budget) {
-			return [text];
+		let totalTokens = _sumTokens(paragraphs, joinTokens);
+		if (totalTokens <= budget) {
+			return [{ text, tokens: totalTokens }];
 		}
 
 		// Group paragraphs into blocks, combining any that are too small to
@@ -1556,13 +1607,13 @@ Zotero.Embeddings.Chunking = new function () {
 				tokens: _sumTokens(group, joinTokens)
 			};
 			if (block.tokens <= budget) {
-				chunks.push(block.text);
+				chunks.push(block);
 			}
 			else {
 				chunks.push(..._splitBlockEvenly(block, budget, count, tokenizer));
 			}
 		}
-		return chunks.length ? chunks : [text];
+		return chunks.length ? chunks : [{ text, tokens: count(text) }];
 	}
 
 	/**
@@ -1594,9 +1645,9 @@ Zotero.Embeddings.Chunking = new function () {
 	 *
 	 * @param {Object[]} sections - [{ text, outlinePath, startBlock, endBlock,
 	 *     pageIndex, pageLabel, position }]
-	 * @return {Promise<Object[]>} - [{ text, embedText, outlinePath,
+	 * @return {Promise<Object[]>} - [{ text, embedText, tokens, outlinePath,
 	 *     startBlock, endBlock, pageIndex, pageLabel, position,
-	 *     sectionPart, sectionParts }]
+	 *     sectionPart, sectionParts }], where tokens counts embedText
 	 */
 	this.chunkSections = async function (sections) {
 		let tokenizer = await this.getTokenizer();
@@ -1679,8 +1730,9 @@ Zotero.Embeddings.Chunking = new function () {
 			let pieces = _chunkParagraphs(text, group.paragraphs, budget - prefixTokens, metrics, tokenizer);
 			for (let i = 0; i < pieces.length; i++) {
 				chunks.push({
-					text: pieces[i],
-					embedText: prefix + pieces[i],
+					text: pieces[i].text,
+					embedText: prefix + pieces[i].text,
+					tokens: pieces[i].tokens + prefixTokens,
 					outlinePath,
 					startBlock,
 					endBlock,
@@ -1723,13 +1775,15 @@ Zotero.Embeddings.Indexing = new function () {
 	let _queue = new Set();
 	let _kickTimer = null;
 
-	// Characters of text per engine call (see _indexItems()). Under memory
-	// pressure this is halved, down to DEGRADED_CHAR_BUDGET_FLOOR, and the
-	// engine is shut down so the next one's memory arena grows only to the
-	// smaller peak. Restored when the pressure lifts.
-	const DEFAULT_CHAR_BUDGET = 12000;
-	const DEGRADED_CHAR_BUDGET_FLOOR = 1500;
-	let _charBudget = DEFAULT_CHAR_BUDGET;
+	// Tokens of text per engine call (see _indexItems()), in the model's own
+	// tokens -- what the engine pads a batch to and what its memory scales
+	// with. Under memory pressure this is halved, down to
+	// DEGRADED_TOKEN_BUDGET_FLOOR, and the engine is shut down so the next
+	// one's memory arena grows only to the smaller peak. Restored when the
+	// pressure lifts.
+	const DEFAULT_TOKEN_BUDGET = 3000;
+	const DEGRADED_TOKEN_BUDGET_FLOOR = 400;
+	let _tokenBudget = DEFAULT_TOKEN_BUDGET;
 
 	// Don't start a run that would load the model with less than this much
 	// memory available, since inference needs room well beyond the model files
@@ -1905,20 +1959,20 @@ Zotero.Embeddings.Indexing = new function () {
 	let _memoryPressureObserver = {
 		observe: (subject, topic) => {
 			if (topic === 'memory-pressure-stop') {
-				if (_charBudget !== DEFAULT_CHAR_BUDGET) {
+				if (_tokenBudget !== DEFAULT_TOKEN_BUDGET) {
 					Zotero.debug("Embeddings: memory pressure over -- restoring batch size");
-					_charBudget = DEFAULT_CHAR_BUDGET;
+					_tokenBudget = DEFAULT_TOKEN_BUDGET;
 				}
 				return;
 			}
-			if (_charBudget <= DEGRADED_CHAR_BUDGET_FLOOR) {
+			if (_tokenBudget <= DEGRADED_TOKEN_BUDGET_FLOOR) {
 				return;
 			}
-			_charBudget = Math.max(
-				DEGRADED_CHAR_BUDGET_FLOOR, Math.floor(_charBudget / 2)
+			_tokenBudget = Math.max(
+				DEGRADED_TOKEN_BUDGET_FLOOR, Math.floor(_tokenBudget / 2)
 			);
 			Zotero.debug(`Embeddings: memory pressure -- batch size reduced to `
-				+ `${_charBudget} characters`);
+				+ `${_tokenBudget} tokens`);
 			Zotero.Embeddings.shutdownEngine({ modelChanged: false })
 				.catch(e => Zotero.logError(e));
 		},
@@ -2393,8 +2447,9 @@ Zotero.Embeddings.Indexing = new function () {
 		// Flat text has no sections, so the whole document plays that role:
 		// the part numbering says where in it a chunk falls
 		let chunks = await Zotero.Embeddings.Chunking.chunkText(text);
-		return chunks.map((chunkText, index) => ({
-			text: chunkText,
+		return chunks.map((chunk, index) => ({
+			text: chunk.text,
+			tokens: chunk.tokens,
 			sectionPart: index + 1,
 			sectionParts: chunks.length
 		}));
@@ -2408,18 +2463,16 @@ Zotero.Embeddings.Indexing = new function () {
 	// @param {Object} [options]
 	// @param {Function} [options.onProgress] - Called as { done, total }
 	// @param {Number} [options.maxBatchItems=20] - Most items per engine call
-	// @param {Number} [options.batchCharBudget=12000] - Most characters per
-	//     engine call, counting every text in the batch as long as its longest
-	//     one, since they're padded to that length. Attention memory grows with
-	//     the square of the padded length, so a batch of long texts uses
-	//     far more memory than the same number of short ones.
+	// @param {Number} [options.batchTokenBudget=3000] - Most tokens per engine
+	//     call, counting every text in the batch as long as its longest one,
+	//     since they're padded to that length.
 	// @param {Function} [options.shouldStop] - Called before each batch;
 	//     return true to stop early
 	// @return {Promise<Number>} - Number of embeddings stored
 	async function _indexItems(items, {
 		onProgress,
 		maxBatchItems = 20,
-		batchCharBudget = 12000,
+		batchTokenBudget = 3000,
 		shouldStop
 	} = {}) {
 		await Zotero.Items.loadDataTypes(items, ['itemData', 'note', 'annotation']);
@@ -2508,11 +2561,16 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 			}
 			else if (entry.item.isNote()) {
-				entry.chunks = (await Zotero.Embeddings.Chunking.chunkText(entry.text))
-					.map(text => ({ text }));
+				// chunkText() already carries each chunk's token count
+				entry.chunks = await Zotero.Embeddings.Chunking.chunkText(entry.text);
 			}
 			else {
-				entry.chunks = [{ text: entry.text }];
+				// Item text is embedded whole, so it never passes through a
+				// chunker and has to be counted here
+				entry.chunks = [{
+					text: entry.text,
+					tokens: await Zotero.Embeddings.Chunking.countTokens(entry.text)
+				}];
 			}
 			entry.vectors = new Array(entry.chunks.length);
 			entry.remaining = entry.chunks.length;
@@ -2558,14 +2616,15 @@ Zotero.Embeddings.Indexing = new function () {
 				units.push({ entry, chunkIndex });
 			}
 		}
-		// Pack batches from chunks of similar size: the engine pads every
-		// text in a batch to its longest one and compute scales with the
-		// padded length, so one long chunk makes a whole mixed batch pay
+		// Pack batches from chunks of similar size, measured in the model's
+		// own tokens -- what the engine pads a batch to, and what its memory
+		// and compute scale with. The engine pads every text in a batch to its
+		// longest one, so one long chunk makes a whole mixed batch pay
 		// long-chunk price. Sorting the individual chunks (an item's chunks
 		// legitimately range from captions to window-sized body text) roughly
 		// halves fulltext indexing time versus item-level ordering.
-		units.sort((a, b) => embedText(a.entry.chunks[a.chunkIndex]).length
-			- embedText(b.entry.chunks[b.chunkIndex]).length);
+		units.sort((a, b) => a.entry.chunks[a.chunkIndex].tokens
+			- b.entry.chunks[b.chunkIndex].tokens);
 
 		let done = 0;
 		for (let i = 0; i < units.length;) {
@@ -2578,11 +2637,11 @@ Zotero.Embeddings.Indexing = new function () {
 			let count = 0;
 			while (i + count < units.length && count < maxBatchItems) {
 				let unit = units[i + count];
-				let length = Math.max(longest, embedText(unit.entry.chunks[unit.chunkIndex]).length);
-				if (count && length * (count + 1) > batchCharBudget) {
+				let tokens = Math.max(longest, unit.entry.chunks[unit.chunkIndex].tokens);
+				if (count && tokens * (count + 1) > batchTokenBudget) {
 					break;
 				}
-				longest = length;
+				longest = tokens;
 				count++;
 			}
 			let batch = units.slice(i, i + count);
@@ -2907,7 +2966,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				await _indexItems(items, {
 					shouldStop,
-					batchCharBudget: _charBudget,
+					batchTokenBudget: _tokenBudget,
 					onProgress: () => _refreshStatusThrottled()
 				});
 			}
