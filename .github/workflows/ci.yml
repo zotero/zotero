@@ -80,7 +80,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
           #cache: npm
 
       # Local via act
@@ -104,7 +104,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ hashFiles('package-lock.json') }}
+          key: node-modules-24-${{ hashFiles('package-lock.json') }}
 
       - name: Install Node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
@@ -192,7 +192,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Cache xulrunner
         id: xulrunner-cache
@@ -210,7 +210,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-mac-${{ hashFiles('package-lock.json') }}
+          key: node-modules-mac-24-${{ hashFiles('package-lock.json') }}
 
       - name: Install Node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
@@ -252,14 +252,14 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Cache utilities Node modules
         id: utilities-node-cache
         uses: actions/cache@v4
         with:
           path: chrome/content/zotero/xpcom/utilities/node_modules
-          key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
+          key: utilities-node-modules-24-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
 
       - name: Install utilities Node modules
         if: steps.utilities-node-cache.outputs.cache-hit != 'true'
@@ -294,7 +294,7 @@ jobs:
         if: steps.check-deploy.outputs.deploy == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
 
       - name: Cache Node modules
         id: node-cache
@@ -302,7 +302,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ hashFiles('package-lock.json') }}
+          key: node-modules-24-${{ hashFiles('package-lock.json') }}
 
       - name: Install Node modules
         if: steps.check-deploy.outputs.deploy == 'true' && steps.node-cache.outputs.cache-hit != 'true'
