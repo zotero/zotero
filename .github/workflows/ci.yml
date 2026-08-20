@@ -135,6 +135,7 @@ jobs:
 
       - name: Set up SMB share
         if: matrix.shard == 'smb'
+        timeout-minutes: 10
         run: |
           sudo apt install -y --no-install-recommends samba cifs-utils
           sudo mkdir -p /srv/zotero-smb /mnt/zotero-smb
@@ -151,6 +152,7 @@ jobs:
 
       - name: Set up NFS share
         if: matrix.shard == 'nfs'
+        timeout-minutes: 10
         run: |
           sudo apt install -y --no-install-recommends nfs-kernel-server
           sudo mkdir -p /srv/zotero-nfs /mnt/zotero-nfs
