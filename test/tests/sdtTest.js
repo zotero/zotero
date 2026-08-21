@@ -248,6 +248,63 @@ describe("Zotero.SDT", function () {
 			{ pageIndex: 1, rects: [[10, 600, 300, 680], [10, 500, 300, 580]] });
 	});
 
+	it("should return block ranges with text, flags, and outline path from getBlockRanges()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [1] },
+				{ title: 'Methods', ref: [4] },
+			],
+			pages: [
+				{ label: '1', contentRange: [[0], [6]] },
+			],
+			blocks: [
+				{ content: [{ text: 'Front matter on the title page' }] },
+				{ content: [{ text: 'Introduction' }] },
+				{
+					anchor: { pageRects: [[0, 10, 700, 300, 720]] },
+					content: [{ text: 'Owls are nocturnal birds of prey.' }],
+				},
+				{ flowClass: 'excluded', content: [{ text: 'Page 1' }] },
+				{ content: [{ text: 'Methods' }] },
+				{ reference: true, content: [{ text: 'Smith, J. (2019). Owls.' }] },
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getBlockRanges(item.id, [[1, 3], [5, 5]]);
+		assert.isTrue(result.ok);
+		assert.lengthOf(result.ranges, 2);
+		// Every block in the range is reported, flagged the way the section
+		// walk treats it: the outline's heading blocks, excluded flow, and
+		// reference entries all identifiable
+		let [first, second] = result.ranges;
+		assert.deepEqual(first.blocks.map(block => block.index), [1, 2, 3]);
+		assert.isTrue(first.blocks[0].outlineHeading);
+		assert.equal(first.blocks[1].text, 'Owls are nocturnal birds of prey.');
+		assert.isFalse(first.blocks[1].outlineHeading);
+		assert.equal(first.blocks[2].flowClass, 'excluded');
+		// Location comes per block, same as getSections() reports it
+		assert.deepEqual(first.blocks[1].position,
+			{ pageIndex: 0, rects: [[10, 700, 300, 720]] });
+		assert.equal(first.blocks[1].pageLabel, '1');
+		// The outline path in effect where each range starts
+		assert.equal(first.outlinePath, 'Introduction');
+		assert.isTrue(second.blocks[0].reference);
+		assert.equal(second.outlinePath, 'Methods');
+	});
+
+	it("should report the expected extraction identity from getProcessorVersion()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let version = await Zotero.SDT.getProcessorVersion(item);
+		assert.equal(version, 'pdf/' + documentWorkerMetadata.SDT_PROCESSOR_VERSIONS.pdf
+			+ '/' + parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION));
+		// Unsupported attachment types have no extraction identity
+		let unsupported = await importFileAttachment('test.png');
+		assert.isNull(await Zotero.SDT.getProcessorVersion(unsupported));
+	});
+
 	it("should generate the pack when missing", async function () {
 		let item = await importFileAttachment('test.pdf');
 		let cachePath = getSDTCachePath(item);
@@ -393,6 +450,25 @@ describe("Zotero.SDT", function () {
 		}
 		finally {
 			unblockWorker();
+			workerStub.restore();
+		}
+	});
+
+	it("should regenerate a stale-processor pack before returning it with allowStale: false", async function () {
+		let item = await importFileAttachment('test.pdf');
+		await writeTestSDTCache(item, getStaleProcessorVersionSDTPackBytes());
+
+		let workerStub = sinon.stub(Zotero.PDFWorker, 'getStructuredDocumentText')
+			.resolves({ buf: getTestSDTPackBuffer() });
+		try {
+			// A consumer that stores references into the pack's content gets
+			// the current extraction, never one about to be replaced
+			let result = await Zotero.SDT.getPack(item.id, { allowStale: false });
+			assert.isTrue(result.ok);
+			assert.deepEqual(new Uint8Array(result.bytes), getTestSDTPackBytes());
+			assert.isTrue(workerStub.calledOnce);
+		}
+		finally {
 			workerStub.restore();
 		}
 	});

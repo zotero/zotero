@@ -66,12 +66,17 @@ Zotero.SDT = new function () {
 	 *
 	 * If the cached pack was produced by an older (but still readable)
 	 * processor version, it's returned as is and a regeneration is started in
-	 * the background, so that processor bumps don't block consumers.
+	 * the background, so that processor bumps don't block consumers. Pass
+	 * allowStale: false to wait for the regeneration instead -- for consumers
+	 * that store references into the pack's content and can't have the cache
+	 * change out from under them.
 	 *
 	 * @param {Integer} itemID
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority] - Put a needed extraction at the
 	 *     front of the worker queue (for user-initiated requests)
+	 * @param {Boolean} [options.allowStale=true] - Whether a cached pack from
+	 *     an older processor version may be returned
 	 * @param {Function} [options.onProgress] - Called with SDT generation
 	 *     progress from 0 to 100 when generation is needed
 	 * @returns {Promise<Object>} { ok: true, bytes: ArrayBuffer, packVersion,
@@ -87,7 +92,9 @@ Zotero.SDT = new function () {
 			if (!context.ok) {
 				return { ok: false, reason: context.reason };
 			}
-			let cache = await _readValidCache(context, { allowStaleProcessorVersion: true });
+			let cache = await _readValidCache(context, {
+				allowStaleProcessorVersion: options.allowStale !== false
+			});
 			if (cache.ok) {
 				if (cache.staleProcessorVersion) {
 					_generate(context, {}).catch(e => Zotero.logError(e));
@@ -194,6 +201,107 @@ Zotero.SDT = new function () {
 		}
 	};
 
+	/**
+	 * Get ranges of an attachment's top-level blocks, without materializing
+	 * the whole document -- the pack stores blocks in independently
+	 * compressed groups, so only the groups a range touches are read. For
+	 * consumers that keep block references into the document (e.g. where an
+	 * embedded chunk came from) and later need those blocks' text and
+	 * location back.
+	 *
+	 * Each requested [startBlock, endBlock] range (inclusive) yields its
+	 * blocks in order, reported the way getSections() reports them -- plain
+	 * text, flow class, whether it's a reference entry, page and position --
+	 * plus `outlineHeading` for blocks the outline uses as section headings
+	 * (whose text getSections() folds into the outline path instead of the
+	 * running text), and the outline path in effect where the range starts.
+	 *
+	 * @param {Integer} itemID
+	 * @param {Number[][]} ranges - [startBlock, endBlock] pairs
+	 * @param {Object} [options] - See getPack()
+	 * @returns {Promise<Object>} { ok: true, ranges: [{ outlinePath, blocks:
+	 *     [{ index, text, flowClass, reference, outlineHeading, pageIndex,
+	 *     pageLabel, position }] }] }, or { ok: false, reason } (see
+	 *     getPack())
+	 */
+	this.getBlockRanges = async function (itemID, ranges, options = {}) {
+		let result = await this.getPack(itemID, options);
+		if (!result.ok) {
+			return { ok: false, reason: result.reason };
+		}
+		try {
+			let reader = await _openPack(new Uint8Array(result.bytes));
+			let metadata = await reader.getMetadata();
+			let catalog = await reader.getCatalog();
+			let blockCount = reader.getTopLevelBlockCount();
+			let blockPages = _getBlockPages(catalog, blockCount);
+			let headings = _flattenOutline(catalog?.outline, [])
+				.sort((a, b) => a.blockIndex - b.blockIndex);
+			let headingBlocks = new Set(headings.map(heading => heading.blockIndex));
+			let results = [];
+			for (let [startBlock, endBlock] of ranges) {
+				let nodes = await reader.getBlocks(startBlock, endBlock);
+				let first = Math.max(0, startBlock);
+				let blocks = nodes.map((node, i) => {
+					let index = first + i;
+					let entry = {
+						index,
+						text: _getNestedBlockPlainText(node).trim(),
+						reference: _isReferenceBlock(node),
+						outlineHeading: headingBlocks.has(index)
+					};
+					if (node.flowClass) {
+						entry.flowClass = node.flowClass;
+					}
+					return Object.assign(entry,
+						_getBlockLocation(node, catalog, metadata, blockPages, index));
+				});
+				// The path of the last outline heading at or before the
+				// range's start -- the same path getSections() gives the
+				// section the range starts in
+				let path = [];
+				for (let heading of headings) {
+					if (heading.blockIndex > startBlock) {
+						break;
+					}
+					path = heading.path;
+				}
+				results.push({ outlinePath: path.join(' > '), blocks });
+			}
+			return { ok: true, ranges: results };
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return { ok: false, reason: 'failed' };
+		}
+	};
+
+	/**
+	 * The identity of the extraction this module would produce for an
+	 * attachment right now: its processor type and version plus the pack
+	 * schema's major version. For consumers that store data derived from
+	 * packs, to fold into their staleness keys, so that a processor upgrade
+	 * -- which changes what the same file extracts to -- re-derives what they
+	 * stored. Null when the attachment isn't a supported type or the
+	 * extraction module isn't available.
+	 *
+	 * @param {Zotero.Item} item
+	 * @returns {Promise<String|null>} - e.g. 'pdf/3/1'
+	 */
+	this.getProcessorVersion = async function (item) {
+		let processorType = _getProcessorType(item);
+		if (!processorType) {
+			return null;
+		}
+		let metadata = await _getDocumentWorkerMetadata();
+		if (!metadata) {
+			return null;
+		}
+		return processorType
+			+ '/' + metadata.SDT_PROCESSOR_VERSIONS[processorType]
+			+ '/' + _getSchemaMajorVersion(metadata.SDT_SCHEMA_VERSION);
+	};
+
 	// The section walk over a materialized structure. Mirrors the outline
 	// handling of the document-worker's own section chunker
 	// (structured-document-text/src/chunker.js), which the bundled reader
@@ -242,7 +350,8 @@ Zotero.SDT = new function () {
 					if (block.flowClass) {
 						entry.flowClass = block.flowClass;
 					}
-					let blockLocation = _getBlockLocation(structure, blockPages, i);
+					let blockLocation = _getBlockLocation(
+						block, structure.catalog, structure.metadata, blockPages, i);
 					location = location || blockLocation;
 					blocks.push(Object.assign(entry, blockLocation));
 				}
@@ -250,7 +359,8 @@ Zotero.SDT = new function () {
 					// A section is located where it begins -- at its heading
 					// when it has one, since that's where a reader would land
 					// -- falling back to its first reported block
-					let start = _getBlockLocation(structure, blockPages, startBlock);
+					let start = _getBlockLocation(content[startBlock],
+						structure.catalog, structure.metadata, blockPages, startBlock);
 					sections.push(Object.assign({
 						text: blocks.map(block => block.text).join('\n'),
 						outlinePath: path.join(' > '),
@@ -268,11 +378,11 @@ Zotero.SDT = new function () {
 
 	// Where a block sits in the source document, as far as the document says.
 	// Only the fields that are actually known are returned.
-	function _getBlockLocation(structure, blockPages, index) {
+	function _getBlockLocation(node, catalog, metadata, blockPages, index) {
 		let location = {};
 		// PDF blocks carry page geometry: [pageIndex, x1, y1, x2, y2] rects,
 		// which the reader can scroll to and highlight
-		let pageRects = structure.content[index]?.anchor?.pageRects;
+		let pageRects = node?.anchor?.pageRects;
 		let pageIndex = null;
 		if (Array.isArray(pageRects) && pageRects.length
 				&& Number.isInteger(pageRects[0][0])) {
@@ -295,9 +405,9 @@ Zotero.SDT = new function () {
 		location.pageIndex = pageIndex;
 		// An EPUB's synthetic locations aren't page numbers -- a label from
 		// them would read as one
-		if (structure.catalog?.pageMappingType !== 'locations') {
-			let label = structure.catalog?.pages?.[pageIndex]?.label;
-			if (!label && structure.metadata?.processor?.type === 'pdf') {
+		if (catalog?.pageMappingType !== 'locations') {
+			let label = catalog?.pages?.[pageIndex]?.label;
+			if (!label && metadata?.processor?.type === 'pdf') {
 				label = String(pageIndex + 1);
 			}
 			if (label) {
