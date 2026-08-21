@@ -1548,6 +1548,18 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		throw new Error("Database permanently closed; not re-opening");
 	}
 	
+	// Opening is asynchronous, so callers arriving while it's under way share the same attempt
+	if (!this._openPromise) {
+		this._openPromise = this._openConnectionAsync()
+			.finally(() => {
+				this._openPromise = null;
+			});
+	}
+	return this._openPromise;
+};
+
+
+Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 	this._debug("Asynchronously opening database '" + this._dbName + "'");
 	Zotero.debug(this._dbPath);
 	
