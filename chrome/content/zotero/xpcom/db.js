@@ -1350,7 +1350,10 @@ Zotero.DBConnection.prototype.backUpDatabase = async function ({ force, suffix, 
 			if (await OS.File.exists(backupFile)) {
 				let currentDBTime = (await OS.File.stat(file)).lastModificationDate;
 				let lastBackupTime = (await OS.File.stat(backupFile)).lastModificationDate;
-				if (currentDBTime == lastBackupTime) {
+				// In WAL mode the database file's mtime advances only when the WAL is
+				// checkpointed, so changes still in the WAL leave it matching the backup
+				if (currentDBTime.getTime() == lastBackupTime.getTime()
+						&& !(await this._hasWALContents(file))) {
 					Zotero.debug("Database '" + this._dbName + "' hasn't changed -- skipping backup");
 					return false;
 				}
@@ -1699,6 +1702,25 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 	}
 
 	return this._connection;
+};
+
+
+/**
+ * Check whether the database's WAL file contains data not yet in the database file
+ *
+ * @param {String} file - Path to the database file
+ * @return {Promise<Boolean>}
+ */
+Zotero.DBConnection.prototype._hasWALContents = async function (file) {
+	try {
+		return (await IOUtils.stat(file + '-wal')).size > 0;
+	}
+	catch (e) {
+		if (e.name != 'NotFoundError') {
+			throw e;
+		}
+		return false;
+	}
 };
 
 
