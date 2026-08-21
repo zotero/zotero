@@ -69,6 +69,22 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 	// Shorter idle threshold (seconds) for the index drain than the sync content processor's, so
 	// indexing ramps back up a few seconds after the user pauses rather than waiting a full 30
 	var _drainIdleDelay = 3;
+	// Items indexed since the last optimize, and how many are worth one. FTS5 merges the segments
+	// left by ordinary incremental writes on its own, so an optimize only pays for itself after a
+	// burst large enough to leave many behind, such as the drain after an upgrade.
+	var _indexedSinceOptimize = 0;
+	const OPTIMIZE_THRESHOLD = 1000;
+	// Pages of index data to merge per statement. The page budget is what keeps a merge short, so
+	// the size of the index doesn't determine how long the database is held.
+	const MERGE_PAGES = 64;
+	// Statements one pass can run, and passes that can end at that cap before the merge is
+	// abandoned. A capped pass leaves its work for the next one; the run cap keeps that from
+	// repeating forever if the index never reports itself merged.
+	const MAX_MERGE_STEPS = 1000;
+	const MAX_MERGE_RUNS = 5;
+	var _cappedMergeRuns = 0;
+	// Index tables with a merge underway, which the next statement continues rather than restarts
+	var _mergingTables = new Set();
 	var _syncContentTimeoutID = null;
 	var _queueDrainTimerID = null;
 	// Combined queue count after the background drain's previous run, for detecting a stuck queue
@@ -1404,6 +1420,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			}
 		}
 		finally {
+			_indexedSinceOptimize += processed;
 			_indexingInProgress = false;
 		}
 	};
@@ -1535,6 +1552,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			}
 		}
 		finally {
+			_indexedSinceOptimize += processed;
 			_indexingInProgress = false;
 		}
 	};
@@ -1686,6 +1704,7 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			}
 		}
 		finally {
+			_indexedSinceOptimize += processed;
 			_indexingInProgress = false;
 		}
 	};
@@ -1817,9 +1836,6 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					itemProgress.setProgress(100);
 				}
 			}
-			if (done > 0) {
-				await this.optimizeContentIndex();
-			}
 			// Reclaim the space freed by a rebuild (e.g., an index-format change dropping the old
 			// tables), which can be most of the file; the freelist gate makes this a no-op on
 			// ordinary startups
@@ -1834,9 +1850,11 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			// Index never-before-indexed attachments (e.g., added while indexing was off) gently in
 			// the background -- they were never searchable, so unlike the migration above they can
 			// wait for idle. If the queues stalled, don't start the background drain, which would
-			// spin on the same stuck items.
+			// spin on the same stuck items. The observer also runs the optimize left pending by
+			// what this drain indexed.
 			if (!stalled
-					&& ((await queueCount()) > 0
+					&& (_indexedSinceOptimize >= OPTIMIZE_THRESHOLD
+						|| (await queueCount()) > 0
 						|| (await this.getAttachmentExtractionQueueCount()) > 0)) {
 				this.registerQueueDrainObserver();
 			}
@@ -1851,26 +1869,84 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 
 
 	/**
-	 * Merge the content index's FTS5 segments into one for faster queries. Called when the content
-	 * index queue drains, which can insert a burst of rows that FTS5 leaves as many segments for
-	 * searches to merge on the fly; 'optimize' merges them once instead. The trickle of inline
-	 * indexing during normal use doesn't need this -- FTS5 auto-merges those incremental writes --
-	 * and the extracted text lives in the cache files regardless, so a failure here is harmless.
+	 * Merge the content index's FTS5 segments for faster queries. A large drain inserts a burst of
+	 * rows that FTS5 leaves as many segments for searches to merge on the fly, and its own
+	 * incremental merging lags behind. The extracted text lives in the cache files regardless, so a
+	 * failure here is harmless.
+	 *
+	 * Each 'merge' is bounded to a set number of pages, so no statement holds the shared database
+	 * long enough to keep other queries waiting.
+	 *
+	 * Runs only once enough items have been indexed to be worth it. Pass force to run it regardless
+	 * (e.g., from tests). A pass that runs out of steps leaves the indexed count standing so that
+	 * the caller can run another to finish the merge.
+	 *
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.force] - Optimize even if little has been indexed
+	 * @return {Promise<Boolean>} - Whether a pass ran
 	 */
-	this.optimizeContentIndex = async function () {
+	this.optimizeContentIndex = async function ({ force = false } = {}) {
+		if (!force && _indexedSinceOptimize < OPTIMIZE_THRESHOLD) {
+			return false;
+		}
+		Zotero.debug("Optimizing full-text content index");
+		let t = new Date();
+		let steps = 0;
+		let capped = false;
 		try {
-			for (let tables of [_contentTables, _noteTables]) {
-				await Zotero.DB.queryAsync(
-					`INSERT INTO ftindex.${tables.main}(${tables.main}) VALUES('optimize')`
-				);
-				await Zotero.DB.queryAsync(
-					`INSERT INTO ftindex.${tables.cjk}(${tables.cjk}) VALUES('optimize')`
-				);
+			let tables = [_contentTables, _noteTables].flatMap(({ main, cjk }) => [main, cjk]);
+			for (let table of tables) {
+				// The first merge of a table takes a negative page count, which gathers its
+				// segments onto one level and disregards usermerge so that all of them merge. The
+				// rest take a positive one, which continues that merge instead of restarting it
+				// when indexing adds a segment partway through.
+				let pages = _mergingTables.has(table) ? MERGE_PAGES : -MERGE_PAGES;
+				while (true) {
+					if (steps++ >= MAX_MERGE_STEPS) {
+						capped = true;
+						break;
+					}
+					let before = await Zotero.DB.valueQueryAsync("SELECT total_changes()");
+					await Zotero.DB.queryAsync(
+						`INSERT INTO ftindex.${table}(${table}, rank) `
+							+ `VALUES('merge', ${pages})`
+					);
+					let after = await Zotero.DB.valueQueryAsync("SELECT total_changes()");
+					// Fewer than two changes means the merge found nothing to do, which is the
+					// only way it reports that the table is fully merged
+					if (after - before < 2) {
+						_mergingTables.delete(table);
+						break;
+					}
+					_mergingTables.add(table);
+					pages = MERGE_PAGES;
+				}
+				if (capped) {
+					break;
+				}
 			}
+			Zotero.debug("Optimized full-text content index in " + steps + " "
+				+ Zotero.Utilities.pluralize(steps, 'step') + ", " + (new Date() - t) + " ms");
 		}
 		catch (e) {
+			// Merging is only an optimization, so don't retry a failure -- leave it to the next
+			// burst of indexing
 			Zotero.logError(e);
+			capped = false;
 		}
+		if (capped && ++_cappedMergeRuns < MAX_MERGE_RUNS) {
+			Zotero.debug("Full-text content index is partly merged -- continuing on the next pass");
+			return true;
+		}
+		if (capped) {
+			Zotero.logError("Giving up on merging the full-text content index after "
+				+ _cappedMergeRuns + " passes");
+			// Start clean rather than continuing a merge nothing is driving anymore
+			_mergingTables.clear();
+		}
+		_cappedMergeRuns = 0;
+		_indexedSinceOptimize = 0;
+		return true;
 	};
 
 
@@ -1949,8 +2025,12 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 					+ (await self.getAttachmentExtractionQueueCount())
 					+ (await self.getNoteIndexQueueCount());
 				if (remaining == 0) {
-					// Drained -- compact the index and stop
+					// Drained -- compact the index and stop. A pass that ran out of steps leaves
+					// the indexed count standing, so keep going until the merge is finished.
 					await self.optimizeContentIndex();
+					if (_indexedSinceOptimize >= OPTIMIZE_THRESHOLD) {
+						_scheduleQueueDrain(_drainIdleDelay * 1000);
+					}
 					return;
 				}
 				if (remaining < _queueDrainPreviousRemaining) {
