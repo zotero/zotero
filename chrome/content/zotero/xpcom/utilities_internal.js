@@ -1790,8 +1790,7 @@ Zotero.Utilities.Internal = {
 			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute("label", label);
 			if (value == currentTarget) {
-				// type="checkbox" hides icon, so only set if checked
-				menuitem.setAttribute("type", "checkbox");
+				// Not type="checkbox", which suppresses the icon
 				menuitem.setAttribute("checked", "true");
 			}
 			menuitem.setAttribute("value", value);
