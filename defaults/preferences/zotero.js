@@ -156,6 +156,7 @@ pref("extensions.zotero.integration.citationDialogMode", "last-used");
 pref("extensions.zotero.integration.citationDialogShowLocatorTip", true);
 pref("extensions.zotero.integration.annotationDialogIncludeComments", true);
 pref("extensions.zotero.integration.citationPreviewShown", true);
+pref("extensions.zotero.integration.googleDocsCitationExplorerEnabled", false);
 
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", true);

@@ -153,6 +153,73 @@ describe("Zotero.Items", function () {
 	});
 	
 	
+	describe("#copyToLibrary()", function () {
+		var group;
+		var copyChildNotes;
+
+		before(async function () {
+			group = await createGroup();
+		});
+
+		beforeEach(function () {
+			copyChildNotes = Zotero.Prefs.get('groups.copyChildNotes');
+			Zotero.Prefs.set('groups.copyChildNotes', true);
+		});
+
+		afterEach(function () {
+			Zotero.Prefs.set('groups.copyChildNotes', copyChildNotes);
+		});
+
+		after(async function () {
+			await group.eraseTx();
+		});
+
+		it("should copy and link a regular item into a group and reuse it", async function () {
+			var item = await createDataObject('item');
+			var newItem;
+			await Zotero.DB.executeTransaction(async function () {
+				newItem = await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			assert.instanceOf(newItem, Zotero.Item);
+			assert.equal(newItem.libraryID, group.libraryID);
+			assert.equal(await item.getLinkedItem(group.libraryID, true), newItem);
+
+			var reusedItem;
+			await Zotero.DB.executeTransaction(async function () {
+				reusedItem = await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+			assert.strictEqual(reusedItem, newItem);
+		});
+
+		it("should copy a child note", async function () {
+			var item = await createDataObject('item');
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			var newItem;
+			await Zotero.DB.executeTransaction(async function () {
+				newItem = await Zotero.Items.copyToLibrary(item, group.libraryID);
+			});
+
+			var notes = Zotero.Items.get(newItem.getNotes());
+			assert.lengthOf(notes, 1);
+			assert.equal(await note.getLinkedItem(group.libraryID, true), notes[0]);
+		});
+
+		it("should honor disabled child-note copying", async function () {
+			var item = await createDataObject('item');
+			await createDataObject('item', { itemType: 'note', parentID: item.id });
+			var newItem;
+			await Zotero.DB.executeTransaction(async function () {
+				newItem = await Zotero.Items.copyToLibrary(item, group.libraryID, {
+					childNotes: false,
+				});
+			});
+
+			assert.isEmpty(newItem.getNotes());
+		});
+	});
+
+
 	describe("#copyChildItems()", function () {
 		var group;
 		

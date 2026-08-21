@@ -44,4 +44,5 @@
 
 html|*.wizard-page-box:not(.specificity) {
     padding: 16px 0;
+    min-height: 0;
 }

@@ -42,6 +42,158 @@ describe("Duplicate Items", function () {
 		await waitForNotifierEvent('refresh', 'trash');
 	}
 	
+	describe("findDuplicatesOf()", function () {
+		it("should find duplicates of a Zotero.Item by title + creator", async function () {
+			var item1 = await createDataObject('item', {
+				title: 'Test Dedup Title',
+				creators: [{
+					firstName: 'John',
+					lastName: 'Smith',
+					creatorType: 'author'
+				}]
+			});
+			var item2 = await createDataObject('item', {
+				title: 'Test Dedup Title',
+				creators: [{
+					firstName: 'John',
+					lastName: 'Smith',
+					creatorType: 'author'
+				}]
+			});
+			// Different title, should not match
+			var item3 = await createDataObject('item', {
+				title: 'Different Title',
+				creators: [{
+					firstName: 'John',
+					lastName: 'Smith',
+					creatorType: 'author'
+				}]
+			});
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(item1);
+			assert.include(dupes, item2.id);
+			assert.notInclude(dupes, item1.id);
+			assert.notInclude(dupes, item3.id);
+		});
+		
+		it("should find duplicates of a CSL-JSON item by title + creator", async function () {
+			var item1 = await createDataObject('item', {
+				title: 'CSL Dedup Title',
+				creators: [{
+					firstName: 'Jane',
+					lastName: 'Doe',
+					creatorType: 'author'
+				}]
+			});
+			
+			var cslItem = {
+				type: 'book',
+				title: 'CSL Dedup Title',
+				author: [{ family: 'Doe', given: 'Jane' }]
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.include(dupes, item1.id);
+		});
+		
+		it("should find duplicates by DOI", async function () {
+			var item1 = await createDataObject('item', {
+				itemType: 'journalArticle',
+				title: 'Article One'
+			});
+			item1.setField('DOI', '10.1234/test.doi');
+			await item1.saveTx();
+			
+			var cslItem = {
+				type: 'article-journal',
+				title: 'Completely Different Title',
+				DOI: '10.1234/test.doi'
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.include(dupes, item1.id);
+		});
+		
+		it("should find duplicates by ISBN", async function () {
+			var item1 = await createDataObject('item', {
+				itemType: 'book',
+				title: 'My Book'
+			});
+			item1.setField('ISBN', '978-0-306-40615-7');
+			await item1.saveTx();
+			
+			var cslItem = {
+				type: 'book',
+				title: 'Some Other Book Title',
+				ISBN: '978-0-306-40615-7'
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.include(dupes, item1.id);
+		});
+		
+		it("should not match items with same title but conflicting years", async function () {
+			var item1 = await createDataObject('item', {
+				title: 'Year Conflict Title',
+				creators: [{
+					firstName: 'Alice',
+					lastName: 'Test',
+					creatorType: 'author'
+				}]
+			});
+			item1.setField('date', '2020');
+			await item1.saveTx();
+			
+			var cslItem = {
+				type: 'book',
+				title: 'Year Conflict Title',
+				author: [{ family: 'Test', given: 'Alice' }],
+				issued: { 'date-parts': [[2015]] }
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.notInclude(dupes, item1.id);
+		});
+		
+		it("should not match items with same title but different creators", async function () {
+			var item1 = await createDataObject('item', {
+				title: 'Creator Mismatch Title',
+				creators: [{
+					firstName: 'Alice',
+					lastName: 'One',
+					creatorType: 'author'
+				}]
+			});
+			
+			var cslItem = {
+				type: 'book',
+				title: 'Creator Mismatch Title',
+				author: [{ family: 'Two', given: 'Bob' }]
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.notInclude(dupes, item1.id);
+		});
+		
+		it("should return empty array when no duplicates exist", async function () {
+			var cslItem = {
+				type: 'book',
+				title: 'Absolutely Unique Title ' + Zotero.Utilities.randomString(),
+				author: [{ family: 'Nobody', given: 'X' }]
+			};
+			
+			var d = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var dupes = await d.findDuplicatesOf(cslItem);
+			assert.lengthOf(dupes, 0);
+		});
+	});
+	
 	describe("Merging", function () {
 		it("should merge two items in duplicates view", async function () {
 			var item1 = await createDataObject('item', { setTitle: true });

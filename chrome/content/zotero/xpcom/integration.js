@@ -2512,6 +2512,85 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
 	return checkbox.value;
 }
 
+
+/**
+ * Relink document and bibliography entries to replacement library items
+ *
+ * @param {{oldItemID: Number|String, item: Zotero.Item}[]} replacements
+ */
+Zotero.Integration.Session.prototype._relinkItems = function (replacements) {
+	let replacementsByID = new Map(
+		replacements.map(({ oldItemID, item }) => [String(oldItemID), item])
+	);
+	let changed = false;
+
+	// Relink every citation occurrence and mark affected fields for update
+	for (let [index, citation] of Object.entries(this.citationsByIndex)) {
+		let citationChanged = false;
+		for (let citationItem of citation.citationItems) {
+			let oldItemID = String(citationItem.cslItemID ?? citationItem.id);
+			let item = replacementsByID.get(oldItemID);
+			if (!item) continue;
+
+			citationItem.id = item.id;
+			delete citationItem.cslItemID;
+			citationItem.uris = this.uriMap.getURIsForItemID(item.id);
+			citationChanged = true;
+		}
+		if (citationChanged) {
+			this.updateIndices[index] = true;
+			changed = true;
+		}
+	}
+
+	// Keep the session index in sync with the mutated citations
+	this.citationsByItemID = {};
+	for (let citation of Object.values(this.citationsByIndex)) {
+		for (let citationItem of citation.citationItems) {
+			let itemID = citationItem.cslItemID ?? citationItem.id;
+			if (!this.citationsByItemID[itemID]) {
+				this.citationsByItemID[itemID] = [];
+			}
+			this.citationsByItemID[itemID].push(citation);
+		}
+	}
+
+	// Relink uncited, omitted, and customized bibliography entries
+	if (this.bibliography) {
+		let bibliographyDataChanged = false;
+		let replaceInSet = (set, skipCited = false) => {
+			for (let [oldItemID, item] of replacementsByID) {
+				if (!set.delete(oldItemID)) continue;
+				if (!skipCited || !this.citationsByItemID[item.id]) {
+					set.add(String(item.id));
+				}
+				changed = true;
+				bibliographyDataChanged = true;
+			}
+		};
+		replaceInSet(this.bibliography.uncitedItemIDs, true);
+		replaceInSet(this.bibliography.omittedItemIDs);
+
+		for (let [oldItemID, item] of replacementsByID) {
+			if (oldItemID in this.bibliography.customEntryText) {
+				this.bibliography.customEntryText[item.id]
+					= this.bibliography.customEntryText[oldItemID];
+				delete this.bibliography.customEntryText[oldItemID];
+				changed = true;
+				bibliographyDataChanged = true;
+			}
+		}
+		if (bibliographyDataChanged) {
+			this.bibliographyDataHasChanged = true;
+		}
+	}
+
+	if (changed) {
+		this.bibliographyHasChanged = true;
+	}
+};
+
+
 /**
  * Opens the citation explorer
  */
@@ -2533,21 +2612,23 @@ Zotero.Integration.Session.prototype.openCitationExplorer = async function () {
 			const data = await citationField.unserialize();
 			return data.citationID === citation.citationID;
 		},
-		updateIndex: index => this.updateIndices[index] = true
+		relinkItems: replacements => this._relinkItems(replacements)
 	};
 	
 	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationExplorer.xhtml', 'resizable', io);
 	
 	if (io.openCitationDialog) {
-		let citations = await this.cite(io.openCitationDialog);
-		if (this.data.prefs.delayCitationUpdates) {
-			for (let citation of citations) {
-				await this.writeDelayedCitation(citation.field, citation);
+		try {
+			await this.cite(io.openCitationDialog);
+		}
+		catch (e) {
+			if (!(e instanceof Zotero.Exception.Alert)) {
+				Zotero.debug("An error occurred while citing from Citation Explorer. Document will be updated.");
+				Zotero.logError(e);
 			}
-		} else {
-			return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 		}
 	}
+	return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 };
 
 
