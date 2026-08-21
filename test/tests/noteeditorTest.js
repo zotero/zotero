@@ -175,4 +175,60 @@ describe("Note Editor", function () {
 			);
 		});
 	});
+
+	describe("Saving", function () {
+		it("should retry a save that times out waiting for the database", async function () {
+			let editorInstance = await openEditor();
+			let crash = sinon.stub(Zotero, 'crash');
+			let executeTransaction = sinon.stub(Zotero.DB, 'executeTransaction');
+			executeTransaction.onFirstCall().rejects(new Zotero.DBConnection.TimeoutError());
+			executeTransaction.callThrough();
+			try {
+				await editorInstance._save({ state: {}, html: '<p>Retried note</p>' });
+			}
+			finally {
+				executeTransaction.restore();
+				crash.restore();
+			}
+			assert.isTrue(crash.notCalled);
+			assert.equal(editorInstance._item.getNote(), '<p>Retried note</p>');
+		});
+
+		it("shouldn't let a retried save overwrite newer note content", async function () {
+			let editorInstance = await openEditor();
+			let crash = sinon.stub(Zotero, 'crash');
+			let executeTransaction = sinon.stub(Zotero.DB, 'executeTransaction');
+			executeTransaction.onFirstCall().rejects(new Zotero.DBConnection.TimeoutError());
+			executeTransaction.callThrough();
+			try {
+				let timedOut = editorInstance._save({ state: {}, html: '<p>Older note</p>' });
+				await editorInstance._save({ state: {}, html: '<p>Newer note</p>' });
+				await timedOut;
+			}
+			finally {
+				executeTransaction.restore();
+				crash.restore();
+			}
+			assert.equal(editorInstance._item.getNote(), '<p>Newer note</p>');
+		});
+
+		it("shouldn't let a save with nothing to save supersede a pending retry", async function () {
+			let editorInstance = await openEditor();
+			let crash = sinon.stub(Zotero, 'crash');
+			let executeTransaction = sinon.stub(Zotero.DB, 'executeTransaction');
+			executeTransaction.onFirstCall().rejects(new Zotero.DBConnection.TimeoutError());
+			executeTransaction.callThrough();
+			try {
+				let timedOut = editorInstance._save({ state: {}, html: '<p>Pending note</p>' });
+				// What saveSync() passes through when the editor has no unsaved changes
+				await editorInstance._save(null);
+				await timedOut;
+			}
+			finally {
+				executeTransaction.restore();
+				crash.restore();
+			}
+			assert.equal(editorInstance._item.getNote(), '<p>Pending note</p>');
+		});
+	});
 });

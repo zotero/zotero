@@ -50,10 +50,14 @@ const DOWNLOADED_IMAGE_TYPE = [
 	'image/png'
 ];
 
+// Tries at saving a note when the database is busy, each waiting out the transaction timeout
+const MAX_SAVE_ATTEMPTS = 3;
+
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
 		this._undoRedoController = null;
+		this._lastSaveID = 0;
 	}
 
 	get itemID() {
@@ -1140,7 +1144,9 @@ class EditorInstance {
 		}
 	}
 
-	async _save(noteData, skipDateModifiedUpdate) {
+	// saveID identifies this save among the editor's others, so that a retry can tell whether it
+	// still holds the newest content. Assigned below, once there's something to write.
+	async _save(noteData, skipDateModifiedUpdate, saveID, attempt = 1) {
 		if (!noteData) return;
 		let { state, html } = noteData;
 		if (html === undefined) return;
@@ -1157,6 +1163,13 @@ class EditorInstance {
 			if (html === null) {
 				Zotero.debug('Note value not available -- not saving', 2);
 				return;
+			}
+			// Claim an ID now that there's something to write. saveSync() calls through with no
+			// data whenever the editor has no unsaved changes -- including once an update has been
+			// dispatched but not yet saved -- and such a save must not make a retry waiting below
+			// look superseded.
+			if (saveID === undefined) {
+				saveID = ++this._lastSaveID;
 			}
 			// Update note
 			if (this._item) {
@@ -1199,6 +1212,20 @@ class EditorInstance {
 			}
 		}
 		catch (e) {
+			// A long-running operation elsewhere (e.g., full-text index maintenance) can hold the
+			// database past the transaction wait timeout. Nothing was written, so try again rather
+			// than telling the user to restart.
+			if (e instanceof Zotero.DBConnection.TimeoutError && attempt < MAX_SAVE_ATTEMPTS) {
+				// Unless the editor has handed us newer content in the meantime, in which case
+				// this save is superseded and retrying it would undo the newer one
+				if (saveID != this._lastSaveID) {
+					Zotero.debug("Timed out saving note, but a newer save is pending -- skipping", 2);
+					return;
+				}
+				Zotero.debug("Timed out waiting for the database to save note -- retrying", 2);
+				await this._save(noteData, skipDateModifiedUpdate, saveID, attempt + 1);
+				return;
+			}
 			Zotero.logError(e);
 			Zotero.crash(true);
 			throw e;
