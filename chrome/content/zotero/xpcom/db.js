@@ -1232,6 +1232,13 @@ Zotero.DBConnection.prototype.closeDatabase = async function (permanent) {
 		this._connection = permanent ? false : null;
 		Zotero.debug("Database closed");
 	}
+	
+	if (permanent && this._idleObserverRegistered) {
+		this._idleObserverRegistered = false;
+		Components.classes["@mozilla.org/widget/useridleservice;1"]
+			.getService(Components.interfaces.nsIUserIdleService)
+			.removeIdleObserver(this, this.IDLE_OBSERVER_SECONDS);
+	}
 };
 
 
