@@ -37,6 +37,7 @@ Zotero.DBConnection = function (dbNameOrPath) {
 	}
 	
 	this.MAX_BOUND_PARAMETERS = 999;
+	this.IDLE_OBSERVER_SECONDS = 300;
 	this.DB_CORRUPTION_STRINGS = [
 		"database disk image is malformed",
 		"2152857611"
@@ -1672,12 +1673,20 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function () {
 		}
 		
 		// Register idle observer for DB backup
-		Zotero.Schema.schemaUpdatePromise.then(() => {
-			Zotero.debug("Initializing DB backup idle observer");
-			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
-				.getService(Components.interfaces.nsIUserIdleService);
-			idleService.addIdleObserver(this, 300);
-		});
+		if (!this._idleObserverScheduled) {
+			this._idleObserverScheduled = true;
+			Zotero.Schema.schemaUpdatePromise.then(() => {
+				// The database can be closed permanently while this is pending
+				if (this._connection === false) {
+					return;
+				}
+				Zotero.debug("Initializing DB backup idle observer");
+				var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+					.getService(Components.interfaces.nsIUserIdleService);
+				idleService.addIdleObserver(this, this.IDLE_OBSERVER_SECONDS);
+				this._idleObserverRegistered = true;
+			});
+		}
 	}
 
 	// Re-load any extensions loaded via loadExtension(), which are registered per connection and
