@@ -2301,15 +2301,23 @@ Zotero.Search._closestRelatedLevel = function (levels, toLevel) {
  * definition can set `level` explicitly; otherwise it defaults to the top-level item, except
  * for the few itemData fields that attachments also have (title, url, accessDate per the
  * schema), which match at either the item or the attachment level.
+ *
+ * A condition that stands in for a whole set of fields -- the generic 'field' condition that
+ * 'Any Field' expands to -- is matched against every field in the set, so it matches wherever
+ * any one of them lives.
  */
 Zotero.Search._conditionLevel = function (name, conditionData) {
 	if (conditionData.level) {
 		return conditionData.level;
 	}
 	if (conditionData.table == 'itemData') {
-		let fieldID = Zotero.ItemFields.getID(name);
-		if (fieldID
-				&& Zotero.ItemFields.isValidForType(fieldID, Zotero.ItemTypes.getID('attachment'))) {
+		let fields = (name == conditionData.name ? conditionData.aliases : null) || [name];
+		let attachmentTypeID = Zotero.ItemTypes.getID('attachment');
+		let onAttachment = fields.some((field) => {
+			let fieldID = Zotero.ItemFields.getID(field);
+			return fieldID && Zotero.ItemFields.isValidForType(fieldID, attachmentTypeID);
+		});
+		if (onAttachment) {
 			return ['item', 'attachment'];
 		}
 	}
