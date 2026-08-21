@@ -600,6 +600,57 @@ describe("Zotero.Search", function () {
 					await item.eraseTx();
 				});
 
+				it("should match Any Field against an attachment's own fields at the attachment result level", async function () {
+					// 'Any Field' expands to the generic 'field' condition, which covers every
+					// searchable field, including the ones attachments have -- so it matches an
+					// attachment's own URL, not just its parent item's
+					var itemURL = 'https://example.com/zaf' + Zotero.Utilities.randomString();
+					var attURL = 'https://example.com/zaf' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					item.setField('url', itemURL);
+					await item.saveTx();
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('url', attURL);
+					await attachment.saveTx();
+
+					let search = (value) => {
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('resultLevel', 'attachment');
+						s.addCondition('anyField', 'contains', value);
+						return s.search();
+					};
+
+					assert.sameMembers(await search(attURL), [attachment.id]);
+					// The parent item's URL isn't the attachment's, as with a single-field condition
+					assert.sameMembers(await search(itemURL), []);
+
+					await item.eraseTx();
+				});
+
+				it("should match an item by Any Field in a group at the attachment level", async function () {
+					// "top-level items matching, in the same attachment, Any Field contains X"
+					var url = 'https://example.com/zafg' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('url', url);
+					await attachment.saveTx();
+					var other = await createDataObject('item');
+					await importPDFAttachment(other);
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('groupStart', 'true', '');
+					s.addCondition('resultLevel', 'attachment');
+					s.addCondition('anyField', 'contains', url);
+					s.addCondition('groupEnd', 'true', '');
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+					await other.eraseTx();
+				});
+
 				it("should map a bare descendant condition to the result level (no group)", async function () {
 					var text = 'zbarecorr' + Zotero.Utilities.randomString();
 					var item = await createDataObject('item', { title: 'zbarecorritem' });
