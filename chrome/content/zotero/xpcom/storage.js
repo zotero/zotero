@@ -111,8 +111,6 @@ Zotero.Sync.Storage = new function () {
 			_syncInProgress = false;
 		}
 		
-		Zotero.DB.rollbackAllTransactions();
-		
 		if (e) {
 			Zotero.debug(e, 1);
 		}

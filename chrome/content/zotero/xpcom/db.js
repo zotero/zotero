@@ -88,13 +88,10 @@ Zotero.DBConnection = function (dbNameOrPath) {
 		this._dbPath = Zotero.DataDirectory.getDatabase(dbNameOrPath);
 		this._externalDB = false;
 	}
-	this._shutdown = false;
 	this._connection = null;
 	this._transactionID = null;
 	this._transactionDate = null;
 	this._lastTransactionDate = null;
-	this._transactionRollback = false;
-	this._transactionNestingLevel = 0;
 	this._commitCount = 0;
 	this._callbacks = {
 		begin: [],
@@ -320,25 +317,6 @@ Zotero.DBConnection.prototype.removeCallback = function (type, id) {
 	}
 	
 	delete this._callbacks[type][id];
-}
-
-
-/*
- * Used on shutdown to rollback all open transactions
- *
- * TODO: update or remove
- */
-Zotero.DBConnection.prototype.rollbackAllTransactions = function () {
-	if (this.transactionInProgress()) {
-		var level = this._transactionNestingLevel;
-		this._transactionNestingLevel = 0;
-		try {
-			this.rollbackTransaction();
-		}
-		catch (e) {}
-		return level ? level : true;
-	}
-	return false;
 }
 
 
