@@ -573,8 +573,10 @@ var ZoteroPane = new function () {
 			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
-		await ZoteroPane.initCollectionsTree();
+		// The items tree has to be initialized first, since the collections tree selects a
+		// row as soon as it's initialized, which loads items into the items tree
 		await ZoteroPane.initItemsTree();
+		await ZoteroPane.initCollectionsTree();
 		ZoteroPane.initCollectionTreeSearch();
 		
 		// Add a default progress window
