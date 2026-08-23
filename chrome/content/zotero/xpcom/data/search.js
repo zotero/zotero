@@ -836,7 +836,7 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 	// items list and membership is untouched.
 	let bestMatch = this.getBestMatchQuery();
 	if (ids && ids.length && bestMatch && bestMatch.topK) {
-		let scores = await Zotero.BestMatch.scoreItemIDs(bestMatch.query, ids);
+		let { scores } = await Zotero.BestMatch.scoreItemIDs(bestMatch.query, ids);
 		ids = [...scores.entries()]
 			// Deterministic order: by score, then by itemID for equal scores
 			.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))

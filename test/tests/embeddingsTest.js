@@ -139,7 +139,7 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
 					[close.id, distant.id]);
 				assert.isAbove(scores.get(close.id), 0.9);
 				assert.isFalse(scores.has(distant.id));
@@ -183,12 +183,66 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
 					[chunked.id, distant.id]);
 				// The item scores as its best chunk, not an average, so the
 				// unrelated first chunk doesn't dilute the match
 				assert.isAbove(scores.get(chunked.id), 0.9);
 				assert.isFalse(scores.has(distant.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
+	describe("#scoreItemIDs() previewable items", function () {
+		it("should report which items a previewable chunk carries", async function () {
+			let axis = (index, scale = 1) => {
+				let vector = Float32Array.from(testMean);
+				vector[index] += scale;
+				return vector;
+			};
+			let store = async (item, chunkIndex, vector, { blocks = false } = {}) => {
+				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings "
+						+ "(itemID, chunkIndex, embedding, sourceHash, startBlock, endBlock) "
+						+ "VALUES (?, ?, ?, 'hash', ?, ?)",
+					[item.id, chunkIndex, blob, blocks ? 0 : null, blocks ? 2 : null],
+					{ debugParams: false }
+				);
+			};
+			// One item matches through a chunk with source references (plus a
+			// below-floor chunk with references, which must not count), one
+			// matches only through a chunk without them, and a distractor
+			// matches nothing
+			let chunked = await createDataObject('item');
+			await store(chunked, 0, axis(2), { blocks: true });
+			await store(chunked, 1, axis(0), { blocks: true });
+			let plain = await createDataObject('item');
+			await store(plain, 0, axis(0));
+			let distant = await createDataObject('item');
+			await store(distant, 0, axis(3));
+
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let { scores, previewableIDs } = await Zotero.Embeddings.scoreItemIDs(
+					'anything', [chunked.id, plain.id, distant.id]);
+				assert.isTrue(previewableIDs.has(chunked.id));
+				// A match carried only by chunks without source references is
+				// its own preview
+				assert.isTrue(scores.has(plain.id));
+				assert.isFalse(previewableIDs.has(plain.id));
+				assert.isFalse(previewableIDs.has(distant.id));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -1784,7 +1838,7 @@ describe("Zotero.Embeddings", function () {
 
 				// A processed-but-empty item can't be scored, and doesn't
 				// break scoring for anything else
-				let scores = await Zotero.Embeddings.scoreItemIDs('anything', [attachment.id]);
+				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything', [attachment.id]);
 				assert.isFalse(scores.has(attachment.id));
 
 				// The record makes later passes skip the attachment without
@@ -1990,7 +2044,7 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
+				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
 					[empty.id, distinct.id]);
 				// Without centering the two would be nearly indistinguishable,
 				// since both consist mostly of the shared direction

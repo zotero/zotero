@@ -94,7 +94,14 @@ Zotero.BestMatch = new function () {
 	 * @param {Object} [options]
 	 * @param {Function} [options.shouldCancel] - Checked between scoring
 	 *     stages; return true to abandon scoring with a ScoringCancelledError
-	 * @return {Promise<Map>} - itemID -> score (0-1, higher is more relevant)
+	 * @return {Promise<Object>} - { scores, matches }: scores maps
+	 *     itemID -> score (0-1, higher is more relevant); matches says which
+	 *     items each engine can show match excerpts in, as { lexical,
+	 *     semantic } Sets of itemIDs (see getMatchingExcerpts()). Every
+	 *     lexical match has excerpts to show; a semantic match does only
+	 *     when a previewable chunk carries it (see
+	 *     Zotero.Embeddings.scoreItemIDs()). An engine that didn't rank
+	 *     contributes an empty Set.
 	 * @throws {Zotero.BestMatch.ScoringCancelledError}
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
@@ -104,16 +111,23 @@ Zotero.BestMatch = new function () {
 			let engine = Zotero.Prefs.get('search.bestMatchEngine');
 			if (engine == 'semantic') {
 				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
-				// On the model's display band, so scores are 0-1 like the
-				// other modes'
-				return new Map([...semantic].map(
-					([itemID, score]) => [itemID, Zotero.Embeddings.getScoreFraction(score)]
-				));
+				return {
+					// On the model's display band, so scores are 0-1 like the
+					// other modes'
+					scores: new Map([...semantic.scores].map(
+						([itemID, score]) => [itemID, Zotero.Embeddings.getScoreFraction(score)]
+					)),
+					matches: { lexical: new Set(), semantic: semantic.previewableIDs }
+				};
 			}
 			// A query the semantic engine can't embed ranks lexically alone
 			if (engine == 'lexical' || !_useSemantic()
 					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
-				return await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
+				let scores = await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
+				return {
+					scores,
+					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+				};
 			}
 			// Both engines score the same candidates concurrently. allSettled
 			// rather than all, so one engine's failure still leaves the
@@ -129,11 +143,23 @@ Zotero.BestMatch = new function () {
 				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
 					Zotero.debug("Semantic index not ready -- ranking lexically: "
 						+ semantic.reason.message);
-					return lexical.value;
+					return {
+						scores: lexical.value,
+						matches: {
+							lexical: new Set(lexical.value.keys()),
+							semantic: new Set()
+						}
+					};
 				}
 				throw semantic.reason;
 			}
-			return _fuse(lexical.value, semantic.value);
+			return {
+				scores: _fuse(lexical.value, semantic.value.scores),
+				matches: {
+					lexical: new Set(lexical.value.keys()),
+					semantic: semantic.value.previewableIDs
+				}
+			};
 		}
 		catch (e) {
 			if (e instanceof Zotero.Embeddings.ScoringCancelledError

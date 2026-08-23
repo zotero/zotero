@@ -412,7 +412,8 @@ Zotero.Lexical = new function () {
 	 * @param {String} queryText
 	 * @param {Number} itemID
 	 * @param {Object} [options]
-	 * @param {Number} [options.limit=5] - Most excerpts to return
+	 * @param {Number} [options.limit=5] - Most excerpts to return; Infinity
+	 *     for every excerpt the item's matches cut into
 	 * @return {Promise<Object[]>} - [{ source, text, ranges, strength }],
 	 *     with ranges an array of [start, end) pairs into the excerpt's text
 	 */

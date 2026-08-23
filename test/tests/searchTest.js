@@ -244,7 +244,10 @@ describe("Zotero.Search", function () {
 
 			// With a cutoff, membership is the K most relevant
 			let stub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs').callsFake(
-				async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
+				async (query, itemIDs) => ({
+					scores: new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5])),
+					matches: { lexical: new Set(itemIDs), semantic: new Set() }
+				})
 			);
 			try {
 				let s2 = new Zotero.Search();

@@ -245,6 +245,16 @@ describe("CollectionViewItemTree", function () {
 		describe("in best-match mode", function () {
 			var stubs = [];
 
+			// Embeddings scoreItemIDs fakes below supply bare score Maps (or a
+			// function returning one); wrap them in the engine's real
+			// { scores, previewableIDs } envelope
+			function scoreEnvelope(fake) {
+				return async (...args) => ({
+					scores: await (typeof fake == 'function' ? fake(...args) : fake),
+					previewableIDs: new Set()
+				});
+			}
+
 			beforeEach(function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
@@ -282,7 +292,7 @@ describe("CollectionViewItemTree", function () {
 				let itemA = await createDataObject('item', { title: "A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "B", collections: [col.id] });
 				let itemC = await createDataObject('item', { title: "C", collections: [col.id] });
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async (query, itemIDs) => {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(async (query, itemIDs) => {
 					let scores = new Map();
 					if (itemIDs.includes(itemA.id)) {
 						scores.set(itemA.id, 0.5);
@@ -291,7 +301,7 @@ describe("CollectionViewItemTree", function () {
 						scores.set(itemB.id, 0.9);
 					}
 					return scores;
-				}));
+				})));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -356,7 +366,7 @@ describe("CollectionViewItemTree", function () {
 				let other = await createDataObject('item', { title: "liftrank other", collections: [col.id] });
 				// Only the annotation and the unrelated peer match on their own
 				// text -- the paper's own abstract says nothing about the query
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async (query, itemIDs) => {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(async (query, itemIDs) => {
 					let scores = new Map();
 					if (itemIDs.includes(annotation.id)) {
 						scores.set(annotation.id, 0.9);
@@ -365,7 +375,7 @@ describe("CollectionViewItemTree", function () {
 						scores.set(other.id, 0.5);
 					}
 					return scores;
-				}));
+				})));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -425,9 +435,9 @@ describe("CollectionViewItemTree", function () {
 			it("should move the Relevance column to the far right and restore it when cleared", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "farright A", collections: [col.id] });
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, 0.5]))
-				));
+				)));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -453,9 +463,9 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let itemA = await createDataObject('item', { title: "persistsort A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "persistsort B", collections: [col.id] });
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
-				));
+				)));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -495,7 +505,7 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "A", collections: [col.id] });
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
-					.resolves(new Map([[item.id, 0.7]])));
+					.callsFake(scoreEnvelope(new Map([[item.id, 0.7]]))));
 				// The counts are split between the item and attachment pairs, so
 				// the banner's totals prove the two are summed
 				Zotero.Embeddings.Indexing.getStatus.returns({
@@ -579,9 +589,9 @@ describe("CollectionViewItemTree", function () {
 				let col2 = await createDataObject('collection');
 				let shared = await createDataObject('item', { collections: [col1.id, col2.id] });
 				let other = await createDataObject('item', { collections: [col2.id] });
-				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == shared.id ? 0.9 : 0.5]))
-				);
+				));
 				stubs.push(scoreStub);
 
 				await cv.selectByID("C" + col1.id);
@@ -607,11 +617,11 @@ describe("CollectionViewItemTree", function () {
 				let itemB = await createDataObject('item', { title: "savedsimtest B" });
 				// Install the stub first: creating the saved search auto-selects
 				// it, which already runs a best-match refresh
-				let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map((id) => {
 						let best = query == 'saved query' ? itemA.id : itemB.id;
 						return [id, id == best ? 0.9 : 0.5];
-					}))
+					})))
 				);
 				stubs.push(stub);
 				let search = new Zotero.Search();
@@ -643,11 +653,11 @@ describe("CollectionViewItemTree", function () {
 				// Install the stub first: creating the saved search auto-selects
 				// it, which already runs its top-K search
 				let scores = new Map([[kItem1.id, 0.9], [kItem2.id, 0.5], [colItem2.id, 0.7]]);
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(
 						itemIDs.filter(id => scores.has(id)).map(id => [id, scores.get(id)])
 					)
-				));
+				)));
 				let search = new Zotero.Search();
 				search.name = "Top-K best-match test";
 				search.libraryID = col.libraryID;
@@ -699,9 +709,9 @@ describe("CollectionViewItemTree", function () {
 				let itemA = await createDataObject('item', { title: "rerank A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "rerank B", collections: [col.id] });
 				let best = itemA.id;
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
-				));
+				)));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -720,9 +730,9 @@ describe("CollectionViewItemTree", function () {
 				let itemA = await createDataObject('item', { title: "norerank A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "norerank B", collections: [col.id] });
 				let best = itemA.id;
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
-				));
+				)));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -741,9 +751,9 @@ describe("CollectionViewItemTree", function () {
 				let itemA = await createDataObject('item', { title: "reuse A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "reuse B", collections: [col.id] });
 				let best = itemA.id;
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
 					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
-				));
+				)));
 
 				await select(win, col);
 				itemsView = zp.itemsView;

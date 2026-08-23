@@ -271,11 +271,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let scores;
 		let generation = this._bestMatchGeneration;
 		try {
-			scores = await Zotero.BestMatch.scoreItemIDs(query, [...itemsByID.keys()], {
+			({ scores } = await Zotero.BestMatch.scoreItemIDs(query, [...itemsByID.keys()], {
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
 				shouldCancel: () => generation !== this._bestMatchGeneration
-			});
+			}));
 		}
 		catch (e) {
 			if (e instanceof Zotero.BestMatch.ScoringCancelledError) {

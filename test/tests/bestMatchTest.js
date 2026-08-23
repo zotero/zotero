@@ -21,8 +21,12 @@ describe("Zotero.BestMatch", function () {
 		if (lexical) {
 			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').callsFake(lexical));
 		}
+		// Per-test semantic fakes return bare score Maps; wrap them in the
+		// engine's { scores, previewableIDs } envelope
 		if (semantic) {
-			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(semantic));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+				.callsFake(async (...args) => (
+					{ scores: await semantic(...args), previewableIDs: new Set() })));
 		}
 	}
 
@@ -41,7 +45,7 @@ describe("Zotero.BestMatch", function () {
 				lexical: async () => lexicalScores
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
 			assert.isFalse(semanticStub.called);
 			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.3]]);
 		});
@@ -54,7 +58,7 @@ describe("Zotero.BestMatch", function () {
 				semantic: async () => new Map([[2, 0.8], [3, 0.6]])
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3, 4]);
+			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3, 4]);
 			assert.sameMembers([...scores.keys()], [1, 2, 3]);
 			assert.closeTo(scores.get(1), rrf([0.9, 1]), 1e-12);
 			assert.closeTo(scores.get(2), rrf([0.5, 2], [0.8, 1]), 1e-12);
@@ -73,7 +77,7 @@ describe("Zotero.BestMatch", function () {
 				semantic: async () => new Map([[1, 0.9], [2, 0.05]])
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
 			// Appearing in both lists isn't worth much when both appearances
 			// are weak: the contributions carry the engines' own fractions
 			assert.isAbove(scores.get(1), scores.get(2));
@@ -87,7 +91,7 @@ describe("Zotero.BestMatch", function () {
 				fraction: score => score / 2
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
 			// The raw similarity scores rank; their display-band fractions
 			// (0.4 and 0.3) are what the contributions carry
 			assert.closeTo(scores.get(1), rrf([0.4, 1]), 1e-12);
@@ -101,7 +105,7 @@ describe("Zotero.BestMatch", function () {
 				semantic: async () => new Map()
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
 			assert.equal(scores.get(1), scores.get(2));
 			assert.closeTo(scores.get(3), rrf([0.4, 2]), 1e-12);
 		});
@@ -116,8 +120,29 @@ describe("Zotero.BestMatch", function () {
 				}
 			});
 
-			let scores = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
 			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.3]]);
+			// The engine that didn't rank shows matches in nothing
+			assert.equal(matches.semantic.size, 0);
+			assert.sameMembers([...matches.lexical], [1, 2]);
+		});
+
+		it("should report which items each engine can show matches in", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
+				.callsFake(score => score));
+			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
+				.resolves(new Map([[1, 0.9]])));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').resolves({
+				scores: new Map([[2, 0.8], [3, 0.7]]),
+				previewableIDs: new Set([2])
+			}));
+
+			let { matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+			// Every lexical match has excerpts to show...
+			assert.sameMembers([...matches.lexical], [1]);
+			// ...while a semantic match shows only through previewable chunks
+			assert.sameMembers([...matches.semantic], [2]);
 		});
 
 		it("should map either engine's cancellation to its own error", async function () {

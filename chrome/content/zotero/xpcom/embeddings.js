@@ -1101,12 +1101,19 @@ Zotero.Embeddings = new function () {
 	 * @param {Function} [options.shouldCancel] - Checked between chunks;
 	 *     return true to abandon scoring with a ScoringCancelledError (e.g.
 	 *     because a newer query made this one obsolete)
-	 * @return {Promise<Map>} - itemID -> similarity score (higher is more similar)
+	 * @return {Promise<Object>} - { scores, previewableIDs }: scores maps
+	 *     itemID -> similarity score (higher is more similar);
+	 *     previewableIDs holds the scored itemIDs with at least one
+	 *     above-floor chunk that stores source references its text can be
+	 *     re-derived from (see getMatchingChunks()) -- the items whose
+	 *     match getMatchingChunks() can show. An item scored only by chunks
+	 *     without references is its own preview and isn't in the set.
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		let scores = new Map();
+		let previewableIDs = new Set();
 		if (!itemIDs.length || !this.isEnabled()) {
-			return scores;
+			return { scores, previewableIDs };
 		}
 		let calibration = await _requireReadyIndex();
 		let generation = _modelGeneration;
@@ -1133,7 +1140,9 @@ Zotero.Embeddings = new function () {
 			// Rows without an embedding are processed-but-empty markers (see
 			// _setUpDB()), with nothing to score
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, embedding FROM embeddings.itemEmbeddings WHERE itemID IN ("
+				"SELECT itemID, embedding, "
+					+ "(startBlock IS NOT NULL OR startOffset IS NOT NULL) AS previewable "
+					+ "FROM embeddings.itemEmbeddings WHERE itemID IN ("
 					+ chunk.map(() => '?').join(',') + ") AND embedding IS NOT NULL",
 				chunk
 			);
@@ -1142,6 +1151,12 @@ Zotero.Embeddings = new function () {
 				let prev = best.get(row.itemID);
 				if (prev === undefined || dot > prev) {
 					best.set(row.itemID, dot);
+				}
+				// An above-floor chunk with source references makes its item's
+				// match showable; the chunk also puts the item's best at or
+				// above the floor, so the set stays within the returned items
+				if (dot >= minScore && row.previewable) {
+					previewableIDs.add(row.itemID);
 				}
 			}
 		}
@@ -1153,7 +1168,7 @@ Zotero.Embeddings = new function () {
 		if (generation !== _modelGeneration) {
 			throw new this.IndexNotReadyError('Model changed during scoring');
 		}
-		return scores;
+		return { scores, previewableIDs };
 	};
 
 	/**
@@ -1176,7 +1191,8 @@ Zotero.Embeddings = new function () {
 	 * @param {String} queryText
 	 * @param {Number} itemID
 	 * @param {Object} [options]
-	 * @param {Number} [options.limit=3] - Most chunks to return
+	 * @param {Number} [options.limit=3] - Most chunks to return; Infinity
+	 *     for every chunk above the floor
 	 * @return {Promise<Object[]>} - [{ chunkIndex, score, text, outlinePath,
 	 *     startBlock, endBlock, pageLabel, position, sectionPart,
 	 *     sectionParts }], best first, ties broken by position in the text.
