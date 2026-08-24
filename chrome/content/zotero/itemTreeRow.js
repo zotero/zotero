@@ -103,6 +103,17 @@ class ItemTreeRow {
 		return getCSSItemTypeIcon('document');
 	}
 
+	/**
+	 * The 0-1 fraction the Relevance column's bar shows for this row on its
+	 * own, for rows carrying their own relevance rather than taking it from
+	 * the view's best-match scores, or null for rows that don't
+	 *
+	 * @return {Number|null}
+	 */
+	getRelevanceFraction() {
+		return null;
+	}
+
 	renderRow(div, index, columns, rowData, renderCtx) {
 		for (let column of columns) {
 			if (column.hidden) continue;
@@ -461,11 +472,16 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 		return true;
 	}
 
-	isContainerEmpty() {
+	isContainerEmpty({ getMatchPreviews } = {}) {
+		// An attachment with search matches to show can be expanded even
+		// with no annotations of its own
+		if (getMatchPreviews?.(this.ref.id)) {
+			return false;
+		}
 		return this.ref.numAnnotations() == 0;
 	}
 
-	getChildItems({ searchMode, searchItemIDs } = {}) {
+	getChildItems({ searchMode, searchItemIDs, getMatchPreviews } = {}) {
 		let annotations = this.ref.getAnnotations();
 		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
 		// annotations match a search, show only those and hide the rest. If none match,
@@ -477,7 +493,8 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 				annotations = matches;
 			}
 		}
-		return annotations;
+		// Fulltext match rows come after the annotations
+		return [...annotations, ...SearchMatch.forItem(this.ref, getMatchPreviews)];
 	}
 
 	_supportsBestAttachmentState() {
@@ -571,6 +588,155 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 				div.append(cell);
 			}
 		}
+	}
+}
+
+/**
+ * The reference a search-match row wraps: one place a best-match search
+ * matched inside an item, or -- with no entry yet -- a stand-in for that
+ * item's matches while its preview is still being derived.
+ *
+ * Item tree rows normally wrap data objects. A preview isn't a stored
+ * object, so this stands in as the tree's reference to one.
+ */
+class SearchMatch {
+	constructor(itemID, entry = null) {
+		this.itemID = itemID;
+		// A preview entry (see Zotero.BestMatch.Session#getPreviews()), or
+		// null while the item's previews are still pending
+		this.entry = entry;
+		this.treeViewID = 'SM' + itemID + (entry ? '-' + entry.key : '-pending');
+		this.id = this.treeViewID;
+	}
+
+	get isPending() {
+		return !this.entry;
+	}
+
+	/**
+	 * The search-match refs to materialize under an item, from its
+	 * best-match preview: one pending ref while the preview is being
+	 * derived, one ref per derived entry once it's filled, and nothing when
+	 * the item has no preview or its preview derived nothing.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Function} [getMatchPreviews] - itemID -> preview accessor (see
+	 *     Zotero.BestMatch.Session#getPreviews()), passed by the row
+	 *     provider while a best-match search is active
+	 * @return {SearchMatch[]}
+	 */
+	static forItem(item, getMatchPreviews) {
+		let preview = getMatchPreviews?.(item.id);
+		if (!preview) {
+			return [];
+		}
+		if (preview.state == 'pending') {
+			return [new SearchMatch(item.id)];
+		}
+		return preview.entries.map(entry => new SearchMatch(item.id, entry));
+	}
+}
+
+/**
+ * Row showing one place a best-match search matched inside its parent row's
+ * item: a derived excerpt with its matches highlighted. The ref is a
+ * SearchMatch carrying the preview entry it shows.
+ */
+class SearchMatchItemTreeRow extends ItemTreeRow {
+	get type() {
+		return 'search-match';
+	}
+
+	getDisplayTitle() {
+		return this.ref.entry.text;
+	}
+
+	getField(field) {
+		if (field == 'title') {
+			return this.getDisplayTitle();
+		}
+		return super.getField(field);
+	}
+
+	/**
+	 * A match row's bar shows the strength of the evidence it displays,
+	 * rather than its item's relevance
+	 */
+	getRelevanceFraction() {
+		return this.ref.entry?.strength ?? null;
+	}
+
+	getIcon() {
+		let icon = getCSSIcon('search');
+		icon.classList.add('icon-item-type');
+		return icon;
+	}
+
+	renderRow(div, index, columns, rowData, renderCtx) {
+		let titleColumn = Object.assign(
+			{},
+			columns.find(column => column.dataKey == 'title'),
+			{ className: 'title' }
+		);
+		div.appendChild(renderCtx.renderCell(index, rowData.title, titleColumn, true));
+		// The relevance bar while a best-match search shows the Relevance column
+		let relevanceColumn = columns.find(column => column.dataKey == 'relevance');
+		if (relevanceColumn && !relevanceColumn.hidden) {
+			let cell = renderCtx.renderCell(index, rowData?.relevance, relevanceColumn, false);
+			if (cell) {
+				div.appendChild(cell);
+			}
+		}
+	}
+
+	renderPrimaryCell(index, data, column) {
+		let span = document.createElement('span');
+		span.className = `cell ${column.className} primary`;
+		let textSpan = document.createElement('span');
+		textSpan.className = 'cell-text';
+		let { text, ranges } = this.ref.entry;
+		let last = 0;
+		for (let [start, end] of ranges || []) {
+			if (start > last) {
+				textSpan.append(text.slice(last, start));
+			}
+			let mark = document.createElement('span');
+			mark.className = 'search-match-highlight';
+			mark.textContent = text.slice(start, end);
+			textSpan.append(mark);
+			last = end;
+		}
+		if (last < text.length) {
+			textSpan.append(text.slice(last));
+		}
+		span.append(textSpan);
+		return span;
+	}
+}
+
+/**
+ * Row standing in for an item's search-match rows while its preview is
+ * still pending: a single row showing that matches are on their way, which
+ * the fill replaces with the item's SearchMatchItemTreeRows. The ref is a
+ * SearchMatch with no entry yet.
+ */
+class SearchMatchPlaceholderItemTreeRow extends SearchMatchItemTreeRow {
+	get type() {
+		return 'search-match-placeholder';
+	}
+
+	getDisplayTitle() {
+		return '';
+	}
+
+	renderPrimaryCell(index, data, column) {
+		let span = document.createElement('span');
+		span.className = `cell ${column.className} primary`;
+		let textSpan = document.createElement('span');
+		textSpan.className = 'cell-text search-match-pending';
+		textSpan.textContent = Zotero.ftl.formatValueSync('items-search-match-pending');
+		span.append(textSpan);
+		return span;
 	}
 }
 
@@ -751,6 +917,11 @@ class SpacerItemTreeRow extends ItemTreeRow {
 ItemTreeRow.create = function (ref, level, isOpen) {
 	if (ref instanceof Zotero.Collection) return new CollectionItemTreeRow(ref, level, isOpen);
 	if (ref instanceof Zotero.Search) return new SearchItemTreeRow(ref, level, isOpen);
+	if (ref instanceof SearchMatch) {
+		return ref.isPending
+			? new SearchMatchPlaceholderItemTreeRow(ref, level, isOpen)
+			: new SearchMatchItemTreeRow(ref, level, isOpen);
+	}
 	if (ref.isAnnotation?.()) return new AnnotationItemTreeRow(ref, level, isOpen);
 	if (ref.isFileAttachment?.()) return new FileItemTreeRow(ref, level, isOpen);
 	return new ZoteroItemTreeRow(ref, level, isOpen);
@@ -761,6 +932,9 @@ module.exports.ItemTreeRow = ItemTreeRow;
 module.exports.ZoteroItemTreeRow = ZoteroItemTreeRow;
 module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
+module.exports.SearchMatchItemTreeRow = SearchMatchItemTreeRow;
+module.exports.SearchMatchPlaceholderItemTreeRow = SearchMatchPlaceholderItemTreeRow;
+module.exports.SearchMatch = SearchMatch;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;
 module.exports.SpacerItemTreeRow = SpacerItemTreeRow;

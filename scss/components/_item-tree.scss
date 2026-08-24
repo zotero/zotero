@@ -373,7 +373,29 @@
 				padding: 0 2px 0 0;
 			}
 		}
-		
+
+		.search-match-row {
+			.cell {
+				font-size: $font-size-small;
+				&.title {
+					flex-grow: 1;
+					flex-basis: 0;
+					max-width: fit-content;
+				}
+				// Push the relevance bar to the row's end, where the Relevance
+				// column sits while a best-match search is active
+				&.relevance {
+					margin-inline-start: auto;
+				}
+			}
+			.search-match-pending {
+				color: var(--fill-secondary);
+			}
+			.search-match-highlight {
+				font-weight: 600;
+			}
+		}
+
 		.cell:not(.hasAttachment) .item-icon {
 			margin-inline-end: 4px;
 		}

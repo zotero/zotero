@@ -182,7 +182,30 @@ describe("Zotero.BestMatch", function () {
 		});
 	});
 
-	describe("#getMatchingExcerpts()", function () {
+	describe("Session#getMatchingExcerpts()", function () {
+		// Previews exist only for file attachments (see _hasPreviews())
+		var attachment;
+
+		before(async function () {
+			attachment = await importFileAttachment('test.pdf');
+		});
+
+		// A session that has scored the attachment, recording which engines
+		// matched it -- what getMatchingExcerpts() consults instead of being
+		// told per call
+		async function sessionFor({ lexical = true, semantic = true } = {}) {
+			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores: new Map([[attachment.id, 0.9]]),
+				matches: {
+					lexical: new Set(lexical ? [attachment.id] : []),
+					semantic: new Set(semantic ? [attachment.id] : [])
+				}
+			}));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([attachment.id]);
+			return session;
+		}
+
 		it("should return lexical excerpts when no semantic model is enabled", async function () {
 			let lexicalExcerpts = [{ source: 'title', text: 'owl', ranges: [[0, 3]], strength: 1 }];
 			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks');
@@ -191,7 +214,8 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Lexical, 'getMatchingExcerpts')
 				.resolves(lexicalExcerpts));
 
-			let excerpts = await Zotero.BestMatch.getMatchingExcerpts('owl', 1);
+			let session = await sessionFor();
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.isFalse(chunksStub.called);
 			assert.equal(excerpts, lexicalExcerpts);
 		});
@@ -207,12 +231,13 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges')
 				.resolves([[[4, 7]]]));
 
-			let excerpts = await Zotero.BestMatch.getMatchingExcerpts('owl', 1);
+			let session = await sessionFor();
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.lengthOf(excerpts, 1);
 			assert.equal(excerpts[0].text, 'the owl chunk');
 			assert.deepEqual(excerpts[0].ranges, [[4, 7]]);
 			assert.equal(excerpts[0].strength, 0.6);
-			// Chunk fields pass through for the card's location line
+			// Chunk fields pass through for the row's location line
 			assert.equal(excerpts[0].position, 1);
 		});
 
@@ -242,7 +267,8 @@ describe("Zotero.BestMatch", function () {
 				}
 			]));
 
-			let excerpts = await Zotero.BestMatch.getMatchingExcerpts('owl migration', 1);
+			let session = await sessionFor();
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.deepEqual(
 				excerpts.map(excerpt => excerpt.source || 'chunk'),
 				['title', 'chunk', 'content']
@@ -250,22 +276,39 @@ describe("Zotero.BestMatch", function () {
 			assert.include(excerpts[2].text, 'different');
 		});
 
-		it("should cap the merged entries at the limit", async function () {
+		it("should skip the lexical engine for an item that didn't match it", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			let lexicalStub = sinon.stub(Zotero.Lexical, 'getMatchingExcerpts');
+			stubs.push(lexicalStub);
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
-				{ text: 'chunk one', score: 0.8 },
-				{ text: 'chunk two', score: 0.4 }
+				{ text: 'the owl chunk', score: 0.6 }
 			]));
-			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[], []]));
-			stubs.push(sinon.stub(Zotero.Lexical, 'getMatchingExcerpts').resolves([
-				{ source: 'title', text: 'owl', ranges: [[0, 3]], strength: 0.6 }
-			]));
+			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[]]));
 
-			let excerpts = await Zotero.BestMatch.getMatchingExcerpts('owl', 1, { limit: 2 });
-			assert.lengthOf(excerpts, 2);
-			assert.equal(excerpts[0].text, 'chunk one');
-			assert.equal(excerpts[1].source, 'title');
+			// Scoring recorded a semantic match only, so the document's text
+			// is never read or scanned
+			let session = await sessionFor({ lexical: false });
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+			assert.isFalse(lexicalStub.called);
+			assert.lengthOf(excerpts, 1);
+			assert.equal(excerpts[0].text, 'the owl chunk');
+		});
+
+		it("should skip the semantic engine for an item that didn't match it", async function () {
+			let lexicalExcerpts = [{ source: 'title', text: 'owl', ranges: [[0, 3]], strength: 1 }];
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Lexical, 'getMatchingExcerpts')
+				.resolves(lexicalExcerpts));
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks');
+			stubs.push(chunksStub);
+
+			// Scoring recorded a lexical match only, so the query is never
+			// embedded for it
+			let session = await sessionFor({ semantic: false });
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+			assert.isFalse(chunksStub.called);
+			assert.equal(excerpts, lexicalExcerpts);
 		});
 
 		it("should keep the lexical excerpts alone when the model shows nothing", async function () {
@@ -278,11 +321,12 @@ describe("Zotero.BestMatch", function () {
 			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks')
 				.resolves([{ text: null }]);
 			stubs.push(chunksStub);
-			assert.equal(await Zotero.BestMatch.getMatchingExcerpts('owl', 1), lexicalExcerpts);
+			let session = await sessionFor();
+			assert.equal(await session.getMatchingExcerpts(attachment.id), lexicalExcerpts);
 
 			// The semantic index isn't ready
 			chunksStub.rejects(new Zotero.Embeddings.IndexNotReadyError('test'));
-			assert.equal(await Zotero.BestMatch.getMatchingExcerpts('owl', 1), lexicalExcerpts);
+			assert.equal(await session.getMatchingExcerpts(attachment.id), lexicalExcerpts);
 		});
 
 		it("should rethrow an unexpected semantic failure", async function () {
@@ -291,9 +335,235 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks')
 				.rejects(new Error('model exploded')));
 
-			let e = await getPromiseError(Zotero.BestMatch.getMatchingExcerpts('owl', 1));
+			let session = await sessionFor();
+			let e = await getPromiseError(session.getMatchingExcerpts(attachment.id));
 			assert.equal(e.message, 'model exploded');
 		});
+	});
+
+	describe("Session", function () {
+		// Previews are only built for file attachments (see _hasPreviews()),
+		// so the items these tests score are real ones
+		var att1, att2, att3;
+
+		before(async function () {
+			att1 = await importFileAttachment('test.pdf');
+			att2 = await importFileAttachment('test.pdf');
+			att3 = await importFileAttachment('test.pdf');
+		});
+
+		function stubScore(scores, lexicalIDs, semanticIDs) {
+			let stub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores,
+				matches: {
+					lexical: new Set(lexicalIDs || []),
+					semantic: new Set(semanticIDs || [])
+				}
+			});
+			stubs.push(stub);
+			return stub;
+		}
+
+		function stubDerive(entriesByItem) {
+			let stub = sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').callsFake(
+				async itemID => entriesByItem.get(itemID) || []);
+			stubs.push(stub);
+			return stub;
+		}
+
+		function settledOnce(session) {
+			return new Promise((resolve) => {
+				session.onUpdate = resolve;
+			});
+		}
+
+		it("should build placeholder previews from the engines' match sets", async function () {
+			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8], [att3.id, 0.7]]), [att1.id], [att2.id]);
+			let session = Zotero.BestMatch.createSession('owl');
+			let scores = await session.score([att1.id, att2.id, att3.id]);
+			assert.equal(scores.get(att1.id), 0.9);
+			assert.equal(session.getPreviews(att1.id).state, 'pending');
+			assert.equal(session.getPreviews(att2.id).state, 'pending');
+			// A scored item neither engine can show matches in -- a semantic
+			// match that is its own preview -- gets no placeholder
+			assert.isNull(session.getPreviews(att3.id));
+		});
+
+		it("should fill requested previews all at once and report them", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl atlas', ranges: [[0, 3]], strength: 1 },
+				{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			assert.deepEqual(await settled, [att1.id]);
+			let preview = session.getPreviews(att1.id);
+			assert.equal(preview.state, 'filled');
+			assert.deepEqual(preview.entries.map(entry => entry.key), [0, 1]);
+			assert.equal(preview.entries[0].text, 'owl atlas');
+			assert.deepEqual(derive.firstCall.args, [att1.id]);
+		});
+
+		it("should not derive again for a repeated or settled request", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			await settled;
+			session.request([att1.id]);
+			await Zotero.Promise.delay(50);
+			assert.equal(derive.callCount, 1);
+		});
+
+		it("should derive preloaded previews without waiting to be requested", async function () {
+			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
+			let derive = stubDerive(new Map([
+				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]]
+			]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id, att2.id]);
+
+			await session.preload([att1.id]);
+			// Settled by the time preload() resolves, with no request() and no
+			// wait for an idle main thread
+			assert.equal(session.getPreviews(att1.id).state, 'filled');
+			assert.equal(session.getPreviews(att2.id).state, 'pending');
+
+			// A preview already in hand costs nothing to preload again
+			await session.preload([att1.id]);
+			assert.equal(derive.callCount, 1);
+		});
+
+		it("should not preload after dispose", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			session.dispose();
+			await session.preload([att1.id]);
+			assert.equal(derive.callCount, 0);
+		});
+
+		it("should let a newer request supersede an older one", async function () {
+			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
+			let derive = stubDerive(new Map([
+				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]],
+				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
+			]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id, att2.id]);
+			let settled = settledOnce(session);
+			// The second request lands before the first's idle batch runs
+			session.request([att1.id]);
+			session.request([att2.id]);
+			assert.deepEqual(await settled, [att2.id]);
+			assert.equal(derive.callCount, 1);
+			assert.equal(session.getPreviews(att1.id).state, 'pending');
+		});
+
+		it("should show nothing for a preview that derives nothing, and not retry it", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map());
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			assert.deepEqual(await settled, [att1.id]);
+			assert.isNull(session.getPreviews(att1.id));
+			session.request([att1.id]);
+			await Zotero.Promise.delay(50);
+			assert.equal(derive.callCount, 1);
+		});
+
+		it("should show nothing for a failed derivation", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+				.rejects(new Error('cache file missing')));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			assert.deepEqual(await settled, [att1.id]);
+			assert.isNull(session.getPreviews(att1.id));
+		});
+
+		it("should rederive an invalidated preview on the next request", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			await settled;
+
+			session.invalidate([att1.id]);
+			assert.equal(session.getPreviews(att1.id).state, 'pending');
+
+			let settledAgain = settledOnce(session);
+			session.request([att1.id]);
+			await settledAgain;
+			assert.equal(derive.callCount, 2);
+			assert.equal(session.getPreviews(att1.id).state, 'filled');
+		});
+
+		it("should derive nothing and never report after dispose", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			let updated = false;
+			session.onUpdate = () => {
+				updated = true;
+			};
+			session.request([att1.id]);
+			session.dispose();
+			await Zotero.Promise.delay(50);
+			assert.isFalse(updated);
+			assert.equal(derive.callCount, 0);
+		});
+
+		it("should keep settled previews across a re-score and drop unmatched items", async function () {
+			let scoreStub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs');
+			stubs.push(scoreStub);
+			scoreStub.onFirstCall().resolves({
+				scores: new Map([[att1.id, 0.9], [att2.id, 0.8]]),
+				matches: { lexical: new Set([att1.id, att2.id]), semantic: new Set() }
+			});
+			scoreStub.onSecondCall().resolves({
+				scores: new Map([[att1.id, 0.9]]),
+				matches: { lexical: new Set([att1.id]), semantic: new Set() }
+			});
+			stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id, att2.id]);
+			let settled = settledOnce(session);
+			session.request([att1.id]);
+			await settled;
+
+			await session.score([att1.id, att2.id]);
+			// The derived text survives the re-score...
+			let preview = session.getPreviews(att1.id);
+			assert.equal(preview.state, 'filled');
+			assert.equal(preview.entries[0].text, 'owl');
+			// ...and an item no longer matched loses its preview
+			assert.isNull(session.getPreviews(att2.id));
+		});
+
 	});
 
 	describe("#isSearchableQuery()", function () {

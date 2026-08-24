@@ -2229,7 +2229,12 @@ var ZoteroPane = new function () {
 			}
 			
 			var selectedItems = this.itemsView.getSelectedObjects();
-			
+
+			// The pane shows data objects; rows standing in for something else
+			// (e.g. a search-match preview row) have none to show, so a
+			// selection of only those reads as an empty one for now
+			selectedItems = selectedItems.filter(o => o instanceof Zotero.DataObject);
+
 			// Display buttons at top of item pane depending on context. This needs to run even if the
 			// selection hasn't changed, because the selected items might have been modified.
 			this.itemPane.data = selectedItems;

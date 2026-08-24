@@ -1,8 +1,4 @@
-// search-result-row (the search-results section's chunk cards) shares this
-// structure and look, minus the parts it doesn't have (icon, action, tags):
-// the section already carries the magnifier in its head, so repeating it on
-// every card says nothing
-annotation-row, search-result-row {
+annotation-row {
 	display: flex;
 	flex-direction: column;
 

@@ -107,6 +107,9 @@ class ItemTreeRowProvider {
 		this._searchItemIDs = new Set();
 		this._searchParentIDs = new Set();
 		this._includeTrashed = false;
+		// The best-match search session whose previews rows show as match
+		// children (see SearchMatch in itemTreeRow.js), while one is active
+		this._bestMatchSession = null;
 		this.onUpdate = this.createEventBinding('update');
 	}
 
@@ -231,6 +234,7 @@ class ItemTreeRowProvider {
 		}
 		return row.isContainerEmpty({
 			includeTrashed: this._includeTrashed,
+			getMatchPreviews: this._bestMatchSession?.getPreviews,
 		});
 	}
 	
@@ -248,8 +252,22 @@ class ItemTreeRowProvider {
 
 	_refreshContainer(index, skipRowMapRefresh = false) {
 		if (!this.isContainer(index)) return;
+		// Reopening recreates child rows closed, so remember which
+		// descendants were open and reopen them afterward
+		let level = this.getLevel(index);
+		let openDescendantIDs = [];
+		for (let i = index + 1; i < this._rows.length && this.getLevel(i) > level; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i)) {
+				openDescendantIDs.push(this.getRow(i).id);
+			}
+		}
 		this._closeContainer(index, true);
 		this._openContainer(index, true);
+		if (openDescendantIDs.length) {
+			// _restoreOpenState() looks rows up by id
+			this.refreshRowMap();
+			this._restoreOpenState(openDescendantIDs);
+		}
 		if (!skipRowMapRefresh) {
 			this.refreshRowMap();
 		}
@@ -282,6 +300,7 @@ class ItemTreeRowProvider {
 				searchItemIDs: this._searchItemIDs,
 				includeTrashed: this._includeTrashed,
 				filterChildItems: this.itemTree.props.filterChildItems,
+				getMatchPreviews: this._bestMatchSession?.getPreviews,
 			});
 
 			let childRows = childRefs.map(ref => this.createRow(ref, level + 1, false));
@@ -1280,6 +1299,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param {boolean} options.restoreSelection - Whether to restore the cached selection.
 	 * @param {boolean} options.ensureRowsAreVisible - Whether to ensure selected rows are visible.
 	 * @param {boolean} options.restoreScroll - Whether to restore the cached scroll position.
+	 * @param {boolean} options.scrollToTop - Whether to show the list from the top, ignoring
+	 *     the cached scroll position.
 	 * @param {boolean} options.loading - Whether to show loading state (hides tree, shows message).
 	 * @param {string} options.message - Optional message to display (for loading, errors, intro text).
 	 */
@@ -1338,7 +1359,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const itemsViewInActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this;
 		const prioritizeRestore = !(options.selectInActiveWindow && itemsViewInActiveWindow);
-		const ensureVisible = options.restoreScroll ? false : options.ensureRowsAreVisible;
+		const ensureVisible = options.restoreScroll || options.scrollToTop
+			? false : options.ensureRowsAreVisible;
 
 		if (prioritizeRestore && options.restoreSelection) {
 			this._restoreSelection(null, options.expandCollapsedParents, ensureVisible);
@@ -1352,7 +1374,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		if (options.restoreScroll) {
+		if (options.scrollToTop) {
+			this._treebox?.scrollTo(0);
+		}
+		else if (options.restoreScroll) {
 			this._restoreScrollPosition();
 		}
 
@@ -2357,6 +2382,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
 
 		row.renderRow(div, index, columns, rowData, this._renderCtx);
+
+		// A pending search-match row on screen is the demand signal for
+		// deriving its item's previews: the virtualized list only renders
+		// what's visible, so rendering names exactly what's worth deriving
+		if (row.type == 'search-match-placeholder') {
+			this.rowProvider.onSearchMatchRendered?.(row.ref.itemID);
+		}
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {

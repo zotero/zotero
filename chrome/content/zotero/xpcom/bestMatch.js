@@ -60,6 +60,10 @@ Zotero.BestMatch = new function () {
 		return Zotero.Embeddings.isEnabled();
 	}
 
+	function _hasPreviews(itemID) {
+		return !!Zotero.Items.get(itemID)?.isFileAttachment?.();
+	}
+
 	/**
 	 * Whether a query has anything for best-match search to rank by. The
 	 * lexical engine needs at least one scoring unit; failing that, the
@@ -171,74 +175,310 @@ Zotero.BestMatch = new function () {
 	};
 
 	/**
-	 * Excerpts showing why an item matches a query, for the item pane's
-	 * search-results section: the union of both engines' evidence, so an
-	 * item ranked by either kind of match -- or both -- explains itself.
+	 * A best-match search session: one query's scoring pass plus the
+	 * previews explaining its matches, derived on demand.
 	 *
-	 * The lexical engine's excerpts around the query's literal matches (see
-	 * Zotero.Lexical.getMatchingExcerpts()) are always collected; they carry
-	 * a source name and highlight ranges. With a semantic model enabled, the
-	 * item's most similar indexed chunks join them (see
-	 * Zotero.Embeddings.getMatchingChunks()), carrying document locations --
-	 * with the query's literal matches highlighted within their text too, so
-	 * a chunk that's both similar and a literal hit tells both at once. A
-	 * lexical fulltext excerpt whose match a shown chunk already covers is
-	 * dropped as redundant; one from a passage no chunk surfaced stays.
-	 *
-	 * Entries are ordered by the strength of the evidence they show, each on
-	 * its engine's 0-1 display scale, and capped at the limit together. A
-	 * semantic index that isn't ready contributes nothing, leaving the
-	 * lexical excerpts alone.
-	 *
-	 * @param {String} queryText
-	 * @param {Number} itemID
-	 * @param {Object} [options]
-	 * @param {Number} [options.limit=5] - Most entries to return
-	 * @return {Promise<Object[]>} - Entries with `text`, `ranges`, and
-	 *     `strength`, plus chunk location fields or a lexical `source`
+	 * score() ranks candidates and synchronously builds a pending preview
+	 * per matched item that has anything to show, with no I/O. request()
+	 * names the items whose previews are wanted next; each call replaces
+	 * the last, so only what is still wanted gets derived, and repeating a
+	 * request is free. Derivation runs one item at a time, each waiting
+	 * first for a moment when the main thread has nothing else to do. An
+	 * item's entries arrive all at once -- both engines' evidence, merged,
+	 * deduplicated and ordered by strength (see getMatchingExcerpts()) --
+	 * and onUpdate reports each item whose preview settled; consumers read
+	 * them back with getPreviews(). A disposed session derives nothing and
+	 * never calls onUpdate.
 	 */
-	this.getMatchingExcerpts = async function (queryText, itemID, options = {}) {
-		// Temporary, for testing: the bestMatchEngine pref keeps the pinned
-		// engine's excerpts alone -- no lexical excerpts or highlights when
-		// pinned semantic, no chunks when pinned lexical
-		let engine = Zotero.Prefs.get('search.bestMatchEngine');
-		let limit = options.limit ?? 5;
-		let excerpts = engine == 'semantic'
-			? []
-			: await Zotero.Lexical.getMatchingExcerpts(queryText, itemID, options);
-		if (engine == 'lexical' || !_useSemantic()
-				|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
-			return excerpts;
+	this.Session = class {
+		constructor(queryText) {
+			// Called with the itemIDs whose previews settled since the last
+			// call, from filling or from a failed derivation
+			this.onUpdate = null;
+			this._queryText = queryText;
+			this._previews = new Map();
+			this._queue = [];
+			this._inFlight = new Set();
+			this._pumping = false;
+			this._disposed = false;
+			this._scoreGeneration = 0;
 		}
-		let chunks = [];
-		try {
-			chunks = await Zotero.Embeddings.getMatchingChunks(queryText, itemID, options);
-			// Only fulltext chunks carry their own text; item-level matches
-			// have nothing to excerpt
-			chunks = chunks.filter(chunk => chunk.text);
+
+		get queryText() {
+			return this._queryText;
 		}
-		catch (e) {
-			if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
-				throw e;
+
+		/**
+		 * Score candidates for this session's query (see
+		 * Zotero.BestMatch.scoreItemIDs()) and rebuild the preview set from
+		 * the engines' match sets, synchronously and with no I/O once
+		 * scoring resolves: a pending preview for every item a preview is
+		 * shown for that some engine can show match excerpts in. Items still
+		 * matched keep their settled previews -- a re-score doesn't drop
+		 * derived text -- and items no longer matched lose theirs. A scoring
+		 * pass superseded by a newer one on the same session leaves the
+		 * previews to the newer pass.
+		 *
+		 * @param {Number[]} itemIDs - Candidate item IDs to score
+		 * @param {Object} [options] - Passed through to scoreItemIDs()
+		 * @return {Promise<Map>} - itemID -> score, as scoreItemIDs() returns
+		 * @throws {Zotero.BestMatch.ScoringCancelledError}
+		 */
+		async score(itemIDs, options = {}) {
+			let generation = ++this._scoreGeneration;
+			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
+				this._queryText, itemIDs, options);
+			if (this._disposed || generation != this._scoreGeneration) {
+				return scores;
+			}
+			let previews = new Map();
+			for (let itemID of new Set([...matches.lexical, ...matches.semantic])) {
+				if (!_hasPreviews(itemID)) {
+					continue;
+				}
+				let existing = this._previews.get(itemID);
+				if (existing && existing.state != 'pending') {
+					previews.set(itemID, existing);
+					continue;
+				}
+				previews.set(itemID, {
+					state: 'pending',
+					entries: [],
+					lexical: matches.lexical.has(itemID),
+					semantic: matches.semantic.has(itemID)
+				});
+			}
+			this._previews = previews;
+			return scores;
+		}
+
+		/**
+		 * The preview to show for an item, or null when there's nothing to
+		 * show: no preview for it (see _hasPreviews()), or one that derived
+		 * nothing after all. Passed to consumers as a bare function, so it's
+		 * bound to its session.
+		 *
+		 * @param {Number} itemID
+		 * @return {Object|null} - { state, entries }: state is 'pending'
+		 *     (placeholder) or 'filled'; entries are the derived entries
+		 *     (see getMatchingExcerpts()), each with a `key` unique within
+		 *     the preview and stable for as long as the preview stays filled
+		 */
+		getPreviews = (itemID) => {
+			let preview = this._previews.get(itemID);
+			return preview && preview.state != 'empty' ? preview : null;
+		};
+
+		/**
+		 * Derive previews for a small batch of items immediately.
+		 *
+		 * @param {Number[]} itemIDs
+		 */
+		async preload(itemIDs) {
+			for (let itemID of itemIDs) {
+				if (this._disposed) {
+					return;
+				}
+				await this._settle(itemID);
 			}
 		}
-		if (!chunks.length) {
-			return excerpts;
+
+		/**
+		 * Ask for the given items' previews to be derived next. Each call
+		 * replaces the previous request -- items no longer asked for aren't
+		 * derived -- and items already settled or mid-derivation are
+		 * skipped, so repeating a request is free.
+		 *
+		 * @param {Number[]} itemIDs
+		 */
+		request(itemIDs) {
+			if (this._disposed) {
+				return;
+			}
+			this._queue = itemIDs.filter((itemID) => {
+				return this._previews.get(itemID)?.state == 'pending'
+					&& !this._inFlight.has(itemID);
+			});
+			this._pump();
 		}
-		let ranges = engine == 'semantic'
-			? chunks.map(() => [])
-			: await Zotero.Lexical.findMatchRanges(
-				queryText, chunks.map(chunk => chunk.text));
-		chunks = chunks.map((chunk, i) => ({
-			...chunk,
-			ranges: ranges[i],
-			strength: Zotero.Embeddings.getScoreFraction(chunk.score)
-		}));
-		excerpts = excerpts.filter(
-			excerpt => excerpt.source != 'content' || !_coveredByChunk(excerpt, chunks));
-		return [...chunks, ...excerpts]
-			.sort((a, b) => (b.strength || 0) - (a.strength || 0))
-			.slice(0, limit);
+
+		/**
+		 * Drop the given items' previews back to placeholders, for items
+		 * whose content changed and made derived text stale
+		 *
+		 * @param {Number[]} itemIDs
+		 */
+		invalidate(itemIDs) {
+			for (let itemID of itemIDs) {
+				let preview = this._previews.get(itemID);
+				if (!preview) {
+					continue;
+				}
+				// A fresh object, so a fill of the old one that's still in
+				// flight can't settle it (see _fill())
+				this._previews.set(itemID, {
+					...preview,
+					state: 'pending',
+					entries: []
+				});
+			}
+		}
+
+		/**
+		 * End the session: abandon queued and in-flight derivation. A
+		 * disposed session derives nothing and never calls onUpdate.
+		 */
+		dispose() {
+			this._disposed = true;
+			this._queue = [];
+			this.onUpdate = null;
+		}
+
+		// Derive queued previews one at a time, each first waiting for a
+		// moment when the main thread has nothing else to do. The queue is
+		// read one item per turn, so a request() arriving mid-derivation
+		// takes effect at the very next item.
+		async _pump() {
+			if (this._pumping) {
+				return;
+			}
+			this._pumping = true;
+			try {
+				while (!this._disposed && this._queue.length) {
+					await new Promise(
+						resolve => Services.tm.idleDispatchToMainThread(resolve));
+					if (this._disposed) {
+						return;
+					}
+					let itemID = this._queue.shift();
+					if (!await this._settle(itemID)) {
+						continue;
+					}
+					if (!this._disposed && this.onUpdate) {
+						try {
+							this.onUpdate([itemID]);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+				}
+			}
+			finally {
+				this._pumping = false;
+			}
+		}
+
+		// Derive one pending item's preview, reporting whether it settled
+		// here: an item already settled or mid-derivation elsewhere is left
+		// alone. A derivation that failed would fail again, so it settles for
+		// showing nothing rather than being retried.
+		async _settle(itemID) {
+			let preview = this._previews.get(itemID);
+			if (!preview || preview.state != 'pending' || this._inFlight.has(itemID)) {
+				return false;
+			}
+			this._inFlight.add(itemID);
+			try {
+				await this._fill(itemID, preview);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				preview.state = 'empty';
+			}
+			finally {
+				this._inFlight.delete(itemID);
+			}
+			return true;
+		}
+
+		/**
+		 * Every excerpt explaining why an item matched this session's query:
+		 * the lexical engine's excerpts around the query's literal matches
+		 * (see Zotero.Lexical.getMatchingExcerpts()) merged with the item's
+		 * most similar indexed chunks (see
+		 * Zotero.Embeddings.getMatchingChunks()), which carry document
+		 * locations and have those literal matches highlighted within them
+		 * too. A lexical fulltext excerpt a shown chunk already covers is
+		 * dropped as redundant, and what's left is ordered by strength, each
+		 * entry on its engine's 0-1 display scale.
+		 *
+		 * Only the engines scoring recorded a match in are asked (see
+		 * score()), so an item that matched one of them never pays the
+		 * other's cost -- scanning the document's whole text, or embedding
+		 * the query. A semantic index that isn't ready contributes nothing.
+		 *
+		 * @param {Number} itemID
+		 * @return {Promise<Object[]>} - Entries with `text`, `ranges`, and
+		 *     `strength`, plus chunk location fields or a lexical `source`
+		 */
+		async getMatchingExcerpts(itemID) {
+			let queryText = this._queryText;
+			let preview = this._previews.get(itemID);
+			// Temporary, for testing: the bestMatchEngine pref keeps the
+			// pinned engine's excerpts alone -- no lexical excerpts or
+			// highlights when pinned semantic, no chunks when pinned lexical
+			let engine = Zotero.Prefs.get('search.bestMatchEngine');
+			// Uncapped: the tree shows every place an item matched
+			let options = { limit: Infinity };
+			let excerpts = engine == 'semantic' || preview?.lexical === false
+				? []
+				: await Zotero.Lexical.getMatchingExcerpts(queryText, itemID, options);
+			if (preview?.semantic === false || engine == 'lexical' || !_useSemantic()
+					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
+				return excerpts;
+			}
+			let chunks = [];
+			try {
+				chunks = await Zotero.Embeddings.getMatchingChunks(queryText, itemID, options);
+				// Only fulltext chunks carry their own text; item-level
+				// matches have nothing to excerpt
+				chunks = chunks.filter(chunk => chunk.text);
+			}
+			catch (e) {
+				if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
+					throw e;
+				}
+			}
+			if (!chunks.length) {
+				return excerpts;
+			}
+			let ranges = engine == 'semantic'
+				? chunks.map(() => [])
+				: await Zotero.Lexical.findMatchRanges(
+					queryText, chunks.map(chunk => chunk.text));
+			chunks = chunks.map((chunk, i) => ({
+				...chunk,
+				ranges: ranges[i],
+				strength: Zotero.Embeddings.getScoreFraction(chunk.score)
+			}));
+			excerpts = excerpts.filter(
+				excerpt => excerpt.source != 'content' || !_coveredByChunk(excerpt, chunks));
+			return [...chunks, ...excerpts]
+				.sort((a, b) => (b.strength || 0) - (a.strength || 0));
+		}
+
+		// Derive one item's entries, all at once. A preview replaced while
+		// deriving (a re-score, an invalidate) keeps the newer object
+		// untouched.
+		async _fill(itemID, preview) {
+			let entries = await this.getMatchingExcerpts(itemID);
+			if (this._disposed || this._previews.get(itemID) != preview) {
+				return;
+			}
+			preview.entries = entries.map((entry, i) => ({ key: i, ...entry }));
+			preview.state = entries.length ? 'filled' : 'empty';
+		}
+	};
+
+	/**
+	 * Start a search session for a query (see Zotero.BestMatch.Session)
+	 *
+	 * @param {String} queryText
+	 * @return {Zotero.BestMatch.Session}
+	 */
+	this.createSession = function (queryText) {
+		return new this.Session(queryText);
 	};
 
 	// Whether a lexical fulltext excerpt's matched evidence already appears
