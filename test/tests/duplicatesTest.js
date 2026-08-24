@@ -110,4 +110,26 @@ describe("Duplicate Items", function () {
 			assert.sameMembers(item3.relatedItems, [item1.key]);
 		});
 	});
+
+	describe("ISBN matching", function () {
+		async function getDuplicateSets() {
+			var duplicates = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			var search = await duplicates.getSearchObject();
+			return search.search();
+		}
+
+		it("should match books with equivalent ISBN-10 and ISBN-13", async function () {
+			var item1 = await createDataObject('item', { itemType: 'book', title: 'Effective Java' });
+			item1.setField('ISBN', '0134685997');
+			await item1.saveTx();
+
+			var item2 = await createDataObject('item', { itemType: 'book', title: 'Effective Java, 3rd Edition' });
+			item2.setField('ISBN', '9780134685991');
+			await item2.saveTx();
+
+			var ids = await getDuplicateSets();
+			assert.include(ids, item1.id);
+			assert.include(ids, item2.id);
+		});
+	});
 });
