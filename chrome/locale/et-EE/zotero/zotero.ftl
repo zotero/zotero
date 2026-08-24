@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Minu väljaanded
 publications-intro = Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.
 publications-include-checkbox-files =

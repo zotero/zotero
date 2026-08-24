@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Các xuất bản của tôi
 publications-intro = Các mục bạn thêm vào Các Xuất bản của tôi sẽ xuất hiện trong trang hồ sơ của bạn trên zotero.org. Nếu bạn chọn gộp các tệp đính kèm, các tệp đó sẽ chuyển thành công cộng theo giấy phép bạn xác định. Chỉ thêm những gì bạn tạo ra và gộp các tệp bạn có quyền phân phối và bạn muốn làm thế.
 publications-include-checkbox-files =

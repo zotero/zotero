@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = הפרסומים שלי
 publications-intro = פריטים שנוספים ל„פרסומים שלי” יופיעו בעמוד הפרופיל שלך ב־zotero.org. אם בחרת לצרף קבצים הם ייחשפו לקהל הרחב בכפוף לרישיון שציינת. יש להוסיף אך ורק יצירה מקורית שלך ולצרף אך ורק קבצים שיש לך זכויות להפיץ ושיש לך רצון בכך.
 publications-include-checkbox-files =

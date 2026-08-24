@@ -486,6 +486,7 @@ styleEditor-editor =
     .aria-label = Stilių rengyklė
 styleEditor-preview =
     .aria-label = Peržiūra
+stylePreview-generating = Generating previews…
 publications-intro-page = Nuosavos publikacijos
 publications-intro = „Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.
 publications-include-checkbox-files =

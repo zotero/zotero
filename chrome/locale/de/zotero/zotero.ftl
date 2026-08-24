@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Zitierstil-Editor
 styleEditor-preview =
     .aria-label = Vorschau
+stylePreview-generating = Generating previews…
 publications-intro-page = Meine Veröffentlichungen
 publications-intro = Einträge, die Sie zu Meine Veröffentlichungen hinzufügen, werden auf Ihrer Profilseite auf Zotero.org angezeigt. Wenn Sie die Option "Dateien verfügbar machen" auswählen, werden die Dateianhänge unter der von Ihnen gewählten Lizenz öffentlich verfügbar gemacht. Fügen Sie nur Werke hinzu, die Sie selbst erstellt haben, und laden wählen Sie diese Option nur dann, wenn Sie zur Verbreitung der Dateien berechtigt sind und sie öffentlich verfügbar machen wollen.
 publications-include-checkbox-files =

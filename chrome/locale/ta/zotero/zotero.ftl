@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = எனது வெளியீடுகள்
 publications-intro = எனது வெளியீடுகளில் நீங்கள் சேர்க்கும் உருப்படிகள் உங்கள் சுயவிவரப் பக்கத்தில் சோட்டெரோ.நிறுவ இல் காண்பிக்கப்படும். இணைக்கப்பட்ட கோப்புகளைச் சேர்க்க நீங்கள் தேர்வுசெய்தால், அவை நீங்கள் குறிப்பிடும் உரிமத்தின் கீழ் பொதுவில் கிடைக்கும். நீங்களே உருவாக்கிய வேலையை மட்டுமே சேர்க்கவும், அவற்றை விநியோகிப்பதற்கான உரிமைகள் இருந்தால் மட்டுமே கோப்புகளைச் சேர்க்கவும், அவ்வாறு செய்ய விரும்பினால்.
 publications-include-checkbox-files =

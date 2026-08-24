@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Nire argitalpenak
 publications-intro = Nire argitalpenak atalean gehitzen dituzun elementuak zure profilean erakutsiko dira zotero.org webgunean. Atxikitako fitxategiak erakustea hautatzen baduzu, publikoki eskuragarri jarriko dira zehazten duzun lizentziarekin. Zuk zeuk sortutako lanak bakarrik gehitu, eta zabaltzeko eskumena daukazun eta zabaldu nahi dituzun fitxategiak gehitu bakarrik.
 publications-include-checkbox-files =

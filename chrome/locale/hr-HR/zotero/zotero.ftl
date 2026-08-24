@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Pretpregled
+stylePreview-generating = Generating previews…
 publications-intro-page = Moje publikacije
 publications-intro = Stavke koje dodate u Moje publikacije bit će prikazane na stranici vašeg profila na zotero.org. Ako odlučite uključiti priložene datoteke, one će biti javno dostupne pod licencom koju navedete. Dodajte samo radove koje ste sami izradili i uključite datoteke samo ako imate prava na njihovu distribuciju i ako to želite.
 publications-include-checkbox-files =

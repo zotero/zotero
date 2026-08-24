@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Moje publikácie
 publications-intro = Exempláre, ktoré pridáte do Mojich publikácií, sa zobrazia na stránke vášho profilu na adrese zotero.org. Ak sa rozhodnete zahrnúť pripojené súbory, zverejnia sa na základe licencie, ktorú určíte. Pridajte iba prácu, ktorú ste sami vytvorili, a pridajte iba také súbory, ak na ne máte právo a prajete si ich distribuovaťť.
 publications-include-checkbox-files =

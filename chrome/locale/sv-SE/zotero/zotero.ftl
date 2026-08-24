@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Förhandsvisa
+stylePreview-generating = Generating previews…
 publications-intro-page = Mina publikationer
 publications-intro = Källor du lägger till i Mina publikationer kommer att visas på din profilsida på zotero.org. Om du väljer att inkludera bifogade filer blir de tillgängliga enligt den licens du anger. Lägg endast till verk som du själv har skapat och bifoga bara filer om du har rätt att dela dem vidare och önskar att göra så.
 publications-include-checkbox-files =

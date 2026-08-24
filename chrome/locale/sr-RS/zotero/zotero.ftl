@@ -484,6 +484,7 @@ styleEditor-editor =
     .aria-label = Уређивач стилова
 styleEditor-preview =
     .aria-label = Преглед
+stylePreview-generating = Generating previews…
 publications-intro-page = Моји радови
 publications-intro = Ставке које сте додали у Моји радови ће бити приказане на вашој страници у оквиру сајта zotero.org. Уколико желите да додате и прилоге, они ће бити јавно доступни под лиценцом који изаберете. Додајте само радове које сте сами направили и датотеке за које поседујете одговарајуће правне дозволе за дељење.
 publications-include-checkbox-files =

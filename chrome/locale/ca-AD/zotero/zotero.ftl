@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Editor d'estil
 styleEditor-preview =
     .aria-label = Previsualització
+stylePreview-generating = Generating previews…
 publications-intro-page = Les meves publicacions
 publications-intro = Els elements que afegiu a «Les meves publicacions» es mostraran en la pàgina de perfil de zotero.org. Si trieu incloure els fitxers adjunts, es posaran disponibles sota la llicència que hi especifiqueu. Només afegiu-hi treballs que hàgiu creat, i només incloeu-hi fitxers que tingueu els drets de distribució i vulgueu compartir.
 publications-include-checkbox-files =

@@ -2,7 +2,7 @@ reader-annotations = 注釈
 reader-show-annotations = 注釈を表示
 reader-search-annotations = 注釈の検索
 reader-search-outline = アウトラインの検索
-reader-no-annotations = 注釈はこのサイドバーに表示されます
+reader-no-annotations = 注釈を作成してサイドバーに表示
 reader-no-extracted-text = 抽出された文字がありません
 reader-add-comment = コメントの追加
 reader-annotation-comment = 注釈コメント
@@ -17,18 +17,18 @@ reader-underline-text = 下線付きテキスト
 reader-add-note = メモを追加
 reader-add-text = テキストを追加
 reader-select-area = 領域を選択
-reader-highlight-annotation = Highlight annotation
-reader-highlight-annotation-short = Highlight
-reader-underline-annotation = Underline annotation
+reader-highlight-annotation = 注釈を強調表示
+reader-highlight-annotation-short = 強調表示
+reader-underline-annotation = 注釈に下線を引く
 reader-underline-annotation-short = 下線
-reader-note-annotation = Note Annotation
+reader-note-annotation = メモの注釈
 reader-note-annotation-short = メモ
-reader-text-annotation = Text Annotation
-reader-text-annotation-short = Text
-reader-image-annotation = Image Annotation
+reader-text-annotation = テキストの注釈
+reader-text-annotation-short = テキスト
+reader-image-annotation = 画像の注釈
 reader-image-annotation-short = 画像
-reader-ink-annotation = Ink Annotation
-reader-ink-annotation-short = Ink
+reader-ink-annotation = インクの注釈
+reader-ink-annotation-short = インク
 reader-search-result-index = 検索結果
 reader-search-result-total = 合計検索結果
 reader-draw = 描画
@@ -49,19 +49,17 @@ reader-page = ページ
 reader-location = 場所
 reader-read-only = 読み取り専用
 reader-prompt-transfer-from-pdf-title = 注釈のインポート
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = PDF ファイルに保存されている注釈は { $target } に移動されます。
 reader-prompt-password-protected = この操作はパスワード保護されたPDFファイルではサポートされていません。
 reader-prompt-delete-pages-title = ページを削除
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+       *[other] PDF ファイルから { $count } ページを削除しますか？
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = 注釈を削除
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+       *[other] 選択された注釈を削除しますか？
     }
 reader-rotate-left = 左に回転
 reader-rotate-right = 右に回転
@@ -133,23 +131,23 @@ reader-double = ダブル
 reader-theme-name = テーマ名 :
 reader-background = 背景 :
 reader-foreground = 前景 :
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-reading-mode = 読み取りモード
+reader-reading-mode-not-supported = この文書では読み取りモードはサポートされていません。
 reader-clear-selection = 選択の解除
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = この電子書籍は暗号化されているため開くことができません。
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
-reader-a11y-move-annotation = Use the arrow keys to move the annotation.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
-reader-a11y-resize-annotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
-reader-a11y-annotation-popup-appeared = Use Tab to navigate the annotation popup.
-reader-a11y-annotation-created = { $type } created.
-reader-a11y-annotation-selected = { $type } selected.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
--reader-a11y-annotation-instruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
+reader-a11y-move-annotation = 矢印キーを使用して注釈を移動します。
+reader-a11y-edit-text-annotation = テキスト注釈の末尾を移動するには、 { general-key-shift } キーを押しながら左右の矢印キーを使用します。注釈の先頭を移動するには、{ general-key-shift }-{ reader-move-annotation-start-key } キーを押しながら矢印キーを使用します。
+reader-a11y-resize-annotation = 注釈のサイズを変更するには、{ general-key-shift } キーを押しながら矢印キーを使用します。
+reader-a11y-annotation-popup-appeared = Tab キーを使用して注釈ポップアップを移動します。
+reader-a11y-annotation-created = { $type } が作成されました。
+reader-a11y-annotation-selected = { $type } が選択されました。
+-reader-a11y-textual-annotation-instruction = キーボードでテキストに注釈を付けるには、まず “{ reader-find-in-document }” を使用してフレーズを検索し、次に { general-key-control }-{ option-or-alt }-{ $number } を押して検索結果を注釈に変換します。
+-reader-a11y-annotation-instruction = この注釈をドキュメントに追加するには、ドキュメントにフォーカスを当て、{ general-key-control }-{ option-or-alt }-{ $number }を押します。
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
     .title = { reader-highlight-text }
@@ -166,101 +164,100 @@ reader-toolbar-area =
     .aria-description = { -reader-a11y-annotation-instruction(number: 5) }
     .title = { reader-select-area }
 reader-toolbar-draw =
-    .aria-description = This annotation type cannot be created via the keyboard.
+    .aria-description = この注釈タイプはキーボードでは作成できません。
     .title = { reader-draw }
 reader-find-in-document-input =
     .title = 検索
     .placeholder = { reader-find-in-document }
-    .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
+    .aria-description = 検索結果を強調表示注釈にするには、{ general-key-control }-{ option-or-alt }-1 を押します。検索結果を下線注釈にするには、{ general-key-control }-{ option-or-alt }-2 を押します。
 reader-import-from-epub =
-    .label = Import Ebook Annotations…
-reader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = 電子書籍の注釈をインポート…
+reader-import-from-epub-prompt-title = 電子書籍の注釈をインポート
 reader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [one] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } 見つかった { $count ->
+        [one] { $count } { $tool } 注釈
+       *[other] { $count } { $tool } 注釈
+    }, 最終更新日は { $lastModifiedRelative } です。
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    この電子書籍から以前にインポートされた { -app-name } の注釈はすべて更新されます。
 reader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    この電子書籍にはインポート可能な注釈が含まれていないようです。
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } は Calibre および KOReader で作成された電子書籍の注釈をインポートできます。
 reader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    “{ $filename }” には Calibre また はKOReader の注釈が含まれていないようです。.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-reader-import-from-epub-select-other = Select Other File…
+    この電子書籍に KOReader で注釈が付けられている場合は、 “metadata.epub.lua” ファイルを直接選択してみてください。
+reader-import-from-epub-select-other = その他のファイルを選択…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+       *[other] { $count } ページが選択されました
     }
-reader-page-options = Page Options
-reader-read-aloud = Read Aloud
-reader-read-aloud-from-here = Read Aloud from Here
+reader-page-options = ページオプション
+reader-read-aloud = 読み上げ
+reader-read-aloud-from-here = ここから読み上げ
 reader-read-aloud-options = オプション
-reader-read-aloud-skip-back = Skip to Previous Paragraph
-reader-read-aloud-skip-back-sentence = Skip to Previous Sentence
-reader-read-aloud-skip-ahead = Skip to Next Paragraph
-reader-read-aloud-skip-ahead-sentence = Skip to Next Sentence
-reader-read-aloud-add-annotation = Annotate Sentence ({ $key1 }/{ $key2 })
-reader-read-aloud-play = Play
-reader-read-aloud-pause = Pause
-reader-read-aloud-speed = Reading Speed
-reader-read-aloud-voice = Voice
-reader-read-aloud-voice-tier = Voice Mode
-reader-read-aloud-voice-tier-local = Local
+reader-read-aloud-skip-back = 前の段落へスキップ
+reader-read-aloud-skip-back-sentence = 前の文へスキップ
+reader-read-aloud-skip-ahead = 次の段落へスキップ
+reader-read-aloud-skip-ahead-sentence = 次の文へスキップ
+reader-read-aloud-add-annotation = 文に注釈を付ける ({ $key1 }/{ $key2 })
+reader-read-aloud-play = 再生
+reader-read-aloud-pause = 一時停止
+reader-read-aloud-speed = 読み上げ速度
+reader-read-aloud-voice = 音声
+reader-read-aloud-voice-tier = 音声モード
+reader-read-aloud-voice-tier-local = ローカル
 reader-read-aloud-voice-tier-standard = 標準
-reader-read-aloud-voice-tier-premium = Premium
-reader-read-aloud-more-voices = More Voices…
+reader-read-aloud-voice-tier-premium = プレミアム
+reader-read-aloud-more-voices = その他の音声…
 reader-read-aloud-language = 言語
-reader-read-aloud-remaining-time = Remaining reading time
-reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access { -app-name } Voices.
+reader-read-aloud-remaining-time = 残り読み上げ時間
+reader-read-aloud-log-in-link = <log-in>ログイン</log-in> して { -app-name } の音声にアクセスしてください。
 reader-read-aloud-log-in-button = ログイン
 reader-read-aloud-done-button = { general-done }
-reader-read-aloud-add-more-time = Add more time
+reader-read-aloud-add-more-time = 時間を追加
 reader-read-aloud-quota-exceeded-message =
-    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
-        [standard] Standard Voices
-       *[local] Local Voices
-    }.
+    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> するか { $tier ->
+        [standard] 標準音声
+       *[local] ローカル音声
+    }で読み続けてください。
 reader-read-aloud-error = { general-error }
-reader-read-aloud-error-unknown = 不明のエラーが発生しました。
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
-reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
-reader-read-aloud-retry = Retry
-reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
-reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Voices provided by your operating system
-reader-read-aloud-first-run-voice-tier-local-bullet-offline = Available without an internet connection
-reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Available without a { -app-name } account
-reader-read-aloud-first-run-voice-tier-local-bullet-free = Free to use
-reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Natural-sounding voices
-reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Limited language selection
-reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = No multilingual support
-reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Source text doesn’t leave { -app-name } servers
-reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Unlimited use with a { -subscription-name } subscription
-reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Highest-quality voices
-reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
-reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Multilingual support
-reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
-reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
-reader-read-aloud-sample-text = I am the local voice { $name }
-reader-read-aloud-voices-none-available = No voices available
-reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
-reader-read-aloud-region = Region
+reader-read-aloud-error-unknown = 不明なエラーが発生しました。
+reader-read-aloud-error-network = 読み上げサービスに接続できません。インターネット接続を確認してください。
+reader-read-aloud-error-daily-limit-exceeded = { -app-name } 音声の1日の利用上限に達しました。
+reader-read-aloud-retry = 再試行
+reader-read-aloud-first-run-title = 読み上げに使用する音声を選択してください :
+reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = オペレーティングシステムが提供する音声
+reader-read-aloud-first-run-voice-tier-local-bullet-offline = インターネット接続なしで利用可能
+reader-read-aloud-first-run-voice-tier-local-bullet-no-account = { -app-name } アカウントなしで利用可能
+reader-read-aloud-first-run-voice-tier-local-bullet-free = 無料で利用可能
+reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = 自然な音声
+reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = インターネット接続時のみ利用可能
+reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = { -app-name } アカウントが必要
+reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = 対応言語数が限られている
+reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = 多言語サポートなし
+reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = ソーステキストは { -app-name } のサーバー外に送信されない
+reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = { -subscription-name } サブスクリプションで無制限に利用可能
+reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = 最高品質の音声
+reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = インターネット接続時のみ利用可能
+reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = { -app-name } アカウントが必要
+reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = 幅広い言語に対応
+reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = 多言語サポートあり
+reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = ソーステキストは外部のテキスト読み上げプロバイダーによって処理される
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } プランには毎月プレミアム音声の利用分数が含まれる
+reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = ベータ期間中は追加分数のクレジットをリクエスト可能
+reader-read-aloud-sample-text = 私はローカル音声 { $name } です
+reader-read-aloud-voices-none-available = 利用可能な音声がありません
+reader-read-aloud-first-run-no-voices-for-language = { $tier } 音声は { $language } に対応していません。
+reader-read-aloud-region = 地域
 reader-read-aloud-region-auto = 自動
-reader-read-aloud-annotation-popup-move = Move annotation by sentence
-reader-read-aloud-annotation-popup-extend = Extend annotation by sentence
+reader-read-aloud-annotation-popup-move = 1文単位で注釈を移動
+reader-read-aloud-annotation-popup-extend = 1文単位で注釈を拡張
 reader-read-aloud-annotation-popup-delete = 削除
 reader-read-aloud-annotation-popup-done = 完了
-reader-read-aloud-annotation-popup-change-color = Change color
-reader-read-aloud-annotation-popup-highlight = Highlight
+reader-read-aloud-annotation-popup-change-color = 色を変更
+reader-read-aloud-annotation-popup-highlight = 強調表示
 reader-read-aloud-annotation-popup-underline = 下線
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }

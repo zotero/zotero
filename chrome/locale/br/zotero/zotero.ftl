@@ -491,6 +491,7 @@ styleEditor-editor =
     .aria-label = Aozer stil
 styleEditor-preview =
     .aria-label = Rakwel
+stylePreview-generating = Generating previews…
 publications-intro-page = Ma Embannadennoù
 publications-intro = Elfennoù da ouzhpennañ D'am Embannadennoù hag a vo diskouezet war pajenn ho profil war zotero.org. Ma tibabit enklozañ restroù-stag, lakaet e vint hegerz en un doare foran dindan al lisañs a vo termenet ganeoc'h. Ouzhpennit labourioù a zo bet krouet ganeoc'h hepken, hag enklozit ar restroù ho peus ar gwir rannañ warno hag ho peus c'hoant d'en ober.
 publications-include-checkbox-files =

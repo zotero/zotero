@@ -6,8 +6,8 @@ note-editor-unlink = リンク解除
 note-editor-right-to-left = 右から左
 note-editor-left-to-right = 左から右
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    このメモは、 { -app-name }. の新しいバージョンで編集されました。
+    変更を加えるには、 { -app-name } を更新してください。
 note-editor-enter-link = リンクの入力
 note-editor-heading-1 = 表題1
 note-editor-heading-2 = 表題2
@@ -61,6 +61,6 @@ note-editor-insert-column-after = 右に列を挿入
 note-editor-delete-row = 行を削除
 note-editor-delete-column = 列を削除
 note-editor-delete-table = 表を削除
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = リンクポップアップが表示されました。Shift+Tabキーを使用して移動します。
+note-editor-citation-popup-appeared = 引用ポップアップが表示されました。Shift+Tabキーを使用して移動します。
 note-editor-toggle-context-pane = コンテキストパネルの切り替え

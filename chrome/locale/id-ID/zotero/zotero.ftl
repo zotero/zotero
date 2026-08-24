@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Publikasi saya
 publications-intro = Item yang Anda tambahkan ke Publikasi Saya akan ditampilkan di halaman profil Anda di zotero.org. Jika Anda memilih untuk menyertakan file lampiran, file tersebut akan tersedia untuk umum di bawah lisensi yang Anda tentukan. Hanya tambahkan karya yang Anda buat sendiri, dan hanya sertakan file jika Anda memiliki hak untuk mendistribusikannya dan ingin melakukannya.
 publications-include-checkbox-files =

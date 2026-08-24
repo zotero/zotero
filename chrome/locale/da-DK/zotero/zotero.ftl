@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Mine publikationer
 publications-intro = Elementer, som tilføjes til Mine publikationer, vil vises på din profilside på zotero.org. Vælger du at inkludere vedhæftede filer, vil de være offentligt tilgængelige under den licens, du angiver. Tilføj kun værker, du selv har lavet, og inkludér kun filer, hvis du har rettighederne til at distribuere dem og ønsker at gøre det.
 publications-include-checkbox-files =

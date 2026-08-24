@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Előnézet
+stylePreview-generating = Generating previews…
 publications-intro-page = Saját publikációk
 publications-intro = A Saját publikációkhoz hozzáadott elemek megjelennek a zotero.org profiloldalán. Ha úgy dönt, hogy fájlokat is csatol, azokat az ön által megadott licenc alapján nyilvánosan elérhetővé teszi. Csak akkor adjon hozzá munkát, amennyiben ön készítette és csak akkor tartalmazzon fájlokat, ha rendelkezik a terjesztési jogokkal, és ezt meg akarja tenni.
 publications-include-checkbox-files =

@@ -500,6 +500,7 @@ styleEditor-editor =
     .aria-label = Editor de estilo
 styleEditor-preview =
     .aria-label = Previsualizar
+stylePreview-generating = Generating previews…
 publications-intro-page = Mis publicaciones
 publications-intro = Los elementos que añada a Mis publicaciones se mostrarán en su página de perfil en zotero.org. Si elige incluir los archivos adjuntos, se pondrán a disposición del público bajo la licencia que especifique. Añada únicamente trabajos que usted mismo haya creado e incluya archivos solo si tiene los derechos para distribuirlos y desea hacerlo.
 publications-include-checkbox-files =

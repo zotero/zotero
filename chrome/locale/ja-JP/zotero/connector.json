@@ -96,16 +96,16 @@
     "message": "保存が完了しました。ダイアログを閉じます。"
   },
   "progressWindow_alreadySaved": {
-    "message": "このWebページの項目は既に保存されています。"
+    "message": "このウェブページの項目は既に保存されています。"
   },
   "progressWindow_tagPlaceholder": {
-    "message": "タグ（コンマで区切り）"
+    "message": "タグ（コンマ区切り）"
   },
   "progressWindow_filterPlaceholder": {
     "message": "コレクションのフィルタリング"
   },
   "progressWindow_error_translation": {
-    "message": "項目の保存中にエラーが発生しました。 さらに詳しくは $1 をご確認ください。"
+    "message": "項目の保存中にエラーが発生しました。 詳しくは $1 をご確認ください。"
   },
   "progressWindow_error_siteAccessLimitsError": {
     "message": "この項目の保存中にエラーが発生しました。 $1 は、一度に保存できる項目の数を制限する場合があります。 詳細については、$2 を参照してください。"
@@ -225,7 +225,7 @@
     "message": "プロキシ経由でないリンクをコピー"
   },
   "copyUnproxiedPageURL": {
-    "message": "プロキシ経由でないページURLをコピー"
+    "message": "プロキシ経由でないページ URL をコピー"
   },
   "reloadViaProxy": {
     "message": "プロキシ経由で再読み込み"

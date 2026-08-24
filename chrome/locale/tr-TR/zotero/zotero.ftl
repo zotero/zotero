@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Stil Editörü
 styleEditor-preview =
     .aria-label = Önizleme
+stylePreview-generating = Generating previews…
 publications-intro-page = Yayınlarım
 publications-intro = Yayınlarım'a eklediğiniz eserler zotero.org adresindeki profil sayfanızda gösterilecektir. Eklenti dosyalarını dahil etmeyi seçerseniz, bu dosyalar belirttiğiniz lisans uyarınca halka açık şekilde paylaşılacaktır. Sadece kendi ürettiğiniz eserleri ekleyiniz ve sadece dağıtım hakkına sahip olduğunuz ve paylaşmak istediğiniz dosyaları dahil ediniz.
 publications-include-checkbox-files =

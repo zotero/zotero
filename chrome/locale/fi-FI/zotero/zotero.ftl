@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Tyylieditori
 styleEditor-preview =
     .aria-label = Esikatselu
+stylePreview-generating = Generating previews…
 publications-intro-page = Omat julkaisuni
 publications-intro = Omat julkaisuni -kokoelmaan lisätyt nimikkeet näkyvät profiilisivullasi zotero.org:ssa. Jos päätät sisällyttää liitetiedostot, ne julkaistaan sivulla määrittelemälläsi lisenssillä. Lisää vain julkaisuja jotka olet itse tehnyt ja sisällytä vain tiedostot, joiden levittämiseen sinulla on oikeudet ja joita haluat levittää.
 publications-include-checkbox-files =

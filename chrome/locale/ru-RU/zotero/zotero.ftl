@@ -518,6 +518,7 @@ styleEditor-editor =
     .aria-label = Редактор стилей
 styleEditor-preview =
     .aria-label = Предпросмотр
+stylePreview-generating = Generating previews…
 publications-intro-page = Мои публикации
 publications-intro = Записи, добавленные в раздел Мои публикации, будут показаны на странице вашего профиля в zotero.org. Если вы присоединили файлы, они будут доступны публично под указанной вами лицензией. Добавляйте только ваши собственные работы и размещайте только те файлы, для которых у вас есть разрешение на распространение.
 publications-include-checkbox-files =

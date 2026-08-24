@@ -464,6 +464,7 @@ styleEditor-editor =
     .aria-label = 样式编辑器
 styleEditor-preview =
     .aria-label = 预览
+stylePreview-generating = Generating previews…
 publications-intro-page = 我的出版物
 publications-intro = 你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。
 publications-include-checkbox-files =

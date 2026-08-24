@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = Publicațiile mele
 publications-intro = Itemii pe care îi adaugi în Publicațiile mele vor fi afișați în profilul tău pe zotero.org. Dacă alegi să incluzi fișiere anexate, acestea vor fi disponibile public sub licența pe care o specifici. Adaugă doar ceea ce ai creat tu însuți și adaugă fișiere doar dacă ai drepturile de a le distribui și vrei să o faci.
 publications-include-checkbox-files =

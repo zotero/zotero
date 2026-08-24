@@ -482,6 +482,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Preview
+stylePreview-generating = Generating previews…
 publications-intro-page = 내 출판물
 publications-intro = 내 출판물에 추가한 항목은 zotero.org 사이트에서 당신의 프로필 페이지에 게시됩니다. 첨부 파일을 포함하기로 결정했다면, 첨부 파일이 지정한 라이선스를 따라 공개 게시됩니다. 스스로 만든 저작물만 추가하시고, 공공 배포 권한이 있으며 그렇게 하기를 희망하는 파일만 포함해주세요.
 publications-include-checkbox-files =

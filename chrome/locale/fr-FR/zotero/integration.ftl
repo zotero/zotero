@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No selected or open notes match the current search
-       *[other] No selected or open notes
+        [true] Aucune note sélectionnée ou ouverte ne correspond à la recherche actuelle
+       *[other] Aucune note n'est sélectionnée ou ouverte
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->

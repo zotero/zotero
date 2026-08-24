@@ -480,6 +480,7 @@ styleEditor-editor =
     .aria-label = 樣式編輯器
 styleEditor-preview =
     .aria-label = 預覽
+stylePreview-generating = Generating previews…
 publications-intro-page = 我的著作
 publications-intro = 您所新增到我的著作中的項目將在 zotero.org 上您的個人頁面中顯示。如果您選擇包含附件檔案，這些檔案將在您所指定的許可協議下開放存取。請僅新增您自己創作的著作，並僅加入您所擁有著作權且願意分享的檔案。
 publications-include-checkbox-files =
