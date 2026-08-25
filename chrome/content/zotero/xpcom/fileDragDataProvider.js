@@ -66,7 +66,8 @@ Zotero.FileDragDataProvider.prototype = {
 					continue;
 				}
 
-				if (draggedItems[i].getFile()) {
+				let path = draggedItems[i].getFilePath();
+				if (path && Zotero.File.pathToFile(path).exists()) {
 					items.push(draggedItems[i]);
 				}
 				else {

@@ -3257,7 +3257,9 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	let files = items
 		.filter(item => item.isAttachment())
 		.map(item => item.getFilePath())
-		.filter(path => path);
+		.filter(path => path)
+		.map(path => Zotero.File.pathToFile(path))
+		.filter(file => file.exists());
 
 	if (files.length) {
 		// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
@@ -3268,7 +3270,7 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 		}
 
 		for (let i = 0; i < files.length; i++) {
-			let file = Zotero.File.pathToFile(files[i]);
+			let file = files[i];
 
 			if (dataProvider) {
 				Zotero.debug("Adding application/x-moz-file-promise");
