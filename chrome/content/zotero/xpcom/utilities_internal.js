@@ -3275,11 +3275,10 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise", dataProvider, i);
 			}
 
-			// Allow dragging to filesystem on Linux and Windows
-			let uri;
-			if (!Zotero.isMac) {
+			// Allow dragging to filesystem on Linux
+			if (Zotero.isLinux) {
 				Zotero.debug("Adding text/x-moz-url " + i);
-				uri = Zotero.File.pathToFileURI(file);
+				let uri = Zotero.File.pathToFileURI(file);
 				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
 			}
 
@@ -3287,11 +3286,8 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 			Zotero.debug("Adding application/x-moz-file " + i);
 			event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
 
-			if (Zotero.isWin) {
-				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, i);
-			}
-			else if (Zotero.isLinux) {
-				// Don't create a symlink for an unmodified drag
+			if (Zotero.isWin || Zotero.isLinux) {
+				// Copy rather than move (Windows) or symlink (Linux) for an unmodified drag
 				event.dataTransfer.effectAllowed = 'copy';
 			}
 		}
