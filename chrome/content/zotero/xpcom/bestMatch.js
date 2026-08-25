@@ -38,6 +38,18 @@ Zotero.BestMatch = new function () {
 	// rank): high enough that a handful of rank positions in one engine
 	// can't drown out the other engine's opinion entirely
 	const RRF_K = 60;
+	// How a passage's two kinds of evidence weigh against each other. The
+	// model's reading leads: it is the calibrated signal, and it chose which
+	// passages are worth showing. Saying the query's own words lifts a
+	// passage above an equally similar one that only paraphrases them.
+	const SEMANTIC_WEIGHT = 0.7;
+	const LEXICAL_WEIGHT = 0.3;
+	// About a line: what a passage is quoted down to for a one-line preview
+	const SNIPPET_CHARS = 200;
+	// Most passages shown for one item. The strongest few say what the item
+	// has to offer, and quoting a passage costs work -- sometimes the model's
+	// -- so passages past this are not worth deriving.
+	const MAX_PASSAGES = 3;
 
 	//
 	// Errors
@@ -393,69 +405,241 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * Every excerpt explaining why an item matched this session's query:
-		 * the lexical engine's excerpts around the query's literal matches
-		 * (see Zotero.Lexical.getMatchingExcerpts()) merged with the item's
-		 * most similar indexed chunks (see
-		 * Zotero.Embeddings.getMatchingChunks()), which carry document
-		 * locations and have those literal matches highlighted within them
-		 * too. A lexical fulltext excerpt a shown chunk already covers is
-		 * dropped as redundant, and what's left is ordered by strength, each
-		 * entry on its engine's 0-1 display scale.
+		 * Every passage explaining why an item matched this session's query,
+		 * strongest first.
+		 *
+		 * A passage is a chunk of the item's text: the chunks the semantic
+		 * index already holds, or -- for an item it hasn't indexed -- chunks
+		 * cut the same way from the item's own structure or flat text (see
+		 * _getPassages()). One unit for both engines, so a match is always a
+		 * piece of the document that knows where it sits, rather than a
+		 * window cut around a word.
+		 *
+		 * At most MAX_PASSAGES come back: the strongest few say what the item
+		 * has to offer, and quoting the rest costs more than it shows.
+		 *
+		 * Each passage carries the whole chunk's `text` and a `snippet`
+		 * extent within it -- the one line that best shows the query (see
+		 * _pickSnippets()) -- so a consumer can quote the line or read the
+		 * passage from the same entry. `ranges` locate the query's literal
+		 * matches in the full text.
 		 *
 		 * Only the engines scoring recorded a match in are asked (see
 		 * score()), so an item that matched one of them never pays the
-		 * other's cost -- scanning the document's whole text, or embedding
-		 * the query. A semantic index that isn't ready contributes nothing.
+		 * other's cost. A semantic index that isn't ready contributes
+		 * nothing.
 		 *
 		 * @param {Number} itemID
-		 * @return {Promise<Object[]>} - Entries with `text`, `ranges`, and
-		 *     `strength`, plus chunk location fields or a lexical `source`
+		 * @return {Promise<Object[]>} - Entries with `text`, `snippet`,
+		 *     `ranges` and `strength`, plus location fields where the
+		 *     passage knows them
 		 */
 		async getMatchingExcerpts(itemID) {
 			let queryText = this._queryText;
-			let preview = this._previews.get(itemID);
-			// Temporary, for testing: the bestMatchEngine pref keeps the
-			// pinned engine's excerpts alone -- no lexical excerpts or
-			// highlights when pinned semantic, no chunks when pinned lexical
-			let engine = Zotero.Prefs.get('search.bestMatchEngine');
-			// Uncapped: the tree shows every place an item matched
-			let options = { limit: Infinity };
-			let excerpts = engine == 'semantic' || preview?.lexical === false
-				? []
-				: await Zotero.Lexical.getMatchingExcerpts(queryText, itemID, options);
-			if (preview?.semantic === false || engine == 'lexical' || !_useSemantic()
-					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
-				return excerpts;
+			let passages = await this._getPassages(itemID);
+			if (!passages.length) {
+				return [];
 			}
-			let chunks = [];
-			try {
-				chunks = await Zotero.Embeddings.getMatchingChunks(queryText, itemID, options);
-				// Only fulltext chunks carry their own text; item-level
-				// matches have nothing to excerpt
-				chunks = chunks.filter(chunk => chunk.text);
+			let texts = passages.map(passage => passage.text);
+			// Chunks always highlight the query's literal matches: finding
+			// them in texts already in hand is cheap, unlike scanning a
+			// document, so it isn't gated on the item having matched
+			// lexically
+			let [ranges, lexical] = await Promise.all([
+				Zotero.Lexical.findMatchRanges(queryText, texts),
+				this._lexicalApplies(itemID) ? Zotero.Lexical.scoreTexts(queryText, texts) : null
+			]);
+			let entries = [];
+			for (let i = 0; i < passages.length; i++) {
+				let passage = passages[i];
+				let share = lexical ? lexical[i] : 0;
+				// A passage the model never weighed has only its words to
+				// recommend it, so one that says nothing of the query isn't a
+				// match at all
+				if (passage.score === undefined && !share) {
+					continue;
+				}
+				entries.push({
+					...passage,
+					ranges: ranges[i],
+					strength: passage.score === undefined
+						? share
+						: SEMANTIC_WEIGHT * Zotero.Embeddings.getScoreFraction(passage.score)
+							+ LEXICAL_WEIGHT * share
+				});
 			}
-			catch (e) {
-				if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
-					throw e;
+			entries.sort((a, b) => b.strength - a.strength);
+			entries = entries.slice(0, MAX_PASSAGES);
+			// Quoting is the expensive half -- a passage the query's words
+			// aren't in has to be read by the model -- so it happens only for
+			// the passages that survived
+			await this._pickSnippets(entries);
+			return entries;
+		}
+
+		/**
+		 * The passages of an item to weigh against the query, from the best
+		 * source the item has: the chunks the semantic index holds, the
+		 * chunks its structured text divides into, or failing both, its flat
+		 * text cut to the same size. Only the first two know where they sit
+		 * in the document.
+		 *
+		 * @param {Number} itemID
+		 * @return {Promise<Object[]>} - Passages, each with `text` and, from
+		 *     an indexed source, a semantic `score` and location fields
+		 */
+		async _getPassages(itemID) {
+			let queryText = this._queryText;
+			if (this._semanticApplies(itemID)) {
+				try {
+					let chunks = await Zotero.Embeddings.getMatchingChunks(
+						queryText, itemID, { limit: Infinity });
+					// Only fulltext chunks carry their own text; item-level
+					// matches have nothing to excerpt
+					chunks = chunks.filter(chunk => chunk.text);
+					if (chunks.length) {
+						return chunks;
+					}
+				}
+				catch (e) {
+					if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
+						throw e;
+					}
 				}
 			}
-			if (!chunks.length) {
-				return excerpts;
+			// Indexed, but with no model weighing the chunks -- either it
+			// isn't ranking, or it found nothing here worth ranking. They
+			// still say how the item divides, for the words to be found in.
+			if (!this._lexicalApplies(itemID)) {
+				return [];
 			}
-			let ranges = engine == 'semantic'
-				? chunks.map(() => [])
-				: await Zotero.Lexical.findMatchRanges(
-					queryText, chunks.map(chunk => chunk.text));
-			chunks = chunks.map((chunk, i) => ({
-				...chunk,
-				ranges: ranges[i],
-				strength: Zotero.Embeddings.getScoreFraction(chunk.score)
-			}));
-			excerpts = excerpts.filter(
-				excerpt => excerpt.source != 'content' || !_coveredByChunk(excerpt, chunks));
-			return [...chunks, ...excerpts]
-				.sort((a, b) => (b.strength || 0) - (a.strength || 0));
+			let indexed = await Zotero.Embeddings.getChunks(itemID);
+			indexed = indexed.filter(chunk => chunk.text);
+			if (indexed.length) {
+				return indexed;
+			}
+			return this._cutPassages(itemID);
+		}
+
+		// Cut an unindexed item into passages the size an indexed one's are:
+		// along its outline where it has structured text, so each passage
+		// still knows its section and page, and along its flat text where it
+		// doesn't.
+		async _cutPassages(itemID) {
+			let item = await Zotero.Items.getAsync(itemID);
+			if (!item) {
+				return [];
+			}
+			let chunking = Zotero.Utilities.Internal.Chunking;
+			// Only structure already extracted: generating it costs seconds,
+			// which is not a price a preview may charge (see
+			// Zotero.SDT.getPack()). Without it the flat text still divides,
+			// just without knowing where its passages sit.
+			let structure = await Zotero.SDT.getSections(itemID, { cachedOnly: true });
+			if (structure.ok && structure.sections.length) {
+				// The metrics only read the text for its script, so a sample
+				// of the opening sections says as much as all of them
+				let sample = structure.sections.slice(0, 5)
+					.map(section => section.text).join('\n\n');
+				return chunking.chunkSections(
+					structure.sections, chunking.getCharacterMetrics(sample));
+			}
+			let text = await item.attachmentText;
+			if (!text) {
+				return [];
+			}
+			return chunking.chunkText(text, chunking.getCharacterMetrics(text));
+		}
+
+		/**
+		 * Choose where in each passage to quote from: the line best showing
+		 * the query.
+		 *
+		 * Where a passage says the query outright, that's the window covering
+		 * the most of it. Where it only means it -- the model matched what no
+		 * word of the query says -- the passage is cut into lines and the
+		 * model picks the one it finds nearest, which is the only thing that
+		 * knows where the resemblance lives.
+		 *
+		 * The passages needing the model are asked about together, in one
+		 * call: embedding costs far more per call than per text, so asking
+		 * once for an item's lines is several times cheaper than asking per
+		 * passage. Every passage gets its opening first, so a model that
+		 * can't answer leaves a usable quote rather than none.
+		 *
+		 * @param {Object[]} entries - Set in place
+		 */
+		async _pickSnippets(entries) {
+			let chunking = Zotero.Utilities.Internal.Chunking;
+			let pending = [];
+			for (let entry of entries) {
+				entry.snippet = {
+					start: 0,
+					end: Math.min(entry.text.length, SNIPPET_CHARS)
+				};
+				if (entry.ranges.length) {
+					let window = await Zotero.Lexical.pickSnippetWindow(
+						this._queryText, entry.text, { width: SNIPPET_CHARS });
+					if (window) {
+						entry.snippet = window;
+						continue;
+					}
+				}
+				if (!this._modelApplies()) {
+					continue;
+				}
+				let lines = chunking.chunkText(entry.text, {
+					...chunking.getCharacterMetrics(entry.text),
+					budget: SNIPPET_CHARS,
+					minSize: Math.floor(SNIPPET_CHARS / 4),
+					overlap: 0
+				});
+				// A passage that is already one line has nothing to choose
+				if (lines.length > 1) {
+					pending.push({ entry, lines });
+				}
+			}
+			if (!pending.length) {
+				return;
+			}
+			let scores;
+			try {
+				scores = await Zotero.Embeddings.scoreTexts(
+					this._queryText,
+					pending.flatMap(({ lines }) => lines.map(line => line.text))
+				);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return;
+			}
+			let offset = 0;
+			for (let { entry, lines } of pending) {
+				let mine = scores.slice(offset, offset + lines.length);
+				offset += lines.length;
+				let best = mine.indexOf(Math.max(...mine));
+				entry.snippet = { start: lines[best].start, end: lines[best].end };
+			}
+		}
+
+		// Whether this session's query reaches each engine for the item being
+		// derived. The bestMatchEngine pref is temporary, for testing.
+		_semanticApplies(itemID) {
+			return this._previews.get(itemID)?.semantic !== false
+				&& this._modelApplies();
+		}
+
+		_lexicalApplies(itemID) {
+			return this._previews.get(itemID)?.lexical !== false
+				&& Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
+		}
+
+		// Whether the model can be asked about this query at all, apart from
+		// what it made of any one item
+		_modelApplies() {
+			return Zotero.Prefs.get('search.bestMatchEngine') != 'lexical'
+				&& _useSemantic()
+				&& !!Zotero.Embeddings.normalizeQuery(this._queryText || '');
 		}
 
 		// Derive one item's entries, all at once. A preview replaced while
@@ -480,26 +664,6 @@ Zotero.BestMatch = new function () {
 	this.createSession = function (queryText) {
 		return new this.Session(queryText);
 	};
-
-	// Whether a lexical fulltext excerpt's matched evidence already appears
-	// inside one of the semantic chunks being shown, making a separate card
-	// for it redundant. Tested on the excerpt's first match with a little
-	// surrounding context -- enough to place the passage, not just the word
-	// -- with whitespace runs collapsed, since the two texts come from the
-	// same extraction but may break lines differently.
-	function _coveredByChunk(excerpt, chunks) {
-		if (!excerpt.ranges.length) {
-			return false;
-		}
-		let [start, end] = excerpt.ranges[0];
-		let probe = excerpt.text
-			.slice(Math.max(0, start - 20), Math.min(excerpt.text.length, end + 20))
-			// The context slice can reach the excerpt's own ellipsis marks,
-			// which the chunk's text doesn't contain
-			.replace(/…/g, '')
-			.replace(/\s+/g, ' ');
-		return chunks.some(chunk => chunk.text.replace(/\s+/g, ' ').includes(probe));
-	}
 
 	// Fuse the two engines' scores with strength-weighted Reciprocal Rank
 	// Fusion: an item's fused score sums fraction / (RRF_K + rank) over the

@@ -1262,6 +1262,8 @@ Zotero.Embeddings = new function () {
 		if (!this.isEnabled() || !texts.length) {
 			return texts.map(() => 0);
 		}
+		// _center() centers with the measured mean, which has to be in memory
+		await this.initDB();
 		await this.loadCalibration();
 		let query = _center(await this.embedQuery(queryText));
 		let vectors = await this.embedPassages(texts);

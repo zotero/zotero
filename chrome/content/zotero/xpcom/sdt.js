@@ -77,11 +77,13 @@ Zotero.SDT = new function () {
 	 *     front of the worker queue (for user-initiated requests)
 	 * @param {Boolean} [options.allowStale=true] - Whether a cached pack from
 	 *     an older processor version may be returned
+	 * @param {Boolean} [options.cachedOnly] - Return 'not-cached' rather than
+	 *     extracting the document when no pack is cached
 	 * @param {Function} [options.onProgress] - Called with SDT generation
 	 *     progress from 0 to 100 when generation is needed
 	 * @returns {Promise<Object>} { ok: true, bytes: ArrayBuffer, packVersion,
 	 *     schemaMajorVersion }, or { ok: false, reason: 'unavailable' |
-	 *     'password-required' | 'failed' }
+	 *     'password-required' | 'not-cached' | 'failed' }
 	 */
 	this.getPack = async function (itemID, options = {}) {
 		try {
@@ -100,6 +102,11 @@ Zotero.SDT = new function () {
 					_generate(context, {}).catch(e => Zotero.logError(e));
 				}
 				return _makeResult(cache);
+			}
+			// Extracting a document costs seconds; a caller that only wants
+			// structure if it's already there says so rather than waiting
+			if (options.cachedOnly) {
+				return { ok: false, reason: 'not-cached' };
 			}
 			return await _generate(context, options);
 		}

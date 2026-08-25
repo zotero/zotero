@@ -657,14 +657,32 @@ Zotero.Lexical = new function () {
 		return ceiling * (FTS5_K1 + 1);
 	}
 
-	// The terms BM25 can score with, of a query's terms. FTS5 floors the
-	// inverse document frequency of a term in more than about half a corpus
-	// (see FTS5_MIN_IDF), which is its way of saying the term separates
-	// nothing there -- so such a term moves no score, and pointing at it as a
-	// reason an item matched would be pointing at nothing. A term still
-	// telling documents apart in either index is kept, since that's the index
-	// its score came from.
+	// The scoring terms of the last query asked about. Deciding them costs a
+	// document-frequency count per term per index, and every matched item asks
+	// the same question about the same query.
+	let _scoringTermsCache = null;
+
+	// The terms BM25 can score with, of a query's terms (see
+	// _computeScoringTerms()), kept for the query last asked about
 	async function _getScoringTerms(terms) {
+		let key = terms.map(
+			term => term.type + '\u0000' + term.text + '\u0000' + !!term.prefix
+		).join('\u0001');
+		if (_scoringTermsCache && _scoringTermsCache.key === key) {
+			return _scoringTermsCache.scoring;
+		}
+		let scoring = await _computeScoringTerms(terms);
+		_scoringTermsCache = { key, scoring };
+		return scoring;
+	}
+
+	// FTS5 floors the inverse document frequency of a term in more than about
+	// half a corpus (see FTS5_MIN_IDF), which is its way of saying the term
+	// separates nothing there -- so such a term moves no score, and pointing
+	// at it as a reason an item matched would be pointing at nothing. A term
+	// still telling documents apart in either index is kept, since that's the
+	// index its score came from.
+	async function _computeScoringTerms(terms) {
 		let scoring = [];
 		for (let term of terms) {
 			let tables = term.type == 'cjk'

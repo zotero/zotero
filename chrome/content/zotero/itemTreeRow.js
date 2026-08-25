@@ -647,8 +647,40 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		return 'search-match';
 	}
 
+	/**
+	 * The line of the passage this row shows: the window best carrying the
+	 * query (see Zotero.BestMatch.Session#getMatchingExcerpts()), cut out of
+	 * the passage with ellipses where it cuts, and the query's matches
+	 * located within it.
+	 *
+	 * The row quotes a line; the passage it came from stays whole on the
+	 * entry, for anything that shows the match in full.
+	 *
+	 * @return {Object} - { text, ranges }
+	 */
+	getQuotedLine() {
+		let { text, ranges, snippet } = this.ref.entry;
+		let start = snippet ? snippet.start : 0;
+		let end = snippet ? snippet.end : text.length;
+		let prefix = start > 0 ? '…' : '';
+		let quoted = prefix + text.slice(start, end) + (end < text.length ? '…' : '');
+		let quotedRanges = [];
+		for (let [rangeStart, rangeEnd] of ranges || []) {
+			let from = Math.max(rangeStart, start);
+			let to = Math.min(rangeEnd, end);
+			if (from >= to) {
+				continue;
+			}
+			quotedRanges.push([
+				from - start + prefix.length,
+				to - start + prefix.length
+			]);
+		}
+		return { text: quoted, ranges: quotedRanges };
+	}
+
 	getDisplayTitle() {
-		return this.ref.entry.text;
+		return this.getQuotedLine().text;
 	}
 
 	getField(field) {
@@ -694,7 +726,7 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		span.className = `cell ${column.className} primary`;
 		let textSpan = document.createElement('span');
 		textSpan.className = 'cell-text';
-		let { text, ranges } = this.ref.entry;
+		let { text, ranges } = this.getQuotedLine();
 		let last = 0;
 		for (let [start, end] of ranges || []) {
 			if (start > last) {

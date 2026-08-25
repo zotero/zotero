@@ -2858,13 +2858,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (row === undefined) {
 			return;
 		}
-		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0), true);
+		var topRow = Math.max(row - scrollPosition.offset, 0);
+		// scrollToRow() aligns a row's top with the viewport's, which throws
+		// away however far into that row the view had been scrolled. Rows are
+		// tall enough now for that to read as the list jumping backwards, so
+		// restore the exact pixel when we know it.
+		if (scrollPosition.pixelOffset !== undefined) {
+			this._treebox.scrollTo(
+				this._treebox._getItemPosition(topRow) + scrollPosition.pixelOffset);
+			return;
+		}
+		this._treebox.scrollToRow(topRow, true);
 	}
 
 	/**
 	 * Return an object describing the current scroll position to restore after changes
 	 *
-	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 * @return {Object|Boolean} - Object with .id (a treeViewID), .offset (rows between the
+	 * 		anchor and the top of the view) and .pixelOffset (how far into the top row the
+	 * 		view is scrolled), or false if no rows
 	 */
 	_saveScrollPosition() {
 		if (!this._treebox) return false;
@@ -2873,6 +2885,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (first === undefined || first === null) {
 			return false;
 		}
+		// How far into the first visible row the view is scrolled. Measured
+		// against the same offset getFirstVisibleRow() reads, so the two
+		// always describe the same position.
+		var pixelOffset = typeof treebox._getItemPosition == 'function'
+			? treebox.scrollOffset - treebox._getItemPosition(first)
+			: undefined;
 		var last = treebox.getLastVisibleRow();
 		for (let i = first; i <= last; i++) {
 			// If an object is selected, keep the first selected one in position
@@ -2881,7 +2899,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (!row) return false;
 				return {
 					id: row.ref.treeViewID,
-					offset: i - first
+					offset: i - first,
+					pixelOffset
 				};
 			}
 		}
@@ -2899,7 +2918,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!row) return false;
 		return {
 			id: row.ref.treeViewID,
-			offset: 0
+			offset: 0,
+			pixelOffset
 		};
 	}
 

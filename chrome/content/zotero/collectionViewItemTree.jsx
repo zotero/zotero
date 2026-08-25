@@ -405,12 +405,49 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (!this._renderedMatchItemIDs) {
 			this._renderedMatchItemIDs = new Set();
 			Promise.resolve().then(() => {
-				let itemIDs = [...this._renderedMatchItemIDs];
+				let painted = this._renderedMatchItemIDs;
 				this._renderedMatchItemIDs = null;
-				this._bestMatchSession?.request(itemIDs);
+				// What's on screen when the request goes out, plus whatever
+				// asked for it: the visible range is read a turn after the
+				// rows were drawn, and a row drawn as the view was still
+				// moving can fall outside it by then. It would never ask
+				// again -- it has already been painted -- so it says so here.
+				this._bestMatchSession?.request(
+					[...new Set([...this._pendingMatchItemIDs(), ...painted])]);
 			});
 		}
 		this._renderedMatchItemIDs.add(itemID);
+	}
+
+	/**
+	 * The items whose placeholders are on screen now, topmost first.
+	 *
+	 * A row signals demand when it's painted, but a pass only paints rows
+	 * newly in view -- so what was just painted is never the whole of what's
+	 * waiting. Each request replaces the last, which is what discards work
+	 * for rows scrolled past, and that only holds if the request says
+	 * everything still wanted rather than only what changed.
+	 *
+	 * @return {Number[]}
+	 */
+	_pendingMatchItemIDs() {
+		let treebox = this.itemTree._treebox;
+		if (!treebox) {
+			return [];
+		}
+		let first = treebox.getFirstVisibleRow();
+		let last = treebox.getLastVisibleRow();
+		if (first === undefined || first === null) {
+			return [];
+		}
+		let itemIDs = [];
+		for (let i = first; i <= last; i++) {
+			let row = this.getRow(i);
+			if (row?.type == 'search-match-placeholder') {
+				itemIDs.push(row.ref.itemID);
+			}
+		}
+		return itemIDs;
 	}
 
 	/**
