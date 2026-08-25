@@ -3472,12 +3472,7 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	// real boundaries too.
 	function _splitToSentences(source, start, end, budget, count) {
 		let units = [];
-		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
-		for (let { segment, index } of segmenter.segment(source.slice(start, end))) {
-			let unit = _measureRange(source, start + index, start + index + segment.length, count);
-			if (!unit) {
-				continue;
-			}
+		for (let unit of _segmentSentences(source, start, end, count)) {
 			if (unit.size <= budget) {
 				units.push(unit);
 				continue;
@@ -3486,6 +3481,35 @@ Zotero.Utilities.Internal.Chunking = new function () {
 		}
 		return units;
 	}
+
+	// The sentences of a range as they stand, whatever their size
+	function _segmentSentences(source, start, end, count) {
+		let units = [];
+		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+		for (let { segment, index } of segmenter.segment(source.slice(start, end))) {
+			let unit = _measureRange(source, start + index, start + index + segment.length, count);
+			if (unit) {
+				units.push(unit);
+			}
+		}
+		return units;
+	}
+
+	/**
+	 * The sentences of a text, in order, each located within it.
+	 *
+	 * No budget: a sentence comes back whole however long it is, which is
+	 * what a caller quoting one wants -- half a sentence reads as a
+	 * truncation rather than as a passage.
+	 *
+	 * @param {String} text
+	 * @param {Object} metrics - See getCharacterMetrics(); only `count` is read
+	 * @return {Object[]} - { text, size, start, end } per sentence, trimmed,
+	 *     with whitespace-only segments dropped
+	 */
+	this.splitSentences = function (text, metrics) {
+		return _segmentSentences(text, 0, text.length, metrics.count);
+	};
 
 	// Split an oversized block into as few and as even pieces as possible.
 	// Filling each to the budget instead would leave a short remainder at the

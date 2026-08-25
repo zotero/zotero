@@ -193,6 +193,16 @@ describe("Zotero.BestMatch", function () {
 		// A session that has scored the attachment, recording which engines
 		// matched it -- what getMatchingExcerpts() consults instead of being
 		// told per call
+		// Pin the temporary bestMatchEngine pref, leaving every other pref
+		// reading through to the profile
+		function pinEngine(engine) {
+			let get = Zotero.Prefs.get;
+			stubs.push(sinon.stub(Zotero.Prefs, 'get').callsFake(
+				(key, ...rest) => (key == 'search.bestMatchEngine'
+					? engine
+					: get.call(Zotero.Prefs, key, ...rest))));
+		}
+
 		async function sessionFor({ lexical = true, semantic = true } = {}) {
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores: new Map([[attachment.id, 0.9]]),
@@ -312,6 +322,90 @@ describe("Zotero.BestMatch", function () {
 			assert.equal(excerpts[0].text, 'a passage naming the owl');
 			// Nothing weighed it but its words
 			assert.isUndefined(excerpts[0].score);
+		});
+
+		it("should quote the way a pinned semantic engine would", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			let head = 'A first paragraph that never mentions the bird at all. '.repeat(5);
+			let tail = 'A second paragraph where the owl is finally named outright. '.repeat(5);
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+				{ text: head + '\n\n' + tail, score: 0.6 }
+			]));
+			let rangesStub = sinon.stub(Zotero.Lexical, 'findMatchRanges');
+			stubs.push(rangesStub);
+			let windowStub = sinon.stub(Zotero.Lexical, 'pickSnippetWindow');
+			stubs.push(windowStub);
+			// The model reads the lines and prefers the last
+			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreTexts')
+				.callsFake(async (query, texts) => texts.map((text, i) => i / texts.length)));
+
+			pinEngine('semantic');
+			// The item matched lexically too, so only the pin can be keeping
+			// the lexical engine out of the quote
+			let session = await sessionFor();
+			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
+
+			assert.isFalse(rangesStub.called);
+			assert.isFalse(windowStub.called);
+			assert.isEmpty(excerpt.ranges);
+			// The model's own choice of line, not the one saying 'owl'
+			assert.isAbove(excerpt.snippet.start, 0);
+			// Nothing but the model weighed it, so its strength is the
+			// model's fraction rather than a share of a blend
+			assert.closeTo(excerpt.strength, 0.6, 1e-9);
+		});
+
+		it("should fill out a short chosen sentence with what follows it", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			let first = 'The owl is here.';
+			let second = 'A modest follow-up sentence that adds a little context.';
+			let third = 'A third sentence long enough that adding it would overrun the '
+				+ 'budget for a quoted line, so it has to be left out of one that '
+				+ 'already holds two sentences before it, whatever else is true.';
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+				{ text: [first, second, third].join(' '), score: 0.6 }
+			]));
+			// The model likes the first sentence best, and it is far too
+			// short to stand as a quote on its own
+			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreTexts')
+				.callsFake(async (query, texts) => texts.map((text, i) => 1 - i)));
+
+			pinEngine('semantic');
+			let session = await sessionFor();
+			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
+			let quoted = excerpt.text.slice(excerpt.snippet.start, excerpt.snippet.end);
+
+			assert.equal(excerpt.snippet.start, 0);
+			assert.include(quoted, first);
+			// The next sentence fits alongside it...
+			assert.include(quoted, second);
+			// ...and the one after that doesn't
+			assert.notInclude(quoted, third);
+		});
+
+		it("should not ask the model to quote an item it never ranked", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getChunks').resolves([
+				{ text: 'A passage of owlish things. '.repeat(20), chunkIndex: 0 }
+			]));
+			// The lexical engine scored the passage on a term it then can't
+			// point at -- the one way a passage arrives with no ranges to
+			// quote around
+			stubs.push(sinon.stub(Zotero.Lexical, 'scoreTexts').resolves([0.8]));
+			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[]]));
+			let scoreTextsStub = sinon.stub(Zotero.Embeddings, 'scoreTexts');
+			stubs.push(scoreTextsStub);
+
+			// Hybrid, but scoring recorded no semantic match for this item
+			let session = await sessionFor({ semantic: false });
+			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
+
+			assert.isFalse(scoreTextsStub.called);
+			// Left with the passage's opening, and its lexical share whole
+			assert.equal(excerpt.snippet.start, 0);
+			assert.closeTo(excerpt.strength, 0.8, 1e-9);
 		});
 
 		it("should read an indexed item's chunks when the model shows nothing", async function () {

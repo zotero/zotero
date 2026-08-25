@@ -375,18 +375,34 @@
 		}
 
 		.search-match-row {
+			// One cell across the row: a match shows a passage, which the
+			// columns say nothing about
 			.cell {
 				font-size: $font-size-small;
-				&.title {
-					flex-grow: 1;
-					flex-basis: 0;
-					max-width: fit-content;
-				}
-				// Push the relevance bar to the row's end, where the Relevance
-				// column sits while a best-match search is active
-				&.relevance {
-					margin-inline-start: auto;
-				}
+				flex: 1 1 auto;
+			}
+			// Location above quote, beside the indent and twisty the tree adds
+			// to the first cell. The row's height is set from JS for exactly
+			// these two lines (ItemTree#_getSearchMatchRowHeight()), so
+			// neither may wrap.
+			.search-match-lines {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				flex: 1 1 auto;
+				// Without this a flex item refuses to shrink below its text,
+				// and nothing is ever clipped to an ellipsis
+				min-width: 0;
+			}
+			.search-match-location,
+			.cell-text {
+				display: block;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.search-match-location {
+				color: var(--fill-secondary);
 			}
 			.search-match-pending {
 				color: var(--fill-secondary);

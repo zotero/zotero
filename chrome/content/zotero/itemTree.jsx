@@ -1289,6 +1289,57 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	/**
+	 * A search-match row shows two lines -- where its passage is, and the
+	 * line of it worth reading -- so it stands a line taller than the rows
+	 * around it. Neither line wraps, so the height is the same for every one
+	 * of them and can be told without measuring anything.
+	 *
+	 * @return {Number}
+	 */
+	_getSearchMatchRowHeight() {
+		let textHeight = this.tree._renderedTextHeight
+			* (this.tree.props.disableFontSizeScaling ? 1 : Zotero.Prefs.get('fontSize'));
+		// Two lines, and half the room a one-line row leaves around its text:
+		// the second line gives the row enough weight without it
+		let padding = (this.tree._rowHeight - textHeight) / 2;
+		return Math.round(textHeight * 2 + padding);
+	}
+
+	/**
+	 * Tell the table which rows are taller than the rest.
+	 *
+	 * The heights are keyed by row index, so they mean something different
+	 * after every insertion, removal and sort -- which is why this runs from
+	 * handleRowModelUpdate(), where all of those end up, rather than from the
+	 * places that change rows.
+	 */
+	_updateSearchMatchRowHeights() {
+		if (!this.tree?._jsWindow) {
+			return;
+		}
+		let height = null;
+		let heights = [];
+		let indexes = [];
+		for (let i = 0, count = this.getRowCount(); i < count; i++) {
+			let type = this.getRow(i)?.type;
+			if (type == 'search-match' || type == 'search-match-placeholder') {
+				height ??= this._getSearchMatchRowHeight();
+				heights.push([i, height]);
+				indexes.push(i);
+			}
+		}
+		// Most updates leave the tall rows exactly where they were. Telling
+		// the table again would have it rebuild its offsets and forget which
+		// way the view was moving for nothing.
+		let signature = height + '|' + indexes.join(',');
+		if (signature === this._searchMatchRowHeights) {
+			return;
+		}
+		this._searchMatchRowHeights = signature;
+		this.tree.updateCustomRowHeights(heights);
+	}
+
+	/**
 	 * NOTE: This method must not trigger further update events (e.g. by calling
 	 * sort() or refresh()) to avoid recursive update loops and UI flashing.
 	 *
@@ -1332,6 +1383,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Reset scrollbar to top (at end of loading/showing message)
 			this._treebox && this._treebox.scrollTo(0);
 		}
+
+		// Before anything is drawn or scrolled to: the rows just changed, and
+		// heights are what say where each one sits
+		this._updateSearchMatchRowHeights();
 
 		if (rows === true) {
 			if (this.tree) {
@@ -2354,6 +2409,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
+		// Both kinds of match row: one stands in for the other, and they lay
+		// out the same. Toggled here rather than set while rendering, since
+		// the tree recycles a row's div for whatever row next needs one.
+		div.classList.toggle(
+			'search-match-row',
+			row.type === 'search-match' || row.type === 'search-match-placeholder');
 		div.classList.toggle('library-header-row', row.type === 'library-header');
 		div.classList.toggle('spacer-row', row.type === 'spacer');
 		if (row.type !== 'annotation') {
@@ -2437,8 +2498,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (isFirstColumn) {
+			// A row with no icon of its own gets none: the indent and twisty
+			// the tree adds don't depend on one
 			const icon = row.getIcon();
-			icon.classList.add('cell-icon', 'item-icon');
+			icon?.classList.add('cell-icon', 'item-icon');
 
 			if (cell.querySelector('.cell-text') === null) {
 				let textSpan = document.createElement('span');
@@ -2448,7 +2511,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				cell.append(textSpan);
 			}
 
-			cell.prepend(icon);
+			if (icon) {
+				cell.prepend(icon);
+			}
 			cell.classList.add('first-column');
 		}
 

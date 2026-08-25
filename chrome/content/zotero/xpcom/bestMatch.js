@@ -45,7 +45,7 @@ Zotero.BestMatch = new function () {
 	const SEMANTIC_WEIGHT = 0.7;
 	const LEXICAL_WEIGHT = 0.3;
 	// About a line: what a passage is quoted down to for a one-line preview
-	const SNIPPET_CHARS = 200;
+	const SNIPPET_CHARS = 150;
 	// Most passages shown for one item. The strongest few say what the item
 	// has to offer, and quoting a passage costs work -- sometimes the model's
 	// -- so passages past this are not worth deriving.
@@ -441,12 +441,14 @@ Zotero.BestMatch = new function () {
 				return [];
 			}
 			let texts = passages.map(passage => passage.text);
-			// Chunks always highlight the query's literal matches: finding
-			// them in texts already in hand is cheap, unlike scanning a
-			// document, so it isn't gated on the item having matched
-			// lexically
+			// Locating the query's words in texts already in hand is cheap,
+			// unlike scanning a document, so it isn't gated on the item
+			// having matched lexically -- only on the lexical engine being
+			// one this session listens to at all
 			let [ranges, lexical] = await Promise.all([
-				Zotero.Lexical.findMatchRanges(queryText, texts),
+				this._lexicalEnabled()
+					? Zotero.Lexical.findMatchRanges(queryText, texts)
+					: texts.map(() => []),
 				this._lexicalApplies(itemID) ? Zotero.Lexical.scoreTexts(queryText, texts) : null
 			]);
 			let entries = [];
@@ -459,13 +461,18 @@ Zotero.BestMatch = new function () {
 				if (passage.score === undefined && !share) {
 					continue;
 				}
+				// Over the engines that spoke for this item, so a strength is
+				// the same 0-1 fraction whether one weighed the passage or
+				// both did
+				let weighed = passage.score !== undefined;
+				let semanticWeight = weighed ? SEMANTIC_WEIGHT : 0;
+				let lexicalWeight = lexical ? LEXICAL_WEIGHT : 0;
+				let fraction = weighed ? Zotero.Embeddings.getScoreFraction(passage.score) : 0;
 				entries.push({
 					...passage,
 					ranges: ranges[i],
-					strength: passage.score === undefined
-						? share
-						: SEMANTIC_WEIGHT * Zotero.Embeddings.getScoreFraction(passage.score)
-							+ LEXICAL_WEIGHT * share
+					strength: (semanticWeight * fraction + lexicalWeight * share)
+						/ (semanticWeight + lexicalWeight)
 				});
 			}
 			entries.sort((a, b) => b.strength - a.strength);
@@ -473,7 +480,7 @@ Zotero.BestMatch = new function () {
 			// Quoting is the expensive half -- a passage the query's words
 			// aren't in has to be read by the model -- so it happens only for
 			// the passages that survived
-			await this._pickSnippets(entries);
+			await this._pickSnippets(entries, itemID);
 			return entries;
 		}
 
@@ -557,26 +564,35 @@ Zotero.BestMatch = new function () {
 		 *
 		 * Where a passage says the query outright, that's the window covering
 		 * the most of it. Where it only means it -- the model matched what no
-		 * word of the query says -- the passage is cut into lines and the
+		 * word of the query says -- the passage is cut into sentences and the
 		 * model picks the one it finds nearest, which is the only thing that
-		 * knows where the resemblance lives.
+		 * knows where the resemblance lives. What's quoted from there is
+		 * whole sentences (see _quoteFrom()).
 		 *
 		 * The passages needing the model are asked about together, in one
 		 * call: embedding costs far more per call than per text, so asking
-		 * once for an item's lines is several times cheaper than asking per
-		 * passage. Every passage gets its opening first, so a model that
+		 * once for an item's sentences is several times cheaper than asking
+		 * per passage. Every passage gets its opening first, so a model that
 		 * can't answer leaves a usable quote rather than none.
 		 *
+		 * Both halves answer to the same gates the passages did: a session
+		 * pinned to one engine quotes the way that engine would, rather than
+		 * ranking with it and then quoting with the other.
+		 *
 		 * @param {Object[]} entries - Set in place
+		 * @param {Number} itemID
 		 */
-		async _pickSnippets(entries) {
+		async _pickSnippets(entries, itemID) {
 			let chunking = Zotero.Utilities.Internal.Chunking;
+			let useModel = this._semanticApplies(itemID);
 			let pending = [];
 			for (let entry of entries) {
-				entry.snippet = {
-					start: 0,
-					end: Math.min(entry.text.length, SNIPPET_CHARS)
-				};
+				let sentences = chunking.splitSentences(
+					entry.text, chunking.getCharacterMetrics(entry.text));
+				// The passage's opening, for a passage nothing chooses within
+				entry.snippet = sentences.length
+					? _quoteFrom(sentences, 0)
+					: { start: 0, end: Math.min(entry.text.length, SNIPPET_CHARS) };
 				if (entry.ranges.length) {
 					let window = await Zotero.Lexical.pickSnippetWindow(
 						this._queryText, entry.text, { width: SNIPPET_CHARS });
@@ -585,19 +601,11 @@ Zotero.BestMatch = new function () {
 						continue;
 					}
 				}
-				if (!this._modelApplies()) {
+				// A passage that is a single sentence has nothing to choose
+				if (!useModel || sentences.length < 2) {
 					continue;
 				}
-				let lines = chunking.chunkText(entry.text, {
-					...chunking.getCharacterMetrics(entry.text),
-					budget: SNIPPET_CHARS,
-					minSize: Math.floor(SNIPPET_CHARS / 4),
-					overlap: 0
-				});
-				// A passage that is already one line has nothing to choose
-				if (lines.length > 1) {
-					pending.push({ entry, lines });
-				}
+				pending.push({ entry, sentences });
 			}
 			if (!pending.length) {
 				return;
@@ -606,7 +614,7 @@ Zotero.BestMatch = new function () {
 			try {
 				scores = await Zotero.Embeddings.scoreTexts(
 					this._queryText,
-					pending.flatMap(({ lines }) => lines.map(line => line.text))
+					pending.flatMap(({ sentences }) => sentences.map(s => s.text))
 				);
 			}
 			catch (e) {
@@ -614,16 +622,16 @@ Zotero.BestMatch = new function () {
 				return;
 			}
 			let offset = 0;
-			for (let { entry, lines } of pending) {
-				let mine = scores.slice(offset, offset + lines.length);
-				offset += lines.length;
-				let best = mine.indexOf(Math.max(...mine));
-				entry.snippet = { start: lines[best].start, end: lines[best].end };
+			for (let { entry, sentences } of pending) {
+				let mine = scores.slice(offset, offset + sentences.length);
+				offset += sentences.length;
+				entry.snippet = _quoteFrom(sentences, mine.indexOf(Math.max(...mine)));
 			}
 		}
 
 		// Whether this session's query reaches each engine for the item being
-		// derived. The bestMatchEngine pref is temporary, for testing.
+		// derived: the engine has to be one the session listens to, and to
+		// have found something in the item worth speaking about.
 		_semanticApplies(itemID) {
 			return this._previews.get(itemID)?.semantic !== false
 				&& this._modelApplies();
@@ -631,15 +639,21 @@ Zotero.BestMatch = new function () {
 
 		_lexicalApplies(itemID) {
 			return this._previews.get(itemID)?.lexical !== false
-				&& Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
+				&& this._lexicalEnabled();
 		}
 
-		// Whether the model can be asked about this query at all, apart from
-		// what it made of any one item
+		// Whether each engine reaches this session at all, apart from what it
+		// made of any one item. The bestMatchEngine pref is temporary, for
+		// testing: it pins a session to a single engine, which then decides
+		// not only what matched but how a match is quoted.
 		_modelApplies() {
 			return Zotero.Prefs.get('search.bestMatchEngine') != 'lexical'
 				&& _useSemantic()
 				&& !!Zotero.Embeddings.normalizeQuery(this._queryText || '');
+		}
+
+		_lexicalEnabled() {
+			return Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
 		}
 
 		// Derive one item's entries, all at once. A preview replaced while
@@ -664,6 +678,24 @@ Zotero.BestMatch = new function () {
 	this.createSession = function (queryText) {
 		return new this.Session(queryText);
 	};
+
+	// The extent to quote starting at one of a passage's sentences: that
+	// sentence, plus the ones after it that still fit SNIPPET_CHARS.
+	//
+	// The chosen sentence is taken whole however long it is -- half a sentence
+	// reads as a truncation rather than as a passage, and the row clips what
+	// doesn't fit anyway. A short one alone reads as a fragment, so the rest
+	// of the line goes to what follows it.
+	function _quoteFrom(sentences, index) {
+		let { start, end } = sentences[index];
+		for (let i = index + 1; i < sentences.length; i++) {
+			if (sentences[i].end - start > SNIPPET_CHARS) {
+				break;
+			}
+			end = sentences[i].end;
+		}
+		return { start, end };
+	}
 
 	// Fuse the two engines' scores with strength-weighted Reciprocal Rank
 	// Fusion: an item's fused score sums fraction / (RRF_K + rank) over the

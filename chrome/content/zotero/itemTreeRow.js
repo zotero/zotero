@@ -12,6 +12,10 @@ XPCOMUtils.defineLazyPreferenceGetter(
 
 const ATTACHMENT_STATE_LOAD_DELAY = 150;
 
+// Headings named above a search match. The path from the document's root can
+// be several levels deep, and the deepest are the ones that place the passage.
+const LOCATION_HEADINGS = 2;
+
 /**
  * Base row in an ItemTree.
  *
@@ -691,6 +695,30 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 	}
 
 	/**
+	 * Where in the document this row's passage sits, for the line above the
+	 * quote: the headings it falls under and the page it starts on. Only the
+	 * deepest headings are named -- a full outline path is longer than the
+	 * line, and the leaf is what says where you'd land.
+	 *
+	 * Empty for a passage that knows neither, which is what a document with
+	 * no structured text to read gives.
+	 *
+	 * @return {String}
+	 */
+	getLocationLabel() {
+		let { outlinePath, pageLabel } = this.ref.entry;
+		let parts = [];
+		if (outlinePath) {
+			parts.push(outlinePath.split(' > ').slice(-LOCATION_HEADINGS).join(' › '));
+		}
+		if (pageLabel) {
+			parts.push(Zotero.ftl.formatValueSync(
+				'items-search-match-page', { page: pageLabel }));
+		}
+		return parts.join(' · ');
+	}
+
+	/**
 	 * A match row's bar shows the strength of the evidence it displays,
 	 * rather than its item's relevance
 	 */
@@ -698,12 +726,20 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		return this.ref.entry?.strength ?? null;
 	}
 
+	/**
+	 * No icon: every match row would carry the same one, which would say
+	 * nothing while taking room from the quote
+	 */
 	getIcon() {
-		let icon = getCSSIcon('search');
-		icon.classList.add('icon-item-type');
-		return icon;
+		return null;
 	}
 
+	/**
+	 * A match row spans the tree's whole width with one cell. It shows a
+	 * passage rather than an item, so the columns describe nothing about it
+	 * -- including the relevance bar, which would rank passages against each
+	 * other where the eye is meant to be reading them.
+	 */
 	renderRow(div, index, columns, rowData, renderCtx) {
 		let titleColumn = Object.assign(
 			{},
@@ -711,19 +747,37 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 			{ className: 'title' }
 		);
 		div.appendChild(renderCtx.renderCell(index, rowData.title, titleColumn, true));
-		// The relevance bar while a best-match search shows the Relevance column
-		let relevanceColumn = columns.find(column => column.dataKey == 'relevance');
-		if (relevanceColumn && !relevanceColumn.hidden) {
-			let cell = renderCtx.renderCell(index, rowData?.relevance, relevanceColumn, false);
-			if (cell) {
-				div.appendChild(cell);
-			}
-		}
 	}
 
+	/**
+	 * Stack the row's lines beside the tree's indent and twisty, which are
+	 * added to the first cell of every row and would otherwise be stacked
+	 * along with them
+	 *
+	 * @param {...Element} lines
+	 * @return {Element}
+	 */
+	_renderLines(...lines) {
+		let wrapper = document.createElement('span');
+		wrapper.className = 'search-match-lines';
+		wrapper.append(...lines);
+		return wrapper;
+	}
+
+	/**
+	 * Two lines: where the passage is, and the line of it worth reading.
+	 * Neither wraps, so every match row is the same height and the tree can
+	 * tell what that height is without measuring (see
+	 * ItemTree#_getSearchMatchRowHeight()).
+	 */
 	renderPrimaryCell(index, data, column) {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className} primary`;
+
+		let locationSpan = document.createElement('span');
+		locationSpan.className = 'search-match-location';
+		locationSpan.textContent = this.getLocationLabel();
+
 		let textSpan = document.createElement('span');
 		textSpan.className = 'cell-text';
 		let { text, ranges } = this.getQuotedLine();
@@ -741,7 +795,8 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		if (last < text.length) {
 			textSpan.append(text.slice(last));
 		}
-		span.append(textSpan);
+
+		span.append(this._renderLines(locationSpan, textSpan));
 		return span;
 	}
 }
@@ -761,13 +816,17 @@ class SearchMatchPlaceholderItemTreeRow extends SearchMatchItemTreeRow {
 		return '';
 	}
 
+	getLocationLabel() {
+		return '';
+	}
+
 	renderPrimaryCell(index, data, column) {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className} primary`;
 		let textSpan = document.createElement('span');
 		textSpan.className = 'cell-text search-match-pending';
 		textSpan.textContent = Zotero.ftl.formatValueSync('items-search-match-pending');
-		span.append(textSpan);
+		span.append(this._renderLines(textSpan));
 		return span;
 	}
 }

@@ -461,6 +461,8 @@ items-column-relevance-rank = Rank { $rank }
 items-best-match-indexing = Indexing in progress — { $indexed } of { $total } items indexed
 items-best-match-indexing-paused = Indexing is paused — { $indexed } of { $total } items indexed
 items-search-match-pending = Loading matches…
+# $page (String) - a page label, e.g. "12" or "ix"
+items-search-match-page = p. { $page }
 
 report-error =
     .label = Report Error…
