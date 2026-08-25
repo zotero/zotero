@@ -1204,12 +1204,7 @@ Zotero.Embeddings = new function () {
 		}
 		let calibration = await _requireReadyIndex();
 		let query = _center(await this.embedQuery(queryText));
-		let rows = await Zotero.DB.queryAsync(
-			"SELECT chunkIndex, embedding, startBlock, endBlock, startOffset, endOffset, "
-				+ "textCheck, sectionPart, sectionParts "
-				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL",
-			itemID
-		);
+		let rows = await _getChunkRows(itemID);
 		let scored = rows
 			.map(row => ({
 				row,
@@ -1219,19 +1214,88 @@ Zotero.Embeddings = new function () {
 			.sort((a, b) => (b.score - a.score) || (a.row.chunkIndex - b.row.chunkIndex))
 			.slice(0, limit);
 		let sources = await _loadChunkSources(itemID, scored.map(entry => entry.row));
-		return scored.map((entry, i) => ({
-			chunkIndex: entry.row.chunkIndex,
-			score: entry.score,
-			text: sources[i].text,
-			outlinePath: sources[i].outlinePath,
-			startBlock: entry.row.startBlock,
-			endBlock: entry.row.endBlock,
-			pageLabel: sources[i].pageLabel,
-			position: sources[i].position,
-			sectionPart: entry.row.sectionPart,
-			sectionParts: entry.row.sectionParts
-		}));
+		return scored.map((entry, i) => Object.assign(
+			_describeChunk(entry.row, sources[i]),
+			{ score: entry.score }
+		));
 	};
+
+	/**
+	 * Every chunk an item is indexed as, in document order, with where in the
+	 * item each came from -- for reading an item's own passages without a
+	 * model's opinion of them. The text is re-derived and verified the same
+	 * way getMatchingChunks() derives it.
+	 *
+	 * Unlike getMatchingChunks() this asks the model nothing, so it answers
+	 * while the model is disabled or unready: the rows are a record of how
+	 * the item was divided, which stands on its own. Deriving every chunk's
+	 * text costs more than deriving a scored handful's, so this is for
+	 * callers that need all of them.
+	 *
+	 * @param {Number} itemID
+	 * @return {Promise<Object[]>} - [{ chunkIndex, text, outlinePath,
+	 *     startBlock, endBlock, pageLabel, position, sectionPart,
+	 *     sectionParts }], in document order
+	 */
+	this.getChunks = async function (itemID) {
+		let rows = await _getChunkRows(itemID);
+		if (!rows.length) {
+			return [];
+		}
+		rows.sort((a, b) => a.chunkIndex - b.chunkIndex);
+		let sources = await _loadChunkSources(itemID, rows);
+		return rows.map((row, i) => _describeChunk(row, sources[i]));
+	};
+
+	/**
+	 * How similar the model finds a query and each of the given texts, on the
+	 * raw scale scoring compares with -- for choosing among passages of one
+	 * item, where what matters is which scores highest rather than what the
+	 * number means. No floor is applied: the caller has already decided the
+	 * texts are worth reading.
+	 *
+	 * @param {String} queryText
+	 * @param {String[]} texts
+	 * @return {Promise<Number[]>} - A score for each text, in order
+	 */
+	this.scoreTexts = async function (queryText, texts) {
+		if (!this.isEnabled() || !texts.length) {
+			return texts.map(() => 0);
+		}
+		await this.loadCalibration();
+		let query = _center(await this.embedQuery(queryText));
+		let vectors = await this.embedPassages(texts);
+		return vectors.map(vector => this.dot(query, _center(vector)));
+	};
+
+	// The stored rows of an item's chunks, embeddings included. Attaches the
+	// database first, which asking the model about the index would otherwise
+	// have done -- getChunks() never asks it anything.
+	async function _getChunkRows(itemID) {
+		await Zotero.Embeddings.initDB();
+		return Zotero.DB.queryAsync(
+			"SELECT chunkIndex, embedding, startBlock, endBlock, startOffset, endOffset, "
+				+ "textCheck, sectionPart, sectionParts "
+				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL",
+			itemID
+		);
+	}
+
+	// One chunk as callers see it: what the row records about where it sits,
+	// with the text and location re-derived from its source
+	function _describeChunk(row, source) {
+		return {
+			chunkIndex: row.chunkIndex,
+			text: source.text,
+			outlinePath: source.outlinePath,
+			startBlock: row.startBlock,
+			endBlock: row.endBlock,
+			pageLabel: source.pageLabel,
+			position: source.position,
+			sectionPart: row.sectionPart,
+			sectionParts: row.sectionParts
+		};
+	}
 
 	/**
 	 * Fingerprint of a chunk's text, for verifying a preview re-derived from
@@ -1476,49 +1540,14 @@ Zotero.Embeddings.Chunking = new function () {
 		let prefix = Zotero.Embeddings.getPassagePrefix();
 		let metrics = {
 			count,
-			joinTokens: Math.max(0, count('a\n\na') - 2 * count('a')),
+			joinSize: Math.max(0, count('a\n\na') - 2 * count('a')),
 			budget: Math.min(CHUNK_MAX_TOKENS, Zotero.Embeddings.getModelMaxTokens())
-				- specialTokens - (prefix ? count(prefix) : 0)
+				- specialTokens - (prefix ? count(prefix) : 0),
+			minSize: CHUNK_MIN_TOKENS,
+			overlap: CHUNK_OVERLAP_TOKENS
 		};
 		_metrics.set(tokenizer, metrics);
 		return metrics;
-	}
-
-	// The paragraphs of a text, each counted exactly once -- the single place
-	// chunking pays for tokenization. Each carries its trimmed extent in the
-	// text, so everything assembled from paragraphs stays addressable as a
-	// slice of the source.
-	function _measureParagraphs(text, count) {
-		let paragraphs = [];
-		for (let match of text.matchAll(/[^\n]+/g)) {
-			let unit = _measureRange(text, match.index, match.index + match[0].length, count);
-			if (unit) {
-				paragraphs.push(unit);
-			}
-		}
-		return paragraphs;
-	}
-
-	// The trimmed extent and token count of a range of a text, or null when
-	// the range is all whitespace
-	function _measureRange(text, start, end, count) {
-		let raw = text.slice(start, end);
-		let trimmed = raw.trim();
-		if (!trimmed) {
-			return null;
-		}
-		start += raw.length - raw.trimStart().length;
-		return { text: trimmed, tokens: count(trimmed), start, end: start + trimmed.length };
-	}
-
-	// Tokens of the given paragraphs once joined back together, charging
-	// joinTokens per join (see _getMetrics())
-	function _sumTokens(paragraphs, joinTokens) {
-		if (!paragraphs.length) {
-			return 0;
-		}
-		return paragraphs.reduce((sum, paragraph) => sum + paragraph.tokens, 0)
-			+ joinTokens * (paragraphs.length - 1);
 	}
 
 	// A text in segments of at most TOKENIZER_SEGMENT_CHARS, each ending
@@ -1548,169 +1577,19 @@ Zotero.Embeddings.Chunking = new function () {
 		return segments;
 	}
 
-	// Last resort for a sentence with no sentence boundary inside the budget:
-	// bisect it by characters -- at whitespace where there is any -- until
-	// every piece fits, so each piece stays a slice of the source. Bisection
-	// makes the pieces even rather than full-then-short, the same policy as
-	// _splitBlockEvenly(). `unit` is a measured range (see _measureRange()).
-	function _hardSplit(source, unit, budget, count) {
-		if (unit.tokens <= budget || unit.end - unit.start < 2) {
-			return [unit];
-		}
-		// Split nearest the midpoint, at a whitespace character when there is
-		// one, so text with words isn't cut inside a word
-		let mid = unit.start + Math.floor((unit.end - unit.start) / 2);
-		let split = mid;
-		for (let i = 0; i < (unit.end - unit.start) / 2 - 1; i++) {
-			if (/\s/.test(source[mid - i])) {
-				split = mid - i;
-				break;
-			}
-			if (/\s/.test(source[mid + i])) {
-				split = mid + i;
-				break;
-			}
-		}
-		let halves = [
-			_measureRange(source, unit.start, split, count),
-			_measureRange(source, split, unit.end, count)
-		];
-		return halves.filter(Boolean)
-			.flatMap(half => _hardSplit(source, half, budget, count));
-	}
-
-	// The sentence units of a range of the source, each within the budget and
-	// located by its trimmed extent. Sentence boundaries come from
-	// Intl.Segmenter, which is locale-aware, so scripts without Western
-	// punctuation still split at real boundaries.
-	function _splitToSentences(source, start, end, budget, count) {
-		let units = [];
-		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
-		for (let { segment, index } of segmenter.segment(source.slice(start, end))) {
-			let unit = _measureRange(source, start + index, start + index + segment.length, count);
-			if (!unit) {
-				continue;
-			}
-			if (unit.tokens <= budget) {
-				units.push(unit);
-				continue;
-			}
-			units.push(..._hardSplit(source, unit, budget, count));
-		}
-		return units;
-	}
-
-	// Split a block that outgrew the budget into as few pieces as possible and
-	// as evenly as possible. Filling each piece to the budget instead would
-	// leave a short, low-information remainder at the end, which is the same
-	// thing CHUNK_MIN_TOKENS exists to prevent. Each piece is the source
-	// slice from its first sentence to its last, so it keeps the source's own
-	// separators and stays addressable by its extent.
-	function _splitBlockEvenly(source, block, budget, count) {
-		// Each piece carries overlap from the previous one, so its own content
-		// has that much less room
-		let pieceCount = Math.ceil(block.tokens / (budget - CHUNK_OVERLAP_TOKENS));
-		let sentences = _splitToSentences(source, block.start, block.end, budget, count);
-		let chunks = [];
-		// Sentences in the current piece, the carried-over tokens among them
-		// (which don't count toward the target, since they're a repeat of the
-		// previous piece's content), and the piece's total size
-		let current = [];
-		let carriedTokens = 0;
-		let totalTokens = 0;
-		// Content and pieces still to place. A piece can only close on a
-		// sentence boundary, so it usually lands a little under its target;
-		// recomputing the target from what's left spreads that slack over the
-		// pieces that follow, instead of letting it accumulate into an extra
-		// undersized piece at the end.
-		let remainingTokens = block.tokens;
-		let remainingPieces = pieceCount;
-		for (let sentence of sentences) {
-			let contentTokens = totalTokens - carriedTokens;
-			// Close the piece at whichever boundary lands nearer the target, so
-			// the pieces come out even rather than full-then-short. On the last
-			// piece there's nothing left to balance against, so only the window
-			// closes it.
-			let closeHere = false;
-			if (current.length) {
-				if (totalTokens + sentence.tokens > budget) {
-					closeHere = true;
-				}
-				else if (remainingPieces > 1) {
-					let target = Math.ceil(remainingTokens / remainingPieces);
-					closeHere = Math.abs(contentTokens + sentence.tokens - target)
-						> Math.abs(contentTokens - target);
-				}
-			}
-			if (closeHere) {
-				// totalTokens is the sum over `current`; the incoming sentence
-				// hasn't been added yet. The slice keeps the source's own
-				// separators between sentences, charged nothing here the same
-				// way the budget checks above don't charge them.
-				chunks.push(_sliceUnits(source, current, totalTokens));
-				remainingTokens -= contentTokens;
-				remainingPieces = Math.max(1, remainingPieces - 1);
-				// Carry the trailing sentences that fit the overlap allowance
-				// alongside the incoming sentence
-				let carry = [];
-				carriedTokens = 0;
-				let allowance = Math.min(CHUNK_OVERLAP_TOKENS, budget - sentence.tokens);
-				for (let i = current.length - 1; i >= 0; i--) {
-					if (carriedTokens + current[i].tokens > allowance) {
-						break;
-					}
-					carry.unshift(current[i]);
-					carriedTokens += current[i].tokens;
-				}
-				current = carry;
-				totalTokens = carriedTokens;
-			}
-			current.push(sentence);
-			totalTokens += sentence.tokens;
-		}
-		if (current.length) {
-			chunks.push(_sliceUnits(source, current, totalTokens));
-		}
-		return chunks;
-	}
-
-	// The source slice spanning the given units, from the first one's start
-	// to the last one's end. Units that overlap (a piece carrying the
-	// previous piece's tail) simply produce overlapping extents.
-	function _sliceUnits(source, units, tokens) {
-		let start = units[0].start;
-		let end = units[units.length - 1].end;
-		return { text: source.slice(start, end), tokens, start, end };
-	}
 
 	/**
 	 * Split a text into chunks that each fit the active model's context
-	 * window. Text that fits the window -- the vast majority -- comes back as
-	 * a single chunk.
-	 *
-	 * Paragraphs are the topic units, so two of them never share a chunk
-	 * unless one was too small to embed on its own: a chunk spanning two
-	 * subjects represents neither of them well, and since an item scores as
-	 * its best chunk, that dilution is what decides whether it matches at all.
-	 * Paragraphs below CHUNK_MIN_TOKENS are therefore combined with their
-	 * neighbors into a block, and a block over the window is split into even
-	 * pieces at sentence boundaries.
-	 *
-	 * Each chunk carries the token count of its own text, measured as it's
-	 * chunked (see _getMetrics()), and its start/end extent in the input --
-	 * every chunk is a slice of it, so the extent alone re-derives the text.
-	 * Extents can overlap where a chunk carries the previous one's tail.
+	 * window, measured in the model's own tokens (see
+	 * Zotero.Utilities.Internal.Chunking.chunkText()).
 	 *
 	 * @param {String} text
 	 * @return {Promise<Object[]>} - [{ text, tokens, start, end }]
 	 */
 	this.chunkText = async function (text) {
-		let tokenizer = await this.getTokenizer();
-		let metrics = _getMetrics(tokenizer);
-		let paragraphs = _measureParagraphs(text, metrics.count);
-		return _chunkParagraphs(text, paragraphs, metrics.budget, metrics);
+		let metrics = _getMetrics(await this.getTokenizer());
+		return _asTokens(Zotero.Utilities.Internal.Chunking.chunkText(text, metrics));
 	};
-
 	/**
 	 * Token count of a text against the active model, leaving out the special
 	 * tokens the tokenizer wraps every input in, so that counts of several
@@ -1725,246 +1604,29 @@ Zotero.Embeddings.Chunking = new function () {
 		return _getCounter(tokenizer)(text);
 	};
 
-	// The paragraph-level chunker behind chunkText(), over paragraphs already
-	// measured by _measureParagraphs() -- everything here is sized by summing
-	// their counts, so no text is tokenized a second time. The budget is the
-	// caller's, so chunkSections() can reserve part of the window for a
-	// section's outline-path prefix. Every chunk is a slice of `text`,
-	// located by its start/end extent.
-	function _chunkParagraphs(text, paragraphs, budget, metrics) {
-		let { count, joinTokens } = metrics;
-		// Text with no paragraphs (all whitespace) has nothing to split
-		if (!paragraphs.length) {
-			return [{ text, tokens: 0, start: 0, end: text.length }];
-		}
-		// Text that fits the window as it stands, which is most of it
-		let totalTokens = _sumTokens(paragraphs, joinTokens);
-		if (totalTokens <= budget) {
-			return [_sliceUnits(text, paragraphs, totalTokens)];
-		}
-
-		// Group paragraphs into blocks, combining any that are too small to
-		// stand alone with the paragraphs that follow them. A paragraph that
-		// reaches the minimum on its own becomes its own block, which is what
-		// keeps distinct subjects out of each other's chunks.
-		let groups = [];
-		let pending = [];
-		let pendingTokens = 0;
-		for (let paragraph of paragraphs) {
-			pending.push(paragraph);
-			pendingTokens += paragraph.tokens;
-			if (pendingTokens >= CHUNK_MIN_TOKENS) {
-				groups.push(pending);
-				pending = [];
-				pendingTokens = 0;
-			}
-		}
-		// A trailing group still under the minimum joins the previous block
-		// rather than standing alone as a runt chunk; the block is split evenly
-		// below, so absorbing it costs nothing
-		if (pending.length) {
-			if (groups.length) {
-				groups[groups.length - 1].push(...pending);
-			}
-			else {
-				groups.push(pending);
-			}
-		}
-
-		let chunks = [];
-		for (let group of groups) {
-			let block = _sliceUnits(text, group, _sumTokens(group, joinTokens));
-			if (block.tokens <= budget) {
-				chunks.push(block);
-			}
-			else {
-				chunks.push(..._splitBlockEvenly(text, block, budget, count));
-			}
-		}
-		return chunks;
-	}
 
 	/**
 	 * Split a document's outline sections (see Zotero.SDT.getSections()) into
-	 * chunks that each fit the active model's context window. Sections play
-	 * the role paragraphs play in chunkText(), one level up: a section is the
-	 * topic unit, so two of them never share a chunk unless one was too small
-	 * to embed on its own, and a section over the window is split by the
-	 * paragraph machinery. Each chunk points back at the section blocks it
-	 * covers, so a match can be located in the document later.
+	 * chunks that each fit the active model's context window, measured in the
+	 * model's own tokens, and prefixed for embedding with their section's
+	 * outline path (see Zotero.Utilities.Internal.Chunking.chunkSections()).
 	 *
-	 * Sections marked `auxiliary` (captions, image descriptions) are exempt
-	 * from the too-small merging in both directions: each becomes exactly
-	 * one chunk (flagged `auxiliary`), so it can surface on its own without
-	 * ever mixing into the running text.
-	 *
-	 * A chunk's `embedText` -- what actually gets embedded -- is its text
-	 * prefixed with its section's outline path (e.g. "Methods >
-	 * Participants"), giving a section fragment the context of its headings;
-	 * the prefix comes out of the chunk's token budget. `text` stays the
-	 * plain piece, for display.
-	 *
-	 * Each chunk records exactly where its text lives in the document: the
-	 * block range it covers (startBlock/endBlock) with character offsets into
-	 * the first and last block's text (startOffset/endOffset), so the text
-	 * can be re-derived later from the blocks alone -- the covered blocks'
-	 * texts joined and cut to the offsets. Location (pageIndex, pageLabel,
-	 * position -- see Zotero.SDT.getSections()) is the first covered block's,
-	 * so each piece of a split section points where that piece is, not where
-	 * the section starts. sectionPart / sectionParts say which piece of a
-	 * split section this is, so a match can be read as coming from the middle
-	 * or the end of its section.
-	 *
-	 * Each section's `text` must be its blocks' texts joined with single
-	 * newlines -- that's what lets a chunk's extent map back to the blocks it
-	 * covers.
-	 *
-	 * @param {Object[]} sections - [{ text, outlinePath, startBlock,
-	 *     auxiliary, blocks: [{ index, text, pageIndex, pageLabel,
-	 *     position }] }]
+	 * @param {Object[]} sections
 	 * @return {Promise<Object[]>} - [{ text, embedText, tokens, outlinePath,
 	 *     startBlock, endBlock, startOffset, endOffset, pageIndex, pageLabel,
 	 *     position, sectionPart, sectionParts, auxiliary }], where tokens
 	 *     counts embedText
 	 */
 	this.chunkSections = async function (sections) {
-		let tokenizer = await this.getTokenizer();
-		let metrics = _getMetrics(tokenizer);
-		let { count, joinTokens, budget } = metrics;
-
-		// Group sections into chunk-worthy units, combining any too small to
-		// stand alone with the sections that follow them -- same policy as
-		// chunkText()'s paragraph grouping. Each section is measured once, at
-		// paragraph granularity, and carries its paragraphs forward, so no
-		// later stage tokenizes the same text again.
-		let groups = [];
-		let pending = null;
-		// Index of the last body group, for the trailing merge below
-		let lastBodyGroup = -1;
-		for (let section of sections) {
-			if (!section.text) {
-				continue;
-			}
-			let entry = { section, paragraphs: _measureParagraphs(section.text, count) };
-			let tokens = _sumTokens(entry.paragraphs, joinTokens);
-			// An auxiliary section (caption, image description) is its own
-			// chunk no matter how small: indexed and searchable on its own,
-			// never mixed into the running text. The body sections around it
-			// still merge with each other -- `pending` just carries across.
-			if (section.auxiliary) {
-				groups.push({ entries: [entry], auxiliary: true });
-				continue;
-			}
-			if (pending) {
-				pending.entries.push(entry);
-				pending.tokens += tokens;
-			}
-			else {
-				pending = { entries: [entry], tokens };
-			}
-			if (pending.tokens >= CHUNK_MIN_TOKENS) {
-				lastBodyGroup = groups.length;
-				groups.push(pending);
-				pending = null;
-			}
-		}
-		// A trailing group still under the minimum joins the previous body
-		// group rather than standing alone as a runt chunk -- never an
-		// auxiliary group, which stays exactly its own text
-		if (pending) {
-			if (lastBodyGroup >= 0) {
-				groups[lastBodyGroup].entries.push(...pending.entries);
-			}
-			else {
-				groups.push(pending);
-			}
-		}
-		// Body sections merge across the auxiliary sections between them, so
-		// a group can close after an auxiliary group whose blocks it
-		// precedes. Chunk indexes are document order (the UI sorts by them),
-		// so restore it here.
-		groups.sort((a, b) => (a.entries[0].section.startBlock ?? 0)
-			- (b.entries[0].section.startBlock ?? 0));
-
-		let chunks = [];
-		for (let group of groups) {
-			// A merged group takes its first section's outline path -- the
-			// heading its text starts under
-			let outlinePath = group.entries[0].section.outlinePath || '';
-			let prefix = outlinePath ? outlinePath + '\n\n' : '';
-			let prefixTokens = prefix ? count(prefix) : 0;
-			// A pathological outline path that would eat a real share of the
-			// window hurts more than it helps
-			if (prefixTokens > budget / 4) {
-				prefix = '';
-				prefixTokens = 0;
-			}
-			// The group's source string: its sections' texts joined, with the
-			// sections' paragraphs shifted to their place in it and every
-			// block's extent recorded, so each chunk's slice can be mapped
-			// back to the blocks it covers
-			let text = '';
-			let paragraphs = [];
-			let blocks = [];
-			for (let entry of group.entries) {
-				if (text) {
-					text += '\n\n';
-				}
-				let base = text.length;
-				for (let paragraph of entry.paragraphs) {
-					paragraphs.push({
-						...paragraph,
-						start: base + paragraph.start,
-						end: base + paragraph.end
-					});
-				}
-				// Within a section, blocks sit at running offsets: each
-				// block's text plus the newline joining it to the next
-				let blockStart = base;
-				for (let block of entry.section.blocks || []) {
-					blocks.push({
-						index: block.index,
-						start: blockStart,
-						end: blockStart + block.text.length,
-						pageIndex: block.pageIndex ?? null,
-						pageLabel: block.pageLabel ?? null,
-						position: block.position ?? null
-					});
-					blockStart += block.text.length + 1;
-				}
-				text += entry.section.text;
-			}
-			let pieces = _chunkParagraphs(text, paragraphs, budget - prefixTokens, metrics);
-			for (let i = 0; i < pieces.length; i++) {
-				let piece = pieces[i];
-				// The blocks the piece's extent overlaps. A piece boundary
-				// always falls inside a block -- paragraphs never span the
-				// newline between blocks -- so the offsets into the first and
-				// last covered block are well-defined.
-				let covered = blocks.filter(
-					block => block.end > piece.start && block.start < piece.end);
-				let first = covered[0];
-				let last = covered[covered.length - 1];
-				chunks.push({
-					text: piece.text,
-					embedText: prefix + piece.text,
-					tokens: piece.tokens + prefixTokens,
-					outlinePath,
-					startBlock: first ? first.index : null,
-					endBlock: last ? last.index : null,
-					startOffset: first ? piece.start - first.start : null,
-					endOffset: last ? piece.end - last.start : null,
-					pageIndex: first ? first.pageIndex : null,
-					pageLabel: first ? first.pageLabel : null,
-					position: first ? first.position : null,
-					sectionPart: i + 1,
-					sectionParts: pieces.length,
-					auxiliary: !!group.auxiliary
-				});
-			}
-		}
-		return chunks;
+		let metrics = _getMetrics(await this.getTokenizer());
+		return _asTokens(Zotero.Utilities.Internal.Chunking.chunkSections(sections, metrics));
 	};
+
+	// Chunks as this module reports them: the shared chunker sizes passages in
+	// whatever it was handed, and what it was handed here is tokens
+	function _asTokens(chunks) {
+		return chunks.map(({ size, ...chunk }) => ({ ...chunk, tokens: size }));
+	}
 };
 
 

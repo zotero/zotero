@@ -757,4 +757,54 @@ describe("Zotero.Utilities.Internal", function () {
 			}
 		});
 	});
+	describe("Chunking", function () {
+		var chunk = text => Zotero.Utilities.Internal.Chunking.chunkText(
+			text, Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text));
+
+		it("should leave a text within the budget whole", function () {
+			let chunks = chunk('A short paragraph.');
+			assert.lengthOf(chunks, 1);
+			assert.equal(chunks[0].text, 'A short paragraph.');
+		});
+
+		it("should cut a long text into passages that are slices of it", function () {
+			let text = ('word '.repeat(60) + '\n').repeat(40);
+			let chunks = chunk(text);
+			assert.isAbove(chunks.length, 1);
+			for (let piece of chunks) {
+				// Every passage is exactly the extent it claims
+				assert.equal(text.slice(piece.start, piece.end), piece.text);
+				assert.isAbove(piece.size, 0);
+			}
+			// In document order
+			for (let i = 1; i < chunks.length; i++) {
+				assert.isAtLeast(chunks[i].start, chunks[i - 1].start);
+			}
+		});
+
+		it("should divide a text with no boundaries at all", function () {
+			let chunks = chunk('x'.repeat(20000));
+			assert.isAbove(chunks.length, 1);
+		});
+
+		it("should budget CJK text more tightly than alphabetic text", function () {
+			// The same number of characters either way
+			let cjk = chunk('\u6c17\u5019\u5909\u52d5\u3002'.repeat(2000));
+			let latin = chunk('climate change. '.repeat(625));
+			// A character of CJK is worth about a token, so the same length
+			// divides into more passages
+			assert.isAbove(cjk.length, latin.length);
+		});
+
+		it("should measure with whatever it is handed", function () {
+			let text = 'word '.repeat(400);
+			let chars = Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text);
+			let tiny = { ...chars, budget: 100, minSize: 20, overlap: 5 };
+			assert.isAbove(
+				Zotero.Utilities.Internal.Chunking.chunkText(text, tiny).length,
+				Zotero.Utilities.Internal.Chunking.chunkText(text, chars).length
+			);
+		});
+	});
+
 });

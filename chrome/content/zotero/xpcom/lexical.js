@@ -99,6 +99,18 @@ Zotero.Lexical = new function () {
 	// The indexes a query is scored against: the attachment content index and
 	// the item-text index, each with the CJK 2-gram table covering the same
 	// documents, and the item-text tables' columns in declaration order
+	// FTS5's BM25 constants, mirrored so a score built here is on the same
+	// footing as one the index produced: the saturation constant K1 and the
+	// (K1 + 1) factor its numerator carries, the length normalization B, and
+	// the floor FTS5 puts under an inverse document frequency -- its way of
+	// saying a term in more than about half a corpus separates nothing there.
+	const FTS5_K1 = 1.2;
+	const FTS5_B = 0.75;
+	const FTS5_MIN_IDF = 1e-6;
+	// An excerpt's width in characters: wide enough to read a match in
+	// context, narrow enough to fit on a row
+	const EXCERPT_WINDOW = 200;
+
 	const SOURCES = [
 		{ word: 'fulltextContent', cjk: 'fulltextContentCJK', columns: null },
 		{
@@ -466,6 +478,147 @@ Zotero.Lexical = new function () {
 	};
 
 	/**
+	 * How much of a query each of the given texts carries, on the same 0-1
+	 * scale as scoreItemIDs(): each text's BM25 score over the terms BM25 can
+	 * score with, divided by what a text about nothing but the query could
+	 * earn (see _getCeiling()).
+	 *
+	 * For weighing passages of one document against each other, where the
+	 * texts are in hand but not in an index of their own. Term rarity is
+	 * counted against the fulltext index, the corpus the passages are drawn
+	 * from, so a term common everywhere lifts nothing; length is normalized
+	 * against the given texts' own average, so a passage is long or short
+	 * relative to its siblings rather than to whole documents.
+	 *
+	 * @param {String} queryText
+	 * @param {String[]} texts
+	 * @return {Promise<Number[]>} - A 0-1 score for each text, in order
+	 */
+	this.scoreTexts = async function (queryText, texts) {
+		let none = texts.map(() => 0);
+		let parsed = this.parseQuery(queryText);
+		if (!parsed.length || !texts.length) {
+			return none;
+		}
+		let weighted = await _getTextScoringTerms(queryText, parsed);
+		let ceiling = weighted.reduce((sum, entry) => sum + entry.idf, 0) * (FTS5_K1 + 1);
+		if (!ceiling) {
+			return none;
+		}
+		let terms = weighted.map(entry => entry.term);
+		let lengths = texts.map(text => (text || '').length);
+		let averageLength = lengths.reduce((sum, length) => sum + length, 0) / texts.length;
+		if (!averageLength) {
+			return none;
+		}
+		return texts.map((text, i) => {
+			if (!text) {
+				return 0;
+			}
+			let counts = new Map();
+			for (let match of _findTermMatches(text, terms)) {
+				counts.set(match.term, (counts.get(match.term) || 0) + 1);
+			}
+			let score = 0;
+			for (let { term, idf } of weighted) {
+				let tf = counts.get(term) || 0;
+				if (!tf) {
+					continue;
+				}
+				score += idf * tf * (FTS5_K1 + 1)
+					/ (tf + FTS5_K1 * (1 - FTS5_B + FTS5_B * lengths[i] / averageLength));
+			}
+			return Math.min(1, score / ceiling);
+		});
+	};
+
+	/**
+	 * Where in a text to quote from, to show a query matching in it: the
+	 * window of about EXCERPT_WINDOW characters covering the most of the
+	 * query's distinct terms, snapped outward to word boundaries.
+	 *
+	 * Offsets are into the given text, so a caller can quote the window and
+	 * still highlight against the whole (see findMatchRanges()).
+	 *
+	 * @param {String} queryText
+	 * @param {String} text
+	 * @param {Object} [options]
+	 * @param {Number} [options.width=EXCERPT_WINDOW] - The width to aim for
+	 * @return {Promise<Object|null>} - { start, end }, or null when the query
+	 *     doesn't match the text at all
+	 */
+	this.pickSnippetWindow = async function (queryText, text, { width = EXCERPT_WINDOW } = {}) {
+		if (!text) {
+			return null;
+		}
+		let terms = await _getScoringTerms(this.parseQuery(queryText));
+		if (!terms.length) {
+			return null;
+		}
+		let matches = _findTermMatches(text, terms);
+		if (!matches.length) {
+			return null;
+		}
+		let best = null;
+		for (let i = 0; i < matches.length; i++) {
+			let bounds = _windowBounds(text, matches, i, width);
+			let shown = new Set(
+				matches
+					.filter(match => match.start >= bounds.start && match.end <= bounds.end)
+					.map(match => match.term)
+			).size;
+			if (!best || shown > best.shown) {
+				best = { bounds, shown };
+			}
+		}
+		return best.bounds;
+	};
+
+	// The FTS5 MATCH expression matching one term, as buildExpression() writes
+	// it, for counting the documents a term is in
+	function _termMatch(term) {
+		return term.type == 'cjk'
+			? (term.bigrams ? '"' + term.bigrams + '"' : '"' + term.text + '"*')
+			: '"' + term.text + '"' + (term.prefix ? '*' : '');
+	}
+
+	// The scoring terms of a query paired with their inverse document
+	// frequencies in the fulltext index (see scoreTexts()). Kept for the last
+	// query asked about: every matched item scores its own passages, and the
+	// counts behind these don't move within one search.
+	let _textScoringTerms = null;
+
+	async function _getTextScoringTerms(queryText, parsed) {
+		if (_textScoringTerms && _textScoringTerms.queryText === queryText) {
+			return _textScoringTerms.weighted;
+		}
+		let weighted = [];
+		let corpusSizes = new Map();
+		for (let term of await _getScoringTerms(parsed)) {
+			let table = term.type == 'cjk' ? SOURCES[0].cjk : SOURCES[0].word;
+			if (!corpusSizes.has(table)) {
+				corpusSizes.set(table, await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM ftindex." + table));
+			}
+			let corpusSize = corpusSizes.get(table);
+			let idf = FTS5_MIN_IDF;
+			if (corpusSize) {
+				let df = await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM ftindex." + table
+						+ " WHERE " + table + " MATCH ?",
+					[_termMatch(term)]
+				);
+				df = Math.max(0, Math.min(df, corpusSize));
+				idf = Math.max(FTS5_MIN_IDF,
+					Math.log((corpusSize - df + 0.5) / (df + 0.5)));
+			}
+			weighted.push({ term, idf });
+		}
+		_textScoringTerms = { queryText, weighted };
+		return weighted;
+	}
+
+	/**
 	 * The most an expression could score against an index: the sum of its
 	 * terms' inverse document frequencies, counted the way FTS5 counts them.
 	 *
@@ -486,21 +639,6 @@ Zotero.Lexical = new function () {
 	 * @return {Promise<Number>}
 	 */
 	async function _getCeiling(pieces, table) {
-		// The floor FTS5 puts under an inverse document frequency. Its BM25
-		// uses the unsmoothed idf, ln((N - df + 0.5) / (df + 0.5)), which
-		// turns negative once a term is in more than about half the
-		// documents; FTS5 clamps it here rather than let a term score against
-		// a document for containing it. Mirrored so a ceiling is built from
-		// the same numbers the index scored with.
-		const FTS5_MIN_IDF = 1e-6;
-		// FTS5's BM25 saturation constant, and the (K1 + 1) factor its
-		// numerator carries: a term's contribution is
-		// idf * tf * (K1 + 1) / (tf + K1 * (1 - B + B * D / avgdl)), so it
-		// approaches (K1 + 1) * idf rather than idf as a document repeats the
-		// term. A ceiling that left the factor out would sit below what a
-		// document can actually score, and the strongest documents would all
-		// read as a perfect match.
-		const FTS5_K1 = 1.2;
 		let corpusSize = await Zotero.DB.valueQueryAsync(
 			"SELECT COUNT(*) FROM ftindex." + table);
 		let ceiling = 0;
@@ -532,9 +670,7 @@ Zotero.Lexical = new function () {
 			let tables = term.type == 'cjk'
 				? SOURCES.map(source => source.cjk)
 				: SOURCES.map(source => source.word);
-			let match = term.type == 'cjk'
-				? (term.bigrams ? '"' + term.bigrams + '"' : '"' + term.text + '"*')
-				: '"' + term.text + '"' + (term.prefix ? '*' : '');
+			let match = _termMatch(term);
 			for (let table of tables) {
 				let corpusSize = await Zotero.DB.valueQueryAsync(
 					"SELECT COUNT(*) FROM ftindex." + table);
@@ -744,22 +880,19 @@ Zotero.Lexical = new function () {
 	// EXCERPT_WINDOW characters holding that match and as many of the
 	// following ones as fit, centered on them, clamped to the text, and
 	// nudged outward (a little) so it doesn't cut into a word
-	function _windowBounds(text, matches, first) {
-		// An excerpt's width in characters: wide enough to read a match in
-		// context, narrow enough that several excerpts fit in a details pane
-		const EXCERPT_WINDOW = 200;
+	function _windowBounds(text, matches, first, width = EXCERPT_WINDOW) {
 		let anchor = matches[first];
 		let last = anchor;
 		for (let i = first + 1; i < matches.length; i++) {
-			if (matches[i].end - anchor.start > EXCERPT_WINDOW) {
+			if (matches[i].end - anchor.start > width) {
 				break;
 			}
 			last = matches[i];
 		}
-		let slack = Math.max(0, EXCERPT_WINDOW - (last.end - anchor.start));
+		let slack = Math.max(0, width - (last.end - anchor.start));
 		let start = Math.max(0, anchor.start - Math.floor(slack / 2));
-		let end = Math.min(text.length, start + EXCERPT_WINDOW);
-		start = Math.max(0, Math.min(start, end - EXCERPT_WINDOW));
+		let end = Math.min(text.length, start + width);
+		start = Math.max(0, Math.min(start, end - width));
 		let budget = 20;
 		while (start > 0 && budget-- && !/\s/.test(text[start - 1])) {
 			start--;

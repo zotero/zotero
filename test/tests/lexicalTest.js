@@ -425,4 +425,58 @@ describe("Zotero.Lexical", function () {
 			);
 		});
 	});
+
+	describe("#scoreTexts()", function () {
+		it("should score a text carrying the query above one that doesn't", async function () {
+			let [carrying, unrelated] = await Zotero.Lexical.scoreTexts(
+				'owl migration',
+				['owl migration patterns across the tundra', 'a note about something else']
+			);
+			assert.isAbove(carrying, unrelated);
+			assert.equal(unrelated, 0);
+			assert.isAtMost(carrying, 1);
+		});
+
+		it("should keep every score within 0-1", async function () {
+			let scores = await Zotero.Lexical.scoreTexts(
+				'owl',
+				['owl owl owl owl owl owl owl owl owl owl', 'owl']
+			);
+			for (let score of scores) {
+				assert.isAtLeast(score, 0);
+				assert.isAtMost(score, 1);
+			}
+		});
+
+		it("should score nothing for a query with no terms", async function () {
+			assert.deepEqual(await Zotero.Lexical.scoreTexts('', ['owl']), [0]);
+		});
+	});
+
+	describe("#pickSnippetWindow()", function () {
+		it("should center the window on the query's terms", async function () {
+			let filler = 'padding words here '.repeat(40);
+			let text = filler + 'the owl migration atlas ' + filler;
+			let { start, end } = await Zotero.Lexical.pickSnippetWindow('owl migration', text);
+			let quoted = text.slice(start, end);
+			assert.include(quoted, 'owl migration');
+			// Offsets are into the text given, not a copy of it
+			assert.isAtLeast(start, 0);
+			assert.isAtMost(end, text.length);
+		});
+
+		it("should prefer the window covering the most of the query", async function () {
+			let gap = 'x '.repeat(300);
+			// One place says only 'owl', another says both terms
+			let text = 'owl alone here ' + gap + 'owl migration together here';
+			let { start, end } = await Zotero.Lexical.pickSnippetWindow('owl migration', text);
+			assert.include(text.slice(start, end), 'owl migration together');
+		});
+
+		it("should return nothing when the query doesn't match", async function () {
+			assert.isNull(await Zotero.Lexical.pickSnippetWindow('owl', 'nothing here'));
+			assert.isNull(await Zotero.Lexical.pickSnippetWindow('owl', ''));
+		});
+	});
+
 });

@@ -250,62 +250,110 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
-	describe("#getMatchingChunks()", function () {
-		var axis = (index, scale = 1) => {
-			let vector = Float32Array.from(testMean);
-			vector[index] += scale;
-			return vector;
-		};
-		var store = async (item, chunkIndex, vector, props = {}) => {
-			let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
-			await Zotero.DB.queryAsync(
-				"REPLACE INTO embeddings.itemEmbeddings "
-					+ "(itemID, chunkIndex, embedding, sourceHash, startBlock, endBlock, "
-					+ "startOffset, endOffset, textCheck, sectionPart, sectionParts) "
-					+ "VALUES (?, ?, ?, 'hash', ?, ?, ?, ?, ?, ?, ?)",
-				[
-					item.id,
-					chunkIndex,
-					blob,
-					props.startBlock ?? null,
-					props.endBlock ?? null,
-					props.startOffset ?? null,
-					props.endOffset ?? null,
-					props.text === undefined ? null : Zotero.Embeddings.textCheck(props.text),
-					props.sectionPart ?? null,
-					props.sectionParts ?? null
-				],
-				{ debugParams: false }
-			);
-		};
-		// A document to re-derive chunk text from: what
-		// Zotero.SDT.getBlockRanges() would report for each stored range
-		var blockWorld = {
-			0: { index: 0, text: 'The introduction', reference: false, outlineHeading: false },
-			1: { index: 1, text: 'text', reference: false, outlineHeading: false },
-			5: {
-				index: 5,
-				text: 'The sampling',
-				reference: false,
-				outlineHeading: false,
-				pageIndex: 6,
-				pageLabel: '7',
-				position: { pageIndex: 6, rects: [[10, 20, 300, 40]] }
-			},
-			6: { index: 6, text: 'text procedures', reference: false, outlineHeading: false },
-			12: { index: 12, text: 'The references text', reference: false, outlineHeading: false }
-		};
-		var stubBlockRanges = () => sinon.stub(Zotero.SDT, 'getBlockRanges').callsFake(
-			async (itemID, ranges) => ({
-				ok: true,
-				ranges: ranges.map(([startBlock, endBlock]) => ({
-					outlinePath: startBlock == 5 ? 'Methods > Sampling' : 'Introduction',
-					blocks: Object.values(blockWorld).filter(
-						block => block.index >= startBlock && block.index <= endBlock)
-				}))
-			})
+	var axis = (index, scale = 1) => {
+		let vector = Float32Array.from(testMean);
+		vector[index] += scale;
+		return vector;
+	};
+	var store = async (item, chunkIndex, vector, props = {}) => {
+		let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.itemEmbeddings "
+				+ "(itemID, chunkIndex, embedding, sourceHash, startBlock, endBlock, "
+				+ "startOffset, endOffset, textCheck, sectionPart, sectionParts) "
+				+ "VALUES (?, ?, ?, 'hash', ?, ?, ?, ?, ?, ?, ?)",
+			[
+				item.id,
+				chunkIndex,
+				blob,
+				props.startBlock ?? null,
+				props.endBlock ?? null,
+				props.startOffset ?? null,
+				props.endOffset ?? null,
+				props.text === undefined ? null : Zotero.Embeddings.textCheck(props.text),
+				props.sectionPart ?? null,
+				props.sectionParts ?? null
+			],
+			{ debugParams: false }
 		);
+	};
+	// A document to re-derive chunk text from: what
+	// Zotero.SDT.getBlockRanges() would report for each stored range
+	var blockWorld = {
+		0: { index: 0, text: 'The introduction', reference: false, outlineHeading: false },
+		1: { index: 1, text: 'text', reference: false, outlineHeading: false },
+		5: {
+			index: 5,
+			text: 'The sampling',
+			reference: false,
+			outlineHeading: false,
+			pageIndex: 6,
+			pageLabel: '7',
+			position: { pageIndex: 6, rects: [[10, 20, 300, 40]] }
+		},
+		6: { index: 6, text: 'text procedures', reference: false, outlineHeading: false },
+		12: { index: 12, text: 'The references text', reference: false, outlineHeading: false }
+	};
+	var stubBlockRanges = () => sinon.stub(Zotero.SDT, 'getBlockRanges').callsFake(
+		async (itemID, ranges) => ({
+			ok: true,
+			ranges: ranges.map(([startBlock, endBlock]) => ({
+				outlinePath: startBlock == 5 ? 'Methods > Sampling' : 'Introduction',
+				blocks: Object.values(blockWorld).filter(
+					block => block.index >= startBlock && block.index <= endBlock)
+			}))
+		})
+	);
 
+	describe("#getChunks()", function () {
+		it("should return every chunk in document order without asking the model", async function () {
+			let item = await createDataObject('item');
+			await store(item, 1, axis(0), {
+				text: 'The sampling\ntext',
+				startBlock: 5,
+				endBlock: 6,
+				startOffset: 0,
+				endOffset: 'text'.length,
+				sectionPart: 2,
+				sectionParts: 3
+			});
+			await store(item, 0, axis(1), {
+				text: 'The introduction\ntext',
+				startBlock: 0,
+				endBlock: 1,
+				startOffset: 0,
+				endOffset: 'text'.length
+			});
+			// Disabled, and no model version stamped: reading how the item was
+			// divided asks the model nothing
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').rejects(new Error('should not embed')),
+				stubBlockRanges()
+			];
+			try {
+				let chunks = await Zotero.Embeddings.getChunks(item.id);
+				assert.lengthOf(chunks, 2);
+				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [0, 1]);
+				assert.equal(chunks[0].text, 'The introduction\ntext');
+				assert.equal(chunks[1].text, 'The sampling\ntext');
+				assert.equal(chunks[1].outlinePath, 'Methods > Sampling');
+				assert.equal(chunks[1].pageLabel, '7');
+				// No score: nothing weighed these
+				assert.isUndefined(chunks[1].score);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should return nothing for an item with no chunks", async function () {
+			let item = await createDataObject('item');
+			assert.deepEqual(await Zotero.Embeddings.getChunks(item.id), []);
+		});
+	});
+
+	describe("#getMatchingChunks()", function () {
 		it("should return an item's matching chunks with their locations, best first", async function () {
 			let item = await createDataObject('item');
 			// A weak match, a strong match, and a chunk below the floor

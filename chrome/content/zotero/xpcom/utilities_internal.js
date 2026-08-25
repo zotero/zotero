@@ -3352,6 +3352,457 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	}
 };
 
+
+/**
+ * Zotero.Utilities.Internal.Chunking -- splitting a text into passages of a
+ * size the caller sets, measured however the caller measures (see
+ * Zotero.Embeddings.Chunking, which measures in a model's tokens).
+ *
+ * Metrics: { count(text), joinSize (charged per join, so pieces' sizes add up
+ * to the joined size), budget (most a passage may reach), minSize (least
+ * worth standing alone), overlap (carried into the next passage where one is
+ * split mid-thought) }.
+ *
+ * Every passage is a slice of its source, located by its start/end extent.
+ */
+Zotero.Utilities.Internal.Chunking = new function () {
+	// The token budgets the character measure mirrors, and what a token is
+	// worth in characters in either kind of script
+	const BUDGET_TOKENS = 768;
+	const MIN_TOKENS = 120;
+	const OVERLAP_TOKENS = 48;
+	const CHARS_PER_TOKEN = 4;
+	const CJK_CHARS_PER_TOKEN = 1;
+
+	/**
+	 * A measure counting characters, for a consumer with no tokenizer. The
+	 * budgets mirror the token ones, so passages come out about the size a
+	 * model-driven chunker would make them.
+	 *
+	 * @param {String} text - Read for the script it's written in
+	 * @return {Object} - Metrics
+	 */
+	this.getCharacterMetrics = function (text) {
+		let scale = _isMostlyCJK(text) ? CJK_CHARS_PER_TOKEN : CHARS_PER_TOKEN;
+		return {
+			count: value => value.length,
+			// The two newlines paragraphs are joined with
+			joinSize: 2,
+			budget: BUDGET_TOKENS * scale,
+			minSize: MIN_TOKENS * scale,
+			overlap: OVERLAP_TOKENS * scale
+		};
+	};
+
+	// CJK is written without spaces, so a character of it carries about what
+	// a word of an alphabetic script does
+	function _isMostlyCJK(text) {
+		let sample = text.slice(0, 4000).replace(/\s/g, '');
+		if (!sample) {
+			return false;
+		}
+		let cjk = sample.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu);
+		return !!cjk && cjk.length * 2 > sample.length;
+	}
+
+	// The paragraphs of a text, each counted exactly once -- the only place
+	// chunking pays to measure it -- and each carrying its trimmed extent
+	function _measureParagraphs(text, count) {
+		let paragraphs = [];
+		for (let match of text.matchAll(/[^\n]+/g)) {
+			let unit = _measureRange(text, match.index, match.index + match[0].length, count);
+			if (unit) {
+				paragraphs.push(unit);
+			}
+		}
+		return paragraphs;
+	}
+
+	// The trimmed extent and size of a range, or null when it's all whitespace
+	function _measureRange(text, start, end, count) {
+		let raw = text.slice(start, end);
+		let trimmed = raw.trim();
+		if (!trimmed) {
+			return null;
+		}
+		start += raw.length - raw.trimStart().length;
+		return { text: trimmed, size: count(trimmed), start, end: start + trimmed.length };
+	}
+
+	// The size of the given paragraphs joined back together
+	function _sumSizes(paragraphs, joinSize) {
+		if (!paragraphs.length) {
+			return 0;
+		}
+		return paragraphs.reduce((sum, paragraph) => sum + paragraph.size, 0)
+			+ joinSize * (paragraphs.length - 1);
+	}
+
+	// Last resort for a sentence with no boundary inside the budget: bisect
+	// at whitespace until every piece fits. Even pieces rather than
+	// full-then-short, the same policy as _splitBlockEvenly().
+	function _hardSplit(source, unit, budget, count) {
+		if (unit.size <= budget || unit.end - unit.start < 2) {
+			return [unit];
+		}
+		// Split nearest the midpoint, at a whitespace character when there is
+		// one, so text with words isn't cut inside a word
+		let mid = unit.start + Math.floor((unit.end - unit.start) / 2);
+		let split = mid;
+		for (let i = 0; i < (unit.end - unit.start) / 2 - 1; i++) {
+			if (/\s/.test(source[mid - i])) {
+				split = mid - i;
+				break;
+			}
+			if (/\s/.test(source[mid + i])) {
+				split = mid + i;
+				break;
+			}
+		}
+		let halves = [
+			_measureRange(source, unit.start, split, count),
+			_measureRange(source, split, unit.end, count)
+		];
+		return halves.filter(Boolean)
+			.flatMap(half => _hardSplit(source, half, budget, count));
+	}
+
+	// The sentence units of a range, each within the budget. Boundaries come
+	// from Intl.Segmenter, so scripts without Western punctuation split at
+	// real boundaries too.
+	function _splitToSentences(source, start, end, budget, count) {
+		let units = [];
+		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+		for (let { segment, index } of segmenter.segment(source.slice(start, end))) {
+			let unit = _measureRange(source, start + index, start + index + segment.length, count);
+			if (!unit) {
+				continue;
+			}
+			if (unit.size <= budget) {
+				units.push(unit);
+				continue;
+			}
+			units.push(..._hardSplit(source, unit, budget, count));
+		}
+		return units;
+	}
+
+	// Split an oversized block into as few and as even pieces as possible.
+	// Filling each to the budget instead would leave a short remainder at the
+	// end -- the same thing minSize exists to prevent. Each piece is the
+	// source slice from its first sentence to its last.
+	function _splitBlockEvenly(source, block, budget, metrics) {
+		let { count } = metrics;
+		// Each piece carries overlap from the previous one, so its own content
+		// has that much less room
+		let pieceCount = Math.ceil(block.size / (budget - metrics.overlap));
+		let sentences = _splitToSentences(source, block.start, block.end, budget, count);
+		let chunks = [];
+		// The current piece's sentences, how much of that is carried over from
+		// the previous piece (a repeat, so it doesn't count toward the
+		// target), and its total size
+		let current = [];
+		let carriedSize = 0;
+		let totalSize = 0;
+		// Content and pieces still to place. A piece closes on a sentence
+		// boundary, so it lands a little under target; recomputing from what's
+		// left spreads that slack instead of accumulating a runt at the end.
+		let remainingSize = block.size;
+		let remainingPieces = pieceCount;
+		for (let sentence of sentences) {
+			let contentSize = totalSize - carriedSize;
+			// Close at whichever boundary lands nearer the target, so pieces
+			// come out even. On the last piece only the budget closes it.
+			let closeHere = false;
+			if (current.length) {
+				if (totalSize + sentence.size > budget) {
+					closeHere = true;
+				}
+				else if (remainingPieces > 1) {
+					let target = Math.ceil(remainingSize / remainingPieces);
+					closeHere = Math.abs(contentSize + sentence.size - target)
+						> Math.abs(contentSize - target);
+				}
+			}
+			if (closeHere) {
+				// totalSize is the sum over `current`; the incoming sentence
+				// isn't in it yet
+				chunks.push(_sliceUnits(source, current, totalSize));
+				remainingSize -= contentSize;
+				remainingPieces = Math.max(1, remainingPieces - 1);
+				// Carry the trailing sentences that fit the overlap allowance
+				// alongside the incoming sentence
+				let carry = [];
+				carriedSize = 0;
+				let allowance = Math.min(metrics.overlap, budget - sentence.size);
+				for (let i = current.length - 1; i >= 0; i--) {
+					if (carriedSize + current[i].size > allowance) {
+						break;
+					}
+					carry.unshift(current[i]);
+					carriedSize += current[i].size;
+				}
+				current = carry;
+				totalSize = carriedSize;
+			}
+			current.push(sentence);
+			totalSize += sentence.size;
+		}
+		if (current.length) {
+			chunks.push(_sliceUnits(source, current, totalSize));
+		}
+		return chunks;
+	}
+
+	// The source slice spanning the given units. Overlapping units (a piece
+	// carrying the previous one's tail) produce overlapping extents.
+	function _sliceUnits(source, units, size) {
+		let start = units[0].start;
+		let end = units[units.length - 1].end;
+		return { text: source.slice(start, end), size, start, end };
+	}
+
+	/**
+	 * Split a text into passages that each fit the budget. Text that already
+	 * fits comes back as a single passage.
+	 *
+	 * Paragraphs are the topic units, so two never share a passage unless one
+	 * was too small to stand alone; a block over the budget is split into even
+	 * pieces at sentence boundaries.
+	 *
+	 * @param {String} text
+	 * @param {Object} metrics
+	 * @return {Object[]} - [{ text, size, start, end }]
+	 */
+	this.chunkText = function (text, metrics) {
+		let paragraphs = _measureParagraphs(text, metrics.count);
+		return _chunkParagraphs(text, paragraphs, metrics.budget, metrics);
+	};
+
+	// The paragraph-level chunker behind chunkText(), sizing everything by
+	// summing already-measured paragraphs so no text is measured twice. The
+	// budget is the caller's, so chunkSections() can reserve part of it for a
+	// section's outline-path prefix.
+	function _chunkParagraphs(text, paragraphs, budget, metrics) {
+		let { joinSize } = metrics;
+		// Text with no paragraphs (all whitespace) has nothing to split
+		if (!paragraphs.length) {
+			return [{ text, size: 0, start: 0, end: text.length }];
+		}
+		// Text that fits the window as it stands, which is most of it
+		let totalSize = _sumSizes(paragraphs, joinSize);
+		if (totalSize <= budget) {
+			return [_sliceUnits(text, paragraphs, totalSize)];
+		}
+
+		// Group paragraphs into blocks, combining any too small to stand alone
+		// with those that follow. A paragraph reaching the minimum on its own
+		// becomes its own block, keeping distinct subjects apart.
+		let groups = [];
+		let pending = [];
+		let pendingSize = 0;
+		for (let paragraph of paragraphs) {
+			pending.push(paragraph);
+			pendingSize += paragraph.size;
+			if (pendingSize >= metrics.minSize) {
+				groups.push(pending);
+				pending = [];
+				pendingSize = 0;
+			}
+		}
+		// A trailing group under the minimum joins the previous block rather
+		// than standing alone; the block is split evenly below anyway
+		if (pending.length) {
+			if (groups.length) {
+				groups[groups.length - 1].push(...pending);
+			}
+			else {
+				groups.push(pending);
+			}
+		}
+
+		let chunks = [];
+		for (let group of groups) {
+			let block = _sliceUnits(text, group, _sumSizes(group, joinSize));
+			if (block.size <= budget) {
+				chunks.push(block);
+			}
+			else {
+				chunks.push(..._splitBlockEvenly(text, block, budget, metrics));
+			}
+		}
+		return chunks;
+	}
+
+	/**
+	 * Split a document's outline sections (see Zotero.SDT.getSections()) into
+	 * chunks that each fit the budget. Sections play the role paragraphs play
+	 * in chunkText(), one level up: a section is the topic unit, and a section
+	 * over the budget is split by the paragraph machinery.
+	 *
+	 * Sections marked `auxiliary` (captions, image descriptions) skip the
+	 * too-small merging in both directions, so each stands as its own chunk
+	 * rather than mixing into the running text.
+	 *
+	 * `embedText` is the chunk's text prefixed with its section's outline path
+	 * ("Methods > Participants"), giving a fragment the context of its
+	 * headings at the cost of part of the budget; `text` stays the plain piece.
+	 *
+	 * Each chunk records where it lives: the block range it covers, with
+	 * offsets into the first and last block, so the text can be re-derived
+	 * from the blocks alone. Location is the first covered block's, so a split
+	 * section's pieces each point at themselves, and sectionPart/sectionParts
+	 * say which piece this is.
+	 *
+	 * Each section's `text` must be its blocks' texts joined with single
+	 * newlines -- that's what maps a chunk's extent back to blocks.
+	 *
+	 * @param {Object[]} sections - [{ text, outlinePath, startBlock,
+	 *     auxiliary, blocks: [{ index, text, pageIndex, pageLabel,
+	 *     position }] }]
+	 * @return {Object[]} - [{ text, embedText, size, outlinePath,
+	 *     startBlock, endBlock, startOffset, endOffset, pageIndex, pageLabel,
+	 *     position, sectionPart, sectionParts, auxiliary }], where size
+	 *     counts embedText
+	 */
+	this.chunkSections = function (sections, metrics) {
+		let { count, joinSize, budget } = metrics;
+
+		// Group sections into chunk-worthy units, combining any too small to
+		// stand alone with the sections that follow them -- same policy as
+		// chunkText()'s paragraph grouping. Each section is measured once, at
+		// paragraph granularity, and carries its paragraphs forward, so no
+		// later stage measures the same text again.
+		let groups = [];
+		let pending = null;
+		// Index of the last body group, for the trailing merge below
+		let lastBodyGroup = -1;
+		for (let section of sections) {
+			if (!section.text) {
+				continue;
+			}
+			let entry = { section, paragraphs: _measureParagraphs(section.text, count) };
+			let size = _sumSizes(entry.paragraphs, joinSize);
+			// An auxiliary section (caption, image description) is its own
+			// chunk no matter how small: indexed and searchable on its own,
+			// never mixed into the running text. The body sections around it
+			// still merge with each other -- `pending` just carries across.
+			if (section.auxiliary) {
+				groups.push({ entries: [entry], auxiliary: true });
+				continue;
+			}
+			if (pending) {
+				pending.entries.push(entry);
+				pending.size += size;
+			}
+			else {
+				pending = { entries: [entry], size };
+			}
+			if (pending.size >= metrics.minSize) {
+				lastBodyGroup = groups.length;
+				groups.push(pending);
+				pending = null;
+			}
+		}
+		// A trailing group still under the minimum joins the previous body
+		// group rather than standing alone as a runt chunk -- never an
+		// auxiliary group, which stays exactly its own text
+		if (pending) {
+			if (lastBodyGroup >= 0) {
+				groups[lastBodyGroup].entries.push(...pending.entries);
+			}
+			else {
+				groups.push(pending);
+			}
+		}
+		// Body sections merge across the auxiliary sections between them, so
+		// a group can close after an auxiliary group whose blocks it
+		// precedes. Chunk indexes are document order (the UI sorts by them),
+		// so restore it here.
+		groups.sort((a, b) => (a.entries[0].section.startBlock ?? 0)
+			- (b.entries[0].section.startBlock ?? 0));
+
+		let chunks = [];
+		for (let group of groups) {
+			// A merged group takes its first section's outline path -- the
+			// heading its text starts under
+			let outlinePath = group.entries[0].section.outlinePath || '';
+			let prefix = outlinePath ? outlinePath + '\n\n' : '';
+			let prefixSize = prefix ? count(prefix) : 0;
+			// A pathological outline path that would eat a real share of the
+			// window hurts more than it helps
+			if (prefixSize > budget / 4) {
+				prefix = '';
+				prefixSize = 0;
+			}
+			// The group's source string: its sections' texts joined, with the
+			// sections' paragraphs shifted to their place in it and every
+			// block's extent recorded, so each chunk's slice can be mapped
+			// back to the blocks it covers
+			let text = '';
+			let paragraphs = [];
+			let blocks = [];
+			for (let entry of group.entries) {
+				if (text) {
+					text += '\n\n';
+				}
+				let base = text.length;
+				for (let paragraph of entry.paragraphs) {
+					paragraphs.push({
+						...paragraph,
+						start: base + paragraph.start,
+						end: base + paragraph.end
+					});
+				}
+				// Within a section, blocks sit at running offsets: each
+				// block's text plus the newline joining it to the next
+				let blockStart = base;
+				for (let block of entry.section.blocks || []) {
+					blocks.push({
+						index: block.index,
+						start: blockStart,
+						end: blockStart + block.text.length,
+						pageIndex: block.pageIndex ?? null,
+						pageLabel: block.pageLabel ?? null,
+						position: block.position ?? null
+					});
+					blockStart += block.text.length + 1;
+				}
+				text += entry.section.text;
+			}
+			let pieces = _chunkParagraphs(text, paragraphs, budget - prefixSize, metrics);
+			for (let i = 0; i < pieces.length; i++) {
+				let piece = pieces[i];
+				// The blocks the piece's extent overlaps. A piece boundary
+				// always falls inside a block -- paragraphs never span the
+				// newline between blocks -- so the offsets into the first and
+				// last covered block are well-defined.
+				let covered = blocks.filter(
+					block => block.end > piece.start && block.start < piece.end);
+				let first = covered[0];
+				let last = covered[covered.length - 1];
+				chunks.push({
+					text: piece.text,
+					embedText: prefix + piece.text,
+					size: piece.size + prefixSize,
+					outlinePath,
+					startBlock: first ? first.index : null,
+					endBlock: last ? last.index : null,
+					startOffset: first ? piece.start - first.start : null,
+					endOffset: last ? piece.end - last.start : null,
+					pageIndex: first ? first.pageIndex : null,
+					pageLabel: first ? first.pageLabel : null,
+					position: first ? first.position : null,
+					sectionPart: i + 1,
+					sectionParts: pieces.length,
+					auxiliary: !!group.auxiliary
+				});
+			}
+		}
+		return chunks;
+	};
+};
+
 if (typeof process === 'object' && process + '' === '[object process]') {
 	module.exports = Zotero.Utilities.Internal;
 }
