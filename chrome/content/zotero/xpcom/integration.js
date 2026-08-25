@@ -1333,13 +1333,19 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	var indicesToUpdate = Object.keys(this.processIndices);
 	
 	// Add bibliography indices to the above indices
-	if (this.bibliography	 				// if bibliography exists
-			&& Object.keys(this.citationsByIndex).length // and doc has citations
-			&& (this.bibliographyHasChanged	// and bibliography changed
-			|| forceBibliography)) {					// or if we should generate regardless of
-														// changes
-		for (let field of this._bibliographyFields) {
-			indicesToUpdate.push(field.index);
+	if (this.bibliography) {								// if bibliography exists
+		if (!Object.keys(this.citationsByIndex).length) {	// and there are no citations
+			for (let field of this._bibliographyFields) {
+				// Remove all bibliography fields
+				this._deleteFields[field.index] = true;
+			}
+		}
+		else if (this.bibliographyHasChanged				// if bibliography changed
+			|| forceBibliography) {							// or force flag is active
+			for (let field of this._bibliographyFields) {
+				// Update all bibliography fields
+				indicesToUpdate.push(field.index);
+			}
 		}
 	}
 	
@@ -1496,7 +1502,7 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	
 	var deleteFields = Object.keys(this._deleteFields).sort((a, b) => b - a);
 	for (let fieldIndex of deleteFields) {
-		this._fields[fieldIndex].delete();
+		await this._fields[fieldIndex].delete();
 	}
 	this.processIndices = {}
 }

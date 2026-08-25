@@ -1088,6 +1088,21 @@ describe("Zotero.Integration", function () {
 		});
 		
 		describe('#refresh', function () {
+			it('should delete the bibliography when the last citation is removed', async function () {
+				var docID = this.test.fullTitle();
+				setAddEditItems(testItems[0]);
+				await initDoc(docID);
+				await execCommand('addEditCitation', docID);
+				await execCommand('addEditBibliography', docID);
+				var doc = applications[docID].doc;
+				assert.equal(doc.fields.length, 2);
+
+				await doc.fields[0].delete();
+				await execCommand('refresh', docID);
+
+				assert.equal(doc.fields.length, 0);
+			});
+
 			it ('should properly disambiguate author after editing in the database', async function () {
 				var docID = this.test.fullTitle();
 				let testItem1 = await createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
