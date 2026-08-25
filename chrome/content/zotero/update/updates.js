@@ -973,7 +973,11 @@ var gDownloadingPage = {
 			if (activeUpdate.state == STATE_PENDING
 					|| activeUpdate.state == STATE_PENDING_ELEVATE
 					|| activeUpdate.state == STATE_PENDING_SERVICE) {
-				if (!activeUpdate.getProperty("stagingFailed")) {
+				// Wait for the update if it's currently being staged. If staging
+				// isn't in progress -- because the installation directory isn't
+				// writable or staging is disabled -- the update is already ready to
+				// install.
+				if (gAUS.currentState == Ci.nsIApplicationUpdateService.STATE_STAGING) {
 					gUpdates.setButtons("hideButton", null, null, false);
 					gUpdates.wiz.getButton("extra1").focus();
 
