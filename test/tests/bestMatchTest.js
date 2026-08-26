@@ -356,6 +356,32 @@ describe("Zotero.BestMatch", function () {
 			assert.closeTo(excerpt.strength, 0.6, 1e-9);
 		});
 
+		it("should derive every matched passage but quote only the strongest", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			let scores = [0.9, 0.8, 0.7, 0.6, 0.5];
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves(
+				scores.map((score, i) => ({ text: `Passage number ${i} of the document.`, score }))
+			));
+
+			// Semantic only, so the passages are kept on the model's word
+			let session = await sessionFor({ lexical: false });
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+
+			// Every passage the model kept comes back, for reading whole
+			assert.lengthOf(excerpts, scores.length);
+			for (let i = 0; i < scores.length; i++) {
+				assert.closeTo(excerpts[i].strength, scores[i], 1e-9);
+			}
+			// Only the strongest few carry the line the tree quotes
+			for (let i = 0; i < Zotero.BestMatch.MAX_QUOTED_PASSAGES; i++) {
+				assert.isDefined(excerpts[i].snippet, `passage ${i} is quoted`);
+			}
+			for (let i = Zotero.BestMatch.MAX_QUOTED_PASSAGES; i < excerpts.length; i++) {
+				assert.isUndefined(excerpts[i].snippet, `passage ${i} is not quoted`);
+			}
+		});
+
 		it("should fill out a short chosen sentence with what follows it", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));

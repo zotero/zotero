@@ -1,0 +1,48 @@
+search-results-pane {
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+
+	@include elements-custom-head;
+
+	// Keep the attachment's name legible however long it is, cutting it by
+	// letter rather than dropping the whole line
+	collapsible-section > .head .title-box .summary {
+		opacity: 1 !important;
+		width: 0;
+		white-space: wrap;
+		word-break: break-all;
+		display: inline;
+	}
+
+	// The section's icon is the quick-search magnifier, the same one the
+	// search bar uses
+	collapsible-section > .head .title::before {
+		content: '';
+		width: 16px;
+		height: 16px;
+		background: icon-url("16/universal/magnifier.svg") no-repeat center;
+		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+		fill: var(--accent-gold);
+		stroke: var(--accent-gold);
+	}
+
+	collapsible-section > .body {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+
+		@include comfortable {
+			gap: 8px;
+		}
+	}
+
+	collapsible-section:not(:last-child) {
+		border-bottom: 1px solid var(--fill-quinary);
+	}
+
+	// A passage shown on its own is there to be read, so it isn't clamped
+	search-result-row .body .quote {
+		-webkit-line-clamp: inherit !important;
+	}
+}

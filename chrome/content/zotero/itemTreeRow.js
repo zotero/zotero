@@ -620,8 +620,12 @@ class SearchMatch {
 	/**
 	 * The search-match refs to materialize under an item, from its
 	 * best-match preview: one pending ref while the preview is being
-	 * derived, one ref per derived entry once it's filled, and nothing when
+	 * derived, one ref per quoted entry once it's filled, and nothing when
 	 * the item has no preview or its preview derived nothing.
+	 *
+	 * A preview holds every passage the item matched in; the tree shows the
+	 * strongest few, which are the ones with a line quoted. The rest are
+	 * read whole in the item pane.
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {Function} [getMatchPreviews] - itemID -> preview accessor (see
@@ -637,7 +641,9 @@ class SearchMatch {
 		if (preview.state == 'pending') {
 			return [new SearchMatch(item.id)];
 		}
-		return preview.entries.map(entry => new SearchMatch(item.id, entry));
+		return preview.entries
+			.slice(0, Zotero.BestMatch.MAX_QUOTED_PASSAGES)
+			.map(entry => new SearchMatch(item.id, entry));
 	}
 }
 

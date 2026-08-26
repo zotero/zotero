@@ -2228,16 +2228,21 @@ var ZoteroPane = new function () {
 				return false;
 			}
 			
-			var selectedItems = this.itemsView.getSelectedObjects();
+			var selectedObjects = this.itemsView.getSelectedObjects();
+
+			// A selection of search-match rows names passages rather than
+			// items, and the pane shows those instead
+			var searchMatches = this.itemsView.getSelectedSearchMatches();
 
 			// The pane shows data objects; rows standing in for something else
-			// (e.g. a search-match preview row) have none to show, so a
-			// selection of only those reads as an empty one for now
-			selectedItems = selectedItems.filter(o => o instanceof Zotero.DataObject);
+			// (a search-match row, a library header) have none to show, so a
+			// selection of only those reads as an empty one
+			var selectedItems = selectedObjects.filter(o => o instanceof Zotero.DataObject);
 
 			// Display buttons at top of item pane depending on context. This needs to run even if the
 			// selection hasn't changed, because the selected items might have been modified.
 			this.itemPane.data = selectedItems;
+			this.itemPane.searchMatches = searchMatches;
 			this.itemPane.collectionTreeRows = collectionTreeRows;
 			this.itemPane.itemsView = this.itemsView;
 			this.itemPane.editable = this.collectionsView.editable;
@@ -2252,7 +2257,10 @@ var ZoteroPane = new function () {
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
 			// such as whenever selectEventsSuppressed is set to false.
-			var ids = selectedItems.map(item => item.treeViewID);
+			// Keyed on what's selected rather than what the pane shows, so
+			// moving between two passages of the same attachment still
+			// counts as a change
+			var ids = selectedObjects.map(o => o.treeViewID);
 			ids.sort();
 			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;

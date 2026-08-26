@@ -388,6 +388,16 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
+	 * The session holding the passages of the active best-match search, or
+	 * null when no such search is running
+	 *
+	 * @return {Zotero.BestMatch.Session|null}
+	 */
+	get bestMatchSession() {
+		return this._bestMatchSession ?? null;
+	}
+
+	/**
 	 * Called for every pending search-match row the tree draws: rendering
 	 * is the demand signal for deriving previews. Reports are collected
 	 * across the render pass and flushed as one request on a microtask -- a

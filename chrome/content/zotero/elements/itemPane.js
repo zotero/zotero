@@ -45,6 +45,7 @@
 					<description id="batch-edit-prompt-message" />
 					<button id="batch-edit-prompt-enable" data-l10n-id="item-pane-batch-editing-enable" />
 				</groupbox>
+				<search-results-pane id="zotero-search-results-pane" />
 			</deck>
 			<item-pane-sidenav id="zotero-view-item-sidenav" no-context-notes="true" class="zotero-view-item-sidenav"/>
 		`);
@@ -55,6 +56,7 @@
 			this._duplicatesPane = this.querySelector("#zotero-duplicates-merge-pane");
 			this._messagePane = this.querySelector("#zotero-item-message");
 			this._annotationsPane = this.querySelector("#zotero-annotations-pane");
+			this._searchResultsPane = this.querySelector("#zotero-search-results-pane");
 			this._batchEditEnableBtn = this.querySelector("#batch-edit-prompt button");
 			this._batchEditPromptMessage = this.querySelector("#batch-edit-prompt-message");
 			this._sidenav = this.querySelector("#zotero-view-item-sidenav");
@@ -113,12 +115,12 @@
 		}
 
 		get mode() {
-			return ["message", "item", "note", "duplicates", "annotations", "batch-edit-prompt"][this._deck.selectedIndex];
+			return ["message", "item", "note", "duplicates", "annotations", "batch-edit-prompt", "search-results"][this._deck.selectedIndex];
 		}
 
 		/**
 		 * Set mode of item pane
-		 * @param {"message" | "item" | "note" | "duplicates" | "annotations" | "batch-edit-prompt"} type view type
+		 * @param {"message" | "item" | "note" | "duplicates" | "annotations" | "batch-edit-prompt" | "search-results"} type view type
 		 */
 		set mode(type) {
 			this.setAttribute("view-type", type);
@@ -133,6 +135,11 @@
 		}
 
 		render() {
+			// Passages of a search match, rather than items: nothing an item
+			// pane shows describes one, so the passages are all there is
+			if (this.searchMatches?.length) {
+				return this.renderSearchResults(this.searchMatches);
+			}
 			if (!this.data) return false;
 			let renderStatus = false;
 			// Only annotations selected
@@ -190,6 +197,13 @@
 			let annotationsViewer = document.getElementById("zotero-annotations-pane");
 			annotationsViewer.items = annotations;
 			annotationsViewer.render();
+			return true;
+		}
+
+		renderSearchResults(matches) {
+			this.mode = "search-results";
+			this._searchResultsPane.matches = matches;
+			this._searchResultsPane.render();
 			return true;
 		}
 
@@ -627,8 +641,12 @@
 		getCurrentPane(mode = undefined) {
 			if (!mode) {
 				// Guess a mode from the current data
+				// Passages of a search match, which aren't items at all
+				if (this.searchMatches?.length) {
+					mode = "search-results";
+				}
 				// Only annotation items selected
-				if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
+				else if (this.data.length > 0 && this.data.every(item => item.isAnnotation())) {
 					mode = "annotations";
 				}
 				// No/multiple objects are selected OR selected object is a trashed collection/search
@@ -648,7 +666,8 @@
 				item: "_itemDetails",
 				note: "_noteEditor",
 				duplicates: "_duplicatesPane",
-				annotations: "_annotationsPane"
+				annotations: "_annotationsPane",
+				"search-results": "_searchResultsPane"
 			};
 			return this[map[mode]];
 		}
@@ -734,6 +753,10 @@
 				}
 				case "batch-edit-prompt": {
 					this._deck.selectedIndex = 5;
+					break;
+				}
+				case "search-results": {
+					this._deck.selectedIndex = 6;
 					break;
 				}
 			}

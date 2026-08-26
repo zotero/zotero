@@ -46,10 +46,13 @@ Zotero.BestMatch = new function () {
 	const LEXICAL_WEIGHT = 0.3;
 	// About a line: what a passage is quoted down to for a one-line preview
 	const SNIPPET_CHARS = 150;
-	// Most passages shown for one item. The strongest few say what the item
-	// has to offer, and quoting a passage costs work -- sometimes the model's
-	// -- so passages past this are not worth deriving.
-	const MAX_PASSAGES = 3;
+	// Most passages quoted for one item. Quoting one costs work -- sometimes
+	// the model's -- and the strongest few already say what the item has to
+	// offer at a glance. The rest are still derived: they're read whole
+	// rather than quoted, which needs no line chosen.
+	const MAX_QUOTED_PASSAGES = 3;
+
+	this.MAX_QUOTED_PASSAGES = MAX_QUOTED_PASSAGES;
 
 	//
 	// Errors
@@ -415,14 +418,13 @@ Zotero.BestMatch = new function () {
 		 * piece of the document that knows where it sits, rather than a
 		 * window cut around a word.
 		 *
-		 * At most MAX_PASSAGES come back: the strongest few say what the item
-		 * has to offer, and quoting the rest costs more than it shows.
+		 * Every passage that clears its engine's threshold comes back, so a
+		 * consumer showing passages whole can show all of them.
 		 *
-		 * Each passage carries the whole chunk's `text` and a `snippet`
-		 * extent within it -- the one line that best shows the query (see
-		 * _pickSnippets()) -- so a consumer can quote the line or read the
-		 * passage from the same entry. `ranges` locate the query's literal
-		 * matches in the full text.
+		 * Each passage carries the whole chunk's `text`, and the strongest
+		 * MAX_QUOTED_PASSAGES of them also carry a `snippet` extent within it
+		 * -- the one line that best shows the query (see _pickSnippets()).
+		 * `ranges` locate the query's literal matches in the full text.
 		 *
 		 * Only the engines scoring recorded a match in are asked (see
 		 * score()), so an item that matched one of them never pays the
@@ -430,9 +432,10 @@ Zotero.BestMatch = new function () {
 		 * nothing.
 		 *
 		 * @param {Number} itemID
-		 * @return {Promise<Object[]>} - Entries with `text`, `snippet`,
-		 *     `ranges` and `strength`, plus location fields where the
-		 *     passage knows them
+		 * @return {Promise<Object[]>} - Entries with `text`, `ranges` and
+		 *     `strength`, plus location fields where the passage knows them,
+		 *     strongest first; the first MAX_QUOTED_PASSAGES also have
+		 *     `snippet`
 		 */
 		async getMatchingExcerpts(itemID) {
 			let queryText = this._queryText;
@@ -476,11 +479,10 @@ Zotero.BestMatch = new function () {
 				});
 			}
 			entries.sort((a, b) => b.strength - a.strength);
-			entries = entries.slice(0, MAX_PASSAGES);
 			// Quoting is the expensive half -- a passage the query's words
-			// aren't in has to be read by the model -- so it happens only for
-			// the passages that survived
-			await this._pickSnippets(entries, itemID);
+			// aren't in has to be read by the model -- so only the passages
+			// that will be quoted pay for it
+			await this._pickSnippets(entries.slice(0, MAX_QUOTED_PASSAGES), itemID);
 			return entries;
 		}
 

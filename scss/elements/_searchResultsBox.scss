@@ -1,0 +1,80 @@
+// The section's icon is the quick-search magnifier, the same one the search
+// bar uses, rather than a per-size copy of its own. Both the sidenav button
+// and the section head otherwise derive their icon from the pane name (see
+// _itemPaneSidenav.scss and _collapsibleSection.scss), so each needs pointing
+// at the shared file.
+item-pane-sidenav .btn[data-pane="search-results"] {
+	background-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
+}
+
+collapsible-section[data-pane="search-results"] > .head .title::before {
+	background-image: icon-url("16/universal/magnifier.svg");
+}
+
+search-results-box {
+	display: flex;
+	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
+
+	& > collapsible-section {
+		& > .body {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+
+			@include comfortable {
+				gap: 8px;
+			}
+		}
+	}
+}
+
+// The parts search-result-row adds on top of the shared annotation-row look
+// (see _annotationRow.scss): the section-part indicator and page label in the
+// head, and the clamp toggle under the quote
+search-result-row {
+	.head {
+		.part {
+			font-weight: 400;
+			color: var(--fill-secondary);
+			margin-inline-start: 4px;
+		}
+
+		.location {
+			margin-inline-start: auto;
+			color: var(--fill-secondary);
+			white-space: nowrap;
+		}
+	}
+
+	&.expanded .body .quote {
+		-webkit-line-clamp: none;
+	}
+
+	// Where the query's words are in the passage
+	.body .quote .match {
+		font-weight: 600;
+	}
+
+	.show-more {
+		align-self: flex-start;
+		margin: 0 8px 4px 16px;
+		padding: 0;
+		border: none;
+		background: transparent;
+		color: var(--fill-secondary);
+		font: inherit;
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+
+		&[hidden] {
+			display: none;
+		}
+	}
+}

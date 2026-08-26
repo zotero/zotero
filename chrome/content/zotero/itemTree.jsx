@@ -31,7 +31,7 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { VirtualizedTree, formatColumnName } = VirtualizedTable;
 const { COLUMNS } = require("zotero/itemTreeColumns");
-const { ItemTreeRow } = require('zotero/itemTreeRow');
+const { ItemTreeRow, SearchMatch } = require('zotero/itemTreeRow');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
@@ -1975,6 +1975,36 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 	
+	/**
+	 * The session holding the passages of the active best-match search, when
+	 * the view's rows come from one
+	 *
+	 * @return {Zotero.BestMatch.Session|null}
+	 */
+	get bestMatchSession() {
+		return this.rowProvider?.bestMatchSession ?? null;
+	}
+
+	/**
+	 * The passages the selection names, when search-match rows are all it
+	 * holds. Empty for any selection with something else in it, so a caller
+	 * can tell "these are passages" from "these are items".
+	 *
+	 * A pending row stands in for passages that don't exist yet and names
+	 * none.
+	 *
+	 * @return {Object[]} - { itemID, entry } per selected passage
+	 */
+	getSelectedSearchMatches() {
+		let selected = this.getSelectedObjects();
+		if (!selected.length || !selected.every(ref => ref instanceof SearchMatch)) {
+			return [];
+		}
+		return selected
+			.filter(ref => ref.entry)
+			.map(ref => ({ itemID: ref.itemID, entry: ref.entry }));
+	}
+
 	/**
 	 * Get selected items, omitting collections and searches in the trash
 	 */

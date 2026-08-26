@@ -646,6 +646,7 @@ pane-related = Related
 pane-attachment-info = Attachment Info
 pane-attachment-preview = Preview
 pane-attachment-annotations = Annotations
+pane-search-results = Search Results
 
 pane-header-attachment-associated =
     .label = Rename associated file
@@ -685,6 +686,15 @@ section-related =
     .label = { $count } Related
 section-attachment-info =
     .label = { pane-attachment-info }
+section-search-results =
+    .label = { $count ->
+                 [one] { $count } Search Result
+                *[other] { $count } Search Results
+             }
+search-result-row-fulltext = Full Text
+search-result-row-show-more = Show More
+search-result-row-show-less = Show Less
+
 section-button-remove =
     .tooltiptext = { general-remove }
 section-button-add =
@@ -722,6 +732,8 @@ sidenav-attachment-preview =
     .tooltiptext = { pane-attachment-preview }
 sidenav-attachment-annotations =
     .tooltiptext = { pane-attachment-annotations }
+sidenav-search-results =
+    .tooltiptext = { pane-search-results }
 sidenav-libraries-collections =
     .tooltiptext = { pane-libraries-collections }
 sidenav-tags =

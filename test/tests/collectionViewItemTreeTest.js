@@ -605,7 +605,7 @@ describe("CollectionViewItemTree", function () {
 				assert.isFalse(itemsView.getRowIndexByID('SM' + note.id + '-pending'));
 			});
 
-			it("should treat a selected match row as no item selection", async function () {
+			it("should show selected match rows as passages in the item pane", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchselect A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
@@ -613,20 +613,47 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-
-				// Hold derivation so the placeholder stays put for the test
 				skipPreload();
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.returns(new Promise(() => {})));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'matchselect owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 16 } },
+					{ key: 1, text: 'more about owls', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 15 } }
+				]));
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
 
-				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-pending');
-				itemsView.selection.select(matchRow);
+				let first = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+				let second = itemsView.getRowIndexByID('SM' + attachment.id + '-1');
+				itemsView.selection.select(second);
+				// A passage isn't an item, so no item is selected
 				assert.lengthOf(itemsView.getSelectedItems(), 0);
+				let matches = itemsView.getSelectedSearchMatches();
+				assert.lengthOf(matches, 1);
+				assert.equal(matches[0].itemID, attachment.id);
+				assert.equal(matches[0].entry.key, 1);
+
 				await zp.itemSelected();
-				assert.equal(zp.itemPane.mode, 'message');
+				// The passage is shown on its own, not the attachment's fields
+				assert.equal(zp.itemPane.mode, 'search-results');
+				let pane = zp.itemPane.querySelector('#zotero-search-results-pane');
+				assert.lengthOf(pane.querySelectorAll('search-result-row'), 1);
+
+				// Every selected passage gets a card, under its attachment
+				itemsView.selection.clearSelection();
+				itemsView.selection.rangedSelect(first, second, true);
+				await zp.itemSelected();
+				assert.lengthOf(itemsView.getSelectedSearchMatches(), 2);
+				assert.equal(zp.itemPane.mode, 'search-results');
+				assert.lengthOf(pane.querySelectorAll('search-result-row'), 2);
+				assert.lengthOf(pane.querySelectorAll('collapsible-section'), 1);
+
+				// A selection holding anything that isn't a passage names none
+				itemsView.selection.clearSelection();
+				itemsView.selection.rangedSelect(
+					itemsView.getRowIndexByID(attachment.id), second, true);
+				assert.isEmpty(itemsView.getSelectedSearchMatches());
 			});
 
 			it("should show the top-ranked matches already derived on a new search", async function () {
@@ -679,6 +706,44 @@ describe("CollectionViewItemTree", function () {
 				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachment.id + '-1'), false);
 				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-pending'));
 				assert.equal(itemsView.getRow(first).ref.entry.text, 'fillrow owls');
+			});
+
+			it("should show only the quoted matches as rows", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "quotedrows A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				skipPreload();
+				let entries = [0, 1, 2, 3, 4].map(i => ({
+					key: i,
+					text: `quotedrows passage ${i}`,
+					ranges: [],
+					strength: 1 - i / 10,
+					snippet: i < 3 ? { start: 0, end: 10 } : undefined
+				}));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.resolves(entries));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// The tree shows the quoted passages; the rest are read in
+				// the item pane
+				await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+				for (let i = 0; i < Zotero.BestMatch.MAX_QUOTED_PASSAGES; i++) {
+					assert.notStrictEqual(
+						itemsView.getRowIndexByID('SM' + attachment.id + '-' + i), false,
+						`passage ${i} has a row`);
+				}
+				assert.isFalse(itemsView.getRowIndexByID(
+					'SM' + attachment.id + '-' + Zotero.BestMatch.MAX_QUOTED_PASSAGES));
+				// The preview still holds them all
+				assert.lengthOf(
+					itemsView.bestMatchSession.getPreviews(attachment.id).entries, 5);
 			});
 
 			it("should hand a selected placeholder's selection to the first derived row", async function () {

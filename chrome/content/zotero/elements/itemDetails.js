@@ -56,6 +56,8 @@
 
 						<related-box id="zotero-editpane-related" class="zotero-editpane-related" data-pane="related"/>
 
+						<search-results-box id="zotero-editpane-search-results" data-pane="search-results" hidden="true"/>
+
 					</html:div>
 				</html:div>
 			</hbox>
