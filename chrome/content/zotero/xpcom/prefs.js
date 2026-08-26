@@ -512,6 +512,23 @@ Zotero.Prefs = new function () {
 	}
 	
 	
+	/**
+	 * @return {String[]} - Name of the observed pref for each registered observer that belongs to
+	 *     a closed window, with one entry per observer
+	 */
+	this.getLeakedObserverNames = function () {
+		var names = [];
+		for (let [name, handlers] of Object.entries(_observers)) {
+			for (let handler of handlers) {
+				if (Zotero.Utilities.Internal.isObjectLeakingWindow(handler)) {
+					names.push(name);
+				}
+			}
+		}
+		return names;
+	};
+	
+	
 	this.getVirtualCollectionState = function (type) {
 		const prefKeys = {
 			duplicates: 'duplicateLibraries',

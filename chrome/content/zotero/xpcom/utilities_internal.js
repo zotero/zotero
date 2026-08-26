@@ -2649,18 +2649,21 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Check whether an object belongs to a closed window, and is therefore
-	 * keeping it alive.
+	 * Check whether an object or function belongs to a closed window, and is
+	 * therefore keeping it alive.
+	 *
+	 * A window only counts as leaked once it's closed and detached from its
+	 * docShell, which happens after its 'unload' handlers have run.
 	 *
 	 * @param {any} obj
 	 * @returns {boolean}
 	 */
 	isObjectLeakingWindow(obj) {
-		if (typeof obj !== 'object' || obj === null) {
+		if (obj === null || (typeof obj !== 'object' && typeof obj !== 'function')) {
 			return false;
 		}
 		let global = Cu.getGlobalForObject(obj);
-		return global.constructor.name === 'Window' && global.closed;
+		return global.constructor.name === 'Window' && global.closed && !global.docShell;
 	}
 };
 

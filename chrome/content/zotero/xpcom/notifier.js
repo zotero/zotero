@@ -111,6 +111,15 @@ Zotero.Notifier = new function () {
 	
 	
 	/**
+	 * @return {String[]} - Ids of registered observers that belong to a closed window
+	 */
+	this.getLeakedObserverIDs = function () {
+		return Object.keys(_observers)
+			.filter(id => Zotero.Utilities.Internal.isObjectLeakingWindow(_observers[id].ref));
+	};
+	
+	
+	/**
 	* Trigger a notification to the appropriate observers
 	*
 	* Possible values:

@@ -791,6 +791,9 @@ var ZoteroPane = new function () {
 		if (_syncRemindersObserverID) {
 			Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
 		}
+		if (_apiKeyObserverID) {
+			Zotero.Notifier.unregisterObserver(_apiKeyObserverID);
+		}
 		
 		this.uninitContainers();
 		
@@ -3279,9 +3282,10 @@ var ZoteroPane = new function () {
 
 
 	var _syncRemindersObserverID = null;
+	var _apiKeyObserverID = null;
 	this.initSyncReminders = function (startup) {
-		if (startup) {
-			Zotero.Notifier.registerObserver(
+		if (startup && !_apiKeyObserverID) {
+			_apiKeyObserverID = Zotero.Notifier.registerObserver(
 				{
 					notify: (event) => {
 						// When the API Key is deleted we need to add an observer

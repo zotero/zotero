@@ -40,4 +40,50 @@ describe("Zotero_Tabs", function() {
 			assert.notOk(tab.querySelector('img'));
 		});
 	});
+
+	describe("Window teardown", function () {
+		it("should not leave observers registered after a window is closed", async function () {
+			this.timeout(60000);
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item', { collections: [collection.id] });
+			let notifierBefore = new Set(Zotero.Notifier.getLeakedObserverIDs());
+			let prefsBefore = Zotero.Prefs.getLeakedObserverNames();
+			
+			// Render the library item pane in a second window
+			let win2 = await loadZoteroPane();
+			await selectCollection(win2, collection);
+			await win2.ZoteroPane.selectItem(item.id);
+			
+			// The window's observers are still registered while it tears down, and shouldn't be
+			// reported as leaked before it's actually gone
+			let leakedWhileUnloading = null;
+			win2.addEventListener('pagehide', () => {
+				leakedWhileUnloading = Zotero.Notifier.getLeakedObserverIDs()
+					.filter(id => !notifierBefore.has(id));
+			});
+			// An object that nothing unregisters, so that it starts reporting as leaked as soon
+			// as the window has finished tearing down
+			let root = win2.document.documentElement;
+			win2.close();
+			await waitForCallback(
+				() => Zotero.Utilities.Internal.isObjectLeakingWindow(root), 50, 20
+			);
+			
+			assert.deepEqual(
+				leakedWhileUnloading, [], 'no observers are reported as leaked while unloading'
+			);
+			let notifierAfter = Zotero.Notifier.getLeakedObserverIDs()
+				.filter(id => !notifierBefore.has(id));
+			assert.isEmpty(notifierAfter, 'no notifier observers belong to a closed window');
+			
+			let prefsAfter = Zotero.Prefs.getLeakedObserverNames();
+			for (let name of prefsBefore) {
+				let index = prefsAfter.indexOf(name);
+				if (index != -1) {
+					prefsAfter.splice(index, 1);
+				}
+			}
+			assert.isEmpty(prefsAfter, 'no pref observers belong to a closed window');
+		});
+	});
 });
