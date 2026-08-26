@@ -468,7 +468,7 @@ async function waitForScrollToPane(itemDetails, paneID) {
 
 function clickOnItemsRow(win, itemsView, row) {
 	itemsView._treebox.scrollToRow(row);
-	let elem = win.document.querySelector(`#${itemsView.id}-row-${row}`);
+	let elem = itemsView.domEl.querySelector(`#${itemsView.id}-row-${row}`);
 	elem.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
 }
 

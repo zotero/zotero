@@ -39,6 +39,7 @@ class TagSelector extends React.PureComponent {
 				<TagList
 					ref={this.props.tagListRef}
 					tags={this.props.tags}
+					label={this.props.label}
 					dragObserver={this.props.dragObserver}
 					onSelect={this.props.onSelect}
 					onKeyDown={this.props.onKeyDown}
@@ -83,6 +84,7 @@ TagSelector.propTypes = {
 		disabled: PropTypes.bool,
 		width: PropTypes.number
 	})),
+	label: PropTypes.string,
 	dragObserver: PropTypes.shape({
 		onDragOver: PropTypes.func,
 		onDragExit: PropTypes.func,

@@ -987,9 +987,9 @@ class VirtualizedTable extends React.Component {
 		const result = this._getResizeColumns();
 		if (!result) return;
 		const [aColumn, bColumn, resizingColumn] = result;
-		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(aColumn.dataKey)}`);
-		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(bColumn.dataKey)}`);
-		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(resizingColumn.dataKey)}`);
+		const a = this._topDiv.querySelector(`.virtualized-table-header .cell.${window.CSS.escape(aColumn.dataKey)}`);
+		const b = this._topDiv.querySelector(`.virtualized-table-header .cell.${window.CSS.escape(bColumn.dataKey)}`);
+		const resizing = this._topDiv.querySelector(`.virtualized-table-header .cell.${window.CSS.escape(resizingColumn.dataKey)}`);
 		const aRect = a.getBoundingClientRect();
 		const bRect = b.getBoundingClientRect();
 		const resizingRect = resizing.getBoundingClientRect();
@@ -1089,7 +1089,7 @@ class VirtualizedTable extends React.Component {
 		if (!result) return;
 		let resizeData = {};
 		for (const column of result) {
-			const elem = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${window.CSS.escape(column.dataKey)}`)
+			const elem = this._topDiv.querySelector(`.virtualized-table-header .cell.${window.CSS.escape(column.dataKey)}`);
 			resizeData[column.dataKey] = elem.getBoundingClientRect().width;
 		}
 		this._columns.onResize(resizeData, true);
@@ -1143,9 +1143,9 @@ class VirtualizedTable extends React.Component {
 	}
 
 	_findColumnDragPosition(x) {
-		const headerRect = document.querySelector(`#${this.props.id} .virtualized-table-header`).getBoundingClientRect();
+		const headerRect = this._topDiv.querySelector(`.virtualized-table-header`).getBoundingClientRect();
 		
-		let coords = Array.from(document.querySelectorAll(`#${this.props.id} .virtualized-table-header .resizer`))
+		let coords = Array.from(this._topDiv.querySelectorAll(`.virtualized-table-header .resizer`))
 			.map((elem) => {
 				const rect = elem.getBoundingClientRect();
 				// accounting for resizer offset
@@ -1669,7 +1669,7 @@ class VirtualizedTable extends React.Component {
 		if (!this.props.showHeader) return;
 		const jsWindow = document.querySelector(`#${this._jsWindowID} .windowed-list`);
 		if (!jsWindow) return;
-		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
+		const header = this._topDiv.querySelector(`.virtualized-table-header`);
 		const scrollbarWidth = jsWindow.parentElement.getBoundingClientRect().width - jsWindow.parentElement.clientWidth;
 
 		header.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);

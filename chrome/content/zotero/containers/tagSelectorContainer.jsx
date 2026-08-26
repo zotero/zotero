@@ -510,7 +510,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				this.divMeasure.style.position = 'absolute';
 				this.divMeasure.style.top = '-9999px';
 				this.divMeasure.whiteSpace = 'nowrap';
-				document.querySelector('#zotero-tag-selector').appendChild(this.divMeasure);
+				this.props.element.appendChild(this.divMeasure);
 			}
 
 			this.divMeasure.style.font = font;
@@ -626,6 +626,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		// Zotero.debug(`Prepared ${tags.length} tags in ${new Date() - d} ms`);
 		return <TagSelector
 			tags={tags}
+			label={this.props.element.getAttribute('label') || ''}
 			searchBoxRef={this.searchBoxRef}
 			tagListRef={this.tagListRef}
 			searchString={this.state.searchString}
@@ -971,6 +972,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		await new Promise((resolve) => {
 			let root = ReactDOM.createRoot(domEl);
 			opts.root = root;
+			opts.element = domEl;
 			root.render(<TagSelectorContainer ref={(c) => {
 				ref = c;
 				resolve();
@@ -991,6 +993,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	
 	static propTypes = {
 		container: PropTypes.string.isRequired,
+		element: PropTypes.object.isRequired,
 		onSelection: PropTypes.func.isRequired,
 		root: PropTypes.object,
 	};
