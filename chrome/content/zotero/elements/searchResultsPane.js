@@ -111,10 +111,7 @@
 			}
 		}
 
-		// Open the activated card's attachment where its passage is: for a
-		// PDF with a stored chunk position, scrolled to and highlighting the
-		// section; without one (EPUB, snapshot, a passage cut from flat
-		// text), just open it.
+		// Open the activated card's attachment at its passage
 		_handleActivate = (event) => {
 			let row = event.target.closest('search-result-row');
 			// The Show More toggle isn't an activation
@@ -124,14 +121,7 @@
 			if (typeof ZoteroPane == 'undefined') {
 				return;
 			}
-			let itemID = parseInt(row.dataset.itemId);
-			let item = Zotero.Items.get(itemID);
-			if (!item || !item.isFileAttachment()) {
-				return;
-			}
-			let position = row.result?.position;
-			ZoteroPane.viewAttachment(itemID, null, false,
-				position ? { location: { position } } : undefined)
+			ZoteroPane.viewSearchMatch(parseInt(row.dataset.itemId), row.result, event)
 				.catch(e => Zotero.logError(e));
 		};
 	}

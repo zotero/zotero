@@ -487,18 +487,19 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 
 	getChildItems({ searchMode, searchItemIDs, getMatchPreviews } = {}) {
 		let annotations = this.ref.getAnnotations();
-		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
-		// annotations match a search, show only those and hide the rest. If none match,
-		// show them all, since otherwise the attachment couldn't be expanded to browse its
-		// annotations at all.
+		let matchRows = SearchMatch.forItem(this.ref, getMatchPreviews);
+		// With "Hide Non-Matching Annotations" enabled, show only the annotations
+		// that matched a search. When none of them did, they're shown anyway rather
+		// than leaving an attachment that can't be expanded to browse them at all --
+		// unless it has match rows, which are already something to expand to.
 		if (searchMode && Zotero.Prefs.get("hideContextAnnotationRows")) {
 			let matches = annotations.filter(annotation => searchItemIDs.has(annotation.id));
-			if (matches.length) {
+			if (matches.length || matchRows.length) {
 				annotations = matches;
 			}
 		}
 		// Fulltext match rows come after the annotations
-		return [...annotations, ...SearchMatch.forItem(this.ref, getMatchPreviews)];
+		return [...annotations, ...matchRows];
 	}
 
 	_supportsBestAttachmentState() {

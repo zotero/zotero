@@ -141,23 +141,17 @@
 			}
 		}
 
-		// For a file attachment, open it where the activated card's passage
-		// is: for a PDF with a stored chunk position, scrolled to and
-		// highlighting the section; without one (EPUB, snapshot, a passage
-		// cut from flat text), just open it.
+		// Open the activated card's attachment at its passage
 		_handleActivate = (event) => {
 			let row = event.target.closest('search-result-row');
 			// The Show More toggle isn't an activation
-			if (!row || !this.item || !this.item.isFileAttachment()
-					|| event.target.closest('.show-more')) {
+			if (!row || !this.item || event.target.closest('.show-more')) {
 				return;
 			}
 			if (typeof ZoteroPane == 'undefined') {
 				return;
 			}
-			let position = row.result?.position;
-			ZoteroPane.viewAttachment(this.item.id, null, false,
-				position ? { location: { position } } : undefined)
+			ZoteroPane.viewSearchMatch(this.item.id, row.result, event)
 				.catch(e => Zotero.logError(e));
 		};
 

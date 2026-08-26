@@ -5486,6 +5486,14 @@ var ZoteroPane = new function () {
 		let { noLocateOnMissing } = options;
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
+			// A search-match row stands in for a passage of its attachment
+			// rather than for an item, so it opens at that passage
+			if (!(item instanceof Zotero.Item)) {
+				if (item.itemID && item.entry) {
+					await this.viewSearchMatch(item.itemID, item.entry, event);
+				}
+				continue;
+			}
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				let attachment = await item.getBestAttachment();
@@ -5753,6 +5761,32 @@ var ZoteroPane = new function () {
 	
 	this.viewPDF = async function (itemID, location) {
 		await this.viewAttachment(itemID, null, false, { location });
+	};
+	
+	
+	/**
+	 * Open the attachment a best-match search passage came from, at the
+	 * passage.
+	 *
+	 * A PDF passage carries the page geometry the reader scrolls to and
+	 * highlights. An EPUB or snapshot passage carries none -- their views
+	 * navigate by DOM selector, which a chunk doesn't know -- so those open
+	 * where the attachment was left.
+	 *
+	 * @param {Number} itemID - The attachment the passage belongs to
+	 * @param {Object} entry - A preview entry (see
+	 *     Zotero.BestMatch.Session#getPreviews())
+	 * @param {Event} [event]
+	 * @return {Promise}
+	 */
+	this.viewSearchMatch = async function (itemID, entry, event = null) {
+		let item = Zotero.Items.get(itemID);
+		if (!item || !item.isFileAttachment()) {
+			return;
+		}
+		let position = entry?.position;
+		await this.viewAttachment(itemID, event, false,
+			position ? { location: { position } } : undefined);
 	};
 	
 	

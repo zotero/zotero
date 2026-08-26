@@ -708,6 +708,102 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(itemsView.getRow(first).ref.entry.text, 'fillrow owls');
 			});
 
+			it("should hide non-matching annotations when the attachment has match rows", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "annhide A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				// Random text, so it never matches the query
+				await createAnnotation('highlight', attachment);
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				skipPreload();
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'annhide owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 12 } }
+				]));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+
+				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+				let childrenFor = () => itemsView.getRow(attachmentRow).getChildItems({
+					searchMode: true,
+					searchItemIDs: new Set([attachment.id]),
+					getMatchPreviews: itemsView.bestMatchSession.getPreviews
+				});
+
+				Zotero.Prefs.set("hideContextAnnotationRows", true);
+				try {
+					// The annotation didn't match, and the match rows are what
+					// the attachment expands to instead
+					let children = childrenFor();
+					assert.isFalse(children.some(ref => ref.isAnnotation?.()));
+					assert.isAbove(children.length, 0);
+				}
+				finally {
+					Zotero.Prefs.set("hideContextAnnotationRows", false);
+				}
+				// With the pref off it stays alongside the match rows
+				assert.isTrue(childrenFor().some(ref => ref.isAnnotation?.()));
+			});
+
+			it("should open a match at its passage from the tree and the item pane", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "openmatch A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				skipPreload();
+				let position = { pageIndex: 3, rects: [[1, 2, 3, 4]] };
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'openmatch owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 14 }, position },
+					// A passage with no geometry to navigate to
+					{ key: 1, text: 'openmatch more owls', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 19 } }
+				]));
+				let viewAttachment = sinon.stub(zp, 'viewAttachment').resolves();
+				stubs.push(viewAttachment);
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				let withPosition = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+
+				// From the tree: the attachment, at the passage's geometry
+				await itemsView.handleActivate({}, [withPosition]);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.equal(viewAttachment.firstCall.args[0], attachment.id);
+				assert.deepEqual(viewAttachment.firstCall.args[3], { location: { position } });
+
+				// A passage with no geometry opens the attachment as it stands
+				viewAttachment.resetHistory();
+				await itemsView.handleActivate(
+					{}, [itemsView.getRowIndexByID('SM' + attachment.id + '-1')]);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.isUndefined(viewAttachment.firstCall.args[3]);
+
+				// From the item pane: selecting the row shows its card, and
+				// double-clicking the card opens the same place
+				viewAttachment.resetHistory();
+				itemsView.selection.select(withPosition);
+				await zp.itemSelected();
+				let card = zp.itemPane
+					.querySelector('#zotero-search-results-pane search-result-row');
+				assert.ok(card);
+				card.dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true }));
+				await Zotero.Promise.delay(50);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.equal(viewAttachment.firstCall.args[0], attachment.id);
+				assert.deepEqual(viewAttachment.firstCall.args[3], { location: { position } });
+			});
+
 			it("should show only the quoted matches as rows", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "quotedrows A", collections: [col.id] });
@@ -800,6 +896,44 @@ describe("CollectionViewItemTree", function () {
 				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
 				// The item stays -- it's still a scored result
 				assert.notStrictEqual(itemsView.getRowIndexByID(item.id), false);
+			});
+
+			it("should re-rank without re-running the search when an item is edited", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "reuse A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				skipPreload();
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.resolves([]));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let refresh = sinon.spy(itemsView.rowProvider, '_refresh');
+				stubs.push(refresh);
+				let row = itemsView.collectionTreeRows[0];
+				let cachedBefore = row._cachedResults;
+				assert.ok(cachedBefore, 'the search results are cached to begin with');
+				item.setField('title', 'reuse B');
+				await item.saveTx();
+				let deadline = Date.now() + 5000;
+				while (!refresh.callCount && Date.now() < deadline) {
+					await Zotero.Promise.delay(10);
+				}
+				await itemsView._refreshPromise;
+
+				// The edit re-ranks the results already in hand rather than
+				// asking the scope for them again
+				assert.isAbove(refresh.callCount, 0);
+				assert.isTrue(refresh.firstCall.args[0].reuseSearchResults,
+					'reuses the cached search results');
+				// The same cached result set, so the underlying query never ran
+				assert.strictEqual(row._cachedResults, cachedBefore);
 			});
 
 			it("should rederive a modified attachment's previews", async function () {
