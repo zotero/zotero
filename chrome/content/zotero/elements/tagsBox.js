@@ -264,7 +264,8 @@
 					}
 
 					// TODO: Return focus to items pane
-					var tree = document.getElementById('zotero-items-tree');
+					var tree = (this.closest('library-view') || window.ZoteroPane?.libraryView)
+					?.getElement('zotero-items-tree');
 					if (tree) {
 						tree.focus();
 					}

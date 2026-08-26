@@ -67,7 +67,7 @@ quick-search-textbox {
 	}
 }
 
-#zotero-tb-search {
+:is(#zotero-tb-search, quick-search-textbox) {
 	height: 100%;
 }
 
@@ -121,7 +121,7 @@ quick-search-textbox {
 }
 
 // Match the specificity of the #zotero-items-toolbar toolbarbutton rules
-#zotero-tb-search #zotero-tb-search-advanced-button {
+:is(#zotero-tb-search, quick-search-textbox) #zotero-tb-search-advanced-button {
 	position: relative;
 	width: 28px;
 	height: 28px;
@@ -163,7 +163,7 @@ quick-search-textbox {
 	}
 }
 
-#zotero-tb-search-spinner {
+:is(#zotero-tb-search-spinner, .zotero-tb-search-spinner) {
 	margin: 0 8px;
 	// make sure the spinner always occupies space
 	display: inline;

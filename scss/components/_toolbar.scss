@@ -26,13 +26,13 @@ $toolbar-padding-inline: 8px;
 	@include inactive-opacity;
 }
 
-#zotero-layout-switcher .zotero-toolbar {
+:is(#zotero-layout-switcher, .zotero-layout-switcher) .zotero-toolbar {
 	background: var(--material-toolbar);
 	border-bottom: var(--material-panedivider);
 }
 
-#zotero-collections-toolbar,
-#zotero-items-toolbar,
+:is(#zotero-collections-toolbar, .zotero-collections-toolbar),
+:is(#zotero-items-toolbar, .zotero-items-toolbar),
 #zotero-item-pane-header,
 #zotero-tabs-toolbar {
 	toolbarbutton {
@@ -47,22 +47,22 @@ $toolbar-padding-inline: 8px;
 	}
 }
 
-#zotero-items-toolbar,
+:is(#zotero-items-toolbar, .zotero-items-toolbar),
 #zotero-tabs-toolbar {
 	toolbarbutton {
 		margin: 0px 4px 0px 4px;
 	}
 }
 
-#zotero-items-toolbar:first-child {
+:is(#zotero-items-toolbar, .zotero-items-toolbar):first-child {
 	margin-inline-start: -4px;
 }
 
-#zotero-collections-toolbar {
+:is(#zotero-collections-toolbar, .zotero-collections-toolbar) {
 	border-bottom: 1px solid transparent;
 }
 
-#zotero-collections-search {
+:is(#zotero-collections-search, .zotero-collections-search) {
 	max-width: 0;
 	transition: max-width 0.2s ease;
 	padding: 0;
@@ -72,25 +72,25 @@ $toolbar-padding-inline: 8px;
 	height: 28px;
 }
 
-#zotero-collections-search.visible {
+:is(#zotero-collections-search, .zotero-collections-search).visible {
 	max-width: 180px; 
 }
 
-#zotero-collections-search.expanding {
+:is(#zotero-collections-search, .zotero-collections-search).expanding {
 	padding-inline-end: 35px;
 }
 
 /* Hide collection search on pane collapse, otherwise it still shows when focused */
-#zotero-collections-pane[collapsed] #zotero-collections-search.visible {
+:is(#zotero-collections-pane, .zotero-collections-pane)[collapsed] :is(#zotero-collections-search, .zotero-collections-search).visible {
 	display: none;
 }
 
 /* Hide the add button on pane collapse. Otherwise, it may show on top of 'New Item' */
-#zotero-collections-pane[collapsed] #zotero-tb-collection-add {
+:is(#zotero-collections-pane, .zotero-collections-pane)[collapsed] :is(#zotero-tb-collection-add, .zotero-tb-collection-add) {
 	visibility: hidden;
 }
 
-#zotero-collections-toolbar {
+:is(#zotero-collections-toolbar, .zotero-collections-toolbar) {
 	flex-grow: 1;
 	flex-shrink: 1;
 	min-width: 0;
@@ -124,15 +124,15 @@ $toolbar-padding-inline: 8px;
 	margin-top: 1px;
 }
 
-#zotero-tb-toggle-item-pane-stacked {
+:is(#zotero-tb-toggle-item-pane-stacked, .zotero-tb-toggle-item-pane-stacked) {
 	// Hidden except in Stacked mode
 	display: none;
 }
 
-#main-window.stacked #zotero-toolbar-item-tree {
+#main-window.stacked :is(#zotero-toolbar-item-tree, .zotero-toolbar-item-tree) {
 	padding-inline-end: 0;
 	
-	#zotero-tb-toggle-item-pane-stacked { // Keep nested for specificity
+	:is(#zotero-tb-toggle-item-pane-stacked, .zotero-tb-toggle-item-pane-stacked) { // Keep nested for specificity
 		display: flex;
 		margin-inline-start: 9px;
 	}
@@ -145,7 +145,7 @@ toolbox {
 	}
 }
 
-#zotero-toolbar-collection-tree {
+:is(#zotero-toolbar-collection-tree, .zotero-toolbar-collection-tree) {
 	// fx140: override default toolbar color on linux
 	background: var(--material-sidepane);
 }

@@ -1518,7 +1518,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					// The row is still not found
 					// Clear the quick search, tag selection, and advanced search
 					// and try again (once)
-					if (!noRecurse && window.ZoteroPane) {
+					let libraryView = this.domEl.closest('library-view');
+					if (!noRecurse && libraryView) {
 						let hasQuickSearch = !!this.collectionTreeRows[0].searchText;
 						let hasTagFilters = this.collectionTreeRows[0].tags?.size > 0;
 						let hasAdvancedSearch = !!this.collectionTreeRows[0].advancedSearch;
@@ -1534,12 +1535,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 							}
 							// Clear tag selection, quicksearch text field, and advanced search
 							// without rerunning search
-							if (window.ZoteroPane.tagSelector) {
-								window.ZoteroPane.tagSelector.clearTagSelection();
+							if (libraryView.tagSelector) {
+								libraryView.tagSelector.clearTagSelection();
 							}
-							window.ZoteroPane.clearQuicksearch(true);
+							libraryView.clearQuicksearch(true);
 							if (hasAdvancedSearch) {
-								await window.ZoteroPane.setAdvancedSearchState('closed', { skipRefresh: true });
+								await libraryView.setAdvancedSearchState('closed', { skipRefresh: true });
 							}
 							// Rerun search and refresh the itemTree
 							await this.refreshAndMaintainSelection();

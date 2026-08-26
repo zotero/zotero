@@ -1,6 +1,6 @@
 @use "sass:map";
 
-#zotero-items-pane-container {
+:is(#zotero-items-pane-container, .zotero-items-pane-container) {
 	flex-grow: 1;
 	flex-shrink: 1;
 	min-width: $min-width-items-pane;
@@ -8,11 +8,11 @@
 	min-height: $min-height-items-pane;
 }
 
-#zotero-items-pane {
+:is(#zotero-items-pane, .zotero-items-pane) {
 	min-width: $min-width-items-pane;
 }
 
-#zotero-items-tree {
+:is(#zotero-items-tree, .zotero-items-tree) {
 	.virtualized-table-body, .drag-image-container {
 		padding: 4px 8px 8px;
 	}

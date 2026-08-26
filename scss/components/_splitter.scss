@@ -68,7 +68,7 @@ splitter {
 	}
 }
 
-#zotero-items-splitter,
+:is(#zotero-items-splitter, .zotero-items-splitter),
 #zotero-context-splitter,
 #zotero-context-splitter-stacked {
 	&[orient=vertical] {

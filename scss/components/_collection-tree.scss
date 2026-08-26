@@ -54,7 +54,7 @@ $universal-icons: (
 	}
 }
 
-#zotero-collections-pane {
+:is(#zotero-collections-pane, .zotero-collections-pane) {
 	min-width: $min-width-collections-pane;
 	max-width: var(--max-width-collections-pane);
 	width: $min-width-collections-pane;
@@ -63,11 +63,11 @@ $universal-icons: (
 	background: var(--material-sidepane);
 }
 
-#zotero-collections-tree-container {
+:is(#zotero-collections-tree-container, .zotero-collections-tree-container) {
 	height: 5.2em;
 }
 
-#zotero-collections-tree {
+:is(#zotero-collections-tree, .zotero-collections-tree) {
 	width: 100%;
 
 	#main-window & {

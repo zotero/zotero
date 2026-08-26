@@ -143,6 +143,18 @@ describe("ZoteroPane", function () {
 			await newSearches[0].eraseTx();
 		});
 	});
+
+	describe("Edit menu", function () {
+		it("should label the text-editing commands and set their shortcuts", async function () {
+			await doc.l10n.ready;
+			for (let id of ['menu_undo', 'menu_redo', 'menu_cut', 'menu_copy', 'menu_paste', 'menu_delete', 'menu_selectAll']) {
+				assert.ok(doc.getElementById(id).label, id);
+			}
+			for (let id of ['key_cut', 'key_copy', 'key_paste', 'key_selectAll']) {
+				assert.ok(doc.getElementById(id).getAttribute('key'), id);
+			}
+		});
+	});
 	
 	describe("#itemSelected()", function () {
 		it.skip("should update the item count", function* () {

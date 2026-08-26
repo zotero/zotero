@@ -509,15 +509,15 @@ const ZoteroStandalone = new function () {
 		// Panes
 		this.updateMenuItemCheckmark(
 			'view-menuitem-collections-pane',
-			!document.getElementById('zotero-collections-pane').hasAttribute('collapsed')
+			!ZoteroPane.libraryView.getElement('zotero-collections-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-item-pane',
-			!document.getElementById('zotero-item-pane').hasAttribute('collapsed')
+			!ZoteroPane.itemPane.hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-tag-selector',
-			!document.getElementById('zotero-tag-selector-container').hasAttribute('collapsed')
+			!ZoteroPane.libraryView.getElement('zotero-tag-selector-container').hasAttribute('collapsed')
 		);
 		
 		// Font size
@@ -635,30 +635,32 @@ const ZoteroStandalone = new function () {
 				break;
 			
 			case 'collections-pane':
-				var collectionsPane = document.getElementById('zotero-collections-pane');
+				var libraryView = ZoteroPane.libraryView;
+				var collectionsPane = libraryView.getElement('zotero-collections-pane');
 				// Show
 				if (collectionsPane.hasAttribute('collapsed')) {
-					document.getElementById('zotero-collections-splitter').setAttribute('state', 'open');
+					libraryView.getElement('zotero-collections-splitter').setAttribute('state', 'open');
 					collectionsPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {
-					document.getElementById('zotero-collections-splitter').setAttribute('state', 'collapsed');
+					libraryView.getElement('zotero-collections-splitter').setAttribute('state', 'collapsed');
 					collectionsPane.setAttribute('collapsed', true);
 				}
 				ZoteroPane.updateLayoutConstraints();
 				break;
 			
 			case 'item-pane':
-				var itemPane = document.getElementById('zotero-item-pane');
+				libraryView = ZoteroPane.libraryView;
+				var itemPane = ZoteroPane.itemPane;
 				// Show
 				if (itemPane.hasAttribute('collapsed')) {
-					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
+					libraryView.getElement('zotero-items-splitter').setAttribute('state', 'open');
 					itemPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {
-					document.getElementById('zotero-items-splitter').setAttribute('state', 'collapsed');
+					libraryView.getElement('zotero-items-splitter').setAttribute('state', 'collapsed');
 					itemPane.setAttribute('collapsed', true);
 				}
 				ZoteroPane.updateLayoutConstraints();

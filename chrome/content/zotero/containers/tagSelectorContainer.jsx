@@ -449,7 +449,7 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 	}
 	
 	getContainerDimensions() {
-		var container = document.getElementById(this.props.container);
+		var container = this.props.container;
 		return {
 			width: container.clientWidth,
 			height: container.clientHeight
@@ -467,7 +467,7 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 		elem.className = 'tag-selector-item';
 		elem.style.position = 'absolute';
 		elem.style.opacity = 0;
-		var container = document.getElementById(this.props.container);
+		var container = this.props.container;
 		container.appendChild(elem);
 		var style = window.getComputedStyle(elem);
 		var props = {
@@ -996,7 +996,7 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 	}
 	
 	static propTypes = {
-		container: PropTypes.string.isRequired,
+		container: PropTypes.object.isRequired,
 		element: PropTypes.object.isRequired,
 		onSelection: PropTypes.func.isRequired,
 		root: PropTypes.object,

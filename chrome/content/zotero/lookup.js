@@ -28,6 +28,9 @@
  * @namespace
  */
 var Zotero_Lookup = new function () {
+	// All the lookup elements live inside the library view
+	var _getElement = id => ZoteroPane.libraryView.getElement(id);
+	
 	this._button = null;
 	this._accepted = false;
 
@@ -150,23 +153,23 @@ var Zotero_Lookup = new function () {
 		if (newItems.length) {
 			// Send the focus to the item tree after the popup closes
 			ZoteroPane.lastFocusedElement = null;
-			document.getElementById("zotero-lookup-panel").hidePopup();
+			_getElement('zotero-lookup-panel').hidePopup();
 			// The item tree's DOM id has a view-specific suffix, so use the current view's id
-			document.getElementById(ZoteroPane.itemsView.id).focus();
+			_getElement(ZoteroPane.itemsView.id).focus();
 		}
 		else {
 			// Hide on failure too
-			document.getElementById("zotero-lookup-panel").hidePopup();
+			_getElement('zotero-lookup-panel').hidePopup();
 		}
 		return false;
 	};
 
 
 	this.showPanel = function (button) {
-		var panel = document.getElementById('zotero-lookup-panel');
+		var panel = _getElement('zotero-lookup-panel');
 		this._button = button;
 		if (!button) {
-			button = document.getElementById("zotero-tb-lookup");
+			button = _getElement('zotero-tb-lookup');
 		}
 		panel.openPopup(button, "after_start", 0, 0, false, false);
 	};
@@ -212,7 +215,7 @@ var Zotero_Lookup = new function () {
 		// closing on click outside (_onMouseDown) and closing on a window
 		// switch when there's no content (_onBlur)
 		window.addEventListener('mousedown', this._onMouseDown, { capture: true });
-		document.getElementById('zotero-lookup-panel').addEventListener('blur', this._onBlur, { capture: true });
+		_getElement('zotero-lookup-panel').addEventListener('blur', this._onBlur, { capture: true });
 	};
 
 
@@ -225,10 +228,10 @@ var Zotero_Lookup = new function () {
 		if (event.target.closest("panel, menupopup")) {
 			return;
 		}
-		document.getElementById("zotero-lookup-panel").hidePopup();
+		_getElement('zotero-lookup-panel').hidePopup();
 		// Prevent the toolbar button's own handlers from triggering, so the
 		// popup doesn't immediately reopen
-		if (document.getElementById("zotero-tb-lookup").contains(event.target)) {
+		if (_getElement('zotero-tb-lookup').contains(event.target)) {
 			event.preventDefault();
 			event.stopPropagation();
 		}
@@ -239,9 +242,9 @@ var Zotero_Lookup = new function () {
 		if (Services.focus.activeWindow === window) {
 			return;
 		}
-		let textBox = document.getElementById('zotero-lookup-textbox');
+		let textBox = _getElement('zotero-lookup-textbox');
 		if (textBox.value.trim() === '') {
-			document.getElementById('zotero-lookup-panel').hidePopup();
+			_getElement('zotero-lookup-panel').hidePopup();
 		}
 	};
 	
@@ -254,10 +257,10 @@ var Zotero_Lookup = new function () {
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
 		window.removeEventListener('mousedown', this._onMouseDown, { capture: true });
-		document.getElementById('zotero-lookup-panel').removeEventListener('blur', this._onBlur, { capture: true });
+		_getElement('zotero-lookup-panel').removeEventListener('blur', this._onBlur, { capture: true });
 
 		if (this._accepted) {
-			document.getElementById("zotero-lookup-textbox").value = "";
+			_getElement('zotero-lookup-textbox').value = "";
 		}
 		Zotero_Lookup.setShowProgress(false);
 		
@@ -267,7 +270,7 @@ var Zotero_Lookup = new function () {
 	
 	
 	this.getActivePanel = function() {
-		return document.getElementById("zotero-lookup-multiline");
+		return _getElement('zotero-lookup-multiline');
 	};
 	
 	
@@ -299,7 +302,7 @@ var Zotero_Lookup = new function () {
 			}
 		}
 		else if (keyCode == event.DOM_VK_ESCAPE) {
-			document.getElementById("zotero-lookup-panel").hidePopup();
+			_getElement('zotero-lookup-panel').hidePopup();
 		}
 	};
 	
@@ -334,8 +337,8 @@ var Zotero_Lookup = new function () {
 	
 	
 	this.setMultiline = function (on) {
-		var mlTxtBox = document.getElementById("zotero-lookup-textbox");
-		var mlButtons = document.getElementById('zotero-lookup-buttons');
+		var mlTxtBox = _getElement('zotero-lookup-textbox');
+		var mlButtons = _getElement('zotero-lookup-buttons');
 
 		mlTxtBox.rows = on ? 5 : 1;
 		mlButtons.hidden = !on;
@@ -347,8 +350,8 @@ var Zotero_Lookup = new function () {
 		// In Firefox 52.6.0, progressmeters burn CPU at idle on Linux when undetermined, even
 		// if they're hidden. (Being hidden is enough on macOS.)
 		
-		document.getElementById("zotero-lookup-textbox").disabled = !!on;
-		var p = document.getElementById("zotero-lookup-multiline-progress");
+		_getElement('zotero-lookup-textbox').disabled = !!on;
+		var p = _getElement('zotero-lookup-multiline-progress');
 		if (on) {
 			p.removeAttribute('value');
 		}

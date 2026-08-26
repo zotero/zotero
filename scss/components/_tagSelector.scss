@@ -1,16 +1,16 @@
 //
 // Tag selector
 // --------------------------------------------------
-#zotero-tag-selector-container {
+:is(#zotero-tag-selector-container, .zotero-tag-selector-container) {
 	display: flex;
 	min-height: 100px;
 }
 
-#zotero-tag-selector-container[collapsed] {
+:is(#zotero-tag-selector-container, .zotero-tag-selector-container)[collapsed] {
 	visibility: collapse;
 }
 
-#zotero-tag-selector {
+:is(#zotero-tag-selector, .zotero-tag-selector) {
 	width: 100%;
 	display: flex;
 	height: 100%;

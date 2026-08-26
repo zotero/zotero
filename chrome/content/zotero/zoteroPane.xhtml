@@ -52,6 +52,7 @@
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
 		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
 		<html:link rel="localization" href="zotero.ftl"/>
 		<html:link rel="localization" href="reader.ftl"/>
 	</linkset>
@@ -97,7 +98,7 @@
 		
 		<!--EDIT-->
 		<command id="cmd_find"
-			oncommand="document.getElementById('zotero-tb-search-textbox').select()"/>
+			oncommand="ZoteroPane.libraryView.getElement('zotero-tb-search-textbox').select()"/>
 			
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
 		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
@@ -1089,6 +1090,101 @@
 	
 	<hbox flex="1" id="browser">
 		<vbox id="appcontent" flex="1">
+			<vbox id="zotero-banners">
+				<vbox id="post-upgrade-container" class="banner-container" collapsed="true" role="status">
+					<html:div id="post-upgrade-banner" class="banner">
+						<html:div
+								id="post-upgrade-message"
+								data-l10n-id="post-upgrade-message">
+							<html:span
+								id="post-upgrade-appver"
+								data-l10n-name="post-upgrade-appver"/>
+							<html:a
+								id="post-upgrade-new-features-link"
+								data-l10n-name="new-features-link"
+								class="link"
+								onclick="Zotero.launchURL(this.href)"
+								tabindex="0"
+							/>
+						</html:div>
+						<html:div id="post-upgrade-buttons">
+							<button
+								data-l10n-id="post-upgrade-remind-me-later"
+								oncommand="ZoteroPane.hidePostUpgradeBanner(true)"
+							/>
+							<button
+								data-l10n-id="post-upgrade-done"
+								oncommand="ZoteroPane.hidePostUpgradeBanner(false)"
+								default="true"
+							/>
+						</html:div>
+					</html:div>
+				</vbox>
+				
+				<vbox id="sync-reminder-container" class="banner-container"  collapsed="true" role="status">
+					<html:div id="sync-reminder-banner" class="banner">
+						<html:div id="sync-reminder-message" class="message"/>
+						<html:a id="sync-reminder-action" class="link"/>
+						<html:a id="sync-reminder-learn-more" class="link"/>
+						<html:div class="spacer"/>
+						<html:a id="sync-reminder-disable" class="link"/>
+						<html:a id="sync-reminder-remind" class="link"/>
+						<html:div role="button" id="sync-reminder-close" class="close-btn" data-l10n-id="banner-close-button">
+							<html:span class="icon" />
+						</html:div>
+					</html:div>
+				</vbox>
+				
+				<vbox id="mac-word-plugin-install-container" class="banner-container" collapsed="true" role="status">
+					<html:div id="mac-word-plugin-install-banner" class="banner">
+						<html:div class="message" data-l10n-id="mac-word-plugin-install-message" />
+						<button
+							id="mac-word-plugin-install-action"
+							data-l10n-id="mac-word-plugin-install-action-button"
+							default="true"/>
+						<html:div class="spacer" />
+						<button
+							id="mac-word-plugin-install-remind-later"
+							data-l10n-id="mac-word-plugin-install-remind-later-button"/>
+						<!-- TODO: Use ftl string -->
+						<button
+							id="mac-word-plugin-install-dont-ask-again"/>
+					</html:div>
+				</vbox>
+				
+				<vbox id="retracted-items-container" class="banner-container" collapsed="true" role="status">
+					<html:div id="retracted-items-banner" class="banner">
+						<html:div id="retracted-items-message" class="message"/>
+						<label is="text-link" id="retracted-items-link"/>
+						<html:div role="button" id="retracted-items-close" class="close-btn" data-l10n-id="banner-close-button">
+							<html:span class="icon" />
+						</html:div>
+					</html:div>
+				</vbox>
+				
+				<vbox id="architecture-warning-container" class="banner-container" collapsed="true" role="status">
+					<html:div id="architecture-warning-banner" class="banner">
+						<html:div id="architecture-warning-message" class="message" data-l10n-id="architecture-win32-warning-message" />
+						<html:a id="architecture-warning-action" data-l10n-id="architecture-warning-action" class="link" />
+						<html:div class="spacer" />
+						<label is="text-link" id="architecture-warning-remind" data-l10n-id="general-remind-me-later" />
+						<html:div role="button" id="architecture-warning-close" class="close-btn" data-l10n-id="banner-close-button">
+							<html:span class="icon" />
+						</html:div>
+					</html:div>
+				</vbox>
+				
+				<vbox id="file-renaming-banner-container" class="banner-container" collapsed="true" role="status">
+					<html:div id="file-renaming-banner" class="banner">
+						<html:div id="file-renaming-message" class="message" data-l10n-id="file-renaming-banner-message" />
+						<html:a id="file-renaming-documentation-link" data-l10n-id="file-renaming-banner-documentation-link" class="link" />
+						<html:div class="spacer" />
+						<html:div role="button" id="file-renaming-banner-close" class="close-btn" data-l10n-id="banner-close-button">
+							<html:span class="icon" />
+						</html:div>
+					</html:div>
+				</vbox>
+			</vbox>
 			<stack id="zotero-pane-stack" flex="1">
 				<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
 				<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
@@ -1102,287 +1198,7 @@
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
 							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
-							
-							<vbox id="post-upgrade-container" class="banner-container" collapsed="true" role="status">
-								<html:div id="post-upgrade-banner" class="banner">
-									<html:div
-											id="post-upgrade-message"
-											data-l10n-id="post-upgrade-message">
-										<html:span
-											id="post-upgrade-appver"
-											data-l10n-name="post-upgrade-appver"/>
-										<html:a
-											id="post-upgrade-new-features-link"
-											data-l10n-name="new-features-link"
-											class="link"
-											onclick="Zotero.launchURL(this.href)"
-											tabindex="0"
-										/>
-									</html:div>
-									<html:div id="post-upgrade-buttons">
-										<button
-											data-l10n-id="post-upgrade-remind-me-later"
-											oncommand="ZoteroPane.hidePostUpgradeBanner(true)"
-										/>
-										<button
-											data-l10n-id="post-upgrade-done"
-											oncommand="ZoteroPane.hidePostUpgradeBanner(false)"
-											default="true"
-										/>
-									</html:div>
-								</html:div>
-							</vbox>
-
-							<vbox id="sync-reminder-container" class="banner-container"  collapsed="true" role="status">
-								<html:div id="sync-reminder-banner" class="banner">
-									<html:div id="sync-reminder-message" class="message"/>
-									<html:a id="sync-reminder-action" class="link"/>
-									<html:a id="sync-reminder-learn-more" class="link"/>
-									<html:div class="spacer"/>
-									<html:a id="sync-reminder-disable" class="link"/>
-									<html:a id="sync-reminder-remind" class="link"/>
-									<html:div role="button" id="sync-reminder-close" class="close-btn" data-l10n-id="banner-close-button">
-										<html:span class="icon" />
-									</html:div>
-								</html:div>
-							</vbox>
-							
-							<vbox id="mac-word-plugin-install-container" class="banner-container" collapsed="true" role="status">
-								<html:div id="mac-word-plugin-install-banner" class="banner">
-									<html:div class="message" data-l10n-id="mac-word-plugin-install-message" />
-									<button
-										id="mac-word-plugin-install-action"
-										data-l10n-id="mac-word-plugin-install-action-button"
-										default="true"/>
-									<html:div class="spacer" />
-									<button
-										id="mac-word-plugin-install-remind-later"
-										data-l10n-id="mac-word-plugin-install-remind-later-button"/>
-									<!-- TODO: Use ftl string -->
-									<button
-										id="mac-word-plugin-install-dont-ask-again"/>
-								</html:div>
-							</vbox>
-							
-							<vbox id="retracted-items-container" class="banner-container" collapsed="true" role="status">
-								<html:div id="retracted-items-banner" class="banner">
-									<html:div id="retracted-items-message" class="message"/>
-									<label is="text-link" id="retracted-items-link"/>
-									<html:div role="button" id="retracted-items-close" class="close-btn" data-l10n-id="banner-close-button">
-										<html:span class="icon" />
-									</html:div>
-								</html:div>
-							</vbox>
-
-							<vbox id="architecture-warning-container" class="banner-container" collapsed="true" role="status">
-								<html:div id="architecture-warning-banner" class="banner">
-									<html:div id="architecture-warning-message" class="message" data-l10n-id="architecture-win32-warning-message" />
-									<html:a id="architecture-warning-action" data-l10n-id="architecture-warning-action" class="link" />
-									<html:div class="spacer" />
-									<label is="text-link" id="architecture-warning-remind" data-l10n-id="general-remind-me-later" />
-									<html:div role="button" id="architecture-warning-close" class="close-btn" data-l10n-id="banner-close-button">
-										<html:span class="icon" />
-									</html:div>
-								</html:div>
-							</vbox>
-
-							<vbox id="file-renaming-banner-container" class="banner-container" collapsed="true" role="status">
-								<html:div id="file-renaming-banner" class="banner">
-									<html:div id="file-renaming-message" class="message" data-l10n-id="file-renaming-banner-message" />
-									<html:a id="file-renaming-documentation-link" data-l10n-id="file-renaming-banner-documentation-link" class="link" />
-									<html:div class="spacer" />
-									<html:div role="button" id="file-renaming-banner-close" class="close-btn" data-l10n-id="banner-close-button">
-										<html:span class="icon" />
-									</html:div>
-								</html:div>
-							</vbox>
-							
-							<hbox id="zotero-trees" flex="1">
-								<vbox id="zotero-collections-pane" zotero-persist="width">
-									<toolbar id="zotero-toolbar-collection-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
-										<hbox id="zotero-collections-toolbar" align="center">
-											<toolbarbutton id="zotero-tb-collection-add" tabindex="-1" class="zotero-tb-button" data-l10n-id="toolbar-new-collection" command="cmd_zotero_newCollection"/>
-											<spacer flex="1"></spacer>
-											<html:div style="display: flex;flex-direction: row; flex-grow: 0; flex-shrink: 1; min-width: 0;">
-												<toolbarbutton id="zotero-tb-collections-search" data-l10n-id="zotero-collections-search-btn" tabindex="-1" class="zotero-tb-button"/>
-												<search-textbox
-													id="zotero-collections-search" class="hidden" disabled="true"
-													data-l10n-id="zotero-collections-search"
-													data-l10n-attrs="placeholder"
-													oncommand="ZoteroPane.handleCollectionSearchInput()"/>
-											</html:div>
-										</hbox>									
-									</toolbar>
-									<!-- This is used for positioning the sync error icon panel
-											under specific tree cells, which don't exist as
-											elements on their own -->
-									<box id="zotero-collections-tree-shim"/>
-									<!-- This extra vbox prevents the toolbar from getting compressed when resizing
-											the tag selector to max height -->
-									<vbox id="zotero-collections-tree-container" class="virtualized-table-container" flex="1" clickthrough="never">
-										<html:div id="zotero-collections-tree"></html:div>
-									</vbox>
-									<splitter
-										id="zotero-tags-splitter"
-										orient="vertical"
-										collapse="after"
-										zotero-persist="state"
-										onmousemove="if (this.getAttribute('state') == 'dragging') { ZoteroPane.handleTagSelectorResize(); }"
-									>
-										<grippy oncommand="ZoteroPane.toggleTagSelector()"/>
-									</splitter>
-									<!-- 'collapsed' is no longer necessary here due to the persisted 'state' on
-										 zotero-tags-splitter, but without this an old-style entry for 'collapsed'
-										 in localstore.rdf can cause the pane to always be closed on Zotero open.
-										 
-										 TODO: deal with this some other way?
-									-->
-									<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed" clickthrough="never">
-										<html:div id="zotero-tag-selector" label="&tagSelector.label;"/>
-									</vbox>
-								</vbox>
-								
-								<splitter id="zotero-collections-splitter" resizebefore="closest" resizeafter="closest" collapse="before"
-									zotero-persist="state"
-									onmousemove="document.getElementById('zotero-items-toolbar').setAttribute('state', this.getAttribute('state'));ZoteroPane_Local.updateLayoutConstraints();"
-									oncommand="ZoteroPane_Local.updateLayoutConstraints()">
-									<grippy id="zotero-collections-grippy"/>
-								</splitter>
-								
-								<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient">
-									<vbox id="zotero-items-pane-container">
-										<toolbar id="zotero-toolbar-item-tree" tabindex="-1" class="zotero-toolbar toolbar toolbar-primary">
-											<hbox id="zotero-items-toolbar" align="center" flex="1">
-												<toolbarbutton
-														id="zotero-tb-add"
-														class="zotero-tb-button"
-														tabindex="-1"
-														tooltiptext="&zotero.toolbar.newItem.label;"
-														type="menu"
-														wantdropmarker="true"
-														onmousedown="if (this.disabled) { event.preventDefault(); return; }">
-													<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()"></menupopup>
-												</toolbarbutton>
-												
-												<toolbarbutton
-													id="zotero-tb-lookup"
-													tabindex="-1"
-													class="zotero-tb-button"
-													tooltiptext="&zotero.toolbar.lookup.label;"
-													type="panel"
-													onmousedown="Zotero_Lookup.handleToolbarButtonMouseDown(event)"
-												/>
-												
-												<panel id="zotero-lookup-panel" type="arrow" animate="false"
-														noautohide="true"
-														onpopupshown="Zotero_Lookup.onShown(event)"
-														onpopuphidden="Zotero_Lookup.onHidden(event)"
-														onfocusout="Zotero_Lookup.onFocusOut(event)"
-												>
-													<vbox>
-														<label control="zotero-lookup-textbox">&zotero.lookup.description;</label>
-														<vbox id="zotero-lookup-multiline">
-															<html:textarea
-																id="zotero-lookup-textbox"
-																onkeypress="Zotero_Lookup.onKeyPress(event, this)"
-																oninput="Zotero_Lookup.onInput(event, this)"
-																oncontextmenu="Zotero_Lookup.onContextMenu(event, this)"
-																rows="1"
-																wrap="off"/>
-															<hbox id="zotero-lookup-buttons" align="start" hidden="true">
-																<button
-																	align="start"
-																	oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-textbox'))"
-																	label="&zotero.lookup.button.search;"/>
-																<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="flex: 1"/>
-															</hbox>
-														</vbox>
-													</vbox>
-												</panel>
-												
-												<toolbarbutton
-														id="zotero-tb-attachment-add"
-														class="zotero-tb-button"
-														tabindex="-1"
-														data-l10n-id="toolbar-add-attachment"
-														type="menu"
-														wantdropmarker="true">
-													<menupopup onpopupshowing="ZoteroPane.updateAddAttachmentMenu(event, this)">
-														<menuitem
-															data-l10n-id="menu-add-standalone-file-attachment"
-															command="cmd_zotero_newStandaloneFileAttachment"
-														/>
-														<menuitem
-															data-l10n-id="menu-add-standalone-linked-file-attachment"
-															command="cmd_zotero_newStandaloneLinkedFileAttachment"
-														/>
-														<menuseparator/>
-														<menuitem
-															data-l10n-id="menu-add-child-file-attachment"
-															command="cmd_zotero_newChildFileAttachment"
-														/>
-														<menuitem
-															data-l10n-id="menu-add-child-linked-file-attachment"
-															command="cmd_zotero_newChildLinkedFileAttachment"
-															id="zotero-tb-attachment-add-file-link"
-														/>
-														<menuitem
-															data-l10n-id="menu-add-child-linked-url-attachment"
-															command="cmd_zotero_newChildURLAttachment"
-														/>
-													</menupopup>
-												</toolbarbutton>
-												<toolbarbutton
-														id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
-														type="menu"
-														tabindex="-1"
-														wantdropmarker="true">
-													<menupopup onpopupshowing="ZoteroPane.updateNewNoteMenu(event, this)">
-														<menuitem
-															data-l10n-id="menu-new-standalone-note"
-															command="cmd_zotero_newStandaloneNote"
-														/>
-														<menuitem
-															data-l10n-id="menu-new-item-note"
-															command="cmd_zotero_newChildNote"
-														/>
-													</menupopup>
-												</toolbarbutton>
-												
-												<spacer flex="1"/>
-												<image id="zotero-tb-search-spinner" class="zotero-spinner-16"/>
-												<quick-search-textbox id="zotero-tb-search" timeout="250"
-														onkeydown="ZoteroPane_Local.handleSearchKeypress(this, event)"
-														oncommand="ZoteroPane_Local.search()"/>
-												
-												<!-- Stacked mode only: Toggle Item Pane button -->
-												<toolbarbutton
-													id="zotero-tb-toggle-item-pane-stacked"
-													class="zotero-tb-button"
-													tabindex="-1"
-													data-l10n-id="toggle-item-pane"
-													oncommand="ZoteroPane.toggleItemPane()"
-												/>
-											</hbox>
-											
-										</toolbar>
-										<advanced-search-deck id="zotero-advanced-search-pane-deck"/>
-										<hbox id="zotero-items-pane" class="virtualized-table-container" flex="1" clickthrough="never">
-											<html:div id="zotero-items-tree"></html:div>
-										</hbox>
-									</vbox>
-									
-				
-									<splitter id="zotero-items-splitter" resizebefore="closest" resizeafter="closest" collapse="after" orient="horizontal" zotero-persist="state orient"
-										onmousemove="ZoteroPane.updateLayoutConstraints()"
-										oncommand="ZoteroPane.updateLayoutConstraints()">
-										<grippy id="zotero-items-grippy"/>
-									</splitter>
-				
-									<!-- itemPane.xul -->
-									<item-pane id="zotero-item-pane" zotero-persist="width height"/>
-								</box>
-							</hbox>
+							<library-view/>
 						</tab-content>
 					</deck>
 		

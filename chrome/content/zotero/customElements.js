@@ -45,6 +45,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['info-box', 'chrome://zotero/content/elements/itemBox.js'],
 		['item-details', 'chrome://zotero/content/elements/itemDetails.js'],
 		['item-pane', 'chrome://zotero/content/elements/itemPane.js'],
+		['library-view', 'chrome://zotero/content/elements/libraryView.js'],
 		['item-message-pane', 'chrome://zotero/content/elements/itemMessagePane.js'],
 		['merge-group', 'chrome://zotero/content/elements/mergeGroup.js'],
 		['menulist-item-types', 'chrome://zotero/content/elements/menulistItemTypes.js'],

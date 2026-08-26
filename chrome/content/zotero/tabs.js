@@ -130,12 +130,13 @@ var Zotero_Tabs = new function () {
 		},
 		focusFirst: {
 			library: async () => {
-				let collectionsPane = document.getElementById("zotero-collections-pane");
+				let libraryView = ZoteroPane.libraryView;
+				let collectionsPane = libraryView.getElement("zotero-collections-pane");
 				if (collectionsPane.hasAttribute("collapsed")) {
-					document.getElementById('zotero-tb-add').focus();
+					libraryView.getElement('zotero-tb-add').focus();
 					return;
 				}
-				document.getElementById('zotero-tb-collection-add').focus();
+				libraryView.getElement('zotero-tb-collection-add').focus();
 			},
 			reader: async (tab) => {
 				let reader = Zotero.Reader.getByTabID(tab.id);
@@ -1398,7 +1399,7 @@ var Zotero_Tabs = new function () {
 				Services.focus.MOVEFOCUS_FORWARD, 0);
 			return;
 		}
-		let itemSideNav = document.getElementById("zotero-view-item-sidenav");
+		let itemSideNav = ZoteroPane.libraryView.getElement("zotero-view-item-sidenav");
 		if (itemSideNav.hidden) {
 			// If sidenav is hidden, focus the last focusable element of item pane
 			Services.focus.moveFocus(window, document.getElementById("zotero-context-splitter"),
@@ -1406,7 +1407,7 @@ var Zotero_Tabs = new function () {
 		}
 		else {
 			// Focus the first focusable button of item pane sidenav
-			Services.focus.moveFocus(window, document.getElementById("zotero-view-item-sidenav"),
+			Services.focus.moveFocus(window, itemSideNav,
 				Services.focus.MOVEFOCUS_FORWARD, 0);
 		}
 	};

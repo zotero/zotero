@@ -2078,7 +2078,8 @@ describe("Zotero.CollectionTree", function () {
 			// Display the collection search bar
 			win.document.getElementById("zotero-tb-collections-search").click();
 			// Do not hide the search panel on blur
-			win.document.getElementById("zotero-collections-search").removeEventListener('blur', zp.hideCollectionSearch);
+			win.document.getElementById("zotero-collections-search")
+				.removeEventListener('blur', zp.libraryView.handleCollectionSearchBlur);
 
 			feed1 = await createFeed({ name: "feed_1 " });
 			feed2 = await createFeed({ name: "feed_2" });

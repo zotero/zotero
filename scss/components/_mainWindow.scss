@@ -25,11 +25,17 @@
 	flex-direction: column;
 }
 
+library-view {
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+}
+
 #zotero-pane-stack > hbox {
 	// Let window chrome, tabs, and toolbar shrink even when sidebars overflow
 	min-width: 0;
 }
-#browser, #zotero-pane-stack, #zotero-trees {
+#browser, #zotero-pane-stack, :is(#zotero-trees, .zotero-trees) {
 	min-height: 0;
 }
 
@@ -59,7 +65,7 @@
 	margin-top: 4px;
 }
 
-#zotero-layout-switcher {
+:is(#zotero-layout-switcher, .zotero-layout-switcher) {
 	flex-grow: 1;
 	flex-shrink: 1;
 	min-width: 0;
@@ -71,12 +77,12 @@
 		properties, and if we remove them, the splitter breaks. So we override
 		them here with !important.
 	*/
-	&[orient="horizontal"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	&[orient="horizontal"] :is(#zotero-items-pane-container, .zotero-items-pane-container, #zotero-item-pane, .zotero-item-pane) {
 		height: auto !important;
 	}
 
 	&[orient="vertical"],
-	&[orient="vertical"] :is(#zotero-items-pane-container, #zotero-item-pane) {
+	&[orient="vertical"] :is(#zotero-items-pane-container, .zotero-items-pane-container, #zotero-item-pane, .zotero-item-pane) {
 		width: -moz-available !important;
 		/* min-width: 0 is required here to allow the pane to shrink in Stacked view,
 		   but the child #zotero-items-pane sets a larger min-width, and the splitter

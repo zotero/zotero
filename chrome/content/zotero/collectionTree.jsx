@@ -2980,7 +2980,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param {Bool} focusTree - Focus the collection tree after the filtering is complete
 	 */
 	async setFilter(filterText, focusTree = false) {
-		let collectionTable = document.getElementById("collection-tree").firstElementChild;
+		let collectionTable = this.domEl.querySelector(`#${this.id}`).firstElementChild;
 		let isEmpty = this._isFilterEmpty();
 		let willBeEmpty = filterText.length == 0;
 		this._filter = Zotero.Utilities.Internal.normalizeForSearch(filterText);
@@ -3096,14 +3096,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	clearFilter() {
+		let libraryView = this.domEl.closest('library-view');
+		let collectionsSearchField = libraryView.getElement('zotero-collections-search');
 		// Clear the search field
 		if (collectionsSearchField.value.length) {
 			collectionsSearchField.value = '';
-			ZoteroPane.handleCollectionSearchInput();
+			libraryView.handleCollectionSearchInput();
 			return null;
 		}
 		// If the search field is empty, focus the collection tree
-		return document.getElementById('collection-tree');
+		return libraryView.getElement(this.id);
 	}
 
 	/**
