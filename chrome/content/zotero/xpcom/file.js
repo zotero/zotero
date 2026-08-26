@@ -1410,7 +1410,7 @@ Zotero.File = new function () {
 	//
 	// @param {String} sourcePath - The file to create a symlink to
 	// @param {String} targetPath - The location of the symlink to create
-	// @return {Promise<Boolean>} - True if successfully created, false otherwise
+	// @return {Boolean} - True if successfully created, false otherwise
 	this.createSymlink = function (sourcePath, targetPath) {
 		const { ctypes } = ChromeUtils.importESModule(
 			"resource://gre/modules/ctypes.sys.mjs"
@@ -1418,7 +1418,7 @@ Zotero.File = new function () {
 		
 		try {
 			const libc = ctypes.open(
-				Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so"
+				Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so.6"
 			);
 			
 			const symlink = libc.declare(

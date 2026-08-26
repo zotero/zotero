@@ -1216,8 +1216,7 @@ describe("Zotero.DB", function () {
 			await db.closeDatabase(true);
 			await IOUtils.move(targetPath + '.copy', targetPath);
 			await IOUtils.move(targetPath + '.copy-wal', targetPath + '-wal');
-			await Zotero.Utilities.Internal.subprocess('/bin/ln', ['-s', targetPath, linkPath]);
-			if (!(await IOUtils.exists(linkPath))) {
+			if (!Zotero.File.createSymlink(targetPath, linkPath)) {
 				// Filesystem doesn't support symlinks (e.g., CIFS)
 				this.skip();
 			}
