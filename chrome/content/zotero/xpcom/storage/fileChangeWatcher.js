@@ -98,6 +98,11 @@ Zotero.Sync.Storage.FileChangeWatcher = {
 		let initFn;
 		let backendName;
 		if (Zotero.isMac) {
+			if (!this._storageRootIsLocalVolume()) {
+				Zotero.debug("FileChangeWatcher: Storage directory isn't on a local volume "
+					+ "-- falling back to scanning");
+				return;
+			}
 			initFn = '_initFSEvents';
 			backendName = 'fsevents';
 		}

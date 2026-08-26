@@ -55,6 +55,14 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			assert.ok(watcher._storageRoot, "Storage root should be set");
 		});
 
+		it("should identify the volume the storage directory is on", function () {
+			watcher.init();
+			// Also covers the statfs() struct layout the local-volume check reads
+			var info = watcher._statfsStorageRoot();
+			assert.match(info.fsTypeName, /^[a-z0-9]+$/);
+			assert.isTrue(watcher._storageRootIsLocalVolume());
+		});
+		
 		it("should return null on first call with no saved event ID", function () {
 			watcher.init();
 			let result = watcher.getChangedItemKeys();
