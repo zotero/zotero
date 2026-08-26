@@ -278,6 +278,149 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
+		it("should download a file marked for download even with no remote storage changes", async function () {
+			var { engine, client, caller } = await setup();
+			
+			// A file that went missing locally is marked for download without any remote
+			// storage change, so the storage version matching the library version isn't a
+			// reason to skip the download
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			library.storageVersion = 5;
+			await library.saveTx();
+			
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var mtime = "1441252524905";
+			var md5 = Zotero.Utilities.Internal.md5(text)
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			server.respondWith(function (req) {
+				if (req.method == "GET"
+						&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": mtime,
+						"Zotero-File-MD5": md5,
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + s3Path,
+					}, "");
+				}
+			});
+			httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+			var result = await engine.start();
+			
+			assert.isTrue(result.localChanges);
+			var contents = await Zotero.File.getContentsAsync(await item.getFilePathAsync());
+			assert.equal(contents, text);
+		})
+		
+		it("should download a file marked for upload that's missing locally", async function () {
+			var { engine, client, caller } = await setup();
+			
+			// Model a platform with a live file-change watcher that has already scanned the
+			// library, where the local file scan that marks missing files for download is skipped
+			var watcher = Zotero.Sync.Storage.FileChangeWatcher;
+			var available = watcher.available;
+			watcher.available = true;
+			var stub = sinon.stub(watcher, 'needsFullScan').returns(false);
+			
+			try {
+				var library = Zotero.Libraries.userLibrary;
+				library.libraryVersion = 5;
+				library.storageVersion = 5;
+				await library.saveTx();
+				
+				var item = new Zotero.Item("attachment");
+				item.attachmentLinkMode = 'imported_file';
+				item.attachmentPath = 'storage:test.txt';
+				var text = Zotero.Utilities.randomString();
+				item.attachmentSyncState = "to_upload";
+				await item.saveTx();
+				
+				var mtime = "1441252524905";
+				var md5 = Zotero.Utilities.Internal.md5(text)
+				
+				var s3Path = `pretend-s3/${item.key}`;
+				server.respondWith(function (req) {
+					if (req.method == "GET"
+							&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+						req.respond(302, {
+							"Zotero-File-Modification-Time": mtime,
+							"Zotero-File-MD5": md5,
+							"Zotero-File-Compressed": "No",
+							"Location": baseURL + s3Path,
+						}, "");
+					}
+				});
+				httpd.registerPathHandler(
+					"/" + s3Path,
+					{
+						handle: function (request, response) {
+							response.setStatusLine(null, 200, "OK");
+							response.write(text);
+						}
+					}
+				);
+				
+				await engine.start();
+			}
+			finally {
+				stub.restore();
+				watcher.available = available;
+			}
+			
+			var contents = await Zotero.File.getContentsAsync(await item.getFilePathAsync());
+			assert.equal(contents, text);
+		})
+		
+		it("should only mark a file marked for upload that's missing locally in as-needed mode", async function () {
+			var { engine, client, caller } = await setup();
+			
+			var watcher = Zotero.Sync.Storage.FileChangeWatcher;
+			var available = watcher.available;
+			watcher.available = true;
+			var stub = sinon.stub(watcher, 'needsFullScan').returns(false);
+			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
+			
+			try {
+				var library = Zotero.Libraries.userLibrary;
+				library.libraryVersion = 5;
+				await library.saveTx();
+				
+				var item = new Zotero.Item("attachment");
+				item.attachmentLinkMode = 'imported_file';
+				item.attachmentPath = 'storage:test.txt';
+				item.attachmentSyncState = "to_upload";
+				await item.saveTx();
+				
+				await engine.start();
+			}
+			finally {
+				Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
+				stub.restore();
+				watcher.available = available;
+			}
+			
+			assert.isFalse(await item.fileExists());
+			assert.equal(
+				item.attachmentSyncState,
+				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+			);
+		})
+		
 		it("should notify when file is downloaded", async function () {
 			var { engine, client, caller } = await setup();
 			
