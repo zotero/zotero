@@ -166,8 +166,12 @@ describe("Zotero.SearchQuery", function () {
 				"year is 1970-2000",
 				"year:1970..2000",
 				"year:1970 to 2000",
+				"year from 1970 to 2000",
 				"year:1970 - 2000",
-				"year:1970–2000"
+				"year:1970–2000",
+				// A whole range reads as one word too, for a locale that
+				// doesn't put spaces between its words
+				"year:1970to2000"
 			];
 			for (let query of queries) {
 				assert.deepEqual(clauses(query), [years], query);

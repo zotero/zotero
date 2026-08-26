@@ -1022,6 +1022,26 @@ search-query-keyword-no-tags = no tags
 search-query-keyword-has-tags = has tags
 search-query-keyword-no-attachments = no attachments
 search-query-keyword-has-attachments = has attachments
+# Words that join conditions typed in the search box, as in "tag:foo or
+# tag:bar", and that go before a condition to find items with or without
+# something, as in "no doi". Each is a comma-separated list of single words.
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+# Units of time that can be typed after a number, as in "added in the last 3
+# days". Each is a comma-separated list; include every form someone would type.
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+# Ways to type a range of dates or numbers in the search box, given as examples
+# with the two ends of the range filled in. Translate each example the way the
+# range is said, leaving the numbers where they belong in that phrasing.
+# Comma-separated, and each phrasing has to keep its own words: a range opened
+# with one word can't be finished with another one's.
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Tag
 search-conditions-numTags = # of Tags
 search-conditions-numNotes = # of Notes

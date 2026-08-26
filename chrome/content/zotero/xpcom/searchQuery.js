@@ -171,6 +171,10 @@ Zotero.SearchQuery = new function () {
 	// empty" wins over "is not" and "is". A comparison also reads with an
 	// extra "is" ("year is before 2020"), which only a condition that
 	// compares takes that way -- `title is before` matches the word.
+	//
+	// These are the English forms, which keep working in every locale so that
+	// a query written anywhere can be read anywhere. Each operator can also be
+	// written the way the Advanced Search shows it, which is localized.
 	const OPERATOR_WORDS = {
 		'is': 'is',
 		'is not': 'isNot',
@@ -185,12 +189,6 @@ Zotero.SearchQuery = new function () {
 		'after': 'isAfter',
 		'is after': 'isAfter',
 		'since': 'isAfter',
-		// A range, which isn't a condition's own operator but the pair of
-		// comparisons that bracket it
-		'between': 'isBetween',
-		'is between': 'isBetween',
-		'not between': 'isNotBetween',
-		'is not between': 'isNotBetween',
 		'in the last': 'isInTheLast',
 		'is in the last': 'isInTheLast',
 		'within the last': 'isInTheLast',
@@ -210,6 +208,12 @@ Zotero.SearchQuery = new function () {
 	// Operators that come before a condition instead of after it, reading
 	// the way they're said: `no doi`, `has doi`
 	const PREFIX_OPERATORS = { no: 'isEmpty', has: 'isNotEmpty' };
+
+	// The same as a locale says them, each message a comma-separated list
+	const PREFIX_OPERATOR_KEYWORDS = {
+		'search-query-keyword-no': 'isEmpty',
+		'search-query-keyword-has': 'isNotEmpty'
+	};
 
 	// Things an item can have some or none of, which the prefix operators
 	// test as counts: `no annotation` means no annotations at all, not an
@@ -255,12 +259,36 @@ Zotero.SearchQuery = new function () {
 
 	const JOIN_WORDS = { and: 'all', or: 'any' };
 
+	const JOIN_KEYWORDS = {
+		'search-query-keyword-and': 'all',
+		'search-query-keyword-or': 'any'
+	};
+
 	const QUOTES = ['"', "'", '“', '‘'];
 	const CLOSING_QUOTES = { '"': '"', "'": "'", '“': '”', '‘': '’' };
 
-	// "3 days", "2 weeks" -- the value an isInTheLast condition stores. Weeks
-	// are counted in days, which is what the date comparison understands.
-	const DURATION_RE = /^(\d+)\s*(day|week|month|year)s?\b/i;
+	// "3 days", "2 weeks" -- the value an isInTheLast condition stores, where
+	// each unit is written as the date comparison understands it. Weeks are
+	// counted in days, which is one of the units it has.
+	const DURATION_UNITS = {
+		day: 'day',
+		days: 'day',
+		week: 'week',
+		weeks: 'week',
+		month: 'month',
+		months: 'month',
+		year: 'year',
+		years: 'year'
+	};
+
+	// The same as a locale says them, each message a comma-separated list of
+	// every form someone would type
+	const DURATION_KEYWORDS = {
+		'search-query-keyword-days': 'day',
+		'search-query-keyword-weeks': 'week',
+		'search-query-keyword-months': 'month',
+		'search-query-keyword-years': 'year'
+	};
 
 	// The range operators, and whether each one excludes the range
 	const RANGE_OPERATORS = { isBetween: false, isNotBetween: true };
@@ -276,12 +304,37 @@ Zotero.SearchQuery = new function () {
 	const RANGE_DOTS_RE = /^([^.]+)\.\.([^.]+)$/;
 	const RANGE_YEARS_RE = /^(\d{4})[-\u2013\u2014](\d{4})$/;
 
-	// What separates the ends when they're written apart. Each word goes with
-	// the form it belongs to, so `between 1970 and 2000` and `1970 to 2000`
-	// each read only as they're said, while the marks fit either. `and` is a
-	// separator only after `between`, where it can't be joining clauses.
-	const RANGE_SEPARATOR_RE = /^\s*(?:\.\.|[-\u2013\u2014]|to\b)\s*/i;
-	const RANGE_BETWEEN_SEPARATOR_RE = /^\s*(?:\.\.|[-\u2013\u2014]|and\b)\s*/i;
+	// Punctuation between the ends, which reads the same in every locale
+	const RANGE_MARKS_RE = /^\s*(?:\.\.|[-\u2013\u2014])\s*/;
+
+	// The ways a range is written, each an example with its two ends filled
+	// in: whatever comes before the first end opens the range, whatever comes
+	// between the ends separates them, and whatever follows the second end
+	// closes it. Written this way, each form keeps its own words together, so
+	// `between 1970 and 2000` and `1970 to 2000` each read only as they're
+	// said, and `and` separates ends only where it can't be joining clauses.
+	const RANGE_FORMS = {
+		isBetween: [
+			'between 2020 and 2025',
+			'is between 2020 and 2025',
+			'from 2020 to 2025',
+			'2020 to 2025'
+		],
+		isNotBetween: [
+			'not between 2020 and 2025',
+			'is not between 2020 and 2025'
+		]
+	};
+
+	// The same as a locale says them, each message a comma-separated list
+	const RANGE_KEYWORDS = {
+		'search-query-keyword-range': 'isBetween',
+		'search-query-keyword-range-excluded': 'isNotBetween'
+	};
+
+	// An example's two ends, which are numbers in whatever digits the locale
+	// writes them in, and the words around them
+	const RANGE_FORM_RE = /^(.*?)\p{Nd}+(.*?)\p{Nd}+(.*)$/u;
 
 	// How a condition that compares reads a range: a date brackets with before
 	// and after, a count with less than and greater than. `key` orders two
@@ -303,8 +356,14 @@ Zotero.SearchQuery = new function () {
 	};
 
 	var _fields = null;
+	var _operators = null;
+	var _prefixOperators = null;
+	var _joinWords = null;
+	var _durationUnits = null;
+	var _rangeForms = null;
 	var _fieldPhrases = null;
 	var _operatorPhrases = null;
+	var _durationPhrases = null;
 	var _prefixOperatorPhrases = null;
 	var _prefixCountPhrases = null;
 	var _countPhrases = null;
@@ -313,6 +372,161 @@ Zotero.SearchQuery = new function () {
 	var _values = {};
 	var _valuePhrases = {};
 	var _operatorRE = null;
+
+	// The words a locale offers for something, from a message that lists them
+	// separated by commas
+	function _localizedWords(l10nID) {
+		let translated;
+		try {
+			translated = Zotero.ftl.formatValueSync(l10nID);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return (translated || '').split(',')
+			.map(word => word.trim().toLowerCase().replace(/\s+/g, ' '))
+			.filter(Boolean);
+	}
+
+	// An operator as the Advanced Search shows it, which every locale
+	// translates
+	function _localizedOperator(operatorName) {
+		try {
+			// The two operators that take no value are in Fluent; the rest are
+			// still in the properties file
+			return UNARY.has(operatorName)
+				? Zotero.ftl.formatValueSync('search-operator-' + operatorName)
+				: Zotero.getString('searchOperator.' + operatorName);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	}
+
+	// Every operator, by the English forms above, by the way the Advanced
+	// Search shows it, and -- for a range -- by the word each form opens with
+	function _getOperators() {
+		if (_operators) {
+			return _operators;
+		}
+		_operators = { ...OPERATOR_WORDS };
+		let add = (name, operatorName) => {
+			let key = (name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+			// A word that already means something else here keeps its meaning
+			if (key && !_operators[key]) {
+				_operators[key] = operatorName;
+			}
+		};
+		for (let operatorName of new Set(Object.values(OPERATOR_WORDS))) {
+			add(_localizedOperator(operatorName), operatorName);
+		}
+		for (let [opener, { operator }] of Object.entries(_getRangeForms().openers)) {
+			add(opener, operator);
+		}
+		return _operators;
+	}
+
+	function _getPrefixOperators() {
+		if (!_prefixOperators) {
+			_prefixOperators = { ...PREFIX_OPERATORS };
+			for (let [id, operatorName] of Object.entries(PREFIX_OPERATOR_KEYWORDS)) {
+				for (let word of _localizedWords(id)) {
+					if (!_prefixOperators[word]) {
+						_prefixOperators[word] = operatorName;
+					}
+				}
+			}
+		}
+		return _prefixOperators;
+	}
+
+	function _getJoinWords() {
+		if (!_joinWords) {
+			_joinWords = { ...JOIN_WORDS };
+			for (let [id, joinMode] of Object.entries(JOIN_KEYWORDS)) {
+				for (let word of _localizedWords(id)) {
+					// Clauses are joined by a single word, so a phrase can't
+					// be one
+					if (!word.includes(' ') && !_joinWords[word]) {
+						_joinWords[word] = joinMode;
+					}
+				}
+			}
+		}
+		return _joinWords;
+	}
+
+	function _getDurationUnits() {
+		if (!_durationUnits) {
+			_durationUnits = { ...DURATION_UNITS };
+			for (let [id, unit] of Object.entries(DURATION_KEYWORDS)) {
+				for (let word of _localizedWords(id)) {
+					if (!_durationUnits[word]) {
+						_durationUnits[word] = unit;
+					}
+				}
+			}
+		}
+		return _durationUnits;
+	}
+
+	// The range forms, read out of the examples they're given as: the words
+	// around each end, keyed by the word the range opens with, or listed as
+	// the forms that open with nothing and so read as a value would
+	function _getRangeForms() {
+		if (_rangeForms) {
+			return _rangeForms;
+		}
+		_rangeForms = { openers: {}, bare: [] };
+		let add = (example, operatorName) => {
+			let parts = RANGE_FORM_RE.exec(example);
+			if (!parts) {
+				// The ends are what the words are read around, so a form
+				// without them can't be read
+				Zotero.warn(`Range form '${example}' doesn't give both ends as numbers`);
+				return;
+			}
+			let [, opener, separator, trailing] = parts
+				.map(part => part.trim().toLowerCase().replace(/\s+/g, ' '));
+			// Ends with nothing between them can't be told apart
+			if (!separator) {
+				return;
+			}
+			// Not every locale puts spaces between words, so a form also reads
+			// as one word
+			let escape = words => words.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			let form = {
+				separator,
+				trailing,
+				compactRE: new RegExp('^(.+?)' + escape(separator) + '(.+?)'
+					+ escape(trailing) + '$')
+			};
+			if (opener) {
+				if (!_rangeForms.openers[opener]) {
+					_rangeForms.openers[opener] = { operator: operatorName, forms: [] };
+				}
+				_rangeForms.openers[opener].forms.push(form);
+			}
+			// A range with nothing in front of it is written where a value
+			// goes, so it reads with whatever operator the clause has, and an
+			// excluded range has to say so
+			else if (operatorName === 'isBetween') {
+				_rangeForms.bare.push(form);
+			}
+		};
+		for (let [operatorName, examples] of Object.entries(RANGE_FORMS)) {
+			for (let example of examples) {
+				add(example, operatorName);
+			}
+		}
+		for (let [id, operatorName] of Object.entries(RANGE_KEYWORDS)) {
+			for (let example of _localizedWords(id)) {
+				add(example, operatorName);
+			}
+		}
+		return _rangeForms;
+	}
 
 	// Every condition the Advanced Search offers is typeable, by its
 	// localized name and by any alias above
@@ -474,7 +688,7 @@ Zotero.SearchQuery = new function () {
 			return null;
 		}
 		let operatorName = split.operator
-			? OPERATOR_WORDS[split.operator]
+			? _getOperators()[split.operator]
 			: (field.operator || _defaultOperator(field));
 		let valueStart = split.valueStart + /^\s*/.exec(head.slice(split.valueStart))[0].length;
 		return {
@@ -503,7 +717,7 @@ Zotero.SearchQuery = new function () {
 			return _valuesFor(self, field.condition, head, start, caret, openQuote);
 		}
 		// A value not started yet ("type:book or ")
-		if (last.type === 'join' && JOIN_WORDS[last.value.toLowerCase()] === 'any'
+		if (last.type === 'join' && _getJoinWords()[last.value.toLowerCase()] === 'any'
 				&& last.end < head.length) {
 			let previous = tokens[tokens.length - 2];
 			if (previous && previous.type === 'value' && previous.field) {
@@ -516,7 +730,7 @@ Zotero.SearchQuery = new function () {
 		if (last.type === 'text' && last.end === head.length && tokens.length >= 3) {
 			let join = tokens[tokens.length - 2];
 			let previous = tokens[tokens.length - 3];
-			if (join.type === 'join' && JOIN_WORDS[join.value.toLowerCase()] === 'any'
+			if (join.type === 'join' && _getJoinWords()[join.value.toLowerCase()] === 'any'
 					&& previous.type === 'value' && previous.field) {
 				let field = self.getField(previous.field);
 				return _valuesFor(self, field.condition, head, last.start, caret, openQuote);
@@ -683,14 +897,14 @@ Zotero.SearchQuery = new function () {
 	// `no d` the `d` is a prefix target, not a new field
 	function _prefixOperatorBefore(head) {
 		if (!_prefixContextRE) {
-			let words = Object.keys(PREFIX_OPERATORS)
+			let words = Object.keys(_getPrefixOperators())
 				.sort((a, b) => b.length - a.length)
 				.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
 				.join('|');
 			_prefixContextRE = new RegExp('(?:^|[\\s(])(' + words + ')\\s+$', 'i');
 		}
 		let match = _prefixContextRE.exec(head);
-		return match ? PREFIX_OPERATORS[match[1].toLowerCase()] : null;
+		return match ? _getPrefixOperators()[match[1].toLowerCase()] : null;
 	}
 
 	// Whether the words at the end could be an operator still being typed
@@ -706,7 +920,7 @@ Zotero.SearchQuery = new function () {
 			let rest = head.slice(field.end).trim()
 				.replace(/\s+/g, ' ')
 				.toLowerCase();
-			if (rest && Object.keys(OPERATOR_WORDS)
+			if (rest && Object.keys(_getOperators())
 					.some(name => name.length > rest.length && name.startsWith(rest))) {
 				return true;
 			}
@@ -743,7 +957,7 @@ Zotero.SearchQuery = new function () {
 	// longest first so that `is not empty` doesn't read as `is`
 	function _operatorPattern() {
 		if (!_operatorRE) {
-			let operators = Object.keys(OPERATOR_WORDS)
+			let operators = Object.keys(_getOperators())
 				.sort((a, b) => b.length - a.length)
 				.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+'))
 				.join('|');
@@ -855,11 +1069,11 @@ Zotero.SearchQuery = new function () {
 			}
 
 			let { value, end, quoted } = _readWord(text, pos);
-			let isJoin = !quoted && JOIN_WORDS[value.toLowerCase()];
+			let isJoin = !quoted && _getJoinWords()[value.toLowerCase()];
 			// `tag is foo or bar` repeats the field of the clause the `or`
 			// directly follows, and the repeated value is read the same way
 			// the first one was
-			if (isJoin && JOIN_WORDS[value.toLowerCase()] === 'any') {
+			if (isJoin && _getJoinWords()[value.toLowerCase()] === 'any') {
 				let previous = tokens.filter(token => token.type !== 'space').pop();
 				let repeated = previous && previous.type === 'value' && previous.field
 					&& _readRepeatedValue(this, text, end, previous);
@@ -891,7 +1105,7 @@ Zotero.SearchQuery = new function () {
 			// 2020` compares dates while `title is before` matches a title
 			// against "before"
 			for (let match of _matchPhrases(text, afterField, _operatorPhrases)) {
-				if (_supportsOperator(definition, OPERATOR_WORDS[match.name])) {
+				if (_supportsOperator(definition, _getOperators()[match.name])) {
 					operator = match;
 					break;
 				}
@@ -910,7 +1124,7 @@ Zotero.SearchQuery = new function () {
 		}
 		let operatorName = operator.name === ':'
 			? (definition.operator || _defaultOperator(definition))
-			: OPERATOR_WORDS[operator.name];
+			: _getOperators()[operator.name];
 		if (!operatorName || !_supportsOperator(definition, operatorName)) {
 			return null;
 		}
@@ -944,7 +1158,7 @@ Zotero.SearchQuery = new function () {
 		if (/[()]/.test(text[valueStart])) {
 			return null;
 		}
-		let value = _readValue(self, text, valueStart, definition, operatorName);
+		let value = _readValue(self, text, valueStart, definition, operatorName, operator.name);
 		if (value && value.pending) {
 			// The rest of a range is still to come, so the clause is
 			// recognized but has nothing to match on yet
@@ -974,6 +1188,7 @@ Zotero.SearchQuery = new function () {
 		};
 		if (value.range) {
 			token.range = value.range;
+			token.operatorPhrase = operator.name;
 		}
 		tokens.push(token);
 		return { tokens, end: value.end };
@@ -982,23 +1197,24 @@ Zotero.SearchQuery = new function () {
 	// A value is a word, a quoted string, a duration ("3 days"), or one of the
 	// values the condition accepts, which can run to several words
 	// ("book section")
-	function _readValue(self, text, pos, definition, operatorName) {
+	function _readValue(self, text, pos, definition, operatorName, operatorPhrase) {
 		if (operatorName === 'isInTheLast') {
-			let duration = DURATION_RE.exec(text.slice(pos));
-			if (!duration) {
+			let number = /^(\d+)\s*/.exec(text.slice(pos));
+			let unit = number && _matchPhrase(text, pos + number[0].length, _durationPhrases);
+			if (!unit) {
 				return null;
 			}
-			let count = parseInt(duration[1]);
-			let unit = duration[2].toLowerCase();
-			if (unit === 'week') {
+			let count = parseInt(number[1]);
+			let name = _getDurationUnits()[unit.name];
+			if (name === 'week') {
 				count *= 7;
-				unit = 'day';
+				name = 'day';
 			}
-			return { value: count + ' ' + unit + 's', end: pos + duration[0].length };
+			return { value: count + ' ' + name + 's', end: unit.end };
 		}
 		// A range, which only a condition that compares takes, so a hyphen or
 		// a `to` stays part of the value everywhere else
-		let range = _readRange(text, pos, definition, operatorName);
+		let range = _readRange(text, pos, definition, operatorName, operatorPhrase);
 		if (range) {
 			return range;
 		}
@@ -1051,7 +1267,8 @@ Zotero.SearchQuery = new function () {
 				|| _readCountPhrase(text, valueStart)) {
 			return null;
 		}
-		let value = _readValue(self, text, valueStart, definition, previous.operator);
+		let value = _readValue(self, text, valueStart, definition, previous.operator,
+			previous.operatorPhrase);
 		if (!value || !value.value) {
 			return null;
 		}
@@ -1066,6 +1283,7 @@ Zotero.SearchQuery = new function () {
 		};
 		if (value.range) {
 			token.range = value.range;
+			token.operatorPhrase = previous.operatorPhrase;
 		}
 		return token;
 	}
@@ -1111,7 +1329,7 @@ Zotero.SearchQuery = new function () {
 		if (!target) {
 			return null;
 		}
-		let clause = _resolvePrefixClause(self, PREFIX_OPERATORS[prefix.name], target.name);
+		let clause = _resolvePrefixClause(self, _getPrefixOperators()[prefix.name], target.name);
 		if (!clause) {
 			return null;
 		}
@@ -1179,8 +1397,9 @@ Zotero.SearchQuery = new function () {
 	function _initPhrases(self) {
 		if (!_fieldPhrases) {
 			_fieldPhrases = _phrasesByLength(self.getFieldNames());
-			_operatorPhrases = _phrasesByLength(Object.keys(OPERATOR_WORDS));
-			_prefixOperatorPhrases = _phrasesByLength(Object.keys(PREFIX_OPERATORS));
+			_operatorPhrases = _phrasesByLength(Object.keys(_getOperators()));
+			_prefixOperatorPhrases = _phrasesByLength(Object.keys(_getPrefixOperators()));
+			_durationPhrases = _phrasesByLength(Object.keys(_getDurationUnits()));
 			_prefixCountPhrases = _phrasesByLength(Object.keys(PREFIX_COUNT_CONDITIONS));
 			_countPhrases = {};
 			for (let [id, clause] of Object.entries(COUNT_PHRASE_KEYWORDS)) {
@@ -1487,10 +1706,18 @@ Zotero.SearchQuery = new function () {
 	// The two ends of a range and where it ends, or null if what's written
 	// isn't one. Both ends are kept as written, along with the values just
 	// outside them, since the comparisons a range becomes are exclusive.
-	function _readRange(text, pos, definition, operatorName) {
+	function _readRange(text, pos, definition, operatorName, operatorPhrase) {
 		let kind = _rangeKind(definition);
 		let spelled = RANGE_OPERATORS.hasOwnProperty(operatorName);
 		if (!kind || (!spelled && !['is', 'isNot'].includes(operatorName))) {
+			return null;
+		}
+		// Only the forms the range was opened with, so that each one's words
+		// stay together
+		let forms = spelled
+			? _getRangeForms().openers[operatorPhrase]?.forms
+			: _getRangeForms().bare;
+		if (!forms) {
 			return null;
 		}
 		let first = _readWord(text, pos);
@@ -1504,23 +1731,32 @@ Zotero.SearchQuery = new function () {
 			: null);
 		let from, to;
 		let end = first.end;
-		let compact = RANGE_DOTS_RE.exec(first.value) || RANGE_YEARS_RE.exec(first.value);
+		let compact = RANGE_DOTS_RE.exec(first.value) || RANGE_YEARS_RE.exec(first.value)
+			|| _matchCompactForm(first.value, forms);
 		if (compact) {
 			[, from, to] = compact;
 		}
 		else {
 			from = first.value;
-			let separator = (spelled ? RANGE_BETWEEN_SEPARATOR_RE : RANGE_SEPARATOR_RE)
-				.exec(text.slice(first.end));
+			let separator = _matchRangeSeparator(text, first.end, forms);
 			if (!separator) {
 				return /^\s*$/.test(text.slice(first.end)) ? unfinished() : null;
 			}
-			let second = _readWord(text, first.end + separator[0].length);
+			let second = _readWord(text, separator.end);
 			if (!second.value || second.quoted) {
 				return second.value ? null : unfinished();
 			}
 			to = second.value;
 			end = second.end;
+			// The words the form closes with, for a locale that has any
+			if (separator.trailing) {
+				let closed = _matchWords(text, end + /^\s*/.exec(text.slice(end))[0].length,
+					separator.trailing.split(' '));
+				if (closed === -1) {
+					return end === text.length ? unfinished() : null;
+				}
+				end = closed;
+			}
 		}
 		let fromKey = kind.key(from);
 		let toKey = kind.key(to);
@@ -1537,6 +1773,48 @@ Zotero.SearchQuery = new function () {
 			value: text.slice(pos, end).trim().replace(/\s+/g, ' '),
 			end,
 			range: { from, to, below, above }
+		};
+	}
+
+	// A whole range written as one word, the way a locale that doesn't space
+	// its words writes one
+	function _matchCompactForm(word, forms) {
+		for (let form of forms) {
+			let match = form.compactRE.exec(word);
+			if (match) {
+				return match;
+			}
+		}
+		return null;
+	}
+
+	// What separates two ends: punctuation, which reads the same in every
+	// locale, or the words of one of the forms the range was opened with
+	function _matchRangeSeparator(text, pos, forms) {
+		let marks = RANGE_MARKS_RE.exec(text.slice(pos));
+		if (marks) {
+			return { end: pos + marks[0].length, trailing: '' };
+		}
+		let space = /^\s+/.exec(text.slice(pos));
+		if (!space) {
+			return null;
+		}
+		let start = pos + space[0].length;
+		let matched = null;
+		// The longest separator wins, so one that begins another doesn't take
+		// its place
+		for (let form of forms) {
+			let end = _matchWords(text, start, form.separator.split(' '));
+			if (end !== -1 && (!matched || end > matched.end)) {
+				matched = { end, trailing: form.trailing };
+			}
+		}
+		if (!matched) {
+			return null;
+		}
+		return {
+			end: matched.end + /^\s*/.exec(text.slice(matched.end))[0].length,
+			trailing: matched.trailing
 		};
 	}
 
@@ -1617,7 +1895,7 @@ Zotero.SearchQuery = new function () {
 				continue;
 			}
 			if (token.type === 'join') {
-				let joinMode = JOIN_WORDS[token.value.toLowerCase()];
+				let joinMode = _getJoinWords()[token.value.toLowerCase()];
 				if (children.length) {
 					joins[children.length] = joinMode;
 				}
