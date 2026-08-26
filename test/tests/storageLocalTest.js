@@ -146,6 +146,21 @@ describe("Zotero.Sync.Storage.Local", function () {
 			);
 			assert.strictEqual(state, local.SYNC_STATE_TO_UPLOAD);
 		});
+		
+		it("should leave an attachment with a missing file marked for download", async function () {
+			var attachment = await importFileAttachment('test.png');
+			attachment.attachmentSyncState = 'to_download';
+			await attachment.saveTx();
+			await IOUtils.remove(attachment.getFilePath());
+			
+			var local = Zotero.Sync.Storage.Local;
+			await local.resetAllSyncStates(attachment.libraryID);
+			assert.strictEqual(attachment.attachmentSyncState, local.SYNC_STATE_TO_DOWNLOAD);
+			var state = await Zotero.DB.valueQueryAsync(
+				"SELECT syncState FROM itemAttachments WHERE itemID=?", attachment.id
+			);
+			assert.strictEqual(state, local.SYNC_STATE_TO_DOWNLOAD);
+		});
 	});
 	
 	describe("#processDownload()", function () {

@@ -440,6 +440,18 @@ Zotero.Sync.Storage.Local = {
 	
 	
 	/**
+	 * Check for files already marked for download
+	 */
+	checkForPendingDownloads: async function (libraryID) {
+		var sql = "SELECT COUNT(*) FROM items JOIN itemAttachments USING (itemID) "
+			+ "WHERE libraryID=? AND syncState=?";
+		return !!((await Zotero.DB.valueQueryAsync(
+			sql, [libraryID, this.SYNC_STATE_TO_DOWNLOAD]
+		)));
+	},
+	
+	
+	/**
 	 * Get files marked as ready to download
 	 *
 	 * @param {Integer} libraryID
@@ -523,33 +535,42 @@ Zotero.Sync.Storage.Local = {
 	
 	
 	/**
-	 * Mark all stored files for upload checking
+	 * Mark all stored files for sync checking, with files that are missing locally marked for
+	 * download and the rest for upload
 	 *
-	 * This is used when switching between storage modes in the preferences so that all existing files
-	 * are uploaded via the new mode if necessary.
+	 * Used by "Reset File Sync History" and when switching between storage modes in the
+	 * preferences, so that all existing files are uploaded via the new mode if necessary.
 	 */
 	resetAllSyncStates: async function (libraryID) {
 		if (!libraryID) {
 			throw new Error("libraryID not provided");
 		}
 		
+		var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
+			+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?, ?)";
+		var params = [
+			libraryID,
+			Zotero.ItemTypes.getID('attachment'),
+			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+			Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
+		];
+		var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
+		var items = await Zotero.Items.getAsync(itemIDs);
+		
+		var toUpload = [];
+		var toDownload = [];
+		for (let item of items) {
+			((await item.fileExists()) ? toUpload : toDownload).push(item);
+		}
+		
 		return Zotero.DB.executeTransaction(async function () {
-			var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
-				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?, ?)";
-			var params = [
-				libraryID,
-				Zotero.ItemTypes.getID('attachment'),
-				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-				Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
-			];
-			var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
-			for (let itemID of itemIDs) {
-				let item = Zotero.Items.get(itemID);
-				item._attachmentSyncState = this.SYNC_STATE_TO_UPLOAD;
+			if (toUpload.length) {
+				await this.updateSyncStates(toUpload, this.SYNC_STATE_TO_UPLOAD);
 			}
-			sql = "UPDATE itemAttachments SET syncState=? WHERE itemID IN (" + sql + ")";
-			await Zotero.DB.queryAsync(sql, [this.SYNC_STATE_TO_UPLOAD].concat(params));
+			if (toDownload.length) {
+				await this.updateSyncStates(toDownload, this.SYNC_STATE_TO_DOWNLOAD);
+			}
 			
 			var library = Zotero.Libraries.get(libraryID);
 			library.storageVersion = -1;
