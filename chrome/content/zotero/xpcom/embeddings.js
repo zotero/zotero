@@ -2946,10 +2946,10 @@ Zotero.Embeddings.Indexing = new function () {
 Zotero.Embeddings.Calibration = new function () {
 	// Where the score floor goes, as a percentile of the null distribution --
 	// what this model scores between texts with nothing to do with each other
-	// (`mismatched` in measure()). At 0.99 only the top 1% of unrelated pairs
+	// (`mismatched` in measure()). At 0.999 only the top 0.1 of unrelated pairs
 	// reach it; raising it cuts more noise and more weak-but-real matches along
 	// with it, lowering it keeps both.
-	const NULL_PERCENTILE = 0.99;
+	const NULL_PERCENTILE = 0.999;
 	// Where the Relevance bar fills, as a percentile of the other distribution
 	// measure() collects -- `matched`, each query against its own passage. At
 	// 0.5 a full bar means "as good as this model's typical real match".
