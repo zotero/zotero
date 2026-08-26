@@ -144,6 +144,199 @@ describe("Zotero.SearchQuery", function () {
 		});
 	});
 
+	describe("ranges", function () {
+		// The comparisons are exclusive, so a range that takes in 1970 and
+		// 2000 is written as after 1969 and before 2001
+		let years = {
+			joinMode: 'all',
+			children: [
+				{ condition: 'date', operator: 'isAfter', value: '1969' },
+				{ condition: 'date', operator: 'isBefore', value: '2001' }
+			]
+		};
+
+		it("should read a range as the comparisons that bracket it", function () {
+			assert.deepEqual(clauses("year is between 1970 and 2000"), [years]);
+			assert.deepEqual(clauses("year between 1970 and 2000"), [years]);
+		});
+
+		it("should accept a range written without a word between the ends", function () {
+			let queries = [
+				"year:1970-2000",
+				"year is 1970-2000",
+				"year:1970..2000",
+				"year:1970 to 2000",
+				"year:1970 - 2000",
+				"year:1970–2000"
+			];
+			for (let query of queries) {
+				assert.deepEqual(clauses(query), [years], query);
+			}
+		});
+
+		it("should step a range end by however much it was written with", function () {
+			assert.deepEqual(clauses("added between 2024-02 and 2024-06"), [{
+				joinMode: 'all',
+				children: [
+					{ condition: 'dateAdded', operator: 'isAfter', value: '2024-01' },
+					{ condition: 'dateAdded', operator: 'isBefore', value: '2024-07' }
+				]
+			}]);
+			assert.deepEqual(clauses("date:2020-03-01..2020-03-15"), [{
+				joinMode: 'all',
+				children: [
+					{ condition: 'date', operator: 'isAfter', value: '2020-02-29' },
+					{ condition: 'date', operator: 'isBefore', value: '2020-03-16' }
+				]
+			}]);
+		});
+
+		it("should compare counts as numbers", function () {
+			assert.deepEqual(clauses("number of tags between 2 and 5"), [{
+				joinMode: 'all',
+				children: [
+					{ condition: 'numTags', operator: 'isGreaterThan', value: '1' },
+					{ condition: 'numTags', operator: 'isLessThan', value: '6' }
+				]
+			}]);
+		});
+
+		it("should match either end when a range is excluded", function () {
+			assert.deepEqual(clauses("year is not between 1970 and 2000"), [{
+				joinMode: 'any',
+				children: [
+					{ condition: 'date', operator: 'isBefore', value: '1970' },
+					{ condition: 'date', operator: 'isAfter', value: '2000' }
+				]
+			}]);
+		});
+
+		it("should read a value that isn't a range as a value", function () {
+			// A date of its own, a range a condition that doesn't compare
+			// can't take, a quoted value, and ends in the wrong order
+			assert.deepEqual(clauses("date:2020-01-05"), [
+				{ condition: 'date', operator: 'is', value: '2020-01-05' }
+			]);
+			assert.deepEqual(clauses("title:1970-2000"), [
+				{ condition: 'title', operator: 'contains', value: '1970-2000' }
+			]);
+			assert.deepEqual(clauses('year:"1970-2000"'), [
+				{ condition: 'date', operator: 'is', value: '1970-2000' }
+			]);
+			assert.deepEqual(clauses("year:2000-1970"), [
+				{ condition: 'date', operator: 'is', value: '2000-1970' }
+			]);
+			// `and` joins clauses, so it separates ends only after `between`
+			assert.deepEqual(clauses("year:1970 and tag:foo"), [
+				{ condition: 'date', operator: 'is', value: '1970' },
+				{ condition: 'tag', operator: 'is', value: 'foo' }
+			]);
+			// Each separator goes with the form it belongs to
+			assert.isNull(Zotero.SearchQuery.parse("year is between 1970 to 2000").tree);
+		});
+
+		it("should scope a range on a child field to one child", function () {
+			// Both ends are about the same attachment, so the level scopes the
+			// pair rather than each comparison
+			assert.deepEqual(clauses("attachment last read between 2020 and 2025"), [{
+				joinMode: 'all',
+				level: 'attachment',
+				children: [
+					{ condition: 'lastRead', operator: 'isAfter', value: '2019' },
+					{ condition: 'lastRead', operator: 'isBefore', value: '2026' }
+				]
+			}]);
+		});
+
+		it("should match a child in the range, not one at each end", async function () {
+			let read = async (parent, year) => {
+				let attachment = await importFileAttachment('test.pdf', { parentItemID: parent.id });
+				attachment.attachmentLastRead = Math.floor(Date.UTC(year, 5, 15) / 1000);
+				await attachment.saveTx();
+			};
+			let inRange = await createDataObject('item');
+			await read(inRange, 2022);
+			let straddling = await createDataObject('item');
+			await read(straddling, 2010);
+			await read(straddling, 2030);
+
+			let ids = await Zotero.SearchQuery.getSearch(
+				"attachment last read between 2020 and 2025",
+				{ libraryID: Zotero.Libraries.userLibraryID }
+			).search();
+			assert.include(ids, inRange.id);
+			assert.notInclude(ids, straddling.id);
+		});
+
+		it("should repeat the field of a range for a value after 'or'", function () {
+			assert.deepEqual(clauses("year:2020-2025 or 1999"), [
+				{
+					joinMode: 'all',
+					children: [
+						{ condition: 'date', operator: 'isAfter', value: '2019' },
+						{ condition: 'date', operator: 'isBefore', value: '2026' }
+					]
+				},
+				{ condition: 'date', operator: 'is', value: '1999' }
+			]);
+		});
+
+		it("should read a day the month doesn't have as a value", function () {
+			// Stepping past the end of the month would widen the range into
+			// the month after it
+			assert.deepEqual(clauses("date:2023-02-29..2023-02-29"), [
+				{ condition: 'date', operator: 'is', value: '2023-02-29..2023-02-29' }
+			]);
+			// A day the month does have still reads as a range
+			assert.deepEqual(clauses("date:2024-02-29..2024-02-29"), [{
+				joinMode: 'all',
+				children: [
+					{ condition: 'date', operator: 'isAfter', value: '2024-02-28' },
+					{ condition: 'date', operator: 'isBefore', value: '2024-03-01' }
+				]
+			}]);
+		});
+
+		it("should recognize a range before both ends are typed", function () {
+			let queries = [
+				"year is between",
+				"year is between 19",
+				"year is between 1970 and",
+				"year is between 1970 and 19"
+			];
+			for (let query of queries) {
+				// Nothing to match on yet, and not text to search for
+				let { tree, text } = Zotero.SearchQuery.parse("crispr " + query);
+				assert.isNull(tree, query);
+				assert.equal(text, "crispr", query);
+				// Every character still belongs to a token, for highlighting
+				let tokens = Zotero.SearchQuery.tokenize(query);
+				assert.equal(tokens[tokens.length - 1].end, query.length, query);
+			}
+		});
+
+		it("should find items dated anywhere in the range, ends included", async function () {
+			let items = {};
+			for (let date of ['1969', '1970', '1985-06-15', '2000-12-31', '2001']) {
+				items[date] = await createDataObject('item', { setTitle: true });
+				items[date].setField('date', date);
+				await items[date].saveTx();
+			}
+
+			for (let query of ["year is between 1970 and 2000", "year:1970-2000"]) {
+				let search = Zotero.SearchQuery.getSearch(query, {
+					libraryID: Zotero.Libraries.userLibraryID
+				});
+				let ids = await search.search();
+				assert.include(ids, items['1970'].id, query);
+				assert.include(ids, items['1985-06-15'].id, query);
+				assert.include(ids, items['2000-12-31'].id, query);
+				assert.notInclude(ids, items['1969'].id, query);
+				assert.notInclude(ids, items['2001'].id, query);
+			}
+		});
+	});
+
 	describe("grouping and precedence", function () {
 		it("should group with parentheses and join modes", function () {
 			let { tree } = Zotero.SearchQuery.parse('by:smith and (tag:foo or tag:bar)');

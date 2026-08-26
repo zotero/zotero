@@ -185,6 +185,12 @@ Zotero.SearchQuery = new function () {
 		'after': 'isAfter',
 		'is after': 'isAfter',
 		'since': 'isAfter',
+		// A range, which isn't a condition's own operator but the pair of
+		// comparisons that bracket it
+		'between': 'isBetween',
+		'is between': 'isBetween',
+		'not between': 'isNotBetween',
+		'is not between': 'isNotBetween',
 		'in the last': 'isInTheLast',
 		'is in the last': 'isInTheLast',
 		'within the last': 'isInTheLast',
@@ -255,6 +261,46 @@ Zotero.SearchQuery = new function () {
 	// "3 days", "2 weeks" -- the value an isInTheLast condition stores. Weeks
 	// are counted in days, which is what the date comparison understands.
 	const DURATION_RE = /^(\d+)\s*(day|week|month|year)s?\b/i;
+
+	// The range operators, and whether each one excludes the range
+	const RANGE_OPERATORS = { isBetween: false, isNotBetween: true };
+
+	// An end of a range: a year, a year and month, or a full date for a date
+	// condition, a whole number for one that counts
+	const RANGE_END_RE = /^(\d{1,4})(?:-(\d{1,2})(?:-(\d{1,2}))?)?$/;
+	const COUNT_RE = /^\d+$/;
+
+	// A range written as one word: `1970..2000` anywhere, and `1970-2000` for
+	// years, which is two of them since a year is four digits and a month is
+	// at most two
+	const RANGE_DOTS_RE = /^([^.]+)\.\.([^.]+)$/;
+	const RANGE_YEARS_RE = /^(\d{4})[-\u2013\u2014](\d{4})$/;
+
+	// What separates the ends when they're written apart. Each word goes with
+	// the form it belongs to, so `between 1970 and 2000` and `1970 to 2000`
+	// each read only as they're said, while the marks fit either. `and` is a
+	// separator only after `between`, where it can't be joining clauses.
+	const RANGE_SEPARATOR_RE = /^\s*(?:\.\.|[-\u2013\u2014]|to\b)\s*/i;
+	const RANGE_BETWEEN_SEPARATOR_RE = /^\s*(?:\.\.|[-\u2013\u2014]|and\b)\s*/i;
+
+	// How a condition that compares reads a range: a date brackets with before
+	// and after, a count with less than and greater than. `key` orders two
+	// ends written at different granularities, and `step` gives the value just
+	// outside an end, since the comparisons are exclusive.
+	const RANGE_KINDS = {
+		date: {
+			lower: 'isAfter',
+			upper: 'isBefore',
+			key: _dateKey,
+			step: _stepDate
+		},
+		count: {
+			lower: 'isGreaterThan',
+			upper: 'isLessThan',
+			key: value => (COUNT_RE.test(value) ? parseInt(value) : null),
+			step: (value, step) => (COUNT_RE.test(value) ? String(parseInt(value) + step) : null)
+		}
+	};
 
 	var _fields = null;
 	var _fieldPhrases = null;
@@ -437,7 +483,7 @@ Zotero.SearchQuery = new function () {
 			valueStart,
 			// Whether the condition takes the operator: `type before boo`
 			// names a condition and an operator but doesn't make a clause
-			supported: field.operators.includes(operatorName)
+			supported: _supportsOperator(field, operatorName)
 		};
 	}
 
@@ -845,7 +891,7 @@ Zotero.SearchQuery = new function () {
 			// 2020` compares dates while `title is before` matches a title
 			// against "before"
 			for (let match of _matchPhrases(text, afterField, _operatorPhrases)) {
-				if (definition.operators.includes(OPERATOR_WORDS[match.name])) {
+				if (_supportsOperator(definition, OPERATOR_WORDS[match.name])) {
 					operator = match;
 					break;
 				}
@@ -865,7 +911,7 @@ Zotero.SearchQuery = new function () {
 		let operatorName = operator.name === ':'
 			? (definition.operator || _defaultOperator(definition))
 			: OPERATOR_WORDS[operator.name];
-		if (!operatorName || !definition.operators.includes(operatorName)) {
+		if (!operatorName || !_supportsOperator(definition, operatorName)) {
 			return null;
 		}
 		let tokens = [
@@ -899,10 +945,25 @@ Zotero.SearchQuery = new function () {
 			return null;
 		}
 		let value = _readValue(self, text, valueStart, definition, operatorName);
+		if (value && value.pending) {
+			// The rest of a range is still to come, so the clause is
+			// recognized but has nothing to match on yet
+			tokens[tokens.length - 1].pending = true;
+			tokens.push({
+				type: 'value',
+				value: text.slice(valueStart, value.end),
+				field: field.name,
+				operator: operatorName,
+				start: operator.end,
+				end: value.end,
+				pending: true
+			});
+			return { tokens, end: value.end };
+		}
 		if (!value || !value.value) {
 			return null;
 		}
-		tokens.push({
+		let token = {
 			type: 'value',
 			value: value.value,
 			field: field.name,
@@ -910,7 +971,11 @@ Zotero.SearchQuery = new function () {
 			start: operator.end,
 			end: value.end,
 			quoted: value.quoted
-		});
+		};
+		if (value.range) {
+			token.range = value.range;
+		}
+		tokens.push(token);
 		return { tokens, end: value.end };
 	}
 
@@ -930,6 +995,16 @@ Zotero.SearchQuery = new function () {
 				unit = 'day';
 			}
 			return { value: count + ' ' + unit + 's', end: pos + duration[0].length };
+		}
+		// A range, which only a condition that compares takes, so a hyphen or
+		// a `to` stays part of the value everywhere else
+		let range = _readRange(text, pos, definition, operatorName);
+		if (range) {
+			return range;
+		}
+		if (RANGE_OPERATORS.hasOwnProperty(operatorName)) {
+			// `between` without a range after it doesn't make a clause
+			return null;
 		}
 		let values = self.getValues(definition.condition);
 		if (values) {
@@ -980,7 +1055,7 @@ Zotero.SearchQuery = new function () {
 		if (!value || !value.value) {
 			return null;
 		}
-		return {
+		let token = {
 			type: 'value',
 			value: value.value,
 			field: previous.field,
@@ -989,6 +1064,10 @@ Zotero.SearchQuery = new function () {
 			end: value.end,
 			quoted: value.quoted
 		};
+		if (value.range) {
+			token.range = value.range;
+		}
+		return token;
 	}
 
 	// The clause a prefix operator and its target make: a count comparison
@@ -1239,6 +1318,11 @@ Zotero.SearchQuery = new function () {
 	function _addNode(search, node) {
 		if (node.children) {
 			search.addCondition('groupStart', 'true', '');
+			// A group that matches at a child level is scoped to it, so all of
+			// its conditions match the same child
+			if (node.level) {
+				search.addCondition('resultLevel', node.level);
+			}
 			search.addCondition('joinMode', node.joinMode);
 			for (let child of node.children) {
 				_addNode(search, child);
@@ -1326,6 +1410,162 @@ Zotero.SearchQuery = new function () {
 		return at;
 	}
 
+	// How a field reads a range, or null for one that doesn't compare
+	function _rangeKind(field) {
+		if (field.operators.includes('isAfter') && field.operators.includes('isBefore')) {
+			return RANGE_KINDS.date;
+		}
+		if (field.operators.includes('isGreaterThan') && field.operators.includes('isLessThan')) {
+			return RANGE_KINDS.count;
+		}
+		return null;
+	}
+
+	// Whether a field takes an operator, counting the range operators, which
+	// are made out of the comparisons rather than being operators themselves
+	function _supportsOperator(field, operatorName) {
+		return RANGE_OPERATORS.hasOwnProperty(operatorName)
+			? !!_rangeKind(field)
+			: field.operators.includes(operatorName);
+	}
+
+	// A date end padded out, so that ends written at different granularities
+	// compare
+	function _dateKey(value) {
+		let parts = RANGE_END_RE.exec(value);
+		return parts
+			? Zotero.Utilities.lpad(parts[1], '0', 4)
+				+ '-' + Zotero.Utilities.lpad(parts[2] || '0', '0', 2)
+				+ '-' + Zotero.Utilities.lpad(parts[3] || '0', '0', 2)
+			: null;
+	}
+
+	// The date just outside a given one, stepped at the granularity it was
+	// written: a year by a year, a year and month by a month, a full date by
+	// a day
+	function _stepDate(value, step) {
+		let parts = RANGE_END_RE.exec(value);
+		if (!parts) {
+			return null;
+		}
+		let year = parseInt(parts[1]);
+		let month = parts[2] === undefined ? null : parseInt(parts[2]);
+		let day = parts[3] === undefined ? null : parseInt(parts[3]);
+		if ((month !== null && (month < 1 || month > 12))
+				|| (day !== null && (day < 1 || day > 31))) {
+			return null;
+		}
+		if (day !== null) {
+			let date = new Date(0);
+			date.setUTCFullYear(year, month - 1, day);
+			// A day the month doesn't have is no date at all, rather than one
+			// in the month after it
+			if (date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+				return null;
+			}
+			date.setUTCDate(day + step);
+			year = date.getUTCFullYear();
+			month = date.getUTCMonth() + 1;
+			day = date.getUTCDate();
+		}
+		else if (month !== null) {
+			let months = year * 12 + month - 1 + step;
+			year = Math.floor(months / 12);
+			month = months % 12 + 1;
+		}
+		else {
+			year += step;
+		}
+		if (year < 1) {
+			return null;
+		}
+		return Zotero.Utilities.lpad(year, '0', 4)
+			+ (month === null ? '' : '-' + Zotero.Utilities.lpad(month, '0', 2))
+			+ (day === null ? '' : '-' + Zotero.Utilities.lpad(day, '0', 2));
+	}
+
+	// The two ends of a range and where it ends, or null if what's written
+	// isn't one. Both ends are kept as written, along with the values just
+	// outside them, since the comparisons a range becomes are exclusive.
+	function _readRange(text, pos, definition, operatorName) {
+		let kind = _rangeKind(definition);
+		let spelled = RANGE_OPERATORS.hasOwnProperty(operatorName);
+		if (!kind || (!spelled && !['is', 'isNot'].includes(operatorName))) {
+			return null;
+		}
+		let first = _readWord(text, pos);
+		if (!first.value || first.quoted) {
+			return null;
+		}
+		// A range written with `between` has no other reading, so one that
+		// runs to the end of the query is still being typed
+		let unfinished = () => (spelled && kind.key(first.value) !== null
+			? { pending: true, end: text.length }
+			: null);
+		let from, to;
+		let end = first.end;
+		let compact = RANGE_DOTS_RE.exec(first.value) || RANGE_YEARS_RE.exec(first.value);
+		if (compact) {
+			[, from, to] = compact;
+		}
+		else {
+			from = first.value;
+			let separator = (spelled ? RANGE_BETWEEN_SEPARATOR_RE : RANGE_SEPARATOR_RE)
+				.exec(text.slice(first.end));
+			if (!separator) {
+				return /^\s*$/.test(text.slice(first.end)) ? unfinished() : null;
+			}
+			let second = _readWord(text, first.end + separator[0].length);
+			if (!second.value || second.quoted) {
+				return second.value ? null : unfinished();
+			}
+			to = second.value;
+			end = second.end;
+		}
+		let fromKey = kind.key(from);
+		let toKey = kind.key(to);
+		let below = kind.step(from, -1);
+		let above = kind.step(to, 1);
+		// Ends that aren't values to compare, that have nothing outside them
+		// to compare against, or that don't make a range in the order they
+		// were written, so what's there is something else -- or, at the end of
+		// the query, an end still being typed
+		if (fromKey === null || toKey === null || fromKey > toKey || !below || !above) {
+			return end === text.length ? unfinished() : null;
+		}
+		return {
+			value: text.slice(pos, end).trim().replace(/\s+/g, ' '),
+			end,
+			range: { from, to, below, above }
+		};
+	}
+
+	// The pair of comparisons a range becomes. They're exclusive, so each end
+	// is compared against the value just outside it: between 1970 and 2000 is
+	// after 1969 and before 2001. Excluding a range compares the ends as
+	// written, and either one matching is enough.
+	function _rangeNode(field, operatorName, range) {
+		let kind = _rangeKind(field);
+		let excluded = operatorName === 'isNot' || RANGE_OPERATORS[operatorName];
+		let children = excluded
+			? [
+				{ condition: field.condition, operator: kind.upper, value: range.from },
+				{ condition: field.condition, operator: kind.lower, value: range.to }
+			]
+			: [
+				{ condition: field.condition, operator: kind.lower, value: range.below },
+				{ condition: field.condition, operator: kind.upper, value: range.above }
+			];
+		let node = { joinMode: excluded ? 'any' : 'all', children };
+		// Both comparisons are about the same child, so the level scopes the
+		// pair rather than each of them, which would let two children each
+		// match one end
+		if (field.level) {
+			node.level = field.level;
+		}
+		return node;
+	}
+
 	function _defaultOperator(field) {
 		// A condition with a list of values to choose from, or a tag, has
 		// discrete values rather than text to match within, so `tag:foo` means
@@ -1387,8 +1627,8 @@ Zotero.SearchQuery = new function () {
 				// two tag conditions
 				let next = state.tokens[state.pos];
 				let previous = children[children.length - 1];
-				if (next && next.type === 'value' && previous && !previous.children) {
-					children.push({ ...previous, value: next.value });
+				if (next && next.type === 'value' && previous) {
+					children.push(_clauseFromValueToken(next));
 					state.pos++;
 				}
 				continue;
@@ -1398,6 +1638,10 @@ Zotero.SearchQuery = new function () {
 			if (token.type === 'field' && state.tokens[state.pos + 1]?.pending) {
 				state.pending = true;
 				state.pos += 2;
+				// The end of a range that has been typed so far
+				if (state.tokens[state.pos]?.pending) {
+					state.pos++;
+				}
 				continue;
 			}
 			let clause = _readClause(state);
@@ -1464,8 +1708,31 @@ Zotero.SearchQuery = new function () {
 		}
 		else {
 			state.pos += 3;
-			clause.value = state.tokens[state.pos - 1].value;
+			let value = state.tokens[state.pos - 1];
+			if (value.range) {
+				return _rangeNode(field, operator, value.range);
+			}
+			clause.value = value.value;
 		}
+		if (field.level) {
+			clause.level = field.level;
+		}
+		return clause;
+	}
+
+	// The clause a repeated value makes on its own, from the field and operator
+	// its token carries. The clause it repeats can be a range, which is a
+	// group rather than something to copy a value into.
+	function _clauseFromValueToken(token) {
+		let field = Zotero.SearchQuery.getField(token.field);
+		if (token.range) {
+			return _rangeNode(field, token.operator, token.range);
+		}
+		let operator = token.operator;
+		if (NAME_OPERATOR_OVERRIDES[operator] && _isNameCondition(field.condition)) {
+			operator = NAME_OPERATOR_OVERRIDES[operator];
+		}
+		let clause = { condition: field.condition, operator, value: token.value };
 		if (field.level) {
 			clause.level = field.level;
 		}
