@@ -233,13 +233,10 @@ export let OS = {
 			);
 			
 			try {
-				// "libc.so" is usually a linker script rather than a real shared object, which
-				// fails with "invalid ELF header", and on some distros (e.g., NixOS) it doesn't
-				// exist at a standard path at all, so use the versioned name
 				const libc = ctypes.open(
 					Services.appinfo.OS === "Darwin" ? "libSystem.B.dylib" : "libc.so.6"
 				);
-
+				
 				const symlink = libc.declare(
 					"symlink",
 					ctypes.default_abi,
@@ -247,7 +244,7 @@ export let OS = {
 					ctypes.char.ptr, // target
 					ctypes.char.ptr //linkpath
 				);
-
+				
 				if (symlink(pathTarget, pathCreate)) {
 					throw new Error("Failed to create symlink at " + pathCreate);
 				}
