@@ -56,6 +56,102 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 	_msg_id: null,
 	_msg_ptr: null,
 
+	/**
+	 * Look up the volume the storage directory is on
+	 *
+	 * @return {Object|false} - { flags, fsTypeName }, or false if it couldn't be determined
+	 */
+	_statfsStorageRoot() {
+		let { ctypes } = ChromeUtils.importESModule(
+			"resource://gre/modules/ctypes.sys.mjs"
+		);
+
+		const MFSTYPENAMELEN = 16;
+		const MAXPATHLEN = 1024;
+
+		let statfs_t = new ctypes.StructType("statfs", [
+			{ f_bsize: ctypes.uint32_t },
+			{ f_iosize: ctypes.int32_t },
+			{ f_blocks: ctypes.uint64_t },
+			{ f_bfree: ctypes.uint64_t },
+			{ f_bavail: ctypes.uint64_t },
+			{ f_files: ctypes.uint64_t },
+			{ f_ffree: ctypes.uint64_t },
+			{ f_fsid: ctypes.ArrayType(ctypes.int32_t, 2) },
+			{ f_owner: ctypes.uint32_t },
+			{ f_type: ctypes.uint32_t },
+			{ f_flags: ctypes.uint32_t },
+			{ f_fssubtype: ctypes.uint32_t },
+			{ f_fstypename: ctypes.ArrayType(ctypes.char, MFSTYPENAMELEN) },
+			{ f_mntonname: ctypes.ArrayType(ctypes.char, MAXPATHLEN) },
+			{ f_mntfromname: ctypes.ArrayType(ctypes.char, MAXPATHLEN) },
+			{ f_flags_ext: ctypes.uint32_t },
+			{ f_reserved: ctypes.ArrayType(ctypes.uint32_t, 7) }
+		]);
+
+		let lib;
+		try {
+			lib = ctypes.open("/usr/lib/libSystem.dylib");
+			let statfsFn;
+			// x86_64 keeps the 32-bit-inode statfs() under the plain name and the 64-bit-inode
+			// version under a suffixed symbol, while on arm64 statfs() is already 64-bit-inode
+			for (let symbol of ["statfs$INODE64", "statfs"]) {
+				try {
+					statfsFn = lib.declare(
+						symbol, ctypes.default_abi, ctypes.int,
+						ctypes.char.ptr, statfs_t.ptr
+					);
+					break;
+				}
+				catch (e) {
+					Zotero.debug("FileChangeWatcher: No " + symbol + "() symbol");
+				}
+			}
+			if (!statfsFn) {
+				throw new Error("statfs() not available");
+			}
+			let sb = statfs_t();
+			if (statfsFn(this._storageRoot, sb.address()) != 0) {
+				throw new Error("statfs() failed for " + this._storageRoot);
+			}
+			return {
+				flags: sb.f_flags,
+				fsTypeName: sb.f_fstypename.readString()
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+		finally {
+			if (lib) {
+				lib.close();
+			}
+		}
+	},
+
+	/**
+	 * Whether the storage directory is on a volume that FSEvents covers
+	 *
+	 * FSEvents is backed by a per-volume journal that only local volumes have. On a network
+	 * mount the stream is created and started successfully but never delivers any events, so
+	 * the watcher would report that nothing had changed for as long as it was used.
+	 */
+	_storageRootIsLocalVolume() {
+		const MNT_LOCAL = 0x00001000;
+
+		let info = this._statfsStorageRoot();
+		if (!info) {
+			return false;
+		}
+		if (!(info.flags & MNT_LOCAL)) {
+			Zotero.debug("FileChangeWatcher: Storage directory is on a " + info.fsTypeName
+				+ " volume, which FSEvents doesn't cover");
+			return false;
+		}
+		return true;
+	},
+
 	_initFSEvents() {
 		let { ctypes } = ChromeUtils.importESModule(
 			"resource://gre/modules/ctypes.sys.mjs"
