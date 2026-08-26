@@ -1086,7 +1086,19 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		await this.itemTree._refreshPromise;
 
 		const cachedSelection = this.itemTree._cachedSelection;
-				const collectionTreeRows = this.collectionTreeRows;
+		const collectionTreeRows = this.collectionTreeRows;
+
+		// Opening an attachment writes its lastRead, which arrives here as an
+		// ordinary modify and triggers best match rerun if it is active.
+		// For now, do nothing since best match searches are costly.
+		if (type == 'item' && action == 'modify' && ids.length
+				&& collectionTreeRows.some(rowIsBestMatchSearch)
+				&& ids.every((id) => {
+					let item = Zotero.Items.get(id);
+					return item && item.isAttachment();
+				})) {
+			return;
+		}
 
 		// A changed item's derived match previews are stale: back to
 		// placeholders, re-derived on their next render. The re-score the
