@@ -932,6 +932,34 @@ Zotero.Embeddings = new function () {
 		return vectors.map(vector => _normalize(new Float32Array(vector)));
 	};
 
+	const ENDPOINT_ATTEMPTS = 3;
+	// Delay before the first retry; each further retry waits proportionally longer
+	const ENDPOINT_RETRY_DELAY = 2000;
+
+	// POST { inputs: [...] } to the endpoint, which returns one vector per
+	// input, as a bare array or under an `embeddings` key. `truncate` tells
+	// a TEI server to cut inputs over the model's window to fit, the way the
+	// local pipeline does, instead of rejecting the batch.
+	async function _embedViaEndpoint(endpoint, texts) {
+		Zotero.debug(`Embeddings: embedding batch of ${texts.length} via endpoint`);
+		let xmlhttp = await Zotero.HTTP.request('POST', endpoint, {
+			body: JSON.stringify({ inputs: texts, truncate: true }),
+			headers: { 'Content-Type': 'application/json' },
+			responseType: 'json',
+			timeout: 120000
+		});
+		let vectors = xmlhttp.response?.embeddings ?? xmlhttp.response;
+		if (!Array.isArray(vectors) || vectors.length !== texts.length) {
+			let received = Array.isArray(vectors)
+				? `${vectors.length} vectors`
+				: JSON.stringify(xmlhttp.response).substring(0, 200);
+			throw new Error(`Embeddings: endpoint returned ${received} `
+				+ `for ${texts.length} inputs`);
+		}
+		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
+		return vectors.map(vector => _normalize(new Float32Array(vector)));
+	}
+
 	// The last embedded query, reused across the scoring passes a single
 	// search triggers (per-row membership cutoffs plus the merged ranking)
 	let _queryCache = null;
@@ -987,9 +1015,33 @@ Zotero.Embeddings = new function () {
 	 * @param {String[]} texts
 	 * @return {Promise<Float32Array[]>}
 	 */
-	this.embedPassages = function (texts) {
+	this.embedPassages = async function (texts) {
 		let passagePrefix = _getModel().passagePrefix;
-		return this.embedMany(texts.map(text => passagePrefix + text));
+		texts = texts.map(text => passagePrefix + text);
+		// Passages can route to an external endpoint serving the same model;
+		// queries always embed locally. After the retries, only this batch
+		// falls back to the local engine -- the next one tries the endpoint
+		// again.
+		let endpoint = Zotero.Prefs.get('embeddings.endpoint');
+		if (!endpoint) {
+			return this.embedMany(texts);
+		}
+		for (let attempt = 1; attempt <= ENDPOINT_ATTEMPTS; attempt++) {
+			try {
+				return await _embedViaEndpoint(endpoint, texts);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				if (attempt < ENDPOINT_ATTEMPTS) {
+					Zotero.debug(`Embeddings: endpoint attempt ${attempt} failed -- retrying`);
+					await Zotero.Promise.delay(ENDPOINT_RETRY_DELAY * attempt);
+				}
+				else {
+					Zotero.debug('Embeddings: endpoint failed -- embedding this batch locally');
+				}
+			}
+		}
+		return this.embedMany(texts);
 	};
 
 	/**
@@ -1592,6 +1644,7 @@ Zotero.Embeddings.Chunking = new function () {
 		let metrics = _getMetrics(await this.getTokenizer());
 		return _asTokens(Zotero.Utilities.Internal.Chunking.chunkText(text, metrics));
 	};
+	
 	/**
 	 * Token count of a text against the active model, leaving out the special
 	 * tokens the tokenizer wraps every input in, so that counts of several
