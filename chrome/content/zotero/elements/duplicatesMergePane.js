@@ -92,7 +92,7 @@
 				
 				if (!item.isRegularItem() || ['annotation', 'attachment', 'note'].includes(item.itemType)) {
 					let msg = Zotero.getString('pane.item.duplicates.onlyTopLevel');
-					ZoteroPane.itemPane.setItemPaneMessage(msg);
+					this.closest('item-pane').setItemPaneMessage(msg);
 					return false;
 				}
 				
@@ -106,7 +106,7 @@
 						else {
 							msg = Zotero.getString('pane.item.duplicates.onlySameItemType');
 						}
-						ZoteroPane.itemPane.setItemPaneMessage(msg);
+						this.closest('item-pane').setItemPaneMessage(msg);
 						return false;
 					}
 				}
