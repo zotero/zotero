@@ -1073,16 +1073,23 @@ Zotero.Embeddings = new function () {
 	 * render before the model has been calibrated, which is also before there
 	 * are any scores.
 	 *
+	 * Pass clamped: false to keep scores above the ceiling apart -- for a
+	 * consumer ordering by the fraction rather than displaying it, a strong
+	 * query's whole top tier can sit past the ceiling, where the clamp would
+	 * flatten the model's ordering into a tie.
+	 *
 	 * @param {Number} score
-	 * @return {Number} - 0-1
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.clamped=true] - Cap the fraction at 1
+	 * @return {Number} - 0-1, or above 1 unclamped
 	 */
-	this.getScoreFraction = function (score) {
+	this.getScoreFraction = function (score, { clamped = true } = {}) {
 		if (!_calibration) {
 			return 0;
 		}
 		let { minScore, maxDisplayScore } = _calibration;
-		return Math.min(1, Math.max(0,
-			(score - minScore) / (maxDisplayScore - minScore)));
+		let fraction = (score - minScore) / (maxDisplayScore - minScore);
+		return clamped ? Math.min(1, Math.max(0, fraction)) : Math.max(0, fraction);
 	};
 
 	/**

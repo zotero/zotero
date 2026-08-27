@@ -112,8 +112,14 @@ Zotero.Lexical = new function () {
 	const EXCERPT_WINDOW = 200;
 
 	const SOURCES = [
-		{ word: 'fulltextContent', cjk: 'fulltextContentCJK', columns: null },
 		{
+			name: 'content',
+			word: 'fulltextContent',
+			cjk: 'fulltextContentCJK',
+			columns: null
+		},
+		{
+			name: 'itemText',
 			word: 'fulltextItemText',
 			cjk: 'fulltextItemTextCJK',
 			columns: ['title', 'abstract', 'note', 'annotation']
@@ -297,9 +303,12 @@ Zotero.Lexical = new function () {
 	 * @param {Object} [options]
 	 * @param {Function} [options.shouldCancel] - Checked between indexes;
 	 *     return true to abandon scoring with a ScoringCancelledError
+	 * @param {String[]} [options.sources] - Limit scoring to these sources by
+	 *     name: 'content' (attachment fulltext) and/or 'itemText' (titles,
+	 *     abstracts, notes, annotations). All sources when omitted.
 	 * @return {Promise<Map>} - itemID -> score (0-1, higher is better)
 	 */
-	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
+	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel, sources } = {}) {
 		// Scores below this aren't matches and aren't returned: measured
 		// against what the query could earn, this is the share of it a
 		// document has to carry. Provisional until tuned against a real
@@ -326,6 +335,9 @@ Zotero.Lexical = new function () {
 			}
 		};
 		for (let source of SOURCES) {
+			if (sources && !sources.includes(source.name)) {
+				continue;
+			}
 			for (let family of ['word', 'cjk']) {
 				checkCancel();
 				let built = this.buildExpression(terms, family);
@@ -453,6 +465,30 @@ Zotero.Lexical = new function () {
 				_findTermMatches(text, terms).map(m => [m.start, m.end])
 			);
 		});
+	};
+
+	/**
+	 * How many terms of a query BM25 can score with (see
+	 * _getScoringTerms()) -- a reading of the query's size that ignores the
+	 * corpus-filling words the ranking ignores too
+	 *
+	 * @param {String} queryText
+	 * @return {Promise<Number>}
+	 */
+	this.getScoringTermCount = async function (queryText) {
+		return (await _getScoringTerms(this.parseQuery(queryText))).length;
+	};
+
+	/**
+	 * Whether every part of a query is quoted -- the query's way of asking
+	 * for its literal words and nothing else, wherever they appear
+	 *
+	 * @param {String} queryText
+	 * @return {Boolean}
+	 */
+	this.isFullyQuotedQuery = function (queryText) {
+		let parts = Zotero.SearchConditions.parseSearchString(queryText || '');
+		return parts.length > 0 && parts.every(part => part.inQuotes);
 	};
 
 	/**

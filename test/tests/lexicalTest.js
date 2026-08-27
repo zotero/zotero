@@ -195,6 +195,21 @@ describe("Zotero.Lexical", function () {
 			assert.isTrue(own.has(item.id));
 		});
 
+		it("should limit scoring to the given sources", async function () {
+			let doc = await addContentDoc(46, 'lexsource in fulltext alone');
+			let item = await createDataObject('item', { title: 'Lexsource in a title' });
+
+			let all = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id]);
+			assert.isTrue(all.has(doc));
+			assert.isTrue(all.has(item.id));
+
+			// The items' own text doesn't include attachment fulltext
+			let own = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id],
+				{ sources: ['itemText'] });
+			assert.isFalse(own.has(doc));
+			assert.isTrue(own.has(item.id));
+		});
+
 		it("should return scores as 0-1 fractions", async function () {
 			let item = await createDataObject('item',
 				{ title: 'Lexfrac owls of the northern coast' });
@@ -318,6 +333,24 @@ describe("Zotero.Lexical", function () {
 			let e = await getPromiseError(Zotero.Lexical.scoreItemIDs(
 				'lexscancel ', [item.id], { shouldCancel: () => true }));
 			assert.instanceOf(e, Zotero.Lexical.ScoringCancelledError);
+		});
+	});
+
+	describe("#getScoringTermCount()", function () {
+		it("should count the terms BM25 can score with", async function () {
+			assert.equal(
+				await Zotero.Lexical.getScoringTermCount('lexcountaaa lexcountbbb'), 2);
+			assert.equal(await Zotero.Lexical.getScoringTermCount(''), 0);
+		});
+	});
+
+	describe("#isFullyQuotedQuery()", function () {
+		it("should be true only when every part is quoted", function () {
+			assert.isTrue(Zotero.Lexical.isFullyQuotedQuery('"owl migration"'));
+			assert.isTrue(Zotero.Lexical.isFullyQuotedQuery('"owl" "migration"'));
+			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery('"owl" migration'));
+			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery('owl migration'));
+			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery(''));
 		});
 	});
 

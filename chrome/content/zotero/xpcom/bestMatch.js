@@ -29,15 +29,27 @@
  * scores; when a semantic model is enabled (Zotero.Embeddings), both engines
  * score and their rankings are fused with Reciprocal Rank Fusion, so an item
  * can match by its words, by its meaning, or -- ranking highest -- by both.
- * The facade owns everything a consumer would otherwise need engine
- * knowledge for: what counts as an empty query, how results map onto the
- * relevance bar, and what the failure modes are.
+ * What text the lexical engine reads depends on the query's shape (see
+ * KEYWORD_QUERY_TERMS): everything for a keyword lookup, the items' own
+ * text for longer queries. The facade owns everything a consumer would
+ * otherwise need engine knowledge for: what counts as an empty query, how
+ * results map onto the relevance bar, and what the failure modes are.
  */
 Zotero.BestMatch = new function () {
 	// The constant in a Reciprocal Rank Fusion contribution, 1 / (RRF_K +
 	// rank): high enough that a handful of rank positions in one engine
 	// can't drown out the other engine's opinion entirely
 	const RRF_K = 60;
+	// A query of this many scoring terms or fewer is a keyword lookup, and
+	// the lexical engine searches everything for it -- exact presence is the
+	// intent, wherever the words appear. A longer query states an intent the
+	// words only gesture at: there the lexical engine searches the items'
+	// own text (titles, abstracts, notes), where saying most of the query
+	// still means answering it, and leaves the attachment fulltext -- where
+	// BM25 can carry a document to the top on one rare word said often -- to
+	// the model, which reads the query whole. A fully quoted query asks for
+	// its literal words outright and searches everything at any length.
+	const KEYWORD_QUERY_TERMS = 2;
 	// How a passage's two kinds of evidence weigh against each other. The
 	// model's reading leads: it is the calibrated signal, and it chose which
 	// passages are worth showing. Saying the query's own words lifts a
@@ -179,11 +191,18 @@ Zotero.BestMatch = new function () {
 			let engine = Zotero.Prefs.get('search.bestMatchEngine');
 			if (engine == 'semantic') {
 				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
+				// On the model's display band, so scores are 0-1 like the other
+				// modes' -- but unclamped and rescaled by the strongest score,
+				// so a top tier past the band's ceiling keeps its ordering
+				// instead of flattening into a tie
+				let fractions = new Map([...semantic.scores].map(([itemID, score]) => [
+					itemID,
+					Zotero.Embeddings.getScoreFraction(score, { clamped: false })
+				]));
+				let scale = Math.max(1, ...fractions.values());
 				return {
-					// On the model's display band, so scores are 0-1 like the
-					// other modes'
-					scores: new Map([...semantic.scores].map(
-						([itemID, score]) => [itemID, Zotero.Embeddings.getScoreFraction(score)]
+					scores: new Map([...fractions].map(
+						([itemID, fraction]) => [itemID, fraction / scale]
 					)),
 					matches: { lexical: new Set(), semantic: semantic.previewableIDs }
 				};
@@ -197,11 +216,20 @@ Zotero.BestMatch = new function () {
 					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
 				};
 			}
+			// What the lexical engine reads for this query (see
+			// KEYWORD_QUERY_TERMS): everything for a keyword lookup or a fully
+			// quoted query, the items' own text for anything longer
+			let allSources = Zotero.Lexical.isFullyQuotedQuery(queryText)
+				|| (await Zotero.Lexical.getScoringTermCount(queryText))
+					<= KEYWORD_QUERY_TERMS;
 			// Both engines score the same candidates concurrently. allSettled
 			// rather than all, so one engine's failure still leaves the
 			// other's rejection observed rather than unhandled
 			let [lexical, semantic] = await Promise.allSettled([
-				Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options),
+				Zotero.Lexical.scoreItemIDs(queryText, itemIDs, {
+					...options,
+					sources: allSources ? undefined : ['itemText']
+				}),
 				Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options)
 			]);
 			if (lexical.status == 'rejected') {
@@ -211,10 +239,15 @@ Zotero.BestMatch = new function () {
 				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
 					Zotero.debug("Semantic index not ready -- ranking lexically: "
 						+ semantic.reason.message);
+					// With no model to read the fulltext, the lexical engine
+					// covers all of it, whatever the query's length
+					let scores = allSources
+						? lexical.value
+						: await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
 					return {
-						scores: lexical.value,
+						scores,
 						matches: {
-							lexical: new Set(lexical.value.keys()),
+							lexical: new Set(scores.keys()),
 							semantic: new Set()
 						}
 					};
@@ -721,14 +754,26 @@ Zotero.BestMatch = new function () {
 	// directions: a pair of barely-above-floor matches would buy the full
 	// agreement bonus, and a strong match only one engine can see -- a
 	// paraphrase without the query's words, say -- would cap at half however
-	// good it is. Fused scores are normalized against the best possible sum
-	// (full-strength evidence at rank 1 in both engines) to keep them 0-1.
-	// Within an engine, tied scores share a rank, so fusion is deterministic
-	// however a map orders its entries.
+	// good it is.
+	//
+	// The semantic fractions enter unclamped: a strong query's whole top
+	// tier can sit past the display band's ceiling, where clamping would
+	// flatten the model's ordering into a tie -- and a tie decided by which
+	// items the lexical engine also happened to match, rather than by what
+	// the model actually read.
+	//
+	// Fused scores are normalized against the best possible sum
+	// (full-strength evidence at rank 1 in both engines) -- or against the
+	// strongest sum where unclamped fractions push past it -- to keep them
+	// 0-1. Within an engine, tied scores share a rank, so fusion is
+	// deterministic however a map orders its entries.
 	function _fuse(lexicalScores, semanticScores) {
 		let engines = [
 			[lexicalScores, score => Math.min(1, Math.max(0, score))],
-			[semanticScores, score => Zotero.Embeddings.getScoreFraction(score)]
+			[
+				semanticScores,
+				score => Zotero.Embeddings.getScoreFraction(score, { clamped: false })
+			]
 		];
 		let scores = new Map();
 		for (let [engineScores, toFraction] of engines) {
@@ -743,7 +788,7 @@ Zotero.BestMatch = new function () {
 					sum + toFraction(score) / (RRF_K + rankOfScore.get(score)));
 			}
 		}
-		let ceiling = 2 / (RRF_K + 1);
+		let ceiling = Math.max(2 / (RRF_K + 1), ...scores.values());
 		for (let [itemID, sum] of scores) {
 			scores.set(itemID, sum / ceiling);
 		}
