@@ -899,7 +899,7 @@
 				<popupset id="condition-tooltips"/>
 				
 				<menulist id="conditionsmenu" oncommand="this.closest('zoterosearchcondition').onConditionSelected(event.target.value); event.stopPropagation()" native="true">
-					<menupopup onpopupshown="if (event.target == this) this.closest('zoterosearchcondition').revealSelectedCondition()">
+					<menupopup nonnative="true" onpopupshown="if (event.target == this) this.closest('zoterosearchcondition').revealSelectedCondition()">
 						<menu id="attachment-conditions-menu">
 							<menupopup/>
 						</menu>
