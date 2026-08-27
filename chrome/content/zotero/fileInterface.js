@@ -40,7 +40,7 @@ ChromeUtils.defineESModuleGetters(globalThis, {
  **/
 var Zotero_File_Exporter = function () {
 	this.name = Zotero.getString("fileInterface.exportedItems");
-	this.collection = false;
+	this.collections = false;
 	this.items = false;
 }
 
@@ -131,8 +131,8 @@ Zotero_File_Exporter.prototype.save = async function () {
 		return;
 	}
 	
-	if (this.collection) {
-		translation.setCollection(this.collection);
+	if (this.collections) {
+		translation.setCollections(this.collections);
 	}
 	else if (this.items) {
 		translation.setItems(this.items);
@@ -206,12 +206,16 @@ var Zotero_File_Interface = new function () {
 		var exporter = new Zotero_File_Exporter();
 	
 		var collections = ZoteroPane_Local.getSelectedCollections();
-		if (collections.length == 1) {
-			exporter.name = collections[0].getName();
-			exporter.collection = collections[0];
-		}
-		else if (collections.length > 1) {
+		var searches = ZoteroPane_Local.getSelectedSavedSearches();
+		if (collections.length && !searches.length) {
 			exporter.name = collections.map(c => c.getName()).join(', ');
+			exporter.collections = collections;
+		}
+		else if (collections.length) {
+			// Saved searches can't be exported as collections, so export all the items shown
+			exporter.name = collections.map(c => c.getName())
+				.concat(searches.map(s => s.name))
+				.join(', ');
 			exporter.items = await ZoteroPane.getUnfilteredItems();
 			if (!exporter.items.length) throw ("No items to save");
 		}
@@ -221,7 +225,6 @@ var Zotero_File_Interface = new function () {
 			if (!exporter.items) throw ("No items to save");
 			
 			// find name
-			var searches = ZoteroPane_Local.getSelectedSavedSearches();
 			if (searches.length) {
 				exporter.name = searches.map(s => s.name).join(', ');
 			}

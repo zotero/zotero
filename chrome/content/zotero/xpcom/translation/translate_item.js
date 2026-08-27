@@ -1108,19 +1108,38 @@ Zotero.Translate.ItemGetter.prototype = {
 	},
 	
 	setCollection: function (collection, getChildCollections) {
-		// get items in this collection
-		var items = new Set(collection.getChildItems());
+		this.setCollections([collection], getChildCollections);
+	},
+	
+	setCollections: function (collections, getChildCollections) {
+		// get items in these collections
+		var items = new Set();
+		for (let collection of collections) {
+			collection.getChildItems().forEach(item => items.add(item));
+			
+			if (getChildCollections) {
+				// Get items in all descendant collections
+				let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
+				for (let descendantCollection of descendantCollections) {
+					let childItems = descendantCollection.getChildItems();
+					childItems.forEach(item => items.add(item));
+				}
+			}
+		}
 		
 		if (getChildCollections) {
-			// Get child collections
-			this._collectionsLeft = Zotero.Collections.getByParent(collection.id);
-			
-			// Get items in all descendant collections
-			let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
-			for (let collection of descendantCollections) {
-				let childItems = collection.getChildItems();
-				childItems.forEach(item => items.add(item));
-			}
+			// Collections below other given collections are exported as descendants of those
+			let ids = new Set(collections.map(collection => collection.id));
+			this._collectionsLeft = collections.filter((collection) => {
+				let parentID = collection.parentID;
+				while (parentID) {
+					if (ids.has(parentID)) {
+						return false;
+					}
+					parentID = Zotero.Collections.get(parentID).parentID;
+				}
+				return true;
+			});
 		}
 		
 		this._itemsLeft = Array.from(items.values());
