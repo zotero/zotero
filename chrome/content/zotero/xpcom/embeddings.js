@@ -347,6 +347,12 @@ Zotero.Embeddings = new function () {
 	}
 
 	async function _setUpDB() {
+		// Scoring runs on sqlite-vec's vector functions (see
+		// _scoreExpression()) rather than in JS, because mozStorage hands a
+		// vector to JS as an array of one number per byte -- a library's worth
+		// of those blocks the main thread for seconds. Loaded once here;
+		// DBConnection re-loads it after a reconnect, before this callback.
+		await Zotero.DB.loadExtension('vec');
 		// Idempotent, since it can run again for a retried initialization or
 		// after a connection reopen
 		let attached = (await Zotero.DB.queryAsync("PRAGMA database_list"))
@@ -1113,6 +1119,35 @@ Zotero.Embeddings = new function () {
 		return new Float32Array(bytes.buffer);
 	}
 
+	// The cosine between a stored vector and the query, both centered on the
+	// model's measured mean -- the same score center() and dot() produce in
+	// JS. A mean of a different width than the vectors is no mean to center
+	// on, and is skipped the way center() skips it. Vectors bind as the JSON
+	// text vec_f32() reads rather than as BLOBs: mozStorage reads an object
+	// bound as the first parameter as a set of named parameters.
+	//
+	// @return {Object} - { sql, params }: the expression, and the values it
+	//     binds ahead of the caller's own
+	function _scoreExpression(mean, query) {
+		let queryJSON = JSON.stringify(Array.from(query));
+		if (!mean || mean.length !== query.length) {
+			return {
+				sql: '1 - vec_distance_cosine(embedding, vec_f32(?))',
+				params: [queryJSON]
+			};
+		}
+		return {
+			sql: '1 - vec_distance_cosine(vec_sub(embedding, vec_f32(?)), vec_f32(?))',
+			params: [JSON.stringify(Array.from(mean)), queryJSON]
+		};
+	}
+
+	// The columns saying where a chunk sits in its item, as _describeChunk()
+	// reads them. The vector itself is never selected -- it's only ever used
+	// for scoring, which happens in SQL.
+	const CHUNK_COLUMNS = 'chunkIndex, startBlock, endBlock, startOffset, endOffset, '
+		+ 'textCheck, sectionPart, sectionParts';
+
 	// The shared guards of the scoring paths: wait out any in-progress model
 	// switch, so a query isn't embedded with one model and compared against
 	// another's vectors, and confirm the stored vectors were produced by the
@@ -1177,14 +1212,16 @@ Zotero.Embeddings = new function () {
 		let calibration = await _requireReadyIndex();
 		let generation = _modelGeneration;
 		let query = _center(await this.embedQuery(queryText));
+		let scoring = _scoreExpression(calibration.mean, query);
 		let minScore = calibration.minScore;
 
-		// Load embeddings for the candidates in chunks (avoids the SQLite bound-
-		// parameter limit for large collections), scoring each as we go. An
-		// item stored as multiple text chunks scores as its best chunk, not an
+		// Score the candidates in chunks (avoids the SQLite bound-parameter
+		// limit for large collections). SQLite scores every stored chunk and
+		// reduces each item to the two numbers below, so ranking a library
+		// hands JS a row per item rather than a vector per chunk. An item
+		// stored as multiple text chunks scores as its best chunk, not an
 		// average, so a long note that addresses the query in one paragraph
 		// isn't diluted by the rest.
-		let best = new Map();
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			if (shouldCancel && shouldCancel()) {
@@ -1199,29 +1236,26 @@ Zotero.Embeddings = new function () {
 			// Rows without an embedding are processed-but-empty markers (see
 			// _setUpDB()), with nothing to score
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, embedding, "
+				"SELECT itemID, MAX(score) AS score, "
+					+ "MAX(CASE WHEN previewable THEN score END) AS previewableScore FROM ("
+					+ "SELECT itemID, " + scoring.sql + " AS score, "
 					+ "(startBlock IS NOT NULL OR startOffset IS NOT NULL) AS previewable "
 					+ "FROM embeddings.itemEmbeddings WHERE itemID IN ("
-					+ chunk.map(() => '?').join(',') + ") AND embedding IS NOT NULL",
-				chunk
+					+ chunk.map(() => '?').join(',') + ") AND embedding IS NOT NULL"
+					+ ") GROUP BY itemID",
+				[...scoring.params, ...chunk]
 			);
 			for (let row of rows) {
-				let dot = this.dot(query, _center(_blobToVector(row.embedding)));
-				let prev = best.get(row.itemID);
-				if (prev === undefined || dot > prev) {
-					best.set(row.itemID, dot);
+				if (row.score < minScore) {
+					continue;
 				}
+				scores.set(row.itemID, row.score);
 				// An above-floor chunk with source references makes its item's
 				// match showable; the chunk also puts the item's best at or
 				// above the floor, so the set stays within the returned items
-				if (dot >= minScore && row.previewable) {
+				if (row.previewableScore !== null && row.previewableScore >= minScore) {
 					previewableIDs.add(row.itemID);
 				}
-			}
-		}
-		for (let [itemID, dot] of best) {
-			if (dot >= minScore) {
-				scores.set(itemID, dot);
 			}
 		}
 		if (generation !== _modelGeneration) {
@@ -1263,19 +1297,19 @@ Zotero.Embeddings = new function () {
 		}
 		let calibration = await _requireReadyIndex();
 		let query = _center(await this.embedQuery(queryText));
-		let rows = await _getChunkRows(itemID);
-		let scored = rows
-			.map(row => ({
-				row,
-				score: this.dot(query, _center(_blobToVector(row.embedding)))
-			}))
-			.filter(entry => entry.score >= calibration.minScore)
-			.sort((a, b) => (b.score - a.score) || (a.row.chunkIndex - b.row.chunkIndex))
-			.slice(0, limit);
-		let sources = await _loadChunkSources(itemID, scored.map(entry => entry.row));
-		return scored.map((entry, i) => Object.assign(
-			_describeChunk(entry.row, sources[i]),
-			{ score: entry.score }
+		let scoring = _scoreExpression(calibration.mean, query);
+		let scored = await Zotero.DB.queryAsync(
+			"SELECT * FROM ("
+				+ "SELECT " + CHUNK_COLUMNS + ", " + scoring.sql + " AS score "
+				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL"
+				+ ") WHERE score >= ? ORDER BY score DESC, chunkIndex",
+			[...scoring.params, itemID, calibration.minScore]
+		);
+		scored = scored.slice(0, limit);
+		let sources = await _loadChunkSources(itemID, scored);
+		return scored.map((row, i) => Object.assign(
+			_describeChunk(row, sources[i]),
+			{ score: row.score }
 		));
 	};
 
@@ -1329,14 +1363,13 @@ Zotero.Embeddings = new function () {
 		return vectors.map(vector => this.dot(query, _center(vector)));
 	};
 
-	// The stored rows of an item's chunks, embeddings included. Attaches the
-	// database first, which asking the model about the index would otherwise
-	// have done -- getChunks() never asks it anything.
+	// The stored rows of an item's chunks. Attaches the database first, which
+	// asking the model about the index would otherwise have done --
+	// getChunks() never asks it anything.
 	async function _getChunkRows(itemID) {
 		await Zotero.Embeddings.initDB();
 		return Zotero.DB.queryAsync(
-			"SELECT chunkIndex, embedding, startBlock, endBlock, startOffset, endOffset, "
-				+ "textCheck, sectionPart, sectionParts "
+			"SELECT " + CHUNK_COLUMNS + " "
 				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL",
 			itemID
 		);

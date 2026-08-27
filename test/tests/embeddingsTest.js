@@ -215,13 +215,17 @@ describe("Zotero.Embeddings", function () {
 			};
 			// One item matches through a chunk with source references (plus a
 			// below-floor chunk with references, which must not count), one
-			// matches only through a chunk without them, and a distractor
-			// matches nothing
+			// matches only through a chunk without them, one matches through a
+			// chunk without them while its only chunk with references scores
+			// below the floor, and a distractor matches nothing
 			let chunked = await createDataObject('item');
 			await store(chunked, 0, axis(2), { blocks: true });
 			await store(chunked, 1, axis(0), { blocks: true });
 			let plain = await createDataObject('item');
 			await store(plain, 0, axis(0));
+			let buried = await createDataObject('item');
+			await store(buried, 0, axis(0));
+			await store(buried, 1, axis(2), { blocks: true });
 			let distant = await createDataObject('item');
 			await store(distant, 0, axis(3));
 
@@ -236,12 +240,16 @@ describe("Zotero.Embeddings", function () {
 			);
 			try {
 				let { scores, previewableIDs } = await Zotero.Embeddings.scoreItemIDs(
-					'anything', [chunked.id, plain.id, distant.id]);
+					'anything', [chunked.id, plain.id, buried.id, distant.id]);
 				assert.isTrue(previewableIDs.has(chunked.id));
 				// A match carried only by chunks without source references is
 				// its own preview
 				assert.isTrue(scores.has(plain.id));
 				assert.isFalse(previewableIDs.has(plain.id));
+				// References on a chunk the query didn't match don't make the
+				// item's match showable
+				assert.isTrue(scores.has(buried.id));
+				assert.isFalse(previewableIDs.has(buried.id));
 				assert.isFalse(previewableIDs.has(distant.id));
 			}
 			finally {
