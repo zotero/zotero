@@ -250,6 +250,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	//
 	// Tests
 	//
+	describe("#getPassword()", function () {
+		it("should return a stored password with non-ASCII characters", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			var password = "p\u00e4ssw\u20acrd";
+			await controller.setPassword(password);
+			assert.equal(await controller.getPassword(), password);
+		})
+	})
+	
 	describe("Syncing", function () {
 		it("should skip downloads if not marked as needed", async function () {
 			var engine = await setup();
