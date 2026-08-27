@@ -1110,6 +1110,27 @@ describe("Advanced Search", function () {
 				assert.equal(searchCondition.selectedCondition, 'language');
 			});
 
+			it("should select an attachment condition by its full name", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('title', 'is', '');
+				pane.search = s;
+
+				var searchCondition = conditions.firstChild;
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+
+				// The Attachment submenu shows a short label, but the menulist shows the
+				// full name, which is what gets typed
+				let menuitem = conditionsMenu.querySelector('menuitem[value="fileTypeID"]');
+				assert.notEqual(
+					menuitem.label,
+					Zotero.SearchConditions.getLocalizedName('fileTypeID')
+				);
+				// The spaces in the name would otherwise open the menu (see customElements.js)
+				typeInMenu(conditionsMenu, 'attachment file t');
+				assert.equal(searchCondition.selectedCondition, 'fileTypeID');
+			});
+
 			it("should cycle through matches when the same letter is typed repeatedly", function () {
 				var s = new Zotero.Search();
 				s.libraryID = Zotero.Libraries.userLibraryID;
