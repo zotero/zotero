@@ -694,7 +694,9 @@ Zotero.HTTP = new function () {
 		// Build headers
 		let headers = new Zotero.HTTP.CasePreservingHeaders(options.headers || {});
 		if (ctx.username) {
-			let encoded = btoa(ctx.username + ':' + (ctx.password || ''));
+			// Encode as UTF-8 before base64, since btoa() only accepts code points below 256
+			let bytes = new TextEncoder().encode(ctx.username + ':' + (ctx.password || ''));
+			let encoded = btoa(String.fromCharCode(...bytes));
 			headers.set('Authorization', `Basic ${encoded}`);
 		}
 		fetchOptions.headers = headers;
