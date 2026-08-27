@@ -313,8 +313,7 @@ Zotero.Schema = new function () {
 			}
 		}
 		
-		// Reset sync queue tries if new version
-		await _checkClientVersion();
+		await _handleClientVersionChange();
 		
 		// See above
 		(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
@@ -2544,7 +2543,12 @@ Zotero.Schema = new function () {
 	};
 	
 	
-	function _checkClientVersion() {
+	/**
+	 * Run upgrade tasks and record the current client version
+	 *
+	 * @return {Promise<Boolean>} - True if the client version changed since the last run
+	 */
+	function _handleClientVersionChange() {
 		return Zotero.DB.executeTransaction(async function () {
 			var lastVersion = await _getLastClientVersion();
 			var currentVersion = Zotero.version;
