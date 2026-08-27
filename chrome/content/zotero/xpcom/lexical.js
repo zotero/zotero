@@ -459,14 +459,17 @@ Zotero.Lexical = new function () {
 	 * How much of a query each of the given texts carries, on the same 0-1
 	 * scale as scoreItemIDs(): each text's BM25 score over the terms BM25 can
 	 * score with, divided by what a text about nothing but the query could
-	 * earn (see _getCeiling()).
+	 * earn.
 	 *
 	 * For weighing passages of one document against each other, where the
 	 * texts are in hand but not in an index of their own. Term rarity is
-	 * counted against the fulltext index, the corpus the passages are drawn
-	 * from, so a term common everywhere lifts nothing; length is normalized
-	 * against the given texts' own average, so a passage is long or short
-	 * relative to its siblings rather than to whole documents.
+	 * counted over the given texts themselves: within a document, the
+	 * discriminating term is the one rare there. A query word the whole
+	 * document is about appears in every passage, so it says nothing about
+	 * which passage answers the query -- however rare it is in the corpus
+	 * that surfaced the document. Length is normalized against the texts'
+	 * own average, so a passage is long or short relative to its siblings
+	 * rather than to whole documents.
 	 *
 	 * @param {String} queryText
 	 * @param {String[]} texts
@@ -478,28 +481,40 @@ Zotero.Lexical = new function () {
 		if (!parsed.length || !texts.length) {
 			return none;
 		}
-		let weighted = await _getTextScoringTerms(queryText, parsed);
-		let ceiling = weighted.reduce((sum, entry) => sum + entry.idf, 0) * (FTS5_K1 + 1);
-		if (!ceiling) {
+		let terms = await _getScoringTerms(parsed);
+		if (!terms.length) {
 			return none;
 		}
-		let terms = weighted.map(entry => entry.term);
 		let lengths = texts.map(text => (text || '').length);
 		let averageLength = lengths.reduce((sum, length) => sum + length, 0) / texts.length;
 		if (!averageLength) {
 			return none;
 		}
+		let counts = texts.map((text) => {
+			let perText = new Map();
+			for (let match of _findTermMatches(text || '', terms)) {
+				perText.set(match.term, (perText.get(match.term) || 0) + 1);
+			}
+			return perText;
+		});
+		// The smoothed BM25 idf (the +1 keeps it positive), so a term in
+		// every text still separates texts of one and of many occurrences a
+		// little, rather than flipping negative
+		let weighted = terms.map((term) => {
+			let df = counts.reduce((sum, perText) => sum + (perText.has(term) ? 1 : 0), 0);
+			return {
+				term,
+				idf: Math.log(1 + (texts.length - df + 0.5) / (df + 0.5))
+			};
+		});
+		let ceiling = weighted.reduce((sum, entry) => sum + entry.idf, 0) * (FTS5_K1 + 1);
 		return texts.map((text, i) => {
 			if (!text) {
 				return 0;
 			}
-			let counts = new Map();
-			for (let match of _findTermMatches(text, terms)) {
-				counts.set(match.term, (counts.get(match.term) || 0) + 1);
-			}
 			let score = 0;
 			for (let { term, idf } of weighted) {
-				let tf = counts.get(term) || 0;
+				let tf = counts[i].get(term) || 0;
 				if (!tf) {
 					continue;
 				}
@@ -558,42 +573,6 @@ Zotero.Lexical = new function () {
 		return term.type == 'cjk'
 			? (term.bigrams ? '"' + term.bigrams + '"' : '"' + term.text + '"*')
 			: '"' + term.text + '"' + (term.prefix ? '*' : '');
-	}
-
-	// The scoring terms of a query paired with their inverse document
-	// frequencies in the fulltext index (see scoreTexts()). Kept for the last
-	// query asked about: every matched item scores its own passages, and the
-	// counts behind these don't move within one search.
-	let _textScoringTerms = null;
-
-	async function _getTextScoringTerms(queryText, parsed) {
-		if (_textScoringTerms && _textScoringTerms.queryText === queryText) {
-			return _textScoringTerms.weighted;
-		}
-		let weighted = [];
-		let corpusSizes = new Map();
-		for (let term of await _getScoringTerms(parsed)) {
-			let table = term.type == 'cjk' ? SOURCES[0].cjk : SOURCES[0].word;
-			if (!corpusSizes.has(table)) {
-				corpusSizes.set(table, await Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM ftindex." + table));
-			}
-			let corpusSize = corpusSizes.get(table);
-			let idf = FTS5_MIN_IDF;
-			if (corpusSize) {
-				let df = await Zotero.DB.valueQueryAsync(
-					"SELECT COUNT(*) FROM ftindex." + table
-						+ " WHERE " + table + " MATCH ?",
-					[_termMatch(term)]
-				);
-				df = Math.max(0, Math.min(df, corpusSize));
-				idf = Math.max(FTS5_MIN_IDF,
-					Math.log((corpusSize - df + 0.5) / (df + 0.5)));
-			}
-			weighted.push({ term, idf });
-		}
-		_textScoringTerms = { queryText, weighted };
-		return weighted;
 	}
 
 	/**

@@ -220,6 +220,13 @@ describe("CollectionViewItemTree", function () {
 
 			it("should rank items lexically", async function () {
 				let col = await createDataObject('collection');
+				// Unrelated items, so the query words the matches share still
+				// separate documents in this corpus -- in a corpus of nothing
+				// but matches, FTS5 floors their idf as separating nothing
+				// and no match earns a score
+				for (let i = 0; i < 6; i++) {
+					await createDataObject('item', { title: `unrelated filler number ${i}` });
+				}
 				let full = await createDataObject('item',
 					{ title: 'Lexint owl migration patterns', collections: [col.id] });
 				// Three of the query's four terms, ranked below the full match
@@ -231,7 +238,7 @@ describe("CollectionViewItemTree", function () {
 
 				await select(win, col);
 				let itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'lexint owl migration ');
+				await itemsView.setFilter('search', 'lexint owl migration patterns');
 
 				// Scored items only, ranked by coverage, most relevant first
 				assert.deepEqual(itemsView._rows.map(row => row.id),

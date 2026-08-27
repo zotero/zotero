@@ -471,6 +471,21 @@ describe("Zotero.Lexical", function () {
 			}
 		});
 
+		it("should weigh terms by their rarity within the given texts", async function () {
+			// Every passage of a dinosaur book says 'dinosaur', so among its
+			// passages the word separates nothing -- 'weight' is what picks
+			// out the passage answering the query, however loudly the others
+			// repeat the word the whole document is about
+			let spam = 'dinosaur dinosaur dinosaur dinosaur dinosaur everywhere';
+			let answer = 'the weight of a grown dinosaur';
+			let scores = await Zotero.Lexical.scoreTexts(
+				'dinosaur weight',
+				[spam, spam, spam, answer]
+			);
+			let best = Math.max(...scores);
+			assert.equal(scores.indexOf(best), 3);
+		});
+
 		it("should score nothing for a query with no terms", async function () {
 			assert.deepEqual(await Zotero.Lexical.scoreTexts('', ['owl']), [0]);
 		});
