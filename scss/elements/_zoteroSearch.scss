@@ -320,11 +320,6 @@ zoterosearch {
 		max-height: 16px;
 	}
 	
-	// Indent subcollections below their parents, icon included
-	#valuemenu menuitem > .menu-icon {
-		margin-inline-start: calc(var(--nesting-level, 0) * 16px);
-	}
-
 	#condition-tooltips hbox > label
 	{
 		font-weight: 600;

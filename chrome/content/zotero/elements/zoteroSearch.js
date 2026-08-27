@@ -1182,21 +1182,7 @@
 			switch (conditionName) {
 				case 'collection':
 				{
-					let rows = [];
-
-					var libraryID = this.parent.search.libraryID;
-
-					let cols = Zotero.Collections.getByLibrary(libraryID, true);
-					for (let col of cols) {
-						rows.push({
-							name: Zotero.Utilities.trimInternal(col.name),
-							value: 'C' + col.key,
-							image: Zotero.Collection.prototype.treeViewImage,
-							level: col.level
-						});
-					}
-
-					this.createValueMenu(rows);
+					this.createCollectionValueMenu(this.parent.search.libraryID);
 					break;
 				}
 				case 'savedSearch':
@@ -1398,6 +1384,7 @@
 
 		createValueMenu(rows) {
 			let valueMenu = this.querySelector('#valuemenu');
+			valueMenu.removeAttribute('tooltiptext');
 
 			while (valueMenu.hasChildNodes()) {
 				valueMenu.removeChild(valueMenu.firstChild);
@@ -1409,20 +1396,101 @@
 					menuitem.className = 'menuitem-iconic';
 					menuitem.setAttribute('image', row.image);
 				}
-				// Indent nested rows (subcollections)
-				if (row.level) {
-					menuitem.style.setProperty('--nesting-level', row.level);
-				}
 			}
 			valueMenu.selectedIndex = 0;
 			
 			if (this.value) {
 				valueMenu.value = this.value;
-				// If the value isn't in the menu (e.g., a collection from another
+				// If the value isn't in the menu (e.g., a saved search from another
 				// library after a library change), fall back to the first item
 				if (!valueMenu.selectedItem) {
 					valueMenu.selectedIndex = 0;
 				}
+			}
+		}
+
+		// Subcollections are shown in submenus, which the menulist can't select from, so
+		// the selection is kept in this.value (see showSelectedCollection())
+		createCollectionValueMenu(libraryID) {
+			let valueMenu = this.querySelector('#valuemenu');
+			valueMenu.removeAllItems();
+			let menupopup = valueMenu.appendChild(document.createXULElement('menupopup'));
+			// macOS renders a menulist's popup as a native menu, which can't be opened to a
+			// submenu and ignores CSS. Opt this one out so the path to the selected
+			// collection can be shown.
+			menupopup.setAttribute('nonnative', 'true');
+			
+			// If the stored collection isn't in this library (e.g., after a library change),
+			// select the first one
+			let selected = (this.value?.startsWith('C')
+					&& Zotero.Collections.getByLibraryAndKey(libraryID, this.value.substr(1)))
+				|| Zotero.Collections.getByLibrary(libraryID)[0];
+			
+			Zotero.Utilities.Internal.createMenuForTarget(
+				Zotero.Libraries.get(libraryID),
+				menupopup,
+				selected?.treeViewID,
+				(event, collection) => this.onCollectionSelected(event, collection),
+				null,
+				{ filter: target => target.objectType == 'collection' }
+			);
+			this.showSelectedCollection(selected);
+
+			// Open the submenus down to the selected collection
+			menupopup.addEventListener('popupshown', (event) => {
+				if (event.target != menupopup) {
+					return;
+				}
+				let item = menupopup.querySelector(`menuitem[checked]`);
+				let menus = [];
+				for (let menu = item?.closest('menu'); menu && menupopup.contains(menu);
+					menu = menu.parentElement?.closest('menu')) {
+					menus.unshift(menu);
+				}
+				let openNext = (index) => {
+					let menu = menus[index];
+					if (!menu) {
+						return;
+					}
+					menu.menupopup.addEventListener(
+						'popupshown', () => openNext(index + 1), { once: true }
+					);
+					menu.open = true;
+				};
+				// Wait for the outer popup to finish its own popupshown handling
+				setTimeout(() => openNext(0));
+			});
+		}
+
+		onCollectionSelected(event, collection) {
+			this.showSelectedCollection(collection);
+			// Clicking the row of a collection that has subcollections selects it without
+			// closing the menu or firing a command event
+			if (event.target.localName == 'menu') {
+				let valueMenu = this.querySelector('#valuemenu');
+				valueMenu.menupopup.hidePopup();
+				valueMenu.dispatchEvent(new Event('command', { bubbles: true }));
+			}
+		}
+
+		// The condition's value, since a collection in a submenu can't be the menulist's
+		// selected item and so can't be read back off the control
+		showSelectedCollection(collection) {
+			this.value = collection ? 'C' + collection.key : '';
+			let valueMenu = this.querySelector('#valuemenu');
+			// A top-level collection can still be the selected item, which lets the popup
+			// open positioned on it. One in a submenu can't, so set the label and icon
+			// directly instead.
+			valueMenu.selectedItem = null;
+			if (collection) {
+				valueMenu.value = collection.treeViewID;
+				valueMenu.setAttribute('label', collection.name);
+				valueMenu.setAttribute('image', collection.treeViewImage);
+				let names = [];
+				for (let c = collection; c; c = c.parentID && Zotero.Collections.get(c.parentID)) {
+					names.unshift(c.name);
+				}
+				valueMenu.setAttribute('tooltiptext', names.join(' \u203A '));
 			}
 		}
 
@@ -1487,6 +1555,10 @@
 			if (this._valueMenuPending) {
 				return this.value;
 			}
+			// The collection menu can't always hold the selection (see showSelectedCollection())
+			if (this.selectedCondition == 'collection') {
+				return this.value;
+			}
 			let valueField = this.querySelector('#valuefield');
 			if (!valueField.hidden) {
 				return valueField.value;
@@ -1546,16 +1618,12 @@
 				value = this.querySelector('#value-date-age').value;
 			}
 
-			// Handle special C1234 and S5678 form for
-			// collections and searches
-			else if (condition == 'collection' || condition == 'savedSearch') {
-				var letter = this.querySelector('#valuemenu').value.substr(0, 1);
-				if (letter == 'C') {
-					condition = 'collection';
-				}
-				else if (letter == 'S') {
-					condition = 'savedSearch';
-				}
+			// Values take the special C1234/S5678 form. A collection can be in a submenu,
+			// which a menulist can't select from, so its selection is kept on the condition.
+			else if (condition == 'collection') {
+				value = this.value.substr(1);
+			}
+			else if (condition == 'savedSearch') {
 				value = this.querySelector('#valuemenu').value.substr(1);
 			}
 
