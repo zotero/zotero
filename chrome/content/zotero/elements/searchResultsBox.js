@@ -117,9 +117,10 @@
 
 			let preview = session.getPreviews(item.id);
 			if (preview?.state == 'pending') {
-				// Selecting an item asks for its passages outright, rather
-				// than waiting for its rows to be scrolled to
-				await session.preload([item.id]);
+				// Previews are derived before the tree's rows appear, but a
+				// selection can still land mid-re-score, so settle this one
+				// outright
+				await session.fill([item.id]);
 				// The selection, or the search, may have moved on while
 				// deriving
 				if (this.item !== item || this._session !== session) {

@@ -479,7 +479,7 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 	isContainerEmpty({ getMatchPreviews } = {}) {
 		// An attachment with search matches to show can be expanded even
 		// with no annotations of its own
-		if (getMatchPreviews?.(this.ref.id)) {
+		if (getMatchPreviews?.(this.ref.id)?.state == 'filled') {
 			return false;
 		}
 		return this.ref.numAnnotations() == 0;
@@ -598,31 +598,24 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 
 /**
  * The reference a search-match row wraps: one place a best-match search
- * matched inside an item, or -- with no entry yet -- a stand-in for that
- * item's matches while its preview is still being derived.
+ * matched inside an item.
  *
  * Item tree rows normally wrap data objects. A preview isn't a stored
  * object, so this stands in as the tree's reference to one.
  */
 class SearchMatch {
-	constructor(itemID, entry = null) {
+	constructor(itemID, entry) {
 		this.itemID = itemID;
-		// A preview entry (see Zotero.BestMatch.Session#getPreviews()), or
-		// null while the item's previews are still pending
+		// A preview entry (see Zotero.BestMatch.Session#getPreviews())
 		this.entry = entry;
-		this.treeViewID = 'SM' + itemID + (entry ? '-' + entry.key : '-pending');
+		this.treeViewID = 'SM' + itemID + '-' + entry.key;
 		this.id = this.treeViewID;
-	}
-
-	get isPending() {
-		return !this.entry;
 	}
 
 	/**
 	 * The search-match refs to materialize under an item, from its
-	 * best-match preview: one pending ref while the preview is being
-	 * derived, one ref per quoted entry once it's filled, and nothing when
-	 * the item has no preview or its preview derived nothing.
+	 * best-match preview: one ref per quoted entry, and nothing when the
+	 * item has no filled preview or its preview derived nothing.
 	 *
 	 * A preview holds every passage the item matched in; the tree shows the
 	 * strongest few, which are the ones with a line quoted. The rest are
@@ -636,11 +629,8 @@ class SearchMatch {
 	 */
 	static forItem(item, getMatchPreviews) {
 		let preview = getMatchPreviews?.(item.id);
-		if (!preview) {
+		if (preview?.state != 'filled') {
 			return [];
-		}
-		if (preview.state == 'pending') {
-			return [new SearchMatch(item.id)];
 		}
 		return preview.entries
 			.slice(0, Zotero.BestMatch.MAX_QUOTED_PASSAGES)
@@ -804,36 +794,6 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		}
 
 		span.append(this._renderLines(locationSpan, textSpan));
-		return span;
-	}
-}
-
-/**
- * Row standing in for an item's search-match rows while its preview is
- * still pending: a single row showing that matches are on their way, which
- * the fill replaces with the item's SearchMatchItemTreeRows. The ref is a
- * SearchMatch with no entry yet.
- */
-class SearchMatchPlaceholderItemTreeRow extends SearchMatchItemTreeRow {
-	get type() {
-		return 'search-match-placeholder';
-	}
-
-	getDisplayTitle() {
-		return '';
-	}
-
-	getLocationLabel() {
-		return '';
-	}
-
-	renderPrimaryCell(index, data, column) {
-		let span = document.createElement('span');
-		span.className = `cell ${column.className} primary`;
-		let textSpan = document.createElement('span');
-		textSpan.className = 'cell-text search-match-pending';
-		textSpan.textContent = Zotero.ftl.formatValueSync('items-search-match-pending');
-		span.append(this._renderLines(textSpan));
 		return span;
 	}
 }
@@ -1015,11 +975,7 @@ class SpacerItemTreeRow extends ItemTreeRow {
 ItemTreeRow.create = function (ref, level, isOpen) {
 	if (ref instanceof Zotero.Collection) return new CollectionItemTreeRow(ref, level, isOpen);
 	if (ref instanceof Zotero.Search) return new SearchItemTreeRow(ref, level, isOpen);
-	if (ref instanceof SearchMatch) {
-		return ref.isPending
-			? new SearchMatchPlaceholderItemTreeRow(ref, level, isOpen)
-			: new SearchMatchItemTreeRow(ref, level, isOpen);
-	}
+	if (ref instanceof SearchMatch) return new SearchMatchItemTreeRow(ref, level, isOpen);
 	if (ref.isAnnotation?.()) return new AnnotationItemTreeRow(ref, level, isOpen);
 	if (ref.isFileAttachment?.()) return new FileItemTreeRow(ref, level, isOpen);
 	return new ZoteroItemTreeRow(ref, level, isOpen);
@@ -1031,7 +987,6 @@ module.exports.ZoteroItemTreeRow = ZoteroItemTreeRow;
 module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
 module.exports.SearchMatchItemTreeRow = SearchMatchItemTreeRow;
-module.exports.SearchMatchPlaceholderItemTreeRow = SearchMatchPlaceholderItemTreeRow;
 module.exports.SearchMatch = SearchMatch;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;

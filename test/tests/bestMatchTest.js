@@ -324,7 +324,7 @@ describe("Zotero.BestMatch", function () {
 			assert.isUndefined(excerpts[0].score);
 		});
 
-		it("should quote the way a pinned semantic engine would", async function () {
+		it("should keep the lexical engine out of a pinned semantic session's quotes", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			let head = 'A first paragraph that never mentions the bird at all. '.repeat(5);
@@ -336,9 +336,6 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(rangesStub);
 			let windowStub = sinon.stub(Zotero.Lexical, 'pickSnippetWindow');
 			stubs.push(windowStub);
-			// The model reads the lines and prefers the last
-			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreTexts')
-				.callsFake(async (query, texts) => texts.map((text, i) => i / texts.length)));
 
 			pinEngine('semantic');
 			// The item matched lexically too, so only the pin can be keeping
@@ -349,8 +346,9 @@ describe("Zotero.BestMatch", function () {
 			assert.isFalse(rangesStub.called);
 			assert.isFalse(windowStub.called);
 			assert.isEmpty(excerpt.ranges);
-			// The model's own choice of line, not the one saying 'owl'
-			assert.isAbove(excerpt.snippet.start, 0);
+			// With no ranges to quote around, the passage's opening -- not
+			// the line saying 'owl'
+			assert.equal(excerpt.snippet.start, 0);
 			// Nothing but the model weighed it, so its strength is the
 			// model's fraction rather than a share of a blend
 			assert.closeTo(excerpt.strength, 0.6, 1e-9);
@@ -382,21 +380,20 @@ describe("Zotero.BestMatch", function () {
 			}
 		});
 
-		it("should fill out a short chosen sentence with what follows it", async function () {
+		it("should quote whole opening sentences until the line is filled", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			// The opening sentence is far too short to stand as a quote on
+			// its own
 			let first = 'The owl is here.';
 			let second = 'A modest follow-up sentence that adds a little context.';
-			let third = 'A third sentence long enough that adding it would overrun the '
-				+ 'budget for a quoted line, so it has to be left out of one that '
-				+ 'already holds two sentences before it, whatever else is true.';
+			let third = 'A third sentence long enough to carry the quote past the '
+				+ 'budget for a quoted line, taken whole anyway, since half a '
+				+ 'sentence would read as a truncation rather than as a passage.';
+			let fourth = 'A fourth sentence that lies beyond the filled line.';
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
-				{ text: [first, second, third].join(' '), score: 0.6 }
+				{ text: [first, second, third, fourth].join(' '), score: 0.6 }
 			]));
-			// The model likes the first sentence best, and it is far too
-			// short to stand as a quote on its own
-			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreTexts')
-				.callsFake(async (query, texts) => texts.map((text, i) => 1 - i)));
 
 			pinEngine('semantic');
 			let session = await sessionFor();
@@ -405,26 +402,27 @@ describe("Zotero.BestMatch", function () {
 
 			assert.equal(excerpt.snippet.start, 0);
 			assert.include(quoted, first);
-			// The next sentence fits alongside it...
+			// The next sentence doesn't fill the line either...
 			assert.include(quoted, second);
-			// ...and the one after that doesn't
-			assert.notInclude(quoted, third);
+			// ...so the one that crosses the limit is taken, whole...
+			assert.include(quoted, third);
+			// ...and nothing after it
+			assert.notInclude(quoted, fourth);
 		});
 
-		it("should not ask the model to quote an item it never ranked", async function () {
+		it("should never ask the model to choose a quote", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getChunks').resolves([
 				{ text: 'A passage of owlish things. '.repeat(20), chunkIndex: 0 }
 			]));
 			// The lexical engine scored the passage on a term it then can't
-			// point at -- the one way a passage arrives with no ranges to
-			// quote around
+			// point at -- so the passage arrives with no ranges to quote
+			// around, which used to be the model's cue to pick a line
 			stubs.push(sinon.stub(Zotero.Lexical, 'scoreTexts').resolves([0.8]));
 			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[]]));
 			let scoreTextsStub = sinon.stub(Zotero.Embeddings, 'scoreTexts');
 			stubs.push(scoreTextsStub);
 
-			// Hybrid, but scoring recorded no semantic match for this item
 			let session = await sessionFor({ semantic: false });
 			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
 
@@ -496,103 +494,88 @@ describe("Zotero.BestMatch", function () {
 			return stub;
 		}
 
-		function settledOnce(session) {
-			return new Promise((resolve) => {
-				session.onUpdate = resolve;
-			});
-		}
-
-		it("should build placeholder previews from the engines' match sets", async function () {
+		it("should score and derive previews for the engines' matches", async function () {
 			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8], [att3.id, 0.7]]), [att1.id], [att2.id]);
+			stubDerive(new Map([
+				[att1.id, [
+					{ source: 'title', text: 'owl atlas', ranges: [[0, 3]], strength: 1 },
+					{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
+				]],
+				[att2.id, [{ source: 'content', text: 'strigiformes', ranges: [], strength: 1 }]]
+			]));
 			let session = Zotero.BestMatch.createSession('owl');
 			let scores = await session.score([att1.id, att2.id, att3.id]);
 			assert.equal(scores.get(att1.id), 0.9);
-			assert.equal(session.getPreviews(att1.id).state, 'pending');
-			assert.equal(session.getPreviews(att2.id).state, 'pending');
-			// A scored item neither engine can show matches in -- a semantic
-			// match that is its own preview -- gets no placeholder
-			assert.isNull(session.getPreviews(att3.id));
-		});
-
-		it("should fill requested previews all at once and report them", async function () {
-			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
-			let derive = stubDerive(new Map([[att1.id, [
-				{ source: 'title', text: 'owl atlas', ranges: [[0, 3]], strength: 1 },
-				{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
-			]]]));
-			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			assert.deepEqual(await settled, [att1.id]);
+			// Settled by the time score() resolves
 			let preview = session.getPreviews(att1.id);
 			assert.equal(preview.state, 'filled');
 			assert.deepEqual(preview.entries.map(entry => entry.key), [0, 1]);
 			assert.equal(preview.entries[0].text, 'owl atlas');
-			assert.deepEqual(derive.firstCall.args, [att1.id]);
+			assert.equal(session.getPreviews(att2.id).state, 'filled');
+			// A scored item neither engine can show matches in -- a semantic
+			// match that is its own preview -- gets no preview
+			assert.isNull(session.getPreviews(att3.id));
 		});
 
-		it("should not derive again for a repeated or settled request", async function () {
-			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
-			let derive = stubDerive(new Map([[att1.id, [
-				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
-			]]]));
-			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			await settled;
-			session.request([att1.id]);
-			await Zotero.Promise.delay(50);
-			assert.equal(derive.callCount, 1);
-		});
-
-		it("should derive preloaded previews without waiting to be requested", async function () {
-			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
-			let derive = stubDerive(new Map([
-				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]]
-			]));
-			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id, att2.id]);
-
-			await session.preload([att1.id]);
-			// Settled by the time preload() resolves, with no request() and no
-			// wait for an idle main thread
-			assert.equal(session.getPreviews(att1.id).state, 'filled');
-			assert.equal(session.getPreviews(att2.id).state, 'pending');
-
-			// A preview already in hand costs nothing to preload again
-			await session.preload([att1.id]);
-			assert.equal(derive.callCount, 1);
-		});
-
-		it("should not preload after dispose", async function () {
-			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
-			let derive = stubDerive(new Map([[att1.id, [
-				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
-			]]]));
-			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id]);
-			session.dispose();
-			await session.preload([att1.id]);
-			assert.equal(derive.callCount, 0);
-		});
-
-		it("should let a newer request supersede an older one", async function () {
+		it("should only build and derive previews for items kept by topK", async function () {
 			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
 			let derive = stubDerive(new Map([
 				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]],
 				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
 			]));
 			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id, att2.id]);
-			let settled = settledOnce(session);
-			// The second request lands before the first's idle batch runs
-			session.request([att1.id]);
-			session.request([att2.id]);
-			assert.deepEqual(await settled, [att2.id]);
+			let scores = await session.score([att1.id, att2.id], { topK: 1 });
+			assert.deepEqual([...scores.keys()], [att1.id]);
+			assert.equal(session.getPreviews(att1.id).state, 'filled');
+			assert.isNull(session.getPreviews(att2.id));
 			assert.equal(derive.callCount, 1);
-			assert.equal(session.getPreviews(att1.id).state, 'pending');
+		});
+
+		it("should rank rows by the best match beneath them, with bars reporting own scores", async function () {
+			let parent = await createDataObject('item');
+			let child = await importFileAttachment('test.pdf', { parentID: parent.id });
+			stubScore(new Map([[child.id, 0.9], [att1.id, 0.5]]), [child.id, att1.id]);
+			stubDerive(new Map());
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([child.id, att1.id]);
+			// The child's score lifts onto its parent, which shares its rank
+			assert.equal(session.ranks.get(child.treeViewID), 1);
+			assert.equal(session.ranks.get(parent.treeViewID), 1);
+			assert.equal(session.ranks.get(att1.treeViewID), 2);
+			// The bar reports only the row's own score: an empty bar for a
+			// row that only inherited its rank
+			assert.equal(session.barFractions.get(child.treeViewID), 0.9);
+			assert.equal(session.barFractions.get(parent.treeViewID), 0);
+			assert.equal(session.barFractions.get(att1.treeViewID), 0.5);
+		});
+
+		it("should not derive after dispose", async function () {
+			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
+			let derive = stubDerive(new Map([[att1.id, [
+				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
+			]]]));
+			let session = Zotero.BestMatch.createSession('owl');
+			session.dispose();
+			await session.score([att1.id]);
+			await session.fill([att1.id]);
+			assert.equal(derive.callCount, 0);
+			assert.isNull(session.getPreviews(att1.id));
+		});
+
+		it("should abandon scoring between derivations when shouldCancel says to", async function () {
+			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
+			let derive = stubDerive(new Map([
+				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]],
+				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
+			]));
+			let session = Zotero.BestMatch.createSession('owl');
+			// Cancels between the first item and the second
+			let e = await getPromiseError(session.score([att1.id, att2.id], {
+				shouldCancel: () => session.getPreviews(att1.id)?.state == 'filled'
+			}));
+			assert.instanceOf(e, Zotero.BestMatch.ScoringCancelledError);
+			assert.equal(derive.callCount, 1);
+			assert.equal(session.getPreviews(att2.id).state, 'pending');
 		});
 
 		it("should show nothing for a preview that derives nothing, and not retry it", async function () {
@@ -600,12 +583,8 @@ describe("Zotero.BestMatch", function () {
 			let derive = stubDerive(new Map());
 			let session = Zotero.BestMatch.createSession('owl');
 			await session.score([att1.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			assert.deepEqual(await settled, [att1.id]);
 			assert.isNull(session.getPreviews(att1.id));
-			session.request([att1.id]);
-			await Zotero.Promise.delay(50);
+			await session.fill([att1.id]);
 			assert.equal(derive.callCount, 1);
 		});
 
@@ -615,49 +594,27 @@ describe("Zotero.BestMatch", function () {
 				.rejects(new Error('cache file missing')));
 			let session = Zotero.BestMatch.createSession('owl');
 			await session.score([att1.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			assert.deepEqual(await settled, [att1.id]);
 			assert.isNull(session.getPreviews(att1.id));
 		});
 
-		it("should rederive an invalidated preview on the next request", async function () {
+		it("should rederive an invalidated preview on the next fill", async function () {
 			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
 			let derive = stubDerive(new Map([[att1.id, [
 				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
 			]]]));
 			let session = Zotero.BestMatch.createSession('owl');
 			await session.score([att1.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			await settled;
 
 			session.invalidate([att1.id]);
 			assert.equal(session.getPreviews(att1.id).state, 'pending');
 
-			let settledAgain = settledOnce(session);
-			session.request([att1.id]);
-			await settledAgain;
+			await session.fill([att1.id]);
 			assert.equal(derive.callCount, 2);
 			assert.equal(session.getPreviews(att1.id).state, 'filled');
-		});
 
-		it("should derive nothing and never report after dispose", async function () {
-			stubScore(new Map([[att1.id, 0.9]]), [att1.id]);
-			let derive = stubDerive(new Map([[att1.id, [
-				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
-			]]]));
-			let session = Zotero.BestMatch.createSession('owl');
-			await session.score([att1.id]);
-			let updated = false;
-			session.onUpdate = () => {
-				updated = true;
-			};
-			session.request([att1.id]);
-			session.dispose();
-			await Zotero.Promise.delay(50);
-			assert.isFalse(updated);
-			assert.equal(derive.callCount, 0);
+			// A preview already in hand costs nothing to fill again
+			await session.fill([att1.id]);
+			assert.equal(derive.callCount, 2);
 		});
 
 		it("should keep settled previews across a re-score and drop unmatched items", async function () {
@@ -671,20 +628,20 @@ describe("Zotero.BestMatch", function () {
 				scores: new Map([[att1.id, 0.9]]),
 				matches: { lexical: new Set([att1.id]), semantic: new Set() }
 			});
-			stubDerive(new Map([[att1.id, [
-				{ source: 'title', text: 'owl', ranges: [], strength: 1 }
-			]]]));
+			let derive = stubDerive(new Map([
+				[att1.id, [{ source: 'title', text: 'owl', ranges: [], strength: 1 }]],
+				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
+			]));
 			let session = Zotero.BestMatch.createSession('owl');
 			await session.score([att1.id, att2.id]);
-			let settled = settledOnce(session);
-			session.request([att1.id]);
-			await settled;
+			assert.equal(derive.callCount, 2);
 
 			await session.score([att1.id, att2.id]);
-			// The derived text survives the re-score...
+			// The derived text survives the re-score without re-deriving...
 			let preview = session.getPreviews(att1.id);
 			assert.equal(preview.state, 'filled');
 			assert.equal(preview.entries[0].text, 'owl');
+			assert.equal(derive.callCount, 2);
 			// ...and an item no longer matched loses its preview
 			assert.isNull(session.getPreviews(att2.id));
 		});

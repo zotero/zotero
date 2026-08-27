@@ -401,8 +401,7 @@
 				text-overflow: ellipsis;
 				white-space: nowrap;
 			}
-			.search-match-location,
-			.search-match-pending {
+			.search-match-location {
 				color: var(--fill-secondary);
 			}
 			&.selected {

@@ -1322,7 +1322,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let indexes = [];
 		for (let i = 0, count = this.getRowCount(); i < count; i++) {
 			let type = this.getRow(i)?.type;
-			if (type == 'search-match' || type == 'search-match-placeholder') {
+			if (type == 'search-match') {
 				height ??= this._getSearchMatchRowHeight();
 				heights.push([i, height]);
 				indexes.push(i);
@@ -1990,9 +1990,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * holds. Empty for any selection with something else in it, so a caller
 	 * can tell "these are passages" from "these are items".
 	 *
-	 * A pending row stands in for passages that don't exist yet and names
-	 * none.
-	 *
 	 * @return {Object[]} - { itemID, entry } per selected passage
 	 */
 	getSelectedSearchMatches() {
@@ -2000,9 +1997,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!selected.length || !selected.every(ref => ref instanceof SearchMatch)) {
 			return [];
 		}
-		return selected
-			.filter(ref => ref.entry)
-			.map(ref => ({ itemID: ref.itemID, entry: ref.entry }));
+		return selected.map(ref => ({ itemID: ref.itemID, entry: ref.entry }));
 	}
 
 	/**
@@ -2439,12 +2434,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
-		// Both kinds of match row: one stands in for the other, and they lay
-		// out the same. Toggled here rather than set while rendering, since
-		// the tree recycles a row's div for whatever row next needs one.
-		div.classList.toggle(
-			'search-match-row',
-			row.type === 'search-match' || row.type === 'search-match-placeholder');
+		div.classList.toggle('search-match-row', row.type === 'search-match');
 		div.classList.toggle('library-header-row', row.type === 'library-header');
 		div.classList.toggle('spacer-row', row.type === 'spacer');
 		if (row.type !== 'annotation') {
@@ -2473,13 +2463,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
 
 		row.renderRow(div, index, columns, rowData, this._renderCtx);
-
-		// A pending search-match row on screen is the demand signal for
-		// deriving its item's previews: the virtualized list only renders
-		// what's visible, so rendering names exactly what's worth deriving
-		if (row.type == 'search-match-placeholder') {
-			this.rowProvider.onSearchMatchRendered?.(row.ref.itemID);
-		}
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {

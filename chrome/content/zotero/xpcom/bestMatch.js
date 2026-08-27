@@ -46,10 +46,9 @@ Zotero.BestMatch = new function () {
 	const LEXICAL_WEIGHT = 0.3;
 	// About a line: what a passage is quoted down to for a one-line preview
 	const SNIPPET_CHARS = 150;
-	// Most passages quoted for one item. Quoting one costs work -- sometimes
-	// the model's -- and the strongest few already say what the item has to
-	// offer at a glance. The rest are still derived: they're read whole
-	// rather than quoted, which needs no line chosen.
+	// Most passages quoted for one item. The strongest few already say what
+	// the item has to offer at a glance; the rest are still derived --
+	// they're read whole rather than quoted, which needs no line chosen.
 	const MAX_QUOTED_PASSAGES = 3;
 
 	this.MAX_QUOTED_PASSAGES = MAX_QUOTED_PASSAGES;
@@ -94,6 +93,56 @@ Zotero.BestMatch = new function () {
 			return true;
 		}
 		return _useSemantic() && !!Zotero.Embeddings.normalizeQuery(queryText || '');
+	};
+
+	/**
+	 * Embedding-index coverage over the given libraries, for banners
+	 * explaining incomplete best-match results. Null when the semantic
+	 * engine is disabled or every eligible item is indexed. Never throws --
+	 * the state is informational and shouldn't break a search.
+	 *
+	 * @param {Number[]} [libraryIDs] - Limit coverage to these libraries;
+	 *     all libraries when empty
+	 * @return {Promise<Object|null>} - { type: 'indexing'|'paused', indexed,
+	 *     total }
+	 */
+	this.getIndexState = async function (libraryIDs = []) {
+		try {
+			let status = Zotero.Embeddings.Indexing.getStatus();
+			if (!status.enabled) {
+				return null;
+			}
+			// Counts aren't populated until the indexer runs in this session
+			if (!status.libraries.length) {
+				status = await Zotero.Embeddings.Indexing.refreshStatus();
+			}
+			let ids = new Set(libraryIDs);
+			let libraries = status.libraries
+				.filter(lib => !ids.size || ids.has(lib.libraryID));
+			// Coverage is coverage: attachment fulltext is reported separately
+			// in the preferences, but an incomplete index is incomplete
+			// whichever part of it is still filling in
+			let indexed = libraries.reduce(
+				(sum, lib) => sum + lib.indexed + lib.indexedAttachments, 0);
+			let total = libraries.reduce(
+				(sum, lib) => sum + lib.eligible + lib.eligibleAttachments, 0);
+			if (indexed >= total) {
+				return null;
+			}
+			// Only an explicit pause reports as paused. Anything else --
+			// between runs (startup, the pre-run debounce) or after an error
+			// (detailed in the preferences) -- reports as indexing, since the
+			// state explains the incomplete coverage, not the indexer.
+			return {
+				type: status.paused ? 'paused' : 'indexing',
+				indexed,
+				total
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
 	};
 
 	/**
@@ -191,32 +240,21 @@ Zotero.BestMatch = new function () {
 
 	/**
 	 * A best-match search session: one query's scoring pass plus the
-	 * previews explaining its matches, derived on demand.
+	 * previews explaining its matches.
 	 *
-	 * score() ranks candidates and synchronously builds a pending preview
-	 * per matched item that has anything to show, with no I/O. request()
-	 * names the items whose previews are wanted next; each call replaces
-	 * the last, so only what is still wanted gets derived, and repeating a
-	 * request is free. Derivation runs one item at a time, each waiting
-	 * first for a moment when the main thread has nothing else to do. An
-	 * item's entries arrive all at once -- both engines' evidence, merged,
-	 * deduplicated and ordered by strength (see getMatchingExcerpts()) --
-	 * and onUpdate reports each item whose preview settled; consumers read
-	 * them back with getPreviews(). A disposed session derives nothing and
-	 * never calls onUpdate.
+	 * score() ranks candidates and, before it resolves, derives a preview
+	 * for every matched item that has anything to show, so consumers read
+	 * settled previews (getPreviews()) the moment scoring ends. An item's
+	 * entries hold both engines' evidence, merged, deduplicated and ordered
+	 * by strength (see getMatchingExcerpts()). A re-score keeps previews
+	 * already derived; fill() re-derives ones invalidate() dropped back to
+	 * pending. A disposed session derives nothing.
 	 */
 	this.Session = class {
 		constructor(queryText) {
-			// Called with the itemIDs whose previews settled since the last
-			// call, from filling or from a failed derivation
-			this.onUpdate = null;
 			this._queryText = queryText;
 			this._previews = new Map();
-			this._queue = [];
-			this._inFlight = new Set();
-			this._pumping = false;
 			this._disposed = false;
-			this._scoreGeneration = 0;
 		}
 
 		get queryText() {
@@ -225,30 +263,39 @@ Zotero.BestMatch = new function () {
 
 		/**
 		 * Score candidates for this session's query (see
-		 * Zotero.BestMatch.scoreItemIDs()) and rebuild the preview set from
-		 * the engines' match sets, synchronously and with no I/O once
-		 * scoring resolves: a pending preview for every item a preview is
-		 * shown for that some engine can show match excerpts in. Items still
-		 * matched keep their settled previews -- a re-score doesn't drop
-		 * derived text -- and items no longer matched lose theirs. A scoring
-		 * pass superseded by a newer one on the same session leaves the
-		 * previews to the newer pass.
+		 * Zotero.BestMatch.scoreItemIDs()), rebuild the preview set from the
+		 * engines' match sets, recompute ranks and barFractions, and derive
+		 * every pending preview before resolving, best-scored first. Items
+		 * still matched keep their settled previews -- a re-score doesn't
+		 * re-derive kept text -- and items no longer matched lose theirs.
 		 *
 		 * @param {Number[]} itemIDs - Candidate item IDs to score
 		 * @param {Object} [options] - Passed through to scoreItemIDs()
+		 * @param {Number} [options.topK] - Keep only the K best-scored items,
+		 *     with a deterministic tiebreak, so equal scores keep a stable
+		 *     membership; previews are only built and derived for the kept
+		 *     items
+		 * @param {Function} [options.shouldCancel] - Also checked between
+		 *     preview derivations
 		 * @return {Promise<Map>} - itemID -> score, as scoreItemIDs() returns
 		 * @throws {Zotero.BestMatch.ScoringCancelledError}
 		 */
 		async score(itemIDs, options = {}) {
-			let generation = ++this._scoreGeneration;
 			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
 				this._queryText, itemIDs, options);
-			if (this._disposed || generation != this._scoreGeneration) {
+			if (this._disposed) {
 				return scores;
+			}
+			if (options.topK) {
+				scores = new Map(
+					[...scores.entries()]
+						.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+						.slice(0, options.topK)
+				);
 			}
 			let previews = new Map();
 			for (let itemID of new Set([...matches.lexical, ...matches.semantic])) {
-				if (!_hasPreviews(itemID)) {
+				if (!scores.has(itemID) || !_hasPreviews(itemID)) {
 					continue;
 				}
 				let existing = this._previews.get(itemID);
@@ -264,7 +311,78 @@ Zotero.BestMatch = new function () {
 				});
 			}
 			this._previews = previews;
+			this._rank(scores);
+			for (let itemID of [...scores.entries()]
+				.sort((a, b) => b[1] - a[1])
+				.map(([id]) => id)
+				.filter(id => previews.get(id)?.state == 'pending')) {
+				if (this._disposed) {
+					return scores;
+				}
+				if (options.shouldCancel?.()) {
+					throw new Zotero.BestMatch.ScoringCancelledError();
+				}
+				await this._derive(itemID);
+			}
 			return scores;
+		}
+
+		/**
+		 * Ranks from this session's last scoring pass: 1-based, tied
+		 * effective scores share a rank, and every row with a match anywhere
+		 * beneath it is covered (see _rank()). Empty before the first pass.
+		 *
+		 * @return {Map} - treeViewID -> rank (1 = most relevant)
+		 */
+		get ranks() {
+			return this._ranks ?? new Map();
+		}
+
+		/**
+		 * Score fractions for the relevance bars, keyed like ranks: each
+		 * row's own score alone, so a row that only inherited its rank from
+		 * a descendant shows its rank over an empty bar
+		 *
+		 * @return {Map} - treeViewID -> 0-1 fraction
+		 */
+		get barFractions() {
+			return this._barFractions ?? new Map();
+		}
+
+		// Rank the scored items, lifting each item's score onto its ancestors
+		// (annotation -> attachment -> top-level item) first, so an item's
+		// effective score -- and so its rank -- is the best match anywhere
+		// beneath it. Equal effective scores get equal ranks, so tied rows
+		// (including a child and its parent) order deterministically via the
+		// consumer's secondary sort fields.
+		_rank(scores) {
+			let effectiveScores = new Map(scores);
+			for (let [itemID, score] of scores) {
+				let parentItemID = Zotero.Items.get(itemID)?.parentItemID;
+				while (parentItemID) {
+					let current = effectiveScores.get(parentItemID);
+					if (current === undefined || score > current) {
+						effectiveScores.set(parentItemID, score);
+					}
+					parentItemID = Zotero.Items.get(parentItemID)?.parentItemID;
+				}
+			}
+			let rankOfScore = new Map(
+				[...new Set(effectiveScores.values())].sort((a, b) => b - a)
+					.map((score, i) => [score, i + 1])
+			);
+			let ranks = new Map();
+			let fractions = new Map();
+			for (let [itemID, score] of effectiveScores) {
+				let item = Zotero.Items.get(itemID);
+				if (!item) {
+					continue;
+				}
+				ranks.set(item.treeViewID, rankOfScore.get(score));
+				fractions.set(item.treeViewID, scores.get(itemID) || 0);
+			}
+			this._ranks = ranks;
+			this._barFractions = fractions;
 		}
 
 		/**
@@ -275,7 +393,7 @@ Zotero.BestMatch = new function () {
 		 *
 		 * @param {Number} itemID
 		 * @return {Object|null} - { state, entries }: state is 'pending'
-		 *     (placeholder) or 'filled'; entries are the derived entries
+		 *     (not yet derived) or 'filled'; entries are the derived entries
 		 *     (see getMatchingExcerpts()), each with a `key` unique within
 		 *     the preview and stable for as long as the preview stays filled
 		 */
@@ -285,41 +403,24 @@ Zotero.BestMatch = new function () {
 		};
 
 		/**
-		 * Derive previews for a small batch of items immediately.
+		 * Derive the given items' previews, in order, for previews put back
+		 * to pending after scoring -- see invalidate(). Items already settled
+		 * are skipped, so filling again is free.
 		 *
 		 * @param {Number[]} itemIDs
 		 */
-		async preload(itemIDs) {
+		async fill(itemIDs) {
 			for (let itemID of itemIDs) {
 				if (this._disposed) {
 					return;
 				}
-				await this._settle(itemID);
+				await this._derive(itemID);
 			}
 		}
 
 		/**
-		 * Ask for the given items' previews to be derived next. Each call
-		 * replaces the previous request -- items no longer asked for aren't
-		 * derived -- and items already settled or mid-derivation are
-		 * skipped, so repeating a request is free.
-		 *
-		 * @param {Number[]} itemIDs
-		 */
-		request(itemIDs) {
-			if (this._disposed) {
-				return;
-			}
-			this._queue = itemIDs.filter((itemID) => {
-				return this._previews.get(itemID)?.state == 'pending'
-					&& !this._inFlight.has(itemID);
-			});
-			this._pump();
-		}
-
-		/**
-		 * Drop the given items' previews back to placeholders, for items
-		 * whose content changed and made derived text stale
+		 * Drop the given items' previews back to pending, for items whose
+		 * content changed and made derived text stale
 		 *
 		 * @param {Number[]} itemIDs
 		 */
@@ -329,8 +430,8 @@ Zotero.BestMatch = new function () {
 				if (!preview) {
 					continue;
 				}
-				// A fresh object, so a fill of the old one that's still in
-				// flight can't settle it (see _fill())
+				// A fresh object, so a derivation of the old one that's still
+				// in flight can't settle it (see _derive())
 				this._previews.set(itemID, {
 					...preview,
 					state: 'pending',
@@ -340,71 +441,36 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * End the session: abandon queued and in-flight derivation. A
-		 * disposed session derives nothing and never calls onUpdate.
+		 * End the session: abandon in-flight derivation. A disposed session
+		 * derives nothing.
 		 */
 		dispose() {
 			this._disposed = true;
-			this._queue = [];
-			this.onUpdate = null;
 		}
 
-		// Derive queued previews one at a time, each first waiting for a
-		// moment when the main thread has nothing else to do. The queue is
-		// read one item per turn, so a request() arriving mid-derivation
-		// takes effect at the very next item.
-		async _pump() {
-			if (this._pumping) {
+		// Derive one pending item's preview and settle it with the result --
+		// its entries, all at once, each keyed for row identity. An item
+		// already settled is left alone, and a preview replaced while
+		// deriving (see invalidate()) is left to its next derivation. A
+		// derivation that failed would fail again, so it settles for showing
+		// nothing rather than being retried.
+		async _derive(itemID) {
+			let preview = this._previews.get(itemID);
+			if (!preview || preview.state != 'pending') {
 				return;
 			}
-			this._pumping = true;
 			try {
-				while (!this._disposed && this._queue.length) {
-					await new Promise(
-						resolve => Services.tm.idleDispatchToMainThread(resolve));
-					if (this._disposed) {
-						return;
-					}
-					let itemID = this._queue.shift();
-					if (!await this._settle(itemID)) {
-						continue;
-					}
-					if (!this._disposed && this.onUpdate) {
-						try {
-							this.onUpdate([itemID]);
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
-					}
+				let entries = await this.getMatchingExcerpts(itemID);
+				if (this._disposed || this._previews.get(itemID) != preview) {
+					return;
 				}
-			}
-			finally {
-				this._pumping = false;
-			}
-		}
-
-		// Derive one pending item's preview, reporting whether it settled
-		// here: an item already settled or mid-derivation elsewhere is left
-		// alone. A derivation that failed would fail again, so it settles for
-		// showing nothing rather than being retried.
-		async _settle(itemID) {
-			let preview = this._previews.get(itemID);
-			if (!preview || preview.state != 'pending' || this._inFlight.has(itemID)) {
-				return false;
-			}
-			this._inFlight.add(itemID);
-			try {
-				await this._fill(itemID, preview);
+				preview.entries = entries.map((entry, i) => ({ key: i, ...entry }));
+				preview.state = entries.length ? 'filled' : 'empty';
 			}
 			catch (e) {
 				Zotero.logError(e);
 				preview.state = 'empty';
 			}
-			finally {
-				this._inFlight.delete(itemID);
-			}
-			return true;
 		}
 
 		/**
@@ -479,10 +545,9 @@ Zotero.BestMatch = new function () {
 				});
 			}
 			entries.sort((a, b) => b.strength - a.strength);
-			// Quoting is the expensive half -- a passage the query's words
-			// aren't in has to be read by the model -- so only the passages
-			// that will be quoted pay for it
-			await this._pickSnippets(entries.slice(0, MAX_QUOTED_PASSAGES), itemID);
+			// Only the strongest few passages are shown as rows in the tree,
+			// so only they get a line chosen to quote
+			await this._pickSnippets(entries.slice(0, MAX_QUOTED_PASSAGES));
 			return entries;
 		}
 
@@ -561,73 +626,36 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * Choose where in each passage to quote from: the line best showing
-		 * the query.
+		 * Choose where in each passage to quote from.
 		 *
-		 * Where a passage says the query outright, that's the window covering
-		 * the most of it. Where it only means it -- the model matched what no
-		 * word of the query says -- the passage is cut into sentences and the
-		 * model picks the one it finds nearest, which is the only thing that
-		 * knows where the resemblance lives. What's quoted from there is
-		 * whole sentences (see _quoteFrom()).
-		 *
-		 * The passages needing the model are asked about together, in one
-		 * call: embedding costs far more per call than per text, so asking
-		 * once for an item's sentences is several times cheaper than asking
-		 * per passage. Every passage gets its opening first, so a model that
-		 * can't answer leaves a usable quote rather than none.
-		 *
-		 * Both halves answer to the same gates the passages did: a session
-		 * pinned to one engine quotes the way that engine would, rather than
-		 * ranking with it and then quoting with the other.
+		 * Where a passage says the query outright, the quote is the window
+		 * covering the most of it. Where it only means it -- the model
+		 * matched what no word of the query says -- the passage is quoted
+		 * from its opening: whole sentences until the line is filled (see
+		 * _quoteFrom()). The model isn't asked to choose a line -- embedding
+		 * every quoted passage's sentences would put model calls on the
+		 * scoring pass that derives all previews at once.
 		 *
 		 * @param {Object[]} entries - Set in place
-		 * @param {Number} itemID
 		 */
-		async _pickSnippets(entries, itemID) {
+		async _pickSnippets(entries) {
 			let chunking = Zotero.Utilities.Internal.Chunking;
-			let useModel = this._semanticApplies(itemID);
-			let pending = [];
 			for (let entry of entries) {
 				let sentences = chunking.splitSentences(
 					entry.text, chunking.getCharacterMetrics(entry.text));
-				// The passage's opening, for a passage nothing chooses within
+				// The passage's opening, for a passage with no words to quote
+				// around
 				entry.snippet = sentences.length
-					? _quoteFrom(sentences, 0)
+					? _quoteFrom(sentences)
 					: { start: 0, end: Math.min(entry.text.length, SNIPPET_CHARS) };
-				if (entry.ranges.length) {
-					let window = await Zotero.Lexical.pickSnippetWindow(
-						this._queryText, entry.text, { width: SNIPPET_CHARS });
-					if (window) {
-						entry.snippet = window;
-						continue;
-					}
-				}
-				// A passage that is a single sentence has nothing to choose
-				if (!useModel || sentences.length < 2) {
+				if (!entry.ranges.length) {
 					continue;
 				}
-				pending.push({ entry, sentences });
-			}
-			if (!pending.length) {
-				return;
-			}
-			let scores;
-			try {
-				scores = await Zotero.Embeddings.scoreTexts(
-					this._queryText,
-					pending.flatMap(({ sentences }) => sentences.map(s => s.text))
-				);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				return;
-			}
-			let offset = 0;
-			for (let { entry, sentences } of pending) {
-				let mine = scores.slice(offset, offset + sentences.length);
-				offset += sentences.length;
-				entry.snippet = _quoteFrom(sentences, mine.indexOf(Math.max(...mine)));
+				let window = await Zotero.Lexical.pickSnippetWindow(
+					this._queryText, entry.text, { width: SNIPPET_CHARS });
+				if (window) {
+					entry.snippet = window;
+				}
 			}
 		}
 
@@ -657,18 +685,6 @@ Zotero.BestMatch = new function () {
 		_lexicalEnabled() {
 			return Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
 		}
-
-		// Derive one item's entries, all at once. A preview replaced while
-		// deriving (a re-score, an invalidate) keeps the newer object
-		// untouched.
-		async _fill(itemID, preview) {
-			let entries = await this.getMatchingExcerpts(itemID);
-			if (this._disposed || this._previews.get(itemID) != preview) {
-				return;
-			}
-			preview.entries = entries.map((entry, i) => ({ key: i, ...entry }));
-			preview.state = entries.length ? 'filled' : 'empty';
-		}
 	};
 
 	/**
@@ -681,19 +697,14 @@ Zotero.BestMatch = new function () {
 		return new this.Session(queryText);
 	};
 
-	// The extent to quote starting at one of a passage's sentences: that
-	// sentence, plus the ones after it that still fit SNIPPET_CHARS.
-	//
-	// The chosen sentence is taken whole however long it is -- half a sentence
-	// reads as a truncation rather than as a passage, and the row clips what
-	// doesn't fit anyway. A short one alone reads as a fragment, so the rest
-	// of the line goes to what follows it.
-	function _quoteFrom(sentences, index) {
-		let { start, end } = sentences[index];
-		for (let i = index + 1; i < sentences.length; i++) {
-			if (sentences[i].end - start > SNIPPET_CHARS) {
-				break;
-			}
+	// The extent to quote from a passage's opening: sentences are added until
+	// the quote passes SNIPPET_CHARS, so the sentence that crosses the limit
+	// is taken whole. Half a sentence reads as a truncation rather than as a
+	// passage, and the row clips what doesn't fit anyway -- while a quote cut
+	// short of the limit would waste the line on a fragment.
+	function _quoteFrom(sentences) {
+		let { start, end } = sentences[0];
+		for (let i = 1; i < sentences.length && end - start < SNIPPET_CHARS; i++) {
 			end = sentences[i].end;
 		}
 		return { start, end };

@@ -259,25 +259,6 @@ describe("CollectionViewItemTree", function () {
 				});
 			}
 
-			// The demand path is what most of these tests exercise, so skip the
-			// preload that would otherwise settle top-ranked previews before
-			// their rows are ever drawn (see _applyBestMatch())
-			function skipPreload() {
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'preload').resolves());
-			}
-
-			// Wait for a row to appear (or, with present = false, disappear):
-			// preview derivation is demand-driven and asynchronous, so the
-			// 1->n replacement lands some time after the placeholder renders
-			async function waitForMatchRow(view, id, present = true) {
-				let deadline = Date.now() + 5000;
-				while ((view.getRowIndexByID(id) === false) == present
-						&& Date.now() < deadline) {
-					await Zotero.Promise.delay(10);
-				}
-				return view.getRowIndexByID(id);
-			}
-
 			beforeEach(function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
@@ -524,7 +505,7 @@ describe("CollectionViewItemTree", function () {
 				}
 			});
 
-			it("should show placeholder match rows under matched attachments", async function () {
+			it("should show match rows under matched attachments, derived before the rows appear", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchrow A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
@@ -532,17 +513,20 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-
-				// Hold derivation so the placeholder stays put for the test
-				skipPreload();
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.returns(new Promise(() => {})));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ source: 'title', text: 'matchrow owls', ranges: [[9, 13]], strength: 1 },
+					{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
+				]));
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
 
-				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-pending');
+				// One row per derived entry, already in place when the search
+				// resolves
+				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
 				assert.notStrictEqual(matchRow, false);
+				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachment.id + '-1'), false);
+				assert.equal(itemsView.getRow(matchRow).ref.entry.text, 'matchrow owls');
 				// The parent and the matched attachment both auto-expanded
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item.id)));
 				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment.id)));
@@ -550,10 +534,10 @@ describe("CollectionViewItemTree", function () {
 
 				// Clearing the search removes the match rows
 				await itemsView.setFilter('search', '');
-				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-pending'));
+				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
 			});
 
-			it("should place a semantic match's placeholder under its attachment", async function () {
+			it("should place a semantic match's rows under its attachment", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "chunkcount A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
@@ -565,16 +549,14 @@ describe("CollectionViewItemTree", function () {
 							? [attachment.id] : [])
 					})
 				));
-
-				// Hold derivation so the placeholder stays put for the test
-				skipPreload();
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.returns(new Promise(() => {})));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ source: 'content', text: 'chunkcount owls', ranges: [], strength: 1 }
+				]));
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
 
-				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-pending');
+				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
 				assert.notStrictEqual(matchRow, false);
 				// Under the attachment, which auto-expanded to show it
 				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
@@ -633,11 +615,6 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(note.id) ? [[note.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-
-				// Hold derivation so the placeholder stays put for the test
-				skipPreload();
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.returns(new Promise(() => {})));
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
@@ -647,7 +624,7 @@ describe("CollectionViewItemTree", function () {
 				let noteRow = itemsView.getRowIndexByID(note.id);
 				assert.notStrictEqual(noteRow, false);
 				assert.isFalse(itemsView.isContainer(noteRow));
-				assert.isFalse(itemsView.getRowIndexByID('SM' + note.id + '-pending'));
+				assert.isFalse(itemsView.getRowIndexByID('SM' + note.id + '-0'));
 			});
 
 			it("should show selected match rows as passages in the item pane", async function () {
@@ -658,7 +635,6 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
 					{ key: 0, text: 'matchselect owls', ranges: [], strength: 1,
 						snippet: { start: 0, end: 16 } },
@@ -669,7 +645,7 @@ describe("CollectionViewItemTree", function () {
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
 
-				let first = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+				let first = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
 				let second = itemsView.getRowIndexByID('SM' + attachment.id + '-1');
 				itemsView.selection.select(second);
 				// A passage isn't an item, so no item is selected
@@ -701,58 +677,6 @@ describe("CollectionViewItemTree", function () {
 				assert.isEmpty(itemsView.getSelectedSearchMatches());
 			});
 
-			it("should show the top-ranked matches already derived on a new search", async function () {
-				let col = await createDataObject('collection');
-				let item = await createDataObject('item', { title: "preload A", collections: [col.id] });
-				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
-					.callsFake(scoreEnvelope(new Map())));
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.resolves([
-						{ source: 'content', text: 'preload owls', ranges: [], strength: 1 }
-					]));
-
-				await select(win, col);
-				itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'some query');
-
-				// The rows are drawn with their matches already in place: no
-				// placeholder was left for a later fill to replace
-				assert.notStrictEqual(
-					itemsView.getRowIndexByID('SM' + attachment.id + '-0'), false);
-				assert.isFalse(
-					itemsView.getRowIndexByID('SM' + attachment.id + '-pending'));
-			});
-
-			it("should replace a rendered placeholder with the derived match rows", async function () {
-				let col = await createDataObject('collection');
-				let item = await createDataObject('item', { title: "fillrow A", collections: [col.id] });
-				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
-					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
-					{ source: 'title', text: 'fillrow owls', ranges: [[8, 12]], strength: 1 },
-					{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
-				]));
-
-				await select(win, col);
-				itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'some query');
-
-				// Rendering the placeholder requests the derivation; the fill
-				// replaces it with one row per derived entry
-				let first = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
-				assert.notStrictEqual(first, false);
-				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachment.id + '-1'), false);
-				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-pending'));
-				assert.equal(itemsView.getRow(first).ref.entry.text, 'fillrow owls');
-			});
-
 			it("should hide non-matching annotations when the attachment has match rows", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "annhide A", collections: [col.id] });
@@ -763,7 +687,6 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
 					{ key: 0, text: 'annhide owls', ranges: [], strength: 1,
 						snippet: { start: 0, end: 12 } }
@@ -772,7 +695,6 @@ describe("CollectionViewItemTree", function () {
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
-				await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
 
 				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
 				let childrenFor = () => itemsView.getRow(attachmentRow).getChildItems({
@@ -804,7 +726,6 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
 				let position = { pageIndex: 3, rects: [[1, 2, 3, 4]] };
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
 					{ key: 0, text: 'openmatch owls', ranges: [], strength: 1,
@@ -819,7 +740,7 @@ describe("CollectionViewItemTree", function () {
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
-				let withPosition = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
+				let withPosition = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
 
 				// From the tree: the attachment, at the passage's geometry
 				await itemsView.handleActivate({}, [withPosition]);
@@ -857,7 +778,6 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
 				let entries = [0, 1, 2, 3, 4].map(i => ({
 					key: i,
 					text: `quotedrows passage ${i}`,
@@ -874,7 +794,6 @@ describe("CollectionViewItemTree", function () {
 
 				// The tree shows the quoted passages; the rest are read in
 				// the item pane
-				await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
 				for (let i = 0; i < Zotero.BestMatch.MAX_QUOTED_PASSAGES; i++) {
 					assert.notStrictEqual(
 						itemsView.getRowIndexByID('SM' + attachment.id + '-' + i), false,
@@ -887,41 +806,7 @@ describe("CollectionViewItemTree", function () {
 					itemsView.bestMatchSession.getPreviews(attachment.id).entries, 5);
 			});
 
-			it("should hand a selected placeholder's selection to the first derived row", async function () {
-				let col = await createDataObject('collection');
-				let item = await createDataObject('item', { title: "handoff A", collections: [col.id] });
-				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
-					.callsFake(scoreEnvelope(new Map())));
-				// Hold derivation open until the placeholder is selected
-				skipPreload();
-				let resolveDerive;
-				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
-					.returns(new Promise((resolve) => {
-						resolveDerive = resolve;
-					})));
-
-				await select(win, col);
-				itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'some query');
-
-				let placeholderIndex = itemsView.getRowIndexByID('SM' + attachment.id + '-pending');
-				itemsView.selection.select(placeholderIndex);
-				// Wait for the rendered placeholder's derivation to start,
-				// then let it finish
-				let deadline = Date.now() + 5000;
-				while (!resolveDerive && Date.now() < deadline) {
-					await Zotero.Promise.delay(10);
-				}
-				resolveDerive([{ source: 'title', text: 'handoff owls', ranges: [], strength: 1 }]);
-
-				let first = await waitForMatchRow(itemsView, 'SM' + attachment.id + '-0');
-				assert.isTrue(itemsView.selection.isSelected(first));
-			});
-
-			it("should remove the placeholder when derivation finds nothing to show", async function () {
+			it("should show no match rows when derivation finds nothing to show", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "emptyfill A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
@@ -929,15 +814,12 @@ describe("CollectionViewItemTree", function () {
 					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
-				skipPreload();
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([]));
 
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
 
-				await waitForMatchRow(itemsView, 'SM' + attachment.id + '-pending', false);
-				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-pending'));
 				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
 				// The item stays -- it's still a scored result
 				assert.notStrictEqual(itemsView.getRowIndexByID(item.id), false);
