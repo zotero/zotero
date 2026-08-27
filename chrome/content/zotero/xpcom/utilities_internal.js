@@ -746,6 +746,51 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
+	 * Run a Gatekeeper assessment of the running app bundle
+	 *
+	 * Safari computes a code signing dictionary for the bundled Safari extension each time it
+	 * launches, and blocks the extension if that fails, which leaves the connector missing from
+	 * Safari's extensions list. The computation can start failing when the app is updated, and it
+	 * keeps failing on every subsequent launch. An assessment refreshes the system state that the
+	 * computation depends on, and Safari loads the extension again the next time it starts.
+	 *
+	 * macOS only. Does nothing for source builds, which don't bundle the extension.
+	 *
+	 * @return {Promise}
+	 */
+	assessAppBundle: async function () {
+		if (!Zotero.isMac || Zotero.isSourceBuild) {
+			return;
+		}
+		
+		let bundle = Services.dirsvc.get("XREExeF", Ci.nsIFile).parent.parent.parent;
+		
+		Zotero.debug("Running Gatekeeper assessment of " + bundle.path);
+		
+		let proc = await Subprocess.call({
+			command: '/usr/sbin/spctl',
+			arguments: ['-a', '-vv', bundle.path],
+			stderr: 'pipe'
+		});
+		
+		// spctl writes its verdict to stderr
+		let output = "";
+		let str;
+		while ((str = await proc.stderr.readString())) {
+			output += str;
+		}
+		let { exitCode } = await proc.wait();
+		
+		let message = "Gatekeeper assessment returned " + exitCode + "\n\n" + output.trim();
+		if (exitCode) {
+			Zotero.warn(message);
+		}
+		else {
+			Zotero.debug(message);
+		}
+	},
+	
+	/**
 	 * Get string data from the clipboard
 	 * @param {String[]} mimeType MIME type of data to get
 	 * @return {String|null} Clipboard data, or null if none was available

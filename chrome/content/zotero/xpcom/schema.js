@@ -313,12 +313,22 @@ Zotero.Schema = new function () {
 			}
 		}
 		
-		await _handleClientVersionChange();
+		var clientVersionChanged = await _handleClientVersionChange();
 		
 		// See above
 		(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 		.then(() => {
 			setTimeout(async function () {
+				// Keep Safari from blocking the bundled extension after an update
+				if (clientVersionChanged) {
+					try {
+						await Zotero.Utilities.Internal.assessAppBundle();
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				
 				try {
 					await this.updateBundledFiles();
 					if (Zotero.Prefs.get('automaticScraperUpdates')) {
