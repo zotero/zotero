@@ -97,6 +97,126 @@ describe("Zotero_File_Interface", function () {
 		assert.propertyVal(matches[0], 'id', attachment.id);
 	});
 	
+	it("should import a single top-level collection without creating another collection", async function () {
+		var collection = await createDataObject('collection', { name: 'Exported' });
+		var subcollection = await createDataObject(
+			'collection', { name: 'Sub', parentID: collection.id }
+		);
+		var item = await createDataObject(
+			'item', { title: 'Collection', collections: [collection.id] }
+		);
+		var sharedItem = await createDataObject(
+			'item', { title: 'Both', collections: [collection.id, subcollection.id] }
+		);
+		
+		var file = OS.Path.join(await getTempDirectory(), 'exported.rdf');
+		var translation = new Zotero.Translate.Export();
+		translation.setCollection(collection);
+		translation.setLocation(Zotero.File.pathToFile(file));
+		translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9');
+		await translation.translate();
+		
+		await win.Zotero_File_Interface.importFile({ file });
+		
+		// The imported collection is at the top level, rather than inside a collection named
+		// after the file
+		var collections = Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID);
+		assert.isEmpty(collections.filter(c => c.name == 'exported'));
+		var imported = collections.filter(c => c.name == collection.name && c.id != collection.id);
+		assert.lengthOf(imported, 1);
+		
+		var titles = c => c.getChildItems().map(i => i.getField('title'));
+		assert.sameMembers(
+			titles(imported[0]), [item.getField('title'), sharedItem.getField('title')]
+		);
+		
+		var importedSubcollections = imported[0].getChildCollections();
+		assert.lengthOf(importedSubcollections, 1);
+		assert.equal(importedSubcollections[0].name, subcollection.name);
+		assert.sameMembers(titles(importedSubcollections[0]), [sharedItem.getField('title')]);
+	});
+	
+	it("should keep items outside a single imported collection out of it", async function () {
+		var group = await createGroup({ name: 'Import' + Zotero.Utilities.randomString() });
+		var libraryID = group.libraryID;
+		var collection = await createDataObject(
+			'collection', { name: 'Collection', libraryID }
+		);
+		var collectionItem = await createDataObject(
+			'item', { title: 'InCollection', libraryID, collections: [collection.id] }
+		);
+		var unfiledItem = await createDataObject('item', { title: 'Unfiled', libraryID });
+		
+		var file = OS.Path.join(await getTempDirectory(), 'library-export.rdf');
+		var translation = new Zotero.Translate.Export();
+		translation.setLibraryID(libraryID);
+		translation.setLocation(Zotero.File.pathToFile(file));
+		translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9');
+		await translation.translate();
+		
+		await win.Zotero_File_Interface.importFile({ file });
+		
+		// The unfiled item doesn't belong to the imported collection, so the collection created
+		// for the import is kept to hold it
+		var importCollections = Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID)
+			.filter(c => c.name == 'library-export');
+		assert.lengthOf(importCollections, 1);
+		var titles = c => c.getChildItems().map(i => i.getField('title'));
+		assert.sameMembers(titles(importCollections[0]), [unfiledItem.getField('title')]);
+		
+		var imported = importCollections[0].getChildCollections();
+		assert.lengthOf(imported, 1);
+		assert.equal(imported[0].name, collection.name);
+		assert.sameMembers(titles(imported[0]), [collectionItem.getField('title')]);
+	});
+	
+	it("should import multiple exported collections below the collection created for the import", async function () {
+		var collection1 = await createDataObject('collection', { name: 'First' });
+		var subcollection = await createDataObject(
+			'collection', { name: 'Sub', parentID: collection1.id }
+		);
+		var collection2 = await createDataObject('collection', { name: 'Second' });
+		var item1 = await createDataObject(
+			'item', { title: 'InFirst', collections: [collection1.id] }
+		);
+		var subItem = await createDataObject(
+			'item', { title: 'InSub', collections: [subcollection.id] }
+		);
+		var item2 = await createDataObject(
+			'item', { title: 'InSecond', collections: [collection2.id] }
+		);
+		
+		var file = OS.Path.join(await getTempDirectory(), 'multiple.rdf');
+		var translation = new Zotero.Translate.Export();
+		translation.setCollections([collection1, collection2]);
+		translation.setLocation(Zotero.File.pathToFile(file));
+		translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9');
+		await translation.translate();
+		
+		await win.Zotero_File_Interface.importFile({ file });
+		
+		// Neither collection can stand in for the collection created for the import, so both are
+		// imported below it
+		var importCollections = Zotero.Collections.getByLibrary(Zotero.Libraries.userLibraryID)
+			.filter(c => c.name == 'multiple');
+		assert.lengthOf(importCollections, 1);
+		assert.isEmpty(importCollections[0].getChildItems());
+		
+		var titles = c => c.getChildItems().map(i => i.getField('title'));
+		var imported = importCollections[0].getChildCollections();
+		assert.sameMembers(imported.map(c => c.name), [collection1.name, collection2.name]);
+		
+		var importedFirst = imported.find(c => c.name == collection1.name);
+		assert.sameMembers(titles(importedFirst), [item1.getField('title')]);
+		var importedSubcollections = importedFirst.getChildCollections();
+		assert.lengthOf(importedSubcollections, 1);
+		assert.equal(importedSubcollections[0].name, subcollection.name);
+		assert.sameMembers(titles(importedSubcollections[0]), [subItem.getField('title')]);
+		
+		var importedSecond = imported.find(c => c.name == collection2.name);
+		assert.sameMembers(titles(importedSecond), [item2.getField('title')]);
+	});
+	
 	it('should import a MODS file', async function () {
 		var modsFile = OS.Path.join(getTestDataDirectory().path, "mods.xml");
 		

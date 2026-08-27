@@ -692,6 +692,7 @@ var Zotero_File_Interface = new function () {
 			await translation.translate({
 				libraryID,
 				collections: importCollections.length ? importCollections.map(c => c.id) : null,
+				autoCreatedCollectionID: createNewCollection ? importCollections[0].id : null,
 				linkFiles,
 				saveOptions: {
 					notifierQueue

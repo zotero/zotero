@@ -30,6 +30,9 @@
  * @param {Object} options
  *         <li>libraryID - ID of library in which items should be saved</li>
  *         <li>collections - New collections to create (used during Import translation</li>
+ *         <li>autoCreatedCollectionID - ID of a collection in 'collections' that was created to
+ *             hold this import, and so can be used for the imported data's own top-level
+ *             collection instead of being made its parent</li>
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>linkFiles - Save attachments as linked files instead of stored files</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
@@ -49,6 +52,7 @@ Zotero.Translate.ItemSaver = function (options) {
 	}
 	
 	this._collections = options.collections || false;
+	this._autoCreatedCollectionID = options.autoCreatedCollectionID || false;
 	
 	// If group filesEditable==false, don't save attachments
 	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
@@ -474,6 +478,42 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	
+	/**
+	 * Determine whether the collection created to hold an import can be used for the imported
+	 * data's own top-level collection, instead of being made its parent
+	 *
+	 * @param {Object[]} collections - Top-level collections from the translator
+	 * @param {Integer|null} rootCollectionID
+	 * @return {Integer|null} - The collection to use, or null to nest within it as usual
+	 */
+	_getCollectionToReuse: function (collections, rootCollectionID) {
+		if (!this._autoCreatedCollectionID || this._autoCreatedCollectionID != rootCollectionID
+				|| collections.length != 1) {
+			return null;
+		}
+		
+		// Items are added to the collection as they're saved, so it can only stand in for the
+		// imported collection if everything in it belongs somewhere in that collection
+		var itemIDs = new Set();
+		var collectionsToProcess = [collections[0]];
+		while (collectionsToProcess.length) {
+			for (let child of collectionsToProcess.shift().children) {
+				if (child.type === "collection") {
+					collectionsToProcess.push(child);
+				}
+				else if (this._IDMap[child.id]) {
+					itemIDs.add(this._IDMap[child.id]);
+				}
+			}
+		}
+		
+		var collection = Zotero.Collections.get(rootCollectionID);
+		return collection.getChildItems(true).every(itemID => itemIDs.has(itemID))
+			? rootCollectionID
+			: null;
+	},
+	
+	
 	"saveCollections": async function (collections) {
 		var collectionsToProcess = collections.slice();
 		// Use first collection passed to translate process as the root
@@ -481,21 +521,28 @@ Zotero.Translate.ItemSaver.prototype = {
 			? this._collections[0] : null;
 		var parentIDs = collections.map(c => null);
 		var topLevelCollections = [];
+		var itemsInCollections = new Set();
+		var reusedCollectionID = this._getCollectionToReuse(collections, rootCollectionID);
+		var reusedCollectionItems = new Set();
 
 		await Zotero.DB.executeTransaction(async function () {
 			while(collectionsToProcess.length) {
 				var collection = collectionsToProcess.shift();
 				var parentID = parentIDs.shift();
 
-				var newCollection = new Zotero.Collection;
-				newCollection.libraryID = this._libraryID;
-				newCollection.name = collection.name;
-				if (parentID) {
-					newCollection.parentID = parentID;
+				var newCollection;
+				if (!parentID && reusedCollectionID) {
+					newCollection = Zotero.Collections.get(reusedCollectionID);
+					newCollection.name = collection.name;
 				}
 				else {
-					newCollection.parentID = rootCollectionID;
-					topLevelCollections.push(newCollection)
+					newCollection = new Zotero.Collection;
+					newCollection.libraryID = this._libraryID;
+					newCollection.name = collection.name;
+					newCollection.parentID = parentID ? parentID : rootCollectionID;
+				}
+				if (!parentID) {
+					topLevelCollections.push(newCollection);
 				}
 				await newCollection.save(this._saveOptions);
 
@@ -520,6 +567,23 @@ Zotero.Translate.ItemSaver.prototype = {
 				if(toAdd.length) {
 					Zotero.debug("Translate: Adding " + toAdd, 5);
 					await newCollection.addItems(toAdd);
+					toAdd.forEach(itemID => itemsInCollections.add(itemID));
+					if (newCollection.id === reusedCollectionID) {
+						toAdd.forEach(itemID => reusedCollectionItems.add(itemID));
+					}
+				}
+			}
+
+			// Items are added to the collections passed to the translate process as they're
+			// saved, so remove the ones that belong to an imported collection
+			if (itemsInCollections.size && this._collections) {
+				for (let collectionID of this._collections) {
+					// The reused collection keeps the items that belong to it
+					let itemIDs = collectionID === reusedCollectionID
+						? [...itemsInCollections].filter(id => !reusedCollectionItems.has(id))
+						: [...itemsInCollections];
+					let collection = Zotero.Collections.get(collectionID);
+					await collection.removeItems(itemIDs, this._saveOptions);
 				}
 			}
 		}.bind(this));
