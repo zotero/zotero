@@ -4509,10 +4509,11 @@ var ZoteroPane = new function () {
 				show.add(m.showInLibrary);
 				show.add(m.sep1);
 			}
-			
 			[
 				m.showInLibrary,
 				m.duplicateItem,
+				m.changeParentItem,
+				m.addToCollection,
 				m.removeItems,
 				m.moveToTrash,
 				m.deleteFromLibrary,
@@ -4520,7 +4521,7 @@ var ZoteroPane = new function () {
 				m.createBib,
 				m.loadReport
 			].forEach(x => disable.add(x));
-			
+
 		}
 		
 		// Show "Export Note…" if all notes or attachments

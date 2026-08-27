@@ -135,9 +135,9 @@ Zotero.Lexical = new function () {
 	 * Parse a query into terms.
 	 *
 	 * A term is the thing that matches (or doesn't) in one text:
-	 * - a word: { type: 'word', text, prefix }. The query's trailing word is
-	 *   flagged `prefix` while it's still being typed (no space or quote
-	 *   after it yet), so it matches its completions.
+	 * - a word: { type: 'word', text, prefix }. A word the query wrote a
+	 *   trailing asterisk after is flagged `prefix` and matches the word's
+	 *   completions. Inside quotes an asterisk is literal text.
 	 * - a quoted phrase: { type: 'phrase', text, tokens } -- multiple words
 	 *   matched adjacently, as typed.
 	 * - a CJK run: { type: 'cjk', text, bigrams } -- matched contiguously via
@@ -149,7 +149,7 @@ Zotero.Lexical = new function () {
 	 *
 	 * A repeated term counts once: repeating a word in the query isn't more
 	 * evidence about the texts it matches. When the same word appears both
-	 * mid-query and as the trailing prefix, the exact form wins.
+	 * on its own and with an asterisk, the exact form wins.
 	 *
 	 * @param {String} queryText
 	 * @return {Object[]}
@@ -158,14 +158,9 @@ Zotero.Lexical = new function () {
 		if (!queryText) {
 			return [];
 		}
-		// Mid-word means the query ends in a word character; a space, a
-		// closing quote, or punctuation after the word means it's finished
-		let endsMidWord = /[\p{L}\p{N}]$/u.test(queryText);
 		let parts = Zotero.SearchConditions.parseSearchString(queryText);
 		let terms = [];
-		for (let i = 0; i < parts.length; i++) {
-			let part = parts[i];
-			let fromLastPart = i == parts.length - 1;
+		for (let part of parts) {
 			let normalized = Zotero.Utilities.Internal.normalizeForSearch(part.text);
 			if (!normalized) {
 				continue;
@@ -177,13 +172,7 @@ Zotero.Lexical = new function () {
 			let words = matches.filter(m => m.groups.word).map(m => m.groups.word);
 			let hasCJK = matches.some(m => m.groups.cjk);
 			if (part.inQuotes && words.length > 1 && !hasCJK) {
-				terms.push({
-					type: 'phrase',
-					text: words.join(' '),
-					tokens: words,
-					fromLastPart,
-					quoted: true
-				});
+				terms.push({ type: 'phrase', text: words.join(' '), tokens: words });
 				continue;
 			}
 			for (let match of matches) {
@@ -191,34 +180,23 @@ Zotero.Lexical = new function () {
 					terms.push({
 						type: 'cjk',
 						text: match.groups.cjk,
-						bigrams: _getBigrams(match.groups.cjk),
-						fromLastPart,
-						quoted: part.inQuotes
+						bigrams: _getBigrams(match.groups.cjk)
 					});
 				}
 				else {
 					terms.push({
 						type: 'word',
 						text: match.groups.word,
-						prefix: false,
-						fromLastPart,
-						quoted: part.inQuotes
+						// An asterisk the query wrote after the word, which
+						// TOKEN_RE leaves out of the token itself
+						prefix: !part.inQuotes
+							&& normalized[match.index + match[0].length] === '*'
 					});
 				}
 			}
 		}
-		// The trailing word of an unquoted query is the one still being
-		// typed. A quoted trailing part is exact by declaration.
-		if (terms.length && endsMidWord) {
-			let last = terms[terms.length - 1];
-			if (last.type == 'word' && last.fromLastPart && !last.quoted) {
-				last.prefix = true;
-			}
-		}
 		let deduped = new Map();
 		for (let term of terms) {
-			delete term.fromLastPart;
-			delete term.quoted;
 			let key = term.type + '\n' + term.text;
 			let existing = deduped.get(key);
 			if (!existing || (existing.prefix && !term.prefix)) {
@@ -279,7 +257,7 @@ Zotero.Lexical = new function () {
 				}
 			}
 			// Consecutive query words, as the query wrote them. A pair whose
-			// second word is still being typed matches its completions too.
+			// second word carries an asterisk matches its completions too.
 			for (let i = 0; i < words.length - 1; i++) {
 				pieces.push({
 					match: '"' + words[i].text + ' ' + words[i + 1].text + '"'

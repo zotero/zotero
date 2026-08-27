@@ -967,6 +967,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// applied to rows carried over from the previous view
 			this._sort(forceSortAll || this._groupedByLibrary ? null : [...addedItemIDs]);
 			
+			// Set before the containers below are rebuilt, since their children
+			// are filtered against these (see ItemTreeRow#getChildItems(),
+			// which hides the annotations a search didn't match): rebuilding
+			// them against the previous search's state leaves rows this one
+			// excludes
+			this._searchMode = newSearchMode;
+			this._searchItemIDs = newSearchItemIDs; // items matching the search
+
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
 			for (let i = this.rows.length - 1; i >= 0; i--) {
@@ -982,8 +990,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				this.refreshRowMap();
 			}
 
-			this._searchMode = newSearchMode;
-			this._searchItemIDs = newSearchItemIDs; // items matching the search
 			this.itemTree.invalidateRowCache(true);
 				
 			if (this.viewMode != 'publications') {

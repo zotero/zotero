@@ -222,23 +222,27 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let full = await createDataObject('item',
 					{ title: 'Lexint owl migration patterns', collections: [col.id] });
+				// Three of the query's four terms, ranked below the full match
 				let partial = await createDataObject('item',
-					{ title: 'Lexint owl handbook', collections: [col.id] });
-				await createDataObject('item',
-					{ title: 'Something else entirely', collections: [col.id] });
+					{ title: 'Lexint owl migration handbook', collections: [col.id] });
+				// Two of four, ranked below both
+				let sparse = await createDataObject('item',
+					{ title: 'Lexint owl guidebook', collections: [col.id] });
 
 				await select(win, col);
 				let itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'lexint owl migration ');
 
 				// Scored items only, ranked by coverage, most relevant first
-				assert.deepEqual(itemsView._rows.map(row => row.id), [full.id, partial.id]);
+				assert.deepEqual(itemsView._rows.map(row => row.id),
+					[full.id, partial.id, sparse.id]);
 				assert.equal(itemsView.getSortField(), 'relevance');
 				// The bars carry the lexical scores directly
 				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
 				assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
+				assert.isAbove(fractions.get(partial.id), fractions.get(sparse.id));
 				assert.isAtMost(fractions.get(full.id), 1);
-				assert.isAbove(fractions.get(partial.id), 0);
+				assert.isAbove(fractions.get(sparse.id), 0);
 			});
 		});
 
@@ -575,6 +579,47 @@ describe("CollectionViewItemTree", function () {
 				// Under the attachment, which auto-expanded to show it
 				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
 				assert.equal(itemsView.getParentIndex(matchRow), attachmentRow);
+			});
+
+			it("should drop a non-matching annotation row when a search starts", async function () {
+				Zotero.Prefs.set("hideContextAnnotationRows", true);
+				try {
+					let col = await createDataObject('collection');
+					let item = await createDataObject('item',
+						{ title: "annstale A", collections: [col.id] });
+					let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+					// One annotation the search matches and one it doesn't --
+					// with a match among them, the non-matching one is context
+					let matching = await createAnnotation('highlight', attachment);
+					let context = await createAnnotation('highlight', attachment);
+					Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+						[attachment.id, matching.id]
+							.filter(id => itemIDs.includes(id))
+							.map(id => [id, 0.8])));
+					stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+						.callsFake(scoreEnvelope(new Map())));
+					stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype,
+						'getMatchingExcerpts').resolves([]));
+
+					await select(win, col);
+					itemsView = zp.itemsView;
+					// Open the container before searching, so its children are
+					// built while no search is filtering them
+					itemsView.expandAllRows(true);
+					assert.notStrictEqual(itemsView.getRowIndexByID(context.id), false,
+						'the annotation is a row to begin with');
+
+					await itemsView.setFilter('search', 'some query');
+
+					// The search excludes it and the pref hides non-matching
+					// annotations, so its row shouldn't have survived
+					assert.isFalse(itemsView.getRowIndexByID(context.id));
+					// ...while the one it matched stays
+					assert.notStrictEqual(itemsView.getRowIndexByID(matching.id), false);
+				}
+				finally {
+					Zotero.Prefs.set("hideContextAnnotationRows", false);
+				}
 			});
 
 			it("should show no match rows for a matched note", async function () {

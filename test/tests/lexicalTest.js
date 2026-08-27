@@ -3,30 +3,38 @@
 describe("Zotero.Lexical", function () {
 	describe("#parseQuery()", function () {
 		it("should split a query into normalized word terms", function () {
-			// Trailing space: the last word is finished, so nothing is a prefix
-			let terms = Zotero.Lexical.parseQuery("OWL Migrátion ");
+			let terms = Zotero.Lexical.parseQuery("OWL Migrátion");
 			assert.deepEqual(terms, [
 				{ type: 'word', text: 'owl', prefix: false },
 				{ type: 'word', text: 'migration', prefix: false }
 			]);
 		});
 
-		it("should flag the trailing mid-word token as a prefix", function () {
-			let terms = Zotero.Lexical.parseQuery("owl migr");
+		it("should flag a word the query put an asterisk after as a prefix", function () {
+			let terms = Zotero.Lexical.parseQuery("owl migr*");
 			assert.deepEqual(terms, [
 				{ type: 'word', text: 'owl', prefix: false },
 				{ type: 'word', text: 'migr', prefix: true }
 			]);
-			// Punctuation after the word means it's finished too
-			terms = Zotero.Lexical.parseQuery("owl migr.");
+			// Any word can carry one, not just the last
+			terms = Zotero.Lexical.parseQuery("migr* owl");
+			assert.isTrue(terms[0].prefix);
 			assert.isFalse(terms[1].prefix);
+			// An unfinished word is exact unless the query says otherwise
+			assert.isFalse(Zotero.Lexical.parseQuery("owl migr")[1].prefix);
+		});
+
+		it("should treat an asterisk inside quotes as literal text", function () {
+			assert.deepEqual(Zotero.Lexical.parseQuery('"migr*"'), [
+				{ type: 'word', text: 'migr', prefix: false }
+			]);
 		});
 
 		it("should keep a quoted multi-word part as one exact phrase", function () {
 			let terms = Zotero.Lexical.parseQuery('"united states" owl');
 			assert.deepEqual(terms, [
 				{ type: 'phrase', text: 'united states', tokens: ['united', 'states'] },
-				{ type: 'word', text: 'owl', prefix: true }
+				{ type: 'word', text: 'owl', prefix: false }
 			]);
 		});
 
@@ -60,9 +68,9 @@ describe("Zotero.Lexical", function () {
 		});
 
 		it("should count a repeated term once, preferring its exact form", function () {
-			// The trailing 'owl' would be a prefix, but the query already
-			// contains it as a finished word
-			let terms = Zotero.Lexical.parseQuery("owl migration owl");
+			// One 'owl' carries an asterisk, but the query also asked for it
+			// exactly
+			let terms = Zotero.Lexical.parseQuery("owl migration owl*");
 			assert.deepEqual(terms, [
 				{ type: 'word', text: 'owl', prefix: false },
 				{ type: 'word', text: 'migration', prefix: false }
@@ -110,8 +118,8 @@ describe("Zotero.Lexical", function () {
 					+ 'OR "owl migration"');
 		});
 
-		it("should carry a trailing prefix into the word and its phrase", function () {
-			assert.deepEqual(pieces("special educat", 'word'), [
+		it("should carry a prefix into the word and its phrase", function () {
+			assert.deepEqual(pieces("special educat*", 'word'), [
 				'"special" x3',
 				'"educat"* x3',
 				'"special educat"* x1'
@@ -170,6 +178,21 @@ describe("Zotero.Lexical", function () {
 				await Zotero.DB.queryAsync(
 					"DELETE FROM ftindex.fulltextIndexState WHERE itemID=?", rowid);
 			}
+		});
+
+		it("should limit scoring to the given sources", async function () {
+			let doc = await addContentDoc(46, 'lexsource in fulltext alone');
+			let item = await createDataObject('item', { title: 'Lexsource in a title' });
+
+			let all = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id]);
+			assert.isTrue(all.has(doc));
+			assert.isTrue(all.has(item.id));
+
+			// The items' own text doesn't include attachment fulltext
+			let own = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id],
+				{ sources: ['itemText'] });
+			assert.isFalse(own.has(doc));
+			assert.isTrue(own.has(item.id));
 		});
 
 		it("should return scores as 0-1 fractions", async function () {
@@ -337,7 +360,7 @@ describe("Zotero.Lexical", function () {
 		it("should highlight the whole word a prefix term matches", async function () {
 			let item = await createDataObject('item', { title: 'Lexkwic Migration Study' });
 
-			let excerpts = await Zotero.Lexical.getMatchingExcerpts('migr', item.id);
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('migr*', item.id);
 			assert.lengthOf(excerpts, 1);
 			assert.deepEqual(rangeTexts(excerpts[0]), ['Migration']);
 		});
