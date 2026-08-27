@@ -112,6 +112,12 @@ Zotero.OSKeyStore = {
 		if (!mod) {
 			throw new Error("OSKeyStore unavailable but stored value is encrypted");
 		}
-		return mod.decrypt(value.slice(this._prefix.length));
+		// OSKeyStore.encrypt() encodes the string as UTF-8 before encrypting, but
+		// OSKeyStore.decrypt() returns the decrypted bytes as a binary string, so
+		// decode it here
+		let binaryStr = await mod.decrypt(value.slice(this._prefix.length));
+		return new TextDecoder().decode(
+			Uint8Array.from(binaryStr, char => char.charCodeAt(0))
+		);
 	}
 };
