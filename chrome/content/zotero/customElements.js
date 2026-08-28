@@ -348,6 +348,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		if (target.tagName !== "menulist") return;
 		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 		if (event.key !== " ") return;
+		// A find-as-you-type search in progress is typing a name with a space in it
+		if (Zotero.Utilities.Internal.isMenuFindAsYouTypeActive(target)) return;
 
 		if (target.open) {
 			// Simulate blinking of the selected menuitem on macOS (same as on Return keypress)

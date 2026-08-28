@@ -1889,6 +1889,104 @@ Zotero.Utilities.Internal = {
 		return _appendTarget(libraryOrCollection, elem);
 	},
 	
+	
+	MENU_FIND_AS_YOU_TYPE_TIMEOUT: 1000,
+	
+	
+	/**
+	 * Whether typing in `menulist` is currently building up a find-as-you-type search
+	 *
+	 * @param {Node<menulist>} menulist
+	 * @return {Boolean}
+	 */
+	isMenuFindAsYouTypeActive: function (menulist) {
+		let state = menulist._findAsYouType;
+		return !!state?.buffer
+			&& Date.now() - state.time <= this.MENU_FIND_AS_YOU_TYPE_TIMEOUT;
+	},
+	
+	
+	/**
+	 * Select an item by typing on the closed <menulist> whose menu is `elem``
+	 *
+	 * A menulist's built-in find-as-you-type only looks at the direct children of its
+	 * menupopup, so an item in a submenu can't be reached from the keyboard without opening
+	 * the menu. This matches on every menuitem in the menu instead, and cycles through the
+	 * matches when the same character is typed repeatedly.
+	 *
+	 * @param {Node<menupopup>} elem
+	 * @param {Function} [getLabel] Given a menuitem, the text to match it on, for a menu
+	 *     whose items are shown with a different label than the menulist gives them
+	 */
+	addMenuFindAsYouType: function (elem, getLabel = item => item.label) {
+		var menulist = elem.closest('menulist');
+		if (!menulist) {
+			return;
+		}
+		// The search is kept on the menulist so that the space-opens-a-menulist handler in
+		// customElements.js can see one in progress
+		if (menulist._findAsYouType) {
+			Object.assign(menulist._findAsYouType, { popup: elem, getLabel, buffer: '', time: 0 });
+			return;
+		}
+		let state = menulist._findAsYouType = { popup: elem, getLabel, buffer: '', time: 0 };
+		
+		menulist.addEventListener('keydown', (event) => {
+			// A later call can replace the menu, so take these from the state rather than
+			// from this call's arguments
+			let { popup, getLabel: getItemLabel } = state;
+			// The menu has been replaced by one this doesn't know about
+			if (menulist.menupopup != popup) {
+				return;
+			}
+			// Let the platform handle typing while the popup is open, and ignore in-progress
+			// IME composition (event.key is "Process")
+			if (menulist.open || event.isComposing
+					|| event.ctrlKey || event.metaKey || event.altKey) {
+				return;
+			}
+			// Only act on a single printable character. Count code points rather than UTF-16
+			// units so supplementary-plane characters aren't treated as multi-key sequences.
+			if (Array.from(event.key).length != 1) {
+				return;
+			}
+			
+			// Start a new search if enough time has passed since the last keystroke
+			let now = Date.now();
+			if (now - state.time > this.MENU_FIND_AS_YOU_TYPE_TIMEOUT) {
+				state.buffer = '';
+			}
+			state.time = now;
+			
+			// With no search to continue, leave the space to open the menu
+			if (event.key == ' ' && !state.buffer) {
+				return;
+			}
+			state.buffer += event.key.toLowerCase();
+			// Keep the platform's own incremental search from acting on the same keystroke
+			event.preventDefault();
+			
+			// When the same character is typed repeatedly, cycle through the matching items,
+			// starting after the current one
+			let items = [...popup.querySelectorAll('menuitem:not([disabled], [hidden])')];
+			let cycling = state.buffer.length > 1
+				&& [...state.buffer].every(c => c == state.buffer[0]);
+			let prefix = cycling ? state.buffer[0] : state.buffer;
+			let startIndex = cycling
+				? items.findIndex(item => item.hasAttribute('checked')) + 1
+				: 0;
+			
+			for (let i = 0; i < items.length; i++) {
+				let item = items[(startIndex + i) % items.length];
+				if (getItemLabel(item).toLowerCase().startsWith(prefix)) {
+					event.stopPropagation();
+					item.doCommand();
+					break;
+				}
+			}
+		}, true);
+	},
+	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
 			throw new Error("openPreferences() now takes an 'options' object -- update your code");
