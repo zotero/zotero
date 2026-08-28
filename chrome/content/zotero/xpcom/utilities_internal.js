@@ -1781,10 +1781,13 @@ Zotero.Utilities.Internal = {
 	 * 		Receives the event and libraryOrCollection for given item.
 	 * @param {Function} disabledPred If provided, called on each library/collection
 	 * 		to determine whether disabled
+	 * @param {Object} [options]
+	 * @param {Function} [options.filter] If provided, called on each library/collection to
+	 * 		determine whether to include it. An excluded target is replaced by its subcollections.
 	 *
-	 * @return {Node<menuitem>|Node<menu>} appended node
+	 * @return {Node<menuitem>|Node<menu>|null} appended node, or null if the target was excluded
 	 */
-	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
+	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred, options = {}) {
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createXULElement('menuitem');
@@ -1818,54 +1821,51 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
-		var imageSrc = libraryOrCollection.treeViewImage;
-		
-		// Create menuitem for library or collection itself, to be placed either directly in the
-		// containing menu or as the top item in a submenu
-		var menuitem = _createMenuitem(
-			libraryOrCollection.name,
-			libraryOrCollection.treeViewID,
-			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
-			},
-			disabledPred && disabledPred(libraryOrCollection)
-		);
-		
-		var collections;
-		if (libraryOrCollection.objectType == 'collection') {
-			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
-		}
-		else {
-			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
-		}
-		
-		// If no subcollections, place menuitem for target directly in containing men
-		if (collections.length == 0) {
-			elem.appendChild(menuitem);
-			return menuitem;
-		}
-		
-		// Otherwise create a submenu for the target's subcollections
-		var menu = _createMenu(
-			libraryOrCollection.name,
-			libraryOrCollection.treeViewID,
-			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
+		function _appendTarget(target, parent) {
+			let collections = target.objectType == 'collection'
+				? Zotero.Collections.getByParent(target.id)
+				: Zotero.Collections.getByLibrary(target.libraryID);
+			
+			// Subcollections move up to take the place of an excluded target
+			if (options.filter && !options.filter(target)) {
+				for (let collection of collections) {
+					_appendTarget(collection, parent);
+				}
+				return null;
 			}
-		);
-		var menupopup = menu.firstChild;
-		menupopup.appendChild(menuitem);
-		menupopup.appendChild(doc.createXULElement('menuseparator'));
-		for (let collection of collections) {
-			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction, disabledPred
+			
+			let command = event => clickAction(event, target);
+			let imageSrc = target.treeViewImage;
+			
+			// Create menuitem for library or collection itself, to be placed either directly in
+			// the containing menu or as the top item in a submenu
+			let menuitem = _createMenuitem(
+				target.name,
+				target.treeViewID,
+				imageSrc,
+				command,
+				disabledPred && disabledPred(target)
 			);
-			menupopup.appendChild(collectionMenu);
+			
+			// If no subcollections, place menuitem for target directly in containing menu
+			if (collections.length == 0) {
+				parent.appendChild(menuitem);
+				return menuitem;
+			}
+			
+			// Otherwise create a submenu for the target's subcollections
+			let menu = _createMenu(target.name, target.treeViewID, imageSrc, command);
+			let menupopup = menu.firstChild;
+			menupopup.appendChild(menuitem);
+			menupopup.appendChild(doc.createXULElement('menuseparator'));
+			for (let collection of collections) {
+				_appendTarget(collection, menupopup);
+			}
+			parent.appendChild(menu);
+			return menu;
 		}
-		elem.appendChild(menu);
-		return menu;
+		
+		return _appendTarget(libraryOrCollection, elem);
 	},
 	
 	openPreferences: function (paneID, options = {}) {
