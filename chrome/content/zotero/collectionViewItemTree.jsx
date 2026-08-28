@@ -245,12 +245,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (newQuery) {
 			session?.dispose();
 			session = Zotero.BestMatch.createSession(query);
+			session.onPreviewsFilled = itemIDs => this._showFilledPreviews(session, itemIDs);
 			this._bestMatchSession = session;
 		}
 		try {
-			// Scoring also derives the matched items' previews before it
-			// resolves, so the rows the refresh builds draw finished match
-			// rows
+			// Scoring derives the best-scored items' previews before it
+			// resolves; the rest arrive through onPreviewsFilled above
 			await session.score(candidateIDs, {
 				topK,
 				// A newer filter (e.g. more typed search text) makes this
@@ -296,6 +296,43 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		this._bestMatchIndexState = await this._getBestMatchIndexState();
 		return kept;
+	}
+
+	/**
+	 * Show the match rows of previews derived after the search resolved (see
+	 * Zotero.BestMatch.Session#score()), by reopening each item -- the same
+	 * path that builds children for an expansion the user asks for.
+	 *
+	 * @param {Zotero.BestMatch.Session} session - Ignored once it isn't the
+	 *     session the tree is showing
+	 * @param {Number[]} itemIDs
+	 */
+	_showFilledPreviews(session, itemIDs) {
+		if (this._bestMatchSession !== session) {
+			return;
+		}
+		let shown = [];
+		for (let itemID of itemIDs) {
+			// Looked up per item, since reopening one shifts the rows below it
+			let item = Zotero.Items.get(itemID);
+			let index = item ? this._rowMap[item.treeViewID] : undefined;
+			if (index === undefined || !this.isContainer(index)) {
+				continue;
+			}
+			if (this.isContainerOpen(index)) {
+				this._toggleOpenState(index);
+			}
+			this._toggleOpenState(index);
+			shown.push(itemID);
+		}
+		// Redrawing is the expensive part, so a batch with no rows in the
+		// tree (under a collapsed parent, say) costs nothing
+		if (!shown.length) {
+			return;
+		}
+		// The twisty appears with the preview, so the rows redraw too
+		this.itemTree.invalidateRowCache(shown);
+		this.runListeners('update', true, { restoreSelection: true, restoreScroll: true });
 	}
 
 	/**
@@ -814,10 +851,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			let attachments = item.isRegularItem() ? item.getAttachments() : [];
 			// expand item row if it is a parent of a match
 			// OR if it has a child that is a parent of a match
-			// OR if it has best-match preview rows to show
+			// OR if it has best-match preview rows to show -- one still
+			// deriving has none, and opens in _showFilledPreviews() instead
 			let shouldBeOpened = searchParentIDs.has(item.id)
 				|| attachments.some(id => searchParentIDs.has(id))
-				|| !!this._bestMatchSession?.getPreviews(item.id);
+				|| this._bestMatchSession?.getPreviews(item.id)?.state == 'filled';
 			if (shouldBeOpened) {
 				this._toggleOpenState(i, true);
 			}

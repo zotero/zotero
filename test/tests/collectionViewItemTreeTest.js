@@ -813,6 +813,54 @@ describe("CollectionViewItemTree", function () {
 					itemsView.bestMatchSession.getPreviews(attachment.id).entries, 5);
 			});
 
+			it("should show match rows for previews derived after the search resolves", async function () {
+				this.timeout(60000);
+				// One more attachment than score() derives before resolving,
+				// so the last preview arrives after the results are on screen
+				let preloaded = Zotero.BestMatch.PRELOADED_MATCH_PREVIEWS;
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "backfill A", collections: [col.id] });
+				let attachments = [];
+				for (let i = 0; i <= preloaded; i++) {
+					attachments.push(await importFileAttachment('test.pdf', { parentID: item.id }));
+				}
+				// Descending, so the extra attachment is the one left over
+				let ids = attachments.map(att => att.id);
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					ids.filter(id => itemIDs.includes(id)).map((id, i) => [id, 0.9 - i / 100])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				// Held open, so the search has to resolve without it
+				let release;
+				let held = new Promise(resolve => release = resolve);
+				let derived = 0;
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.callsFake(async () => {
+						if (++derived > preloaded) {
+							await held;
+						}
+						return [{ source: 'content', text: 'backfill owls', ranges: [], strength: 1 }];
+					}));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let last = attachments[attachments.length - 1];
+				// The preloaded ones are on screen with the results...
+				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachments[0].id + '-0'), false);
+				// ...while the leftover is still deriving, so it has no rows
+				assert.isFalse(itemsView.getRowIndexByID('SM' + last.id + '-0'));
+
+				release();
+				await itemsView.bestMatchSession.previewsSettled;
+				// Filling expanded the attachment and added the match row
+				let matchRow = itemsView.getRowIndexByID('SM' + last.id + '-0');
+				assert.notStrictEqual(matchRow, false);
+				assert.equal(itemsView.getParentIndex(matchRow),
+					itemsView.getRowIndexByID(last.id));
+			});
+
 			it("should show no match rows when derivation finds nothing to show", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "emptyfill A", collections: [col.id] });

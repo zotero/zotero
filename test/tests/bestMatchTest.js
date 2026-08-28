@@ -747,6 +747,110 @@ describe("Zotero.BestMatch", function () {
 
 	});
 
+	describe("Session background previews", function () {
+		// More matches than score() derives before resolving, so the rest go
+		// to the background pass
+		const PRELOADED = Zotero.BestMatch.PRELOADED_MATCH_PREVIEWS;
+		var atts;
+
+		before(async function () {
+			this.timeout(60000);
+			atts = [];
+			for (let i = 0; i < PRELOADED + 3; i++) {
+				atts.push(await importFileAttachment('test.pdf'));
+			}
+		});
+
+		// Scores descending in creation order, so the background pass covers
+		// the last three
+		function stubScore() {
+			let scores = new Map(atts.map((att, i) => [att.id, 1 - i / 100]));
+			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores,
+				matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+			}));
+			return scores;
+		}
+
+		// Derives one entry per item, holding each derivation until it's let
+		// through, so a test can stop the pass at a known point
+		function stubDerive() {
+			let waiting = [];
+			let stub = sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+				.callsFake(async () => {
+					await new Promise(resolve => waiting.push(resolve));
+					return [{ source: 'title', text: 'owl', ranges: [], strength: 1 }];
+				});
+			stubs.push(stub);
+			let release = () => waiting.splice(0).forEach(resolve => resolve());
+			return {
+				stub,
+				release,
+				// Let derivations through until `count` have started. They run
+				// one at a time, so the last is left waiting, not released.
+				advanceTo: async (count) => {
+					while (stub.callCount < count) {
+						release();
+						await Zotero.Promise.delay(0);
+					}
+				}
+			};
+		}
+
+		it("should derive the best-scored previews before resolving and the rest after", async function () {
+			stubScore();
+			let { stub, release, advanceTo } = stubDerive();
+			let reported = [];
+			let session = Zotero.BestMatch.createSession('owl');
+			session.onPreviewsFilled = itemIDs => reported.push(...itemIDs);
+			let scored = session.score(atts.map(att => att.id));
+			// Only the previews score() waits for are let through, so its
+			// resolution can't have depended on the one left in flight
+			await advanceTo(PRELOADED + 1);
+			await scored;
+
+			// Settled by the time score() resolves
+			for (let att of atts.slice(0, PRELOADED)) {
+				assert.equal(session.getPreviews(att.id).state, 'filled');
+			}
+			for (let att of atts.slice(PRELOADED)) {
+				assert.equal(session.getPreviews(att.id).state, 'pending');
+			}
+			// Nothing reported for what score() derived itself
+			assert.isEmpty(reported);
+
+			let settled = false;
+			session.previewsSettled.then(() => settled = true);
+			while (!settled) {
+				release();
+				await Zotero.Promise.delay(0);
+			}
+			await session.previewsSettled;
+			assert.equal(stub.callCount, atts.length);
+			for (let att of atts.slice(PRELOADED)) {
+				assert.equal(session.getPreviews(att.id).state, 'filled');
+			}
+			assert.sameMembers(reported, atts.slice(PRELOADED).map(att => att.id));
+		});
+
+		it("should stop the background pass when the session is disposed", async function () {
+			stubScore();
+			let { stub, release, advanceTo } = stubDerive();
+			let session = Zotero.BestMatch.createSession('owl');
+			let scored = session.score(atts.map(att => att.id));
+			await advanceTo(PRELOADED + 1);
+			await scored;
+
+			session.dispose();
+			release();
+			await session.previewsSettled;
+			// The in-flight derivation settles nothing, and the ones behind
+			// it are never asked for
+			assert.equal(stub.callCount, PRELOADED + 1);
+			assert.equal(session.getPreviews(atts[PRELOADED].id).state, 'pending');
+		});
+	});
+
 	describe("#isSearchableQuery()", function () {
 		it("should accept any query the lexical engine can parse", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false));

@@ -62,8 +62,25 @@ Zotero.BestMatch = new function () {
 	// the item has to offer at a glance; the rest are still derived --
 	// they're read whole rather than quoted, which needs no line chosen.
 	const MAX_QUOTED_PASSAGES = 3;
+	// Previews derived before scoring resolves, best-scored first: enough to
+	// cover the top of the results. The rest follow in the background, since
+	// reading every matched item's text takes far longer than the ranking.
+	const PRELOADED_MATCH_PREVIEWS = 10;
+	// How long background-derived previews accumulate before the consumer
+	// hears about them, so a pass redraws the view about twice a second
+	const PREVIEW_BATCH_INTERVAL = 500;
+	// How long a background derivation waits for an idle main thread before
+	// running anyway
+	const PREVIEW_IDLE_TIMEOUT = 1000;
+	// How long the pass rests after deriving a preview, as a multiple of what
+	// that preview cost. Deriving reads the item's text; run flat out, that
+	// work lands inside the frames of whatever the user is doing and
+	// scrolling stutters.
+	const PREVIEW_PAUSE_RATIO = 3;
+	const PREVIEW_MAX_PAUSE = 250;
 
 	this.MAX_QUOTED_PASSAGES = MAX_QUOTED_PASSAGES;
+	this.PRELOADED_MATCH_PREVIEWS = PRELOADED_MATCH_PREVIEWS;
 
 	//
 	// Errors
@@ -88,6 +105,13 @@ Zotero.BestMatch = new function () {
 
 	function _hasPreviews(itemID) {
 		return !!Zotero.Items.get(itemID)?.isFileAttachment?.();
+	}
+
+	// Resolves the next time the main thread is idle, or after
+	// PREVIEW_IDLE_TIMEOUT regardless
+	function _idle() {
+		return new Promise(resolve => requestIdleCallback(
+			resolve, { timeout: PREVIEW_IDLE_TIMEOUT }));
 	}
 
 	/**
@@ -275,19 +299,28 @@ Zotero.BestMatch = new function () {
 	 * A best-match search session: one query's scoring pass plus the
 	 * previews explaining its matches.
 	 *
-	 * score() ranks candidates and, before it resolves, derives a preview
-	 * for every matched item that has anything to show, so consumers read
-	 * settled previews (getPreviews()) the moment scoring ends. An item's
-	 * entries hold both engines' evidence, merged, deduplicated and ordered
-	 * by strength (see getMatchingExcerpts()). A re-score keeps previews
-	 * already derived; fill() re-derives ones invalidate() dropped back to
-	 * pending. A disposed session derives nothing.
+	 * score() ranks candidates and derives the best-scored few previews
+	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive in the
+	 * background, in score order and paced to stay out of the user's way
+	 * (see PREVIEW_PAUSE_RATIO), reported through onPreviewsFilled and
+	 * awaitable through previewsSettled. An item's entries hold both
+	 * engines' evidence, merged, deduplicated and ordered by strength (see
+	 * getMatchingExcerpts()). A re-score keeps previews already derived;
+	 * fill() re-derives ones invalidate() dropped back to pending. A
+	 * disposed session derives nothing.
 	 */
 	this.Session = class {
 		constructor(queryText) {
 			this._queryText = queryText;
 			this._previews = new Map();
 			this._disposed = false;
+			// Bumped per background pass, so a re-score abandons the last one
+			this._derivation = 0;
+			this._previewsSettled = Promise.resolve();
+			// Set by a consumer showing previews as they arrive: called with
+			// the itemIDs filled since the last call (see
+			// PREVIEW_BATCH_INTERVAL), never for what score() derived itself
+			this.onPreviewsFilled = null;
 		}
 
 		get queryText() {
@@ -298,9 +331,14 @@ Zotero.BestMatch = new function () {
 		 * Score candidates for this session's query (see
 		 * Zotero.BestMatch.scoreItemIDs()), rebuild the preview set from the
 		 * engines' match sets, recompute ranks and barFractions, and derive
-		 * every pending preview before resolving, best-scored first. Items
-		 * still matched keep their settled previews -- a re-score doesn't
-		 * re-derive kept text -- and items no longer matched lose theirs.
+		 * the best-scored pending previews before resolving. Items still
+		 * matched keep their settled previews -- a re-score doesn't re-derive
+		 * kept text -- and items no longer matched lose theirs.
+		 *
+		 * The previews past PRELOADED_MATCH_PREVIEWS derive after this
+		 * resolves (see onPreviewsFilled, previewsSettled). Ranks and
+		 * barFractions are complete either way -- neither depends on a
+		 * preview.
 		 *
 		 * @param {Number[]} itemIDs - Candidate item IDs to score
 		 * @param {Object} [options] - Passed through to scoreItemIDs()
@@ -345,10 +383,11 @@ Zotero.BestMatch = new function () {
 			}
 			this._previews = previews;
 			this._rank(scores);
-			for (let itemID of [...scores.entries()]
+			let pending = [...scores.entries()]
 				.sort((a, b) => b[1] - a[1])
 				.map(([id]) => id)
-				.filter(id => previews.get(id)?.state == 'pending')) {
+				.filter(id => previews.get(id)?.state == 'pending');
+			for (let itemID of pending.slice(0, PRELOADED_MATCH_PREVIEWS)) {
 				if (this._disposed) {
 					return scores;
 				}
@@ -357,7 +396,63 @@ Zotero.BestMatch = new function () {
 				}
 				await this._derive(itemID);
 			}
+			this._previewsSettled = this._deriveRest(
+				pending.slice(PRELOADED_MATCH_PREVIEWS));
 			return scores;
+		}
+
+		/**
+		 * Resolves once the previews score() didn't wait for have derived, or
+		 * once the session is disposed
+		 *
+		 * @return {Promise}
+		 */
+		get previewsSettled() {
+			return this._previewsSettled;
+		}
+
+		// Derive the previews score() left behind, best-scored first,
+		// reporting them in batches (see onPreviewsFilled). Left unawaited by
+		// score(), so a consumer draws the ranking while the explanations
+		// behind it fill in. A newer pass -- another score() -- or dispose()
+		// abandons this one.
+		async _deriveRest(itemIDs) {
+			let derivation = ++this._derivation;
+			let filled = [];
+			let reportedAt = Date.now();
+			let report = () => {
+				if (!filled.length) {
+					return;
+				}
+				let reported = filled;
+				filled = [];
+				reportedAt = Date.now();
+				// A consumer that throws shouldn't strand the rest
+				try {
+					this.onPreviewsFilled?.(reported);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			};
+			for (let itemID of itemIDs) {
+				await _idle();
+				if (this._disposed || derivation !== this._derivation) {
+					return;
+				}
+				let started = Date.now();
+				await this._derive(itemID);
+				await Zotero.Promise.delay(Math.min(PREVIEW_MAX_PAUSE,
+					(Date.now() - started) * PREVIEW_PAUSE_RATIO));
+				// A preview that derived nothing has no rows to redraw
+				if (this._previews.get(itemID)?.state == 'filled') {
+					filled.push(itemID);
+				}
+				if (Date.now() - reportedAt >= PREVIEW_BATCH_INTERVAL) {
+					report();
+				}
+			}
+			report();
 		}
 
 		/**
