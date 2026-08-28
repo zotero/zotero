@@ -1821,6 +1821,24 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
+		// The menu isn't rebuilt between openings, so move the checkmark to the target
+		// that's activated. A <menulist> marks the item clicked in its own popup as
+		// selected, drawing a checkmark of its own, and can't clear it when the next
+		// pick is in a submenu, so clear that too.
+		function _setCurrentTarget(target) {
+			if (!currentTarget) {
+				return;
+			}
+			for (let menuitem of elem.querySelectorAll('menuitem[checked], menuitem[selected]')) {
+				menuitem.removeAttribute('checked');
+				menuitem.removeAttribute('selected');
+			}
+			let menuitem = elem.querySelector(`menuitem[value="${target.treeViewID}"]`);
+			if (menuitem) {
+				menuitem.setAttribute('checked', 'true');
+			}
+		}
+		
 		function _appendTarget(target, parent) {
 			let collections = target.objectType == 'collection'
 				? Zotero.Collections.getByParent(target.id)
@@ -1834,7 +1852,10 @@ Zotero.Utilities.Internal = {
 				return null;
 			}
 			
-			let command = event => clickAction(event, target);
+			let command = (event) => {
+				_setCurrentTarget(target);
+				clickAction(event, target);
+			};
 			let imageSrc = target.treeViewImage;
 			
 			// Create menuitem for library or collection itself, to be placed either directly in
