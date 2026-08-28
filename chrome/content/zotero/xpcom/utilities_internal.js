@@ -3354,29 +3354,41 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 
 
 /**
- * Zotero.Utilities.Internal.Chunking -- splitting a text into passages of a
- * size the caller sets, measured however the caller measures (see
- * Zotero.Embeddings.Chunking, which measures in a model's tokens).
+ * Zotero.Utilities.Internal.Chunking -- splitting a text into passages.
  *
- * Metrics: { count(text), joinSize (charged per join, so pieces' sizes add up
+ * Passages are measured in characters unless the caller supplies its own
+ * metrics (see Zotero.Embeddings.Chunking, which measures in a model's
+ * tokens): { count(text), joinSize (charged per join, so pieces' sizes add up
  * to the joined size), budget (most a passage may reach), minSize (least
  * worth standing alone), overlap (carried into the next passage where one is
- * split mid-thought) }.
+ * split mid-thought) }. The character default (see getCharacterMetrics())
+ * approximates the same geometry, so it suits cuts made and discarded in one
+ * sitting; boundaries that get stored should be measured exactly, with the
+ * caller's own metrics.
  *
  * Every passage is a slice of its source, located by its start/end extent.
  */
 Zotero.Utilities.Internal.Chunking = new function () {
-	// The token budgets the character measure mirrors, and what a token is
-	// worth in characters in either kind of script
+	// The passage geometry, in tokens: the most a passage may hold
+	// (BUDGET_TOKENS), the least text worth standing alone rather than being
+	// combined with a neighbor (MIN_TOKENS), and how much of a split
+	// passage's tail is carried into the next one (OVERLAP_TOKENS). Exported
+	// as the single definition of passage size, whichever measure a set of
+	// metrics counts it in.
 	const BUDGET_TOKENS = 768;
 	const MIN_TOKENS = 120;
 	const OVERLAP_TOKENS = 48;
+	this.BUDGET_TOKENS = BUDGET_TOKENS;
+	this.MIN_TOKENS = MIN_TOKENS;
+	this.OVERLAP_TOKENS = OVERLAP_TOKENS;
+	// What a token is worth in characters in either kind of script
 	const CHARS_PER_TOKEN = 4;
 	const CJK_CHARS_PER_TOKEN = 1;
 
 	/**
-	 * A measure counting characters, for a consumer with no tokenizer. The
-	 * budgets mirror the token ones, so passages come out about the size a
+	 * A measure counting characters, for a consumer with no tokenizer -- what
+	 * the chunkers here default to when no metrics are given. The budgets
+	 * mirror the token geometry above, so passages come out about the size a
 	 * model-driven chunker would make them.
 	 *
 	 * @param {String} text - Read for the script it's written in
@@ -3393,6 +3405,12 @@ Zotero.Utilities.Internal.Chunking = new function () {
 			overlap: OVERLAP_TOKENS * scale
 		};
 	};
+
+	// The character measure over the text a call is about to chunk, for a
+	// call that gave no metrics of its own
+	function _defaultMetrics(text) {
+		return Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text);
+	}
 
 	// CJK is written without spaces, so a character of it carries about what
 	// a word of an alphabetic script does
@@ -3503,11 +3521,13 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	 * truncation rather than as a passage.
 	 *
 	 * @param {String} text
-	 * @param {Object} metrics - See getCharacterMetrics(); only `count` is read
+	 * @param {Object} [metrics] - Only `count` is read; the character measure
+	 *     when omitted
 	 * @return {Object[]} - { text, size, start, end } per sentence, trimmed,
 	 *     with whitespace-only segments dropped
 	 */
 	this.splitSentences = function (text, metrics) {
+		metrics = metrics || _defaultMetrics(text);
 		return _segmentSentences(text, 0, text.length, metrics.count);
 	};
 
@@ -3595,10 +3615,11 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	 * pieces at sentence boundaries.
 	 *
 	 * @param {String} text
-	 * @param {Object} metrics
+	 * @param {Object} [metrics] - The character measure when omitted
 	 * @return {Object[]} - [{ text, size, start, end }]
 	 */
 	this.chunkText = function (text, metrics) {
+		metrics = metrics || _defaultMetrics(text);
 		let paragraphs = _measureParagraphs(text, metrics.count);
 		return _chunkParagraphs(text, paragraphs, metrics.budget, metrics);
 	};
@@ -3684,12 +3705,16 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	 * @param {Object[]} sections - [{ text, outlinePath, startBlock,
 	 *     auxiliary, blocks: [{ index, text, pageIndex, pageLabel,
 	 *     position }] }]
+	 * @param {Object} [metrics] - The character measure when omitted
 	 * @return {Object[]} - [{ text, embedText, size, outlinePath,
 	 *     startBlock, endBlock, startOffset, endOffset, pageIndex, pageLabel,
 	 *     position, sectionPart, sectionParts, auxiliary }], where size
 	 *     counts embedText
 	 */
 	this.chunkSections = function (sections, metrics) {
+		if (!metrics) {
+			metrics = _defaultMetrics(sections.map(section => section.text).join('\n\n'));
+		}
 		let { count, joinSize, budget } = metrics;
 
 		// Group sections into chunk-worthy units, combining any too small to

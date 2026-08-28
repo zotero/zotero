@@ -552,6 +552,22 @@ describe("Zotero.BestMatch", function () {
 			assert.lengthOf(await session.getMatchingExcerpts(attachment.id), 1);
 		});
 
+		it("shouldn't touch the chunk store while no model is enabled", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false));
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getChunks');
+			stubs.push(chunksStub);
+			stubs.push(sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: false, reason: 'none' }));
+			stubs.push(sinon.stub(Zotero.Items, 'getAsync')
+				.resolves({ attachmentText: Promise.resolve('A paragraph about the owl.') }));
+
+			let session = await sessionFor();
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+			// Reading stored chunks would attach the embeddings database,
+			// which a purely lexical search shouldn't create
+			assert.isFalse(chunksStub.called);
+			assert.isAbove(excerpts.length, 0);
+		});
+
 		it("should rethrow an unexpected semantic failure", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks')
@@ -831,6 +847,32 @@ describe("Zotero.BestMatch", function () {
 				assert.equal(session.getPreviews(att.id).state, 'filled');
 			}
 			assert.sameMembers(reported, atts.slice(PRELOADED).map(att => att.id));
+		});
+
+		it("should preload previews by where rows appear, not by items' own scores", async function () {
+			let parent = await createDataObject('item');
+			let child = await importFileAttachment('test.pdf', { parentItemID: parent.id });
+			// The child scores worst of every match, but its preview rows
+			// render under the top-ranked parent, at the top of the list
+			let scores = new Map(atts.map((att, i) => [att.id, 0.9 - i / 100]));
+			scores.set(parent.id, 0.99);
+			scores.set(child.id, 0.01);
+			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores,
+				matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+			}));
+			let { release, advanceTo } = stubDerive();
+			let session = Zotero.BestMatch.createSession('owl');
+			let scored = session.score([...scores.keys()]);
+			await advanceTo(PRELOADED + 1);
+			await scored;
+
+			assert.equal(session.getPreviews(child.id).state, 'filled');
+			// The weakest standalone attachment waited instead
+			assert.equal(session.getPreviews(atts[atts.length - 1].id).state, 'pending');
+
+			session.dispose();
+			release();
 		});
 
 		it("should stop the background pass when the session is disposed", async function () {

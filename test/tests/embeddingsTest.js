@@ -478,7 +478,7 @@ describe("Zotero.Embeddings", function () {
 		// that wrap every input is what a chunk's own text gets (see MODELS).
 		// bge's window is under the chunking ceiling, so the window governs here.
 		const BUDGET = 512 - 2;
-		// CHUNK_MAX_TOKENS less those same special tokens
+		// The shared BUDGET_TOKENS geometry less those same special tokens
 		const CEILING = 768 - 2;
 		var fakeTokenizer = wordTokenizer();
 		// A chunk's own tokens, the way chunking counts them
@@ -595,7 +595,7 @@ describe("Zotero.Embeddings", function () {
 			// A block only ever closes on a sentence boundary, so each piece
 			// lands a little under its target. Without spreading that slack over
 			// the pieces still to come, it accumulates into an extra runt piece
-			// -- which is what CHUNK_MIN_TOKENS exists to prevent.
+			// -- which is what the MIN_TOKENS geometry exists to prevent.
 			for (let count of [45, 64, 83, 97, 140]) {
 				let sentences = Array.from({ length: count },
 					(x, i) => `Sentence ${i} has a few more words in it about subject ${i}.`);

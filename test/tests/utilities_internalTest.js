@@ -758,8 +758,27 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 	});
 	describe("Chunking", function () {
-		var chunk = text => Zotero.Utilities.Internal.Chunking.chunkText(
-			text, Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text));
+		var chunk = text => Zotero.Utilities.Internal.Chunking.chunkText(text);
+
+		it("should chunk with the character measure when no metrics are given", function () {
+			let text = ('word '.repeat(60) + '\n').repeat(40);
+			let explicit = Zotero.Utilities.Internal.Chunking.chunkText(
+				text, Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text));
+			assert.deepEqual(chunk(text), explicit);
+		});
+
+		it("should mirror the exported geometry in its character defaults", function () {
+			let chunking = Zotero.Utilities.Internal.Chunking;
+			// One scale for all three numbers, so the character measure can't
+			// drift from the geometry it stands in for
+			for (let text of ['climate change', '気候変動'.repeat(10)]) {
+				let metrics = chunking.getCharacterMetrics(text);
+				let scale = metrics.budget / chunking.BUDGET_TOKENS;
+				assert.isAbove(scale, 0);
+				assert.equal(metrics.minSize, chunking.MIN_TOKENS * scale);
+				assert.equal(metrics.overlap, chunking.OVERLAP_TOKENS * scale);
+			}
+		});
 
 		it("should leave a text within the budget whole", function () {
 			let chunks = chunk('A short paragraph.');

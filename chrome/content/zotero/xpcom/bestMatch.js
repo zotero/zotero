@@ -62,7 +62,7 @@ Zotero.BestMatch = new function () {
 	// the item has to offer at a glance; the rest are still derived --
 	// they're read whole rather than quoted, which needs no line chosen.
 	const MAX_QUOTED_PASSAGES = 3;
-	// Previews derived before scoring resolves, best-scored first: enough to
+	// Previews derived before scoring resolves, in screen order: enough to
 	// cover the top of the results. The rest follow in the background, since
 	// reading every matched item's text takes far longer than the ranking.
 	const PRELOADED_MATCH_PREVIEWS = 10;
@@ -299,9 +299,9 @@ Zotero.BestMatch = new function () {
 	 * A best-match search session: one query's scoring pass plus the
 	 * previews explaining its matches.
 	 *
-	 * score() ranks candidates and derives the best-scored few previews
+	 * score() ranks candidates and derives the first few previews on screen
 	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive in the
-	 * background, in score order and paced to stay out of the user's way
+	 * background, in the same order and paced to stay out of the user's way
 	 * (see PREVIEW_PAUSE_RATIO), reported through onPreviewsFilled and
 	 * awaitable through previewsSettled. An item's entries hold both
 	 * engines' evidence, merged, deduplicated and ordered by strength (see
@@ -313,6 +313,7 @@ Zotero.BestMatch = new function () {
 		constructor(queryText) {
 			this._queryText = queryText;
 			this._previews = new Map();
+			this._effectiveScores = new Map();
 			this._disposed = false;
 			// Bumped per background pass, so a re-score abandons the last one
 			this._derivation = 0;
@@ -331,7 +332,7 @@ Zotero.BestMatch = new function () {
 		 * Score candidates for this session's query (see
 		 * Zotero.BestMatch.scoreItemIDs()), rebuild the preview set from the
 		 * engines' match sets, recompute ranks and barFractions, and derive
-		 * the best-scored pending previews before resolving. Items still
+		 * the first pending previews on screen before resolving. Items still
 		 * matched keep their settled previews -- a re-score doesn't re-derive
 		 * kept text -- and items no longer matched lose theirs.
 		 *
@@ -383,10 +384,15 @@ Zotero.BestMatch = new function () {
 			}
 			this._previews = previews;
 			this._rank(scores);
-			let pending = [...scores.entries()]
-				.sort((a, b) => b[1] - a[1])
-				.map(([id]) => id)
-				.filter(id => previews.get(id)?.state == 'pending');
+			// Derive in the order rows appear on screen: an item's preview
+			// rows render under its top-level ancestor, which is ranked by
+			// the best match anywhere beneath it -- an item's own score can
+			// sit far below its position
+			let pending = [...scores.keys()]
+				.filter(id => previews.get(id)?.state == 'pending')
+				.map(id => [id, this._topLevelScore(id), this._effectiveScores.get(id) ?? 0])
+				.sort((a, b) => (b[1] - a[1]) || (b[2] - a[2]) || (a[0] - b[0]))
+				.map(([id]) => id);
 			for (let itemID of pending.slice(0, PRELOADED_MATCH_PREVIEWS)) {
 				if (this._disposed) {
 					return scores;
@@ -411,11 +417,11 @@ Zotero.BestMatch = new function () {
 			return this._previewsSettled;
 		}
 
-		// Derive the previews score() left behind, best-scored first,
-		// reporting them in batches (see onPreviewsFilled). Left unawaited by
-		// score(), so a consumer draws the ranking while the explanations
-		// behind it fill in. A newer pass -- another score() -- or dispose()
-		// abandons this one.
+		// Derive the previews score() left behind, in screen order (see
+		// score()), reporting them in batches (see onPreviewsFilled). Left
+		// unawaited by score(), so a consumer draws the ranking while the
+		// explanations behind it fill in. A newer pass -- another score() --
+		// or dispose() abandons this one.
 		async _deriveRest(itemIDs) {
 			let derivation = ++this._derivation;
 			let filled = [];
@@ -511,6 +517,18 @@ Zotero.BestMatch = new function () {
 			}
 			this._ranks = ranks;
 			this._barFractions = fractions;
+			this._effectiveScores = effectiveScores;
+		}
+
+		// The effective score of an item's top-level ancestor -- what places
+		// the row subtree the item's preview rows render in
+		_topLevelScore(itemID) {
+			let id = itemID;
+			let parentItemID;
+			while ((parentItemID = Zotero.Items.get(id)?.parentItemID)) {
+				id = parentItemID;
+			}
+			return this._effectiveScores.get(id) ?? 0;
 		}
 
 		/**
@@ -709,16 +727,21 @@ Zotero.BestMatch = new function () {
 					}
 				}
 			}
-			// Indexed, but with no model weighing the chunks -- either it
-			// isn't ranking, or it found nothing here worth ranking. They
-			// still say how the item divides, for the words to be found in.
 			if (!this._lexicalApplies(itemID)) {
 				return [];
 			}
-			let indexed = await Zotero.Embeddings.getChunks(itemID);
-			indexed = indexed.filter(chunk => chunk.text);
-			if (indexed.length) {
-				return indexed;
+			// Indexed, but with no model weighing the chunks -- either it
+			// found nothing here worth ranking, or its index isn't ready. The
+			// chunks still say how the item divides, for the words to be
+			// found in. Only asked while a model is enabled: with semantic
+			// search off there's no chunk store, and asking would create the
+			// embeddings database for a purely lexical search.
+			if (Zotero.Embeddings.isEnabled()) {
+				let indexed = await Zotero.Embeddings.getChunks(itemID);
+				indexed = indexed.filter(chunk => chunk.text);
+				if (indexed.length) {
+					return indexed;
+				}
 			}
 			return this._cutPassages(itemID);
 		}
@@ -732,25 +755,19 @@ Zotero.BestMatch = new function () {
 			if (!item) {
 				return [];
 			}
-			let chunking = Zotero.Utilities.Internal.Chunking;
 			// Only structure already extracted: generating it costs seconds,
 			// which is not a price a preview may charge (see
 			// Zotero.SDT.getPack()). Without it the flat text still divides,
 			// just without knowing where its passages sit.
 			let structure = await Zotero.SDT.getSections(itemID, { cachedOnly: true });
 			if (structure.ok && structure.sections.length) {
-				// The metrics only read the text for its script, so a sample
-				// of the opening sections says as much as all of them
-				let sample = structure.sections.slice(0, 5)
-					.map(section => section.text).join('\n\n');
-				return chunking.chunkSections(
-					structure.sections, chunking.getCharacterMetrics(sample));
+				return Zotero.Utilities.Internal.Chunking.chunkSections(structure.sections);
 			}
 			let text = await item.attachmentText;
 			if (!text) {
 				return [];
 			}
-			return chunking.chunkText(text, chunking.getCharacterMetrics(text));
+			return Zotero.Utilities.Internal.Chunking.chunkText(text);
 		}
 
 		/**
@@ -767,10 +784,8 @@ Zotero.BestMatch = new function () {
 		 * @param {Object[]} entries - Set in place
 		 */
 		async _pickSnippets(entries) {
-			let chunking = Zotero.Utilities.Internal.Chunking;
 			for (let entry of entries) {
-				let sentences = chunking.splitSentences(
-					entry.text, chunking.getCharacterMetrics(entry.text));
+				let sentences = Zotero.Utilities.Internal.Chunking.splitSentences(entry.text);
 				// The passage's opening, for a passage with no words to quote
 				// around
 				entry.snippet = sentences.length
