@@ -1774,6 +1774,10 @@ Zotero.Utilities.Internal = {
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
 	 *
+	 * When the menu belongs to a <menulist>, typing while the menu is closed selects the
+	 * first matching target at any depth, since the platform's own find-as-you-type only
+	 * reaches the items of the open popup.
+	 *
 	 * @param {Library|Collection} libraryOrCollection
 	 * @param {Node<menupopup>} elem Parent element
 	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
@@ -1886,7 +1890,9 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
-		return _appendTarget(libraryOrCollection, elem);
+		var node = _appendTarget(libraryOrCollection, elem);
+		this.addMenuFindAsYouType(elem);
+		return node;
 	},
 	
 	
