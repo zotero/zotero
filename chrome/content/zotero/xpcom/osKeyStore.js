@@ -63,17 +63,22 @@ Zotero.OSKeyStore = {
 			|| Services.wm.getMostRecentWindow('navigator:browser');
 	},
 
-	// Show an alert when an active write of new credentials fails (e.g., keychain unavailable)
-	alertSaveFailed: function () {
-		let win = this._getParentWindow();
-		if (!win) {
-			return;
-		}
-		Zotero.alert(
-			win,
-			Zotero.getString('general-error'),
-			Zotero.getString('os-keystore-save-failed')
-		);
+	// Offer to store credentials unencrypted after a write to the keystore fails. The keystore
+	// can be unusable in ways the user can't fix -- most often on Linux, where the platform
+	// requires a Secret Service that some managed systems don't run.
+	//
+	// Returns true if the user agrees.
+	confirmUnencryptedFallback: function () {
+		let index = Zotero.Prompt.confirm({
+			window: this._getParentWindow(),
+			title: Zotero.getString('general-error'),
+			text: Zotero.getString('os-keystore-save-failed') + "\n\n"
+				+ Zotero.getString('os-keystore-save-unencrypted'),
+			button0: Zotero.getString('os-keystore-save-unencrypted-button'),
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+			defaultButton: 1
+		});
+		return index == 0;
 	},
 
 	// Show a one-shot alert when migration of an existing legacy plaintext entry

@@ -85,7 +85,22 @@ Zotero.Sync.Data.Local = {
 		}
 		var login = this._getAPIKeyLoginInfo();
 		if (login) {
-			return Zotero.OSKeyStore.decrypt(login.password);
+			if (Zotero.OSKeyStore.isEncrypted(login.password)) {
+				return Zotero.OSKeyStore.decrypt(login.password);
+			}
+			// Key stored without encryption after a failed write -- encrypt it now, in case
+			// the keystore has since become usable
+			if (!this._reencryptedAPIKey) {
+				this._reencryptedAPIKey = true;
+				try {
+					Zotero.debug("Encrypting unencrypted API key");
+					await this._writeEncryptedAPIKey(login.password);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			return login.password;
 		}
 		// If the login manager had to be reset, the stored API key is gone, so tell the user
 		// to log in again
@@ -132,24 +147,7 @@ Zotero.Sync.Data.Local = {
 			return;
 		}
 		
-		try {
-			await this._writeEncryptedAPIKey(apiKey);
-		}
-		catch (e) {
-			// If the write failed because the key database was unusable, reset the login
-			// manager and retry, so that logging in works without a manual fix
-			if (!this.repairLoginManager()) {
-				Zotero.OSKeyStore.alertSaveFailed();
-				throw e;
-			}
-			try {
-				await this._writeEncryptedAPIKey(apiKey);
-			}
-			catch (e) {
-				Zotero.OSKeyStore.alertSaveFailed();
-				throw e;
-			}
-		}
+		await this._saveAPIKey(apiKey);
 		// Drop any leftover plaintext entry from the legacy realm
 		if (legacyLoginInfo) {
 			Services.logins.removeLogin(legacyLoginInfo);
@@ -158,9 +156,47 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
+	/**
+	 * Store the API key, retrying after a login manager repair and, if the keystore still
+	 * can't be used, offering to store the key without it
+	 */
+	_saveAPIKey: async function (apiKey) {
+		var error;
+		try {
+			await this._writeEncryptedAPIKey(apiKey);
+			return;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			error = e;
+		}
+		// If the write failed because the key database was unusable, reset the login manager
+		// and retry, so that logging in works without a manual fix
+		if (this.repairLoginManager()) {
+			try {
+				await this._writeEncryptedAPIKey(apiKey);
+				return;
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		if (!Zotero.OSKeyStore.confirmUnencryptedFallback()) {
+			throw error;
+		}
+		await this._writeAPIKey(apiKey);
+		// The keystore is unusable, so don't try to encrypt again on the next read
+		this._reencryptedAPIKey = true;
+	},
+	
+	
 	_writeEncryptedAPIKey: async function (apiKey) {
+		await this._writeAPIKey(await Zotero.OSKeyStore.encrypt(apiKey));
+	},
+	
+	
+	_writeAPIKey: async function (storedValue) {
 		var oldLoginInfo = this._getAPIKeyLoginInfo();
-		var storedValue = await Zotero.OSKeyStore.encrypt(apiKey);
 		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
 		var loginInfo = new nsLoginInfo(
