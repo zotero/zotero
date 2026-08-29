@@ -233,7 +233,14 @@ Zotero_Preferences.Sync = {
 		}
 
 		// Validate and store the API key
-		await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
+		try {
+			await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
+		}
+		catch (e) {
+			this._pendingSessionToken = null;
+			this._showLoginDefault();
+			throw e;
+		}
 
 		// Handle secmod.db issue when storing the API key
 		// This can happen when people have a very old profile directory (e.g., from 2013)
