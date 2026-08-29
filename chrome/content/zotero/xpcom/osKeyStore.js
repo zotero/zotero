@@ -56,9 +56,16 @@ Zotero.OSKeyStore = {
 		return typeof value == 'string' && value.startsWith(this._prefix);
 	},
 
+	// The settings window, where credentials are usually saved from, or the main window when
+	// they're saved during a sync
+	_getParentWindow: function () {
+		return Services.wm.getMostRecentWindow('zotero:pref')
+			|| Services.wm.getMostRecentWindow('navigator:browser');
+	},
+
 	// Show an alert when an active write of new credentials fails (e.g., keychain unavailable)
 	alertSaveFailed: function () {
-		let win = Services.wm.getMostRecentWindow('zotero:main');
+		let win = this._getParentWindow();
 		if (!win) {
 			return;
 		}
@@ -78,7 +85,7 @@ Zotero.OSKeyStore = {
 			return;
 		}
 		this._migrateAlertShown = true;
-		let win = Services.wm.getMostRecentWindow('zotero:main');
+		let win = this._getParentWindow();
 		if (!win) {
 			return;
 		}
