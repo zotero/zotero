@@ -259,6 +259,40 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			await controller.setPassword(password);
 			assert.equal(await controller.getPassword(), password);
 		})
+		
+		
+		it("shouldn't store a password that would read back as encrypted", async function () {
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				var e = await getPromiseError(controller.setPassword("oskv1:example"));
+				assert.ok(e);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+			}
+		})
+		
+		
+		it("should return a password stored without encryption after a keystore failure", async function () {
+			var password = "p\u00e4ssw\u20acrd";
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				await controller.setPassword(password);
+				assert.ok(confirmStub.called);
+				assert.equal(await controller.getPassword(), password);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+			}
+		})
 	})
 	
 	describe("Syncing", function () {

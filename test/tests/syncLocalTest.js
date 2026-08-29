@@ -18,6 +18,95 @@ describe("Zotero.Sync.Data.Local", function () {
 			await Zotero.Sync.Data.Local.setAPIKey("");
 			assert.strictEqual(await Zotero.Sync.Data.Local.getAPIKey(apiKey), "");
 		})
+		
+		
+		it("should store the key without encryption if the keystore is unusable and the user agrees", async function () {
+			var apiKey = Zotero.Utilities.randomString(24);
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				await Zotero.Sync.Data.Local.setAPIKey(apiKey);
+				assert.ok(confirmStub.called);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				// The read shouldn't have retried encryption against the same broken keystore
+				assert.equal(encryptStub.callCount, 1);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+		
+		
+		it("shouldn't store the key if the keystore is unusable and the user declines", async function () {
+			var apiKey = Zotero.Utilities.randomString(24);
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(false);
+			try {
+				var e = await getPromiseError(Zotero.Sync.Data.Local.setAPIKey(apiKey));
+				assert.ok(e);
+				assert.strictEqual(await Zotero.Sync.Data.Local.getAPIKey(), "");
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+		
+		
+		it("should prompt before storing the key without encryption", async function () {
+			var apiKey = Zotero.Utilities.randomString(24);
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var promptStub = sinon.stub(Zotero.Prompt, "confirm").returns(0);
+			try {
+				await Zotero.Sync.Data.Local.setAPIKey(apiKey);
+				assert.ok(promptStub.calledOnce);
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+			}
+			finally {
+				encryptStub.restore();
+				promptStub.restore();
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+		
+		
+		it("should encrypt a key stored without encryption in a later session", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			var apiKey = Zotero.Utilities.randomString(24);
+			// Store it with an unusable keystore
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				await Zotero.Sync.Data.Local.setAPIKey(apiKey);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+			}
+			try {
+				// Encryption is retried once per session, so stand in for a restart
+				Zotero.Sync.Data.Local._reencryptedAPIKey = false;
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				let login = await Zotero.Sync.Data.Local._getAPIKeyLoginInfo();
+				assert.ok(Zotero.OSKeyStore.isEncrypted(login.password));
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+			}
+			finally {
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
 	})
 
 

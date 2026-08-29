@@ -1189,15 +1189,19 @@ login-manager-reset = { -app-name } was unable to read your saved login informat
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+
+os-keystore-save-unencrypted-button = Save Anyway
 
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 
 search-button =
