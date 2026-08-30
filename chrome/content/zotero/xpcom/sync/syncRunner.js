@@ -39,6 +39,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 	});
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
+	Zotero.defineProperty(this, 'backgroundSync', { get: () => _backgroundSync });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
 	Zotero.defineProperty(this, 'RESET_MODE_FROM_SERVER', { value: 1 });
@@ -73,6 +74,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _delayPromises = new Set();
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _backgroundSync = false;
 	var _queuedSyncOptions = [];
 	var _stopping = false;
 	var _canceller;
@@ -131,6 +133,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			return false;
 		}
 		_syncInProgress = true;
+		_backgroundSync = !!options.background;
 		_stopping = false;
 
 		// Reset remote-change tracking for this sync; the undo stack is
@@ -921,6 +924,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	this.end = async function (options) {
 		_syncInProgress = false;
+		_backgroundSync = false;
 		await this.checkErrors(_errors, options);
 		if (!options.restartSync) {
 			let showOnSyncButton = !options.background

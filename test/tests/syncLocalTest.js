@@ -78,6 +78,27 @@ describe("Zotero.Sync.Data.Local", function () {
 		})
 		
 		
+		it("shouldn't prompt to save the key unencrypted during an automatic sync", async function () {
+			var apiKey = Zotero.Utilities.randomString(24);
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var promptStub = sinon.stub(Zotero.Prompt, "confirm").returns(0);
+			var backgroundStub = sinon.stub(Zotero.Sync.Runner, "backgroundSync").get(() => true);
+			try {
+				var e = await getPromiseError(Zotero.Sync.Data.Local.setAPIKey(apiKey));
+				assert.ok(e);
+				assert.isFalse(promptStub.called);
+				assert.strictEqual(await Zotero.Sync.Data.Local.getAPIKey(), "");
+			}
+			finally {
+				encryptStub.restore();
+				promptStub.restore();
+				backgroundStub.restore();
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+		
+		
 		it("should encrypt a key stored without encryption in a later session", async function () {
 			if (!Zotero.OSKeyStore.available) {
 				this.skip();
