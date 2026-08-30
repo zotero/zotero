@@ -260,7 +260,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					}
 					catch (e) {
 						Zotero.logError(e);
-						Zotero.OSKeyStore.alertMigrateFailed();
+						if (!Zotero.Sync.Runner.backgroundSync) {
+							Zotero.OSKeyStore.alertMigrateFailed();
+						}
 					}
 				}
 				return password;

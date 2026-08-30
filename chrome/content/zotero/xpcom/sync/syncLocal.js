@@ -78,7 +78,9 @@ Zotero.Sync.Data.Local = {
 				}
 				catch (e) {
 					Zotero.logError(e);
-					Zotero.OSKeyStore.alertMigrateFailed();
+					if (!Zotero.Sync.Runner.backgroundSync) {
+						Zotero.OSKeyStore.alertMigrateFailed();
+					}
 				}
 			}
 			return apiKey;
@@ -181,7 +183,9 @@ Zotero.Sync.Data.Local = {
 				Zotero.logError(e);
 			}
 		}
-		if (!Zotero.OSKeyStore.confirmUnencryptedFallback()) {
+		// An automatic sync can reach this via the legacy credential upgrade in
+		// _getAPIKeyFromLogin(), so don't interrupt one with a dialog
+		if (Zotero.Sync.Runner.backgroundSync || !Zotero.OSKeyStore.confirmUnencryptedFallback()) {
 			throw error;
 		}
 		await this._writeAPIKey(apiKey);
