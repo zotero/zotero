@@ -237,6 +237,10 @@ var Zotero_Tabs = new function () {
 				// At first, library tab is added without the icon data. We set it here once we know what it is
 				let libraryTab = this._getTab('zotero-pane');
 				libraryTab.tab.data = tab.data || {};
+				if (libraryTab.tab.data.state) {
+					// Not awaited, so that the other tabs are restored right away
+					ZoteroPane.restoreLibraryTabState(libraryTab.tab.data.state);
+				}
 				return {
 					itemID: null,
 				};
@@ -580,7 +584,30 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
+	/**
+	 * Store the current state of the library view on the library tab
+	 */
+	this._captureLibraryTabState = function () {
+		if (typeof ZoteroPane == 'undefined') {
+			return;
+		}
+		let { tab } = this._getTab('zotero-pane');
+		if (!tab) {
+			return;
+		}
+		try {
+			let state = ZoteroPane.captureLibraryTabState();
+			if (state) {
+				tab.data.state = state;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	};
+
 	this.getState = function () {
+		this._captureLibraryTabState();
 		return this._tabs.map((tab) => {
 			let type = tab.type;
 			// If type matches *-unloaded, use the base type
