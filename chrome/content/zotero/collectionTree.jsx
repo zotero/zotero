@@ -635,31 +635,47 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this.tree.invalidate();
 	}
 	
-	async selectByID(id, ensureRowVisible = true) {
-		var type = id[0];
-		id = parseInt(('' + id).substr(1));
+	/**
+	 * Expand the tree as necessary to show a row
+	 *
+	 * @param {String} id - A collection tree row id
+	 * @return {Promise<Integer|false>} - The row index, or false if the row isn't in the tree
+	 */
+	async _expandToID(id) {
+		var objectID = parseInt(('' + id).substr(1));
 		
-		switch (type) {
-		case 'L':
-			return this.selectLibrary(id);
-		
-		case 'C':
-			await this.expandToCollection(id);
-			break;
-		
-		case 'S':
-			var search = await Zotero.Searches.getAsync(id);
-			await this.expandLibrary(search.libraryID);
-			break;
-		
-		case 'D':
-		case 'U':
-		case 'T':
-			await this.expandLibrary(id);
-			break;
+		switch (id[0]) {
+			case 'C':
+				await this.expandToCollection(objectID);
+				break;
+			
+			case 'S': {
+				let search = await Zotero.Searches.getAsync(objectID);
+				if (search) {
+					await this.expandLibrary(search.libraryID);
+				}
+				break;
+			}
+			
+			case 'D':
+			case 'U':
+			case 'T':
+			case 'Y':
+			case 'R':
+			case 'P':
+				await this.expandLibrary(objectID);
+				break;
 		}
 		
-		var row = this.getRowIndexByID(type + id);
+		return this.getRowIndexByID(id);
+	}
+	
+	async selectByID(id, ensureRowVisible = true) {
+		if (id[0] == 'L') {
+			return this.selectLibrary(parseInt(('' + id).substr(1)));
+		}
+		
+		var row = await this._expandToID(id);
 		if (row === false) {
 			return false;
 		}
@@ -668,6 +684,59 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		await this.selectWait(row);
 		
+		return true;
+	}
+	
+	/**
+	 * Reapply a saved selection, expanding the tree as necessary
+	 *
+	 * @param {String[]} ids - Collection tree row ids
+	 * @param {Object} [options]
+	 * @param {String} [options.focusedID] - The row to focus, if it's among the selected rows
+	 * @return {Promise<Boolean>} - True if at least one row was selected
+	 */
+	async restoreSelection(ids, { focusedID } = {}) {
+		var indexes = [];
+		for (let id of ids || []) {
+			let index = await this._expandToID(id);
+			if (index !== false && !indexes.includes(index)) {
+				indexes.push(index);
+			}
+		}
+		if (!indexes.length) {
+			return false;
+		}
+		indexes.sort((a, b) => a - b);
+		
+		var focusedIndex = focusedID ? this.getRowIndexByID(focusedID) : false;
+		if (focusedIndex === false || !indexes.includes(focusedIndex)) {
+			focusedIndex = indexes[0];
+		}
+		
+		var promise = this.waitForSelect();
+		var unsuppress = false;
+		if (!this.selection.selectEventsSuppressed) {
+			unsuppress = this.selection.selectEventsSuppressed = true;
+		}
+		try {
+			this.selection.select(indexes[0]);
+			for (let index of indexes.slice(1)) {
+				this.selection.toggleSelect(index);
+			}
+			this.selection.focused = focusedIndex;
+			this.selection.pivot = focusedIndex;
+		}
+		finally {
+			if (unsuppress) {
+				this.selection.selectEventsSuppressed = false;
+			}
+		}
+		
+		this.ensureRowIsVisible(focusedIndex);
+		
+		if (unsuppress) {
+			await promise;
+		}
 		return true;
 	}
 	

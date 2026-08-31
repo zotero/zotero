@@ -142,7 +142,7 @@ describe("CollectionTreeRow", function () {
 			var attachment = await importPDFAttachment(item2);
 			var annotation = await createAnnotation('highlight', attachment);
 			
-			cv.selectByID("U" + userLibraryID);
+			await cv.selectByID("U" + userLibraryID);
 			await waitForItemsLoad(win);
 			var itemsView = zp.itemsView;
 			

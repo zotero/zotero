@@ -41,6 +41,35 @@ describe("Zotero_Tabs", function() {
 		});
 	});
 
+	describe("Library view state", function () {
+		var collection, item;
+
+		before(async function () {
+			collection = await createDataObject('collection', { name: 'Library View State' });
+			item = await createDataObject('item', {
+				title: 'Library View State Item',
+				collections: [collection.id]
+			});
+			win.Zotero_Tabs.closeAll();
+		});
+
+		it("should round-trip the library view through getState() and restoreState()", async function () {
+			await selectCollection(win, collection);
+
+			let state = win.Zotero_Tabs.getState();
+			let libraryTab = state.find(tab => tab.type == 'library');
+			assert.deepEqual(libraryTab.data.state.collections, ['C' + collection.id]);
+
+			// Move away from the saved view before restoring it
+			await selectLibrary(win);
+
+			await win.Zotero_Tabs.restoreState(state);
+			await zp.waitForLibraryTabState();
+
+			assert.deepEqual(zp.getCollectionTreeRows().map(row => row.id), ['C' + collection.id]);
+		});
+	});
+
 	describe("Window teardown", function () {
 		it("should not leave observers registered after a window is closed", async function () {
 			this.timeout(60000);

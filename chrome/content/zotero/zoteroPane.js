@@ -40,6 +40,8 @@ var ZoteroPane = new function () {
 	var _lastSelectedItems = [];
 	// [element, listener] for the collection tree focus listener added in initCollectionsTree()
 	var _collectionsTreeFocusListener = null;
+	var _libraryTabStateRestores = 0;
+	var _libraryTabStatePromise = Promise.resolve();
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
 	
@@ -1651,11 +1653,38 @@ var ZoteroPane = new function () {
 		}
 	}
 
+	/**
+	 * The library view state from the saved session
+	 *
+	 * @return {Object|null}
+	 */
+	function getSessionLibraryTabState() {
+		try {
+			let state = Zotero.Session.state.windows.find(x => x.type == 'pane');
+			let tab = (state?.tabs || []).find(x => x.type == 'library');
+			return tab?.data?.state || null;
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return null;
+	}
+
+	/**
+	 * The collection to show at startup
+	 *
+	 * @return {String|null} - A collection tree row id
+	 */
+	function getSessionCollectionID() {
+		return getSessionLibraryTabState()?.collections?.[0] || null;
+	}
+
 	this.initCollectionsTree = async function () {
 		try {
 			const CollectionTree = require('zotero/collectionTree');
 			var collectionsTree = document.getElementById('zotero-collections-tree');
 			ZoteroPane.collectionsView = await CollectionTree.init(collectionsTree, {
+				initialFolder: getSessionCollectionID(),
 				onSelectionChange: prevSelection => ZoteroPane.onCollectionSelected(prevSelection),
 				onContextMenu: (...args) => ZoteroPane.onCollectionsContextMenuOpen(...args),
 				dragAndDrop: true,
@@ -1940,6 +1969,124 @@ var ZoteroPane = new function () {
 	};
 
 
+	/**
+	 * The library a collection tree row id belongs to
+	 *
+	 * @param {String} [rowID]
+	 * @return {Integer|null}
+	 */
+	function getLibraryIDFromRowID(rowID) {
+		if (!rowID) {
+			return null;
+		}
+		let objectID = parseInt(rowID.substr(1));
+		switch (rowID[0]) {
+			case 'L':
+			case 'T':
+			case 'D':
+			case 'U':
+			case 'Y':
+			case 'R':
+			case 'P':
+				return objectID;
+			
+			case 'C':
+				return Zotero.Collections.get(objectID)?.libraryID ?? null;
+			
+			case 'S':
+				return Zotero.Searches.get(objectID)?.libraryID ?? null;
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * Capture the state of the library view, for the session
+	 *
+	 * @return {Object|null} - A JSON-serializable snapshot, or null if the view isn't ready
+	 */
+	this.captureLibraryTabState = function () {
+		if (_libraryTabStateRestores
+				|| !this.collectionsView
+				|| !this.itemsView?.collectionTreeRows?.length) {
+			return null;
+		}
+		let focusedRow = this.collectionsView.getRow(this.collectionsView.selection.focused);
+		return {
+			collections: this.getCollectionTreeRows().map(row => row.id),
+			focusedCollection: focusedRow ? focusedRow.id : null
+		};
+	};
+	
+	
+	/**
+	 * Show a library view captured by captureLibraryTabState()
+	 *
+	 * @param {Object} [state]
+	 * @return {Promise}
+	 */
+	this.restoreLibraryTabState = function (state) {
+		_libraryTabStateRestores++;
+		_libraryTabStatePromise = (async () => {
+			try {
+				await this._restoreLibraryTabState(state || {});
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			finally {
+				_libraryTabStateRestores--;
+			}
+		})();
+		return _libraryTabStatePromise;
+	};
+	
+	
+	/**
+	 * Wait for any in-progress restore of the library view
+	 *
+	 * @return {Promise}
+	 */
+	this.waitForLibraryTabState = function () {
+		return _libraryTabStatePromise;
+	};
+	
+	
+	this._restoreLibraryTabState = Zotero.serial(async function (state) {
+		if (!this.collectionsView) {
+			return;
+		}
+		await this.collectionsView.waitForLoad();
+		
+		// Show the loading message only if the collection selection is changing, so that a
+		// window that opens with the collection already selected keeps its loaded items
+		// list showing
+		let itemsPaneMessageShown = !Zotero.Utilities.arrayEquals(
+			this.getCollectionTreeRows().map(row => row.id).sort(),
+			(state.collections || []).slice().sort()
+		);
+		if (itemsPaneMessageShown) {
+			this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+		}
+		
+		let selected = await this.collectionsView.restoreSelection(state.collections, {
+			focusedID: state.focusedCollection
+		});
+		if (!selected) {
+			let libraryID = getLibraryIDFromRowID(state.collections?.[0]);
+			if (!libraryID || !(await this.collectionsView.selectLibrary(libraryID))) {
+				await this.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+			}
+		}
+		// Let any queued collection selection finish
+		await this.onCollectionSelected();
+		await this.itemsView.waitForLoad();
+		if (itemsPaneMessageShown) {
+			this.clearItemsPaneMessage();
+		}
+	});
+	
+	
 	/**
 	 * Prompt to save changes in the open saved-search editor and close it
 	 *
