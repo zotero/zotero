@@ -267,7 +267,6 @@
 				search.name = this._nameField.value;
 				await search.saveTx();
 				await ZoteroPane.setSavedSearchEditorState('closed');
-				Zotero_Tabs.rename('zotero-pane', search.name);
 				return;
 			}
 

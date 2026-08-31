@@ -378,7 +378,7 @@
 			this._header.renderCustomHead(callback);
 		}
 
-		notify = async (action, type, ids, _extraData) => {
+		notify = async (action, type, ids, extraData) => {
 			if (action == 'refresh' && this.item) {
 				if (type == 'itempane') {
 					this.renderCustomSections();
@@ -389,7 +389,7 @@
 			}
 
 			if (action == 'select' && type == 'tab') {
-				this._handleTabSelect(ids);
+				this._handleTabSelect(ids, extraData);
 			}
 		};
 
@@ -648,8 +648,9 @@
 			}
 		};
 
-		_handleTabSelect(tabIDs) {
-			if (!this.tabID || typeof Zotero_Tabs === 'undefined') {
+		_handleTabSelect(tabIDs, extraData) {
+			if (!this.tabID || typeof Zotero_Tabs === 'undefined'
+					|| !Zotero_Tabs.isOwnTabEvent(extraData, tabIDs[0])) {
 				return;
 			}
 			let isTabSelected = tabIDs.includes(this.tabID);

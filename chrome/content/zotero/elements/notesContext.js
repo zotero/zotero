@@ -303,7 +303,7 @@
 		_isNotesListVisible() {
 			let splitter = ZoteroContextPane.splitter;
 			
-			return Zotero_Tabs.selectedID != 'zotero-pane'
+			return Zotero_Tabs.selectedType != 'library'
 				&& ZoteroContextPane.context.mode == "notes"
 				&& this.mode == "notesList"
 				&& splitter.getAttribute('state') != 'collapsed';
@@ -513,7 +513,7 @@
 			switch (event.originalTarget.classList[0]) {
 				case 'context-pane-list-show-in-library':
 					ZoteroPane_Local.selectItem(id);
-					Zotero_Tabs.select('zotero-pane');
+					Zotero_Tabs.selectLibraryTab();
 					break;
 
 				case 'context-pane-list-edit-in-window':

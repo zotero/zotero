@@ -294,7 +294,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		treeRow.ref.name = treeRow.editingName;
 		delete treeRow.editingName;
 		await treeRow.ref.saveTx({ undoAction: 'undo-action-rename-collection' });
-		window.Zotero_Tabs.rename("zotero-pane", treeRow.ref.name);
 	}
 	
 	startEditing = (treeRow) => {
@@ -2471,7 +2470,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				let promises = [];
 				for (let item of items) {
 					// No transaction, because most time is spent traversing urls
-					promises.push(item.translate(targetLibraryID, targetCollectionID))
+					promises.push(item.translate(targetLibraryID, targetCollectionID, { window }));
 				}
 				return Zotero.Promise.all(promises);	
 			}

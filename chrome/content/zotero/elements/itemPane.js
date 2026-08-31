@@ -522,7 +522,8 @@
 			var collectionID = this._translationTarget.objectType == 'collection' ? this._translationTarget.id : undefined;
 			var items = this.data;
 			for (let item of items) {
-				await item.translate(this._translationTarget.libraryID, collectionID);
+				await item.translate(this._translationTarget.libraryID, collectionID,
+					{ window: this.ownerDocument.defaultView });
 			}
 		}
 		

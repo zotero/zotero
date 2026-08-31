@@ -44,7 +44,9 @@ const defaults = {
 // first n tags will be measured using DOM method for more accurate measurment (at the cost of performance)
 const FORCE_DOM_TAGS_FOR_COUNT = 200;
 
-Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
+// The class closes over this window's React and DOM globals, so each window initializes
+// its tag selector from its own copy.
+window.TagSelectorContainer = class TagSelectorContainer extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this._notifierID = Zotero.Notifier.registerObserver(

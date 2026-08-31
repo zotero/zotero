@@ -144,6 +144,7 @@
 				state,
 				item: this._item,
 				reloaded,
+				window: this.ownerDocument.defaultView,
 				iframeWindow: this._id('editor-view').contentWindow,
 				popup: this._id('editor-menu'),
 				onNavigate: this._navigateHandler,

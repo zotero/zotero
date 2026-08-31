@@ -59,7 +59,8 @@ const ZoteroStandalone = new function () {
 		this._notifierID = Zotero.Notifier.registerObserver(
 			{
 				notify: async (action, type, ids, extraData) => {
-					if (['select', 'load'].includes(action)) {
+					if (['select', 'load'].includes(action)
+							&& Zotero_Tabs.isOwnTabEvent(extraData, ids[0])) {
 						// Reader doesn't have tabID yet
 						setTimeout(async () => {
 							// Item and other things might not be loaded yet when reopening tabs
@@ -146,12 +147,12 @@ const ZoteroStandalone = new function () {
 		// Switch to library tab if dragging over PDF/EPUB/HTML file(s)
 		window.addEventListener('dragover', function (event) {
 			// TODO: Consider allowing more (or all) file types, although shouldn't interfere with image dragging to note editor
-			if (Zotero_Tabs.selectedID != 'zotero-pane'
+			if (Zotero_Tabs.selectedType != 'library'
 					&& event.dataTransfer.items
 					&& event.dataTransfer.items.length
 					&& !Array.from(event.dataTransfer.items).find(x =>
 						!['application/pdf', 'application/epub+zip', 'text/html'].includes(x.type))) {
-				Zotero_Tabs.select('zotero-pane');
+				Zotero_Tabs.selectLibraryTab();
 			}
 		}, true);
 	}

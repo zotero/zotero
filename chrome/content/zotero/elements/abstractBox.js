@@ -120,12 +120,12 @@
 			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
-		notify(action, type, ids) {
+		notify(action, type, ids, extraData) {
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
 				this._forceRenderAll();
 			}
 			if (action === 'select' && type === 'tab' && ids.length > 0) {
-				this._handleTabSelect(ids[0]);
+				this._handleTabSelect(ids[0], extraData);
 			}
 		}
 		
@@ -304,8 +304,9 @@
 			this.save();
 		};
 
-		_handleTabSelect = (tabID) => {
-			if (!this.tabID || typeof Zotero_Tabs === 'undefined') {
+		_handleTabSelect = (tabID, extraData) => {
+			if (!this.tabID || typeof Zotero_Tabs === 'undefined'
+					|| !Zotero_Tabs.isOwnTabEvent(extraData, tabID)) {
 				return;
 			}
 			if (tabID !== this.tabID) {
