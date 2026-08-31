@@ -1194,7 +1194,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
@@ -1236,7 +1236,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				// These fake an active model rather than selecting one (which
 				// would kick off a model switch), so name one to keep the
@@ -1294,7 +1294,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
@@ -1350,7 +1350,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
@@ -1403,7 +1403,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer())
@@ -1446,12 +1446,13 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
 				// The extraction itself is sdt.js's concern (see sdtTest.js);
 				// what's under test is what indexing does with the sections
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
 					sections: [
@@ -1565,10 +1566,11 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
 					sections: [
@@ -1615,10 +1617,11 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
 					sections: [
@@ -1687,10 +1690,11 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
 					sections: [
@@ -1759,10 +1763,11 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
 					if (itemID === big.id || itemID === small.id) {
 						extracted.push(itemID);
@@ -1787,6 +1792,115 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should run items, then extraction, then attachments, one step at a time", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of phased attachment' });
+			let note = new Zotero.Item('note');
+			note.parentID = item.id;
+			note.setNote('<p>A note with several words about owls.</p>');
+			await note.saveTx();
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			// What the run did, in order, as the steps themselves report it
+			let events = [];
+			let ensureStub = sinon.stub(Zotero.SDT, 'ensure').callsFake(async () => {
+				events.push('extract');
+				return true;
+			});
+			let getSectionsStub = sinon.stub(Zotero.SDT, 'getSections').resolves({
+				ok: true,
+				sections: [sdtSection('', 0, ['A section with enough words to be worth indexing.'])]
+			});
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
+					events.push(passages.some(text => text.includes('A section with enough'))
+						? 'embed-attachment'
+						: 'embed-item');
+					return passages.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				ensureStub,
+				getSectionsStub
+			];
+			let phases = [];
+			let onProgress = (status) => {
+				if (status.phase !== phases[phases.length - 1]) {
+					phases.push(status.phase);
+				}
+			};
+			Zotero.Embeddings.Indexing.addProgressListener(onProgress);
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+
+				// Every item embeds before any document is extracted, and
+				// every document is extracted before any of them embeds
+				assert.include(events, 'embed-item');
+				assert.include(events, 'embed-attachment');
+				assert.isBelow(events.lastIndexOf('embed-item'), events.indexOf('extract'));
+				assert.isBelow(events.lastIndexOf('extract'), events.indexOf('embed-attachment'));
+				assert.isTrue(ensureStub.calledWith(attachment.id));
+				assert.isTrue(getSectionsStub.calledWith(attachment.id));
+				// And each step announces itself, in the same order
+				assert.deepEqual(
+					phases.filter(phase => phase !== 'idle'),
+					['indexing', 'extracting', 'indexing-attachments']
+				);
+			}
+			finally {
+				Zotero.Embeddings.Indexing.removeProgressListener(onProgress);
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("shouldn't prepare an attachment whose stored embedding is current", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of current attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			let ensureStub = sinon.stub(Zotero.SDT, 'ensure').resolves(true);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				ensureStub,
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [sdtSection('', 0, ['A section with enough words to be worth indexing.'])]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.isTrue(ensureStub.calledWith(attachment.id));
+
+				// A second pass finds the stored embedding current, so the
+				// attachment needs no pack
+				ensureStub.resetHistory();
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.isFalse(ensureStub.calledWith(attachment.id));
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
 		it("should fall back to an attachment's plain text when structured extraction fails", async function () {
 			this.timeout(60000);
 			let item = await createDataObject('item', { title: 'Parent of fallback attachment' });
@@ -1803,10 +1917,11 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: false, reason: 'failed' })
 			];
 			try {
@@ -1870,11 +1985,12 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer').resolves(wordTokenizer()),
 				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(Float32Array.from(testMean)),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				getSectionsStub
 			];
 			try {
@@ -1923,7 +2039,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
-				sinon.stub(Zotero.Embeddings, 'preloadModel').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings.Chunking, 'getTokenizer')
 					.resolves(wordTokenizer())

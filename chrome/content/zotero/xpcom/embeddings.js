@@ -1713,17 +1713,30 @@ Zotero.Embeddings.Indexing = new function () {
 	let _indexing = false;
 	let _indexingPromise = null;
 	let _stopping = false;
-	let _phase = 'idle'; // 'idle' | 'downloading' | 'indexing'
+	// The step a run is on (see _run()): getting the model, then each kind of
+	// work in turn
+	let _phase = 'idle';
+	// 'idle' | 'downloading' | 'indexing' | 'extracting' | 'indexing-attachments'
 	// Bytes of the model downloaded so far, while _phase is 'downloading'
 	let _downloadProgress = null;
+	// Attachments prepared so far ({ done, total }), while _phase is 'extracting'
+	let _extractionProgress = null;
 	let _lastError = null;
 	let _status = new Map(); // libraryID -> { name, indexed, eligible }
 	let _progressListeners = new Set();
 	let _lastStatusRefresh = 0;
 
-	// The indexing queue. Producers (the item notifier, startIndexing()) only
-	// add itemIDs here; _run() is the single consumer that embeds them.
+	// The indexing queues. Producers (the item notifier, startIndexing()) only
+	// add itemIDs here; _run() is the single consumer that drains them.
+	//
+	// Attachments queue separately because their work is a different job:
+	// their text has to be extracted from a file before any of it can be
+	// embedded, and that extraction costs orders of magnitude more than
+	// everything else here. Keeping them apart is what lets a run be one
+	// step at a time -- items, then extraction, then attachments (see
+	// _run()) -- rather than three kinds of work interleaved.
 	let _queue = new Set();
+	let _attachmentQueue = new Set();
 	let _kickTimer = null;
 
 	// Tokens of text per engine call (see _indexItems()), in the model's own
@@ -1806,7 +1819,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				if (event === 'add' || event === 'modify') {
 					for (let id of ids) {
-						_queue.add(id);
+						_enqueue(id);
 					}
 					_scheduleKick();
 				}
@@ -1955,6 +1968,19 @@ Zotero.Embeddings.Indexing = new function () {
 		return true;
 	}
 
+	// Put an itemID on the queue its kind of work belongs to. An item the
+	// cache can't type goes to the regular queue, which routes it when it
+	// loads (see _drainItemQueue()).
+	function _enqueue(itemID) {
+		if (Zotero.Items.get(itemID)?.isAttachment()) {
+			if (_indexFulltextEnabled()) {
+				_attachmentQueue.add(itemID);
+			}
+			return;
+		}
+		_queue.add(itemID);
+	}
+
 	function _scheduleKick(delay = KICK_DELAY) {
 		if (_kickTimer) {
 			clearTimeout(_kickTimer);
@@ -1970,7 +1996,7 @@ Zotero.Embeddings.Indexing = new function () {
 		if (_indexing) {
 			return _indexingPromise;
 		}
-		if (!_queue.size || !Zotero.Embeddings.isEnabled()
+		if ((!_queue.size && !_attachmentQueue.size) || !Zotero.Embeddings.isEnabled()
 				|| Zotero.Embeddings.Indexing.isPaused()) {
 			return Promise.resolve();
 		}
@@ -2110,25 +2136,21 @@ Zotero.Embeddings.Indexing = new function () {
 		return [text, comment].filter(Boolean).join(' ').replace(/<\/?[a-z][^>]*>/gi, ' ');
 	}
 
-	// Enqueue every eligible item in two passes: first every library's items,
-	// notes, and annotations, then every library's attachments. That index is
-	// cheap and immediately useful, so it fills in across all libraries
-	// before the far slower fulltext extraction starts anywhere -- no
-	// library's metadata waits behind another library's documents.
-	//
-	// This governs full passes only. Items the notifier enqueues as they
-	// change go in on arrival, so editing a huge PDF still indexes it now
-	// rather than deferring it behind everything else.
+	// Enqueue every eligible item, each kind on its queue. The consumer
+	// takes the regular queue first, so every library's metadata is indexed
+	// -- cheap, and immediately useful -- before the far slower document
+	// work starts anywhere.
 	function _enqueueAllLibraries(eligibleByLibrary) {
-		for (let kind of ['items', 'attachments']) {
-			for (let library of _indexableLibraries()) {
-				let eligible = eligibleByLibrary.get(library.libraryID);
-				if (!eligible) {
-					continue;
-				}
-				for (let id of eligible[kind]) {
-					_queue.add(id);
-				}
+		for (let library of _indexableLibraries()) {
+			let eligible = eligibleByLibrary.get(library.libraryID);
+			if (!eligible) {
+				continue;
+			}
+			for (let id of eligible.items) {
+				_queue.add(id);
+			}
+			for (let id of eligible.attachments) {
+				_attachmentQueue.add(id);
 			}
 		}
 	}
@@ -2420,6 +2442,148 @@ Zotero.Embeddings.Indexing = new function () {
 		}));
 	}
 
+	// The stored source hash of each of the given items that has rows, read
+	// in one query per chunk rather than one per item (every start
+	// re-enqueues the whole library to find what changed). Every chunk row
+	// of an item carries the same hash.
+	async function _getStoredHashes(itemIDs) {
+		let storedHashes = new Map();
+		let chunkSize = 500;
+		for (let i = 0; i < itemIDs.length; i += chunkSize) {
+			let chunk = itemIDs.slice(i, i + chunkSize);
+			let rows = await Zotero.DB.queryAsync(
+				"SELECT DISTINCT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
+					+ chunk.map(() => '?').join(',') + ")",
+				chunk
+			);
+			for (let row of rows) {
+				storedHashes.set(row.itemID, row.sourceHash);
+			}
+		}
+		return storedHashes;
+	}
+
+	// How long between extraction-progress emissions
+	const EXTRACTION_EMIT_INTERVAL = 1000;
+
+	// The given attachments whose stored embeddings are stale or absent --
+	// the ones the embedding pass will read packs for. An up-to-date
+	// attachment won't be re-embedded and a fileless one has nothing to
+	// extract, so neither needs a pack.
+	async function _staleAttachmentIDs(itemIDs, shouldStop) {
+		let items = await Zotero.Items.getAsync(itemIDs);
+		let storedHashes = await _getStoredHashes(itemIDs);
+		let stale = [];
+		for (let item of items) {
+			if (shouldStop()) {
+				break;
+			}
+			let hash = await _getAttachmentSourceHash(item);
+			if (hash && storedHashes.get(item.id) !== hash) {
+				stale.push(item.id);
+			}
+		}
+		return stale;
+	}
+
+	// Embed the regular queue -- items, notes and annotations -- in chunks
+	// until it's empty or the run stops
+	async function _drainItemQueue(shouldStop, indexOptions) {
+		_setPhase('indexing');
+		while (_queue.size && !shouldStop()) {
+			let itemIDs = [];
+			for (let id of _queue) {
+				itemIDs.push(id);
+				_queue.delete(id);
+				if (itemIDs.length >= CHUNK_SIZE) {
+					break;
+				}
+			}
+			// Deleted items simply aren't returned; their embeddings are
+			// removed by the delete notifier
+			let items = await Zotero.Items.getAsync(itemIDs);
+			for (let item of items) {
+				// Enqueued before the cache could type it (see _enqueue())
+				if (item.isAttachment()) {
+					if (_indexFulltextEnabled()) {
+						_attachmentQueue.add(item.id);
+					}
+				}
+			}
+			items = items.filter(item => item.isRegularItem() || item.isNote()
+				|| item.isAnnotation());
+			if (items.length) {
+				await _indexItems(items, indexOptions());
+			}
+		}
+	}
+
+	// Embed attachments whose text is extracted and cached, in chunks. Gives
+	// way when the regular queue has new work, putting back what's left --
+	// its packs are cached, so the next cycle resumes without extracting
+	// again.
+	async function _embedAttachments(itemIDs, shouldStop, indexOptions) {
+		_setPhase('indexing-attachments');
+		for (let i = 0; i < itemIDs.length; i += CHUNK_SIZE) {
+			if (shouldStop()) {
+				return;
+			}
+			if (_queue.size) {
+				for (let itemID of itemIDs.slice(i)) {
+					_attachmentQueue.add(itemID);
+				}
+				return;
+			}
+			let items = (await Zotero.Items.getAsync(itemIDs.slice(i, i + CHUNK_SIZE)))
+				.filter(item => _indexFulltextEnabled() && _isIndexableAttachment(item));
+			if (items.length) {
+				await _indexItems(items, indexOptions());
+			}
+		}
+	}
+
+	// Extract the structured text of the attachments about to be embedded, so
+	// the embedding step reads cached packs instead of extracting inline.
+	// `extracted` collects what this run has put through extraction --
+	// attempts included, so a failure isn't retried for the rest of the run
+	// -- and lets an interrupted pass resume without re-reading packs.
+	//
+	// Runs with the engine shut down: extraction takes a long while, and the
+	// model would otherwise sit in memory throughout, competing with the
+	// worker for the same cores.
+	async function _extractAttachments(itemIDs, extracted, shouldStop) {
+		let toExtract = (await _staleAttachmentIDs(itemIDs, shouldStop))
+			.filter(itemID => !extracted.has(itemID));
+		if (!toExtract.length) {
+			return;
+		}
+		_setPhase('extracting');
+		await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+		let progress = { done: 0, total: toExtract.length };
+		_extractionProgress = progress;
+		_emitProgress();
+		let lastEmit = Date.now();
+		try {
+			for (let itemID of toExtract) {
+				if (shouldStop()) {
+					return;
+				}
+				extracted.add(itemID);
+				await Zotero.SDT.ensure(itemID);
+				progress.done++;
+				if (Date.now() - lastEmit >= EXTRACTION_EMIT_INTERVAL) {
+					lastEmit = Date.now();
+					_emitProgress();
+				}
+			}
+		}
+		finally {
+			if (_extractionProgress === progress) {
+				_extractionProgress = null;
+			}
+		}
+	}
+
 	// Compute and store embeddings for the given items, skipping any whose
 	// stored embedding is already up to date (via sourceHash). Items with no
 	// embeddable text have any existing embedding removed.
@@ -2442,23 +2606,7 @@ Zotero.Embeddings.Indexing = new function () {
 	} = {}) {
 		await Zotero.Items.loadDataTypes(items, ['itemData', 'note', 'annotation']);
 
-		// Every start re-enqueues the whole library to find what changed, so
-		// read the stored hashes in one query per chunk rather than one per
-		// item. Every chunk row of an item carries the same hash.
-		let storedHashes = new Map();
-		let itemIDs = items.map(item => item.id);
-		let chunkSize = 500;
-		for (let i = 0; i < itemIDs.length; i += chunkSize) {
-			let chunk = itemIDs.slice(i, i + chunkSize);
-			let rows = await Zotero.DB.queryAsync(
-				"SELECT DISTINCT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
-					+ chunk.map(() => '?').join(',') + ")",
-				chunk
-			);
-			for (let row of rows) {
-				storedHashes.set(row.itemID, row.sourceHash);
-			}
-		}
+		let storedHashes = await _getStoredHashes(items.map(item => item.id));
 
 		let toEmbed = [];
 		let toDelete = [];
@@ -2734,7 +2882,11 @@ Zotero.Embeddings.Indexing = new function () {
 			stopping: _indexing && _stopping,
 			paused: this.isPaused(),
 			phase: _phase,
+			// What each queue still holds, for telling a run that's stuck
+			// from one that's merely long
+			queued: { items: _queue.size, attachments: _attachmentQueue.size },
 			downloadProgress: _downloadProgress,
+			extractionProgress: _extractionProgress,
 			error: _lastError ? (_lastError.message || String(_lastError)) : null,
 			libraries: [..._status.entries()].map(([libraryID, s]) => ({ libraryID, ...s }))
 		};
@@ -2747,6 +2899,15 @@ Zotero.Embeddings.Indexing = new function () {
 	this.removeProgressListener = function (fn) {
 		_progressListeners.delete(fn);
 	};
+
+	// Move to a phase of the run, announcing the move (see _run())
+	function _setPhase(phase) {
+		if (_phase === phase) {
+			return;
+		}
+		_phase = phase;
+		_emitProgress();
+	}
 
 	function _emitProgress() {
 		let status = Zotero.Embeddings.Indexing.getStatus();
@@ -2859,10 +3020,6 @@ Zotero.Embeddings.Indexing = new function () {
 		);
 	}
 
-	// The single consumer: drain the queue in chunks until it's empty or
-	// stopIndexing() is called. Every indexing pass -- library-wide or
-	// notifier-driven -- runs through here, so there's never more than one
-	// indexing process and all of them can be stopped.
 	// The runtime's progress is a percentage of the files it has discovered so
 	// far, so it jumps while the small config and tokenizer files are fetched
 	// and then climbs steadily through the weights, which dominate the
@@ -2887,6 +3044,11 @@ Zotero.Embeddings.Indexing = new function () {
 	}
 
 
+	// The single consumer: get the model ready, then drain the queues a step
+	// at a time until they're empty or stopIndexing() is called. Every
+	// indexing pass -- library-wide or notifier-driven -- runs through here,
+	// so there's never more than one indexing process and all of them can be
+	// stopped.
 	async function _run() {
 		// Wait for memory rather than starting a run that would make things
 		// worse. The queue is untouched, so a later kick picks it up.
@@ -2900,45 +3062,44 @@ Zotero.Embeddings.Indexing = new function () {
 		try {
 			await Zotero.Embeddings.initDB();
 			await _ensureIndexMatchesModel();
-			_phase = (await Zotero.Embeddings.isDownloaded()) ? 'indexing' : 'downloading';
-			_emitProgress();
+			_setPhase((await Zotero.Embeddings.isDownloaded()) ? 'indexing' : 'downloading');
 			await Zotero.Embeddings.Indexing.refreshStatus();
-			await Zotero.Embeddings.preloadModel(_onDownloadProgress);
+			// Download only -- the engine is created lazily by the first
+			// embed, so the model isn't held in memory through the extraction
+			// step below
+			await Zotero.Embeddings.download(_onDownloadProgress);
 			// Measure the model before storing anything scored against it. Only
 			// the first run for a given model version pays for this; every
 			// later one finds the numbers already in the database.
 			await Zotero.Embeddings.ensureCalibration();
 
-			_phase = 'indexing';
 			_downloadProgress = null;
-			_emitProgress();
 			let shouldStop = () => _stopping;
-			while (_queue.size) {
-				if (shouldStop()) {
-					break;
-				}
-				// Pull the next chunk of ids off the queue
-				let ids = [];
-				for (let id of _queue) {
-					ids.push(id);
-					_queue.delete(id);
-					if (ids.length >= CHUNK_SIZE) {
-						break;
-					}
-				}
-				// Deleted items simply aren't returned; their embeddings are
-				// removed by the delete notifier
-				let items = (await Zotero.Items.getAsync(ids))
-					.filter(item => item.isRegularItem() || item.isNote() || item.isAnnotation()
-						|| (_indexFulltextEnabled() && _isIndexableAttachment(item)));
-				if (!items.length) {
+			// Built per call: memory pressure can shrink the token budget
+			// between chunks
+			let indexOptions = () => ({
+				shouldStop,
+				batchTokenBudget: _tokenBudget,
+				onProgress: () => _refreshStatusThrottled()
+			});
+			// Attachments this run has already extracted, so a cycle the
+			// regular queue interrupted resumes without re-reading packs
+			let extracted = new Set();
+			// One step at a time, in a fixed order: the regular queue, then
+			// the attachment queue's extraction, then its embedding. The
+			// regular queue goes first and preempts the attachments, so a
+			// just-edited item is searchable without waiting behind the
+			// library's documents -- and so the phase a run is in says which
+			// of the three kinds of work is holding it up.
+			while ((_queue.size || _attachmentQueue.size) && !shouldStop()) {
+				if (_queue.size) {
+					await _drainItemQueue(shouldStop, indexOptions);
 					continue;
 				}
-				await _indexItems(items, {
-					shouldStop,
-					batchTokenBudget: _tokenBudget,
-					onProgress: () => _refreshStatusThrottled()
-				});
+				let itemIDs = [..._attachmentQueue];
+				_attachmentQueue.clear();
+				await _extractAttachments(itemIDs, extracted, shouldStop);
+				await _embedAttachments(itemIDs, shouldStop, indexOptions);
 			}
 			await Zotero.Embeddings.Indexing.refreshStatus();
 		}
@@ -2950,9 +3111,10 @@ Zotero.Embeddings.Indexing = new function () {
 			_indexing = false;
 			_phase = 'idle';
 			_downloadProgress = null;
+			_extractionProgress = null;
 			_emitProgress();
 			// Pick up anything enqueued while we were finishing up
-			if (_queue.size && !_stopping) {
+			if ((_queue.size || _attachmentQueue.size) && !_stopping) {
 				_scheduleKick();
 			}
 			// Inference memory is held by the process running the model, and
@@ -2981,6 +3143,7 @@ Zotero.Embeddings.Indexing = new function () {
 	this.stopIndexing = function () {
 		_stopping = true;
 		_queue.clear();
+		_attachmentQueue.clear();
 		if (_kickTimer) {
 			clearTimeout(_kickTimer);
 			_kickTimer = null;

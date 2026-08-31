@@ -182,6 +182,23 @@ Zotero_Preferences.Advanced = {
 				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
 			}
 		}
+		else if (status.phase === 'extracting') {
+			let progress = status.extractionProgress;
+			if (progress) {
+				document.l10n.setAttributes(
+					phaseLabel,
+					'preferences-advanced-semantic-search-extracting-progress',
+					{ done: progress.done, total: progress.total }
+				);
+			}
+			else {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-extracting');
+			}
+		}
+		else if (status.phase === 'indexing-attachments') {
+			document.l10n.setAttributes(phaseLabel,
+				'preferences-advanced-semantic-search-indexing-attachments');
+		}
 		else if (status.phase === 'indexing') {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');
 		}
