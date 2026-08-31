@@ -52,10 +52,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			['collection-item', 'item', 'item-tag', 'tag', 'setting'],
 			'tagSelector'
 		);
-		this._prefObserverID = Zotero.Prefs.registerObserver('fontSize', this.handleUIPropertiesChange.bind(this));
-		this._prefObserverID = Zotero.Prefs.registerObserver('uiDensity', this.handleUIPropertiesChange.bind(this));
+		this._prefObserverIDs = [
+			Zotero.Prefs.registerObserver('fontSize', this.handleUIPropertiesChange.bind(this)),
+			Zotero.Prefs.registerObserver('uiDensity', this.handleUIPropertiesChange.bind(this))
+		];
 		this._mediaQueryList = window.matchMedia("(min-resolution: 1.5dppx)");
-		this._mediaQueryList.addEventListener("change", this.handleUIPropertiesChange.bind(this));
+		this._boundHandleUIPropertiesChange = this.handleUIPropertiesChange.bind(this);
+		this._mediaQueryList.addEventListener("change", this._boundHandleUIPropertiesChange);
 		
 		this.tagListRef = React.createRef();
 		this.searchBoxRef = React.createRef();
@@ -980,7 +983,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		this._uninitialized = true;
 		this.props.root.unmount();
 		Zotero.Notifier.unregisterObserver(this._notifierID);
-		Zotero.Prefs.unregisterObserver(this._prefObserverID);
+		for (let id of this._prefObserverIDs) {
+			Zotero.Prefs.unregisterObserver(id);
+		}
+		this._mediaQueryList.removeEventListener("change", this._boundHandleUIPropertiesChange);
 	}
 	
 	static propTypes = {
