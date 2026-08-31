@@ -162,9 +162,6 @@ describe("Zotero.Cite", function () {
 	
 	describe("previewCitationCluster()", function () {
 		before(async function () {
-			if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-				this.skip();
-			}
 			await Zotero.Styles.init();
 			await Zotero.Styles.install(
 				{ file: OS.Path.join(getTestDataDirectory().path, 'apa.csl') },
@@ -215,7 +212,6 @@ describe("Zotero.Cite", function () {
 				);
 			});
 			assertStateRestored(cslEngine, item);
-			cslEngine.free();
 		});
 		
 		it("shouldn't modify processor state if rendering fails", async function () {
@@ -230,7 +226,6 @@ describe("Zotero.Cite", function () {
 			});
 			stub.restore();
 			assertStateRestored(cslEngine, item);
-			cslEngine.free();
 		});
 	});
 	

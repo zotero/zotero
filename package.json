@@ -17,7 +17,6 @@
   },
   "license": "",
   "dependencies": {
-    "@citeproc-rs/wasm": "^0.2.0",
     "ace-builds": "^1.4.12",
     "classnames": "^2.2.6",
     "csl-validator-wasm": "^1.0.0",

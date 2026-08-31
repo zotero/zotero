@@ -123,7 +123,6 @@ describe("Zotero.Styles", function () {
 			var style = new Zotero.Style(eventStyleXML);
 			var cslEngine = style.getCiteProc('en-US', 'text');
 			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
-			cslEngine.free();
 			assert.equal(text, 'Conference - Conference - Place\n');
 		});
 	});
@@ -143,10 +142,6 @@ describe("Zotero.Styles", function () {
 	});
 
 	describe("Cached CSL.Engine instances", function () {
-		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-			this.skip();
-		}
-		
 		it("should correctly handle disambiguation", async function () {
 			let style = Zotero.Styles.get('http://www.zotero.org/styles/apa');
 			

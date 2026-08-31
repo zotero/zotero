@@ -55,10 +55,6 @@ Zotero.Styles = new function () {
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
 	this.init = async function (options = {}) {
-		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-			await Zotero.CiteprocRs.init();
-		}
-		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
@@ -776,12 +772,10 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	format = format || 'text';
 	automaticJournalAbbreviations = !!automaticJournalAbbreviations;
 
-	let useCiteprocRs = Zotero.Prefs.get('cite.useCiteprocRs');
-	
-	// We can cache the Engine instance if we aren't using citeproc-rs
-	// and this is an installed style. The output format is excluded from
-	// the cache key because setOutputFormat() can switch it cheaply.
-	let cacheKey = cache && !useCiteprocRs && this.path
+	// We can cache the Engine instance if this is an installed style. The output
+	// format is excluded from the cache key because setOutputFormat() can switch
+	// it cheaply.
+	let cacheKey = cache && this.path
 		? JSON.stringify({ locale, automaticJournalAbbreviations })
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
@@ -855,44 +849,24 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	xml = this._eventToEventTitle(xml);
 	
 	try {
-		var citeproc;
-		var engineDesc;
-		if (useCiteprocRs) {
-			citeproc = new Zotero.CiteprocRs.Engine(
-				new Zotero.Cite.System({
-					automaticJournalAbbreviations,
-					uppercaseSubtitles: uppercaseSubtitles
-				}),
-				this,
-				xml,
-				locale,
-				format == 'text' ? 'plain' : format,
-				overrideLocale
-			);
-			engineDesc = 'CiteprocRs';
-		}
-		else {
-			citeproc = new Zotero.CiteProc.CSL.Engine(
-				new Zotero.Cite.System({
-					automaticJournalAbbreviations,
-					uppercaseSubtitles
-				}),
-				xml,
-				locale,
-				overrideLocale
-			);
-			citeproc.setOutputFormat(format);
-			citeproc.free = () => 0;
-			citeproc.opt.development_extensions.wrap_url_and_doi = true;
-			// Don't try to parse author names. We parse them in itemToCSLJSON
-			citeproc.opt.development_extensions.parse_names = false;
-			engineDesc = 'CSL';
-		}
+		var citeproc = new Zotero.CiteProc.CSL.Engine(
+			new Zotero.Cite.System({
+				automaticJournalAbbreviations,
+				uppercaseSubtitles
+			}),
+			xml,
+			locale,
+			overrideLocale
+		);
+		citeproc.setOutputFormat(format);
+		citeproc.opt.development_extensions.wrap_url_and_doi = true;
+		// Don't try to parse author names. We parse them in itemToCSLJSON
+		citeproc.opt.development_extensions.parse_names = false;
 		
 		// Cache the Engine instance if allowed
 		if (cacheKey) {
 			this._cachedEngines.set(cacheKey, citeproc);
-			Zotero.debug(`Cached ${engineDesc}.Engine instance with ${cacheKey} for ${this.styleID}`);
+			Zotero.debug(`Cached CSL.Engine instance with ${cacheKey} for ${this.styleID}`);
 		}
 
 		return citeproc;

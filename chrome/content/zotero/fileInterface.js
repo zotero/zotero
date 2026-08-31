@@ -871,7 +871,6 @@ var Zotero_File_Interface = new function () {
 				output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, 'text');
 			}
 		}
-		cslEngine.free();
 
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
