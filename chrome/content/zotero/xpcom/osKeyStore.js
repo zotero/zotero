@@ -101,6 +101,32 @@ Zotero.OSKeyStore = {
 		);
 	},
 
+	// Mozilla's OSKeyStore reports every failure as a canceled unlock prompt, whatever the
+	// cause, so probe the native store to record what actually went wrong and return an error
+	// with a message that can be shown to the user
+	_error: async function (e, stringName) {
+		let detail;
+		// Make sure the label from Mozilla's module still exists
+		let label = this._module && this._module.STORE_LABEL;
+		if (typeof label != 'string' || !label) {
+			detail = "store label unavailable";
+		}
+		else {
+			try {
+				let keyStore = Cc["@mozilla.org/security/oskeystore;1"]
+					.getService(Ci.nsIOSKeyStore);
+				detail = (await keyStore.asyncSecretAvailable(label))
+					? "secret is available"
+					: "no secret stored";
+			}
+			catch (probeError) {
+				detail = "key store unusable: " + probeError;
+			}
+		}
+		Zotero.debug(`OS key store failure (${detail}): ${e}`, 1);
+		return new Zotero.Error(Zotero.getString(stringName), 0, { keyStoreError: e });
+	},
+
 	// Returns prefixed ciphertext. Throws if OSKeyStore is unavailable so we
 	// don't silently store plaintext when a caller expects encryption.
 	encrypt: async function (plaintext) {
@@ -108,7 +134,13 @@ Zotero.OSKeyStore = {
 		if (!mod) {
 			throw new Error("OSKeyStore unavailable");
 		}
-		let ciphertext = await mod.encrypt(plaintext);
+		let ciphertext;
+		try {
+			ciphertext = await mod.encrypt(plaintext);
+		}
+		catch (e) {
+			throw await this._error(e, 'os-keystore-save-failed');
+		}
 		return this._prefix + ciphertext;
 	},
 
@@ -127,7 +159,13 @@ Zotero.OSKeyStore = {
 		// OSKeyStore.encrypt() encodes the string as UTF-8 before encrypting, but
 		// OSKeyStore.decrypt() returns the decrypted bytes as a binary string, so
 		// decode it here
-		let binaryStr = await mod.decrypt(value.slice(this._prefix.length));
+		let binaryStr;
+		try {
+			binaryStr = await mod.decrypt(value.slice(this._prefix.length));
+		}
+		catch (e) {
+			throw await this._error(e, 'os-keystore-read-failed');
+		}
 		return new TextDecoder().decode(
 			Uint8Array.from(binaryStr, char => char.charCodeAt(0))
 		);
