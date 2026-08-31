@@ -2374,6 +2374,14 @@ Zotero.Utilities.Internal = {
 			}
 			ev.listeners.delete(listener);
 		};
+		
+		/**
+		 * Remove all listeners from all events, so that an object being torn down doesn't
+		 * keep its listeners' closures alive
+		 */
+		cls.prototype.clearEventListeners = function () {
+			this._events = null;
+		};
 
 		cls.prototype._waitForEvent = async function (event) {
 			return new Zotero.Promise((resolve) => {

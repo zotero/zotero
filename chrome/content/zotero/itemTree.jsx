@@ -1145,6 +1145,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let id of this._prefsObserverIDs) {
 			Zotero.Prefs.unregisterObserver(id);
 		}
+		this.clearEventListeners();
 		this._writeColumnPrefsToFile(true);
 	}
 

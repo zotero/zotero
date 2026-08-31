@@ -1367,6 +1367,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		this.clearEventListeners();
 	}
 
 ////////////////////////////////////////////////////////////////////////////////

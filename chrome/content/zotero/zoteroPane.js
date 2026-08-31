@@ -38,6 +38,8 @@ var ZoteroPane = new function () {
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () { return _loaded; });
 	var _lastSelectedItems = [];
+	// [element, listener] for the collection tree focus listener added in initCollectionsTree()
+	var _collectionsTreeFocusListener = null;
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
 	
@@ -779,6 +781,11 @@ var ZoteroPane = new function () {
 		
 		this.serializePersist();
 
+		if (_collectionsTreeFocusListener) {
+			let [elem, listener] = _collectionsTreeFocusListener;
+			elem.removeEventListener("focus", listener);
+			_collectionsTreeFocusListener = null;
+		}
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
 		if (_syncRemindersObserverID) {
@@ -1651,7 +1658,10 @@ var ZoteroPane = new function () {
 				dragAndDrop: true,
 				multiSelect: true
 			});
-			collectionsTree.firstChild.addEventListener("focus", ZoteroPane.collectionsView.recordCollectionTreeFocus);
+			let treeElem = collectionsTree.firstChild;
+			let focusListener = ZoteroPane.collectionsView.recordCollectionTreeFocus;
+			treeElem.addEventListener("focus", focusListener);
+			_collectionsTreeFocusListener = [treeElem, focusListener];
 		}
 		catch (e) {
 			Zotero.logError(e);
