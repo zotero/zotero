@@ -237,6 +237,17 @@ Zotero_Preferences.Sync = {
 			await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
 		}
 		catch (e) {
+			// The session already created a key on the server, so revoke it rather than
+			// leaving an active key we can't use
+			if (result.apiKey) {
+				try {
+					await Zotero.Sync.Runner.getAPIClient({ apiKey: result.apiKey })
+						.deleteAPIKey();
+				}
+				catch (e2) {
+					Zotero.logError(e2);
+				}
+			}
 			this._pendingSessionToken = null;
 			this._showLoginDefault();
 			throw e;

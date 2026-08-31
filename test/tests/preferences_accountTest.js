@@ -116,6 +116,23 @@ describe("Account Preferences", function () {
 			});
 
 
+			it("should revoke the API key when it can't be stored locally", async function () {
+				var setAPIKeyStub = sinon.stub(Zotero.Sync.Data.Local, 'setAPIKey')
+					.rejects(new Error("User canceled OS unlock entry"));
+				try {
+					let e = await getPromiseError(performLogin("Username"));
+					assert.ok(e);
+					assert.isTrue(deleteAPIKey.calledOnce);
+					assert.equal(deleteAPIKey.firstCall.thisValue.apiKey, apiKey);
+					assert.equal(doc.querySelector('.account-login-default').hidden, false);
+					assert.equal(doc.querySelector('.account-login-pending').hidden, true);
+				}
+				finally {
+					setAPIKeyStub.restore();
+				}
+			});
+
+
 			it("should delete API key and display auth form when 'Unlink Account' clicked", async function () {
 				await performLogin("Username");
 				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
