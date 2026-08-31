@@ -2361,7 +2361,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getRowData(index) {
 		var treeRow = this.getRow(index);
 		if (!treeRow) {
-			throw new Error(`Attempting to get row data for a non-existant tree row ${index}`);
+			throw new Error(`Attempting to get row data for a non-existent tree row ${index}`);
 		}
 		var itemID = treeRow.id;
 		
