@@ -700,6 +700,34 @@ describe("Zotero.DB", function () {
 			assert.isFalse(await IOUtils.exists(dbPath + '.repair.tmp'));
 			assert.isFalse(await IOUtils.exists(dbPath + '.damaged'));
 		});
+		
+		it("should flag the connection as read-only if the database isn't writable", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			}
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT)");
+			await db.closeDatabase();
+			await IOUtils.setPermissions(dbPath, 0o444);
+			// Open through internal initialization so that the journal mode is set
+			db._externalDB = false;
+			
+			try {
+				assert.equal(await db.valueQueryAsync("SELECT COUNT(*) FROM foo"), 0);
+				assert.isTrue(db.readOnly);
+			}
+			finally {
+				await db.closeDatabase();
+				await IOUtils.setPermissions(dbPath, 0o644);
+			}
+			
+			// The flag is cleared when the database can be written again
+			await db.queryAsync("INSERT INTO foo VALUES (1)");
+			assert.isFalse(db.readOnly);
+			await db.closeDatabase();
+		});
 	});
 	
 

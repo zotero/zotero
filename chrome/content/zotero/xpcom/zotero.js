@@ -877,6 +877,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
 				var msg = 'Cannot write to ' + dbfile;
 			}
+			// Shouldn't be reached, since the checks above should catch anything SQLite refuses
+			// to write to, but don't continue with a connection that couldn't be configured
+			else if (Zotero.DB.readOnly) {
+				var msg = dbfile + ' was opened read-only';
+			}
 			else {
 				var msg = false;
 			}

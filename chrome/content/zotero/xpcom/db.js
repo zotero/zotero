@@ -103,6 +103,8 @@ Zotero.DBConnection = function (dbNameOrPath) {
 		}
 	};
 	this._dbIsCorrupt = null
+	// Set when SQLite opens the database read-only, which blocks every write
+	this.readOnly = false;
 	this._checkingCorruption = false;
 	this._handlingCorruption = false;
 	this._corruptionHandlers = [];
@@ -1148,6 +1150,14 @@ Zotero.DBConnection.prototype.isCorruptionError = function (e) {
 
 
 /**
+ * Check for SQLite's read-only-database error
+ */
+Zotero.DBConnection.prototype.isReadOnlyError = function (e) {
+	return !!e.message?.includes('attempt to write a readonly database');
+};
+
+
+/**
  * Register a callback to run when a corruption error occurs but the main database checks out,
  * meaning an attached database (e.g., the rebuildable full-text index) is corrupt. The callback
  * can rebuild it. Run deferred, after the failing operation unwinds.
@@ -1541,6 +1551,8 @@ Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 	this._debug("Asynchronously opening database '" + this._dbName + "'");
 	Zotero.debug(this._dbPath);
 	
+	this.readOnly = false;
+	
 	// Get the storage service
 	var store = Services.storage;
 	
@@ -1623,11 +1635,25 @@ Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 		}
 
 		if (useWAL) {
-			// Enable WAL mode for better write performance
-			await this.queryAsync("PRAGMA journal_mode=WAL");
-			// NORMAL synchronous is safe with WAL -- only risks losing the last
-			// transaction on power loss, not corruption
-			await this.queryAsync("PRAGMA synchronous=NORMAL");
+			try {
+				// Enable WAL mode for better write performance
+				await this.queryAsync("PRAGMA journal_mode=WAL");
+				// NORMAL synchronous is safe with WAL -- only risks losing the last
+				// transaction on power loss, not corruption
+				await this.queryAsync("PRAGMA synchronous=NORMAL");
+			}
+			catch (e) {
+				// Setting the journal mode is the first write to the database, so it fails
+				// when the database file or its directory isn't writable. Let the connection
+				// open in whatever journal mode the database is already in, so that startup can
+				// fail with a message about permissions instead of this error, and flag it so
+				// that startup fails even if its write-access checks pass.
+				if (!this.isReadOnlyError(e)) {
+					throw e;
+				}
+				this.readOnly = true;
+				Zotero.logError(e);
+			}
 		}
 
 		// Set page cache size to 8MB
