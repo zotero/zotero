@@ -668,6 +668,7 @@ var Zotero_File_Interface = new function () {
 		var progress;
 		if (showProgressWindow) {
 			progressWin = new Zotero.ProgressWindow({
+				window,
 				closeOnClick: false
 			});
 			progressWin.changeHeadline(Zotero.getString('fileInterface.importing'));

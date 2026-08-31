@@ -636,7 +636,7 @@ export function ZoteroProtocolHandler() {
 				throw new Error("Pane not open");
 			}
 			
-			win.Zotero_Tabs.select('zotero-pane');
+			win.Zotero_Tabs.selectLibraryTab();
 			if (params.objectType == 'collection') {
 				return zp.collectionsView.selectCollection(results[0].id);
 			}

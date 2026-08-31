@@ -54,6 +54,13 @@
 			ww.openWindow(null, 'chrome://zotero/content/about.xhtml', 'about', 'chrome,centerscreen,dialog=yes', null);
 		}
 		
+		// Equivalent to ZoteroPane.newWindow(), but with no view to take the current
+		// collections from
+		function openNewWindow() {
+			const { Zotero } = ChromeUtils.importESModule('chrome://zotero/content/zotero.mjs');
+			Zotero.openMainWindow();
+		}
+		
 		// Equivalent to Zotero.Utilities.Internal.openPreferences()
 		function openPreferences() {
 			let win = Services.wm.getMostRecentWindow('zotero:pref');
@@ -79,6 +86,7 @@
 	</commandset>
 	
 	<keyset id="mainKeyset">
+		<key id="key_newWindow" key="N" oncommand="openNewWindow()" modifiers="accel"/>
 		<key id="key_close" data-l10n-id="close-shortcut" command="cmd_close" modifiers="accel"/>
 		<key id="key_preferencesCmdMac"
 				data-l10n-id="preferences-shortcut"
@@ -106,6 +114,10 @@
 	<menubar id="main-menubar">
 		<menu id="fileMenu" data-l10n-id="menu-file">
 			<menupopup id="menu_FilePopup">
+				<menuitem id="menu_newWindow"
+						data-l10n-id="menu-new-window"
+						key="key_newWindow"
+						oncommand="openNewWindow()"/>
 				<!-- This gets moved to the Application menu automatically -->
 				<menuitem id="aboutName"
 						accesskey="&aboutProduct.accesskey;"

@@ -205,9 +205,10 @@ Zotero.FeedItem.prototype.toggleRead = async function (state) {
  * in the library
  * @param libraryID {Integer} save item in library
  * @param collectionID {Integer} add item to collection
+ * @param options.window {ChromeWindow} main window to show progress in
  * @return {Promise<FeedItem|Item>} translated feed item
  */
-Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
+Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID, { window: win } = {}) {
 	const { RemoteTranslate } = ChromeUtils.importESModule("chrome://zotero/content/RemoteTranslate.mjs");
 	const { HiddenBrowser } = ChromeUtils.importESModule("chrome://zotero/content/HiddenBrowser.mjs");
 
@@ -219,7 +220,7 @@ Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
 
 	let error = function (e) {  };
 	let translate = new RemoteTranslate();
-	var win = Services.wm.getMostRecentWindow("navigator:browser");
+	win = win || Zotero.getMainWindow();
 	let progressWindow = win.ZoteroPane.progressWindow;
 	
 	if (libraryID) {

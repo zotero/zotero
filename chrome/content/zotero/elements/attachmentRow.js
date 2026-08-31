@@ -115,10 +115,13 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			if (pane) {
 				pane._section.open = true;
 			}
-			let win = Zotero.getMainWindow();
+			let win = this.ownerDocument.defaultView;
+			if (!win?.ZoteroPane) {
+				win = Zotero.getMainWindow();
+			}
 			if (win) {
 				win.ZoteroPane.selectItem(this._attachment.id);
-				win.Zotero_Tabs.select('zotero-pane');
+				win.Zotero_Tabs.selectLibraryTab();
 				win.focus();
 			}
 		};

@@ -88,6 +88,244 @@ describe("Zotero_Tabs", function() {
 		});
 	});
 
+	describe("Multiple windows", function () {
+		var win2, zp2, collection, item, otherItem;
+		
+		before(async function () {
+			collection = await createDataObject('collection', { name: 'Second Window' });
+			item = await createDataObject('item', {
+				title: 'Second Window Item One',
+				collections: [collection.id]
+			});
+			otherItem = await createDataObject('item', {
+				title: 'Second Window Item Two',
+				collections: [collection.id]
+			});
+			win2 = await loadZoteroPane();
+			zp2 = win2.ZoteroPane;
+		});
+		
+		after(async function () {
+			if (win2) {
+				win2.close();
+			}
+			// Leave the window showing its library, as other tests expect
+			await selectLibrary(win);
+		});
+		
+		it("should open a reader tab in the window that requested it", async function () {
+			let attachment = await importPDFAttachment(item);
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
+			await reader._initPromise;
+			try {
+				assert.equal(reader._window, win2);
+				assert.include(win2.Zotero_Tabs._tabs.map(tab => tab.id), reader.tabID);
+				assert.notInclude(win.Zotero_Tabs._tabs.map(tab => tab.id), reader.tabID);
+				assert.equal(win2.Zotero_Tabs.selectedID, reader.tabID);
+				assert.equal(win.Zotero_Tabs.selectedType, 'library');
+			}
+			finally {
+				win2.Zotero_Tabs.close(reader.tabID);
+			}
+		});
+		
+		it("should leave another window's panes alone when a tab is selected", async function () {
+			await selectCollection(win2, collection);
+			await zp2.selectItem(item.id);
+			let splitter = win2.ZoteroContextPane.splitter;
+			assert.isTrue(splitter.hasAttribute('hidden'));
+			
+			let attachment = await importPDFAttachment(otherItem);
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			await reader._initPromise;
+			try {
+				// The other window's reader tab leaves this window showing its library
+				assert.isTrue(splitter.hasAttribute('hidden'));
+				
+				// The item pane keeps following this window's selection
+				await zp2.selectItem(otherItem.id);
+				let infoBox = zp2.itemPane._itemDetails.getPane('info');
+				await waitForCallback(
+					() => infoBox.querySelector('#itembox-field-value-title')?.value
+						=== 'Second Window Item Two',
+					100,
+					5
+				);
+			}
+			finally {
+				win.Zotero_Tabs.close(reader.tabID);
+			}
+		});
+		
+		it("should open the selected collections in a new window", async function () {
+			await selectCollection(win2, collection);
+			let newWin;
+			try {
+				newWin = zp2.openCollectionsInNewWindow();
+				await waitForCallback(
+					() => newWin.ZoteroPane
+						&& newWin.ZoteroPane.getCollectionTreeRows().map(row => row.id).join()
+							=== 'C' + collection.id,
+					100,
+					10
+				);
+				assert.notEqual(newWin.Zotero_Tabs.windowID, win2.Zotero_Tabs.windowID);
+			}
+			finally {
+				if (newWin) {
+					newWin.close();
+				}
+			}
+		});
+		
+		it("should show tags in a reinitialized tag selector while another window is open", async function () {
+			await item.addTag('second-window-tag');
+			await item.saveTx();
+			
+			// Hide the other window's tag selector so that this window's tag selector can't
+			// accidentally work against it
+			let otherShown = zp2.tagSelectorShown();
+			if (otherShown) {
+				await zp2.toggleTagSelector();
+			}
+			await selectCollection(win, collection);
+			await waitForItemsLoad(win);
+			try {
+				if (zp.tagSelectorShown()) {
+					await zp.toggleTagSelector();
+				}
+				await zp.toggleTagSelector();
+				await waitForCallback(
+					() => [...win.document.querySelectorAll('#zotero-tag-selector .tag-selector-item')]
+						.some(node => node.textContent === 'second-window-tag'),
+					100,
+					5
+				);
+			}
+			finally {
+				if (otherShown) {
+					await zp2.toggleTagSelector();
+				}
+			}
+		});
+		
+		it("should restore a saved window state into a window opened for it", async function () {
+			let sessionState = {
+				type: 'pane',
+				geometry: { screenX: 60, screenY: 80, width: 980, height: 640, sizemode: 'normal' },
+				tabs: [
+					{
+						type: 'library',
+						title: collection.name,
+						selected: true,
+						data: { state: { collections: ['C' + collection.id] } }
+					}
+				]
+			};
+			let windows = Zotero.Session.state.windows;
+			// Pending, as at startup
+			Zotero.Session.setLastClosedZoteroPaneState(sessionState);
+			let newWin;
+			try {
+				newWin = Zotero.openMainWindow({ sessionState });
+				await waitForCallback(
+					() => newWin.ZoteroPane
+						&& newWin.ZoteroPane.getCollectionTreeRows().map(row => row.id).join()
+							=== 'C' + collection.id,
+					100,
+					10
+				);
+				assert.equal(newWin.screenX, 60);
+				assert.equal(newWin.screenY, 80);
+				assert.equal(newWin.outerWidth, 980);
+				assert.equal(newWin.outerHeight, 640);
+				await waitForCallback(
+					() => newWin.ZoteroPane.itemsView?.rowCount === 2,
+					100,
+					10
+				);
+				// Once restored, the window saves its own state in place of the saved one
+				await waitForCallback(
+					() => !Zotero.Session.getPendingPaneStates().length,
+					100,
+					10
+				);
+				assert.isNotNull(newWin.ZoteroPane.getState());
+			}
+			finally {
+				if (newWin) {
+					newWin.close();
+				}
+				Zotero.Session.removePendingPaneState(sessionState);
+				Zotero.Session.state.windows = windows;
+			}
+		});
+
+		it("should keep a saved window state in the session until a window restores it", async function () {
+			let windows = Zotero.Session.state.windows;
+			let sessionState = { type: 'pane', geometry: {}, tabs: [] };
+			try {
+				// As when the last window is closed on macOS, which the next window opened restores
+				Zotero.Session.setLastClosedZoteroPaneState(sessionState);
+				assert.deepEqual(Zotero.Session.getPendingPaneStates(), [sessionState]);
+				
+				await Zotero.Session.save(true);
+				let paneStates = Zotero.Session.state.windows.filter(x => x.type == 'pane');
+				assert.include(paneStates, sessionState);
+				assert.lengthOf(paneStates, Zotero.getZoteroPanes().length + 1);
+				
+				Zotero.Session.removePendingPaneState(sessionState);
+				await Zotero.Session.save(true);
+				assert.notInclude(Zotero.Session.state.windows, sessionState);
+			}
+			finally {
+				Zotero.Session.removePendingPaneState(sessionState);
+				Zotero.Session.state.windows = windows;
+			}
+		});
+
+		it("should save a separate session state for each window", function () {
+			let states = Zotero.getZoteroPanes().map(pane => pane.getState());
+			assert.isAbove(states.length, 1);
+			for (let state of states) {
+				assert.equal(state.type, 'pane');
+				assert.isAbove(state.geometry.width, 0);
+				assert.isAbove(state.tabs.length, 0);
+			}
+		});
+
+		it("should save window states with the most recently activated window last", async function () {
+			let panes = Zotero.getZoteroPanes();
+			assert.isAbove(panes.length, 1);
+			// Mark the first-enumerated window as the last one activated
+			panes.forEach((pane, i) => pane.lastActivated = 1000 - i);
+			await Zotero.Session.save(true);
+			let states = Zotero.Session.state.windows.filter(x => x.type == 'pane');
+			assert.deepEqual(states[states.length - 1], panes[0].getState());
+		});
+		
+		it("should open a new window with the context pane state of the window it's opened from", async function () {
+			let source = Services.wm.getMostRecentWindow('navigator:browser');
+			let splitter = source.document.getElementById('zotero-context-splitter');
+			let originalState = splitter.getAttribute('state');
+			let state = originalState == 'open' ? 'collapsed' : 'open';
+			splitter.setAttribute('state', state);
+			let newWin;
+			try {
+				newWin = Zotero.openMainWindow();
+				await waitForCallback(() => newWin.ZoteroPane?.collectionsView, 50, 20);
+				assert.equal(
+					newWin.document.getElementById('zotero-context-splitter').getAttribute('state'),
+					state
+				);
+			}
+			finally {
+				splitter.setAttribute('state', originalState);
+				newWin?.close();
+			}
+		});
+	});
+
 	describe("Window teardown", function () {
 		it("should not leave observers registered after a window is closed", async function () {
 			this.timeout(60000);
@@ -96,10 +334,15 @@ describe("Zotero_Tabs", function() {
 			let notifierBefore = new Set(Zotero.Notifier.getLeakedObserverIDs());
 			let prefsBefore = Zotero.Prefs.getLeakedObserverNames();
 			
-			// Render the library item pane in a second window
+			// Render the library item pane in a second window, and a per-tab item pane
+			// in its context pane
 			let win2 = await loadZoteroPane();
 			await selectCollection(win2, collection);
 			await win2.ZoteroPane.selectItem(item.id);
+			let otherItem = await createDataObject('item', { collections: [collection.id] });
+			let attachment = await importPDFAttachment(otherItem);
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
+			await reader._initPromise;
 			
 			// The window's observers are still registered while it tears down, and shouldn't be
 			// reported as leaked before it's actually gone

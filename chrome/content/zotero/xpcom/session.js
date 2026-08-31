@@ -32,6 +32,10 @@ Zotero.Session = new function () {
 	};
 	let _initialized = false;
 
+	// Saved main-window states that haven't been restored into a window yet
+	let _pendingPaneStates = [];
+	let _finalized = false;
+	
 	Zotero.defineProperty(this, 'state', {
 		get: () => {
 			return _state;
@@ -49,28 +53,76 @@ Zotero.Session = new function () {
 				Zotero.logError(e);
 			}
 		}
+		_pendingPaneStates = _state.windows.filter(x => x.type == 'pane');
 		_initialized = true;
 	};
 	
+	/**
+	 * The saved main-window states that haven't been restored into a window yet
+	 *
+	 * The first main window opened while no other is open, at startup or after the last one
+	 * was closed, restores the first of these and opens a window for each of the others.
+	 *
+	 * @return {Object[]}
+	 */
+	this.getPendingPaneStates = function () {
+		return [..._pendingPaneStates];
+	};
+	
+	/**
+	 * Remove a pending state once its window saves its own state, or closes before it can
+	 *
+	 * @param {Object} state
+	 */
+	this.removePendingPaneState = function (state) {
+		_pendingPaneStates = _pendingPaneStates.filter(x => x !== state);
+	};
+	
 	this.setLastClosedZoteroPaneState = function (state) {
-		_state.windows = [state];
+		// This is the last open main window, so any other saved pane states are stale
+		_state.windows = _state.windows
+			.filter(x => x.type != 'pane')
+			.concat([state]);
+		// Let the next window opened restore it
+		_pendingPaneStates = [state];
 	};
 
 	this.debounceSave = Zotero.Utilities.debounce(() => {
 		this.save();
 	}, DEBOUNCED_SAVING_DELAY);
 
-	this.save = async function () {
+	/**
+	 * Save the state at quit and ignore any save requests that arrive while windows are
+	 * closing, which would record the already-emptying window list
+	 */
+	this.saveFinalState = function () {
+		_finalized = true;
+		return this.save(true);
+	};
+
+	this.save = Zotero.serial(async function (force) {
 		// Don't overwrite the saved session if startup failed before the session was loaded
 		if (!_initialized) {
 			return;
 		}
-		
+		if (_finalized && !force) {
+			return;
+		}
 		try {
 			// Saving is triggered in `zotero.js` when a quit event is received,
 			// though if it was triggered by closing a window, ZoteroPane might
 			// be already destroyed at the time
-			let panes = Zotero.getZoteroPanes().map(x => x.getState());
+			// Order pane states with the most recently activated window last: restored
+			// windows are opened in saved order, so the last-used window ends up on top.
+			// Windows still restoring their saved states don't have their own yet, and
+			// pending states stay in the session until they're restored.
+			let panes = Zotero.getZoteroPanes()
+				.sort((a, b) => a.lastActivated - b.lastActivated)
+				.map(x => x.getState())
+				.filter(Boolean);
+			if (panes.length) {
+				panes = [..._pendingPaneStates, ...panes];
+			}
 			let readers = Zotero.Reader.getWindowStates();
 			if (panes.length) {
 				_state.windows = [...readers, ...panes];
@@ -85,5 +137,5 @@ Zotero.Session = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
-	};
+	});
 };

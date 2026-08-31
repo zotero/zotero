@@ -38,12 +38,23 @@ var ZoteroPane = new function () {
 	this._listeners = {};
 	this.__defineGetter__('loaded', function () { return _loaded; });
 	var _lastSelectedItems = [];
+	var _progressQueueListeners = [];
 	// [element, listener] for the collection tree focus listener added in initCollectionsTree()
 	var _collectionsTreeFocusListener = null;
 	var _libraryTabStateRestores = 0;
 	var _libraryTabStatePromise = Promise.resolve();
+	// The saved session state this window restores, if any
+	var _sessionPaneState = null;
+	// Whether this window has restored its saved session state, after which it saves its own
+	var _sessionPaneStateRestored = false;
+	// Saved session states this window opens other windows for once it has restored its own
+	var _otherSessionPaneStates = [];
+	// The view state this window's library tab starts with, if it was opened with one
+	var _initialLibraryTabState = null;
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
+	// When this window was last activated, for ordering saved window states
+	this.lastActivated = 0;
 	
 	//Privileged methods
 	this.destroy = destroy;
@@ -99,13 +110,17 @@ var ZoteroPane = new function () {
 				Zotero.ProgressQueues.get(progressQueue.getID()).getDialog().open();
 			}, false);
 			
-			progressQueue.addListener('empty', function () {
+			let emptyListener = function () {
 				button.hidden = true;
-			});
+			};
+			progressQueue.addListener('empty', emptyListener);
+			_progressQueueListeners.push([progressQueue, 'empty', emptyListener]);
 			
-			progressQueue.addListener('nonempty', function () {
+			let nonemptyListener = function () {
 				button.hidden = false;
-			});
+			};
+			progressQueue.addListener('nonempty', nonemptyListener);
+			_progressQueueListeners.push([progressQueue, 'nonempty', nonemptyListener]);
 			
 			progressQueueButtons.appendChild(button);
 		}
@@ -159,6 +174,11 @@ var ZoteroPane = new function () {
 			Zotero.Sync.Runner.registerSyncStatus(this.firstChild);
 			let lastSync = document.querySelector("#zotero-tb-sync-last-sync").value;
 			this.setAttribute("aria-description", lastSync || "");
+		});
+		
+		this.lastActivated = Date.now();
+		window.addEventListener('activate', () => {
+			ZoteroPane.lastActivated = Date.now();
 		});
 		
 		// register an observer for Zotero reload
@@ -534,11 +554,165 @@ var ZoteroPane = new function () {
 	}
 
 	/**
+	 * Whether this is the first main window in the process to take on a piece of startup work,
+	 * so that opening another window doesn't repeat it
+	 *
+	 * @param {String} id
+	 * @return {Boolean}
+	 */
+	function claimStartupTask(id) {
+		if (!Zotero.startupTasks) {
+			Zotero.startupTasks = new Set();
+		}
+		if (Zotero.startupTasks.has(id)) {
+			return false;
+		}
+		Zotero.startupTasks.add(id);
+		return true;
+	}
+	
+	
+	/**
+	 * The arguments the window was opened with, as passed to Zotero.openMainWindow()
+	 *
+	 * @return {Object}
+	 */
+	function getWindowArgs() {
+		let args = window.arguments && window.arguments[0];
+		if (args && args.wrappedJSObject) {
+			args = args.wrappedJSObject;
+		}
+		return args && typeof args == 'object' ? args : {};
+	}
+	
+	
+	/**
+	 * The saved session state this window is opening with, until it has restored it
+	 *
+	 * @return {Object|null}
+	 */
+	function getUnrestoredSessionState() {
+		if (_sessionPaneStateRestored) {
+			return null;
+		}
+		return _sessionPaneState || getWindowArgs().sessionState || null;
+	}
+	
+	
+	/**
+	 * Take on the saved session state or the library view this window was opened for
+	 *
+	 * The first window opened while no other main window is open, at startup or after the last
+	 * one was closed, restores the first saved state and opens a window for each of the others.
+	 * Other windows opened by the user don't restore anything.
+	 */
+	function takeWindowState() {
+		let args = getWindowArgs();
+		if (args.libraryTabState) {
+			_initialLibraryTabState = args.libraryTabState;
+			return;
+		}
+		if (args.sessionState) {
+			_sessionPaneState = args.sessionState;
+			restoreWindowGeometry(_sessionPaneState.geometry);
+			return;
+		}
+		if (Zotero.getZoteroPanes().some(pane => pane !== ZoteroPane)) {
+			return;
+		}
+		let states = Zotero.Session.getPendingPaneStates();
+		_sessionPaneState = states[0] || null;
+		_otherSessionPaneStates = states.slice(1);
+		// The window opens with the persisted geometry, which is shared by all windows and
+		// holds the position of whichever closed last, so when there are other windows to
+		// restore, use its own saved geometry instead
+		if (_sessionPaneState && _otherSessionPaneStates.length) {
+			restoreWindowGeometry(_sessionPaneState.geometry);
+		}
+	}
+	
+	
+	/**
+	 * @param {Object} [geometry] - The geometry property of a saved session state
+	 */
+	function restoreWindowGeometry(geometry) {
+		if (!geometry) {
+			return;
+		}
+		try {
+			let { screenX, screenY, width, height } = geometry;
+			if ([screenX, screenY, width, height].every(Number.isFinite)) {
+				({ screenX, screenY, width, height } = constrainToScreen(
+					screenX, screenY, width, height
+				));
+				window.resizeTo(width, height);
+				window.moveTo(screenX, screenY);
+			}
+			else if (Number.isFinite(width) && Number.isFinite(height)) {
+				window.resizeTo(width, height);
+			}
+			if (geometry.sizemode == 'maximized') {
+				window.maximize();
+			}
+			else if (geometry.sizemode == 'fullscreen') {
+				window.fullScreen = true;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+	
+	
+	/**
+	 * Fit a window rect onto the screen it overlaps most, so that a window saved on a screen
+	 * that's no longer connected doesn't open out of view
+	 *
+	 * Positions are in desktop pixels, offset from the screen's origin in CSS pixels, as in
+	 * window.screenX, and sizes are in CSS pixels.
+	 *
+	 * @return {Object} - screenX, screenY, width, height
+	 */
+	function constrainToScreen(screenX, screenY, width, height) {
+		// Allow windows snapped to a screen edge to keep their borders off-screen
+		const SCREEN_EDGE_SLOP = 8;
+		
+		let screen = Cc["@mozilla.org/gfx/screenmanager;1"]
+			.getService(Ci.nsIScreenManager)
+			.screenForRect(screenX, screenY, width, height);
+		if (!screen) {
+			return { screenX, screenY, width, height };
+		}
+		let left = {}, top = {}, availWidth = {}, availHeight = {};
+		screen.GetAvailRectDisplayPix(left, top, availWidth, availHeight);
+		let screenLeft = left.value;
+		let screenTop = top.value;
+		screen.GetAvailRect(left, top, availWidth, availHeight);
+		let screenRight = screenLeft + availWidth.value / screen.defaultCSSScaleFactor;
+		let screenBottom = screenTop + availHeight.value / screen.defaultCSSScaleFactor;
+		
+		width = Math.min(width, screenRight - screenLeft);
+		height = Math.min(height, screenBottom - screenTop);
+		if (screenX < screenLeft - SCREEN_EDGE_SLOP
+				|| screenX + width > screenRight + SCREEN_EDGE_SLOP) {
+			screenX = Math.max(screenLeft, Math.min(screenX, screenRight - width));
+		}
+		if (screenY < screenTop - SCREEN_EDGE_SLOP
+				|| screenY + height > screenBottom + SCREEN_EDGE_SLOP) {
+			screenY = Math.max(screenTop, Math.min(screenY, screenBottom - height));
+		}
+		return { screenX, screenY, width, height };
+	}
+	
+	
+	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
 	 */
 	async function _loadPane() {
 		if (!Zotero || !Zotero.initialized) return;
+		
+		takeWindowState();
 		
 		// Set flags for hi-res displays
 		Zotero.hiDPI = window.devicePixelRatio > 1;
@@ -641,7 +815,7 @@ var ZoteroPane = new function () {
 		// -- this way the page won't be displayed when they sync their DB to
 		// another profile or if the DB is initialized erroneously (e.g. while
 		// switching data directory locations)
-		else if (Zotero.Prefs.get('firstRun2')) {
+		else if (Zotero.Prefs.get('firstRun2') && claimStartupTask('firstRun')) {
 			if (Zotero.Schema.dbInitialized || !Zotero.Sync.Server.enabled) {
 				setTimeout(function () {
 					ZoteroPane_Local.loadURI(ZOTERO_CONFIG.START_URL);
@@ -669,31 +843,46 @@ var ZoteroPane = new function () {
 			ZoteroPane.showFileRenamingBanner();
 			ZoteroPane.initSyncReminders(true);
 
-			if (Zotero.Prefs.get('reopenAccountPrefsOnRestart')) {
+			if (Zotero.Prefs.get('reopenAccountPrefsOnRestart')
+					&& claimStartupTask('reopenAccountPrefs')) {
 				Zotero.Prefs.clear('reopenAccountPrefsOnRestart');
 				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-account');
 			}
 		});
 		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
-		setTimeout(async function () {
-			var needsCleanup = await Zotero.DB.valueQueryAsync(
-				"SELECT COUNT(*) FROM settings WHERE setting='mImport' AND key='cleanup'"
-			)
-			if (!needsCleanup) return;
-			
-			var { Zotero_Import_Mendeley } = ChromeUtils.importESModule(
-				"chrome://zotero/content/import/mendeley/mendeleyImport.mjs"
-			);
-			var importer = new Zotero_Import_Mendeley();
-			importer.deleteNonPrimaryFiles();
-		}, 10000)
+		if (claimStartupTask('mendeleyCleanup')) {
+			setTimeout(async function () {
+				var needsCleanup = await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM settings WHERE setting='mImport' AND key='cleanup'"
+				);
+				if (!needsCleanup) return;
+				
+				var { Zotero_Import_Mendeley } = ChromeUtils.importESModule(
+					"chrome://zotero/content/import/mendeley/mendeleyImport.mjs"
+				);
+				var importer = new Zotero_Import_Mendeley();
+				importer.deleteNonPrimaryFiles();
+			}, 10000);
+		}
 		
 		// Restore pane state
 		try {
-			let state = Zotero.Session.state.windows.find(x => x.type == 'pane');
-			if (state) {
-				Zotero_Tabs.restoreState(state.tabs);
+			if (_initialLibraryTabState) {
+				ZoteroPane.restoreLibraryTabState(_initialLibraryTabState);
+			}
+			else if (_sessionPaneState) {
+				let state = _sessionPaneState;
+				Zotero_Tabs.restoreState(state.tabs)
+					.catch(e => Zotero.logError(e))
+					.finally(() => {
+						_sessionPaneStateRestored = true;
+						Zotero.Session.removePendingPaneState(state);
+						for (let sessionState of _otherSessionPaneStates) {
+							Zotero.openMainWindow({ sessionState });
+						}
+						_otherSessionPaneStates = [];
+					});
 			}
 		}
 		catch (e) {
@@ -796,16 +985,32 @@ var ZoteroPane = new function () {
 		if (_apiKeyObserverID) {
 			Zotero.Notifier.unregisterObserver(_apiKeyObserverID);
 		}
+		for (let [progressQueue, name, listener] of _progressQueueListeners) {
+			progressQueue.removeListener(name, listener);
+		}
+		_progressQueueListeners = [];
 		
 		this.uninitContainers();
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+		observerService.removeObserver(_reloadObserver, "zotero-before-reload");
 		
 		ZoteroContextPane.destroy();
-		Zotero_Tabs.destroy();
 
-		if (!Zotero.getZoteroPanes().length) {
-			Zotero.Session.setLastClosedZoteroPaneState(this.getState());
+		// A window closed before it restored its saved state shouldn't come back in the next
+		// session, unless it's the last one
+		let unrestoredState = getUnrestoredSessionState();
+		if (unrestoredState) {
+			Zotero.Session.removePendingPaneState(unrestoredState);
+		}
+		let panes = Zotero.getZoteroPanes();
+		if (!panes.length) {
+			Zotero.Session.setLastClosedZoteroPaneState(this.getState() || unrestoredState);
+		}
+		// The layout is only switched by window size when there's a single window, so when
+		// one window remains, let it recalculate the layout
+		else if (panes.length == 1) {
+			panes[0].updateLayoutConstraints();
 		}
 
 		Zotero_Tabs.closeAll();
@@ -860,7 +1065,8 @@ var ZoteroPane = new function () {
 		
 		// Auto-sync on pane open or if new account
 		let startupSync = false;
-		if (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync) {
+		if (claimStartupTask('autoSync')
+				&& (Zotero.Prefs.get('sync.autoSync') || Zotero.initAutoSync)) {
 			await Zotero.proxyAuthComplete;
 			await Zotero.uiReadyPromise;
 			
@@ -1654,14 +1860,17 @@ var ZoteroPane = new function () {
 	}
 
 	/**
-	 * The library view state from the saved session
+	 * The library view state the window opens with, from the library view it was opened for
+	 * or from the saved session state it took over
 	 *
 	 * @return {Object|null}
 	 */
 	function getSessionLibraryTabState() {
 		try {
-			let state = Zotero.Session.state.windows.find(x => x.type == 'pane');
-			let tab = (state?.tabs || []).find(x => x.type == 'library');
+			if (_initialLibraryTabState) {
+				return _initialLibraryTabState;
+			}
+			let tab = (_sessionPaneState?.tabs || []).find(x => x.type == 'library');
 			return tab?.data?.state || null;
 		}
 		catch (e) {
@@ -1671,7 +1880,7 @@ var ZoteroPane = new function () {
 	}
 
 	/**
-	 * The collection to show at startup
+	 * The collection to show when the window opens
 	 *
 	 * @return {String|null} - A collection tree row id
 	 */
@@ -1705,7 +1914,7 @@ var ZoteroPane = new function () {
 		try {
 			var container = document.getElementById('zotero-tag-selector-container');
 			if (!container.hasAttribute('collapsed')) {
-				this.tagSelector = await Zotero.TagSelector.init(
+				this.tagSelector = await TagSelectorContainer.init(
 					document.getElementById('zotero-tag-selector'),
 					{
 						container: 'zotero-tag-selector-container',
@@ -1892,10 +2101,7 @@ var ZoteroPane = new function () {
 		}
 		
 		// Rename tab
-		let tabName = collectionTreeRows.length == 1
-			? collectionTreeRows[0].getName()
-			: Zotero.getString('tab-title-multiple-collections');
-		Zotero_Tabs.rename('zotero-pane', tabName);
+		Zotero_Tabs.rename('zotero-pane');
 		
 		// Clear quick search and tag selector when switching views
 		document.getElementById('zotero-tb-search').onCollectionSelected();
@@ -2001,7 +2207,7 @@ var ZoteroPane = new function () {
 	
 	
 	/**
-	 * Capture the state of the library view, for the session
+	 * Capture the state of the library view, for the session or for another window
 	 *
 	 * @return {Object|null} - A JSON-serializable snapshot, or null if the view isn't ready
 	 */
@@ -2161,7 +2367,7 @@ var ZoteroPane = new function () {
 			advancedSearchPane.search = null;
 		}
 		else if (state === 'open') {
-			Zotero_Tabs.select('zotero-pane');
+			Zotero_Tabs.selectLibraryTab();
 			advancedSearchPane.focus();
 		}
 		
@@ -2273,7 +2479,7 @@ var ZoteroPane = new function () {
 			collectionTreeRow.setSearch('');
 		}
 
-		Zotero_Tabs.select('zotero-pane');
+		Zotero_Tabs.selectLibraryTab();
 		await deck.pane.submit();
 		// Focus the first condition so the user can refine the seeded search
 		deck.pane.focus();
@@ -2396,6 +2602,48 @@ var ZoteroPane = new function () {
 			.sort((a, b) => a - b)
 			.map(index => this.collectionsView.getRow(index));
 	}
+	
+	
+	/**
+	 * The library view state for the selected collection tree rows
+	 *
+	 * @param {CollectionTreeRow[]} [collectionTreeRows] - Rows to use instead of the selected rows
+	 * @return {Object|null} - A library view state, or null if there are no rows
+	 */
+	this._getSelectedCollectionsState = function (collectionTreeRows = this.getCollectionTreeRows()) {
+		if (!collectionTreeRows.length) {
+			return null;
+		}
+		let focusedRow = this.collectionsView.getRow(this.collectionsView.selection.focused);
+		return {
+			collections: collectionTreeRows.map(row => row.id),
+			focusedCollection: collectionTreeRows.includes(focusedRow)
+				? focusedRow.id
+				: collectionTreeRows[0].id
+		};
+	};
+
+
+	/**
+	 * Open a new main window showing this window's collection selection
+	 */
+	this.newWindow = function () {
+		return Zotero.openMainWindow({ libraryTabState: this._getSelectedCollectionsState() });
+	};
+
+
+	/**
+	 * Open the selected collection tree rows in a new main window
+	 *
+	 * @param {CollectionTreeRow[]} [collectionTreeRows] - Rows to open instead of the selected rows
+	 */
+	this.openCollectionsInNewWindow = function (collectionTreeRows) {
+		let state = this._getSelectedCollectionsState(collectionTreeRows);
+		if (!state) {
+			return null;
+		}
+		return Zotero.openMainWindow({ libraryTabState: state });
+	};
 	
 	
 	/**
@@ -3268,9 +3516,6 @@ var ZoteroPane = new function () {
 		feed.cleanupReadAfter = data.cleanupReadAfter;
 		feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 		await feed.saveTx();
-		if (this.getCollectionTreeRows().includes(row)) {
-			Zotero_Tabs.rename("zotero-pane", feed.name);
-		}
 	};
 	
 	this.refreshFeed = function (rows = this.getCollectionTreeRows()) {
@@ -3502,6 +3747,10 @@ var ZoteroPane = new function () {
 						return;
 					}
 					setTimeout(() => {
+						// Remind in one window only
+						if (Zotero.getActiveZoteroPane() !== this) {
+							return;
+						}
 						this.showSetUpSyncReminder();
 						this.showAutoSyncReminder();
 					}, 5000);
@@ -3683,7 +3932,7 @@ var ZoteroPane = new function () {
 		}
 		
 		if (!noTabSwitch) {
-			Zotero_Tabs.select('zotero-pane', false, { focusElementID: ZoteroPane.itemsView.id });
+			Zotero_Tabs.selectLibraryTab({ focusElementID: ZoteroPane.itemsView.id });
 		}
 		return true;
 	};
@@ -3944,6 +4193,13 @@ var ZoteroPane = new function () {
 	// entirely in JS, but various localized strings are only in zotero.dtd, and they're used in
 	// standalone.xul as well, so for now they have to remain as XML entities.
 	var _collectionContextMenuOptions = [
+		{
+			id: "openInNewWindow",
+			oncommand: rows => this.openCollectionsInNewWindow(rows)
+		},
+		{
+			id: "sep0",
+		},
 		{
 			id: "sync",
 			label: Zotero.getString('sync.sync'),
@@ -4362,6 +4618,11 @@ var ZoteroPane = new function () {
 			if (library.archived) {
 				show.push('removeLibrary');
 			}
+		}
+
+		// Any row that shows an items list can be opened in its own window
+		if (!collectionTreeRows[0].isHeader()) {
+			show.push('openInNewWindow', 'sep0');
 		}
 
 		if (useHideOrDelete === 'delete') {
@@ -5489,6 +5750,7 @@ var ZoteroPane = new function () {
 
 		return Zotero.Notes.open(itemID, undefined, {
 			openInWindow,
+			window
 		});
 	};
 
@@ -5649,8 +5911,7 @@ var ZoteroPane = new function () {
 				}
 				else {
 					if (file.endsWith(".lnk")) {
-						let win = Services.wm.getMostRecentWindow("navigator:browser");
-						win.ZoteroPane.displayCannotAddShortcutMessage(file);
+						ZoteroPane.displayCannotAddShortcutMessage(file);
 						continue;
 					}
 
@@ -5707,7 +5968,7 @@ var ZoteroPane = new function () {
 	 * Shows progress dialog for a webpage/snapshot save request
 	 */
 	function _showPageSaveStatus(title) {
-		var progressWin = new Zotero.ProgressWindow();
+		var progressWin = new Zotero.ProgressWindow({ window });
 		progressWin.changeHeadline(Zotero.getString('ingester.scraping'));
 		var icon = 'chrome://zotero/skin/treeitem-webpage.png';
 		progressWin.addLines(title, icon)
@@ -5921,6 +6182,7 @@ var ZoteroPane = new function () {
 			await Zotero.FileHandlers.open(item, {
 				location: extraData?.location,
 				openInWindow,
+				window
 			});
 		};
 		
@@ -7647,9 +7909,23 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	/**
+	 * @return {Object|null} - The window's session state, or null if it's still restoring
+	 *     its saved one
+	 */
 	this.getState = function () {
+		if (getUnrestoredSessionState()) {
+			return null;
+		}
 		return {
 			type: 'pane',
+			geometry: {
+				screenX: window.screenX,
+				screenY: window.screenY,
+				width: window.outerWidth,
+				height: window.outerHeight,
+				sizemode: document.documentElement.getAttribute('sizemode')
+			},
 			tabs: Zotero_Tabs.getState()
 		};
 	};
@@ -7790,13 +8066,16 @@ var ZoteroPane = new function () {
 		document.documentElement.style.setProperty('--height-of-fixed-components', `${fixedComponentHeight}px`);
 
 		let layoutChanged = false;
+		// The layout is shared by all windows, so only switch it by window size when there's
+		// a single window
+		let canAutoStack = Zotero.getZoteroPanes().length <= 1;
 		// Collections pane + items pane + items pane + sidenav + 3px for draggability
 		const windowAutoStackMinWidth = 930;
 		if (window.innerWidth < windowAutoStackMinWidth) {
 			// Disable layout mode menus because the standard mode is not available
 			layoutModeMenus.forEach(menu => menu.toggleAttribute("disabled", "true"));
 			// If the window is too small in standard mode, enter stack mode temporarily
-			if (!isStackedMode && !isTempStackedMode) {
+			if (canAutoStack && !isStackedMode && !isTempStackedMode) {
 				Zotero.Prefs.set('tempStackedMode', true);
 				Zotero.Prefs.set('layout', 'stacked');
 				layoutChanged = true;
@@ -7804,7 +8083,7 @@ var ZoteroPane = new function () {
 		}
 		else {
 			layoutModeMenus.forEach(menu => menu.removeAttribute("disabled"));
-			if (isTempStackedMode) {
+			if (canAutoStack && isTempStackedMode) {
 				Zotero.Prefs.clear('tempStackedMode');
 				Zotero.Prefs.set('layout', 'standard');
 				layoutChanged = true;

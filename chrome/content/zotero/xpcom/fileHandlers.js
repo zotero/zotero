@@ -27,7 +27,7 @@
 
 Zotero.FileHandlers = {
 	async open(item, params) {
-		let { location, openInWindow = false } = params || {};
+		let { location, openInWindow = false, window: ownerWindow } = params || {};
 		
 		let path = await item.getFilePathAsync();
 		if (!path) {
@@ -52,7 +52,8 @@ Zotero.FileHandlers = {
 			Zotero.debug('No external handler for ' + readerType + ' -- opening in Zotero');
 			await Zotero.Reader.open(item.id, location, {
 				openInWindow,
-				allowDuplicate: openInWindow
+				allowDuplicate: openInWindow,
+				window: ownerWindow
 			});
 			return true;
 		}

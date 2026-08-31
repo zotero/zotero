@@ -70,6 +70,10 @@ Zotero.Server.Connector.SaveSession = class {
 		this._progressItems = {};
 		this._orderedProgressItems = [];
 		this._userAddedNotes = {};
+		// The pane that was active when the save started, so that later updates to the session
+		// keep targeting the same window
+		this._pane = Zotero.getActiveZoteroPane();
+		this._paneWindow = this._pane?.document.defaultView;
 	}
 
 	async saveItems(target) {
@@ -151,6 +155,18 @@ Zotero.Server.Connector.SaveSession = class {
 	}
 
 	/**
+	 * The pane this session saves to, falling back to the active one if its window is gone
+	 *
+	 * @return {ZoteroPane|null}
+	 */
+	_getPane() {
+		if (this._pane && !this._paneWindow.closed) {
+			return this._pane;
+		}
+		return Zotero.getActiveZoteroPane();
+	}
+	
+	/**
 	 * Change the target data for this session and update any items that have already been saved
 	 */
 	async update(targetID, tags, note) {
@@ -160,7 +176,7 @@ Zotero.Server.Connector.SaveSession = class {
 		this._currentNote = note || "";
 		
 		// Select new destination in collections pane
-		var zp = Zotero.getActiveZoteroPane();
+		var zp = this._getPane();
 		if (zp && zp.collectionsView) {
 			await zp.collectionsView.selectByID(targetID);
 		}
