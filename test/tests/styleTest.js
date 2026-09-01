@@ -248,4 +248,30 @@ describe("Zotero.Styles", function () {
 			assert.equal(style.effectiveLocale, "en-US");
 		});
 	});
+
+	describe("CSL 0.8 styles", function () {
+		var csl08Style = `<?xml version="1.0" encoding="utf-8"?>
+		<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+		  <info>
+			<title>Test 0.8 Style</title>
+			<id>http://www.zotero.org/styles/test-08</id>
+			<updated>2010-01-01T00:00:00+00:00</updated>
+		  </info>
+		  <bibliography>
+			<layout>
+			  <text variable="title"/>
+			</layout>
+		  </bibliography>
+		</style>
+		`;
+		
+		it("should upgrade a style to CSL 1.0 and format a bibliography", async function () {
+			var item = await createDataObject('item', { title: 'Foo Bar' });
+			var style = new Zotero.Style(csl08Style);
+			assert.equal(style._version, "0.8");
+			var cslEngine = style.getCiteProc('en-US', 'text');
+			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			assert.equal(text, 'Foo Bar\n');
+		});
+	});
 });
