@@ -672,7 +672,10 @@ Zotero.Embeddings = new function () {
 					modelHubRootUrl: MODEL_HUB_ROOT_URL,
 					modelHubUrlTemplate: MODEL_HUB_URL_TEMPLATE,
 					dtype: model.dtype,
-					numThreads: Zotero.ML.getOptimalConcurrency()
+					// Half the cores: a first index runs for hours in the
+					// background, so trade wall time for heat and leave the
+					// rest of the machine to the user
+					numThreads: Math.max(1, Math.floor(Zotero.ML.getOptimalConcurrency() / 2))
 				}, onProgress);
 				_engineModelVersion = modelVersion;
 				Zotero.debug('Embeddings: engine ready');
@@ -1670,6 +1673,78 @@ Zotero.Embeddings.Indexing = new function () {
 	// well-packed batches
 	const CHUNK_SIZE = 256;
 
+	// The inference process's memory arena only grows: fragmentation from
+	// varying batch shapes accumulates and is never returned to the OS
+	// (~650 MB/min measured), while throughput stays flat however large it
+	// gets. Restarting the engine is the only reclaim and costs about a
+	// second, so past this footprint it's restarted between batches.
+	const INFERENCE_MEMORY_CAP = 1.5 * 1024 * 1024 * 1024;
+	// How often process usage is sampled and logged during a run
+	const PROC_SAMPLE_INTERVAL = 10 * 1000;
+	let _procTimer = null;
+	let _procCpuTimes = new Map();
+	let _procLastSample = 0;
+	// The inference process's footprint at the last sample, in bytes --
+	// what the between-batches restart check reads
+	let _inferenceFootprint = 0;
+
+	// One line of process usage for the debug log -- the main and inference
+	// processes' footprint and CPU (in core-fractions, so several busy
+	// threads read over 100%), and the memory still available -- so a
+	// submitted debug log shows what indexing cost while it ran.
+	async function _sampleProcesses() {
+		let info = await ChromeUtils.requestProcInfo();
+		let now = Date.now();
+		let elapsedNS = _procLastSample ? (now - _procLastSample) * 1e6 : 0;
+		_procLastSample = now;
+		let inference = info.children.find(child => child.type == 'inference');
+		_inferenceFootprint = inference ? inference.memory : 0;
+		let procs = [
+			{ label: 'main', pid: info.pid, memory: info.memory, cpuTime: info.cpuTime }
+		];
+		if (inference) {
+			procs.push({
+				label: 'inference',
+				pid: inference.pid,
+				memory: inference.memory,
+				cpuTime: inference.cpuTime
+			});
+		}
+		let parts = procs.map((proc) => {
+			let cpu = '';
+			let prev = _procCpuTimes.get(proc.pid);
+			if (prev !== undefined && elapsedNS) {
+				cpu = ` cpu ${Math.round((proc.cpuTime - prev) / elapsedNS * 100)}%`;
+			}
+			_procCpuTimes.set(proc.pid, proc.cpuTime);
+			return `${proc.label} ${(proc.memory / 1024 / 1024).toFixed(0)} MB${cpu}`;
+		});
+		let available = _availableMemory();
+		Zotero.debug('Embeddings: ' + parts.join(', ')
+			+ (available ? `, ${Math.round(available / 1024 / 1024)} MB available` : ''));
+	}
+
+	function _startProcMonitor() {
+		if (_procTimer) {
+			return;
+		}
+		_procCpuTimes = new Map();
+		_procLastSample = 0;
+		_inferenceFootprint = 0;
+		_procTimer = setInterval(
+			() => _sampleProcesses().catch(e => Zotero.logError(e)),
+			PROC_SAMPLE_INTERVAL
+		);
+	}
+
+	function _stopProcMonitor() {
+		if (!_procTimer) {
+			return;
+		}
+		clearInterval(_procTimer);
+		_procTimer = null;
+	}
+
 	// Serialize model switches so rapid preference changes don't run their
 	// clear/prune/re-index steps concurrently.
 	let _switchChain = Promise.resolve();
@@ -1855,20 +1930,27 @@ Zotero.Embeddings.Indexing = new function () {
 	 * @return {Boolean}
 	 */
 	function _hasMemoryToIndex() {
+		let available = _availableMemory();
+		if (available && available < MIN_AVAILABLE_MEMORY) {
+			Zotero.debug(`Embeddings: only ${Math.round(available / 1024 / 1024)} MB `
+				+ "available -- not indexing yet");
+			return false;
+		}
+		return true;
+	}
+
+	// Physical memory available right now, in bytes -- 0 when the platform
+	// can't say
+	function _availableMemory() {
 		try {
-			let available = Cc["@mozilla.org/ml-utils;1"]
+			return Cc["@mozilla.org/ml-utils;1"]
 				.getService(Ci.nsIMLUtils)
-				.availablePhysicalMemory;
-			if (available && available < MIN_AVAILABLE_MEMORY) {
-				Zotero.debug(`Embeddings: only ${Math.round(available / 1024 / 1024)} MB `
-					+ "available -- not indexing yet");
-				return false;
-			}
+				.availablePhysicalMemory || 0;
 		}
 		catch (e) {
 			Zotero.logError(e);
+			return 0;
 		}
-		return true;
 	}
 
 	// Put an itemID on the queue its kind of work belongs to. An item the
@@ -2667,6 +2749,15 @@ Zotero.Embeddings.Indexing = new function () {
 			let vectors = await Zotero.Embeddings.embedPassages(
 				batch.map(unit => embedText(unit.entry.chunks[unit.chunkIndex]))
 			);
+			// The arena's only reclaim is a restart (see INFERENCE_MEMORY_CAP);
+			// zeroing the footprint holds the next check until a fresh sample
+			if (_inferenceFootprint > INFERENCE_MEMORY_CAP) {
+				let footprintMB = Math.round(_inferenceFootprint / 1024 / 1024);
+				_inferenceFootprint = 0;
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				Zotero.debug(`Embeddings: inference process at ${footprintMB} MB `
+					+ '-- engine restarted to release its memory');
+			}
 			let completed = [];
 			for (let j = 0; j < batch.length; j++) {
 				let { entry, chunkIndex } = batch[j];
@@ -2964,6 +3055,7 @@ Zotero.Embeddings.Indexing = new function () {
 		_indexing = true;
 		_stopping = false;
 		_lastError = null;
+		_startProcMonitor();
 		try {
 			await Zotero.Embeddings.initDB();
 			await _ensureIndexMatchesModel();
@@ -3013,6 +3105,7 @@ Zotero.Embeddings.Indexing = new function () {
 			_lastError = e;
 		}
 		finally {
+			_stopProcMonitor();
 			_indexing = false;
 			_phase = 'idle';
 			_downloadProgress = null;
