@@ -2314,6 +2314,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var targetLibraryID = targetTreeRow.ref.libraryID;
 		var targetCollectionID = targetTreeRow.isCollection() ? targetTreeRow.ref.id : false;
 		
+		if (targetCollectionID) {
+			Zotero.Collections.addToRecent(targetTreeRow.ref);
+		}
+		
 		if (dataType == 'zotero/collection') {
 			let droppedCollections = await Zotero.Collections.getAsync(data);
 			if (droppedCollections.some(c => c.id == targetCollectionID)) {
