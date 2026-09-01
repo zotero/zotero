@@ -821,7 +821,16 @@ var ZoteroPane = new function () {
 		// Restore pane state
 		try {
 			if (_initialLibraryTabState) {
-				ZoteroPane.restoreLibraryTabState(_initialLibraryTabState);
+				let state = _initialLibraryTabState;
+				ZoteroPane.restoreLibraryTabState(state)
+					.then(() => {
+						// Focus an Advanced Search the window was opened with, as opening it
+						// within the window would
+						if (state.advancedSearch) {
+							document.getElementById('zotero-advanced-search-pane-deck').pane.focus();
+						}
+					})
+					.catch(e => Zotero.logError(e));
 			}
 			else if (_sessionPaneState) {
 				let promise = Zotero_Tabs.restoreState(_sessionPaneState.tabs);
@@ -2108,9 +2117,7 @@ var ZoteroPane = new function () {
 
 		deck.pane.refresh();
 
-		let search = deck.state === 'closed' || deck.selectedSearchType !== 'temporary' || !deck.pane.active
-			? null
-			: deck.pane.search;
+		let search = this._getActiveAdvancedSearch();
 		if (collectionTreeRows) {
 			for (let collectionTreeRow of collectionTreeRows) {
 				collectionTreeRow.setAdvancedSearch(search);
@@ -2223,6 +2230,9 @@ var ZoteroPane = new function () {
 			this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		}
 		
+		// Set the Advanced Search first, so that a collection change applies it to the new rows
+		this._restoreAdvancedSearchState(state.advancedSearch);
+		
 		let selected = await this.collectionsView.restoreSelection(state.collections, {
 			focusedID: state.focusedCollection
 		});
@@ -2235,10 +2245,68 @@ var ZoteroPane = new function () {
 		// Let any queued collection selection finish
 		await this.onCollectionSelected();
 		await this.itemsView.waitForLoad();
+		
+		// Apply the Advanced Search to rows the collection change didn't replace
+		let advancedSearch = this._getActiveAdvancedSearch();
+		let changed = false;
+		for (let collectionTreeRow of this.itemsView.collectionTreeRows) {
+			changed = collectionTreeRow.setAdvancedSearch(advancedSearch) || changed;
+		}
+		if (changed) {
+			if (!itemsPaneMessageShown) {
+				itemsPaneMessageShown = true;
+				this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+			}
+			await this.itemsView.refresh();
+		}
 		if (itemsPaneMessageShown) {
 			this.clearItemsPaneMessage();
 		}
 	});
+
+
+	/**
+	 * The temporary search shown and applied by the open Advanced Search pane, if any
+	 *
+	 * @return {Zotero.Search|null}
+	 */
+	this._getActiveAdvancedSearch = function () {
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		return deck.state === 'closed' || deck.selectedSearchType !== 'temporary' || !deck.pane.active
+			? null
+			: deck.pane.search;
+	};
+
+
+	/**
+	 * Show or reset the Advanced Search pane for a library tab state
+	 *
+	 * @param {Object} [advancedSearch] - The advancedSearch property of a library view state,
+	 *     with `search` (search JSON or null) and `libraryID`. If present, the pane opens as
+	 *     a temporary search; if not, the pane is reset and closed.
+	 */
+	this._restoreAdvancedSearchState = function (advancedSearch) {
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
+		deck.selectedSearchType = 'temporary';
+		if (!advancedSearch) {
+			deck.state = 'closed';
+			deck.pane.search = null;
+		}
+		else {
+			deck.state = 'open';
+			let search = null;
+			if (advancedSearch.search) {
+				search = new Zotero.Search();
+				// A library is required to clone the search; the pane's refresh() sets
+				// the one the selected rows belong to
+				search.libraryID = advancedSearch.libraryID || Zotero.Libraries.userLibraryID;
+				search.fromJSON(advancedSearch.search);
+			}
+			deck.pane.search = search;
+			deck.pane.active = !!search;
+		}
+		document.getElementById('zotero-tb-search').updateMode();
+	};
 	
 	
 	/**
@@ -2352,28 +2420,23 @@ var ZoteroPane = new function () {
 
 
 	/**
-	 * Open the Advanced Search pane seeded from the quick search text, reproducing
-	 * the current quick search mode as editable conditions.
-	 *
-	 * The quick search field is cleared, since its text now lives in the Advanced
-	 * Search. Closing the Advanced Search resets to an unfiltered view rather than
-	 * restoring the quick search.
+	 * Build a search from the quick search text, reproducing the quick search mode as
+	 * editable conditions
 	 *
 	 * @param {String} searchText
-	 * @param {String} [mode='fields'] - The quick search mode to reproduce
+	 * @param {String} mode - The quick search mode to reproduce
+	 * @return {Zotero.Search|null} - Null if the text contains no conditions or words
 	 */
-	this.openAdvancedSearchFromQuickSearch = async function (searchText, mode = 'fields') {
+	this._buildSearchFromQuickSearch = function (searchText, mode) {
 		// Conditions written in the query ("tag:foo") become conditions in the
 		// search; what's left is split into words (keeping quoted phrases
 		// intact), as the quick search does
 		let { tree, text } = Zotero.SearchQuery.parse(searchText);
 		let parts = Zotero.SearchConditions.parseSearchString(text);
 		if (!parts.length && !tree) {
-			await this.toggleAdvancedSearchState('open');
-			return;
+			return null;
 		}
 
-		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 		let search = new Zotero.Search();
 		let libraryID = this.getSelectedLibraryIDs()[0];
 		if (libraryID) {
@@ -2409,6 +2472,28 @@ var ZoteroPane = new function () {
 				search.addCondition('anyField', 'contains', part.text);
 			}
 		}
+		return search;
+	};
+
+
+	/**
+	 * Open the Advanced Search pane seeded from the quick search text, reproducing
+	 * the current quick search mode as editable conditions.
+	 *
+	 * The quick search field is cleared, since its text now lives in the Advanced
+	 * Search. Closing the Advanced Search resets to an unfiltered view.
+	 *
+	 * @param {String} searchText
+	 * @param {String} [mode='fields'] - The quick search mode to reproduce
+	 */
+	this.openAdvancedSearchFromQuickSearch = async function (searchText, mode = 'fields') {
+		let search = this._buildSearchFromQuickSearch(searchText, mode);
+		if (!search) {
+			await this.toggleAdvancedSearchState('open');
+			return;
+		}
+
+		let deck = document.getElementById('zotero-advanced-search-pane-deck');
 
 		// Show the Advanced Search and seed it, without yet touching the items list,
 		// so that the quick search results stay visible until they're replaced below
@@ -2575,6 +2660,28 @@ var ZoteroPane = new function () {
 	 */
 	this.newWindow = function () {
 		return Zotero.openMainWindow({ libraryTabState: this._getSelectedCollectionsState() });
+	};
+
+
+	/**
+	 * Open a new main window showing this window's collection selection with the Advanced
+	 * Search pane open
+	 *
+	 * If searchText contains conditions or words, the new window's search is seeded from it,
+	 * reproducing the quick search mode as editable conditions, and run against the new
+	 * window's items list. This window's quick search is left in place.
+	 *
+	 * @param {String} [searchText]
+	 * @param {String} [mode='fields'] - The quick search mode to reproduce
+	 */
+	this.openAdvancedSearchInNewWindow = function (searchText, mode = 'fields') {
+		let state = this._getSelectedCollectionsState() || {};
+		let search = searchText ? this._buildSearchFromQuickSearch(searchText, mode) : null;
+		state.advancedSearch = {
+			search: search ? search.toJSON() : null,
+			libraryID: search ? search.libraryID : null
+		};
+		return Zotero.openMainWindow({ libraryTabState: state });
 	};
 
 

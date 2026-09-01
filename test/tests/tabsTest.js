@@ -158,6 +158,37 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should open the Advanced Search in a new window", async function () {
+			let newWin;
+			try {
+				newWin = zp.openAdvancedSearchInNewWindow('foo');
+				await waitForCallback(
+					() => {
+						let deck = newWin.document
+							?.getElementById('zotero-advanced-search-pane-deck');
+						return deck?.state === 'open'
+							&& deck.pane.search
+							&& Object.values(deck.pane.search.getConditions())
+								.some(c => c.condition == 'anyField' && c.value == 'foo');
+					},
+					100,
+					10
+				);
+				// The search is focused, as it would be when opened within the window
+				let deck = newWin.document.getElementById('zotero-advanced-search-pane-deck');
+				await waitForCallback(
+					() => deck.pane.contains(newWin.document.activeElement),
+					100,
+					5
+				);
+			}
+			finally {
+				if (newWin) {
+					newWin.close();
+				}
+			}
+		});
+		
 		it("should show tags in a reinitialized tag selector while another window is open", async function () {
 			await item.addTag('second-window-tag');
 			await item.saveTx();
