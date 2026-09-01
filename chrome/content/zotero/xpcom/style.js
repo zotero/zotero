@@ -845,8 +845,11 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 		let styleDOMXML = new DOMParser()
 			.parseFromString(this.getXML(), "text/xml");
 		
-		// apply XSLT and serialize output
-		let newDOMXML = Zotero.Styles.xsltProcessor.transformToDocument(styleDOMXML);
+		// apply XSLT and serialize output. transformToFragment() is used because
+		// transformToDocument() needs a load group, which it takes from the source
+		// document or from the window that created the processor, and there's
+		// neither here.
+		let newDOMXML = Zotero.Styles.xsltProcessor.transformToFragment(styleDOMXML, styleDOMXML);
 		var xml = new XMLSerializer().serializeToString(newDOMXML);
 	} else {
 		var xml = this.getXML();
