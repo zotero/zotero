@@ -3357,14 +3357,12 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
  * Zotero.Utilities.Internal.Chunking -- splitting a text into passages.
  *
  * Passages are measured in characters unless the caller supplies its own
- * metrics (see Zotero.Embeddings.Chunking, which measures in a model's
- * tokens): { count(text), joinSize (charged per join, so pieces' sizes add up
+ * metrics (see Zotero.Embeddings.Chunking, which fits the budget to a model's
+ * window): { count(text), joinSize (charged per join, so pieces' sizes add up
  * to the joined size), budget (most a passage may reach), minSize (least
  * worth standing alone), overlap (carried into the next passage where one is
  * split mid-thought) }. The character default (see getCharacterMetrics())
- * approximates the same geometry, so it suits cuts made and discarded in one
- * sitting; boundaries that get stored should be measured exactly, with the
- * caller's own metrics.
+ * scales the same geometry by what a token is worth in the text's scripts.
  *
  * Every passage is a slice of its source, located by its start/end extent.
  */
@@ -3381,21 +3379,59 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	this.BUDGET_TOKENS = BUDGET_TOKENS;
 	this.MIN_TOKENS = MIN_TOKENS;
 	this.OVERLAP_TOKENS = OVERLAP_TOKENS;
-	// What a token is worth in characters in either kind of script
-	const CHARS_PER_TOKEN = 4;
-	const CJK_CHARS_PER_TOKEN = 1;
+	// What a token is worth in characters, by script class. Alphabetic
+	// scripts pack several characters into a token; CJK is written without
+	// spaces, so a character carries about what a word of an alphabetic
+	// script does; abjads and Indic scripts fragment in between. The
+	// unclassified rest (digits, punctuation, symbols) fragments more than
+	// alphabetic prose.
+	const SCRIPT_CHARS_PER_TOKEN = [
+		[/\p{Script=Latin}/gu, 4],
+		[/[\p{Script=Cyrillic}\p{Script=Greek}]/gu, 3],
+		[/[\p{Script=Arabic}\p{Script=Hebrew}]/gu, 2.5],
+		[/[\p{Script=Devanagari}\p{Script=Bengali}\p{Script=Gurmukhi}\p{Script=Gujarati}\p{Script=Tamil}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Sinhala}\p{Script=Thai}\p{Script=Lao}\p{Script=Khmer}\p{Script=Myanmar}]/gu, 1.5],
+		[/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu, 1]
+	];
+	const DEFAULT_CHARS_PER_TOKEN = 3;
+	// How much of a text its script mix is read from
+	const SCRIPT_SAMPLE_CHARS = 4000;
+
+	/**
+	 * What a token of the text is worth in characters: the share-weighted
+	 * average of the script classes in a leading sample. An estimate -- real
+	 * tokenizers vary by model and by text -- so a consumer sizing against a
+	 * hard window should hold back some headroom.
+	 *
+	 * @param {String} text
+	 * @return {Number}
+	 */
+	this.getCharsPerToken = function (text) {
+		let sample = text.slice(0, SCRIPT_SAMPLE_CHARS).replace(/\s/g, '');
+		if (!sample) {
+			return DEFAULT_CHARS_PER_TOKEN;
+		}
+		let weighted = 0;
+		let classified = 0;
+		for (let [pattern, charsPerToken] of SCRIPT_CHARS_PER_TOKEN) {
+			let matched = sample.match(pattern)?.length || 0;
+			weighted += matched * charsPerToken;
+			classified += matched;
+		}
+		weighted += (sample.length - classified) * DEFAULT_CHARS_PER_TOKEN;
+		return weighted / sample.length;
+	};
 
 	/**
 	 * A measure counting characters, for a consumer with no tokenizer -- what
 	 * the chunkers here default to when no metrics are given. The budgets
-	 * mirror the token geometry above, so passages come out about the size a
-	 * model-driven chunker would make them.
+	 * mirror the token geometry above at the text's chars-per-token scale, so
+	 * passages come out about the size a model-driven chunker would make them.
 	 *
-	 * @param {String} text - Read for the script it's written in
+	 * @param {String} text - Read for the scripts it's written in
 	 * @return {Object} - Metrics
 	 */
 	this.getCharacterMetrics = function (text) {
-		let scale = _isMostlyCJK(text) ? CJK_CHARS_PER_TOKEN : CHARS_PER_TOKEN;
+		let scale = this.getCharsPerToken(text);
 		return {
 			count: value => value.length,
 			// The two newlines paragraphs are joined with
@@ -3410,17 +3446,6 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	// call that gave no metrics of its own
 	function _defaultMetrics(text) {
 		return Zotero.Utilities.Internal.Chunking.getCharacterMetrics(text);
-	}
-
-	// CJK is written without spaces, so a character of it carries about what
-	// a word of an alphabetic script does
-	function _isMostlyCJK(text) {
-		let sample = text.slice(0, 4000).replace(/\s/g, '');
-		if (!sample) {
-			return false;
-		}
-		let cjk = sample.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/gu);
-		return !!cjk && cjk.length * 2 > sample.length;
 	}
 
 	// The paragraphs of a text, each counted exactly once -- the only place
@@ -3500,11 +3525,17 @@ Zotero.Utilities.Internal.Chunking = new function () {
 		return units;
 	}
 
+	// Built once: constructing a segmenter is expensive next to running one,
+	// and a text with no paragraph breaks segments a block at a time
+	let _sentenceSegmenter = null;
+
 	// The sentences of a range as they stand, whatever their size
 	function _segmentSentences(source, start, end, count) {
 		let units = [];
-		let segmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
-		for (let { segment, index } of segmenter.segment(source.slice(start, end))) {
+		if (!_sentenceSegmenter) {
+			_sentenceSegmenter = new Intl.Segmenter(undefined, { granularity: 'sentence' });
+		}
+		for (let { segment, index } of _sentenceSegmenter.segment(source.slice(start, end))) {
 			let unit = _measureRange(source, start + index, start + index + segment.length, count);
 			if (unit) {
 				units.push(unit);

@@ -780,6 +780,18 @@ describe("Zotero.Utilities.Internal", function () {
 			}
 		});
 
+		it("should scale a token's worth by the script of the text", function () {
+			let chunking = Zotero.Utilities.Internal.Chunking;
+			// Pure scripts land on their table entries...
+			assert.equal(chunking.getCharsPerToken('climate change'), 4);
+			assert.equal(chunking.getCharsPerToken('\u6c17\u5019\u5909\u52d5'.repeat(10)), 1);
+			assert.equal(chunking.getCharsPerToken('\u0438\u0437\u043c\u0435\u043d\u0435\u043d\u0438\u0435 \u043a\u043b\u0438\u043c\u0430\u0442\u0430'), 3);
+			// ...and a mixture lands between its parts
+			let mixed = chunking.getCharsPerToken('climate change \u6c17\u5019\u5909\u52d5\u6c17\u5019\u5909\u52d5');
+			assert.isAbove(mixed, 1);
+			assert.isBelow(mixed, 4);
+		});
+
 		it("should leave a text within the budget whole", function () {
 			let chunks = chunk('A short paragraph.');
 			assert.lengthOf(chunks, 1);

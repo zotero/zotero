@@ -1498,205 +1498,108 @@ Zotero.Embeddings = new function () {
 
 
 /**
- * Zotero.Embeddings.Chunking -- splitting a text into passages small enough to
- * each be embedded on their own, so a long text's later paragraphs are
- * searchable instead of being averaged into one vector or truncated away by the
- * pipeline. The indexer applies this to notes (chunkText()) and to attachment
- * full text (chunkSections()). Chunk size is bounded by the shared passage
- * geometry's BUDGET_TOKENS (see Zotero.Utilities.Internal.Chunking), capped
- * by the model's window, and counted in the model's own tokens.
+ * Zotero.Embeddings.Chunking -- the shared chunker fitted to the active model.
+ * Splitting a text into passages small enough to each be embedded on their own
+ * keeps a long text's later paragraphs searchable instead of averaged into one
+ * vector or truncated away. The geometry and the splitting live in
+ * Zotero.Utilities.Internal.Chunking; this module caps the budget to the
+ * model's window and reports passage sizes as estimated tokens.
  */
 Zotero.Embeddings.Chunking = new function () {
-	// The shared passage geometry (see Zotero.Utilities.Internal.Chunking),
-	// counted here in the model's own tokens: BUDGET_TOKENS caps a chunk,
-	// within what the model's window allows (see _getMetrics()); MIN_TOKENS
-	// is the least worth embedding alone -- an item scores as its best chunk,
-	// so fragments would inflate the score while losing their context; and
-	// OVERLAP_TOKENS is carried across a split, so a thought spanning the
-	// boundary is searchable in both halves.
+	// The shared geometry: BUDGET_TOKENS caps a chunk within the model's
+	// window (see _getBudget()); MIN_TOKENS is the least worth embedding
+	// alone -- an item scores as its best chunk, so fragments would inflate
+	// the score; OVERLAP_TOKENS is carried across a split, so a thought
+	// spanning the boundary is searchable in both halves.
 	const { BUDGET_TOKENS, MIN_TOKENS, OVERLAP_TOKENS } = Zotero.Utilities.Internal.Chunking;
-	// Most characters per encode() call. The multilingual models'
-	// SentencePiece Unigram tokenizer is quadratic in input length (its
-	// Metaspace pre-tokenizer doesn't split at whitespace), so a single long
-	// encode can take seconds. Segments this size stay in the linear regime,
-	// and token counts are additive across whitespace boundaries, so the
-	// segmented measurement is exact.
-	const TOKENIZER_SEGMENT_CHARS = 1000;
+	// Window taken by the special tokens wrapped around every input -- two
+	// for the BERT-family models here; the budget's headroom absorbs more
+	const SPECIAL_TOKENS = 2;
 
-	// Tokenizer instances by model name. Failures aren't cached, so a later
-	// indexing run retries the load.
-	let _tokenizers = new Map();
+	// Headroom held back from the window: the character estimate can
+	// undercount, and a chunk that overshoots loses its tail to the
+	// pipeline's truncation
+	const BUDGET_SAFETY = 0.9;
 
-	// Counters and metrics cached per tokenizer: each costs a few encode()
-	// calls to derive, which adds up when many short texts are measured one
-	// at a time. A tokenizer belongs to one model (see getTokenizer()), so
-	// the model facts baked into its metrics can't go stale.
-	let _metrics = new WeakMap();
-	let _counters = new WeakMap();
-
-	/**
-	 * The active model's tokenizer, built from the files in the runtime's
-	 * model cache with the transformers.js implementation Firefox ships --
-	 * the same code, over the same files, that the inference process
-	 * tokenizes with.
-	 *
-	 * A failure throws rather than falling back to an approximate count:
-	 * approximated chunk boundaries would persist uncorrected (an item's
-	 * source hash covers its text, not the chunker), and with the tokenizer
-	 * files broken nothing would embed anyway.
-	 *
-	 * @return {Promise<Object>}
-	 */
-	this.getTokenizer = function () {
-		let name = Zotero.Embeddings.getModelName();
-		if (!_tokenizers.has(name)) {
-			let promise = (async () => {
-				let { PreTrainedTokenizer } = ChromeUtils.importESModule(
-					'chrome://global/content/ml/transformers.js'
-				);
-				let decoder = new TextDecoder();
-				let [tokenizerJSON, tokenizerConfig] = await Promise.all(
-					['tokenizer.json', 'tokenizer_config.json'].map(
-						async file => JSON.parse(decoder.decode(
-							await Zotero.Embeddings.getModelFile(file)
-						))
-					)
-				);
-				return new PreTrainedTokenizer(tokenizerJSON, tokenizerConfig);
-			})();
-			// Allow a later run to retry after a failed load
-			promise.catch(() => {
-				if (_tokenizers.get(name) === promise) {
-					_tokenizers.delete(name);
-				}
-			});
-			_tokenizers.set(name, promise);
-		}
-		return _tokenizers.get(name);
-	};
-
-	// A counter of a text's tokens that leaves out the special tokens the
-	// tokenizer wraps every input in, so counts of several pieces add up to
-	// the count of the pieces joined -- the additivity that lets the shared
-	// chunker measure each paragraph once and size every grouping by summing.
-	function _getCounter(tokenizer) {
-		let counter = _counters.get(tokenizer);
-		if (!counter) {
-			let specialTokens = tokenizer.encode('').length;
-			// Measured in segments (see _splitForTokenizer()), so a long
-			// paragraph never hits the tokenizer's quadratic regime in a
-			// single call
-			counter = text => _splitForTokenizer(text).reduce(
-				(sum, segment) => sum + tokenizer.encode(segment).length - specialTokens,
-				0
-			);
-			_counters.set(tokenizer, counter);
-		}
-		return counter;
+	// The shared ceiling capped to the model's window, less the special
+	// tokens and the passage prefix embedPassages() prepends -- not part of
+	// the text the chunker sees, but in the window once a chunk is embedded
+	function _getBudget() {
+		let prefix = Zotero.Embeddings.getPassagePrefix();
+		let prefixTokens = prefix
+			? Math.ceil(prefix.length / Zotero.Utilities.Internal.Chunking.getCharsPerToken(prefix))
+			: 0;
+		return Math.floor(
+			(Math.min(BUDGET_TOKENS, Zotero.Embeddings.getModelMaxTokens())
+				- SPECIAL_TOKENS - prefixTokens) * BUDGET_SAFETY
+		);
 	}
 
-	// The shared chunker's metrics for the active model. joinSize is what one
-	// '\n\n' join adds, measured rather than assumed (a SentencePiece model
-	// can spend a token on collapsed whitespace). The budget is the shared
-	// ceiling, capped by the model's window, less the special tokens and the
-	// passage prefix embedPassages() prepends -- neither is part of the text
-	// the chunker sees, but both take up window once the chunk is embedded.
-	function _getMetrics(tokenizer) {
-		let cached = _metrics.get(tokenizer);
-		if (cached) {
-			return cached;
-		}
-		let count = _getCounter(tokenizer);
-		let specialTokens = tokenizer.encode('').length;
-		let prefix = Zotero.Embeddings.getPassagePrefix();
-		let metrics = {
-			count,
-			joinSize: Math.max(0, count('a\n\na') - 2 * count('a')),
-			budget: Math.min(BUDGET_TOKENS, Zotero.Embeddings.getModelMaxTokens())
-				- specialTokens - (prefix ? count(prefix) : 0),
+	// The shared chunker's metrics for the active model: counts estimated
+	// from characters at the sample's chars-per-token scale. The estimate
+	// errs both ways -- a misjudged small chunk merges or stands alone, an
+	// overshooting one is truncated by the pipeline.
+	function _getMetrics(sample) {
+		let charsPerToken = Zotero.Utilities.Internal.Chunking.getCharsPerToken(sample);
+		return {
+			count: text => text.length / charsPerToken,
+			joinSize: 2 / charsPerToken,
+			budget: _getBudget(),
 			minSize: MIN_TOKENS,
 			overlap: OVERLAP_TOKENS
 		};
-		_metrics.set(tokenizer, metrics);
-		return metrics;
-	}
-
-	// A text in segments of at most TOKENIZER_SEGMENT_CHARS, each ending
-	// right before a whitespace character, so the next segment carries it and
-	// the tokenizer sees every word with its leading space. Text with no
-	// whitespace in a whole window (e.g., unsegmented CJK) is cut mid-run,
-	// which can miscount by a token per boundary -- noise against the budget.
-	function _splitForTokenizer(text) {
-		if (text.length <= TOKENIZER_SEGMENT_CHARS) {
-			return [text];
-		}
-		let segments = [];
-		let start = 0;
-		while (start < text.length) {
-			let end = Math.min(start + TOKENIZER_SEGMENT_CHARS, text.length);
-			if (end < text.length) {
-				for (let i = end; i > start; i--) {
-					if (/\s/.test(text[i])) {
-						end = i;
-						break;
-					}
-				}
-			}
-			segments.push(text.slice(start, end));
-			start = end;
-		}
-		return segments;
 	}
 
 
 	/**
-	 * Split a text into chunks that each fit the active model's context
-	 * window, measured in the model's own tokens (see
+	 * Split a text into chunks that each fit the active model's window,
+	 * sized in estimated tokens (see
 	 * Zotero.Utilities.Internal.Chunking.chunkText()).
 	 *
 	 * @param {String} text
-	 * @return {Promise<Object[]>} - [{ text, tokens, start, end }]
+	 * @return {Object[]} - [{ text, tokens, start, end }]
 	 */
-	this.chunkText = async function (text) {
-		let metrics = _getMetrics(await this.getTokenizer());
+	this.chunkText = function (text) {
+		let metrics = _getMetrics(text);
 		return _asTokens(Zotero.Utilities.Internal.Chunking.chunkText(text, metrics));
 	};
 	
 	/**
-	 * Token count of a text against the active model, without the special
-	 * tokens the tokenizer wraps every input in -- the same additive measure
-	 * the chunkers report on their chunks.
+	 * Estimated token count of a text -- the same character measure the
+	 * chunkers size their chunks with, no model involved.
 	 *
 	 * @param {String} text
-	 * @return {Promise<Number>}
+	 * @return {Number}
 	 */
-	this.countTokens = async function (text) {
-		let tokenizer = await this.getTokenizer();
-		return _getCounter(tokenizer)(text);
+	this.estimateTokens = function (text) {
+		return Math.round(
+			text.length / Zotero.Utilities.Internal.Chunking.getCharsPerToken(text)
+		);
 	};
 
 
 	/**
 	 * Split a document's outline sections (see Zotero.SDT.getSections()) into
-	 * chunks that each fit the active model's context window, measured in the
-	 * model's own tokens, and prefixed for embedding with their section's
-	 * outline path (see Zotero.Utilities.Internal.Chunking.chunkSections()).
+	 * chunks that each fit the active model's window, sized in estimated
+	 * tokens and prefixed for embedding with their section's outline path
+	 * (see Zotero.Utilities.Internal.Chunking.chunkSections()).
 	 *
 	 * @param {Object[]} sections
-	 * @return {Promise<Object[]>} - [{ text, embedText, tokens, outlinePath,
+	 * @return {Object[]} - [{ text, embedText, tokens, outlinePath,
 	 *     startBlock, endBlock, startOffset, endOffset, pageIndex, pageLabel,
 	 *     position, sectionPart, sectionParts, auxiliary }], where tokens
 	 *     counts embedText
 	 */
-	this.chunkSections = async function (sections) {
-		let metrics = _getMetrics(await this.getTokenizer());
+	this.chunkSections = function (sections) {
+		let sample = sections.map(section => section.text).join('\n\n');
+		let metrics = _getMetrics(sample);
 		return _asTokens(Zotero.Utilities.Internal.Chunking.chunkSections(sections, metrics));
 	};
 
 	// Chunks as this module reports them: the shared chunker sizes passages in
-	// whatever it was handed, and what it was handed here is tokens
+	// whatever it was handed, and what it was handed here is estimated tokens
 	function _asTokens(chunks) {
-		return chunks.map(({ size, ...chunk }) => ({ ...chunk, tokens: size }));
+		return chunks.map(({ size, ...chunk }) => ({ ...chunk, tokens: Math.round(size) }));
 	}
 };
 
@@ -2065,8 +1968,10 @@ Zotero.Embeddings.Indexing = new function () {
 			// The title is the note's first line, so its words are among the
 			// note's own -- a title with enough of them settles it without
 			// stripping the body's HTML
-			if (_hasEmbeddableText(row.title)
-					|| _hasEmbeddableText(_htmlToText(row.note, true))) {
+			if (_hasEmbeddableText(row.title)) {
+				add(row);
+			}
+			else if (_hasEmbeddableText(_htmlToText(row.note, true))) {
 				add(row);
 			}
 		}
@@ -2408,7 +2313,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// to rank
 		if (sections.length
 				&& _hasEmbeddableText(sections.map(section => section.text).join(' '))) {
-			let chunks = await Zotero.Embeddings.Chunking.chunkSections(sections);
+			let chunks = Zotero.Embeddings.Chunking.chunkSections(sections);
 			// An auxiliary chunk stands alone, so it's held to the same word
 			// minimum as any standalone text -- a bare "Figure 1" gives the
 			// model nothing to rank
@@ -2431,7 +2336,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// Flat text has no sections, so the whole document plays that role:
 		// the part numbering says where in it a chunk falls, and the chunk's
 		// extent in the flat text is its source reference
-		let chunks = await Zotero.Embeddings.Chunking.chunkText(text);
+		let chunks = Zotero.Embeddings.Chunking.chunkText(text);
 		return chunks.map((chunk, index) => ({
 			text: chunk.text,
 			tokens: chunk.tokens,
@@ -2675,14 +2580,14 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 			else if (entry.item.isNote()) {
 				// chunkText() already carries each chunk's token count
-				entry.chunks = await Zotero.Embeddings.Chunking.chunkText(entry.text);
+				entry.chunks = Zotero.Embeddings.Chunking.chunkText(entry.text);
 			}
 			else {
 				// Item text is embedded whole, so it never passes through a
 				// chunker and has to be counted here
 				entry.chunks = [{
 					text: entry.text,
-					tokens: await Zotero.Embeddings.Chunking.countTokens(entry.text)
+					tokens: Zotero.Embeddings.Chunking.estimateTokens(entry.text)
 				}];
 			}
 			entry.vectors = new Array(entry.chunks.length);
