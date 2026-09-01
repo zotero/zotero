@@ -289,8 +289,16 @@ Zotero.Sync.Storage.Local = {
 		var changed = false;
 		var statesToSet = {};
 		for (let item of items) {
-			// TODO: Catch error?
-			let state = await this._checkForUpdatedFile(item, attachmentData[item.id]);
+			let state;
+			try {
+				state = await this._checkForUpdatedFile(item, attachmentData[item.id]);
+			}
+			catch (e) {
+				// Don't let one broken attachment stop the rest of the library from syncing
+				Zotero.logError("Error checking attachment file for item " + item.libraryKey);
+				Zotero.logError(e);
+				continue;
+			}
 			if (state !== false) {
 				if (!statesToSet[state]) {
 					statesToSet[state] = [];
