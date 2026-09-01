@@ -1136,6 +1136,68 @@ describe("ZoteroPane", function () {
 		});
 	});
 
+	describe("#buildAddItemToCollectionMenu()", function () {
+		var popup;
+		
+		before(function () {
+			popup = doc.getElementById('zotero-add-to-collection-popup');
+		});
+		
+		beforeEach(async function () {
+			// Leave the tree on the library root, so that a collection created later in a test
+			// can't be recorded by the reselection that follows adding a row
+			await selectLibrary(win);
+		});
+		
+		after(async function () {
+			// Don't leave a multiple selection behind for later tests
+			await selectLibrary(win);
+		});
+		
+		it("should record the selected collection as recently used", async function () {
+			var collection = await createDataObject('collection');
+			await zp.collectionsView.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+			
+			assert.equal(Zotero.Collections.getRecent()[0], collection);
+		});
+		
+		it("should record the collection added to a multiple selection", async function () {
+			var c1 = await createDataObject('collection', { name: 'AAA recent' });
+			var c2 = await createDataObject('collection', { name: 'ZZZ recent' });
+			var cv = zp.collectionsView;
+			await cv.selectByID("C" + c1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			
+			assert.equal(Zotero.Collections.getRecent()[0], c2);
+		});
+		
+		it("should offer recently used collections above the full list", async function () {
+			var parent = await createDataObject('collection', { name: 'Parent' });
+			var child = await createDataObject('collection', { name: 'Child', parentID: parent.id });
+			var item = await createDataObject('item', { collections: [parent.id] });
+			
+			Zotero.Collections.addToRecent(parent);
+			Zotero.Collections.addToRecent(child);
+			
+			zp.buildAddItemToCollectionMenu({ target: popup, currentTarget: popup }, [item]);
+			
+			// Recent collections follow New Collection and a separator, by full path
+			var nodes = [...popup.children];
+			var recent = [];
+			for (let node of nodes.slice(nodes.findIndex(n => n.tagName == 'menuseparator') + 1)) {
+				if (node.tagName == 'menuseparator') break;
+				recent.push(node.getAttribute('label'));
+			}
+			assert.include(recent, 'Parent \u203A Child');
+			// The parent already contains the item, so it isn't offered
+			assert.notInclude(recent, 'Parent');
+		});
+	});
+	
 	describe("#buildItemContextMenu()", function () {
 		it("shouldn't show export or bib options for multiple standalone file attachments without notes", async function () {
 			var item1 = await importFileAttachment('test.png');

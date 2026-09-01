@@ -62,6 +62,8 @@ var ZoteroPane = new function () {
 	|| ev.getModifierState("Control") || ev.getModifierState("OS");
 	
 	const TAB_NUMBER_CODE_RE = /^(?:Numpad|Digit)([0-9])$/;
+	
+	const RECENT_COLLECTIONS_SHOWN = 5;
 
 	var self = this,
 		_loaded = false, _madeVisible = false,
@@ -1893,6 +1895,11 @@ var ZoteroPane = new function () {
 		await this.itemsView.changeCollectionTreeRows(collectionTreeRows);
 		
 		Zotero.Prefs.set('lastViewedFolder', collectionTreeRows[0].id);
+		// The focused row is the one just clicked, whereas collectionTreeRows is in tree order
+		let focusedRow = this.collectionsView.selectedTreeRow;
+		if (focusedRow && focusedRow.isCollection()) {
+			Zotero.Collections.addToRecent(focusedRow.ref);
+		}
 	});
 
 
@@ -4849,6 +4856,19 @@ var ZoteroPane = new function () {
 		}
 	};
 
+	
+	function _getCollectionPathLabel(collection) {
+		var names = [collection.name];
+		var parentID = collection.parentID;
+		while (parentID) {
+			let parent = Zotero.Collections.get(parentID);
+			names.unshift(parent.name);
+			parentID = parent.parentID;
+		}
+		return names.join(' \u203A ');
+	}
+	
+	
 	this.buildAddItemToCollectionMenu = function (event, items = this.getSelectedItems()) {
 		if (event.target !== event.currentTarget) return;
 		let popup = event.target;
@@ -4873,6 +4893,27 @@ var ZoteroPane = new function () {
 			throw new Error('All items must be the same library');
 		}
 		
+		let containsItems = collection => items.every(item => collection.hasItem(item));
+		
+		// Recently used collections above the full list, skipping any that already contain
+		// all the items so that every slot is a usable target
+		let recent = Zotero.Collections.getRecent(libraryID)
+			.filter(collection => !containsItems(collection))
+			.slice(0, RECENT_COLLECTIONS_SHOWN);
+		if (recent.length) {
+			let menuitems = recent.map((collection) => {
+				let menuitem = document.createXULElement('menuitem');
+				// Full path, since collections in different parts of the tree can share a name
+				menuitem.setAttribute('label', _getCollectionPathLabel(collection));
+				menuitem.setAttribute('image', collection.treeViewImage);
+				menuitem.classList.add('menuitem-iconic');
+				menuitem.addEventListener('command',
+					() => this.addItemsToCollection(items, collection));
+				return menuitem;
+			});
+			popup.append(...menuitems, document.createXULElement('menuseparator'));
+		}
+		
 		let collections = Zotero.Collections.getByLibrary(libraryID);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
@@ -4885,7 +4926,7 @@ var ZoteroPane = new function () {
 						event.stopPropagation();
 					}
 				},
-				collection => items.every(item => collection.hasItem(item))
+				containsItems
 			);
 			popup.append(menuItem);
 		}
@@ -4918,6 +4959,7 @@ var ZoteroPane = new function () {
 			);
 			await collection.addItems(ids);
 		});
+		Zotero.Collections.addToRecent(collection);
 	};
 
 
