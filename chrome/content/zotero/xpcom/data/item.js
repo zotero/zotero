@@ -2876,6 +2876,22 @@ Zotero.Item.prototype.getFile = function () {
 
 
 /**
+ * Check whether a stored file's filename contains a directory path -- a forward slash (never
+ * valid in a filename) or a Windows absolute path (drive-letter or UNC prefix). Bare
+ * backslashes are technically valid on Linux/macOS and present in existing filenames (e.g.,
+ * LaTeX in titles), so they're allowed here.
+ *
+ * @param {String} filename
+ * @return {Boolean}
+ */
+function filenameContainsPath(filename) {
+	return filename.includes('/')
+		|| /^[a-zA-Z]:[\\/]/.test(filename)
+		|| filename.startsWith('\\\\');
+}
+
+
+/**
  * Get the absolute file path for the attachment
  *
  * @return {string|false} - The absolute file path of the attachment, or false for invalid paths
@@ -2913,6 +2929,13 @@ Zotero.Item.prototype.getFilePath = function () {
 		}
 		// Strip "storage:"
 		path = path.substr(8);
+		
+		// A stored file's path is just a filename, so a directory path means it's invalid
+		if (filenameContainsPath(path)) {
+			Zotero.logError("Invalid stored-file attachment filename '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
+		}
 		
 		// Ignore .zotero* files that were relinked before we started blocking them
 		if (path.startsWith(".zotero")) {
@@ -3007,6 +3030,13 @@ Zotero.Item.prototype.getFilePathAsync = async function () {
 		
 		// Strip "storage:"
 		path = path.substr(8);
+		
+		// A stored file's path is just a filename, so a directory path means it's invalid
+		if (filenameContainsPath(path)) {
+			Zotero.logError("Invalid stored-file attachment filename '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
+		}
 		
 		// Ignore .zotero* files that were relinked before we started blocking them
 		if (path.startsWith(".zotero")) {
@@ -3671,15 +3701,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				}
 				val = 'storage:' + PathUtils.filename(val);
 			}
-			// A leaked directory path -- a forward slash (never valid in a filename) or
-			// a Windows absolute path (drive-letter or UNC prefix). Bare backslashes
-			// are technically valid on Linux/macOS and present in existing filenames
-			// (e.g., LaTeX in titles), so allow here for now to avoid breaking things,
-			// but getValidFileName() should be used elsewhere to strip them.
-			let filename = val.substr(8);
-			if (filename.includes('/')
-					|| /^[a-zA-Z]:[\\/]/.test(filename)
-					|| filename.startsWith('\\\\')) {
+			// getValidFileName() should be used elsewhere to strip backslashes
+			if (filenameContainsPath(val.substr(8))) {
 				throw new Error(`Stored-file filename cannot contain a directory path -- got '${val}'`);
 			}
 		}

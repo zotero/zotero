@@ -1067,6 +1067,30 @@ describe("Zotero.Item", function () {
 				attachment.getFilePath()
 			);
 		});
+		
+		it("should return false for a stored file with a directory path instead of a filename", async function () {
+			var item = await importTextAttachment();
+			// Corrupt paths from a third-party tool that bypassed the setter
+			for (let path of ["storage:/", "storage:D:\\foo\\bar\\", "storage:foo/bar.pdf"]) {
+				item._attachmentPath = path;
+				assert.isFalse(item.getFilePath(), path);
+				assert.isFalse(await item.getFilePathAsync(), path);
+			}
+		});
+		
+		it("should return a path for a stored file with a backslash in the filename", async function () {
+			// Backslashes are only valid in filenames on Linux/macOS
+			if (Zotero.isWin) this.skip();
+			
+			var item = await importTextAttachment();
+			var storageDir = Zotero.getStorageDirectory().path;
+			item._attachmentPath = "storage:foo\\bar.txt";
+			
+			assert.equal(
+				item.getFilePath(),
+				OS.Path.join(storageDir, item.key, "foo\\bar.txt")
+			);
+		});
 	});
 	
 	

@@ -31,6 +31,47 @@ describe("Zotero.Sync.Storage.Local", function () {
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
 		});
 		
+		it("should keep checking files after an error on one attachment", async function () {
+			var item1 = await importTextAttachment();
+			var item2 = await importTextAttachment();
+			var hash = await item2.attachmentHash;
+			// Set file mtime to the past (without milliseconds, which aren't used on OS X)
+			var mtime = (Math.floor(new Date().getTime() / 1000) * 1000) - 1000;
+			await OS.File.setDates(((await item2.getFilePathAsync())), null, mtime);
+			
+			// Mark as synced, so they will be checked
+			item1.attachmentSyncState = "in_sync";
+			await item1.saveTx({ skipAll: true });
+			item2.attachmentSyncedModificationTime = mtime;
+			item2.attachmentSyncedHash = hash;
+			item2.attachmentSyncState = "in_sync";
+			await item2.saveTx({ skipAll: true });
+			
+			// Update mtime and contents of the second file
+			var path = await item2.getFilePathAsync();
+			await OS.File.setDates(path);
+			await Zotero.File.putContentsAsync(path, Zotero.Utilities.randomString());
+			
+			var local = Zotero.Sync.Storage.Local;
+			var stub = sinon.stub(local, '_checkForUpdatedFile');
+			stub.withArgs(sinon.match(item => item.id == item1.id)).throws(new Error("Test error"));
+			stub.callThrough();
+			
+			var libraryID = Zotero.Libraries.userLibraryID;
+			try {
+				var changed = await local.checkForUpdatedFiles(libraryID, [item1.id, item2.id]);
+			}
+			finally {
+				stub.restore();
+			}
+			
+			await item1.eraseTx();
+			await item2.eraseTx();
+			
+			assert.isTrue(changed);
+			assert.equal(item2.attachmentSyncState, local.SYNC_STATE_TO_UPLOAD);
+		});
+		
 		it("should skip a file if mod time hasn't changed", async function () {
 			// Create attachment
 			let item = await importTextAttachment();
