@@ -114,7 +114,11 @@
 					// If there's text in the field, seed the Advanced Search with it,
 					// reproducing the current quick search mode as editable conditions.
 					let mode = Zotero.Prefs.get('search.quicksearch-mode');
-					if (this.value) {
+					// Shift-click opens the Advanced Search in a new window
+					if (event.shiftKey) {
+						ZoteroPane.openAdvancedSearchInNewWindow(this.value, mode);
+					}
+					else if (this.value) {
 						ZoteroPane.openAdvancedSearchFromQuickSearch(this.value, mode);
 					}
 					else {
