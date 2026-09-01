@@ -119,6 +119,7 @@ reader-spread-mode = Spreads
 reader-flow-mode = Page Layout
 reader-columns = Columns
 reader-split-view = Split View
+reader-citation-and-link-previews = Citation and Link Previews
 reader-themes = Themes
 reader-vertical = Vertical
 reader-horizontal = Horizontal

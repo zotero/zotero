@@ -200,6 +200,46 @@ describe("Reader", function () {
 			reader.close();
 		});
 
+		it('should persist the Citation and Link Previews switch', async function () {
+			let originalValue = Zotero.Prefs.get('reader.citationAndLinkPreviews');
+			let reader;
+			try {
+				Zotero.Prefs.set('reader.citationAndLinkPreviews', false);
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.itemID);
+				await reader._initPromise;
+
+				reader._internalReader.toggleAppearancePopup(true);
+				let input = await waitForCallback(
+					() => reader._iframeWindow.document.getElementById('citation-and-link-previews-enabled'),
+					50,
+					5
+				);
+				assert.isFalse(input.checked);
+
+				input.click();
+				await waitForCallback(
+					() => Zotero.Prefs.get('reader.citationAndLinkPreviews') === true,
+					50,
+					5
+				);
+				assert.isTrue(reader._internalReader._state.citationAndLinkPreviewsEnabled);
+
+				Zotero.Prefs.set('reader.citationAndLinkPreviews', false);
+				await waitForCallback(
+					() => reader._internalReader._state.citationAndLinkPreviewsEnabled === false && !input.checked,
+					50,
+					5
+				);
+				assert.isFalse(reader._internalReader._state.citationAndLinkPreviewsEnabled);
+				assert.isFalse(input.checked);
+			}
+			finally {
+				Zotero.Prefs.set('reader.citationAndLinkPreviews', originalValue);
+				await cleanupReaders(reader);
+			}
+		});
+
 		async function cleanupReaders(...readers) {
 			for (let reader of readers.filter(Boolean)) {
 				reader.close();

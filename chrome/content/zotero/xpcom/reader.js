@@ -254,6 +254,7 @@ class ReaderInstance {
 			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
+			citationAndLinkPreviews: Zotero.Prefs.get('reader.citationAndLinkPreviews'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			hyphenate: Zotero.Prefs.get('reader.ebookHyphenate'),
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
@@ -627,6 +628,9 @@ class ReaderInstance {
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
 			},
+			onSetCitationAndLinkPreviews: (enabled) => {
+				Zotero.Prefs.set('reader.citationAndLinkPreviews', enabled);
+			},
 			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
 			onSetReadAloudEnabledVoices: this._setReadAloudEnabledVoices.bind(this),
 			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
@@ -661,6 +665,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.textSelectionAnnotationMode', this._handleTextSelectionAnnotationModeChange),
 			Zotero.Prefs.registerObserver('reader.lightTheme', this._handleLightThemeChange),
 			Zotero.Prefs.registerObserver('reader.darkTheme', this._handleDarkThemeChange),
+			Zotero.Prefs.registerObserver('reader.citationAndLinkPreviews', this._handleCitationAndLinkPreviewsChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
@@ -1217,6 +1222,12 @@ class ReaderInstance {
 
 	_handleDarkThemeChange = () => {
 		this._internalReader.setDarkTheme(Zotero.Prefs.get('reader.darkTheme'));
+	};
+
+	_handleCitationAndLinkPreviewsChange = () => {
+		this._internalReader.setCitationAndLinkPreviews(
+			Zotero.Prefs.get('reader.citationAndLinkPreviews')
+		);
 	};
 
 	_handleEbookPrefChange = () => {
