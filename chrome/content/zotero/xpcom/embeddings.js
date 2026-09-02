@@ -606,6 +606,8 @@ Zotero.Embeddings = new function () {
 	let _engineReady = null;
 	// Model identity the current engine was created for
 	let _engineModelVersion = null;
+	// Thread count the current engine was created with
+	let _engineNumThreads = null;
 	// Bumped on every engine shutdown (e.g. a model switch), so long-running
 	// consumers can detect that the model changed under them and discard
 	// their results
@@ -661,8 +663,10 @@ Zotero.Embeddings = new function () {
 			let modelVersion = Zotero.Embeddings.getModelVersion();
 			_engineReady = (async () => {
 				let model = _getModel();
+				let numThreads = Zotero.Embeddings.Indexing.getEngineThreads();
 				Zotero.debug(`Embeddings: creating engine for '${model.modelId}' `
-					+ `(dtype ${model.dtype}, pooling ${model.pooling})`);
+					+ `(dtype ${model.dtype}, pooling ${model.pooling}, `
+					+ `${numThreads} threads)`);
 				_engine = await Zotero.ML.createEngine({
 					engineId: ENGINE_ID,
 					taskName: TASK_NAME,
@@ -672,12 +676,10 @@ Zotero.Embeddings = new function () {
 					modelHubRootUrl: MODEL_HUB_ROOT_URL,
 					modelHubUrlTemplate: MODEL_HUB_URL_TEMPLATE,
 					dtype: model.dtype,
-					// Half the cores: a first index runs for hours in the
-					// background, so trade wall time for heat and leave the
-					// rest of the machine to the user
-					numThreads: Math.max(1, Math.floor(Zotero.ML.getOptimalConcurrency() / 2))
+					numThreads
 				}, onProgress);
 				_engineModelVersion = modelVersion;
+				_engineNumThreads = numThreads;
 				Zotero.debug('Embeddings: engine ready');
 			})();
 		}
@@ -714,6 +716,7 @@ Zotero.Embeddings = new function () {
 		_engine = null;
 		_engineReady = null;
 		_engineModelVersion = null;
+		_engineNumThreads = null;
 		// Only a model change makes vectors computed by the old engine
 		// unusable, so a shutdown to release memory leaves scoring alone
 		if (modelChanged) {
@@ -726,6 +729,16 @@ Zotero.Embeddings = new function () {
 			await engine.terminate();
 			await Zotero.ML.shutdown();
 		}
+	};
+
+	/**
+	 * Whether the live engine was created with a different thread count than
+	 * indexing currently wants (see Indexing.getEngineThreads())
+	 *
+	 * @return {Boolean}
+	 */
+	this.engineThreadsStale = function () {
+		return !!_engine && _engineNumThreads !== this.Indexing.getEngineThreads();
 	};
 
 	//
@@ -1922,6 +1935,46 @@ Zotero.Embeddings.Indexing = new function () {
 	Services.obs.addObserver(_memoryPressureObserver, 'memory-pressure');
 	Services.obs.addObserver(_memoryPressureObserver, 'memory-pressure-stop');
 
+	// Reasons the engine may run at full thread count right now. Sources
+	// ('prefs-open', 'user-idle') add and remove themselves independently.
+	let _threadBoosts = new Set();
+
+	/**
+	 * Add or remove a reason to run the engine at full thread count. Applied
+	 * at the next engine creation; an indexing run restarts its engine
+	 * between batches when the count changed (see engineThreadsStale()).
+	 *
+	 * @param {String} reason
+	 * @param {Boolean} enabled
+	 */
+	this.setThreadBoost = function (reason, enabled) {
+		let before = !!_threadBoosts.size;
+		if (enabled) {
+			_threadBoosts.add(reason);
+		}
+		else {
+			_threadBoosts.delete(reason);
+		}
+		if (before !== !!_threadBoosts.size) {
+			Zotero.debug('Embeddings: engine threads '
+				+ (enabled ? `boosted (${[..._threadBoosts].join(', ')})` : 'restored'));
+		}
+	};
+
+	/**
+	 * Thread count for the inference engine: the runtime's optimum while
+	 * boosted -- the user is watching indexing progress or is away -- and
+	 * half of it otherwise, trading wall time for heat during a long
+	 * background index.
+	 *
+	 * @return {Number}
+	 */
+	this.getEngineThreads = function () {
+		let optimal = Zotero.ML.getOptimalConcurrency();
+		return _threadBoosts.size ? optimal : Math.max(1, Math.floor(optimal / 2));
+	};
+
+
 	/**
 	 * Whether there's enough memory available to load the model and run
 	 * inference. The runtime's own check is against total system memory, which
@@ -2758,6 +2811,12 @@ Zotero.Embeddings.Indexing = new function () {
 				Zotero.debug(`Embeddings: inference process at ${footprintMB} MB `
 					+ '-- engine restarted to release its memory');
 			}
+			// A thread-boost change applies at the next engine, so restart
+			// between batches, never mid-request
+			else if (Zotero.Embeddings.engineThreadsStale()) {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				Zotero.debug('Embeddings: engine restarted to apply new thread count');
+			}
 			let completed = [];
 			for (let j = 0; j < batch.length; j++) {
 				let { entry, chunkIndex } = batch[j];
@@ -3056,6 +3115,7 @@ Zotero.Embeddings.Indexing = new function () {
 		_stopping = false;
 		_lastError = null;
 		_startProcMonitor();
+		_startIdleWatch();
 		try {
 			await Zotero.Embeddings.initDB();
 			await _ensureIndexMatchesModel();
@@ -3105,6 +3165,7 @@ Zotero.Embeddings.Indexing = new function () {
 			_lastError = e;
 		}
 		finally {
+			_stopIdleWatch();
 			_stopProcMonitor();
 			_indexing = false;
 			_phase = 'idle';
@@ -3149,6 +3210,40 @@ Zotero.Embeddings.Indexing = new function () {
 		Zotero.Prefs.set('embeddings.indexingPaused', true);
 		_emitProgress();
 	};
+
+	// Boost while the user is away from the machine, watched only during a run
+	const IDLE_BOOST_SECONDS = 300;
+	let _idleObserver = {
+		observe: (subject, topic) => {
+			Zotero.Embeddings.Indexing.setThreadBoost('user-idle', topic === 'idle');
+		}
+	};
+	let _watchingIdle = false;
+
+	function _startIdleWatch() {
+		if (_watchingIdle) {
+			return;
+		}
+		_watchingIdle = true;
+		let idleService = Cc["@mozilla.org/widget/useridleservice;1"]
+			.getService(Ci.nsIUserIdleService);
+		idleService.addIdleObserver(_idleObserver, IDLE_BOOST_SECONDS);
+		// Already away when the run starts
+		if (idleService.idleTime >= IDLE_BOOST_SECONDS * 1000) {
+			Zotero.Embeddings.Indexing.setThreadBoost('user-idle', true);
+		}
+	}
+
+	function _stopIdleWatch() {
+		if (!_watchingIdle) {
+			return;
+		}
+		_watchingIdle = false;
+		Cc["@mozilla.org/widget/useridleservice;1"]
+			.getService(Ci.nsIUserIdleService)
+			.removeIdleObserver(_idleObserver, IDLE_BOOST_SECONDS);
+		Zotero.Embeddings.Indexing.setThreadBoost('user-idle', false);
+	}
 };
 
 /**

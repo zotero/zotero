@@ -87,6 +87,8 @@ Zotero_Preferences.Advanced = {
 		// Live progress updates from the background indexer
 		this._semanticSearchListener = status => this.updateSemanticSearchUI(status);
 		Zotero.Embeddings.Indexing.addProgressListener(this._semanticSearchListener);
+		// Full engine threads while the user is watching indexing progress
+		Zotero.Embeddings.Indexing.setThreadBoost('prefs-open', true);
 		let modelPrefObserverID = Zotero.Prefs.registerObserver(
 			'embeddings.model',
 			() => {
@@ -96,6 +98,7 @@ Zotero_Preferences.Advanced = {
 
 		document.getElementById('zotero-prefpane-advanced').addEventListener('unload', () => {
 			Zotero.Embeddings.Indexing.removeProgressListener(this._semanticSearchListener);
+			Zotero.Embeddings.Indexing.setThreadBoost('prefs-open', false);
 			Zotero.Prefs.unregisterObserver(modelPrefObserverID);
 		});
 
