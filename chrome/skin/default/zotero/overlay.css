@@ -17,6 +17,11 @@
 	text-align: left;
 }
 
+/* Single-paragraph status messages stay centered when they wrap */
+.items-tree-message > p:only-child {
+	text-align: center;
+}
+
 .items-tree-message div.publications p {
 	font-size: 1.2em;
 }
