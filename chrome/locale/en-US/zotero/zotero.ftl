@@ -1324,6 +1324,26 @@ undo-action-merge-items = { $count ->
     [one] Merge Item
    *[other] Merge { $count } Items
 }
+undo-action-add-annotation = { $count ->
+    [one] Add Annotation
+   *[other] Add { $count } Annotations
+}
+undo-action-edit-annotation = { $count ->
+    [one] Edit Annotation
+   *[other] Edit { $count } Annotations
+}
+undo-action-delete-annotation = { $count ->
+    [one] Delete Annotation
+   *[other] Delete { $count } Annotations
+}
+undo-action-convert-annotation = { $count ->
+    [one] Convert Annotation
+   *[other] Convert { $count } Annotations
+}
+undo-action-merge-annotations = { $count ->
+    [one] Merge Annotation
+   *[other] Merge { $count } Annotations
+}
 menu-edit-undo-action = Undo { $action }
 menu-edit-redo-action = Redo { $action }
 
