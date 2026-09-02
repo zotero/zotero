@@ -50,6 +50,25 @@ const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.m
 
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 
+/**
+ * Message for a failed items list load, naming the plugin responsible if the error came
+ * from plugin code
+ *
+ * @param {Error} e
+ * @return {Promise<String>}
+ */
+async function getLoadErrorMessage(e) {
+	let plugin = await Zotero.Plugins.getPluginFromError(e);
+	if (!plugin) {
+		return Zotero.getString('pane.items.loadError');
+	}
+	Zotero.warn(`Items list failed to load in a call from plugin ${plugin.name} (${plugin.id})`);
+	return Zotero.ftl.formatValueSync('items-list-load-error-plugin', {
+		// The message is rendered as HTML
+		plugin: Zotero.Utilities.htmlSpecialChars(plugin.name)
+	});
+}
+
 // Minimal CollectionTreeRow-like object for callers that pass plain objects to
 // changeCollectionTreeRow()/setCollectionTreeRow() (e.g. advanced search).
 const STUB_COLLECTION_TREE_ROW = {
@@ -628,7 +647,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			await Zotero.Promise.delay();
 			this.runListeners('update', true, {
-				message: Zotero.getString('pane.items.loadError')
+				message: await getLoadErrorMessage(e)
 			});
 			throw e;
 		}
