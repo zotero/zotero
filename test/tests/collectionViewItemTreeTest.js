@@ -1989,6 +1989,20 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(itemsView.getRow(searchRowIndex).type, 'search');
 			});
 
+			it("shouldn't show a value in Added By/Modified By for trashed collections and searches", async function () {
+				let collection = await createDataObject('collection', { deleted: true });
+				let search = await createDataObject('search', { deleted: true });
+
+				await selectTrash(win);
+
+				for (let obj of [collection, search]) {
+					let row = itemsView.getRowIndexByID(obj.treeViewID);
+					assert.isNumber(row);
+					assert.strictEqual(itemsView.getCellText(row, 'addedBy'), "");
+					assert.strictEqual(itemsView.getCellText(row, 'lastModifiedBy'), "");
+				}
+			});
+
 			it("shouldn't show trashed collections or searches when an advanced search is active", async function () {
 				let item = await createDataObject('item', { title: "advancedTrashMatch", deleted: true });
 				let collection = await createDataObject('collection', { name: "advancedTrashMatch", deleted: true });

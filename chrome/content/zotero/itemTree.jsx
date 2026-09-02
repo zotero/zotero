@@ -2403,8 +2403,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.lastRead = row.isItem ? treeRow.ref.getItemLastRead() : "";
-		row.addedBy = row.isItem && treeRow.getAddedBy();
-		row.lastModifiedBy = row.isItem && treeRow.getLastModifiedBy();
+		row.addedBy = row.isItem ? treeRow.getAddedBy() : "";
+		row.lastModifiedBy = row.isItem ? treeRow.getLastModifiedBy() : "";
 		row.title = treeRow.getDisplayTitle();
 		
 		const columns = this.getColumns();
