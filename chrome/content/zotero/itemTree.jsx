@@ -32,15 +32,14 @@ const VirtualizedTable = require('components/virtualized-table');
 const { VirtualizedTree, formatColumnName } = VirtualizedTable;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { ItemTreeRow } = require('zotero/itemTreeRow');
-const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
+const { TreePrefs } = ChromeUtils.importESModule('chrome://zotero/content/modules/treePrefs.mjs');
 
 /**
  * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
 
 const CHILD_INDENT = 16;
-const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 
 // Migrate unsuffixed `<id>` keys back to `<id>-default`. Earlier 10.0 betas dropped the `-default`
 // suffix from main-library tree IDs, stranding 9.0.x prefs and breaking version switching.
@@ -48,16 +47,7 @@ const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json")
 let _treePrefsMigrationPromise = null;
 function _migrateTreePrefsFile() {
 	if (!_treePrefsMigrationPromise) {
-		_treePrefsMigrationPromise = (async () => {
-			let persistSettings;
-			try {
-				let contents = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
-				persistSettings = JSON.parse(contents);
-			}
-			catch {
-				return;
-			}
-			if (!persistSettings || typeof persistSettings !== 'object') return;
+		_treePrefsMigrationPromise = TreePrefs._updateSettings((persistSettings) => {
 			let knownSuffixes = [
 				'-default',
 				...Object.values(Zotero.CollectionTreeRow.visibilityGroups).map(g => '-' + g),
@@ -75,12 +65,8 @@ function _migrateTreePrefsFile() {
 				delete persistSettings[key];
 				changed = true;
 			}
-			if (changed) {
-				await Zotero.File.putContentsAsync(
-					COLUMN_PREFS_FILEPATH, JSON.stringify(persistSettings)
-				);
-			}
-		})();
+			return changed;
+		});
 	}
 	return _treePrefsMigrationPromise;
 }
@@ -1146,7 +1132,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.Prefs.unregisterObserver(id);
 		}
 		this.clearEventListeners();
-		this._writeColumnPrefsToFile(true);
+		// A pending timeout means unsaved column pref changes
+		if (this._writeColumnsTimeout) {
+			this._writeColumnPrefsToFile(true);
+		}
 	}
 
 	componentDidMount() {
@@ -2498,14 +2487,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_loadColumnPrefsFromFile = async () => {
 		if (!this.props.columnPicker) return;
 		await _migrateTreePrefsFile();
-		try {
-			let columnPrefs = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
-			let persistSettings = JSON.parse(columnPrefs);
-			this._columnPrefs = persistSettings[this.id] || {};
-		}
-		catch (e) {
-			this._columnPrefs = {};
-		}
+		this._columnPrefs = await TreePrefs.get(this.id);
 	}
 
 	/**
@@ -2518,22 +2500,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.props.columnPicker) return;
 		await _migrateTreePrefsFile();
 		var writeToFile = async () => {
-			try {
-				let persistSettingsString = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
-				var persistSettings = JSON.parse(persistSettingsString);
-			}
-			catch {
-				persistSettings = {};
-			}
-			persistSettings[this.id] = this._columnPrefs;
-
-			let prefString = JSON.stringify(persistSettings);
-			Zotero.debug(`Writing column prefs of length ${prefString.length} to file ${COLUMN_PREFS_FILEPATH}`);
-
-			return Zotero.File.putContentsAsync(COLUMN_PREFS_FILEPATH, prefString);
+			this._writeColumnsTimeout = null;
+			Zotero.debug(`Writing column prefs of tree ${this.id}`);
+			return TreePrefs.set(this.id, this._columnPrefs);
 		};
 		if (this._writeColumnsTimeout) {
 			clearTimeout(this._writeColumnsTimeout);
+			this._writeColumnsTimeout = null;
 		}
 		if (force) {
 			return writeToFile();
