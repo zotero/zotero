@@ -977,6 +977,14 @@ os-keystore-save-failed =
         [windows] { -app-name } は認証情報を安全に保存できませんでした。もう一度試すか、{ -app-name } を再起動してください。
        *[other] { -app-name } は認証情報を安全に保存するために { -os-name } キーリングにアクセスできませんでした。キーリングサービスが実行されていることを確認して、もう一度試してください。
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } は保存された認証情報を暗号化するために { -os-name } キーチェーンにアクセスできませんでした。認証情報はディスク上に暗号化されずに保存されたままです。キーチェーンにアクセスできることを確認して、{ -app-name } を再起動してください。

@@ -55,9 +55,9 @@ integration-citationDialog-lib-message-annotations =
        *[other] Kein Eintrag mit Anmerkungen ausgewählt oder geöffnet
     }
 integration-citationDialog-settings-keepSorted = Quellen sortiert lassen
-integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-preview-error = Vorschau nicht verfügbar
 integration-citationDialog-btn-displayPreview =
-    .title = Display citation preview
+    .title = Zitationsvorschau anzeigen
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliothek
@@ -80,7 +80,7 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Drücken Sie die Tabulatortaste, um Elemente auszuwählen, die Sie zu diesem Zitat hinzufügen möchten. Drücken Sie die Escape-Taste, um die Änderungen zu verwerfen und das Dialogfeld zu schließen.
-integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-placeholder = „10-15“ eintippen, um Seiten zu zitieren, oder weitere Einträge suchen
 integration-citationDialog-just-added-input-citation =
     .placeholder = { $placeholder }
     .title = { $title }

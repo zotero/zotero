@@ -1036,6 +1036,14 @@ os-keystore-save-failed =
         [windows] { -app-name } no ha podido guardar sus credenciales de forma segura. Inténtelo de nuevo o reinicia { -app-name }.
        *[other] { -app-name } no ha podido acceder a su llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el servicio de llavero esté en ejecución e inténtelo de nuevo.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } no ha podido acceder al llavero de { -os-name } para cifrar tus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que se pueda acceder al llavero y reinicia { -app-name }.

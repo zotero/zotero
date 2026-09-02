@@ -981,6 +981,14 @@ os-keystore-save-failed =
         [windows] { -app-name } 无法安全保存您的凭据。请重试或重启 { -app-name }。
        *[other] { -app-name } 无法访问您的 { -os-name } 密钥环来安全保存您的凭据。请确保密钥环服务正在运行，然后重试。
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } 无法访问 { -os-name } 钥匙串来加密您存储的凭据。您的凭据仍以未加密形式存储在磁盘上。请确保您的钥匙串可访问，然后重启 { -app-name }。
