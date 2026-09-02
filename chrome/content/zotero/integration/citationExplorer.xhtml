@@ -25,76 +25,78 @@
     ***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
-<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <xul:window
 	id="zotero-citation-explorer-dialog"
+	class="zotero-dialog-window"
 	orient="vertical"
-	title="Citation Explorer"
-	width="750" height="450"
+	data-l10n-id="integration-citationExplorer-window"
+	width="800" height="600"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
 	resizable="true">
+
+<!-- do not wait for itemTree to add the menubar, otherwise it does not appear on the first dialog open -->
+<xul:item-tree-menu-bar/>
+
 <xul:dialog
 	buttons="accept" buttonpack="end">
 
+	<linkset>
+		<link rel="localization" href="browser/menubar.ftl"/>
+		<link rel="localization" href="browser/browserSets.ftl"/>
+		<link rel="localization" href="zotero.ftl"/>
+		<link rel="localization" href="reader.ftl"/>
+		<link rel="localization" href="integration.ftl"/>
+	</linkset>
+	
 	<script>
-		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/citationExplorer.js", this);
 
 	</script>
-	<div class="vbox flex xul-border-div">
-		<div class="hbox flex">
-			<div class="vbox flex">
-				<div id="citations-label">Citations</div>
-				<div class="vbox flex panel" style="border-right: none">
-					<xul:search-textbox id="citation-search" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
-					<div id="citation-list-container" class="virtualized-table-container">
-						<div id="citation-list"></div>
-					</div>
-					<div class="hbox button-container">
-						<input type="button" id="button-show-in-document" value="Show in Document"/>
-						<input type="button" id="button-edit-citation" value="Edit Citation"/>
-					</div>
-				</div>
-			</div>
-			<div class="splitter"></div>
-			<div class="vbox flex">
-				<xul:tabbox onselect="ZoteroDocumentCitations.onSelectTab(this.selectedIndex)">
-					<xul:tabs>
-						<xul:tab id="tab-cited-items" label="Cited Items"/>
-						<xul:tab id="tab-uncited-items" label="Uncited Items"/>
-					</xul:tabs>
-					<!--We are making our own tabpanel UI, but the onselect event above won't fire without these-->
-					<xul:tabpanels hidden="true"><xul:tabpanel/><xul:tabpanel/></xul:tabpanels>
-				</xul:tabbox>
-				<div id="items-panel" class="vbox flex panel">
-					<xul:search-textbox id="item-search" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
-					<div id="item-list-container" class="virtualized-table-container">
-						<div id="item-list"></div>
-					</div>
-					<div class="hbox button-container">
-						<input type="button" id="button-show-in-zotero" value="Show in Zotero"/>
-						<input type="button" id="button-relink-item" value="Relink Item" hidden="true"/>
-						<button is="split-menu-button" id="button-addTo-library"
-									 onclick="ZoteroDocumentCitations.addToLibraryAndLink()"
-									 popup="item-addTo-menu" style="display: none"/>
-						<xul:popupset>
-							<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroDocumentCitations.buildAddToLibraryContextMenu(event);"/>
-						</xul:popupset>
-					</div>
-				</div>
-			</div>
+	
+	<div class="citation-explorer-grid">
+	
+		<!-- Left Column -->
+		<div class="citation-explorer-grid-left grid-padded-section" id="citations-label" data-l10n-id="integration-citationExplorer-citations"></div>
+
+		<div class="searchbox-container citation-explorer-grid-left grid-padded-section">
+			<xul:search-textbox id="citation-search" data-l10n-id="integration-citationExplorer-citation-search" data-l10n-attrs="placeholder" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onCitationFilter()" dir="reverse"/>
+		</div>
+	
+		<div class="virtualized-table-container citation-explorer-grid-left">
+			<div id="citation-list-container"></div>
+		</div>
+
+		<div class="button-container citation-explorer-grid-left grid-padded-section">
+			<input type="button" id="button-show-in-document" data-l10n-id="integration-citationExplorer-show-in-document" disabled="true"/>
+			<input type="button" id="button-edit-citation" class="right" data-l10n-id="integration-citationExplorer-edit-citation" disabled="true"/>
+		</div>
+
+		<!-- Right Column -->
+		<div class="grid-padded-section" id="items-in-bibliography-label" data-l10n-id="integration-citationExplorer-items-in-bibliography"></div>
+
+		<div class="searchbox-container grid-padded-section">
+			<xul:search-textbox id="item-search" data-l10n-id="integration-citationExplorer-item-search" data-l10n-attrs="placeholder" class="search-box" timeout="250" oncommand="ZoteroCitationExplorer.onItemFilter()" dir="reverse"/>
+		</div>
+		
+		<div class="virtualized-table-container">
+			<div id="zotero-items-tree" class="citation-explorer-item-tree"></div>
+		</div>
+
+		<div class="button-container grid-padded-section">
+			<input type="button" id="button-show-in-zotero" data-l10n-id="integration-citationExplorer-show-in-zotero" disabled="true"/>
+			<input type="button" id="button-manage-items" class="right" data-l10n-id="integration-citationExplorer-manage-items"/>
 		</div>
 	</div>
 </xul:dialog>
