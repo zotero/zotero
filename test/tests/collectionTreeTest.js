@@ -2173,4 +2173,31 @@ describe("Zotero.CollectionTree", function () {
 			invalidateSpy.restore();
 		});
 	})
+
+	describe("removed single-selection methods", function () {
+		it("should return the selected row when focus is on a different row", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			var index1 = cv.getRowIndexByID(collection1.treeViewID);
+			var index2 = cv.getRowIndexByID(collection2.treeViewID);
+			
+			cv.selection.select(index1);
+			// Ctrl/Cmd-arrow moves focus without changing the selection
+			cv.selection.focused = index2;
+			
+			assert.equal(cv.getSelectedCollection(), collection1);
+			assert.equal(zp.getSelectedCollection(), collection1);
+			assert.equal(zp.getCollectionTreeRow().ref, collection1);
+		});
+		
+		it("should throw when multiple rows are selected", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			cv.selection.select(cv.getRowIndexByID(collection1.treeViewID));
+			cv.selection.toggleSelect(cv.getRowIndexByID(collection2.treeViewID));
+			
+			assert.throws(() => cv.getSelectedCollection());
+			assert.throws(() => zp.getSelectedLibraryID());
+		});
+	});
 })

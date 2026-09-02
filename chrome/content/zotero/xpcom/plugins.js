@@ -379,6 +379,35 @@ Zotero.Plugins = new function () {
 	};
 
 
+	var warnedRemovedAPICalls = new Set();
+
+	/**
+	 * Warn about a call to an API that was removed, naming the plugin that called it
+	 *
+	 * Resolving the plugin is async, so the warning is logged after this returns.
+	 *
+	 * @param {String} name - The removed API, e.g. "CollectionTree#getSelectedSearch()"
+	 * @param {String} replacement - What to use instead, e.g. "getSelectedSearches()"
+	 */
+	this.warnRemovedAPICall = function (name, replacement) {
+		let stack = new Error().stack;
+		// Warn once per call site, since a plugin may call these repeatedly (e.g., on every
+		// item list load). The frames above the caller are this method and the removed
+		// method itself, which are the same for every caller.
+		let callerFrame = stack.split("\n").find(line => !_isZoteroStackFrame(line));
+		let key = name + "\n" + (callerFrame || "");
+		if (warnedRemovedAPICalls.has(key)) {
+			return;
+		}
+		warnedRemovedAPICalls.add(key);
+		this.getPluginFromError(stack)
+			.then((plugin) => {
+				let caller = plugin ? `${plugin.name} (${plugin.id})` : "Something";
+				Zotero.warn(`${caller} called ${name}, which was removed -- use ${replacement}`);
+			})
+			.catch(e => Zotero.logError(e));
+	};
+
 
 	/**
 	 * Resolve a chrome:// or resource:// URI to the file or JAR URI it points at, since
@@ -422,6 +451,21 @@ Zotero.Plugins = new function () {
 			return pos == -1 ? uri.substring(4) : uri.substring(4, pos);
 		}
 		return uri;
+	}
+
+
+	/**
+	 * @param {String} line - A line from an error stack
+	 * @return {Boolean} - True if the frame is Zotero's own code
+	 */
+	function _isZoteroStackFrame(line) {
+		let uri = _stackFrameURI(line);
+		// Trailing slashes matter: a plugin package can start with our own name, as
+		// chrome://zoterostyle/ does
+		return !uri
+			|| uri.startsWith("chrome://zotero/")
+			|| uri.startsWith("resource://zotero/")
+			|| uri.startsWith("resource://gre/");
 	}
 
 

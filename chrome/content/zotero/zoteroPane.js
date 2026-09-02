@@ -2215,8 +2215,12 @@ var ZoteroPane = new function () {
 	
 	
 	this.getCollectionTreeRow = function () {
-		throw new Error("ZoteroPane.getCollectionTreeRow() was removed "
-			+ "-- use ZoteroPane.getCollectionTreeRows()");
+		if (!this.collectionsView) {
+			return false;
+		}
+		this.collectionsView._requireSingleSelection("ZoteroPane.getCollectionTreeRow()",
+			"ZoteroPane.getCollectionTreeRows()");
+		return this.getCollectionTreeRows()[0] || false;
 	}
 	
 	
@@ -3517,8 +3521,10 @@ var ZoteroPane = new function () {
 	};
 	
 	this.getSelectedLibraryID = function () {
-		throw new Error("ZoteroPane.getSelectedLibraryID() was removed "
-			+ "-- use ZoteroPane.getSelectedLibraryIDs()");
+		this.collectionsView._requireSingleSelection("ZoteroPane.getSelectedLibraryID()",
+			"ZoteroPane.getSelectedLibraryIDs()");
+		var libraryIDs = this.getSelectedLibraryIDs();
+		return libraryIDs.length ? libraryIDs[0] : false;
 	}
 
 
@@ -3533,9 +3539,10 @@ var ZoteroPane = new function () {
 	}
 
 
-	this.getSelectedCollection = function () {
-		throw new Error("ZoteroPane.getSelectedCollection() was removed "
-			+ "-- use ZoteroPane.getSelectedCollections()");
+	this.getSelectedCollection = function (asID) {
+		this.collectionsView._requireSingleSelection("ZoteroPane.getSelectedCollection()",
+			"ZoteroPane.getSelectedCollections()");
+		return this.getSelectedCollections(asID)[0];
 	}
 
 
@@ -3544,9 +3551,11 @@ var ZoteroPane = new function () {
 	}
 
 
-	function getSelectedSavedSearch() {
-		throw new Error("ZoteroPane.getSelectedSavedSearch() was removed "
-			+ "-- use ZoteroPane.getSelectedSavedSearches()");
+	function getSelectedSavedSearch(asID) {
+		this.collectionsView._requireSingleSelection("ZoteroPane.getSelectedSavedSearch()",
+			"ZoteroPane.getSelectedSavedSearches()");
+		var searches = this.getSelectedSavedSearches(asID);
+		return searches.length ? searches[0] : false;
 	}
 
 
@@ -3555,9 +3564,14 @@ var ZoteroPane = new function () {
 	}
 
 
-	this.getSelectedGroup = function () {
-		throw new Error("ZoteroPane.getSelectedGroup() was removed -- filter "
-			+ "ZoteroPane.getCollectionTreeRows() by isGroup()");
+	this.getSelectedGroup = function (asID) {
+		this.collectionsView._requireSingleSelection("ZoteroPane.getSelectedGroup()",
+			"ZoteroPane.getCollectionTreeRows() filtered by isGroup()");
+		var group = this.getCollectionTreeRows().find(row => row.isGroup());
+		if (group) {
+			return asID ? group.ref.id : group.ref;
+		}
+		return false;
 	}
 	
 	
@@ -4161,7 +4175,12 @@ var ZoteroPane = new function () {
 			{
 				getContext: () => ({
 					get collectionTreeRow() {
-						throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+						if (collectionTreeRows.length > 1) {
+							throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+						}
+						Zotero.Plugins.warnRemovedAPICall("Menu context collectionTreeRow",
+							"collectionTreeRows");
+						return collectionTreeRows[0];
 					},
 					collectionTreeRows,
 					tabType: "library",
@@ -4707,7 +4726,12 @@ var ZoteroPane = new function () {
 			{
 				getContext: () => ({
 					get collectionTreeRow() {
-						throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+						if (collectionTreeRows.length > 1) {
+							throw new Error("collectionTreeRow was removed -- use collectionTreeRows");
+						}
+						Zotero.Plugins.warnRemovedAPICall("Menu context collectionTreeRow",
+							"collectionTreeRows");
+						return collectionTreeRows[0];
 					},
 					collectionTreeRows,
 					items,

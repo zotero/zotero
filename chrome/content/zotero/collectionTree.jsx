@@ -1407,9 +1407,28 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return this.getRow(index).getName();
 	}
 	
+	/**
+	 * Throw for a plugin calling one of the removed single-selection methods while multiple
+	 * rows are selected, where the items list can span collections or libraries and acting
+	 * on one row's value isn't safe
+	 *
+	 * Also used by the ZoteroPane methods that wrap these, which pass their own names.
+	 *
+	 * @param {String} name
+	 * @param {String} replacement
+	 */
+	_requireSingleSelection(name, replacement) {
+		if (this.selection.count > 1) {
+			throw new Error(`${name} was removed -- use ${replacement}`);
+		}
+		Zotero.Plugins.warnRemovedAPICall(name, replacement);
+	}
+
 	getSelectedLibraryID() {
-		throw new Error("CollectionTree#getSelectedLibraryID() was removed "
-			+ "-- use getSelectedLibraryIDs()");
+		this._requireSingleSelection("CollectionTree#getSelectedLibraryID()",
+			"getSelectedLibraryIDs()");
+		var libraryIDs = this.getSelectedLibraryIDs();
+		return libraryIDs.length ? libraryIDs[0] : false;
 	}
 
 	/**
@@ -1429,9 +1448,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return libraryIDs;
 	}
 
-	getSelectedCollection() {
-		throw new Error("CollectionTree#getSelectedCollection() was removed "
-			+ "-- use getSelectedCollections()");
+	getSelectedCollection(asID) {
+		this._requireSingleSelection("CollectionTree#getSelectedCollection()",
+			"getSelectedCollections()");
+		return this.getSelectedCollections(asID)[0];
 	}
 
 	getSelectedCollections(asID) {
@@ -1445,9 +1465,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return collections;
 	}
 	
-	getSelectedSearch() {
-		throw new Error("CollectionTree#getSelectedSearch() was removed "
-			+ "-- use getSelectedSearches()");
+	getSelectedSearch(asID) {
+		this._requireSingleSelection("CollectionTree#getSelectedSearch()",
+			"getSelectedSearches()");
+		var searches = this.getSelectedSearches(asID);
+		return searches.length ? searches[0] : false;
 	}
 
 	getSelectedSearches(asID) {
@@ -1461,9 +1483,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return searches;
 	}
 	
-	getSelectedGroup() {
-		throw new Error("CollectionTree#getSelectedGroup() was removed "
-			+ "-- filter getSelectedRows() by isGroup()");
+	getSelectedGroup(asID) {
+		this._requireSingleSelection("CollectionTree#getSelectedGroup()",
+			"getSelectedRows() filtered by isGroup()");
+		var group = this.getSelectedRows().find(row => row.isGroup());
+		if (group) {
+			return asID ? group.ref.id : group.ref;
+		}
+		return false;
 	}
 
 	getIconName(index) {
