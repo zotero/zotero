@@ -206,6 +206,8 @@ collections-menu-clear-all-last-read =
     .label = Clear All Last Read Dates…
 recently-read-clear-all-confirm = All Last Read dates in this library will be erased.
 
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
+
 # Item list section headers for a multiple-row collection-tree selection within one library
 items-section-collections-selected =
     { $count ->
