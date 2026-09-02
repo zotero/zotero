@@ -160,6 +160,67 @@ Zotero.Collections = function () {
 	}
 	
 	
+	/**
+	 * The number of collections tracked in the recently used list for each library
+	 */
+	this.MAX_RECENT = 20;
+	
+	/**
+	 * The number of collections tracked in the recently used list across all libraries
+	 */
+	this.MAX_RECENT_TOTAL = 100;
+	
+	
+	// Collection ids, most recent first, for the current session only
+	var _recent = [];
+	
+	
+	/**
+	 * Get the collections the user has most recently viewed or added items to, most recent first
+	 *
+	 * @param {Integer} [libraryID] - Limit to collections in a given library
+	 * @return {Zotero.Collection[]}
+	 */
+	this.getRecent = function (libraryID) {
+		var collections = [];
+		for (let id of _recent) {
+			// A collection can be deleted or trashed after it's added to the list
+			let collection = this.get(id);
+			if (!collection || collection.deleted) {
+				continue;
+			}
+			if (libraryID === undefined || collection.libraryID == libraryID) {
+				collections.push(collection);
+			}
+		}
+		return collections;
+	};
+	
+	
+	/**
+	 * Move a collection to the front of the recently used list
+	 *
+	 * @param {Zotero.Collection} collection
+	 */
+	this.addToRecent = function (collection) {
+		_recent = _recent.filter(id => id != collection.id);
+		_recent.unshift(collection.id);
+		// Drop collections that have been deleted, along with everything from a library that
+		// has been removed, and trim each library separately, so that heavy use of one doesn't
+		// push another's collections off the end of the list
+		var counts = new Map();
+		_recent = _recent.filter((id) => {
+			let collection = this.get(id);
+			if (!collection) {
+				return false;
+			}
+			let count = (counts.get(collection.libraryID) || 0) + 1;
+			counts.set(collection.libraryID, count);
+			return count <= this.MAX_RECENT;
+		}).slice(0, this.MAX_RECENT_TOTAL);
+	};
+	
+	
 	this._loadChildCollections = async function (libraryID, ids, idSQL) {
 		var sql = "SELECT C1.collectionID, C2.collectionID AS childCollectionID "
 			+ "FROM collections C1 LEFT JOIN collections C2 ON (C1.collectionID=C2.parentCollectionID) "
