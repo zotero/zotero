@@ -3881,10 +3881,16 @@ var ZoteroPane = new function () {
 	 * lastDisplayed time.
 	 */
 	this.hideSyncReminder = function () {
-		let panel = document.getElementById('sync-reminder-container');
-		let reminderType = panel.getAttribute('data-reminder-type');
-		panel.setAttribute('collapsed', true);
-		panel.removeAttribute('data-reminder-type');
+		let reminderType = document.getElementById('sync-reminder-container')
+			.getAttribute('data-reminder-type');
+		for (let win of Zotero.getMainWindows()) {
+			let panel = win.document.getElementById('sync-reminder-container');
+			if (!panel) {
+				continue;
+			}
+			panel.setAttribute('collapsed', true);
+			panel.removeAttribute('data-reminder-type');
+		}
 
 		if (['setUp', 'autoSync'].includes(reminderType)) {
 			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, Math.round(Date.now() / 1000));
@@ -7674,7 +7680,7 @@ var ZoteroPane = new function () {
 	
 	
 	this.hideRetractionBanner = function () {
-		document.getElementById('retracted-items-container').setAttribute('collapsed', true);
+		Zotero.Banners.hide('retracted-items-container');
 		Zotero.Prefs.clear('retractions.recentItems');
 	};
 	
@@ -7789,14 +7795,15 @@ var ZoteroPane = new function () {
 	};
 
 	this.hideArchitectureWarning = function () {
-		document.getElementById('architecture-warning-container').setAttribute('collapsed', true);
+		Zotero.Banners.hide('architecture-warning-container');
 	};
 
 	
 	this.showPostUpgradeBanner = function () {
 		// Don't show for non-release builds or if disabled
 		if (Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild
-				|| !Zotero.Prefs.get('showPostUpgradeBanner')) {
+				|| !Zotero.Prefs.get('showPostUpgradeBanner')
+				|| Zotero.Banners.isPostUpgradeBannerDeferred()) {
 			return;
 		}
 		// Don't show if we've already shown a banner for this or a higher major version
@@ -7828,13 +7835,11 @@ var ZoteroPane = new function () {
 	
 	
 	this.hidePostUpgradeBanner = function (remindMeLater = false) {
-		document.getElementById('post-upgrade-container').setAttribute('collapsed', true);
 		if (remindMeLater) {
-			setTimeout(() => {
-				this.showPostUpgradeBanner();
-			}, 1000 * 60 * 60 * 24); // 24 hours
+			Zotero.Banners.deferPostUpgradeBanner();
 		}
 		else {
+			Zotero.Banners.hide('post-upgrade-container');
 			let majorVersion = parseInt(Zotero.version.split('.')[0]);
 			Zotero.Prefs.set('postUpgradeBannerVersionShown', majorVersion);
 		}
@@ -7874,7 +7879,7 @@ var ZoteroPane = new function () {
 	};
 
 	this.hideFileRenamingBanner = function () {
-		document.getElementById('file-renaming-banner-container').setAttribute('collapsed', true);
+		Zotero.Banners.hide('file-renaming-banner-container');
 		Zotero.Prefs.clear('autoRenameFiles.bannerDisplayTime');
 		Zotero.Prefs.set('autoRenameFiles.bannerShown', true);
 	};
