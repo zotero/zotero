@@ -27,7 +27,7 @@
 }
 
 /* Increase size when window is wider */
-#zotero-pane.width-1000 .items-tree-message div.publications p {
+library-view.width-1000 .items-tree-message div.publications p {
 	font-size: 1.35em;
 }
 
@@ -47,7 +47,7 @@
 	width: 0px !important;
 }
 
-#zotero-pane toolbarseparator {
+library-view toolbarseparator {
 	height:24px;
 }
 

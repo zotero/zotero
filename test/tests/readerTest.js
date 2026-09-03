@@ -9,7 +9,7 @@ describe("Reader", function () {
 	});
 
 	after(function () {
-		win.Zotero_Tabs.closeAll();
+		closeItemTabs(win);
 		win.close();
 	});
 

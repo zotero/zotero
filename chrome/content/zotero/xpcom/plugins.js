@@ -40,6 +40,8 @@ Zotero.Plugins = new function () {
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
+	// Windows that have a live library view, for which onMainWindowLoad has been called
+	var mainWindows = new Set();
 
 	// All plugins' FTL content is consolidated into one L10nFileSource, so the
 	// solver never has to choose between competing per-plugin sources.
@@ -89,39 +91,42 @@ Zotero.Plugins = new function () {
 				await _callMethod(addon, 'shutdown', REASONS.APP_SHUTDOWN);
 			}
 		});
-
-		const mainWindowListener = {
-			onOpenWindow: function (xulWindow) {
-				let domWindow = xulWindow.docShell.domWindow;
-				async function onload() {
-					domWindow.removeEventListener("load", onload, false);
-					if (
-						domWindow.location.href
-						!== "chrome://zotero/content/zoteroPane.xhtml"
-					) {
-						return;
-					}
-					let { addons } = await AddonManager.getActiveAddons(["extension"]);
-					for (let addon of addons) {
-						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
-					}
-				}
-				domWindow.addEventListener("load", onload, false);
-			},
-			onCloseWindow: async function (xulWindow) {
-				let domWindow = xulWindow.docShell.domWindow;
-				if (
-					domWindow.location.href !== "chrome://zotero/content/zoteroPane.xhtml"
-				) {
-					return;
-				}
-				let { addons } = await AddonManager.getActiveAddons(["extension"]);
-				for (let addon of addons) {
-					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
-				}
-			},
-		};
-		Services.wm.addListener(mainWindowListener);
+	};
+	
+	
+	/**
+	 * Called when a window's first library view has finished loading
+	 *
+	 * A window can go through the load/unload cycle more than once, since its library views
+	 * can all be closed and new ones opened.
+	 *
+	 * @param {ChromeWindow} window
+	 */
+	this.notifyMainWindowLoad = async function (window) {
+		if (mainWindows.has(window)) {
+			return;
+		}
+		mainWindows.add(window);
+		let { addons } = await AddonManager.getActiveAddons(["extension"]);
+		for (let addon of addons) {
+			await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window });
+		}
+	};
+	
+	
+	/**
+	 * Called when a window's last library view has been destroyed or the window is closing
+	 *
+	 * @param {ChromeWindow} window
+	 */
+	this.notifyMainWindowUnload = async function (window) {
+		if (!mainWindows.delete(window)) {
+			return;
+		}
+		let { addons } = await AddonManager.getActiveAddons(["extension"]);
+		for (let addon of addons) {
+			await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, { window });
+		}
 	};
 	
 	

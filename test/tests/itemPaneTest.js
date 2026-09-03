@@ -68,7 +68,7 @@ describe("Item pane", function () {
 	
 	after(function () {
 		Zotero_Tabs.select("zotero-pane");
-		Zotero_Tabs.closeAll();
+		closeItemTabs(win);
 		win.close();
 	});
 
@@ -878,7 +878,7 @@ describe("Item pane", function () {
 			}
 
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		after(function () {
@@ -1705,7 +1705,7 @@ describe("Item pane", function () {
 			}
 
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should refresh on file rename", async function () {
@@ -2197,7 +2197,7 @@ describe("Item pane", function () {
 		it("should switch to the correct pane when switching tabs", async function () {
 			// https://github.com/zotero/zotero/issues/4531#issuecomment-2470874876
 			let attachment = await importFileAttachment('test.pdf');
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 			Zotero_Tabs.add({
 				type: 'reader-unloaded',
 				title: "Reader",
@@ -2224,7 +2224,7 @@ describe("Item pane", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should scroll to pinned pane after selection moves from note to item", async function () {

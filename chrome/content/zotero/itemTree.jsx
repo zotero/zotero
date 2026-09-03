@@ -925,6 +925,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		regularOnly: PropTypes.bool,
 		multiSelect: PropTypes.bool,
 		shouldListenForNotifications: PropTypes.bool,
+		// Appended to the DOM id, so that trees sharing a prefs id can coexist in a document
+		domIdSuffix: PropTypes.string,
+		// Whether column prefs should currently be written; the tree's own changes still
+		// apply to it
+		shouldPersistColumnPrefs: PropTypes.func,
 		columns: PropTypes.array,
 		onSelectionChange: PropTypes.func,
 		onContextMenu: PropTypes.func,
@@ -998,7 +1003,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._setRowProviderUpdateHandler();
 	}
 
+	/**
+	 * The DOM id of the tree, which is the prefs id plus any domIdSuffix
+	 */
 	get id() {
+		return this._id + (this.props.domIdSuffix || '');
+	}
+
+	/**
+	 * The id that column prefs are stored under
+	 */
+	get prefsId() {
 		return this._id;
 	}
 
@@ -1801,6 +1816,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	/**
+	 * Get the current scroll position, for passing back to setScrollPosition()
+	 *
+	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 */
+	getScrollPosition() {
+		return this._saveScrollPosition();
+	}
+	
+	/**
+	 * @param {Object} [scrollPosition] - A position from getScrollPosition()
+	 */
+	setScrollPosition(scrollPosition) {
+		if (scrollPosition) {
+			this._restoreScrollPosition(scrollPosition);
+		}
+	}
+	
+	/**
 	 * Get selected items, omitting collections and searches in the trash
 	 */
 	getSelectedItems(asIDs) {
@@ -2479,7 +2512,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_loadColumnPrefsFromFile = async () => {
 		if (!this.props.columnPicker) return;
 		await _migrateTreePrefsFile();
-		this._columnPrefs = await TreePrefs.get(this.id);
+		this._columnPrefs = await TreePrefs.get(this.prefsId);
+	}
+
+	/**
+	 * Reload the column prefs from the shared store and rebuild the columns, so that a tree
+	 * picks up changes made in other trees with the same prefs id
+	 *
+	 * @return {Promise}
+	 */
+	async reloadColumnPrefs() {
+		if (!this.props.columnPicker || this._id === null) return;
+		let before = JSON.stringify(this._columnPrefs || {});
+		await this._loadColumnPrefsFromFile();
+		if (JSON.stringify(this._columnPrefs || {}) == before) return;
+		let sortField = this.getSortField();
+		let sortDirection = this.getSortDirection();
+		this._sortedColumn = null;
+		await this._resetColumns();
+		if (this.getSortField() != sortField || this.getSortDirection() != sortDirection) {
+			await this.sort();
+		}
 	}
 
 	/**
@@ -2490,11 +2543,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	_writeColumnPrefsToFile = async (force=false) => {
 		if (!this.props.columnPicker) return;
+		if (this.props.shouldPersistColumnPrefs && !this.props.shouldPersistColumnPrefs()) return;
 		await _migrateTreePrefsFile();
 		var writeToFile = async () => {
 			this._writeColumnsTimeout = null;
 			Zotero.debug(`Writing column prefs of tree ${this.id}`);
-			return TreePrefs.set(this.id, this._columnPrefs);
+			return TreePrefs.set(this.prefsId, this._columnPrefs);
 		};
 		if (this._writeColumnsTimeout) {
 			clearTimeout(this._writeColumnsTimeout);

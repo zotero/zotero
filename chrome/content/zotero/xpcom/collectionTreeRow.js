@@ -616,6 +616,11 @@ Zotero.CollectionTreeRow.prototype.clearCache = function () {
 };
 
 Zotero.CollectionTreeRow.prototype.setSearch = function (searchText, mode = null) {
+	// An empty search matches everything in every mode, so callers can pass any mode
+	// when clearing an already-empty search without triggering a change
+	if (!searchText && !this.searchText) {
+		return false;
+	}
 	if (this.searchText === searchText && this.searchMode === mode) {
 		return false;
 	}

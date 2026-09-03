@@ -64,6 +64,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		dragAndDrop: PropTypes.bool,
 		filterLibraryIDs: PropTypes.array,
 		hideSources: PropTypes.array,
+		// DOM id of the tree
+		id: PropTypes.string,
 		multiSelect: PropTypes.bool,
 		onContextMenu: PropTypes.func,
 	};
@@ -74,7 +76,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 		this.type = 'collection';
 		this.name = "CollectionTree";
-		this.id = "collection-tree";
+		this.id = props.id || "collection-tree";
 		this._rows = [];
 		this._rowMap = {};
 		this._highlightedRows = new Set();
@@ -631,6 +633,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				}
 			}
 		} catch (e) {
+			// Ignore errors from a tree torn down while it refreshes
+			if (this._uninitialized || !this.domEl.isConnected) return;
 			Zotero.logError(e);
 			window.ZoteroPane.displayErrorMessage();
 		}
@@ -704,9 +708,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param {String[]} ids - Collection tree row ids
 	 * @param {Object} [options]
 	 * @param {String} [options.focusedID] - The row to focus, if it's among the selected rows
+	 * @param {Number} [options.scrollTop] - Scroll position to restore before making the
+	 *     focused row visible
 	 * @return {Promise<Boolean>} - True if at least one row was selected
 	 */
-	async restoreSelection(ids, { focusedID } = {}) {
+	async restoreSelection(ids, { focusedID, scrollTop } = {}) {
 		var indexes = [];
 		for (let id of ids || []) {
 			let index = await this._expandToID(id);
@@ -743,12 +749,28 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 		}
 		
+		if (typeof scrollTop == 'number') {
+			let collectionTable = this.domEl.querySelector('.virtualized-table');
+			if (collectionTable) {
+				collectionTable.scrollTop = scrollTop;
+			}
+		}
 		this.ensureRowIsVisible(focusedIndex);
 		
 		if (unsuppress) {
 			await promise;
 		}
 		return true;
+	}
+	
+	/**
+	 * Get the current scroll position, for passing to restoreSelection()
+	 *
+	 * @return {Number}
+	 */
+	getScrollPosition() {
+		let collectionTable = this.domEl.querySelector('.virtualized-table');
+		return collectionTable ? collectionTable.scrollTop : 0;
 	}
 	
 	/**
@@ -1406,7 +1428,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let treeViewID = types[type] + libraryID;
 		
 		Zotero.Prefs.setVirtualCollectionStateForLibrary(libraryID, type, show);
-		
+
+		for (let win of Zotero.getMainWindows()) {
+			for (let view of win.ZoteroPane.libraryViews) {
+				if (view.loaded && view.collectionsView && view.collectionsView !== this) {
+					view.collectionsView.updateVirtualCollection(treeViewID)
+						.catch(e => Zotero.logError(e));
+				}
+			}
+		}
+
 		var promise = this.waitForSelect();
 		var selectedRow = this.selection.focused;
 		var selectedRowID = this.getRow(selectedRow).id;
@@ -1425,8 +1456,29 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			await this.selectWait(this.selection.focused);
 		}
 		this.selection.selectEventsSuppressed = false;
-		
+
 		return promise;
+	}
+
+	/**
+	 * Show or hide a virtual collection toggled in another tree, keeping this tree's selection
+	 *
+	 * @param {String} treeViewID
+	 * @return {Promise}
+	 */
+	async updateVirtualCollection(treeViewID) {
+		var selectedIDs = [...this.selection.selected].map(index => this.getRow(index)?.id);
+		var focusedID = this.getRow(this.selection.focused)?.id;
+		var scrollTop = this.getScrollPosition();
+
+		// refresh() suppresses select events, so the rows are reselected before the items view
+		// sees the selection
+		await this.refresh();
+		if (!await this.restoreSelection(selectedIDs, { focusedID, scrollTop })) {
+			this.selection.select(this.getRowIndexByID('L' + treeViewID.substr(1)));
+		}
+		this.tree.invalidate();
+		this.selection.selectEventsSuppressed = false;
 	}
 
 	/**

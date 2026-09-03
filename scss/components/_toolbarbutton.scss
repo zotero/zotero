@@ -79,7 +79,7 @@ $toolbarbutton-icons: (
 );
 
 @each $cls, $icon in $toolbarbutton-icons {
-	#zotero-tb-#{$cls} {
+	:is(#zotero-tb-#{$cls}, .zotero-tb-#{$cls}) {
 		@include svgicon-menu($icon, "universal", "20");
 	}
 };

@@ -59,7 +59,7 @@ describe("Note Editor", function () {
 
 	describe("Edit menu", function () {
 		afterEach(function () {
-			win.Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should dispatch history commands to a focused note editor", async function () {

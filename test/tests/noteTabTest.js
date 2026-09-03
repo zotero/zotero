@@ -10,14 +10,14 @@ describe("Note Tab", function () {
 	});
 	
 	after(function () {
-		Zotero_Tabs.closeAll();
+		closeItemTabs(win);
 		win.close();
 	});
 
 	describe("Note Tab Operations", function () {
 		beforeEach(function () {
 			// Reset the state before each test
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should open note in tab", async function () {
@@ -43,7 +43,7 @@ describe("Note Tab", function () {
 			assert.notEqual(editorInstance, duplicateEditorInstance, "Duplicate note editor should be a new instance");
 			assert.equal(duplicateEditorInstance.itemID, item.id, "Duplicate note editor should be associated with the correct item");
 
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 
 			await waitForCallback(
 				() => !Zotero.Notes._editorInstances.find(e => e.tabID),

@@ -94,11 +94,12 @@
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="ZoteroPane.handleClose(event)"/>
+		<command id="cmd_zotero_newTab" oncommand="ZoteroPane.newLibraryTab()"/>
 		<command id="cmd_zotero_newWindow" oncommand="ZoteroPane.newWindow()"/>
 		
 		<!--EDIT-->
 		<command id="cmd_find"
-			oncommand="ZoteroPane.libraryView.getElement('zotero-tb-search-textbox').select()"/>
+			oncommand="ZoteroPane.libraryView?.getElement('zotero-tb-search-textbox').select()"/>
 			
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
 		<command id="cmd_zotero_import" oncommand="Zotero_File_Interface.showImportWizard();"/>
@@ -153,6 +154,7 @@
 	</keyset>
 
 	<keyset id="mainKeyset">
+		<key id="key_newTab" key="T" command="cmd_zotero_newTab" modifiers="accel"/>
 		<key id="key_newWindow" key="N" command="cmd_zotero_newWindow" modifiers="accel"/>
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_quitApplication"
@@ -240,6 +242,10 @@
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 						<menupopup id="menu_FilePopup"
 									onpopupshowing="ZoteroStandalone.onFileMenuOpen(event)">
+							<menuitem id="menu_newTab"
+									data-l10n-id="menu-new-library-tab"
+									key="key_newTab"
+									command="cmd_zotero_newTab"/>
 							<menuitem id="menu_newWindow"
 									data-l10n-id="menu-new-window"
 									key="key_newWindow"
@@ -941,6 +947,7 @@
 				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)"
 				onpopuphidden="ZoteroPane.onCollectionsContextMenuHidden(event)">
 			<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
+			<menuitem data-l10n-id="collections-menu-open-in-new-tab" data-l10n-args='{"count": 1}'/>
 			<menuitem data-l10n-id="collections-menu-open-in-new-window"/>
 			<menuseparator/>
 			<menuitem class="zotero-menuitem-sync"/>
@@ -1193,14 +1200,7 @@
 					<div id="zotero-tab-cover" class="hidden" xmlns="http://www.w3.org/1999/xhtml">
 						<label>&zotero.general.loading;</label>
 					</div>
-					<deck id="tabs-deck">
-						<tab-content id="zotero-pane"
-							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
-							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
-							onkeypress="ZoteroPane_Local.handleKeyPress(event)">
-							<library-view/>
-						</tab-content>
-					</deck>
+					<deck id="tabs-deck"/>
 		
 					<splitter id="zotero-context-splitter"
 							  hidden="true"

@@ -566,7 +566,7 @@
 				event.preventDefault();
 				event.stopPropagation();
 			};
-			let isLibraryTab = Zotero_Tabs.selectedIndex == 0;
+			let isLibraryTab = Zotero_Tabs.selectedIsLibrary;
 
 			// Tab from the scrollable area focuses the pinned pane if it exists
 			if (event.target.classList.contains("zotero-view-item") && event.key == "Tab" && !event.shiftKey && this.pinnedPane) {
@@ -578,7 +578,8 @@
 			// On Escape/Enter on editable-text, return focus to the item tree or reader
 			if (event.key == "Escape" || (event.key == "Enter" && event.target.classList.contains('input'))) {
 				if (isLibraryTab) {
-					document.querySelector('#zotero-items-tree .virtualized-table').focus();
+					this.closest('library-view')?.getElement('zotero-items-tree')
+						.querySelector('.virtualized-table').focus();
 				}
 				else {
 					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);

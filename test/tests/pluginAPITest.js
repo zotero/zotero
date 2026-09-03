@@ -75,7 +75,7 @@ describe("Plugin API", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should render custom row and call onGetData hook", async function () {
@@ -481,7 +481,7 @@ describe("Plugin API", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should render custom column and call dataProvider hook", async function () {
@@ -687,7 +687,7 @@ describe("Plugin API", function () {
 
 		afterEach(function () {
 			Zotero_Tabs.select("zotero-pane");
-			Zotero_Tabs.closeAll();
+			closeItemTabs(win);
 		});
 
 		it("should register custom menu and call hooks", async function () {

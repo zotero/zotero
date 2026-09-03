@@ -168,6 +168,9 @@ menu-view-note-tab-font-size =
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 
+menu-new-library-tab =
+    .label = New Library Tab
+
 menu-new-window =
     .label = New Window
 
@@ -246,6 +249,11 @@ items-section-library-sources =
     }
 items-section-library-recently-read = { $library } ({ recently-read })
 items-section-library = { $library }
+collections-menu-open-in-new-tab =
+    .label = { $count ->
+        [one] Open in New Tab
+       *[other] Open in New Tabs
+    }
 collections-menu-open-in-new-window =
     .label = Open in New Window
 collections-menu-rename =

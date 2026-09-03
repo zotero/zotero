@@ -770,8 +770,31 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 		return this.selectedTags;
 	}
 
+	/**
+	 * Set the selected tags without filtering the items list
+	 *
+	 * @param {Set|Array} tags
+	 */
+	setTagSelection(tags) {
+		this.selectedTags = new Set(tags);
+	}
+
 	clearTagSelection() {
 		this.selectedTags = new Set();
+	}
+
+	/**
+	 * Apply the current values of the shared tag selector prefs, which another tag selector
+	 * may have changed
+	 */
+	async adoptPrefs() {
+		let showAutomatic = Zotero.Prefs.get('tagSelector.showAutomatic');
+		let displayAllTags = Zotero.Prefs.get('tagSelector.displayAllTags');
+		if (showAutomatic == this.state.showAutomatic && displayAllTags == this.displayAllTags) {
+			return;
+		}
+		this.displayAllTags = displayAllTags;
+		this.setState({ showAutomatic, ...(await this.getTagsAndScope()) });
 	}
 	
 	async openColorPickerWindow() {
@@ -969,6 +992,10 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 
 	get showAutomatic() {
 		return this.state.showAutomatic;
+	}
+	
+	get searchString() {
+		return this.state.searchString;
 	}
 	
 	static async init(domEl, opts) {

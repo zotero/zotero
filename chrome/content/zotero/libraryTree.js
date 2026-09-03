@@ -122,6 +122,9 @@ var LibraryTree = class LibraryTree extends React.Component {
 		// so we set an unintialized flag that we check in select functions
 		// like #notify
 		if (this._uninitialized) return;
+		// Ignore errors from a tree removed from the document, e.g., when a library tab closes
+		// while the tree mounts
+		if (!this.domEl.isConnected) return;
 		Zotero.debug("ItemTree: React threw an error");
 		Zotero.logError(error);
 		Zotero.debug(info);

@@ -185,8 +185,8 @@
 				closeButton.appendChild(closeIcon);
 				closeButton.addEventListener("click", this._handleCloseClick);
 
-				// Library tab has no close button
-				if (tab.id == "zotero-pane") {
+				// Tabs that can't be closed have no close button
+				if (!tab.closable) {
 					closeButton.hidden = true;
 				}
 
@@ -195,12 +195,10 @@
 				// Item type icon
 				let span = document.createElement("span");
 				span.className = "icon icon-css tab-icon";
-				if (tab.id == 'zotero-pane') {
-					// Determine which icon from the collection view rows to use (same as in _update())
-					let index = ZoteroPane.collectionsView?.selection?.focused;
-					if (typeof index !== 'undefined' && ZoteroPane.collectionsView.getRow(index)) {
-						let iconName = ZoteroPane.collectionsView.getIconName(index);
-						span.classList.add(`icon-${iconName}`);
+				if (Zotero_Tabs._isLibraryTab(tab)) {
+					// Kept up to date by Zotero_Tabs._update()
+					if (tab.data.icon) {
+						span.classList.add(`icon-${tab.data.icon}`);
 					}
 				}
 				else {
@@ -357,8 +355,9 @@
 		}
 
 		cacheFocus() {
-			if (this._selectedIndex === 0) {
-				// The first tab row does not have focusable elements
+			let closeButton = this._tabsList.querySelector(".selected > .close");
+			if (closeButton?.hidden) {
+				// A row without a close button has no focusable elements
 				return;
 			}
 			let activeElement = document.activeElement;
@@ -574,8 +573,9 @@
 		_handleRowDragStart = (event) => {
 			let row = event.target.closest(".row");
 			let tabID = row.dataset.tabId;
-			// No drag-drop on the cross button or the library tab
-			if (tabID == 'zotero-pane' || event.target.classList.contains("close")) {
+			let { tab } = Zotero_Tabs._getTab(tabID);
+			// No drag-drop on the cross button or on tabs that can't be moved
+			if (!tab?.movable || event.target.classList.contains("close")) {
 				event.preventDefault();
 				event.stopPropagation();
 				return;
@@ -598,7 +598,8 @@
 			let rowTabId = row.dataset.tabId;
 			event.preventDefault();
 			let tabId = event.dataTransfer.getData("zotero/tab");
-			if (!tabId || rowTabId == "zotero-pane") {
+			let { tab: rowTab } = Zotero_Tabs._getTab(rowTabId);
+			if (!tabId || !rowTab?.movable) {
 				return false;
 			}
 			if (row.getAttribute("id") == "zotero-tabs-menu-dragged") {
@@ -622,7 +623,7 @@
 			let row = event.target.closest(".row");
 			let tabId = event.dataTransfer.getData("zotero/tab");
 			let rowIndex = parseInt(row.getAttribute("index"));
-			if (rowIndex == 0) return;
+			if (rowIndex < Zotero_Tabs._getFirstUnpinnedIndex()) return;
 			Zotero_Tabs.move(tabId, rowIndex);
 		};
 

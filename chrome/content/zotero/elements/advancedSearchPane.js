@@ -113,6 +113,17 @@
 		}
 		
 		/**
+		 * The value of the name field, for type "saved"
+		 */
+		get savedSearchName() {
+			return this._nameField.value;
+		}
+		
+		set savedSearchName(name) {
+			this._nameField.value = name || '';
+		}
+		
+		/**
 		 * Whether the search has been submitted and should filter the items list
 		 */
 		get active() {
@@ -121,6 +132,13 @@
 		
 		set active(active) {
 			this._active = !!active;
+		}
+		
+		/**
+		 * Fold any in-progress condition edits into the search
+		 */
+		updateSearch() {
+			this._searchElem.updateSearch();
 		}
 		
 		set search(search) {

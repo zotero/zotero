@@ -178,7 +178,10 @@
 			for (let id of ids) {
 				this._removeItemContext(id);
 			}
-			if (Zotero_Tabs.deck.children.length == 1) {
+			let hasContextPaneTabs = Zotero_Tabs._tabs.some(
+				tab => Zotero_Tabs.hasContextPane(Zotero_Tabs.parseTabType(tab.type).tabContentType)
+			);
+			if (!hasContextPaneTabs) {
 				Array.from(this._notesPaneDeck.children).forEach(x => x.notesList.expanded = false);
 			}
 			// Close tab specific notes if tab id no longer exists, but
@@ -208,7 +211,9 @@
 			// It seems that changing `hidden` or `collapsed` values might
 			// be related with significant slow down when there are too many
 			// DOM nodes (i.e. 10k notes)
-			if (tabType == 'library') {
+			// A library tab that finishes loading after another tab is selected leaves the
+			// context pane to that tab
+			if (tabType == 'library' && (action === 'select' || Zotero_Tabs.selectedID == tabID)) {
 				_contextPaneSplitter.setAttribute('hidden', true);
 				_contextPane.setAttribute('collapsed', true);
 				ZoteroContextPane.showLoadingMessage(false);

@@ -92,18 +92,18 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	
 	this.getActiveZoteroPane = function () {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
+		if (win && !win.ZoteroPane?.libraryView) {
+			// Actions on the library belong in a window that has one
+			let panes = this.getZoteroPanes().filter(pane => pane.libraryView);
+			if (panes.length) {
+				return panes.reduce((a, b) => (b.lastActivated >= a.lastActivated ? b : a));
+			}
+		}
 		return win ? win.ZoteroPane : null;
 	};
 	
 	this.getZoteroPanes = function () {
-		var enumerator = Services.wm.getEnumerator("navigator:browser");
-		var zps = [];
-		while (enumerator.hasMoreElements()) {
-			let win = enumerator.getNext();
-			if (!win.ZoteroPane) continue;
-			zps.push(win.ZoteroPane);
-		}
-		return zps;
+		return this.getMainWindows().filter(win => win.ZoteroPane).map(win => win.ZoteroPane);
 	};
 	
 	/**
@@ -1153,6 +1153,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {Object} [args.sessionState] - The saved session state the window should restore
 	 * @param {Object} [args.libraryTabState] - The view state for the window's library tab, as
 	 *     returned by ZoteroPane.captureLibraryTabState()
+	 * @param {Object[]} [args.otherLibraryTabs] - { title, icon, state } for library tabs to open
+	 *     in the background after the one for libraryTabState
 	 * @return {ChromeWindow}
 	 */
 	this.openMainWindow = function (args) {
@@ -1999,15 +2001,19 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	}
 	
 	function _showWindowZoteroPaneOverlay(doc) {
-		doc.getElementById('zotero-collections-tree').disabled = true;
-		doc.getElementById('zotero-items-tree').disabled = true;
+		for (let libraryView of doc.querySelectorAll('library-view')) {
+			libraryView.getElement('zotero-collections-tree').disabled = true;
+			libraryView.getElement('zotero-items-tree').disabled = true;
+		}
 		doc.getElementById('zotero-pane-overlay').hidden = false;
 	}
 	
 	
 	function _hideWindowZoteroPaneOverlay(doc) {
-		doc.getElementById('zotero-collections-tree').disabled = false;
-		doc.getElementById('zotero-items-tree').disabled = false;
+		for (let libraryView of doc.querySelectorAll('library-view')) {
+			libraryView.getElement('zotero-collections-tree').disabled = false;
+			libraryView.getElement('zotero-items-tree').disabled = false;
+		}
 		doc.getElementById('zotero-pane-overlay').hidden = true;
 		
 		// See note in showZoteroPaneProgressMeter()
@@ -2019,9 +2025,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	
 	
 	this.updateQuickSearchBox = function (document) {
-		var searchBox = document.getElementById('zotero-tb-search');
-		if (searchBox) {
-			searchBox.updateMode();
+		for (let libraryView of document.querySelectorAll('library-view')) {
+			libraryView.getElement('zotero-tb-search')?.updateMode();
 		}
 	};
 	
@@ -2629,10 +2634,9 @@ Zotero.DragDrop = {
 		var target = event.target;
 		if (target.tagName == 'treechildren') {
 			var tree = target.parentNode;
-			if (tree.id == 'zotero-collections-tree') {
+			if (tree.classList.contains('zotero-collections-tree')) {
 				let { row } = tree.getCellAt(event.clientX, event.clientY);
-				let win = tree.ownerDocument.defaultView;
-				return win.ZoteroPane.collectionsView.getRow(row);
+				return tree.closest('library-view').collectionsView.getRow(row);
 			}
 		}
 		return false;

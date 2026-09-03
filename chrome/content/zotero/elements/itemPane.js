@@ -220,7 +220,7 @@
 			}
 
 			this._itemDetails.editable = this.editable;
-			this._itemDetails.tabID = "zotero-pane";
+			this._itemDetails.tabID = this.closest('library-view')?.tabID || "zotero-pane";
 			this._itemDetails.tabType = "library";
 			this._itemDetails.item = items[0];
 			this._itemDetails.extraItems = items.slice(1);

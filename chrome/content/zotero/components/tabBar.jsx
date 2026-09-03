@@ -33,12 +33,12 @@ const { CSSIcon, CSSItemTypeIcon } = require('./icons');
 const SCROLL_ARROW_SCROLL_BY = 222;
 
 const Tab = memo((props) => {
-	const { icon, id, index, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, onAudioStatusClick, selected, title, renderTitle, width, audioStatus } = props;
+	const { icon, id, isBeingDragged, isItemType, onContextMenu, onDragEnd, onDragStart, onTabClick, onTabClose, onTabMouseDown, onAudioStatusClick, pinned, closable, movable, selected, title, renderTitle, width, audioStatus } = props;
 	
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
 	const handleTabClick = useCallback(event => onTabClick(event, id), [onTabClick, id]);
-	const handleDragStart = useCallback(event => onDragStart(event, id, index), [onDragStart, id, index]);
+	const handleDragStart = useCallback(event => onDragStart(event, id, movable), [onDragStart, id, movable]);
 	const handleTabClose = useCallback(event => onTabClose(event, id), [onTabClose, id]);
 	const handleAudioStatusClick = useCallback(event => onAudioStatusClick(event, id), [onAudioStatusClick, id]);
 	
@@ -58,7 +58,7 @@ const Tab = memo((props) => {
 		<div
 			key={id}
 			data-id={id}
-			className={cx('tab', { selected, dragging: isBeingDragged })}
+			className={cx('tab', { selected, pinned, closable, dragging: isBeingDragged })}
 			draggable={true}
 			onMouseDown={handleTabMouseDown}
 			onContextMenu={handleContextMenu}
@@ -101,7 +101,6 @@ Tab.displayName = 'Tab';
 Tab.propTypes = {
 	icon: PropTypes.string,
 	id: PropTypes.string.isRequired,
-	index: PropTypes.number.isRequired,
 	isBeingDragged: PropTypes.bool.isRequired,
 	isItemType: PropTypes.bool,
 	onContextMenu: PropTypes.func.isRequired,
@@ -111,6 +110,9 @@ Tab.propTypes = {
 	onTabClose: PropTypes.func.isRequired,
 	onTabMouseDown: PropTypes.func.isRequired,
 	onAudioStatusClick: PropTypes.func.isRequired,
+	pinned: PropTypes.bool,
+	closable: PropTypes.bool,
+	movable: PropTypes.bool,
 	selected: PropTypes.bool.isRequired,
 	title: PropTypes.string.isRequired,
 	renderTitle: PropTypes.bool,
@@ -172,20 +174,26 @@ const TabBar = forwardRef(function (props, ref) {
 			// position it under the mouse
 			let x = dragMouseX - tab.offsetLeft - dragGrabbedDeltaXRef.current;
 
-			let firstTab = tabsRef.current.firstChild;
-			let lastTab = tabsRef.current.lastChild;
-
-			// Don't allow to move tab beyond the second and the last tab
+			// Keep the tab between the pinned tabs, or the start of the tab bar, and the last tab
+			let tabNodes = Array.from(tabsRef.current.querySelectorAll('.tab'))
+				.filter(node => node.offsetWidth);
+			let lastPinnedTab = tabNodes.filter(node => node.classList.contains('pinned')).pop();
+			let firstTab = tabNodes[0];
+			let lastTab = tabNodes[tabNodes.length - 1];
+			let minLeft, maxLeft;
 			if (Zotero.rtl) {
-				if (tab.offsetLeft + x < lastTab.offsetLeft
-					|| tab.offsetLeft + tab.offsetWidth + x > firstTab.offsetLeft) {
-					x = 0;
-				}
+				minLeft = lastTab.offsetLeft;
+				maxLeft = (lastPinnedTab
+					? lastPinnedTab.offsetLeft
+					: firstTab.offsetLeft + firstTab.offsetWidth) - tab.offsetWidth;
 			}
-			else if (tab.offsetLeft + x > lastTab.offsetLeft
-				|| tab.offsetLeft + x < firstTab.offsetLeft + firstTab.offsetWidth) {
-				x = 0;
+			else {
+				minLeft = lastPinnedTab
+					? lastPinnedTab.offsetLeft + lastPinnedTab.offsetWidth
+					: firstTab.offsetLeft;
+				maxLeft = lastTab.offsetLeft + lastTab.offsetWidth - tab.offsetWidth;
 			}
+			x = Math.min(Math.max(x, minLeft - tab.offsetLeft), maxLeft - tab.offsetLeft);
 			
 			tab.style.transform = dragging ? `translateX(${x}px)` : 'unset';
 		}
@@ -272,9 +280,8 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 	}, [props.onTabClose]);
 
-	const handleDragStart = useCallback((event, id, index) => {
-		// Library tab is not draggable
-		if (index === 0) {
+	const handleDragStart = useCallback((event, id, movable) => {
+		if (!movable) {
 			event.preventDefault();
 			return;
 		}
@@ -343,10 +350,14 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 
 		// If the new tab position doesn't fit between the central points
-		// of other tabs, check if it's moved beyond the last tab
+		// of other tabs, check if it's moved before the first tab or beyond the last tab
 		if (index === null) {
-			let p = points[points.length - 1];
-			if (Zotero.rtl && x1 < p || !Zotero.rtl && x2 > p) {
+			let first = points[0];
+			let last = points[points.length - 1];
+			if (Zotero.rtl && x2 > first || !Zotero.rtl && x1 < first) {
+				index = 0;
+			}
+			else if (Zotero.rtl && x1 < last || !Zotero.rtl && x2 > last) {
 				index = points.length;
 			}
 		}
@@ -362,11 +373,11 @@ const TabBar = forwardRef(function (props, ref) {
 		// so that the next tab's "X" button also ends up under the mouse
 		if (!lockedTabsState.size) {
 			let tabElements = [...tabsInnerContainerRef.current.querySelectorAll(".tab")].filter(tab => tab.offsetWidth);
-			let zoteroPaneTab = tabElements.find(tab => tab.dataset.id === "zotero-pane");
-			let tab = tabElements.find(tab => tab.dataset.id !== "zotero-pane");
+			let pinnedTab = tabElements.find(tab => tab.classList.contains("pinned"));
+			let tab = tabElements.find(tab => !tab.classList.contains("pinned"));
 			setLockedTabsState(new Map([
-				["zotero-pane", zoteroPaneTab.offsetWidth],
-				["tab", tab.offsetWidth],
+				["pinned", pinnedTab?.offsetWidth],
+				["tab", tab?.offsetWidth],
 				["scroll-left", tabsRef.current.scrollLeft]
 			]));
 		}
@@ -429,21 +440,18 @@ const TabBar = forwardRef(function (props, ref) {
 					<div
 						className="tabs"
 					>
-						{tabs.length
-							? <Tab
-								{ ...tabs[0] }
-								key={tabs[0].id}
-								index={0}
-								isBeingDragged={ false }
-								onContextMenu={ handleContextMenu}
-								onDragEnd={ handleDragEnd }
-								onDragStart={ handleDragStart}
-								onTabClick={ handleTabClick}
-								onTabClose={ handleTabClose}
-								onTabMouseDown = { handleTabMouseDown }
-								onAudioStatusClick={handleAudioStatusClick}
-							/>
-							: null}
+						{tabs.filter(tab => tab.pinned).map(tab => <Tab
+							{ ...tab }
+							key={tab.id}
+							isBeingDragged={ false }
+							onContextMenu={ handleContextMenu}
+							onDragEnd={ handleDragEnd }
+							onDragStart={ handleDragStart}
+							onTabClick={ handleTabClick}
+							onTabClose={ handleTabClose}
+							onTabMouseDown = { handleTabMouseDown }
+							onAudioStatusClick={handleAudioStatusClick}
+						/>)}
 					</div>
 				</div>
 				<div
@@ -467,11 +475,10 @@ const TabBar = forwardRef(function (props, ref) {
 						onScroll={updateScrollArrows}
 						dir={Zotero.dir}
 					>
-						{tabs.map((tab, index) => <Tab
+						{tabs.map(tab => <Tab
 							{...tab}
 							key={tab.id}
-							index={index}
-							width={ tab.id === "zotero-pane" ? lockedTabsState.get("zotero-pane") : lockedTabsState.get("tab") }
+							width={ tab.pinned ? lockedTabsState.get("pinned") : lockedTabsState.get("tab") }
 							isBeingDragged={dragging && dragIDRef.current === tab.id}
 							onContextMenu={handleContextMenu}
 							onDragEnd={handleDragEnd}

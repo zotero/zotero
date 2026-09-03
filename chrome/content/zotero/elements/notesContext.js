@@ -303,7 +303,7 @@
 		_isNotesListVisible() {
 			let splitter = ZoteroContextPane.splitter;
 			
-			return Zotero_Tabs.selectedType != 'library'
+			return !Zotero_Tabs.selectedIsLibrary
 				&& ZoteroContextPane.context.mode == "notes"
 				&& this.mode == "notesList"
 				&& splitter.getAttribute('state') != 'collapsed';

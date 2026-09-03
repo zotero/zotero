@@ -126,7 +126,7 @@
 	}
 
 	&.scrollable {
-		.tabs-wrapper > .tabs > :first-child {
+		.tabs-wrapper > .tabs > .tab.pinned {
 			display: none;
 		}
 
@@ -134,7 +134,7 @@
 			display: flex;
 		}
 
-		.pinned-tabs {
+		.pinned-tabs:has(.tab) {
 			display: block;
 		}
 	}
@@ -193,8 +193,8 @@
 		background-color: var(--fill-quinary);
 	}
 
-	&:first-child {
-		padding: 6px; // no 22px padding for X button because pinned tab cannot be closed
+	&:not(.closable) {
+		padding: 6px; // no 22px padding for X button, which isn't shown
 
 		.tab-close {
 			display: none;

@@ -29,7 +29,7 @@
  */
 var Zotero_Lookup = new function () {
 	// All the lookup elements live inside the library view
-	var _getElement = id => ZoteroPane.libraryView.getElement(id);
+	var _getElement = (id, libraryView = ZoteroPane.libraryView) => libraryView.getElement(id);
 	
 	this._button = null;
 	this._accepted = false;
@@ -143,23 +143,29 @@ var Zotero_Lookup = new function () {
 	 */
 	this.accept = async function (textBox) {
 		this._accepted = true;
+		// The lookup finishes in the view it started in, even if another tab is selected by then
+		let libraryView = textBox.closest('library-view');
 		
 		let newItems = await Zotero_Lookup.addItemsFromIdentifier(
 			textBox,
 			false,
-			on => Zotero_Lookup.setShowProgress(on)
+			on => Zotero_Lookup.setShowProgress(on, libraryView)
 		);
+		// The view's tab was closed
+		if (!libraryView.isConnected) {
+			return false;
+		}
 
 		if (newItems.length) {
 			// Send the focus to the item tree after the popup closes
 			ZoteroPane.lastFocusedElement = null;
-			_getElement('zotero-lookup-panel').hidePopup();
-			// The item tree's DOM id has a view-specific suffix, so use the current view's id
-			_getElement(ZoteroPane.itemsView.id).focus();
+			_getElement('zotero-lookup-panel', libraryView).hidePopup();
+			// The item tree's DOM id has a view-specific suffix, so use the view's id
+			_getElement(libraryView.itemsView.id, libraryView).focus();
 		}
 		else {
 			// Hide on failure too
-			_getElement('zotero-lookup-panel').hidePopup();
+			_getElement('zotero-lookup-panel', libraryView).hidePopup();
 		}
 		return false;
 	};
@@ -201,7 +207,7 @@ var Zotero_Lookup = new function () {
 	
 	this.onShown = function (event) {
 		// Ignore context menu
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		if (event.originalTarget !== _getElement('zotero-lookup-panel')) return;
 
 		this._accepted = false;
 		
@@ -254,7 +260,7 @@ var Zotero_Lookup = new function () {
 	 */
 	this.onHidden = function (event) {
 		// Ignore context menu
-		if (event.originalTarget.id != 'zotero-lookup-panel') return;
+		if (event.originalTarget !== _getElement('zotero-lookup-panel')) return;
 		
 		window.removeEventListener('mousedown', this._onMouseDown, { capture: true });
 		_getElement('zotero-lookup-panel').removeEventListener('blur', this._onBlur, { capture: true });
@@ -346,12 +352,19 @@ var Zotero_Lookup = new function () {
 		return mlTxtBox;
 	};
 
-	this.setShowProgress = function (on) {
+	/**
+	 * @param {Boolean} on
+	 * @param {LibraryView} [libraryView] - The view whose panel to update, if not the active one
+	 */
+	this.setShowProgress = function (on, libraryView = ZoteroPane.libraryView) {
 		// In Firefox 52.6.0, progressmeters burn CPU at idle on Linux when undetermined, even
 		// if they're hidden. (Being hidden is enough on macOS.)
 		
-		_getElement('zotero-lookup-textbox').disabled = !!on;
-		var p = _getElement('zotero-lookup-multiline-progress');
+		if (!libraryView?.isConnected) {
+			return;
+		}
+		_getElement('zotero-lookup-textbox', libraryView).disabled = !!on;
+		var p = _getElement('zotero-lookup-multiline-progress', libraryView);
 		if (on) {
 			p.removeAttribute('value');
 		}

@@ -406,7 +406,7 @@
 				}
 				if (action == 'toggle-pane') {
 					document.l10n.setAttributes(button,
-						Zotero_Tabs.selectedType === 'library'
+						Zotero_Tabs.selectedIsLibrary
 							? 'toggle-item-pane'
 							: 'toggle-context-pane');
 				}

@@ -1015,7 +1015,36 @@ describe("ZoteroPane", function () {
 			assert.isFalse(cv.getRowIndexByID(id));
 			assert.isFalse(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
-		
+
+		it("should show and hide a virtual collection in other windows", async function () {
+			await cv.refresh();
+			var id = "U" + userLibraryID;
+			var win2 = await loadZoteroPane();
+			try {
+				let cv2 = win2.ZoteroPane.collectionsView;
+				assert.ok(await cv2.selectByID(id));
+
+				await zp.setVirtual(userLibraryID, 'unfiled', false);
+				await waitForCallback(() => cv2.getRowIndexByID(id) === false, 50, 20);
+				// The hidden row's library is selected in its place
+				await waitForCallback(
+					() => win2.ZoteroPane.getCollectionTreeRows()[0]?.id == "L" + userLibraryID,
+					50,
+					20
+				);
+
+				let collection = await createDataObject('collection');
+				await selectCollection(win2, collection);
+				await zp.setVirtual(userLibraryID, 'unfiled', true);
+				await waitForCallback(() => cv2.getRowIndexByID(id) !== false, 50, 20);
+				// The selection is kept
+				assert.equal(win2.ZoteroPane.getCollectionTreeRows()[0].id, collection.treeViewID);
+			}
+			finally {
+				win2.close();
+			}
+		});
+
 		it("should hide a virtual collection in a group", async function () {
 			await cv.refresh();
 			
@@ -1920,7 +1949,7 @@ describe("ZoteroPane", function () {
 				}
 			}
 			doc.activeElement.dispatchEvent(shiftTab);
-			assert.equal(doc.activeElement.className, "tab selected");
+			assert.includeMembers([...doc.activeElement.classList], ["tab", "selected"]);
 
 			doc.activeElement.dispatchEvent(shiftTab);
 			// Toggle Item/Context Pane button
@@ -2769,6 +2798,19 @@ describe("ZoteroPane", function () {
 			// The button must stay within the items pane rather than overflowing under the item pane
 			assert.isAtMost(advButton.getBoundingClientRect().right, container.getBoundingClientRect().right,
 				"Advanced Search button's right edge is within the items pane");
+		});
+	});
+	
+	describe("#serializePersist()", function () {
+		afterEach(function () {
+			Zotero.Prefs.clear('pane.persist');
+		});
+		
+		it("should keep the library view's saved layout when the window has no library view", function () {
+			Zotero.Prefs.set('pane.persist', JSON.stringify({ 'zotero-collections-pane': { width: '321' } }));
+			zp.serializePersist(null);
+			let values = JSON.parse(Zotero.Prefs.get('pane.persist'));
+			assert.deepEqual(values['zotero-collections-pane'], { width: '321' });
 		});
 	});
 })

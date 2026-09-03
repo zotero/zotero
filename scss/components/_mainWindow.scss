@@ -19,7 +19,7 @@
 	min-height: calc(var(--height-of-fixed-components) + $min-height-items-pane + $height-toolbar);
 }
 
-#zotero-pane {
+tab-content:has(> library-view) {
 	min-width: 0;
 	min-height: 0;
 	flex-direction: column;

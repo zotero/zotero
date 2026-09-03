@@ -29,7 +29,6 @@ var ZoteroContextPane = new function () {
 	let _contextPaneInner;
 	let _contextPaneSplitter;
 	let _contextPaneSplitterStacked;
-	let _librarySidenav;
 	let _readerSidenav;
 
 	Object.defineProperty(this, 'activeEditor', {
@@ -37,8 +36,8 @@ var ZoteroContextPane = new function () {
 	});
 
 	Object.defineProperty(this, 'sidenav', {
-		get: () => (Zotero_Tabs.selectedType == "library"
-			? _librarySidenav
+		get: () => (Zotero_Tabs.selectedIsLibrary
+			? ZoteroPane.libraryView?.getElement("zotero-view-item-sidenav")
 			: _readerSidenav)
 	});
 
@@ -80,7 +79,6 @@ var ZoteroContextPane = new function () {
 		_contextPaneInner = document.getElementById('zotero-context-pane-inner');
 		_contextPaneSplitter = document.getElementById('zotero-context-splitter');
 		_contextPaneSplitterStacked = document.getElementById('zotero-context-splitter-stacked');
-		_librarySidenav = document.querySelector("#zotero-view-item-sidenav");
 		_readerSidenav = document.getElementById('zotero-context-pane-sidenav');
 
 		// Never use default status for the reader sidenav
@@ -137,7 +135,7 @@ var ZoteroContextPane = new function () {
 	};
 
 	this.update = () => {
-		if (Zotero_Tabs.selectedType === 'library') {
+		if (!Zotero_Tabs.hasContextPane(Zotero_Tabs.parseTabType().tabContentType)) {
 			return;
 		}
 		if (_isStacked()) {

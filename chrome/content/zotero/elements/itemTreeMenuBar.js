@@ -119,7 +119,7 @@ class ItemTreeMenuBar extends XULElement {
 			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'alt');
 			key.setAttribute('key', (i + 1) % 10);
 			key.addEventListener('command', () => {
-				if (!window.Zotero_Tabs || window.Zotero_Tabs.selectedType == 'library') {
+				if (!window.Zotero_Tabs || window.Zotero_Tabs.selectedIsLibrary) {
 					getItemsView()?.toggleSort(i, true);
 				}
 			});

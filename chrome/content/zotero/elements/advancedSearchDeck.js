@@ -78,6 +78,10 @@
 		get pane() {
 			return this.deck.selectedPanel;
 		}
+		
+		focus(options) {
+			this.pane.focus(options);
+		}
 	}
 	customElements.define("advanced-search-deck", AdvancedSearchDeck);
 }

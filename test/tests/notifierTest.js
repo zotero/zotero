@@ -9,7 +9,9 @@ describe("Zotero.Notifier", function () {
 					events.push(action);
 				}
 			};
-			var id = Zotero.Notifier.registerObserver(observer, null, 'test_trigger');
+			// Only item events, since a window closed by a previous test can still be closing its
+			// tabs
+			var id = Zotero.Notifier.registerObserver(observer, ['item'], 'test_trigger');
 			
 			await Zotero.DB.executeTransaction(async function () {
 				var item = new Zotero.Item('book');
@@ -36,7 +38,9 @@ describe("Zotero.Notifier", function () {
 			var observer = {
 				notify: () => didNotify = true
 			};
-			var id = Zotero.Notifier.registerObserver(observer, null, 'test_trigger');
+			// Only item events, since a window closed by a previous test can still be closing its
+			// tabs
+			var id = Zotero.Notifier.registerObserver(observer, ['item'], 'test_trigger');
 			
 			var queue = new Zotero.Notifier.Queue;
 			var item = createUnsavedDataObject('item');

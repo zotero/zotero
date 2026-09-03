@@ -59,7 +59,10 @@ const ZoteroStandalone = new function () {
 		this._notifierID = Zotero.Notifier.registerObserver(
 			{
 				notify: async (action, type, ids, extraData) => {
-					if (['select', 'load'].includes(action)
+					if ((action == 'select'
+								// A tab that finishes loading after another tab is selected
+								// doesn't change the menus
+								|| action == 'load' && ids[0] == Zotero_Tabs.selectedID)
 							&& Zotero_Tabs.isOwnTabEvent(extraData, ids[0])) {
 						// Reader doesn't have tabID yet
 						setTimeout(async () => {
@@ -147,7 +150,7 @@ const ZoteroStandalone = new function () {
 		// Switch to library tab if dragging over PDF/EPUB/HTML file(s)
 		window.addEventListener('dragover', function (event) {
 			// TODO: Consider allowing more (or all) file types, although shouldn't interfere with image dragging to note editor
-			if (Zotero_Tabs.selectedType != 'library'
+			if (!Zotero_Tabs.selectedIsLibrary
 					&& event.dataTransfer.items
 					&& event.dataTransfer.items.length
 					&& !Array.from(event.dataTransfer.items).find(x =>
@@ -507,17 +510,28 @@ const ZoteroStandalone = new function () {
 		this.updateMenuItemCheckmark('view-menuitem-ui-density-comfortable', density == 'comfortable');
 		
 		// Panes
+		let libraryView = ZoteroPane.libraryView;
+		let paneMenuItems = [
+			'view-menuitem-collections-pane',
+			'view-menuitem-item-pane',
+			'view-menuitem-tag-selector'
+		];
+		for (let id of paneMenuItems) {
+			this.updateMenuItemEnabled(id, !!libraryView);
+		}
 		this.updateMenuItemCheckmark(
 			'view-menuitem-collections-pane',
-			!ZoteroPane.libraryView.getElement('zotero-collections-pane').hasAttribute('collapsed')
+			!!libraryView
+				&& !libraryView.getElement('zotero-collections-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-item-pane',
-			!ZoteroPane.itemPane.hasAttribute('collapsed')
+			!!libraryView && !ZoteroPane.itemPane.hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-tag-selector',
-			!ZoteroPane.libraryView.getElement('zotero-tag-selector-container').hasAttribute('collapsed')
+			!!libraryView
+				&& !libraryView.getElement('zotero-tag-selector-container').hasAttribute('collapsed')
 		);
 		
 		// Font size
