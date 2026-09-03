@@ -55,6 +55,7 @@ Zotero_Preferences.General = {
 		
 		this.refreshLocale();
 		this._initItemPaneHeaderUI();
+		this._initNewLibraryTabTargetMenu();
 		this._updateFileHandlerUI();
 		this._initEbookFontFamilyMenu();
 		this._initAutoDisableToolCheckbox();
@@ -508,6 +509,75 @@ Zotero_Preferences.General = {
 		Palatino: 'Palatino, Palatino Linotype, Adobe Palatino, Book Antiqua, URW Palladio L, FPL Neu, Domitian, serif',
 		// Times New Roman and equivalent-ish
 		'Times New Roman': 'Times New Roman, Linux Libertine, Liberation Serif, serif',
+	},
+
+	_initNewLibraryTabTargetMenu: function () {
+		let menupopup = document.getElementById('new-library-tab-target').menupopup;
+		menupopup.querySelector('[value="last"]').addEventListener('command', () => {
+			Zotero.Prefs.set('newLibraryTabTarget', 'last');
+			this._updateNewLibraryTabTargetMenu();
+		});
+		// Rebuild on every open to pick up collection changes made while the window is open,
+		// ignoring popupshowing events bubbling from collection submenus
+		menupopup.addEventListener('popupshowing', (event) => {
+			if (event.target === menupopup) {
+				this._updateNewLibraryTabTargetMenu();
+			}
+		});
+		this._updateNewLibraryTabTargetMenu();
+	},
+
+	_updateNewLibraryTabTargetMenu: function () {
+		let menulist = document.getElementById('new-library-tab-target');
+		let menupopup = menulist.menupopup;
+		let target = Zotero.Prefs.get('newLibraryTabTarget');
+		
+		let lastItem = menupopup.querySelector('[value="last"]');
+		if (target == 'last') {
+			// type="checkbox" hides the icon, so only set it while checked
+			lastItem.setAttribute('type', 'checkbox');
+			lastItem.setAttribute('checked', 'true');
+		}
+		else {
+			lastItem.removeAttribute('type');
+			lastItem.removeAttribute('checked');
+		}
+		
+		// Rebuild the library and collection targets
+		let separator = menupopup.querySelector('menuseparator');
+		while (separator.nextSibling) {
+			separator.nextSibling.remove();
+		}
+		let onClick = (event, libraryOrCollection) => {
+			// If a menu for a collection with children is clicked, close the entire menu,
+			// which otherwise remains open
+			if (event.target.tagName == 'menu') {
+				menupopup.hidePopup();
+			}
+			Zotero.Prefs.set('newLibraryTabTarget', libraryOrCollection.treeViewID);
+			this._updateNewLibraryTabTargetMenu();
+		};
+		for (let library of Zotero.Libraries.getAll()) {
+			if (!['user', 'group'].includes(library.libraryType)) {
+				continue;
+			}
+			Zotero.Utilities.Internal.createMenuForTarget(
+				library, menupopup, target, onClick, null
+			);
+		}
+		
+		if (target == 'last') {
+			menulist.setAttribute('data-l10n-id', 'preferences-new-library-tab-target-last');
+			menulist.removeAttribute('image');
+		}
+		else {
+			// Fall back to My Library if the target no longer exists
+			let selectedItem = menupopup.querySelector(`menuitem[value="${target}"]`)
+				|| menupopup.querySelector(`menuitem[value="L${Zotero.Libraries.userLibraryID}"]`);
+			menulist.removeAttribute('data-l10n-id');
+			menulist.setAttribute('label', selectedItem.getAttribute('label'));
+			menulist.setAttribute('image', selectedItem.getAttribute('image'));
+		}
 	},
 
 	async _initEbookFontFamilyMenu() {

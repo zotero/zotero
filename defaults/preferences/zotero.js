@@ -238,6 +238,8 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 
 // Tabs
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
+// 'last' for the last opened collections, or a collection tree row id (e.g., 'L1' or 'C123')
+pref("extensions.zotero.newLibraryTabTarget", "last");
 
 // Reader
 pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");

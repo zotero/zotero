@@ -58,7 +58,8 @@
 		// collections from
 		function openNewWindow() {
 			const { Zotero } = ChromeUtils.importESModule('chrome://zotero/content/zotero.mjs');
-			Zotero.openMainWindow();
+			let data = Zotero.Utilities.Internal.getNewLibraryTabTargetData();
+			Zotero.openMainWindow(data ? { libraryTabState: data.state } : null);
 		}
 		
 		// Equivalent to Zotero.Utilities.Internal.openPreferences()

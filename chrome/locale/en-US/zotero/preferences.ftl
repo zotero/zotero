@@ -37,7 +37,6 @@ preferences-read-aloud-highlight-granularity-sentence =
 preferences-read-aloud-highlight-granularity-word =
     .label = word
 
-preferences-note-title = Notes
 preferences-note-open-in-new-window =
     .label = Open notes in new windows instead of tabs
 
@@ -53,6 +52,12 @@ preferences-item-pane-header = Item Pane Header:
 preferences-item-pane-header-style = Header Citation Style:
 preferences-item-pane-header-locale = Header Language:
 preferences-item-pane-header-missing-style = Missing style: <{ $shortName }>
+
+preferences-tabs-and-windows-title = Tabs and Windows
+preferences-new-library-tab-target = Open new library tabs to
+preferences-new-library-tab-target-last =
+    .label = last opened collection
+preferences-show-reader-tabs-as = Show reader tabs as
 
 preferences-locate-library-lookup-intro = Library Lookup can find a resource online using your library’s OpenURL resolver.
 preferences-locate-resolver = Resolver:

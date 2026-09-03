@@ -279,6 +279,25 @@ describe("Zotero_Tabs", function() {
 			assert.equal(tabs._getTab(tabs.selectedID).tab.title, collection1.name);
 		});
 		
+		it("should open the newLibraryTabTarget pref's target in a new tab", async function () {
+			try {
+				// A collection tree row id opens that row
+				Zotero.Prefs.set('newLibraryTabTarget', 'C' + collection2.id);
+				zp.newLibraryTab();
+				let view = await waitForLibraryView(tabs.selectedID);
+				assert.deepEqual(getRowIDs(view), ['C' + collection2.id]);
+				
+				// A no-longer-existing target falls back to My Library
+				Zotero.Prefs.set('newLibraryTabTarget', 'C' + (collection2.id + 12345));
+				zp.newLibraryTab();
+				view = await waitForLibraryView(tabs.selectedID);
+				assert.deepEqual(getRowIDs(view), ['L' + Zotero.Libraries.userLibraryID]);
+			}
+			finally {
+				Zotero.Prefs.clear('newLibraryTabTarget');
+			}
+		});
+		
 		it("should duplicate a library tab with its view", async function () {
 			await setQuickSearch('Item One');
 			await zp.itemsView.selectItem(item1.id);

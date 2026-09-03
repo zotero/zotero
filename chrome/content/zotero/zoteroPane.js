@@ -1831,16 +1831,6 @@ var ZoteroPane = new function () {
 	
 	
 	/**
-	 * The library view state for the selected collection tree rows
-	 *
-	 * @return {Object|null} - A library view state, or null if no rows are selected
-	 */
-	this._getSelectedCollectionsState = function () {
-		return this._getSelectedCollectionsTabData()?.state || null;
-	};
-
-
-	/**
 	 * The tab data for a library tab showing the selected collection tree rows
 	 *
 	 * @return {Object|null} - { title, icon, state }, or null if no rows are selected
@@ -1867,18 +1857,41 @@ var ZoteroPane = new function () {
 
 
 	/**
-	 * Open a new library tab showing this window's collection selection
+	 * The tab data for a new library tab or window, based on the
+	 * extensions.zotero.newLibraryTabTarget pref, which is either 'last' for this window's
+	 * collection selection or a collection tree row id (e.g., 'L1' or 'C123')
+	 *
+	 * @return {Object} - { title, icon, state }
 	 */
-	this.newLibraryTab = function () {
-		Zotero_Tabs.addLibraryTab(this._getSelectedCollectionsTabData() || {});
+	this.getNewLibraryTabData = function () {
+		let data = Zotero.Utilities.Internal.getNewLibraryTabTargetData()
+			|| this._getSelectedCollectionsTabData();
+		if (data) {
+			return data;
+		}
+		// No selected rows to open, so fall back to My Library
+		let library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
+		return {
+			title: library.name,
+			icon: 'library',
+			state: { collections: ['L' + library.libraryID] }
+		};
 	};
 
 
 	/**
-	 * Open a new main window showing this window's collection selection
+	 * Open a new library tab showing the configured new-tab target
+	 */
+	this.newLibraryTab = function () {
+		Zotero_Tabs.addLibraryTab(this.getNewLibraryTabData());
+	};
+
+
+	/**
+	 * Open a new main window showing the configured new-tab target
 	 */
 	this.newWindow = function () {
-		return Zotero.openMainWindow({ libraryTabState: this._getSelectedCollectionsState() });
+		return Zotero.openMainWindow({ libraryTabState: this.getNewLibraryTabData().state });
 	};
 
 

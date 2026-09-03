@@ -89,6 +89,43 @@
 			</vbox>
 		</groupbox>
 		
+		<groupbox id="zotero-prefpane-tabs-windows-groupbox" aria-labelledby="preferences-tabs-and-windows-title">
+			<label><html:h2 id="preferences-tabs-and-windows-title" data-l10n-id="preferences-tabs-and-windows-title"/></label>
+			
+			<hbox align="center">
+				<label data-l10n-id="preferences-new-library-tab-target" control="new-library-tab-target"/>
+				<menulist id="new-library-tab-target" native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-new-library-tab-target-last" value="last"/>
+						<menuseparator/>
+					</menupopup>
+				</menulist>
+			</hbox>
+			
+			<hbox align="center">
+				<label data-l10n-id="preferences-show-reader-tabs-as" control="reader-tabs-title"/>
+				<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
+					<menupopup>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+			
+			<checkbox id="open-reader-in-new-window"
+				data-l10n-id="preferences-reader-open-in-new-window"
+				preference="extensions.zotero.openReaderInNewWindow"
+				native="true"
+			/>
+			
+			<checkbox id="open-note-in-new-window"
+				data-l10n-id="preferences-note-open-in-new-window"
+				preference="extensions.zotero.openNoteInNewWindow"
+				native="true"
+			/>
+		</groupbox>
+		
 		<groupbox id="zotero-prefpane-file-handling-groupbox" aria-label="&zotero.preferences.fileHandling;">
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
@@ -179,25 +216,6 @@
 					</menupopup>
 				</menulist>
 			</vbox>
-			<vbox class="indented-pref">
-				<checkbox id="open-reader-in-new-window"
-					data-l10n-id="preferences-reader-open-in-new-window"
-					preference="extensions.zotero.openReaderInNewWindow"
-					native="true"
-				/>
-			</vbox>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
-				<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
-					<menupopup>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-			
 			<vbox>
 				<checkbox
 					id="auto-disable-tool"
@@ -239,15 +257,6 @@
 			</hbox>
 		</groupbox>
 
-		<groupbox id="zotero-prefpane-note-groupbox" aria-labelledby="preferences-note-title">
-			<label><html:h2 id="preferences-note-title" data-l10n-id="preferences-note-title"/></label>
-			<checkbox id="open-note-in-new-window"
-				data-l10n-id="preferences-note-open-in-new-window"
-				preference="extensions.zotero.openNoteInNewWindow"
-				native="true"
-			/>
-		</groupbox>
-		
 		<groupbox id="zotero-prefpane-locate-groupbox" aria-label="&zotero.preferences.prefpane.locate;" aria-describedby="preferences-locate-library-lookup-intro">
 			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 			

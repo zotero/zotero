@@ -26,7 +26,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre		"Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost		"days ago">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label             "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle  "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear  "Title - Creator - Year">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename          "Filename">

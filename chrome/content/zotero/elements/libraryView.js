@@ -1430,33 +1430,29 @@
 		
 		/**
 		 * @return {Object} - { title, icon, state } for a library tab or window showing the
-		 *     Advanced Search, seeded with the given quick search
+		 *     Advanced Search, seeded with the given quick search, in the configured new-tab
+		 *     target
 		 */
 		_getAdvancedSearchTabData(searchText, mode) {
-			let collectionTreeRows = this.getCollectionTreeRows();
-			let focusedIndex = this.collectionsView.selection.focused;
-			let focusedRow = this.collectionsView.getRow(focusedIndex);
-			let state = collectionTreeRows.length
-				? {
-					collections: collectionTreeRows.map(row => row.id),
-					focusedCollection: focusedRow ? focusedRow.id : null
-				}
-				: {};
+			let data = ZoteroPane.getNewLibraryTabData();
 			let search = searchText ? this._buildSearchFromQuickSearch(searchText, mode) : null;
-			state.advancedSearch = {
+			// Search the library of the collection the new tab shows
+			let match = search && data.state.collections?.[0]?.match(/^([CL])(\d+)$/);
+			if (match) {
+				let id = parseInt(match[2]);
+				let libraryID = match[1] == 'C' ? Zotero.Collections.get(id)?.libraryID : id;
+				if (libraryID) {
+					search.libraryID = libraryID;
+				}
+			}
+			data.state.advancedSearch = {
 				state: 'open',
 				type: 'temporary',
 				active: !!search,
 				search: search ? search.toJSON() : null,
 				libraryID: search ? search.libraryID : null
 			};
-			return {
-				title: collectionTreeRows.length == 1
-					? collectionTreeRows[0].getName()
-					: Zotero.getString('tab-title-multiple-collections'),
-				icon: focusedRow ? this.collectionsView.getIconName(focusedIndex) : null,
-				state
-			};
+			return data;
 		}
 		
 		/**

@@ -1993,6 +1993,41 @@ Zotero.Utilities.Internal = {
 		}, true);
 	},
 	
+	/**
+	 * Get the tab data for the fixed target of the extensions.zotero.newLibraryTabTarget pref,
+	 * falling back to My Library if the target no longer exists
+	 *
+	 * @return {Object|false} - { title, icon, state }, or false if the pref is set to 'last'
+	 */
+	getNewLibraryTabTargetData: function () {
+		let target = Zotero.Prefs.get('newLibraryTabTarget');
+		if (target == 'last') {
+			return false;
+		}
+		if (/^C\d+$/.test(target)) {
+			let collection = Zotero.Collections.get(parseInt(target.substring(1)));
+			if (collection) {
+				return {
+					title: collection.name,
+					icon: 'collection',
+					state: { collections: [target] }
+				};
+			}
+		}
+		let library = null;
+		if (/^L\d+$/.test(target)) {
+			library = Zotero.Libraries.get(parseInt(target.substring(1)));
+		}
+		if (!library) {
+			library = Zotero.Libraries.get(Zotero.Libraries.userLibraryID);
+		}
+		return {
+			title: library.name,
+			icon: library.libraryType == 'group' ? 'library-group' : 'library',
+			state: { collections: ['L' + library.libraryID] }
+		};
+	},
+	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
 			throw new Error("openPreferences() now takes an 'options' object -- update your code");
