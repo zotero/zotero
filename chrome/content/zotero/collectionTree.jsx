@@ -1412,13 +1412,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * rows are selected, where the items list can span collections or libraries and acting
 	 * on one row's value isn't safe
 	 *
+	 * Pre-release builds throw regardless of the selection, so that plugin developers see
+	 * the failure.
+	 *
 	 * Also used by the ZoteroPane methods that wrap these, which pass their own names.
 	 *
 	 * @param {String} name
 	 * @param {String} replacement
 	 */
 	_requireSingleSelection(name, replacement) {
-		if (this.selection.count > 1) {
+		if (this.selection.count > 1
+				|| Zotero.isBetaBuild || Zotero.isDevBuild || Zotero.isSourceBuild) {
 			throw new Error(`${name} was removed -- use ${replacement}`);
 		}
 		Zotero.Plugins.warnRemovedAPICall(name, replacement);

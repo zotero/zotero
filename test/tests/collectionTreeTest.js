@@ -2175,6 +2175,19 @@ describe("Zotero.CollectionTree", function () {
 	})
 
 	describe("removed single-selection methods", function () {
+		var buildFlags = ['isBetaBuild', 'isDevBuild', 'isSourceBuild'];
+		var savedBuildFlags;
+		
+		beforeEach(function () {
+			savedBuildFlags = buildFlags.map(flag => Zotero[flag]);
+			// Tests run in a source build, where these methods always throw
+			buildFlags.forEach(flag => Zotero[flag] = false);
+		});
+		
+		afterEach(function () {
+			buildFlags.forEach((flag, i) => Zotero[flag] = savedBuildFlags[i]);
+		});
+		
 		it("should return the selected row when focus is on a different row", async function () {
 			var collection1 = await createDataObject('collection');
 			var collection2 = await createDataObject('collection');
@@ -2198,6 +2211,15 @@ describe("Zotero.CollectionTree", function () {
 			
 			assert.throws(() => cv.getSelectedCollection());
 			assert.throws(() => zp.getSelectedLibraryID());
+		});
+		
+		it("should throw in pre-release builds with a single row selected", async function () {
+			Zotero.isBetaBuild = true;
+			var collection = await createDataObject('collection');
+			cv.selection.select(cv.getRowIndexByID(collection.treeViewID));
+			
+			assert.throws(() => cv.getSelectedCollection());
+			assert.throws(() => zp.getSelectedCollection());
 		});
 	});
 })
