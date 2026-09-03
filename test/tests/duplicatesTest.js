@@ -20,7 +20,25 @@ describe("Duplicate Items", function () {
 	after(function () {
 		win.close();
 	});
-
+	
+	
+	describe("ISBN matching", function () {
+		it("should match books with equivalent ISBN-10 and ISBN-13", async function () {
+			var item1 = await createDataObject('item', { itemType: 'book', title: 'Effective Java' });
+			item1.setField('ISBN', '0134685997');
+			await item1.saveTx();
+			
+			var item2 = await createDataObject('item', { itemType: 'book', title: 'Effective Java, 3rd Edition' });
+			item2.setField('ISBN', '9780134685991');
+			await item2.saveTx();
+			
+			var duplicates = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			await duplicates.getSearchObject();
+			assert.sameMembers(duplicates.getSetItemsByItemID(item1.id), [item1.id, item2.id]);
+		});
+	});
+	
+	
 	async function merge(itemID) {
 		var userLibraryID = Zotero.Libraries.userLibraryID;
 			
@@ -108,28 +126,6 @@ describe("Duplicate Items", function () {
 			assert.sameMembers(item1.relatedItems, [item2.key, item3.key]);
 			assert.sameMembers(item2.relatedItems, [item1.key]);
 			assert.sameMembers(item3.relatedItems, [item1.key]);
-		});
-	});
-
-	describe("ISBN matching", function () {
-		async function getDuplicateSets() {
-			var duplicates = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
-			var search = await duplicates.getSearchObject();
-			return search.search();
-		}
-
-		it("should match books with equivalent ISBN-10 and ISBN-13", async function () {
-			var item1 = await createDataObject('item', { itemType: 'book', title: 'Effective Java' });
-			item1.setField('ISBN', '0134685997');
-			await item1.saveTx();
-
-			var item2 = await createDataObject('item', { itemType: 'book', title: 'Effective Java, 3rd Edition' });
-			item2.setField('ISBN', '9780134685991');
-			await item2.saveTx();
-
-			var ids = await getDuplicateSets();
-			assert.include(ids, item1.id);
-			assert.include(ids, item2.id);
 		});
 	});
 });
