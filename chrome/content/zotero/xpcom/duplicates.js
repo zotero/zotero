@@ -211,6 +211,8 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 			let row = rows[i];
 			let newVal = Zotero.Utilities.cleanISBN('' + row.value);
 			if (!newVal) continue;
+			// Canonicalize to ISBN-13 so an ISBN-10 and its ISBN-13 equivalent match
+			newVal = Zotero.Utilities.toISBN13(newVal);
 			isbnCache[row.itemID] = newVal;
 			newRows.push({
 				itemID: row.itemID,
