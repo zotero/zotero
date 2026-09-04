@@ -1718,19 +1718,42 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
-		it("should index smaller attachments before larger ones", async function () {
+		it("should index recently touched attachments first", async function () {
 			this.timeout(60000);
-			let item = await createDataObject('item', { title: 'Parent of sized attachments' });
-			// The big one is created first, so insertion order can't account
-			// for the result on its own
-			let big = await importPDFAttachment(item);
-			let small = await importPDFAttachment(item);
-			// The size the enqueue order goes by comes from Zotero's own
-			// fulltext index
+			// One attachment per signal, each under its own parent. All are
+			// created now and then backdated, so creation order can't account
+			// for the result.
+			let attachments = [];
+			for (let i = 0; i < 5; i++) {
+				let item = await createDataObject('item', { title: 'Parent of recency attachment ' + i });
+				attachments.push(await importPDFAttachment(item));
+			}
+			let [read, annotated, parentEdited, noted, untouched] = attachments;
+			let annotation = await createAnnotation('highlight', annotated);
+			let note = new Zotero.Item('note');
+			note.parentID = noted.parentID;
+			note.setNote('<p>A note about the attachment next to it.</p>');
+			await note.saveTx();
+			let ids = [
+				...attachments.map(a => a.id),
+				...attachments.map(a => a.parentID),
+				annotation.id,
+				note.id
+			];
 			await Zotero.DB.queryAsync(
-				"REPLACE INTO fulltextItems (itemID, totalPages) VALUES (?, ?)", [big.id, 800]);
+				"UPDATE items SET dateModified='2020-01-01 00:00:00' WHERE itemID IN ("
+					+ ids.join(',') + ")");
+			// One signal each, newest first: read, annotated, parent
+			// edited, note added
 			await Zotero.DB.queryAsync(
-				"REPLACE INTO fulltextItems (itemID, totalPages) VALUES (?, ?)", [small.id, 2]);
+				"UPDATE itemAttachments SET lastRead=? WHERE itemID=?",
+				[Date.UTC(2024, 0, 5) / 1000, read.id]);
+			await Zotero.DB.queryAsync(
+				"UPDATE items SET dateModified='2024-01-04 00:00:00' WHERE itemID=?", annotation.id);
+			await Zotero.DB.queryAsync(
+				"UPDATE items SET dateModified='2024-01-03 00:00:00' WHERE itemID=?", parentEdited.parentID);
+			await Zotero.DB.queryAsync(
+				"UPDATE items SET dateModified='2024-01-02 00:00:00' WHERE itemID=?", note.id);
 
 			let extracted = [];
 			let vector = new Float32Array(4).fill(0.5);
@@ -1745,7 +1768,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
-					if (itemID === big.id || itemID === small.id) {
+					if (attachments.some(a => a.id === itemID)) {
 						extracted.push(itemID);
 					}
 					return {
@@ -1760,7 +1783,8 @@ describe("Zotero.Embeddings", function () {
 				Zotero.Prefs.set('embeddings.indexFulltext', true);
 				await Zotero.Embeddings.Indexing.startIndexing();
 
-				assert.deepEqual(extracted, [small.id, big.id]);
+				assert.deepEqual(extracted,
+					[read.id, annotated.id, parentEdited.id, noted.id, untouched.id]);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());

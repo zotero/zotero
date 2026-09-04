@@ -1681,10 +1681,11 @@ Zotero.Embeddings.Indexing = new function () {
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass
 	const KICK_DELAY = 3000;
-	// itemIDs pulled off the queue per consumer iteration. Large enough that
-	// sorting by text length within the chunk (see indexItems()) produces
-	// well-packed batches
-	const CHUNK_SIZE = 256;
+	// itemIDs taken off a queue per pass of _indexItems(). Small, so the
+	// head of the queue is searchable soon: an item's rows are written only
+	// once all of its chunks are embedded, and a pass sorts every chunk in
+	// the slice by length before batching.
+	const QUEUE_SLICE_SIZE = 32;
 
 	// The inference process's memory arena only grows: fragmentation from
 	// varying batch shapes accumulates and is never returned to the OS
@@ -2059,9 +2060,9 @@ Zotero.Embeddings.Indexing = new function () {
 	// the index stay in agreement.
 	//
 	// Attachments are kept apart from the rest: their text costs orders of
-	// magnitude more to index, so they're enqueued last, ordered smallest
-	// first, and reported on their own line rather than buried in one total
-	// that barely moves.
+	// magnitude more to index, so they're enqueued last, ordered most
+	// recently touched first, and reported on their own line rather than
+	// buried in one total that barely moves.
 	//
 	// @return {Promise<Map>} - libraryID -> { items: [itemID, ...],
 	//     attachments: [itemID, ...] }
@@ -2120,33 +2121,36 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 		}
 		if (_indexFulltextEnabled()) {
-			// Ordering attachments by size compares the
-			// two things the fulltext index records -- characters for EPUBs and
-			// snapshots, pages for PDFs -- so page counts are scaled to roughly the
-			// characters they stand for.
-			const CHARS_PER_PAGE = 3000;
-			const UNKNOWN_ATTACHMENT_SIZE = 99999999;
+			// Attachments the user touched most recently go first -- read,
+			// modified, annotated, or with a recently edited parent or sibling
+			// note -- since those are what they're most likely to search for.
+			// Compared as integer seconds: strftime() returns text, which
+			// SQLite sorts above every integer
+			const EPOCH_SECONDS = "CAST(strftime('%s', {0}) AS INTEGER)";
+			let epoch = column => EPOCH_SECONDS.replace('{0}', column);
 			// The SQL mirror of _isIndexableAttachment(): stored or linked
-			// PDFs and EPUBs, and snapshots (which are always stored),
-			// smallest first so that one enormous book doesn't sit at the
-			// head of the queue while the rest of the library waits behind
-			// it. Size is taken from Zotero's own fulltext index, which
-			// already knows it for virtually every attachment -- unlike
-			// measuring the files, which would mean a filesystem call per
-			// attachment every time this runs.
+			// PDFs and EPUBs, and snapshots (which are always stored)
 			rows = await Zotero.DB.queryAsync(
-				"SELECT libraryID, itemID FROM itemAttachments "
-					+ "JOIN items USING (itemID) "
-					+ "LEFT JOIN fulltextItems USING (itemID) "
-					+ "WHERE (contentType IN ('application/pdf', 'application/epub+zip') "
-						+ "AND linkMode!=?) "
-					+ "OR (contentType='text/html' AND linkMode=?) "
-					+ "ORDER BY COALESCE(totalChars, totalPages * ?, ?), itemID",
+				"SELECT I.libraryID, I.itemID FROM itemAttachments IA "
+					+ "JOIN items I USING (itemID) "
+					+ "LEFT JOIN items P ON (P.itemID=IA.parentItemID) "
+					+ "WHERE (IA.contentType IN ('application/pdf', 'application/epub+zip') "
+						+ "AND IA.linkMode!=?) "
+					+ "OR (IA.contentType='text/html' AND IA.linkMode=?) "
+					+ "ORDER BY MAX("
+						+ "COALESCE(IA.lastRead, 0), "
+						+ epoch('I.dateModified') + ", "
+						+ "COALESCE(" + epoch('P.dateModified') + ", 0), "
+						+ "COALESCE((SELECT MAX(" + epoch('AI.dateModified') + ") "
+							+ "FROM itemAnnotations AN JOIN items AI USING (itemID) "
+							+ "WHERE AN.parentItemID=IA.itemID), 0), "
+						+ "COALESCE((SELECT MAX(" + epoch('NI.dateModified') + ") "
+							+ "FROM itemNotes N JOIN items NI USING (itemID) "
+							+ "WHERE N.parentItemID=IA.parentItemID), 0)"
+					+ ") DESC, I.itemID",
 				[
 					Zotero.Attachments.LINK_MODE_LINKED_URL,
-					Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-					CHARS_PER_PAGE,
-					UNKNOWN_ATTACHMENT_SIZE
+					Zotero.Attachments.LINK_MODE_IMPORTED_URL
 				]
 			);
 			for (let row of rows) {
@@ -2526,8 +2530,8 @@ Zotero.Embeddings.Indexing = new function () {
 		return stale;
 	}
 
-	// Embed the regular queue -- items, notes and annotations -- in chunks
-	// until it's empty or the run stops
+	// Embed the regular queue -- items, notes and annotations -- a slice at
+	// a time until it's empty or the run stops
 	async function _drainItemQueue(shouldStop, indexOptions) {
 		_setPhase('indexing');
 		while (_queue.size && !shouldStop()) {
@@ -2535,7 +2539,7 @@ Zotero.Embeddings.Indexing = new function () {
 			for (let id of _queue) {
 				itemIDs.push(id);
 				_queue.delete(id);
-				if (itemIDs.length >= CHUNK_SIZE) {
+				if (itemIDs.length >= QUEUE_SLICE_SIZE) {
 					break;
 				}
 			}
@@ -2558,13 +2562,14 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 	}
 
-	// Embed attachments whose text is extracted and cached, in chunks. Gives
-	// way when the regular queue has new work, putting back what's left --
+	// Embed attachments whose text is extracted and cached, a slice at a
+	// time. Gives way when the regular queue has new work, putting back
+	// what's left --
 	// its packs are cached, so the next cycle resumes without extracting
 	// again.
 	async function _embedAttachments(itemIDs, shouldStop, indexOptions) {
 		_setPhase('indexing-attachments');
-		for (let i = 0; i < itemIDs.length; i += CHUNK_SIZE) {
+		for (let i = 0; i < itemIDs.length; i += QUEUE_SLICE_SIZE) {
 			if (shouldStop()) {
 				return;
 			}
@@ -2574,7 +2579,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				return;
 			}
-			let items = (await Zotero.Items.getAsync(itemIDs.slice(i, i + CHUNK_SIZE)))
+			let items = (await Zotero.Items.getAsync(itemIDs.slice(i, i + QUEUE_SLICE_SIZE)))
 				.filter(item => _indexFulltextEnabled() && _isIndexableAttachment(item));
 			if (items.length) {
 				await _indexItems(items, indexOptions());
