@@ -621,6 +621,35 @@ describe("Citation Dialog", function () {
 			SearchHandler.clearNonLibraryItemsCache();
 		});
 
+		it("should suggest the page of the selected duplicate reader tab", async function () {
+			let item = await createDataObject('item');
+			// A multi-page PDF, so that the reader can be navigated to another page
+			let attachment = await importFileAttachment('wonderland_short.pdf', {
+				contentType: 'application/pdf',
+				parentID: item.id
+			});
+			// Two tabs for the same attachment, the second of which is selected
+			await Zotero.Reader.open(attachment.id);
+			let firstTabID = win.Zotero_Tabs.selectedID;
+			await Zotero.Reader.open(attachment.id, null, { allowDuplicate: true });
+			let secondTabID = win.Zotero_Tabs.selectedID;
+			assert.notEqual(firstTabID, secondTabID);
+
+			let reader = Zotero.Reader.getByTabID(secondTabID);
+			await reader._waitForReader();
+			// View stats, which the current page comes from, are set after the view renders
+			await waitForCallback(() => reader.getCurrentPage());
+			await reader.navigate({ pageIndex: 2 });
+			await waitForCallback(() => reader.getCurrentPage() == "3");
+
+			assert.equal(await Helpers.getOpenTabPage(item), "3");
+
+			// Cleanup
+			win.Zotero_Tabs.close(secondTabID);
+			win.Zotero_Tabs.close(firstTabID);
+			SearchHandler.clearNonLibraryItemsCache();
+		});
+
 		it("should not suggest a saved EPUB page whose position is out of date", async function () {
 			let item = await createDataObject('item');
 			let attachment = await importFileAttachment('stub.epub', {
