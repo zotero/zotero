@@ -517,8 +517,8 @@ export class CitationDialogHelpers {
 		let win = Zotero.getMainWindow();
 		if (!win) return null;
 		let tabs = item.getAttachments()
-			.map(attachmentID => ({ attachmentID, tabID: win.Zotero_Tabs.getTabIDByItemID(attachmentID) }))
-			.filter(({ tabID }) => tabID);
+			.flatMap(attachmentID => win.Zotero_Tabs.getTabIDsByItemID(attachmentID)
+				.map(tabID => ({ attachmentID, tabID })));
 		// Look at the selected tab first
 		tabs.sort((a, b) => {
 			if (a.tabID === win.Zotero_Tabs.selectedID) return -1;
