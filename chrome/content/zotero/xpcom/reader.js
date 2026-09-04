@@ -80,6 +80,8 @@ class ReaderInstance {
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 		this._readAloudGuidancePanel = null;
+		this._primaryViewState = null;
+		this._lastSecondaryPageIndex = null;
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -425,7 +427,18 @@ class ReaderInstance {
 				}
 				else if (this.tabID) {
 					this._window.Zotero_Tabs.setTabData(this.tabID, { secondViewState: state });
+					// Scrolling or removing the secondary view can change the displayed page
+					let secondaryPageIndex = state ? this._getStateLastPageIndex(state) : null;
+					if (this._lastSecondaryPageIndex !== secondaryPageIndex) {
+						this._lastSecondaryPageIndex = secondaryPageIndex;
+						await this._handleDisplayedPageChange();
+					}
 				}
+			},
+			onChangeActiveView: async () => {
+				// Switching views can change the displayed page without changing either
+				// view's position
+				await this._handleDisplayedPageChange();
 			},
 			onOpenTagsPopup: (id, x, y) => {
 				let key = id;
@@ -1071,25 +1084,28 @@ class ReaderInstance {
 		}
 	}
 
+	_getStateLastPageIndex(state) {
+		if (this._type === 'pdf') {
+			return state.pageIndex;
+		}
+		else if (this._type === 'epub') {
+			return state.cfi;
+		}
+		else if (this._type === 'snapshot') {
+			return state.scrollYPercent;
+		}
+		else {
+			throw new Error('Unknown reader type: ' + this._type);
+		}
+	}
+	
 	async _setState(state) {
 		if (this._isTransient()) {
 			return;
 		}
 		let item = Zotero.Items.get(this._item.id);
 		if (item) {
-			let lastPageIndex;
-			if (this._type === 'pdf') {
-				lastPageIndex = state.pageIndex;
-			}
-			else if (this._type === 'epub') {
-				lastPageIndex = state.cfi;
-			}
-			else if (this._type === 'snapshot') {
-				lastPageIndex = state.scrollYPercent;
-			}
-			else {
-				throw new Error('Unknown reader type: ' + this._type);
-			}
+			let lastPageIndex = this._getStateLastPageIndex(state);
 			let pageChanged = item.getAttachmentLastPageIndex() != lastPageIndex;
 			item.setAttachmentLastPageIndex(lastPageIndex);
 
@@ -1104,39 +1120,71 @@ class ReaderInstance {
 			// Save the page displayed at the time of this state, so that it is available
 			// while the reader is not loaded (e.g. for an unloaded tab)
 			state.pageLabel = this.getCurrentPage();
-
-			let file = Zotero.Attachments.getStorageDirectory(item);
-			if (!(await OS.File.exists(file.path))) {
-				await Zotero.Attachments.createDirectoryForItem(item);
-			}
-			file.append(this.stateFileName);
+			this._primaryViewState = state;
 			
-			// Write the new state to disk
-			let path = file.path;
-
-			// State updates can be frequent (every scroll) and we need to debounce actually writing them to disk.
-			// We flush the debounced write operation when Zotero shuts down or the window/tab is closed.
-			if (this._pendingWriteStateTimeout) {
-				clearTimeout(this._pendingWriteStateTimeout);
-			}
-			this._pendingWriteStateFunction = async () => {
-				if (this._pendingWriteStateTimeout) {
-					clearTimeout(this._pendingWriteStateTimeout);
-				}
-				this._pendingWriteStateFunction = null;
-				this._pendingWriteStateTimeout = null;
-				
-				Zotero.debug('Writing reader state to ' + path);
-				// Using atomic `writeJSON` instead of `putContentsAsync` to avoid using temp file that causes conflicts
-				// on simultaneous writes (on slow systems)
-				await IOUtils.writeJSON(path, state);
-			};
-			this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
-
+			await this._writeStateDebounced(item, state);
+			
 			if (pageChanged) {
 				Zotero.Notifier.trigger('pageChange', 'file', item.id);
 			}
 		}
+	}
+	
+	async _handleDisplayedPageChange() {
+		await this._saveCurrentPageLabel();
+		Zotero.Notifier.trigger('pageChange', 'file', this._item.id);
+	}
+
+	// Refresh the page label saved with the state, which is used to suggest a locator while
+	// the reader is not loaded. The displayed page can belong to the secondary view of a
+	// split tab, which doesn't go through _setState().
+	async _saveCurrentPageLabel() {
+		if (this._isTransient()) {
+			return;
+		}
+		let state = this._primaryViewState;
+		if (!state) {
+			return;
+		}
+		let pageLabel = this.getCurrentPage();
+		if (state.pageLabel === pageLabel) {
+			return;
+		}
+		state.pageLabel = pageLabel;
+		let item = Zotero.Items.get(this._item.id);
+		if (item) {
+			await this._writeStateDebounced(item, state);
+		}
+	}
+	
+	async _writeStateDebounced(item, state) {
+		let file = Zotero.Attachments.getStorageDirectory(item);
+		if (!(await OS.File.exists(file.path))) {
+			await Zotero.Attachments.createDirectoryForItem(item);
+		}
+		file.append(this.stateFileName);
+		
+		// Write the new state to disk
+		let path = file.path;
+		
+		// State updates can be frequent (every scroll) and we need to debounce actually writing them to disk.
+		// We flush the debounced write operation when Zotero shuts down or the window/tab is closed.
+		if (this._pendingWriteStateTimeout) {
+			clearTimeout(this._pendingWriteStateTimeout);
+		}
+		this._pendingWriteStateFunction = async () => {
+			if (this._pendingWriteStateTimeout) {
+				clearTimeout(this._pendingWriteStateTimeout);
+			}
+			this._pendingWriteStateFunction = null;
+			this._pendingWriteStateTimeout = null;
+			
+			Zotero.debug('Writing reader state to ' + path);
+			// Using atomic `writeJSON` instead of `putContentsAsync` to avoid using temp file that causes conflicts
+			// on simultaneous writes (on slow systems)
+			await IOUtils.writeJSON(path, state);
+		};
+		this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
 	}
 	
 	async _flushState() {

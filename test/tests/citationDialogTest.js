@@ -456,6 +456,18 @@ describe("Citation Dialog", function () {
 			return Zotero.Cite.getLocatorString("page", "short").toLowerCase() + " " + page;
 		}
 
+		// The suggestion reads the reader's current page directly, so it can update before the
+		// view state that saves the page label arrives
+		async function waitForSavedPageLabel(reader, attachment, page) {
+			let savedPage;
+			for (let i = 0; i < 100 && savedPage !== page; i++) {
+				await reader._flushState();
+				savedPage = await Zotero.Reader.getSavedPageLabel(attachment.id);
+				await Zotero.Promise.delay(10);
+			}
+			assert.equal(savedPage, page);
+		}
+
 		// Pretend that the reader tab of the given attachment scrolled to the given page
 		async function changeReaderPage(attachment, page) {
 			getOpenTabPageStub.returns(page);
@@ -562,6 +574,55 @@ describe("Citation Dialog", function () {
 			await IOManager.addItemsToCitation([item]);
 			await waitForCallback(() => panel.state == "open");
 			assert.equal(option.textContent, pageSuggestionText("1"));
+
+			// Cleanup
+			panel.hidePopup();
+			win.Zotero_Tabs.close(tabID);
+			SearchHandler.clearNonLibraryItemsCache();
+		});
+
+		it("should suggest the page of the active split view of a reader tab", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importFileAttachment('wonderland_short.pdf', {
+				contentType: 'application/pdf',
+				parentID: item.id
+			});
+			// A split tab, as one is restored from a session
+			await Zotero.Reader.open(attachment.id, null, {
+				secondViewState: { pageIndex: 0, scale: 1, top: 0, left: 0, splitType: 'vertical' }
+			});
+			let tabID = win.Zotero_Tabs.selectedID;
+			let reader = Zotero.Reader.getByTabID(tabID);
+			await reader._waitForReader();
+			// View stats, which the current page comes from, are set after the view renders
+			await waitForCallback(() => reader.getCurrentPage());
+
+			// Opening a tab refocuses the dialog, which kicks off a search
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			await IOManager.addItemsToCitation([item]);
+			await waitForCallback(() => panel.state == "open");
+			assert.equal(option.textContent, pageSuggestionText("1"));
+
+			// Navigate the secondary view, which becomes the active one when focused
+			reader.focusView(false);
+			await reader.navigate({ pageIndex: 4 });
+			await waitForCallback(() => option.textContent == pageSuggestionText("5"));
+
+			// The page of the active view is saved, so that it is available once the tab is unloaded
+			await waitForSavedPageLabel(reader, attachment, "5");
+
+			// Focusing the other view switches to its page without either view moving
+			reader.focusView(true);
+			await waitForCallback(() => option.textContent == pageSuggestionText("1"));
+			await waitForSavedPageLabel(reader, attachment, "1");
+			reader.focusView(false);
+			await waitForCallback(() => option.textContent == pageSuggestionText("5"));
+
+			// Removing the split view switches back to the page of the primary view
+			reader.toggleVerticalSplit(false);
+			await waitForCallback(() => option.textContent == pageSuggestionText("1"));
 
 			// Cleanup
 			panel.hidePopup();
