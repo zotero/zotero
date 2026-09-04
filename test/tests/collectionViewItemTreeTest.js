@@ -2202,6 +2202,91 @@ describe("CollectionViewItemTree", function () {
 	})
 	
 	
+	describe("#onDragOver()", function () {
+		function fileDataTransfer() {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			return {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+		}
+		
+		// clientY ratio: first 1/6 of the row is drop-before (-1), last 1/6 is drop-after (1)
+		function dragOverFile(index, clientY) {
+			var rowEl = {
+				classList: { contains: () => false },
+				getBoundingClientRect: () => ({ y: 0, height: 100 })
+			};
+			itemsView.onDragOver({
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: rowEl,
+				target: rowEl,
+				clientY,
+				dataTransfer: fileDataTransfer()
+			}, index);
+		}
+		
+		function getIndent(node) {
+			return parseInt(node.querySelector('.cell-indent')?.style.paddingInlineStart || 0);
+		}
+		
+		function assertTopLevelUnindented(node, row) {
+			assert.equal(row.level, 0);
+			assert.equal(getIndent(node), 0);
+			let firstCell = node.querySelector('.first-column') || node.querySelector('.cell');
+			assert.ok(firstCell, "row has a first column");
+			// span.drop-before/after must not precede the title cell. :first-child first-column
+			// CSS (padding / --extra-width) otherwise treats the drop line as a cell and shifts
+			// the title as if the item were becoming a child of the incoming attachment.
+			assert.isTrue(firstCell.matches(':first-child'),
+				"first column must remain the row's first child during a between-row file drop");
+		}
+		
+		afterEach(function () {
+			itemsView._dropRow = null;
+			Zotero.DragDrop.currentOrientation = 0;
+		});
+		
+		it("should not indent a top-level item when a file drop target is a line", async function () {
+			var item1 = await createDataObject('item', { title: "Top-level A" });
+			var item2 = await createDataObject('item', { title: "Top-level B" });
+			await waitForItemsLoad(win);
+			
+			var index = itemsView.getRowIndexByID(item1.id);
+			var neighborIndex = itemsView.getRowIndexByID(item2.id);
+			assert.equal(itemsView.getRow(index).level, 0);
+			assert.equal(itemsView.getRow(neighborIndex).level, 0);
+			assert.isTrue(itemsView.canDropCheck(index, -1, fileDataTransfer()),
+				"Setup: between-row file drops are allowed");
+			
+			for (let { clientY, orient, selector } of [
+				{ clientY: 5, orient: -1, selector: 'span.drop-before' },
+				{ clientY: 95, orient: 1, selector: 'span.drop-after' }
+			]) {
+				dragOverFile(index, clientY);
+				assert.equal(Zotero.DragDrop.currentOrientation, orient);
+				assert.equal(itemsView._dropRow, index);
+				
+				let node = itemsView.tree._renderItem(index);
+				let neighborNode = itemsView.tree._renderItem(neighborIndex);
+				
+				assert.ok(node.querySelector(selector),
+					`Setup: ${selector} drop line is shown for orientation ${orient}`);
+				assertTopLevelUnindented(node, itemsView.getRow(index));
+				assertTopLevelUnindented(neighborNode, itemsView.getRow(neighborIndex));
+			}
+		});
+	});
+	
 	describe("#onDrop()", function () {
 		function drop(index, orient, dataTransfer) {
 			Zotero.DragDrop.currentOrientation = orient;
