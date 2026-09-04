@@ -16,7 +16,7 @@ describe("Citation Dialog", function () {
 		preview: () => {},
 		allCitedDataLoadedPromise: Promise.resolve(),
 	};
-	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler;
+	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler, Helpers;
 
 	before(async function () {
 		// Zotero.Cite.getLocatorString() requires styles to be initialized
@@ -30,6 +30,7 @@ describe("Citation Dialog", function () {
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
 		SearchHandler = dialog.SearchHandler;
+		Helpers = dialog.Helpers;
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
 		while (!dialog.DIALOG_STATE.loaded) {
 			await Zotero.Promise.delay(10);
@@ -430,6 +431,210 @@ describe("Citation Dialog", function () {
 			
 			// Cleanup
 			SearchHandler.searchValue = "";
+		});
+	});
+
+	describe("Page suggestion", function () {
+		let panel, option, getOpenTabPageStub;
+
+		// Add an item to the citation, pretending that it is opened in a reader tab
+		// displaying the given page, and wait for the suggestion popup to appear
+		async function addItemWithOpenTabPage(page = "12") {
+			let item = await createDataObject('item');
+			getOpenTabPageStub = sinon.stub(Helpers, "getOpenTabPage").returns(page);
+			await IOManager.addItemsToCitation([item]);
+			await waitForCallback(() => panel.state == "open");
+			return item;
+		}
+
+		function keydown(key) {
+			let input = doc.getElementById("bubble-input").getCurrentInput();
+			input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+		}
+
+		function pageSuggestionText(page) {
+			return Zotero.Cite.getLocatorString("page", "short").toLowerCase() + " " + page;
+		}
+
+		// Pretend that the reader tab of the given attachment scrolled to the given page
+		async function changeReaderPage(attachment, page) {
+			getOpenTabPageStub.returns(page);
+			await Zotero.Notifier.trigger('pageChange', 'file', [attachment.id]);
+		}
+
+		before(function () {
+			panel = doc.getElementById("page-suggestion");
+			option = doc.getElementById("page-suggestion-option");
+		});
+
+		beforeEach(function () {
+			CitationDataManager.items = [];
+			IOManager.updateBubbleInput();
+			// The guidance panel is displayed next to the same bubble, so the suggestion
+			// is not shown until it has been seen
+			Zotero.Prefs.set("firstRunGuidanceShown.citationDialog", true);
+		});
+
+		afterEach(async function () {
+			getOpenTabPageStub?.restore();
+			getOpenTabPageStub = null;
+			// Wait for the popup to be fully hidden, since a popup that is still
+			// hiding cannot be opened again by the next test
+			if (panel.state != "closed") {
+				panel.hidePopup();
+				await waitForCallback(() => panel.state == "closed");
+			}
+		});
+
+		it("should suggest the current page of an item opened in a reader tab", async function () {
+			let item = await createDataObject('item');
+			// A multi-page PDF, so that the reader can be navigated to another page
+			let attachment = await importFileAttachment('wonderland_short.pdf', {
+				contentType: 'application/pdf',
+				parentID: item.id
+			});
+			await Zotero.Reader.open(attachment.id);
+			let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+			await reader._waitForReader();
+			// View stats, which the current page comes from, are set after the view renders
+			await waitForCallback(() => reader.getCurrentPage());
+			assert.equal(reader.getCurrentPage(), "1");
+
+			// Opening a tab refocuses the dialog, which kicks off a search
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			assert.equal(await Helpers.getOpenTabPage(item), "1");
+
+			await IOManager.addItemsToCitation([item]);
+			await waitForCallback(() => panel.state == "open");
+			assert.equal(option.textContent, pageSuggestionText("1"));
+
+			// Navigating the reader to another page fires a 'pageChange' notification,
+			// which the dialog picks up to refresh the suggestion
+			await reader.navigate({ pageIndex: 2 });
+			await waitForCallback(() => option.textContent == pageSuggestionText("3"));
+			assert.equal(panel.state, "open");
+
+			// Cleanup
+			panel.hidePopup();
+			win.Zotero_Tabs.close(win.Zotero_Tabs.selectedID);
+			SearchHandler.clearNonLibraryItemsCache();
+		});
+
+		it("should suggest the last saved page of an item opened in an unloaded tab", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			await Zotero.Reader.open(attachment.id);
+			let tabID = win.Zotero_Tabs.selectedID;
+			let reader = Zotero.Reader.getByTabID(tabID);
+			await reader._waitForReader();
+			await waitForCallback(() => reader.getCurrentPage());
+			// The reader saves its state on a debounce, and there is nothing to flush
+			// until it has done so at least once
+			await waitForCallback(() => Number.isInteger(attachment.getAttachmentLastPageIndex()));
+
+			// Only an unselected tab can be unloaded. Unloading closes the reader,
+			// which flushes its state -- including the page -- to disk.
+			win.Zotero_Tabs.select("zotero-pane");
+			win.Zotero_Tabs.unload(tabID);
+			// The reader is discarded once the tab close notification is processed
+			await waitForCallback(() => !Zotero.Reader.getByTabID(tabID));
+			// The state is written asynchronously
+			let savedPage;
+			for (let i = 0; i < 100 && !savedPage; i++) {
+				savedPage = await Zotero.Reader.getSavedPageLabel(attachment.id);
+				await Zotero.Promise.delay(10);
+			}
+			assert.equal(savedPage, "1");
+			assert.equal(await Helpers.getOpenTabPage(item), "1");
+
+			// A last page index that moved past the saved state (e.g. via sync) makes the
+			// saved page stale, so nothing is suggested until the reader saves again
+			await attachment.setAttachmentLastPageIndex(5);
+			assert.isNull(await Zotero.Reader.getSavedPageLabel(attachment.id));
+			await attachment.setAttachmentLastPageIndex(0);
+			assert.equal(await Zotero.Reader.getSavedPageLabel(attachment.id), "1");
+
+			while (SearchHandler.searching) {
+				await Zotero.Promise.delay(10);
+			}
+			await IOManager.addItemsToCitation([item]);
+			await waitForCallback(() => panel.state == "open");
+			assert.equal(option.textContent, pageSuggestionText("1"));
+
+			// Cleanup
+			panel.hidePopup();
+			win.Zotero_Tabs.close(tabID);
+			SearchHandler.clearNonLibraryItemsCache();
+		});
+
+		it("should not suggest a saved EPUB page whose position is out of date", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importFileAttachment('stub.epub', {
+				contentType: 'application/epub+zip',
+				parentID: item.id
+			});
+			// Write the state the reader would have saved for an EPUB with physical page numbers
+			let cfi = 'epubcfi(/6/4!/4/2/1:0)';
+			let directory = Zotero.Attachments.getStorageDirectory(attachment);
+			await Zotero.Attachments.createDirectoryForItem(attachment);
+			await IOUtils.writeJSON(PathUtils.join(directory.path, '.zotero-reader-state'), { cfi, pageLabel: "42" });
+
+			// No synced position yet, so the saved page is trusted
+			assert.equal(await Zotero.Reader.getSavedPageLabel(attachment.id), "42");
+			await attachment.setAttachmentLastPageIndex(cfi);
+			assert.equal(await Zotero.Reader.getSavedPageLabel(attachment.id), "42");
+			// The synced position moved on, so the saved page is stale
+			await attachment.setAttachmentLastPageIndex('epubcfi(/6/8!/4/2/1:0)');
+			assert.isNull(await Zotero.Reader.getSavedPageLabel(attachment.id));
+		});
+
+		it("should add the suggested page as a locator on ArrowDown and Enter", async function () {
+			await addItemWithOpenTabPage("12");
+
+			keydown("ArrowDown");
+			assert.isTrue(option.classList.contains("highlighted"));
+
+			keydown("Enter");
+			assert.equal(CitationDataManager.items[0].locator, "12");
+			assert.equal(CitationDataManager.items[0].label, "page");
+			assert.equal(panel.state, "closed");
+			// The bubble no longer awaits a typed locator
+			assert.notOk(IOManager._justAddedBubbles);
+		});
+
+		it("should add the suggested page as a locator on click", async function () {
+			await addItemWithOpenTabPage("iv");
+
+			option.click();
+			assert.equal(CitationDataManager.items[0].locator, "iv");
+			assert.equal(CitationDataManager.items[0].label, "page");
+			assert.equal(panel.state, "closed");
+		});
+
+
+		it("should dismiss the suggestion when the bubble is no longer just-added", async function () {
+			await addItemWithOpenTabPage("12");
+
+			IOManager._clearJustAddedBubbles();
+			assert.equal(panel.state, "closed");
+		});
+
+		it("should update the suggestion when the reader tab changes page", async function () {
+			let item = await addItemWithOpenTabPage("12");
+			let attachment = await importPDFAttachment(item);
+			// Highlight the suggestion to make sure the highlight survives the update
+			keydown("ArrowDown");
+
+			await changeReaderPage(attachment, "13");
+			assert.equal(option.textContent, pageSuggestionText("13"));
+			assert.equal(panel.state, "open");
+			assert.isTrue(option.classList.contains("highlighted"));
+
+			// The updated page is what gets added as a locator
+			keydown("Enter");
+			assert.equal(CitationDataManager.items[0].locator, "13");
 		});
 	});
 
