@@ -101,6 +101,22 @@ Zotero.OSKeyStore = {
 		);
 	},
 
+	// Returns whether the store can actually be used. asyncSecretAvailable() isn't enough,
+	// since a locked or inaccessible store can still report a secret.
+	_usable: async function () {
+		let mod = this._load();
+		if (!mod) {
+			return false;
+		}
+		try {
+			await mod.encrypt('test');
+		}
+		catch {
+			return false;
+		}
+		return true;
+	},
+
 	// Mozilla's OSKeyStore reports every failure as a canceled unlock prompt, whatever the
 	// cause, so probe the native store to record what actually went wrong and return an error
 	// with a message that can be shown to the user
@@ -164,7 +180,13 @@ Zotero.OSKeyStore = {
 			binaryStr = await mod.decrypt(value.slice(this._prefix.length));
 		}
 		catch (e) {
-			throw await this._error(e, 'os-keystore-read-failed');
+			// A read can fail because the store is unusable or because the store is working
+			// and the stored value just can't be decrypted with the current key. Those need
+			// different advice, since fixing the store won't bring the value back.
+			let stringName = (await this._usable())
+				? 'os-keystore-read-unrecoverable'
+				: 'os-keystore-read-failed';
+			throw await this._error(e, stringName);
 		}
 		return new TextDecoder().decode(
 			Uint8Array.from(binaryStr, char => char.charCodeAt(0))

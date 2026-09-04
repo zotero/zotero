@@ -266,11 +266,31 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				this.skip();
 			}
 			await controller.setPassword("password");
-			var stub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
+			var decryptStub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			var encryptStub = sinon.stub(Zotero.OSKeyStore._module, "encrypt")
 				.rejects(new Error("User canceled OS unlock entry"));
 			try {
 				let e = await getPromiseError(controller.getPassword());
 				assert.equal(e.message, Zotero.getString('os-keystore-read-failed'));
+			}
+			finally {
+				decryptStub.restore();
+				encryptStub.restore();
+			}
+		})
+		
+		
+		it("should tell the user to reenter a password the keystore can't decrypt", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			await controller.setPassword("password");
+			var stub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
+				.rejects(new Error("User canceled OS unlock entry"));
+			try {
+				let e = await getPromiseError(controller.getPassword());
+				assert.equal(e.message, Zotero.getString('os-keystore-read-unrecoverable'));
 			}
 			finally {
 				stub.restore();
