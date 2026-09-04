@@ -56,6 +56,10 @@ var Zotero_Tabs = new function () {
 		get: () => document.getElementById('tabs-deck')
 	});
 
+	Object.defineProperty(this, 'windowID', {
+		get: () => this._windowID
+	});
+
 	Object.defineProperty(this, 'numTabs', {
 		get: () => this._tabs.length
 	});
@@ -69,6 +73,8 @@ var Zotero_Tabs = new function () {
 	});
 
 	this._tabBarRef = React.createRef();
+	// Identifies this window in tab notifications and in the session
+	this._windowID = 'win-' + Zotero.Utilities.randomString();
 	this._tabs = [{
 		id: 'zotero-pane',
 		type: 'library',
@@ -105,7 +111,8 @@ var Zotero_Tabs = new function () {
 					tabIndex,
 					allowDuplicate: true,
 					secondViewState: tab.data.secondViewState,
-					preventJumpback: true
+					preventJumpback: true,
+					window
 				});
 				await reader._initPromise;
 			},
@@ -115,7 +122,8 @@ var Zotero_Tabs = new function () {
 					title: tab.title,
 					tabIndex,
 					allowDuplicate: true,
-					preventJumpback: true
+					preventJumpback: true,
+					window
 				});
 				await editorInstance._initPromise;
 			}
@@ -180,24 +188,24 @@ var Zotero_Tabs = new function () {
 			reader: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID, secondViewState } = tab.data;
-				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
+				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState, window });
 			},
 			note: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID } = tab.data;
-				await Zotero.Notes.open(itemID, null, { openInWindow: true });
+				await Zotero.Notes.open(itemID, null, { openInWindow: true, window });
 			}
 		},
 		duplicate: {
 			reader: async (tab, tabIndex) => {
 				if (tab.data.itemID) {
 					let { secondViewState } = tab.data;
-					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState });
+					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState, window });
 				}
 			},
 			note: async (tab, tabIndex) => {
 				if (tab.data.itemID) {
-					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true });
+					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, window });
 				}
 			}
 		},
@@ -209,7 +217,8 @@ var Zotero_Tabs = new function () {
 						{
 							tabIndex,
 							openInBackground: true,
-							allowDuplicate: true
+							allowDuplicate: true,
+							window
 						}
 					);
 					return true;
@@ -223,7 +232,8 @@ var Zotero_Tabs = new function () {
 						{
 							tabIndex,
 							openInBackground: true,
-							allowDuplicate: true
+							allowDuplicate: true,
+							window
 						}
 					);
 					return true;
@@ -237,6 +247,10 @@ var Zotero_Tabs = new function () {
 				// At first, library tab is added without the icon data. We set it here once we know what it is
 				let libraryTab = this._getTab('zotero-pane');
 				libraryTab.tab.data = tab.data || {};
+				if (libraryTab.tab.data.state) {
+					// Not awaited, so that the other tabs are restored right away
+					ZoteroPane.restoreLibraryTabState(libraryTab.tab.data.state);
+				}
 				return {
 					itemID: null,
 				};
@@ -282,6 +296,15 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		getTitle: {
+			library: async (tab) => {
+				let collectionTreeRows = ZoteroPane.getCollectionTreeRows();
+				if (!collectionTreeRows.length) {
+					return tab.title;
+				}
+				return collectionTreeRows.length == 1
+					? collectionTreeRows[0].getName()
+					: Zotero.getString('tab-title-multiple-collections');
+			},
 			reader: async (tab) => {
 				let item = Zotero.Items.get(tab.data.itemID);
 				return item ? item.getTabTitle() : "";
@@ -333,8 +356,10 @@ var Zotero_Tabs = new function () {
 		};
 	};
 
-	// Keep track of item modifications to update the title
-	this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'tabs');
+	// Keep track of modifications to objects that tabs are named for, to update tab titles
+	this._notifierID = Zotero.Notifier.registerObserver(
+		this, ['item', 'collection', 'search', 'feed', 'group'], 'tabs'
+	);
 
 	// Update the title when pref of title format is changed
 	this._prefsObserverID = Zotero.Prefs.registerObserver('tabs.title.reader', async () => {
@@ -353,6 +378,33 @@ var Zotero_Tabs = new function () {
 		this.unloadUnusedTabs();
 	}, 60000); // Trigger every minute
 
+	/**
+	 * Extra data for a 'tab' notification, tagged with this window's id
+	 *
+	 * @param {String[]} ids - Tab ids the notification is for
+	 * @param {Object} [data] - Extra data for each tab
+	 * @return {Object}
+	 */
+	this._getNotifierExtraData = function (ids, data) {
+		let extraData = {};
+		for (let id of ids) {
+			extraData[id] = Object.assign({}, data, { windowID: this._windowID });
+		}
+		return extraData;
+	};
+	
+	/**
+	 * Whether a 'tab' notification came from this window
+	 *
+	 * @param {Object} extraData
+	 * @param {String} id - Tab id from the notification
+	 * @return {Boolean}
+	 */
+	this.isOwnTabEvent = function (extraData, id) {
+		let windowID = extraData?.[id]?.windowID;
+		return !windowID || windowID === this._windowID;
+	};
+	
 	this._getTab = function (id) {
 		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
 		return { tab: this._tabs[tabIndex], tabIndex };
@@ -549,13 +601,15 @@ var Zotero_Tabs = new function () {
 		this._loadSidebarState();
 	};
 
-	this.destroy = function () {
-		this._saveSidebarState();
-	};
-
-	// When an item is modified, update the title accordingly
+	// When an object that tabs are named for is modified, update the title accordingly
 	this.notify = async (event, type, ids, _) => {
 		if (event !== "modify") return;
+		// A renamed collection, saved search, or library can be what the library tab is
+		// named for, in this window or another one
+		if (type != 'item') {
+			this.rename('zotero-pane');
+			return;
+		}
 		for (let id of ids) {
 			let item = Zotero.Items.get(id);
 			// If a top-level item is updated, update all tabs that have its attachments and notes
@@ -580,7 +634,30 @@ var Zotero_Tabs = new function () {
 		}
 	};
 
+	/**
+	 * Store the current state of the library view on the library tab
+	 */
+	this._captureLibraryTabState = function () {
+		if (typeof ZoteroPane == 'undefined') {
+			return;
+		}
+		let { tab } = this._getTab('zotero-pane');
+		if (!tab) {
+			return;
+		}
+		try {
+			let state = ZoteroPane.captureLibraryTabState();
+			if (state) {
+				tab.data.state = state;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	};
+
 	this.getState = function () {
+		this._captureLibraryTabState();
 		return this._tabs.map((tab) => {
 			let type = tab.type;
 			// If type matches *-unloaded, use the base type
@@ -656,7 +733,9 @@ var Zotero_Tabs = new function () {
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
-		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: Object.assign({}, data, { type }) }, true);
+		Zotero.Notifier.trigger(
+			'add', 'tab', [id], this._getNotifierExtraData([id], Object.assign({}, data, { type })), true
+		);
 		if (select) {
 			let previousID = this._selectedID;
 			this.select(id);
@@ -780,7 +859,7 @@ var Zotero_Tabs = new function () {
 			});
 		}
 		this._history.push(historyEntry);
-		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
+		Zotero.Notifier.trigger('close', 'tab', [closedIDs], this._getNotifierExtraData(closedIDs));
 		this._update();
 	};
 
@@ -941,7 +1020,9 @@ var Zotero_Tabs = new function () {
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
-		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
+		Zotero.Notifier.trigger(
+			'select', 'tab', [tab.id], this._getNotifierExtraData([tab.id], { type: tab.type }), true
+		);
 
 		let currentTabContent = this.getTabContent(id);
 
@@ -1010,7 +1091,9 @@ var Zotero_Tabs = new function () {
 		}
 		let prevType = tab.type;
 		tab.type = tabContentType;
-		Zotero.Notifier.trigger("load", "tab", [id], { [id]: Object.assign({}, tab, { prevType }) }, true);
+		Zotero.Notifier.trigger(
+			"load", "tab", [id], this._getNotifierExtraData([id], Object.assign({}, tab, { prevType })), true
+		);
 	};
 
 	this.unloadUnusedTabs = function () {
@@ -1028,6 +1111,15 @@ var Zotero_Tabs = new function () {
 		for (let tab of tabs) {
 			this.unload(tab.id);
 		}
+	};
+
+	/**
+	 * Select this window's library tab
+	 *
+	 * @param {Object} [options] - Additional options, passed to select()
+	 */
+	this.selectLibraryTab = function (options = {}) {
+		this.select('zotero-pane', false, options);
 	};
 
 	/**

@@ -187,7 +187,7 @@
 
 		renderAnnotations(annotations) {
 			this.mode = "annotations";
-			let annotationsViewer = document.getElementById("zotero-annotations-pane");
+			let annotationsViewer = this.querySelector("#zotero-annotations-pane");
 			annotationsViewer.items = annotations;
 			annotationsViewer.render();
 			return true;
@@ -196,7 +196,7 @@
 		renderNoteEditor(item) {
 			this.mode = "note";
 
-			let noteEditor = document.getElementById('zotero-note-editor');
+			let noteEditor = this.querySelector('#zotero-note-editor');
 			noteEditor.mode = this.editable ? 'edit' : 'view';
 			noteEditor.viewMode = 'library';
 			noteEditor.parent = null;
@@ -522,7 +522,8 @@
 			var collectionID = this._translationTarget.objectType == 'collection' ? this._translationTarget.id : undefined;
 			var items = this.data;
 			for (let item of items) {
-				await item.translate(this._translationTarget.libraryID, collectionID);
+				await item.translate(this._translationTarget.libraryID, collectionID,
+					{ window: this.ownerDocument.defaultView });
 			}
 		}
 		

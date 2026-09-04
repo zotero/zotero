@@ -88,6 +88,7 @@ class EditorInstance {
 		this._filesReadOnly = !Zotero.Libraries.get(this._item.libraryID).filesEditable;
 		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
+		this._window = options.window;
 		this._iframeWindow = options.iframeWindow;
 		this._popup = options.popup;
 		this._state = options.state;
@@ -363,7 +364,7 @@ class EditorInstance {
 
 		if (type === 'item' && ['delete', 'trash'].includes(event) && this._tabID) {
 			if (this._item && (ids.includes(this._item.id) || ids.includes(this._item.parentItemID))) {
-				Zotero.getMainWindow().Zotero_Tabs.close(this._tabID);
+				this._getMainWindow()?.Zotero_Tabs.close(this._tabID);
 			}
 		}
 
@@ -480,11 +481,21 @@ class EditorInstance {
 		}
 	};
 	
+	/**
+	 * The main window this editor belongs to, or the most recent one if it's not in a main
+	 * window (e.g., a note window)
+	 *
+	 * @return {ChromeWindow|null}
+	 */
+	_getMainWindow() {
+		return this._window?.ZoteroPane ? this._window : Zotero.getMainWindow();
+	}
+	
 	_showInLibrary(ids) {
 		if (!Array.isArray(ids)) {
 			ids = [ids];
 		}
-		let win = Zotero.getMainWindow();
+		let win = this._getMainWindow();
 		if (win) {
 			win.ZoteroPane.selectItems(ids);
 			win.focus();
@@ -671,7 +682,7 @@ class EditorInstance {
 						this.onNavigate(attachmentURI, { position });
 					}
 					else {
-						let zp = Zotero.getActiveZoteroPane();
+						let zp = this._getMainWindow()?.ZoteroPane;
 						if (zp) {
 							let item = await Zotero.URI.getURIItem(attachmentURI);
 							if (item) {
@@ -696,7 +707,7 @@ class EditorInstance {
 						let attachments = await item.getBestAttachments();
 						attachments = attachments.filter(x => x.isPDFAttachment());
 						if (attachments.length) {
-							let zp = Zotero.getActiveZoteroPane();
+							let zp = this._getMainWindow()?.ZoteroPane;
 							if (zp) {
 								zp.viewPDF(attachments[0].id, { pageLabel: citationItem.locator });
 							}
@@ -724,7 +735,7 @@ class EditorInstance {
 				}
 				case 'openURL': {
 					let { url } = message;
-					let zp = Zotero.getActiveZoteroPane();
+					let zp = this._getMainWindow()?.ZoteroPane;
 					if (zp) {
 						zp.loadURI(url);
 					}
@@ -737,8 +748,8 @@ class EditorInstance {
 				case 'openWindow': {
 					// TODO: Can we can avoid creating empty note just to open it in a new window?
 					await this._ensureNoteCreated();
-					let zp = Zotero.getActiveZoteroPane();
-					zp.openNoteWindow(this._item.id);
+					let zp = this._getMainWindow()?.ZoteroPane;
+					zp?.openNoteWindow(this._item.id);
 					return;
 				}
 				case 'update': {
@@ -793,7 +804,7 @@ class EditorInstance {
 					}
 					let openedEmpty = !citation.citationItems.length;
 					if (!citation.citationItems.length) {
-						let win = Zotero.getMainWindow();
+						let win = this._getMainWindow();
 						if (win) {
 							let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
 							if (reader) {
@@ -838,15 +849,13 @@ class EditorInstance {
 					return;
 				}
 				case 'toggleContextPane': {
-					let win = Zotero.getMainWindow();
-					win.ZoteroContextPane.togglePane();
+					this._getMainWindow()?.ZoteroContextPane.togglePane();
 					return;
 				}
 				case 'focusBack': {
 					// If editor is in a tab, let Zotero_Tabs handle the focus
 					if (this._tabID) {
-						let win = Zotero.getMainWindow();
-						win.Zotero_Tabs.focusBack();
+						this._getMainWindow()?.Zotero_Tabs.focusBack();
 					}
 					// If the editor is in a standalone window, itemPane, or contextPane,
 					// move focus back from the iframe
@@ -860,8 +869,7 @@ class EditorInstance {
 					return;
 				}
 				case 'focusForward': {
-					let win = Zotero.getMainWindow();
-					win.Zotero_Tabs.focusForward();
+					this._getMainWindow()?.Zotero_Tabs.focusForward();
 					return;
 				}
 				case 'return': {

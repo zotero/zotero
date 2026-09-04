@@ -120,6 +120,9 @@
 				this._handleItemUpdate(action, type, ids, extraData);
 				return;
 			}
+			if (type == 'tab' && !Zotero_Tabs.isOwnTabEvent(extraData, ids[0])) {
+				return;
+			}
 			if (type == 'tab' && action == 'add') {
 				this._handleTabAdd(action, type, ids, extraData);
 				return;

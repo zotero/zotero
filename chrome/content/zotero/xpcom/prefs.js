@@ -375,7 +375,9 @@ Zotero.Prefs = new function () {
 			Zotero.UIProperties.setAll();
 		}],
 		[ "layout", function (val) {
-			Zotero.getActiveZoteroPane().updateLayout();
+			for (let pane of Zotero.getZoteroPanes()) {
+				pane.updateLayout();
+			}
 		}],
 		[ "note.fontSize", function (val) {
 			if (val < 6) {
@@ -400,7 +402,9 @@ Zotero.Prefs = new function () {
 				Zotero.Prefs.set('sync.reminder.autoSync.lastDisplayed', Math.round(Date.now() / 1000));
 			}
 			try {
-				Zotero.getActiveZoteroPane().initSyncReminders(false);
+				for (let pane of Zotero.getZoteroPanes()) {
+					pane.initSyncReminders(false);
+				}
 			}
 			catch (e) {
 				Zotero.logError(e);

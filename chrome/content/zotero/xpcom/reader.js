@@ -104,6 +104,15 @@ class ReaderInstance {
 		return this._type;
 	}
 
+	/**
+	 * The main window this reader belongs to, or the most recent one for a reader window
+	 *
+	 * @return {ChromeWindow|null}
+	 */
+	_getMainWindow() {
+		return this._window?.ZoteroPane ? this._window : Zotero.getMainWindow();
+	}
+	
 	async focus() {
 		await this._waitForReader();
 		this._iframeWindow.focus();
@@ -361,10 +370,7 @@ class ReaderInstance {
 					await this._setState(state);
 				}
 				else if (this.tabID) {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.Zotero_Tabs.setTabData(this.tabID, { secondViewState: state });
-					}
+					this._window.Zotero_Tabs.setTabData(this.tabID, { secondViewState: state });
 				}
 			},
 			onOpenTagsPopup: (id, x, y) => {
@@ -386,7 +392,7 @@ class ReaderInstance {
 				}
 			},
 			onOpenLink: (url) => {
-				let win = Services.wm.getMostRecentWindow('navigator:browser');
+				let win = this._getMainWindow();
 				if (win) {
 					win.ZoteroPane.loadURI(url);
 				}
@@ -566,20 +572,17 @@ class ReaderInstance {
 			},
 			onToggleContextPane: () => {
 				Zotero.debug('toggle context pane');
-				let win = Zotero.getMainWindow();
-				win.ZoteroContextPane.togglePane();
+				this._window.ZoteroContextPane?.togglePane();
 			},
 			onToolbarShiftTab: () => {
 				// Shift-tab from the toolbar focuses the sync button (if reader instance is opened in a tab)
 				if (!this.tabID) return;
-				let win = Zotero.getMainWindow();
-				win.Zotero_Tabs.focusBack();
+				this._window.Zotero_Tabs.focusBack();
 			},
 			onIframeTab: () => {
 				// Tab after the last tabstop will focus the contextPane (if reader instance is opened in a tab)
 				if (!this.tabID) return;
-				let win = Zotero.getMainWindow();
-				win.Zotero_Tabs.focusForward();
+				this._window.Zotero_Tabs.focusForward();
 			},
 			onSetZoom: (iframe, zoom) => {
 				iframe.browsingContext.textZoom = 1;
@@ -998,12 +1001,14 @@ class ReaderInstance {
 	}
 
 	export() {
-		let zp = Zotero.getActiveZoteroPane();
-		zp.exportPDF(this._item.id);
+		let win = this._getMainWindow();
+		if (win) {
+			win.ZoteroPane.exportPDF(this._item.id);
+		}
 	}
 
 	showInLibrary() {
-		let win = Zotero.getMainWindow();
+		let win = this._getMainWindow();
 		if (win) {
 			let item = Zotero.Items.get(this._item.id);
 			let id = item.parentID || item.id;
@@ -1541,10 +1546,7 @@ class ReaderInstance {
 
 	_updateSecondViewState() {
 		if (this.tabID) {
-			let win = Zotero.getMainWindow();
-			if (win) {
-				win.Zotero_Tabs.setTabData(this.tabID, { secondViewState: this.getSecondViewState() });
-			}
+			this._window.Zotero_Tabs.setTabData(this.tabID, { secondViewState: this.getSecondViewState() });
 		}
 	}
 
@@ -1957,7 +1959,7 @@ class ReaderTab extends ReaderInstance {
 		this._showContextPaneToggle = true;
 		this._readAloudPlaying = false;
 		this._pointerDownWindow = null;
-		this._window = Services.wm.getMostRecentWindow('navigator:browser');
+		this._window = options.window || Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
 		// If an unloaded tab for this item already exists, load the reader in it.
@@ -2210,7 +2212,7 @@ class ReaderWindow extends ReaderInstance {
 		this._bottomPlaceholderHeight = 0;
 		this._onClose = options.onClose;
 
-		let win = Services.wm.getMostRecentWindow('navigator:browser');
+		let win = options.window || Services.wm.getMostRecentWindow('navigator:browser');
 		if (!win) return;
 
 		this._window = win.open(
@@ -2904,10 +2906,10 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback, window: ownerWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = Zotero.getMainWindow();
+		let win = ownerWindow || Zotero.getMainWindow();
 
 		await library.waitForDataLoad('item');
 
@@ -2919,10 +2921,12 @@ class Reader {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
+		// A tab is only a duplicate of another tab in the same window
+		let inWindow = r => !(r instanceof ReaderTab) || r._window === win;
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
 		if (!allowDuplicate && !this._readers.find(
-			r => r.itemID === itemID && (openInWindow || !r._isTabClosed)
+			r => r.itemID === itemID && (openInWindow || (!r._isTabClosed && inWindow(r)))
 		)) {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
@@ -2937,7 +2941,9 @@ class Reader {
 			reader = this._readers.find(r => r.itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else if (!allowDuplicate) {
-			reader = this._readers.find(r => r.itemID === itemID && !r._isTabClosed);
+			reader = this._readers.find(
+				r => r.itemID === itemID && !r._isTabClosed && inWindow(r)
+			);
 		}
 
 		if (reader) {
@@ -2954,6 +2960,7 @@ class Reader {
 				item,
 				location,
 				secondViewState,
+				window: win,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight,
@@ -2973,6 +2980,7 @@ class Reader {
 				title,
 				index: tabIndex,
 				tabID,
+				window: win,
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,

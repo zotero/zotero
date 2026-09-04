@@ -167,6 +167,9 @@ menu-view-note-tab-font-size =
 menu-show-tabs-menu =
     .label = Show Tabs Menu
 
+menu-new-window =
+    .label = New Window
+
 menu-edit-copy-annotation =
     .label = { $count ->
         [one] Copy Annotation
@@ -242,6 +245,8 @@ items-section-library-sources =
     }
 items-section-library-recently-read = { $library } ({ recently-read })
 items-section-library = { $library }
+collections-menu-open-in-new-window =
+    .label = Open in New Window
 collections-menu-rename =
     .label = Rename
 edit-saved-search = Edit Saved Search

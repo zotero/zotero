@@ -44,6 +44,7 @@ class TagList extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.collectionRef = React.createRef();
+		this.listContainerRef = React.createRef();
 		this.scrollToTopOnNextUpdate = false;
 		this.prevTagCount = 0;
 		this.focusedTagIndex = null;
@@ -84,7 +85,7 @@ class TagList extends React.PureComponent {
 	scrollToTop() {
 		if (!this.collectionRef.current) return;
 		// Scroll to the top of the view
-		document.querySelector('.tag-selector-list').scrollTop = 0;
+		this.tagSelectorList().scrollTop = 0;
 		// Reset internal component scroll state to force it to redraw components, since that
 		// doesn't seem to happen automatically as of 9.21.0. Without this, scrolling down and
 		// clicking on a tag blanks out the pane (presumably because it still thinks it's at an
@@ -224,7 +225,9 @@ class TagList extends React.PureComponent {
 	};
 
 	tagSelectorList() {
-		return document.querySelector('.tag-selector-list');
+		return this.listContainerRef.current
+			? this.listContainerRef.current.querySelector('.tag-selector-list')
+			: null;
 	}
 
 	isEmpty() {
@@ -240,7 +243,7 @@ class TagList extends React.PureComponent {
 	// non-disabled tag. If there are no enabled tags, focus the first visible tag.
 	async focus() {
 		if (this.isEmpty()) {
-			document.querySelector('.tag-selector-list').focus();
+			this.tagSelectorList()?.focus();
 			return;
 		}
 		if (this.focusedTagIndex === null) {
@@ -262,7 +265,7 @@ class TagList extends React.PureComponent {
 
 	// Try to refocus a focused tag that was removed due to windowing
 	refocusTag() {
-		let tagsList = document.querySelector('.tag-selector-list');
+		let tagsList = this.tagSelectorList();
 		let tagsNodes = [...tagsList.querySelectorAll(".tag-selector-item")];
 		let tagToFocus = this.props.tags[this.focusedTagIndex];
 		let nodeToFocus = tagsNodes.find(node => node.textContent == tagToFocus.name);
@@ -280,7 +283,7 @@ class TagList extends React.PureComponent {
 	}
 
 	handleSectionRendered = ({ indices }) => {
-		let tagsList = document.querySelector('.tag-selector-list');
+		let tagsList = this.tagSelectorList();
 		// <Collection> sets role="grid" which is not semantically correct
 		tagsList.setAttribute("role", "group");
 
@@ -363,7 +366,7 @@ class TagList extends React.PureComponent {
 					verticalOverscanSize={300}
 					width={this.props.width}
 					height={this.props.height - filterBarHeight}
-					aria-label={document.querySelector("#zotero-tag-selector").getAttribute("label") || ""}
+					aria-label={this.props.label || ""}
 					onSectionRendered={this.handleSectionRendered}
 					scrollToCell={Number.isInteger(this.state.scrollToCell) ? this.state.scrollToCell : undefined}
 				/>
@@ -371,7 +374,7 @@ class TagList extends React.PureComponent {
 		}
 		
 		return (
-			<div className="tag-selector-list-container" onKeyDown={this.handleKeyDown.bind(this)}>
+			<div className="tag-selector-list-container" ref={this.listContainerRef} onKeyDown={this.handleKeyDown.bind(this)}>
 				{tagList}
 			</div>
 		);
@@ -385,6 +388,7 @@ class TagList extends React.PureComponent {
 			disabled: PropTypes.bool,
 			width: PropTypes.number
 		})),
+		label: PropTypes.string,
 		dragObserver: PropTypes.shape({
 			onDragOver: PropTypes.func,
 			onDragExit: PropTypes.func,

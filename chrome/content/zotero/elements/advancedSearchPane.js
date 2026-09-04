@@ -119,6 +119,10 @@
 			return this._active;
 		}
 		
+		set active(active) {
+			this._active = !!active;
+		}
+		
 		set search(search) {
 			this._active = false;
 			if (this.type === 'saved') {
@@ -267,7 +271,6 @@
 				search.name = this._nameField.value;
 				await search.saveTx();
 				await ZoteroPane.setSavedSearchEditorState('closed');
-				Zotero_Tabs.rename('zotero-pane', search.name);
 				return;
 			}
 

@@ -93,6 +93,7 @@
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="ZoteroPane.handleClose(event)"/>
+		<command id="cmd_zotero_newWindow" oncommand="ZoteroPane.newWindow()"/>
 		
 		<!--EDIT-->
 		<command id="cmd_find"
@@ -151,6 +152,7 @@
 	</keyset>
 
 	<keyset id="mainKeyset">
+		<key id="key_newWindow" key="N" command="cmd_zotero_newWindow" modifiers="accel"/>
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_quitApplication"
 			key="&quitApplicationCmdMac.key;"
@@ -237,6 +239,11 @@
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 						<menupopup id="menu_FilePopup"
 									onpopupshowing="ZoteroStandalone.onFileMenuOpen(event)">
+							<menuitem id="menu_newWindow"
+									data-l10n-id="menu-new-window"
+									key="key_newWindow"
+									command="cmd_zotero_newWindow"/>
+							<menuseparator/>
 							<menu id="menu_newItem" class="menu-type-library" label="&zotero.toolbar.newItem.label;">
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
@@ -932,6 +939,8 @@
 		<menupopup id="zotero-collectionmenu"
 				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 			<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
+			<menuitem data-l10n-id="collections-menu-open-in-new-window"/>
+			<menuseparator/>
 			<menuitem class="zotero-menuitem-sync"/>
 			<menuseparator/>
 			<menuitem class="zotero-menuitem-new-collection" data-l10n-id="menu-new-collection"/>

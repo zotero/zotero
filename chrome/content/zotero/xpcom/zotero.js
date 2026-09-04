@@ -383,7 +383,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		
 		Services.obs.addObserver({
 			observe: function () {
-				Zotero.Session.save();
+				Zotero.Session.saveFinalState();
 			}
 		}, "quit-application-granted", false);
 		
@@ -1101,12 +1101,23 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	}
 	
 	
-	this.openMainWindow = function () {
+	/**
+	 * Open a new main window
+	 *
+	 * @param {Object} [args] - Passed to the new window as window.arguments[0]
+	 * @param {String} [args.sessionWindowID] - The id of the session pane state the window
+	 *     should restore
+	 * @param {Object} [args.libraryTabState] - The view state for the window's library tab, as
+	 *     returned by ZoteroPane.captureLibraryTabState()
+	 * @return {ChromeWindow}
+	 */
+	this.openMainWindow = function (args) {
 		var chromeURI = AppConstants.BROWSER_CHROME_URL;
 		var flags = "chrome,all,dialog=no,resizable=yes";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
-		ww.openWindow(null, chromeURI, '_blank', flags, null);
+		// Box the args so they reliably cross openWindow()'s nsISupports argument
+		return ww.openWindow(null, chromeURI, '_blank', flags, args ? { wrappedJSObject: args } : null);
 	}
 	
 	
@@ -1466,7 +1477,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			
 			// Display as popup progress window
 			if (popup) {
-				var pw = new Zotero.ProgressWindow();
+				var pw = new Zotero.ProgressWindow({ window: win });
 				pw.changeHeadline(Zotero.getString('general.errorHasOccurred'));
 				pw.addDescription(msg);
 				pw.show();
