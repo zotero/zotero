@@ -202,12 +202,12 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		undoClose: {
-			reader: async (tab, _tabIndex) => {
+			reader: async (tab, tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					await Zotero.Reader.open(tab.data.itemID,
 						null,
 						{
-							tabIndex: tab.index,
+							tabIndex,
 							openInBackground: true,
 							allowDuplicate: true
 						}
@@ -216,12 +216,12 @@ var Zotero_Tabs = new function () {
 				}
 				return false;
 			},
-			note: async (tab, _tabIndex) => {
+			note: async (tab, tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					await Zotero.Notes.open(tab.data.itemID,
 						null,
 						{
-							tabIndex: tab.index,
+							tabIndex,
 							openInBackground: true,
 							allowDuplicate: true
 						}
