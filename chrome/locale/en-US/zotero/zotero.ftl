@@ -362,6 +362,8 @@ item-button-view-online =
 
 file-renaming-file-renamed-to = File renamed to { $filename }
 
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
+
 itembox-button-options =
     .tooltiptext = Open context menu
 itembox-button-merge =

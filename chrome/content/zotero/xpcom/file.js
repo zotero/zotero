@@ -1727,16 +1727,27 @@ Zotero.File = new function () {
 		if (e.name == 'NS_ERROR_FILE_ACCESS_DENIED' || e.name == 'NS_ERROR_FILE_IS_LOCKED'
 				// These show up on some Windows systems
 				|| e.name == 'NS_ERROR_FAILURE' || e.name == 'NS_ERROR_FILE_NOT_FOUND'
+				// NS_ERROR_FILE_FS_CORRUPTED (Windows ERROR_FILE_CORRUPT/ERROR_DISK_CORRUPT), which
+				// isn't in Components.results or exposed as an exception name
+				|| e.result == 0x80520016
 				// OS.File.Error
 				|| e.becauseAccessDenied || e.becauseNoSuchFile
 				// IOUtils
 				|| e.name == 'NotAllowedError'
 				|| e.name == 'ReadOnlyError'
 				|| e.name == 'NotFoundError') {
-			let checkFileWindows = Zotero.getString('file.accessError.message.windows');
-			let checkFileOther = Zotero.getString('file.accessError.message.other');
+			let checkFile;
+			if (e.result == 0x80520016) {
+				checkFile = Zotero.ftl.formatValueSync('file-access-error-fs-corrupted');
+			}
+			else if (Zotero.isWin) {
+				checkFile = Zotero.getString('file.accessError.message.windows');
+			}
+			else {
+				checkFile = Zotero.getString('file.accessError.message.other');
+			}
 			let msg = str + "\n\n"
-					+ (Zotero.isWin ? checkFileWindows : checkFileOther)
+					+ checkFile
 					+ "\n\n"
 					+ Zotero.getString('file.accessError.restart');
 			
