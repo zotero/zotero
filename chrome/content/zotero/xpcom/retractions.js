@@ -525,9 +525,10 @@ Zotero.Retractions = {
 			return;
 		}
 		
-		// Download list
+		// Download list. Skip the conditional request if the cached list was saved by a
+		// different version, so that a version bump forces a full refresh of stored data.
 		var headers = {};
-		if (this._cacheETag) {
+		if (this._cacheETag && this._cacheVersion == this._version) {
 			headers["If-None-Match"] = this._cacheETag;
 		}
 		var req = await Zotero.HTTP.request(
