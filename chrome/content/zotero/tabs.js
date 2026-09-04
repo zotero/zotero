@@ -86,7 +86,7 @@ var Zotero_Tabs = new function () {
 	this._history = [];
 	this._focusOptions = {};
 
-	this._loadableTypes = ['reader', 'note'];
+	this._loadableTypes = ['reader', 'note', 'library'];
 
 	this._hasContextPaneTypes = ['reader', 'note'];
 
@@ -1289,6 +1289,10 @@ var Zotero_Tabs = new function () {
 	this.canUnload = function (id) {
 		var { tab } = this._getTab(id);
 		return tab && tab.id !== this._selectedID && this._loadableTypes.includes(tab.type)
+			// A window's last loaded library view stays, so that the window remains a main window
+			// for plugins and for library actions (e.g., connector saves)
+			&& !(this._isLibraryTab(tab) && (!ZoteroPane.getLibraryView(tab.id)?.loaded
+				|| ZoteroPane.libraryViews.filter(view => view.loaded).length < 2))
 			&& !(tab.audioStatus && tab.audioStatus.active && !tab.audioStatus.paused);
 	};
 
@@ -1297,8 +1301,8 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		var { tab, tabIndex } = this._getTab(id);
-		// The tab stays open, so it isn't reopenable
-		this.close(tab.id, { skipHistory: true });
+		// The tab stays in place, so it isn't reopenable and can't be the last one to go
+		this.close(tab.id, { skipHistory: true, skipWindowClose: true });
 		this.add({
 			id: tab.id,
 			type: `${tab.type}-unloaded`,
@@ -1332,11 +1336,14 @@ var Zotero_Tabs = new function () {
 		// TODO: also proactively unload note tabs, though they are already lazy loaded
 		// We don't for now because the open-with-location is not implemented.
 		// Unload them will cause cursor position to be reset.
-		let tabs = this._tabs.slice().filter(x => x.type === 'reader');
-		tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
-		tabs = tabs.slice(MAX_LOADED_TABS);
-		for (let tab of tabs) {
-			this.unload(tab.id);
+		// Each type gets its own allowance of loaded tabs
+		for (let type of ['reader', 'library']) {
+			let tabs = this._tabs.slice().filter(x => x.type === type);
+			tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
+			tabs = tabs.slice(MAX_LOADED_TABS);
+			for (let tab of tabs) {
+				this.unload(tab.id);
+			}
 		}
 	};
 

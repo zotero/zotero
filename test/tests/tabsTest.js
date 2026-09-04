@@ -358,6 +358,84 @@ describe("Zotero_Tabs", function() {
 			assert.deepEqual(getRowIDs(view), ['C' + collection2.id]);
 		});
 		
+		it("should restore an unloaded library tab when it's selected again", async function () {
+			let { id, view } = await addLibraryTab({ collections: ['C' + collection2.id] });
+			view.getElement('zotero-tb-search').value = 'Item Two';
+			await view.search();
+			await view.itemsView.selectItem(item2.id);
+			let title = tabs._getTab(id).tab.title;
+			let historyLength = tabs._history.length;
+			
+			tabs.select(zp.primaryLibraryView.tabID);
+			assert.isTrue(tabs.canUnload(id));
+			tabs.unload(id);
+			await Zotero.Promise.delay(50);
+			
+			let { tab, tabIndex } = tabs._getTab(id);
+			assert.isNull(zp.getLibraryView(id));
+			assert.equal(tab.type, 'library-unloaded');
+			assert.equal(tab.title, title);
+			assert.equal(tabIndex, 1);
+			// An unloaded tab isn't a closed one
+			assert.lengthOf(tabs._history, historyLength);
+			
+			tabs.select(id);
+			let restoredView = await waitForLibraryView(id);
+			assert.notEqual(restoredView, view);
+			assert.deepEqual(getRowIDs(restoredView), ['C' + collection2.id]);
+			assert.equal(restoredView.getElement('zotero-tb-search').value, 'Item Two');
+			assert.sameMembers(restoredView.itemsView.getSelectedItems(true), [item2.id]);
+		});
+		
+		it("should make the next library view primary when the primary view is unloaded", async function () {
+			let primaryView = zp.libraryView;
+			let primaryID = primaryView.tabID;
+			let { view } = await addLibraryTab({ collections: ['C' + collection2.id] });
+			assert.equal(zp.primaryLibraryView, primaryView);
+			assert.isTrue(tabs.canUnload(primaryID));
+			
+			tabs.unload(primaryID);
+			
+			assert.equal(zp.primaryLibraryView, view);
+			assert.equal(zp.libraryView, view);
+			let { tab, tabIndex } = tabs._getTab(primaryID);
+			assert.equal(tab.type, 'library-unloaded');
+			assert.equal(tabIndex, 0);
+		});
+		
+		it("should unload library tabs beyond the loaded-tab cap", async function () {
+			this.timeout(60000);
+			// More library tabs than the cap allows
+			for (let i = 0; i < 6; i++) {
+				await addLibraryTab();
+			}
+			let libraryTabs = tabs._tabs.filter(tab => tabs.isLibraryTab(tab.id));
+			let titles = new Map(libraryTabs.map(tab => [tab.id, tab.title]));
+			
+			tabs.unloadUnusedTabs();
+			
+			let loadedIDs = libraryTabs.map(tab => tab.id).filter(id => zp.getLibraryView(id));
+			assert.isBelow(loadedIDs.length, libraryTabs.length);
+			assert.include(loadedIDs, tabs.selectedID);
+			// Unloaded tabs keep their place and title
+			for (let [index, { id }] of libraryTabs.entries()) {
+				assert.equal(tabs._getTab(id).tabIndex, index);
+				assert.equal(tabs._getTab(id).tab.title, titles.get(id));
+			}
+		});
+		
+		it("should not unload a window's last loaded library view", async function () {
+			let libraryTabID = zp.libraryView.tabID;
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			await reader._initPromise;
+			assert.equal(tabs.selectedID, reader.tabID);
+			assert.isFalse(tabs.canUnload(libraryTabID));
+			
+			let { id } = await addLibraryTab();
+			tabs.select(reader.tabID);
+			assert.isTrue(tabs.canUnload(id));
+		});
+		
 		it("should keep working in a window with no library view", async function () {
 			let win2 = await loadZoteroPane();
 			try {
