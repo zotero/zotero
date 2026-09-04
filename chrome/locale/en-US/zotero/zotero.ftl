@@ -1204,6 +1204,13 @@ os-keystore-read-failed =
        *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
 
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+
 os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
 
 os-keystore-save-unencrypted-button = Save Anyway
