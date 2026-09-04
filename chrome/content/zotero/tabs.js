@@ -722,8 +722,10 @@ var Zotero_Tabs = new function () {
 	 * Close tabs
 	 *
 	 * @param {String|Array<String>|undefined} ids One or more ids, or empty for the current tab
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.skipHistory=false] - Don't make the tabs reopenable with undoClose()
 	 */
-	this.close = function (ids) {
+	this.close = function (ids, { skipHistory = false } = {}) {
 		if (!ids) {
 			ids = [this._selectedID];
 		}
@@ -779,7 +781,9 @@ var Zotero_Tabs = new function () {
 				}
 			});
 		}
-		this._history.push(historyEntry);
+		if (!skipHistory) {
+			this._history.push(historyEntry);
+		}
 		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
 		this._update();
 	};
@@ -990,7 +994,8 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		var { tab, tabIndex } = this._getTab(id);
-		this.close(tab.id);
+		// The tab stays open, so it isn't reopenable
+		this.close(tab.id, { skipHistory: true });
 		this.add({
 			id: tab.id,
 			type: `${tab.type}-unloaded`,

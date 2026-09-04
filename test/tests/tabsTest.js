@@ -41,6 +41,24 @@ describe("Zotero_Tabs", function() {
 		});
 	});
 
+	describe("#unload()", function () {
+		it("should not make an unloaded tab reopenable", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importPDFAttachment(item);
+			let reader = await Zotero.Reader.open(attachment.id);
+			let tabs = win.Zotero_Tabs;
+			tabs.select('zotero-pane');
+			let historyLength = tabs._history.length;
+			
+			tabs.unload(reader.tabID);
+			
+			let { tab } = tabs._getTab(reader.tabID);
+			assert.equal(tab.type, 'reader-unloaded');
+			assert.lengthOf(tabs._history, historyLength);
+			tabs.close(reader.tabID);
+		});
+	});
+
 	describe("Window teardown", function () {
 		it("should not leave observers registered after a window is closed", async function () {
 			this.timeout(60000);
