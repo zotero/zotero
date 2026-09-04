@@ -98,6 +98,27 @@
 	margin-inline-start: 6px;
 }
 
+#semantic-search-progress {
+	display: grid;
+	grid-template-columns: max-content 1fr max-content;
+	align-items: center;
+	column-gap: 8px;
+	row-gap: 4px;
+	margin-top: 4px;
+	
+	.semantic-search-progress-row {
+		display: contents;
+		
+		&[hidden] {
+			display: none;
+		}
+	}
+	
+	progress {
+		width: 100%;
+	}
+}
+
 #db-maintenance-options {
 	display: flex;
 	gap: 6px;

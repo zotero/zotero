@@ -1632,6 +1632,18 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
 			];
+			// Status reports the ledger, and items apart from it
+			let assertStatusMatchesLedger = async () => {
+				let { items, chunks } = Zotero.Embeddings.Indexing.getStatus();
+				assert.isAtLeast(items.done, 1);
+				assert.isAtLeast(items.total, items.done);
+				let ledger = await Zotero.DB.rowQueryAsync(
+					"SELECT COALESCE(SUM(chunks), 0) AS total, COALESCE(SUM(embedded), 0) AS done "
+						+ "FROM embeddings.itemChunkCounts"
+				);
+				assert.deepEqual(chunks, { done: ledger.done, total: ledger.total });
+				return chunks;
+			};
 			try {
 				Zotero.Prefs.set('embeddings.indexFulltext', true);
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1640,6 +1652,8 @@ describe("Zotero.Embeddings", function () {
 					attachment.id
 				);
 				assert.isAbove(counted, 1);
+				let chunks = await assertStatusMatchesLedger();
+				assert.isAtLeast(chunks.total - chunks.done, counted);
 				assert.equal(await Zotero.DB.valueQueryAsync(
 					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
 					attachment.id
@@ -1650,8 +1664,21 @@ describe("Zotero.Embeddings", function () {
 					item.id
 				), 0);
 
+				// The count marks the attachment as extracted, so the next
+				// run goes straight to embedding it
 				failAttachment = false;
-				await Zotero.Embeddings.Indexing.startIndexing();
+				Zotero.SDT.ensure.resetHistory();
+				let phases = new Set();
+				let listener = status => phases.add(status.phase);
+				Zotero.Embeddings.Indexing.addProgressListener(listener);
+				try {
+					await Zotero.Embeddings.Indexing.startIndexing();
+				}
+				finally {
+					Zotero.Embeddings.Indexing.removeProgressListener(listener);
+				}
+				assert.isFalse(Zotero.SDT.ensure.calledWith(attachment.id));
+				assert.notInclude([...phases], 'extracting');
 				assert.equal(await Zotero.DB.valueQueryAsync(
 					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?",
 					attachment.id
@@ -1661,6 +1688,83 @@ describe("Zotero.Embeddings", function () {
 						+ "WHERE itemID=? AND embedding IS NOT NULL",
 					attachment.id
 				), counted);
+				await assertStatusMatchesLedger();
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should store an attachment's chunks as they're embedded and resume from them", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of resumed attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			// More chunks than fit one engine call, so the attachment spans
+			// several batches
+			let sections = [];
+			for (let i = 0; i < 12; i++) {
+				sections.push(sdtSection('', i, ['Owls hunt at night. '.repeat(200)]));
+			}
+			// The first batch with the attachment's text succeeds, the next
+			// one fails, so the run ends with the attachment partly stored
+			let hunts = 0;
+			let failSecond = true;
+			let embedded = [];
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (texts) => {
+					if (texts.some(text => text.includes('hunt'))) {
+						if (failSecond && ++hunts === 2) {
+							throw new Error('Embedding failed');
+						}
+						embedded.push(...texts.filter(text => text.includes('hunt')));
+					}
+					return texts.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
+			];
+			let ledgerRow = () => Zotero.DB.rowQueryAsync(
+				"SELECT chunks, embedded FROM embeddings.itemChunkCounts WHERE itemID=?",
+				attachment.id
+			);
+			let storedRows = () => Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings "
+					+ "WHERE itemID=? AND embedding IS NOT NULL",
+				attachment.id
+			);
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				let { chunks, embedded: stored } = await ledgerRow();
+				assert.isAbove(chunks, 20);
+				assert.isAbove(stored, 0);
+				assert.isBelow(stored, chunks);
+				assert.equal(await storedRows(), stored);
+				assert.equal(embedded.length, stored);
+
+				// The next run embeds only what's missing
+				failSecond = false;
+				embedded = [];
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(embedded.length, chunks - stored);
+				let after = await ledgerRow();
+				assert.equal(after.chunks, chunks);
+				assert.equal(after.embedded, chunks);
+				assert.equal(await storedRows(), chunks);
+
+				// ...and a complete attachment isn't read again
+				let reads = Zotero.SDT.getSections.callCount;
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(Zotero.SDT.getSections.callCount, reads);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -2082,22 +2186,20 @@ describe("Zotero.Embeddings", function () {
 				Zotero.Prefs.set('embeddings.indexFulltext', true);
 				await Zotero.Embeddings.Indexing.startIndexing();
 
-				// The attempt is recorded as a single embedding-less row, so
-				// the item counts as processed and the progress counts align
-				let rows = await Zotero.DB.queryAsync(
-					"SELECT embedding, sourceHash FROM embeddings.itemEmbeddings WHERE itemID=?",
+				// The attempt is recorded as a complete ledger row of zero
+				// chunks, so the item counts as processed with nothing stored
+				let row = await Zotero.DB.rowQueryAsync(
+					"SELECT chunks, embedded FROM embeddings.itemChunkCounts WHERE itemID=?",
 					attachment.id
 				);
-				assert.lengthOf(rows, 1);
-				assert.isNull(rows[0].embedding);
-				assert.ok(rows[0].sourceHash);
-				// Sections are read once to count chunks at extraction and
-				// once to embed
-				assert.equal(ourCalls(), 2);
+				assert.equal(row.chunks, 0);
+				assert.equal(row.embedded, 0);
 				assert.equal(await Zotero.DB.valueQueryAsync(
-					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?",
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
 					attachment.id
 				), 0);
+				// Sections are read once, to count chunks at extraction
+				assert.equal(ourCalls(), 1);
 
 				// A processed-but-empty item can't be scored, and doesn't
 				// break scoring for anything else
@@ -2107,7 +2209,7 @@ describe("Zotero.Embeddings", function () {
 				// The record makes later passes skip the attachment without
 				// re-extracting, until the file changes
 				await Zotero.Embeddings.Indexing.startIndexing();
-				assert.equal(ourCalls(), 2);
+				assert.equal(ourCalls(), 1);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());

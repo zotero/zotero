@@ -163,9 +163,8 @@ Zotero_Preferences.Advanced = {
 
 		// Phase / status message
 		let phaseLabel = document.getElementById('semantic-search-phase');
-		let hasRemaining = status.libraries.some(
-			lib => lib.indexed < lib.eligible
-				|| lib.indexedAttachments < lib.eligibleAttachments);
+		let hasRemaining = status.items.done < status.items.total
+			|| status.chunks.done < status.chunks.total;
 		if (status.error) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
 		}
@@ -225,32 +224,27 @@ Zotero_Preferences.Advanced = {
 		stopButton.hidden = !status.indexing;
 		stopButton.disabled = !!status.stopping;
 
-		// Per-library "indexed / total" counts
-		let grid = document.getElementById('semantic-search-libraries');
-		if (grid.childElementCount !== status.libraries.length * 2) {
-			grid.textContent = '';
-			for (let i = 0; i < status.libraries.length; i++) {
-				grid.append(document.createXULElement('label'), document.createXULElement('label'));
-			}
-		}
-		status.libraries.forEach((lib, i) => {
-			grid.children[i * 2].setAttribute(
-				'value',
-				Zotero.Utilities.Internal.stringWithColon(lib.name)
-			);
-			// Attachment fulltext is reported on its own, since it's a much
-			// larger and much slower job than the rest -- one combined count
-			// would look stalled. With fulltext indexing off, none are
-			// eligible and only the item count is shown.
-			let counts = `${lib.indexed.toLocaleString()} / ${lib.eligible.toLocaleString()}`;
-			if (lib.eligibleAttachments) {
-				counts += ` ${Zotero.getString('general.and')} `
-					+ `${lib.indexedAttachments.toLocaleString()} / `
-					+ `${lib.eligibleAttachments.toLocaleString()} `
-					+ Zotero.getString('itemTypes.attachment');
-			}
-			grid.children[i * 2 + 1].setAttribute('value', counts);
-		});
+		// One bar for items, notes and annotations, one for attachment full
+		// text
+		document.getElementById('semantic-search-items-row').hidden = !status.items.total;
+		this._updateSemanticSearchBar('items', status.items);
+		document.getElementById('semantic-search-attachments-row').hidden
+			= !Zotero.Prefs.get('embeddings.indexFulltext');
+		this._updateSemanticSearchBar('attachments', status.chunks);
+	},
+
+
+	// Fill one progress row with done out of total. The percentage is
+	// rounded down, so it reads 100% only when everything is done.
+	_updateSemanticSearchBar: function (name, { done, total }) {
+		let bar = document.getElementById(`semantic-search-${name}-progress`);
+		bar.max = Math.max(total, 1);
+		bar.value = done;
+		document.l10n.setAttributes(
+			document.getElementById(`semantic-search-${name}-value`),
+			'preferences-advanced-semantic-search-progress-value',
+			{ done, total, percent: total ? Math.floor(done / total * 100) : 0 }
+		);
 	},
 	
 	

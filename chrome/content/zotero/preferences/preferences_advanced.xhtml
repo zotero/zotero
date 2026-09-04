@@ -343,7 +343,18 @@
 						data-l10n-id="preferences-advanced-semantic-search-stop"
 						hidden="true"/>
 				</hbox>
-				<vbox class="form-grid" id="semantic-search-libraries"/>
+				<html:div id="semantic-search-progress">
+					<html:div id="semantic-search-items-row" class="semantic-search-progress-row">
+						<label data-l10n-id="preferences-advanced-semantic-search-items"/>
+						<html:progress id="semantic-search-items-progress" value="0" max="1"/>
+						<label id="semantic-search-items-value"/>
+					</html:div>
+					<html:div id="semantic-search-attachments-row" class="semantic-search-progress-row">
+						<label data-l10n-id="preferences-advanced-semantic-search-attachments"/>
+						<html:progress id="semantic-search-attachments-progress" value="0" max="1"/>
+						<label id="semantic-search-attachments-value"/>
+					</html:div>
+				</html:div>
 			</vbox>
 		</groupbox>
 	</vbox>
