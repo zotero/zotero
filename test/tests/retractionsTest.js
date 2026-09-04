@@ -257,6 +257,60 @@ describe("Retractions", function () {
 				Zotero.Retractions._version = version;
 			}
 		});
+		
+		it("should keep a hidden retraction hidden across an update", async function () {
+			var doi = '10.1234/defgh';
+			var hash = Zotero.Utilities.Internal.sha1(doi);
+			var line = Zotero.Retractions.TYPE_DOI + hash.substr(0, 5) + ' 12345\n';
+			var etags = ['first', 'second'];
+			
+			server.respond(function (req) {
+				if (req.method == 'GET' && req.url == baseURL + 'list') {
+					req.respond(
+						200,
+						{ 'Content-Type': 'text/plain', 'ETag': etags.shift() || 'second' },
+						line
+					);
+				}
+				else if (req.method == 'POST' && req.url == baseURL + 'search') {
+					req.respond(
+						200,
+						{ 'Content-Type': 'application/json' },
+						JSON.stringify([
+							{
+								doi: hash,
+								retractionDOI: '10.1234/efghi',
+								date: '2019-01-02',
+								reasons: ["Error in Data"],
+								urls: []
+							}
+						])
+					);
+				}
+			});
+			
+			await Zotero.Retractions.updateFromServer();
+			
+			let promise = waitForItemEvent('refresh');
+			let item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('DOI', doi);
+			await item.saveTx();
+			await promise;
+			assert.isTrue(Zotero.Retractions.isRetracted(item));
+			
+			await Zotero.Retractions.hideRetraction(item);
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+			
+			// The stored flag is what survives a restart, so it has to outlast an update
+			await Zotero.Retractions.updateFromServer();
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT flag FROM retractedItems WHERE itemID=?", item.id
+				),
+				Zotero.Retractions.FLAG_HIDDEN
+			);
+		});
 	});
 	
 	

@@ -911,7 +911,9 @@ Zotero.Retractions = {
 		delete o.retractionDOI;
 		delete o.retractionPMID;
 		
-		var sql = "REPLACE INTO retractedItems (itemID, data) VALUES (?, ?)";
+		// Leave the flag alone, so a hidden retraction stays hidden across refreshes
+		var sql = "INSERT INTO retractedItems (itemID, data) VALUES (?, ?) "
+			+ "ON CONFLICT(itemID) DO UPDATE SET data=excluded.data";
 		await Zotero.DB.queryAsync(sql, [itemID, JSON.stringify(o)]);
 		
 		var item = await Zotero.Items.getAsync(itemID);
