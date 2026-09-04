@@ -1116,6 +1116,11 @@ describe("Zotero.Embeddings", function () {
 						+ "(itemID, chunkIndex, embedding, sourceHash) VALUES (?, 0, ?, ?)",
 					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
 				);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemChunkCounts (itemID, sourceHash, chunks) "
+						+ "VALUES (?, ?, 1)",
+					[item.id, 'hash']
+				);
 				// The model switch clears the old vectors and announces the
 				// removals (after the coalescing delay), so active semantic
 				// views refresh
@@ -1126,6 +1131,13 @@ describe("Zotero.Embeddings", function () {
 				assert.equal(
 					await Zotero.DB.valueQueryAsync(
 						"SELECT COUNT(*) FROM embeddings.itemEmbeddings"
+					),
+					0
+				);
+				// Chunks are sized to the model, so the counts go too
+				assert.equal(
+					await Zotero.DB.valueQueryAsync(
+						"SELECT COUNT(*) FROM embeddings.itemChunkCounts"
 					),
 					0
 				);
@@ -1564,16 +1576,91 @@ describe("Zotero.Embeddings", function () {
 					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
 					attachment.id
 				));
+				assert.ok(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemChunkCounts WHERE itemID=?",
+					attachment.id
+				));
 
 				// Turning the pref off makes attachments ineligible, and the
-				// pref observer prunes their stored chunks. The observer runs
-				// asynchronously, so poll (the test times out on failure).
+				// pref observer prunes their stored chunks and chunk counts.
+				// The observer runs asynchronously, so poll (the test times
+				// out on failure).
 				Zotero.Prefs.set('embeddings.indexFulltext', false);
 				while (await Zotero.DB.valueQueryAsync(
 						"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
 						attachment.id)) {
 					await Zotero.Promise.delay(10);
 				}
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemChunkCounts WHERE itemID=?",
+					attachment.id
+				), 0);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should record an attachment's chunk count at extraction and keep it once embedded", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of counted attachment' });
+			let attachment = await importPDFAttachment(item);
+
+			let vector = new Float32Array(4).fill(0.5);
+			// Two sections long enough that the chunker keeps them apart
+			let sections = [
+				sdtSection('', 0, ['Owls hunt at night. '.repeat(120)]),
+				sdtSection('', 1, ['Hawks hunt by day. '.repeat(120)])
+			];
+			// Embedding the attachment fails on the first run, so its count
+			// can only have come from the extraction step
+			let failAttachment = true;
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (texts) => {
+					if (failAttachment && texts.some(text => text.includes('hunt'))) {
+						throw new Error('Embedding failed');
+					}
+					return texts.map(() => vector);
+				}),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				let counted = await Zotero.DB.valueQueryAsync(
+					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?",
+					attachment.id
+				);
+				assert.isAbove(counted, 1);
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?",
+					attachment.id
+				), 0);
+				// Only attachments are counted
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemChunkCounts WHERE itemID=?",
+					item.id
+				), 0);
+
+				failAttachment = false;
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?",
+					attachment.id
+				), counted);
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings "
+						+ "WHERE itemID=? AND embedding IS NOT NULL",
+					attachment.id
+				), counted);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -1768,7 +1855,9 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
-					if (attachments.some(a => a.id === itemID)) {
+					// Sections are read once to count chunks and again to
+					// embed; the first read is the order of interest
+					if (attachments.some(a => a.id === itemID) && !extracted.includes(itemID)) {
 						extracted.push(itemID);
 					}
 					return {
@@ -2002,7 +2091,13 @@ describe("Zotero.Embeddings", function () {
 				assert.lengthOf(rows, 1);
 				assert.isNull(rows[0].embedding);
 				assert.ok(rows[0].sourceHash);
-				assert.equal(ourCalls(), 1);
+				// Sections are read once to count chunks at extraction and
+				// once to embed
+				assert.equal(ourCalls(), 2);
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?",
+					attachment.id
+				), 0);
 
 				// A processed-but-empty item can't be scored, and doesn't
 				// break scoring for anything else
@@ -2012,7 +2107,7 @@ describe("Zotero.Embeddings", function () {
 				// The record makes later passes skip the attachment without
 				// re-extracting, until the file changes
 				await Zotero.Embeddings.Indexing.startIndexing();
-				assert.equal(ourCalls(), 1);
+				assert.equal(ourCalls(), 2);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());

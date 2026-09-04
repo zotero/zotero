@@ -287,7 +287,7 @@ Zotero.Embeddings = new function () {
 	// Schema version of the attached embeddings database. The tables are only
 	// created when this is bumped (_setUpDB() drops and recreates everything),
 	// so any schema change needs a bump.
-	const _dbVersion = 3;
+	const _dbVersion = 4;
 
 	let _dbInitPromise = null;
 	let _dbHooksRegistered = false;
@@ -347,11 +347,8 @@ Zotero.Embeddings = new function () {
 	}
 
 	async function _setUpDB() {
-		// Scoring runs on sqlite-vec's vector functions (see
-		// _scoreExpression()) rather than in JS, because mozStorage hands a
-		// vector to JS as an array of one number per byte -- a library's worth
-		// of those blocks the main thread for seconds. Loaded once here;
-		// DBConnection re-loads it after a reconnect, before this callback.
+		// Scoring uses sqlite-vec's vector functions: mozStorage hands a
+		// vector to JS one number per byte, far too slow for a whole library
 		await Zotero.DB.loadExtension('vec');
 		// Idempotent, since it can run again for a retried initialization or
 		// after a connection reopen
@@ -361,87 +358,76 @@ Zotero.Embeddings = new function () {
 			let path = Zotero.DataDirectory.getDatabase('embeddings');
 			await Zotero.DB.queryAsync("ATTACH DATABASE ? AS embeddings", [path]);
 		}
-		// The embeddings are keyed by local itemID, which is reassigned
-		// whenever zotero.sqlite is recreated (e.g., deleted and re-synced
-		// from the server). Vectors stored against a different database
-		// instance would map to the wrong items, so they have to be discarded
-		// rather than reused. Detect that by comparing the localUserKey the
-		// database was stamped with against the current one.
+		// itemIDs are reassigned when zotero.sqlite is recreated, so vectors
+		// stamped with a different localUserKey belong to other items
 		let localUserKey = Zotero.Users.getLocalUserKey();
 		let version = await Zotero.DB.valueQueryAsync("PRAGMA embeddings.user_version");
 		let storedUserKey = version >= _dbVersion
 			? await Zotero.DB.valueQueryAsync(
 				"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key='localUserKey'")
 			: false;
-		if (version < _dbVersion || storedUserKey != localUserKey) {
-			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
-			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
-			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
-			// No foreign key on itemID -- references across attached databases
-			// aren't possible, so item deletions are handled by the indexing
-			// notifier and eligibility pruning instead.
-			// An item's text is stored as one or more chunks (see
-			// Zotero.Embeddings.Chunking);
-			// every chunk row carries the hash of the item's full source text,
-			// and scoring takes the item's best chunk.
-			// An attachment fulltext chunk also records where its text came
-			// from, rather than the text itself: the top-level block range it
-			// covers (see Zotero.SDT.getBlockRanges()) with character offsets
-			// into the first and last block's text -- or, for a chunk of flat
-			// fallback text with no block structure, NULL blocks and offsets
-			// into the attachment's plain text. The preview is re-derived
-			// from those references and verified against textCheck (see
-			// getMatchingChunks()). sectionPart of sectionParts says which
-			// piece of a split section the chunk is. All NULL for chunks of
-			// other item types, which are their own preview and location.
-			// An attachment that yields no text at all (missing file,
-			// password-protected, no text layer) gets a single row with a
-			// NULL embedding: a record that it was processed, so progress
-			// counts it and later passes skip it (via sourceHash) until the
-			// file changes. Scoring reads only rows with an embedding.
-			await Zotero.DB.queryAsync(
-				"CREATE TABLE embeddings.itemEmbeddings (\n"
-				+ "    itemID INTEGER NOT NULL,\n"
-				+ "    chunkIndex INTEGER NOT NULL,\n"
-				+ "    embedding BLOB,\n"
-				+ "    sourceHash TEXT NOT NULL,\n"
-				+ "    startBlock INTEGER,\n"
-				+ "    endBlock INTEGER,\n"
-				+ "    startOffset INTEGER,\n"
-				+ "    endOffset INTEGER,\n"
-				+ "    textCheck TEXT,\n"
-				+ "    sectionPart INTEGER,\n"
-				+ "    sectionParts INTEGER,\n"
-				+ "    PRIMARY KEY (itemID, chunkIndex)\n"
-				+ ")"
-			);
-			// Database metadata: the localUserKey the vectors were built
-			// against (above) and the identity of the model that produced them
-			// (see Indexing._ensureIndexMatchesModel())
-			await Zotero.DB.queryAsync(
-				"CREATE TABLE embeddings.itemEmbeddingsMeta (\n"
-				+ "    key TEXT PRIMARY KEY,\n"
-				+ "    value NOT NULL\n"
-				+ ")"
-			);
-			// What running the model taught us about it, measured once per
-			// model version (see Zotero.Embeddings.ensureCalibration()). Keyed
-			// by version rather than name, so a `revision` bump measures again
-			// alongside the reindex it already forces.
-			await Zotero.DB.queryAsync(
-				"CREATE TABLE embeddings.modelCalibration (\n"
-				+ "    modelVersion TEXT PRIMARY KEY,\n"
-				+ "    meanVector BLOB NOT NULL,\n"
-				+ "    minScore REAL NOT NULL,\n"
-				+ "    maxDisplayScore REAL NOT NULL\n"
-				+ ")"
-			);
-			await Zotero.DB.queryAsync(
-				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) VALUES ('localUserKey', ?)",
-				[localUserKey]
-			);
-			await Zotero.DB.queryAsync("PRAGMA embeddings.user_version = " + _dbVersion);
+		if (version >= _dbVersion && storedUserKey == localUserKey) {
+			return;
 		}
+		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
+		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
+		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
+		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemChunkCounts");
+		// One row per chunk of an item's text, each carrying the hash of the
+		// item's full source. For attachments, the block range and offsets
+		// locate the chunk's text in the document (see getMatchingChunks()),
+		// and one with no text gets a single NULL-embedding row so it counts
+		// as processed. No foreign key: deletions are handled by the notifier
+		// and eligibility pruning.
+		await Zotero.DB.queryAsync(
+			"CREATE TABLE embeddings.itemEmbeddings (\n"
+			+ "    itemID INTEGER NOT NULL,\n"
+			+ "    chunkIndex INTEGER NOT NULL,\n"
+			+ "    embedding BLOB,\n"
+			+ "    sourceHash TEXT NOT NULL,\n"
+			+ "    startBlock INTEGER,\n"
+			+ "    endBlock INTEGER,\n"
+			+ "    startOffset INTEGER,\n"
+			+ "    endOffset INTEGER,\n"
+			+ "    textCheck TEXT,\n"
+			+ "    sectionPart INTEGER,\n"
+			+ "    sectionParts INTEGER,\n"
+			+ "    PRIMARY KEY (itemID, chunkIndex)\n"
+			+ ")"
+		);
+		// The localUserKey the vectors were built against and the model that
+		// produced them
+		await Zotero.DB.queryAsync(
+			"CREATE TABLE embeddings.itemEmbeddingsMeta (\n"
+			+ "    key TEXT PRIMARY KEY,\n"
+			+ "    value NOT NULL\n"
+			+ ")"
+		);
+		// Per-model measurements (see ensureCalibration()), keyed by version
+		// so a revision bump measures again
+		await Zotero.DB.queryAsync(
+			"CREATE TABLE embeddings.modelCalibration (\n"
+			+ "    modelVersion TEXT PRIMARY KEY,\n"
+			+ "    meanVector BLOB NOT NULL,\n"
+			+ "    minScore REAL NOT NULL,\n"
+			+ "    maxDisplayScore REAL NOT NULL\n"
+			+ ")"
+		);
+		// How many chunks each attachment's current source splits into,
+		// recorded at extraction, so fulltext work is known without reading
+		// a pack. Other item types count as one apiece.
+		await Zotero.DB.queryAsync(
+			"CREATE TABLE embeddings.itemChunkCounts (\n"
+			+ "    itemID INTEGER PRIMARY KEY,\n"
+			+ "    sourceHash TEXT NOT NULL,\n"
+			+ "    chunks INTEGER NOT NULL\n"
+			+ ")"
+		);
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) VALUES ('localUserKey', ?)",
+			[localUserKey]
+		);
+		await Zotero.DB.queryAsync("PRAGMA embeddings.user_version = " + _dbVersion);
 	}
 
 	async function _rebuildDB() {
@@ -2213,28 +2199,34 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 		}
 		let stored = await Zotero.DB.columnQueryAsync(
-			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings"
+			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings "
+				+ "UNION SELECT itemID FROM embeddings.itemChunkCounts"
 		);
 		await _deleteEmbeddings(stored.filter(id => !eligible.has(id)));
 	}
 
-	// Delete the stored embeddings for the given items, in chunks (avoids the
-	// SQLite bound-parameter limit)
+	// Delete the stored embeddings and chunk counts for the given items, in
+	// chunks (avoids the SQLite bound-parameter limit)
 	async function _deleteEmbeddings(itemIDs) {
 		await Zotero.Embeddings.initDB();
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			let chunk = itemIDs.slice(i, i + chunkSize);
+			let placeholders = chunk.map(() => '?').join(',');
 			await Zotero.DB.queryAsync(
-				"DELETE FROM embeddings.itemEmbeddings WHERE itemID IN ("
-					+ chunk.map(() => '?').join(',') + ")",
+				"DELETE FROM embeddings.itemEmbeddings WHERE itemID IN (" + placeholders + ")",
+				chunk
+			);
+			await Zotero.DB.queryAsync(
+				"DELETE FROM embeddings.itemChunkCounts WHERE itemID IN (" + placeholders + ")",
 				chunk
 			);
 		}
 	}
 
-	// Delete all stored item embeddings. This removes the computed vectors,
-	// not the downloaded model files.
+	// Delete all stored item embeddings and chunk counts (chunks are sized to
+	// the model's window, so the counts go with the vectors). This removes
+	// the computed vectors, not the downloaded model files.
 	async function _clearEmbeddings() {
 		await Zotero.Embeddings.initDB();
 		// Announce the removals, so active semantic views refresh after the
@@ -2244,6 +2236,7 @@ Zotero.Embeddings.Indexing = new function () {
 			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings"
 		);
 		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings");
+		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemChunkCounts");
 		if (cleared.length) {
 			_notifyIndexed(cleared);
 		}
@@ -2486,18 +2479,18 @@ Zotero.Embeddings.Indexing = new function () {
 		}));
 	}
 
-	// The stored source hash of each of the given items that has rows, read
-	// in one query per chunk rather than one per item (every start
-	// re-enqueues the whole library to find what changed). Every chunk row
-	// of an item carries the same hash.
-	async function _getStoredHashes(itemIDs) {
+	// The stored source hash of each of the given items that has rows in
+	// the given table, read in one query per chunk rather than one per item
+	// (every start re-enqueues the whole library to find what changed).
+	// Every chunk row of an item carries the same hash.
+	async function _getStoredHashes(itemIDs, table = 'itemEmbeddings') {
 		let storedHashes = new Map();
 		let chunkSize = 500;
 		for (let i = 0; i < itemIDs.length; i += chunkSize) {
 			let chunk = itemIDs.slice(i, i + chunkSize);
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT DISTINCT itemID, sourceHash FROM embeddings.itemEmbeddings WHERE itemID IN ("
-					+ chunk.map(() => '?').join(',') + ")",
+				"SELECT DISTINCT itemID, sourceHash FROM embeddings." + table
+					+ " WHERE itemID IN (" + chunk.map(() => '?').join(',') + ")",
 				chunk
 			);
 			for (let row of rows) {
@@ -2514,7 +2507,7 @@ Zotero.Embeddings.Indexing = new function () {
 	// the ones the embedding pass will read packs for. An up-to-date
 	// attachment won't be re-embedded and a fileless one has nothing to
 	// extract, so neither needs a pack.
-	async function _staleAttachmentIDs(itemIDs, shouldStop) {
+	async function _staleAttachments(itemIDs, shouldStop) {
 		let items = await Zotero.Items.getAsync(itemIDs);
 		let storedHashes = await _getStoredHashes(itemIDs);
 		let stale = [];
@@ -2524,10 +2517,20 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 			let hash = await _getAttachmentSourceHash(item);
 			if (hash && storedHashes.get(item.id) !== hash) {
-				stale.push(item.id);
+				stale.push({ item, hash });
 			}
 		}
 		return stale;
+	}
+
+	// Record how many chunks an attachment's current source splits into (see
+	// the itemChunkCounts table in _setUpDB())
+	async function _storeChunkCount(itemID, hash, chunks) {
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.itemChunkCounts (itemID, sourceHash, chunks) "
+				+ "VALUES (?, ?, ?)",
+			[itemID, hash, chunks]
+		);
 	}
 
 	// Embed the regular queue -- items, notes and annotations -- a slice at
@@ -2597,24 +2600,34 @@ Zotero.Embeddings.Indexing = new function () {
 	// model would otherwise sit in memory throughout, competing with the
 	// worker for the same cores.
 	async function _extractAttachments(itemIDs, extracted, shouldStop) {
-		let toExtract = (await _staleAttachmentIDs(itemIDs, shouldStop))
-			.filter(itemID => !extracted.has(itemID));
+		let toExtract = (await _staleAttachments(itemIDs, shouldStop))
+			.filter(({ item }) => !extracted.has(item.id));
 		if (!toExtract.length) {
 			return;
 		}
 		_setPhase('extracting');
 		await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+		// Chunk counts are taken while the pack is fresh, through the same
+		// derivation the embedder uses so the two can't disagree. One already
+		// recorded for the current source is kept -- chunking again would
+		// only repeat it.
+		let counted = await _getStoredHashes(
+			toExtract.map(({ item }) => item.id), 'itemChunkCounts');
 		let progress = { done: 0, total: toExtract.length };
 		_extractionProgress = progress;
 		_emitProgress();
 		let lastEmit = Date.now();
 		try {
-			for (let itemID of toExtract) {
+			for (let { item, hash } of toExtract) {
 				if (shouldStop()) {
 					return;
 				}
-				extracted.add(itemID);
-				await Zotero.SDT.ensure(itemID);
+				extracted.add(item.id);
+				await Zotero.SDT.ensure(item.id);
+				if (counted.get(item.id) !== hash) {
+					let chunks = await _getAttachmentChunks(item);
+					await _storeChunkCount(item.id, hash, chunks ? chunks.length : 0);
+				}
 				progress.done++;
 				if (Date.now() - lastEmit >= EXTRACTION_EMIT_INTERVAL) {
 					lastEmit = Date.now();
@@ -2755,6 +2768,7 @@ Zotero.Embeddings.Indexing = new function () {
 							+ "VALUES (?, 0, NULL, ?)",
 						[entry.item.id, entry.hash]
 					);
+					await _storeChunkCount(entry.item.id, entry.hash, 0);
 				}
 			});
 		}
@@ -2883,6 +2897,13 @@ Zotero.Embeddings.Indexing = new function () {
 								],
 								{ debugParams: false }
 							);
+						}
+						// Normally recorded at extraction; written here too
+						// for an attachment that reached embedding without
+						// passing through it, so the count always matches
+						// the rows
+						if (entry.item.isAttachment()) {
+							await _storeChunkCount(entry.item.id, entry.hash, entry.chunks.length);
 						}
 					}
 				});
