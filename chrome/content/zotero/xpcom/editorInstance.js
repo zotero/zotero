@@ -491,11 +491,21 @@ class EditorInstance {
 		return this._window?.ZoteroPane ? this._window : Zotero.getMainWindow();
 	}
 	
+	/**
+	 * The window a library action should go to -- this editor's window if it has a library
+	 * view, or the most recent window that does
+	 *
+	 * @return {ChromeWindow|null}
+	 */
+	_getLibraryWindow() {
+		return this._window?.ZoteroPane?.libraryView ? this._window : Zotero.getMainWindow();
+	}
+	
 	_showInLibrary(ids) {
 		if (!Array.isArray(ids)) {
 			ids = [ids];
 		}
-		let win = this._getMainWindow();
+		let win = this._getLibraryWindow();
 		if (win) {
 			win.ZoteroPane.selectItems(ids);
 			win.focus();

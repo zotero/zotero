@@ -2074,13 +2074,12 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
-	 * Select an object in the library tab of the main window
+	 * The pane to act on for a library action, opening a main window if none is open (Mac)
 	 *
-	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
+	 * @return {Promise<ZoteroPane>}
 	 */
-	showInLibrary: async function (dataObject) {
+	getActiveZoteroPaneOrOpen: async function () {
 		var pane = Zotero.getActiveZoteroPane();
-		// Open main window if it's not open (Mac)
 		if (!pane) {
 			let win = Zotero.openMainWindow();
 			await new Zotero.Promise((resolve) => {
@@ -2092,8 +2091,21 @@ Zotero.Utilities.Internal = {
 			});
 			pane = win.ZoteroPane;
 		}
+		// The pane opens its tabs after the window has loaded
+		await pane.loadedPromise;
+		return pane;
+	},
+	
+	
+	/**
+	 * Select an object in a library view of a main window
+	 *
+	 * @param {Zotero.DataObject} - Data object (e.g., Zotero.Item) to select
+	 */
+	showInLibrary: async function (dataObject) {
+		var pane = await this.getActiveZoteroPaneOrOpen();
 		if (dataObject instanceof Zotero.Item) {
-			pane.selectItem(dataObject.id);
+			await pane.selectItem(dataObject.id);
 		}
 		else {
 			throw new Error("Unimplemented");

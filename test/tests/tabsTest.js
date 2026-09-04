@@ -1,15 +1,66 @@
 describe("Zotero_Tabs", function() {
-	var win, doc, zp;
+	var win, doc, zp, tabs;
 
 	before(async function () {
 		win = await loadZoteroPane();
 		doc = win.document;
 		zp = win.ZoteroPane;
+		tabs = win.Zotero_Tabs;
 	});
-
+	
 	after(function () {
 		win.close();
 	});
+	
+	/**
+	 * Leave the window with one selected library tab whose view has the base element ids
+	 */
+	async function resetTabs() {
+		let libraryTab = tabs._tabs.find(tab => tabs.isLibraryTab(tab.id));
+		// A view promoted to primary keeps its suffixed ids, so start over from a new one
+		if (zp.getLibraryView(libraryTab?.id)?._idSuffix) {
+			libraryTab = null;
+		}
+		let ids = tabs._tabs.filter(tab => tab !== libraryTab).map(tab => tab.id);
+		if (ids.length) {
+			tabs.close(ids, { skipWindowClose: true });
+		}
+		if (!libraryTab) {
+			await addLibraryTab();
+			return;
+		}
+		tabs.select(libraryTab.id);
+		await waitForLibraryView(libraryTab.id);
+	}
+	
+	/**
+	 * Wait for a library tab's view to be created and to finish restoring its state
+	 *
+	 * @return {Promise<LibraryView>}
+	 */
+	async function waitForLibraryView(tabID) {
+		await waitForCallback(
+			() => tabs._getTab(tabID).tab?.type == 'library' && zp.getLibraryView(tabID)?.loaded,
+			50,
+			10
+		);
+		let view = zp.getLibraryView(tabID);
+		await view.waitForLibraryTabState();
+		return view;
+	}
+	
+	/**
+	 * Open and select a library tab showing the given state
+	 */
+	async function addLibraryTab(state) {
+		let id = tabs.addLibraryTab({ state });
+		let view = await waitForLibraryView(id);
+		return { id, view };
+	}
+	
+	function getRowIDs(view) {
+		return view.getCollectionTreeRows().map(row => row.id);
+	}
 
 	describe("Title rendering", function () {
 		it("should render citeproc.js markup in a tab title", async function () {
@@ -60,10 +111,9 @@ describe("Zotero_Tabs", function() {
 	});
 
 	describe("Library tabs", function () {
-		var tabs, collection1, collection2, item1, item2, attachment;
+		var collection1, collection2, item1, item2, attachment;
 		
 		before(async function () {
-			tabs = win.Zotero_Tabs;
 			collection1 = await createDataObject('collection', { name: 'Library Tab 1' });
 			collection2 = await createDataObject('collection', { name: 'Library Tab 2' });
 			item1 = await createDataObject('item', {
@@ -88,59 +138,9 @@ describe("Zotero_Tabs", function() {
 			await resetTabs();
 		});
 		
-		/**
-		 * Leave the window with one selected library tab whose view has the base element ids
-		 */
-		async function resetTabs() {
-			let libraryTab = tabs._tabs.find(tab => tabs.isLibraryTab(tab.id));
-			// A view promoted to primary keeps its suffixed ids, so start over from a new one
-			if (zp.getLibraryView(libraryTab?.id)?._idSuffix) {
-				libraryTab = null;
-			}
-			let ids = tabs._tabs.filter(tab => tab !== libraryTab).map(tab => tab.id);
-			if (ids.length) {
-				tabs.close(ids, { skipWindowClose: true });
-			}
-			if (!libraryTab) {
-				await addLibraryTab();
-				return;
-			}
-			tabs.select(libraryTab.id);
-			await waitForLibraryView(libraryTab.id);
-		}
-		
 		async function setQuickSearch(value) {
 			zp.libraryView.getElement('zotero-tb-search').value = value;
 			await zp.search();
-		}
-		
-		/**
-		 * Wait for a library tab's view to be created and to finish restoring its state
-		 *
-		 * @return {Promise<LibraryView>}
-		 */
-		async function waitForLibraryView(tabID) {
-			await waitForCallback(
-				() => tabs._getTab(tabID).tab?.type == 'library' && zp.getLibraryView(tabID)?.loaded,
-				50,
-				10
-			);
-			let view = zp.getLibraryView(tabID);
-			await view.waitForLibraryTabState();
-			return view;
-		}
-		
-		/**
-		 * Open and select a library tab showing the given state
-		 */
-		async function addLibraryTab(state) {
-			let id = tabs.addLibraryTab({ state });
-			let view = await waitForLibraryView(id);
-			return { id, view };
-		}
-		
-		function getRowIDs(view) {
-			return view.getCollectionTreeRows().map(row => row.id);
 		}
 		
 		it("should show different collections in two library tabs at the same time", async function () {
@@ -566,6 +566,78 @@ describe("Zotero_Tabs", function() {
 			tabs.select(tabs._tabs[0].id);
 			let otherView = await waitForLibraryView(tabs.selectedID);
 			assert.deepEqual(getRowIDs(otherView), ['C' + collection1.id]);
+		});
+	});
+
+	describe("Library-targeted routing", function () {
+		var group, groupItem, item, attachment;
+		
+		before(async function () {
+			group = await createGroup({ name: 'Routing Group' });
+			groupItem = await createDataObject('item', {
+				title: 'Routing Group Item',
+				libraryID: group.libraryID
+			});
+			item = await createDataObject('item', { title: 'Routing Item' });
+			attachment = await importPDFAttachment(item);
+		});
+		
+		beforeEach(async function () {
+			await resetTabs();
+		});
+		
+		after(async function () {
+			await resetTabs();
+		});
+		
+		it("should select an item in a library tab that already shows its library", async function () {
+			let primaryView = zp.libraryView;
+			let primaryRows = getRowIDs(primaryView);
+			let { id, view } = await addLibraryTab({ collections: ['L' + group.libraryID] });
+			tabs.select(primaryView.tabID);
+			
+			await zp.selectItems([groupItem.id]);
+			
+			assert.equal(tabs.selectedID, id);
+			assert.deepEqual(view.itemsView.getSelectedItems(true), [groupItem.id]);
+			// The other tab keeps showing what it was showing
+			assert.deepEqual(getRowIDs(primaryView), primaryRows);
+		});
+		
+		it("should create a library view to select an item in a window without one", async function () {
+			let win2 = await loadZoteroPane();
+			try {
+				let zp2 = win2.ZoteroPane;
+				// Another tab, so that closing the library tab doesn't close the window
+				await Zotero.Reader.open(attachment.id, null, { window: win2 });
+				win2.Zotero_Tabs.close(zp2.libraryView.tabID);
+				assert.isNull(zp2.libraryView);
+				
+				await zp2.selectItems([item.id]);
+				
+				assert.isNotNull(zp2.libraryView);
+				assert.deepEqual(zp2.itemsView.getSelectedItems(true), [item.id]);
+			}
+			finally {
+				win2.close();
+			}
+		});
+		
+		it("should use a window with a library view for a library action", async function () {
+			let win2 = await loadZoteroPane();
+			try {
+				let zp2 = win2.ZoteroPane;
+				await Zotero.Reader.open(attachment.id, null, { window: win2 });
+				win2.Zotero_Tabs.close(zp2.libraryView.tabID);
+				assert.isNull(zp2.libraryView);
+				
+				let mainWindow = Zotero.getMainWindow();
+				assert.notEqual(mainWindow, win2);
+				assert.isNotNull(mainWindow.ZoteroPane.libraryView);
+			}
+			finally {
+				win2.close();
+			}
 		});
 	});
 

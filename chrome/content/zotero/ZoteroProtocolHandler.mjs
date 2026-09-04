@@ -629,19 +629,20 @@ export function ZoteroProtocolHandler() {
 				return;
 			}
 			
-			var win = Zotero.getMainWindow();
-			var zp = win?.ZoteroPane;
-			if (!zp) {
-				// TEMP
-				throw new Error("Pane not open");
+			var zp = await Zotero.Utilities.Internal.getActiveZoteroPaneOrOpen();
+			// Act on a library tab that's already showing the objects' library, if there is one
+			var view = await zp.openLibraryViewForLibrary(results[0].libraryID);
+			if (!view) {
+				Zotero.debug("No library view available", 2);
+				return undefined;
 			}
+			zp.document.defaultView.Zotero_Tabs.select(view.tabID);
 			
-			win.Zotero_Tabs.selectLibraryTab();
 			if (params.objectType == 'collection') {
-				return zp.collectionsView.selectCollection(results[0].id);
+				return view.collectionsView.selectCollection(results[0].id);
 			}
 			else if (params.objectType == 'search') {
-				return zp.collectionsView.selectSearch(results[0].id);
+				return view.collectionsView.selectSearch(results[0].id);
 			}
 			else {
 				// Select collection first if specified
@@ -655,7 +656,7 @@ export function ZoteroProtocolHandler() {
 					else {
 						col = Zotero.Collections.get(params.scopeObjectID);
 					}
-					await zp.collectionsView.selectCollection(col.id);
+					await view.collectionsView.selectCollection(col.id);
 				}
 				else if (params.scopeObject == 'searches') {
 					let s;
@@ -667,11 +668,11 @@ export function ZoteroProtocolHandler() {
 					else {
 						s = Zotero.Searches.get(params.scopeObjectID);
 					}
-					await zp.collectionsView.selectSearch(s.id);
+					await view.collectionsView.selectSearch(s.id);
 				}
 				// If collection not specified, select library root
 				else {
-					await zp.collectionsView.selectLibrary(params.libraryID);
+					await view.collectionsView.selectLibrary(params.libraryID);
 				}
 				return zp.selectItems(results.map(x => x.id));
 			}

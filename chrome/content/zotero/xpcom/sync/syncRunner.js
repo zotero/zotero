@@ -1295,10 +1295,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 						// Include "Show Item in Library" button
 						e.dialogButtonText = Zotero.getString('pane.items.showItemInLibrary');
 						e.dialogButtonCallback = () => {
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-							var win = wm.getMostRecentWindow("navigator:browser");
-							win.ZoteroPane.selectItem(object.id);
+							Zotero.Utilities.Internal.showInLibrary(object);
 						};
 					}
 				}

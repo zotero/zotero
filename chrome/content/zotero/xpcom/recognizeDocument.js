@@ -261,6 +261,7 @@ Zotero.RecognizeDocument = new function () {
 		}
 		
 		var zp = Zotero.getActiveZoteroPane();
+		var view = zp?.libraryView;
 		var selectParent = false;
 		if (zp) {
 			let selected = zp.getSelectedItems();
@@ -310,9 +311,10 @@ Zotero.RecognizeDocument = new function () {
 		}
 
 		try {
-			let win = Zotero.getMainWindow();
-			if (selectParent && win && win.Zotero_Tabs.selectedIsLibrary) {
-				await win.ZoteroPane.selectItem(parentItem.id);
+			// Select the new parent in the view the attachment was selected in, if it's
+			// still the one showing
+			if (selectParent && view?.loaded && view.isVisible) {
+				await view.selectItems([parentItem.id]);
 			}
 		}
 		catch (e) {

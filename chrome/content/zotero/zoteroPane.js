@@ -57,6 +57,58 @@ var ZoteroPane = new function () {
 		return _libraryViews.find(view => view.tabID === tabID) || null;
 	};
 	/**
+	 * The library view an action on a given library should act on -- the active view if it
+	 * shows the library, else the most recently selected view that does, else the active view
+	 *
+	 * @param {Integer} libraryID
+	 * @return {LibraryView|null} - null if the window has no loaded library view
+	 */
+	this.getLibraryViewForLibrary = function (libraryID) {
+		let showsLibrary = (view) => {
+			return !!view.collectionsView?.getSelectedLibraryIDs().includes(libraryID);
+		};
+		let loadedViews = _libraryViews.filter(view => view.loaded);
+		let activeView = loadedViews.includes(this.libraryView) ? this.libraryView : null;
+		if (activeView && showsLibrary(activeView)) {
+			return activeView;
+		}
+		let matchingViews = loadedViews.filter(showsLibrary);
+		if (matchingViews.length) {
+			return matchingViews.reduce((a, b) => {
+				let timeA = Zotero_Tabs._getTab(a.tabID).tab?.timeSelected || 0;
+				let timeB = Zotero_Tabs._getTab(b.tabID).tab?.timeSelected || 0;
+				return timeB >= timeA ? b : a;
+			});
+		}
+		return activeView;
+	};
+	/**
+	 * The library view for a library, opening a library tab if the window has no loaded view
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise<LibraryView|null>}
+	 */
+	this.openLibraryViewForLibrary = async function (libraryID) {
+		let view = this.getLibraryViewForLibrary(libraryID);
+		if (!view) {
+			Zotero_Tabs.selectLibraryTab();
+			view = await this.waitForLibraryView(Zotero_Tabs.selectedID);
+		}
+		return view;
+	};
+	/**
+	 * Wait for a library tab's view to be created and to finish restoring its state
+	 *
+	 * @param {String} tabID
+	 * @return {Promise<LibraryView|null>}
+	 */
+	this.waitForLibraryView = async function (tabID) {
+		await Zotero_Tabs.getLoadPromise(tabID);
+		let view = this.getLibraryView(tabID);
+		await view?.waitForLibraryTabState();
+		return view;
+	};
+	/**
 	 * Called by a library view when it's connected to the document
 	 */
 	this.registerLibraryView = function (view) {
@@ -174,6 +226,9 @@ var ZoteroPane = new function () {
 			return this.libraryView?.[method](...args);
 		};
 	}
+	// Resolved once the window has opened its tabs, which is the last step of loading the pane
+	var _loadedDeferred = Zotero.Promise.defer();
+	this.loadedPromise = _loadedDeferred.promise;
 	var _progressQueueListeners = [];
 	// The saved session state this window restores, if any
 	var _sessionPaneState = null;
@@ -677,7 +732,10 @@ var ZoteroPane = new function () {
 	 * mode
 	 */
 	async function _loadPane() {
-		if (!Zotero || !Zotero.initialized) return;
+		if (!Zotero || !Zotero.initialized) {
+			_loadedDeferred.resolve();
+			return;
+		}
 		
 		takeWindowState();
 		
@@ -868,6 +926,7 @@ var ZoteroPane = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
+		_loadedDeferred.resolve();
 		addFocusHandlers();
 	}
 	
@@ -3083,19 +3142,15 @@ var ZoteroPane = new function () {
 			window.restore();
 		}
 		
-		if (!this.collectionsView) {
-			throw new Error("Collections view not loaded");
+		// Show the items in a tab that's already showing their library, if there is one
+		var view = await this.openLibraryViewForLibrary(items[0].libraryID);
+		if (!view) {
+			return false;
 		}
-		
-		var found = await this.collectionsView.selectItems(itemIDs, inLibraryRoot);
-		
-		// Focus the items pane
-		if (found) {
-			document.getElementById(ZoteroPane.itemsView.id).focus();
-		}
+		await view.selectItems(itemIDs, { inLibraryRoot });
 		
 		if (!noTabSwitch) {
-			Zotero_Tabs.selectLibraryTab({ focusElementID: ZoteroPane.itemsView.id });
+			Zotero_Tabs.select(view.tabID, false, { focusElementID: view.itemsView.id });
 		}
 		return true;
 	};
@@ -3179,8 +3234,8 @@ var ZoteroPane = new function () {
 	 *
 	 * If asIDs is true, return an array of itemIDs instead
 	 *
-	 * If libraryTabOnly is true, return the library tab's item tree selection even if
-	 * another tab is currently selected
+	 * If libraryTabOnly is true, return the active library view's item tree selection even
+	 * if another tab is currently selected
 	 */
 	this.getSelectedItems = function (asIDs, { libraryTabOnly = false } = {}) {
 		if (libraryTabOnly) {

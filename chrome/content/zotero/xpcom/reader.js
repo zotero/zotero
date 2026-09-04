@@ -125,6 +125,16 @@ class ReaderInstance {
 		return this._window?.ZoteroPane ? this._window : Zotero.getMainWindow();
 	}
 	
+	/**
+	 * The window a library action should go to -- this reader's window if it has a library
+	 * view, or the most recent window that does
+	 *
+	 * @return {ChromeWindow|null}
+	 */
+	_getLibraryWindow() {
+		return this._window?.ZoteroPane?.libraryView ? this._window : Zotero.getMainWindow();
+	}
+	
 	async focus() {
 		await this._waitForReader();
 		this._iframeWindow.focus();
@@ -1020,7 +1030,7 @@ class ReaderInstance {
 	}
 
 	showInLibrary() {
-		let win = this._getMainWindow();
+		let win = this._getLibraryWindow();
 		if (win) {
 			let item = Zotero.Items.get(this._item.id);
 			let id = item.parentID || item.id;

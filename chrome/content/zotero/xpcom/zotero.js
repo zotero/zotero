@@ -74,8 +74,15 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	this.initialURL; // used by Schema to show the changelog on upgrades
 	this.Promise = BluebirdShimPromise;
 	
+	/**
+	 * The main window a library action should go to -- the most recently activated window
+	 * with a live library view, or the most recent main window if none has one
+	 *
+	 * @return {ChromeWindow|null}
+	 */
 	this.getMainWindow = function () {
-		return Services.wm.getMostRecentWindow("navigator:browser");
+		return this.getActiveZoteroPane()?.document.defaultView
+			|| Services.wm.getMostRecentWindow("navigator:browser");
 	};
 
 	/**

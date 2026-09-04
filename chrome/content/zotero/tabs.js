@@ -391,12 +391,6 @@ var Zotero_Tabs = new function () {
 		if (!type) {
 			type = this.selectedType || '';
 		}
-		if (type === 'zotero-pane') {
-			return {
-				tabContentType: 'library',
-				tabState: '',
-			};
-		}
 		let [tabContentType, tabState] = type.split('-');
 		return {
 			tabContentType,
@@ -470,6 +464,16 @@ var Zotero_Tabs = new function () {
 	 */
 	this.isLibraryTab = function (id) {
 		return this._isLibraryTab(this._getTab(id).tab);
+	};
+
+	/**
+	 * The promise for the creation of a tab's content, if it has been shown
+	 *
+	 * @param {String} id
+	 * @return {Promise|null}
+	 */
+	this.getLoadPromise = function (id) {
+		return this._getTab(id).tab?.loadPromise || null;
 	};
 
 	/**
@@ -1232,7 +1236,7 @@ var Zotero_Tabs = new function () {
 			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
 			let loadHook = this._getHook(tabContentType, 'load');
-			loadHook(tab, tabIndex, options).then(() => {
+			tab.loadPromise = loadHook(tab, tabIndex, options).then(() => {
 				ZoteroContextPane.showLoadingMessage(false);
 				this.markAsLoaded(tab.id);
 			});

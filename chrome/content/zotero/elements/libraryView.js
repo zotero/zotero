@@ -907,6 +907,26 @@
 		}
 		
 		/**
+		 * Select items in this view, selecting a collection tree row that contains them
+		 *
+		 * @param {Integer[]} itemIDs
+		 * @param {Object} [options]
+		 * @param {Boolean} [options.inLibraryRoot] - Select the items in the library root
+		 *     rather than in a collection
+		 * @return {Promise<Boolean>} - Whether the items were selected
+		 */
+		async selectItems(itemIDs, { inLibraryRoot } = {}) {
+			if (!this.collectionsView) {
+				return false;
+			}
+			let found = await this.collectionsView.selectItems(itemIDs, inLibraryRoot);
+			if (found) {
+				this.getElement(this.itemsView.id).focus();
+			}
+			return !!found;
+		}
+		
+		/**
 		 * return {CollectionTreeRow[]}
 		 */
 		getCollectionTreeRows() {
