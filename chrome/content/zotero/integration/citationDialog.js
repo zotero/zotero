@@ -119,6 +119,7 @@ async function onLoad() {
 
 	// citation has to be built before libraryLayout.init to so itemTree knows which items to highlight
 	await CitationDataManager.buildCitation();
+	CitationFormManager.init();
 	IOManager.updateBubbleInput();
 	// init library layout after bubble input is built since bubble-input's height is a factor
 	// determining initial library layout height
@@ -153,7 +154,9 @@ async function onLoad() {
 
 
 async function accept() {
-	if (accepted || SearchHandler.searching || !CitationDataManager.items.length) return;
+	if (accepted || SearchHandler.searching || !CitationDataManager.items.length
+			|| (CitationFormManager.form == "narrative"
+				&& !CitationFormManager.headReferenceID)) return;
 	accepted = true;
 	Zotero.debug("Citation Dialog: accepted");
 
@@ -1238,6 +1241,162 @@ class ListLayout extends Layout {
 	}
 }
 
+// Citation-level form and Narrative Head selection.
+const CitationFormManager = {
+	form: "ordinary",
+	headReferenceID: null,
+	_initialForm: "ordinary",
+
+	init() {
+		this.form = io.citationForm || "ordinary";
+		this._initialForm = this.form;
+		let markedHead = CitationDataManager.items.find(item => item.isNarrativeHead);
+		this.headReferenceID = markedHead?.dialogReferenceID || null;
+		if (this.form == "narrative" && !this.headReferenceID && CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+
+		_id("citation-form-setting").addEventListener("click", (event) => {
+			let option = event.target.closest(".option");
+			if (option) this.setForm(option.getAttribute("value"));
+		});
+		_id("narrative-head-remove").addEventListener("click", () => {
+			this.setHead(null);
+			this.setForm("ordinary");
+		});
+		_id("narrative-head").addEventListener("click", () => {
+			if (!this.headReferenceID) return;
+			IOManager._openItemDetailsPopup(this.headReferenceID);
+		});
+		_id("narrative-infix").addEventListener("input", (event) => {
+			io.narrativeInfix = event.target.value;
+			CitationPreview.update();
+			dialogNotPristine();
+		});
+		_id("narrative-infix").value = io.narrativeInfix || "";
+		this.updateUI();
+	},
+
+	setForm(form) {
+		if (form == this.form) return;
+		if (form == "author-only" && !this.canUseAuthorOnly()) return;
+		this.form = form;
+		io.citationForm = form;
+		io.citationFormChanged = true;
+		if (form == "narrative" && !this.headReferenceID && CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+		this.updateUI();
+		CitationDataManager.updateCitationObject();
+		CitationPreview.update();
+		dialogNotPristine();
+	},
+
+	canUseAuthorOnly() {
+		return CitationDataManager.items.length <= 1
+			|| (this.form == "narrative" && !!this.headReferenceID);
+	},
+
+	setHead(dialogReferenceID, { userInitiated = false } = {}) {
+		if (dialogReferenceID
+				&& !CitationDataManager.getItem({ dialogReferenceID })) {
+			return;
+		}
+		this.headReferenceID = dialogReferenceID;
+		for (let item of CitationDataManager.items) {
+			item.isNarrativeHead = item.dialogReferenceID == dialogReferenceID;
+		}
+		if (userInitiated && dialogReferenceID) {
+			let index = CitationDataManager.getItemIndex({ dialogReferenceID });
+			if (index > 0) {
+				CitationDataManager.moveItem(dialogReferenceID, 0);
+			}
+			_id("keepSorted").checked = false;
+		}
+		this.updateUI();
+	},
+
+	onItemDetailsUpdated(dialogReferenceID) {
+		if (this.form != "narrative") return;
+		let item = CitationDataManager.getItem({ dialogReferenceID });
+		if (!item) return;
+		if (item.isNarrativeHead && dialogReferenceID != this.headReferenceID) {
+			this.setHead(dialogReferenceID, { userInitiated: true });
+		}
+		else if (!item.isNarrativeHead && dialogReferenceID == this.headReferenceID) {
+			this.setHead(null);
+			this.setForm("ordinary");
+		}
+	},
+
+	onItemDeleted(dialogReferenceID) {
+		if (dialogReferenceID == this.headReferenceID) {
+			this.setHead(null);
+		}
+	},
+
+	onItemsSorted() {
+		if (this.form == "narrative" && _id("keepSorted").checked
+				&& CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+	},
+
+	getState() {
+		return {
+			form: this.form,
+			headReferenceID: this.headReferenceID,
+			itemOrder: CitationDataManager.items.map(item => item.dialogReferenceID),
+			keepSorted: _id("keepSorted").checked,
+			citationFormChanged: !!io.citationFormChanged,
+		};
+	},
+
+	restoreState(state) {
+		let itemsByReferenceID = new Map(CitationDataManager.items.map(item => (
+			[item.dialogReferenceID, item]
+		)));
+		CitationDataManager.items = state.itemOrder
+			.map(dialogReferenceID => itemsByReferenceID.get(dialogReferenceID))
+			.filter(Boolean);
+		this.form = state.form;
+		io.citationForm = state.form;
+		io.citationFormChanged = state.citationFormChanged;
+		_id("keepSorted").checked = state.keepSorted;
+		this.setHead(state.headReferenceID);
+		this.updateUI();
+	},
+
+	updateUI() {
+		for (let option of _id("citation-form-setting").querySelectorAll(".option")) {
+			let active = option.getAttribute("value") == this.form;
+			option.classList.toggle("active", active);
+			option.setAttribute("aria-checked", active ? "true" : "false");
+		}
+		let authorOnly = _id("citation-form-author-only");
+		authorOnly.setAttribute("aria-disabled", this.canUseAuthorOnly() ? "false" : "true");
+
+		let narrative = this.form == "narrative";
+		_id("narrative-fields").hidden = !narrative;
+		let headItem = this.headReferenceID
+			? CitationDataManager.getItem({ dialogReferenceID: this.headReferenceID })
+			: null;
+		_id("narrative-head").textContent = headItem?.bubbleString || "—";
+		_id("narrative-head").disabled = !headItem;
+		_id("narrative-head-remove").hidden = !headItem;
+		_id("narrative-infix").hidden = !io.narrativeInfixAvailable;
+		_id("narrative-infix").previousElementSibling.hidden = !io.narrativeInfixAvailable;
+
+		for (let bubble of doc.querySelectorAll("#bubble-input .bubble")) {
+			bubble.classList.toggle("narrative-head-item",
+				bubble.getAttribute("dialogReferenceID") == this.headReferenceID && narrative);
+		}
+		_id("narrative-head-container").hidden = !narrative;
+		_id("accept-button").disabled = !CitationDataManager.items.length
+			|| (narrative && !headItem);
+	},
+};
+
 //
 // Handling of user IO
 //
@@ -1272,7 +1431,15 @@ const IOManager = {
 		// focus the item tree from citation dialog keyboard navigation
 		doc.addEventListener("focus-item-tree", ({ detail }) => this.focusItemTree(detail));
 		// update bubbles after citation item is updated by itemDetails popup
-		doc.addEventListener("item-details-updated", () => this.updateBubbleInput());
+		doc.addEventListener("item-details-updated", ({ detail }) => {
+			if (detail.restoreCitationFormState) {
+				CitationFormManager.restoreState(detail.restoreCitationFormState);
+			}
+			else {
+				CitationFormManager.onItemDetailsUpdated(detail.dialogReferenceID);
+			}
+			this.updateBubbleInput();
+		});
 
 		doc.addEventListener("DOMMenuBarActive", () => this._handleMenuBarAppearance());
 
@@ -1384,6 +1551,7 @@ const IOManager = {
 			};
 		}), DIALOG_STATE.type);
 		_id("accept-button").disabled = !CitationDataManager.items.length;
+		CitationFormManager.updateUI();
 		CitationPreview.update();
 	},
 
@@ -1395,6 +1563,11 @@ const IOManager = {
 		}
 		if (DIALOG_STATE.isAddingAnnotations()) {
 			items = items.filter(item => item.isAnnotation());
+		}
+		if (DIALOG_STATE.isCitingItems()
+				&& CitationFormManager.form == "author-only"
+				&& CitationDataManager.items.length) {
+			return;
 		}
 		// if selecting a note, add it and immediately accept the dialog
 		if (DIALOG_STATE.isAddingNote()) {
@@ -1786,6 +1959,7 @@ const IOManager = {
 	},
 
 	_deleteItem(dialogReferenceID) {
+		CitationFormManager.onItemDeleted(dialogReferenceID);
 		CitationDataManager.deleteItem({ dialogReferenceID });
 		// If the citation is emptied, show the placeholder guidance again on the next add
 		if (!CitationDataManager.items.length) {
@@ -1813,6 +1987,10 @@ const IOManager = {
 		let moved = CitationDataManager.moveItem(dialogReferenceID, newIndex);
 		if (moved) {
 			_id("keepSorted").checked = false;
+			if (CitationFormManager.form == "narrative"
+					&& CitationFormManager.headReferenceID) {
+				CitationDataManager.moveItem(CitationFormManager.headReferenceID, 0);
+			}
 		}
 		this.updateBubbleInput();
 		dialogNotPristine();
@@ -1821,6 +1999,7 @@ const IOManager = {
 	_openItemDetailsPopup(dialogReferenceID) {
 		let bubbleItem = CitationDataManager.getItem({ dialogReferenceID });
 		let topLevelItem = bubbleItem.item;
+		PopupsHandler.citationFormStateWhenOpened = CitationFormManager.getState();
 		if (DIALOG_STATE.isAddingAnnotations()) {
 			topLevelItem = bubbleItem.item.topLevelItem;
 		}
@@ -1954,6 +2133,7 @@ const IOManager = {
 	_resortItems() {
 		if (!_id("keepSorted").checked) return;
 		CitationDataManager.sort().then(() => {
+			CitationFormManager.onItemsSorted();
 			this.updateBubbleInput();
 		});
 	},
@@ -2107,7 +2287,26 @@ const CitationPreview = {
 		CitationDataManager.updateCitationObject();
 		let html;
 		try {
-			html = await io.preview("html");
+			if (CitationFormManager.form == "narrative" && io.previewNarrative) {
+				let headItem = CitationDataManager.getItem({
+					dialogReferenceID: CitationFormManager.headReferenceID
+				});
+				if (!headItem) return;
+				let [headHTML, remainderHTML] = await io.previewNarrative(
+					headItem.getCitationItem(), io.citation, "html");
+				if (io.narrativeInfixAvailable) {
+					let infix = _id("narrative-infix").value || " ";
+					html = headHTML + Zotero.Utilities.htmlSpecialChars(infix) + remainderHTML;
+				}
+				else {
+					html = `<span class="narrative-preview-part">${headHTML}</span>`
+					+ `<span class="narrative-preview-separator"> … </span>`
+					+ `<span class="narrative-preview-part">${remainderHTML}</span>`;
+				}
+			}
+			else {
+				html = await io.preview("html");
+			}
 		}
 		catch (e) {
 			// A preview failure usually means the citation itself won't process, but that
@@ -2156,6 +2355,7 @@ class BubbleItem {
 		this.suffix = citationItem.suffix;
 		this.prefix = citationItem.prefix;
 		this.suppressAuthor = citationItem["suppress-author"];
+		this.isNarrativeHead = !!citationItem["is-narrative-head"];
 		
 		this.bubbleString = "";
 		this.selected = false;
@@ -2192,6 +2392,9 @@ class BubbleItem {
 		}
 		if (this.suppressAuthor) {
 			citationItem["suppress-author"] = this.suppressAuthor;
+		}
+		if (this.isNarrativeHead) {
+			citationItem["is-narrative-head"] = true;
 		}
 		if (this.cslItemData) {
 			citationItem.itemData = this.cslItemData;
@@ -2282,10 +2485,35 @@ const CitationDataManager = {
 
 	// Update io citation object based on Citation.items array
 	updateCitationObject(final = false) {
-		io.citation.citationItems = this.items.map(item => item.getCitationItem({ includeDialogReferenceID: !final }));
+		let items = this.items;
+		if (CitationFormManager.form == "author-only") {
+			let headItem = CitationFormManager.headReferenceID
+				? this.getItem({ dialogReferenceID: CitationFormManager.headReferenceID })
+				: items[0];
+			items = headItem ? [headItem] : [];
+		}
+		io.citation.citationItems = items.map(item => (
+			item.getCitationItem({ includeDialogReferenceID: !final })
+		));
+
+		if (CitationFormManager.form == "narrative") {
+			io.citation.properties.mode = "suppress-author";
+		}
+		else if (CitationFormManager.form == "author-only") {
+			io.citation.properties.mode = "author-only";
+		}
+		else if (io.originalCitationForm == "standalone-suppress-author"
+				&& !io.citationFormChanged) {
+			io.citation.properties.mode = "suppress-author";
+		}
+		else {
+			delete io.citation.properties.mode;
+		}
 		if (io.sortable) {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
 		}
+		io.citationForm = CitationFormManager.form;
+		io.narrativeInfix = _id("narrative-infix").value;
 	},
 
 	// Resorts the items in the citation
@@ -2325,6 +2553,7 @@ const CitationDataManager = {
 			return this.items.find(item => item.dialogReferenceID === sortedItem.dialogReferenceID);
 		});
 		this.items = sortedItems;
+		CitationFormManager.onItemsSorted();
 	},
 	
 	// Construct citation upon initial load
@@ -2341,6 +2570,7 @@ const CitationDataManager = {
 
 // Explicitly expose singletons to global window for tests
 window.CitationDataManager = CitationDataManager;
+window.CitationFormManager = CitationFormManager;
 window.IOManager = IOManager;
 
 // Top level listeners

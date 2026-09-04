@@ -127,6 +127,80 @@ describe("Zotero.Styles", function () {
 		});
 	});
 
+	describe("narrative citation compatibility", function () {
+		function getStyleXML({
+			citationFormat = "author-date", citationVariable = "citation-number",
+			citationContent = `<text variable="${citationVariable}"/>`,
+			nativeInText = "", macros = ""
+		} = {}) {
+			return `<?xml version="1.0" encoding="utf-8"?>
+			<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0">
+			  <info>
+				<title>Test</title>
+				<id>http://www.zotero.org/styles/test</id>
+				<link href="http://www.zotero.org/styles/test" rel="self"/>
+				<category citation-format="${citationFormat}"/>
+				<updated>2025-01-01T00:00:00+00:00</updated>
+			  </info>
+			  ${macros}
+			  <citation><layout>${citationContent}</layout></citation>
+			  ${nativeInText}
+			</style>`;
+		}
+
+		it("should preserve a native in-text definition", function () {
+			let xml = getStyleXML({
+				nativeInText: '<intext><layout><text variable="title"/></layout></intext>'
+			});
+			assert.strictEqual(
+				Zotero.Style.prototype._addInText(xml, 'http://www.zotero.org/styles/test'),
+				xml
+			);
+		});
+
+		it("should add an author fallback to numeric styles", function () {
+			let xml = getStyleXML({ citationFormat: "numeric", citationVariable: "title" });
+			let result = Zotero.Style.prototype._addInText(
+				xml, 'http://www.zotero.org/styles/test');
+			let doc = new DOMParser().parseFromString(result, "text/xml");
+			let inText = Array.from(doc.documentElement.children)
+				.find(elem => elem.localName == "intext");
+			assert.isOk(inText);
+			assert.equal(inText.querySelector("names").getAttribute("variable"), "author");
+			assert.equal(inText.querySelector("substitute names").getAttribute("variable"), "editor");
+		});
+
+		it("should detect citation numbers rendered through nested macros", function () {
+			let xml = getStyleXML({
+				citationVariable: "title",
+				citationContent: '<text macro="outer"/>',
+				macros: '<macro name="outer"><text macro="inner"/></macro>'
+					+ '<macro name="inner"><text variable="citation-number"/></macro>',
+			});
+			let result = Zotero.Style.prototype._addInText(
+				xml, 'http://www.zotero.org/styles/test');
+			let doc = new DOMParser().parseFromString(result, "text/xml");
+			assert.isOk(Array.from(doc.documentElement.children)
+				.find(elem => elem.localName == "intext"));
+		});
+
+		it("should adapt APA's in-text author macro to use a textual conjunction", function () {
+			let xml = getStyleXML({
+				macros: '<macro name="author-intext"><names variable="author">'
+					+ '<name and="symbol"/></names></macro>'
+			});
+			let result = Zotero.Style.prototype._addInText(
+				xml, 'http://www.zotero.org/styles/apa');
+			let doc = new DOMParser().parseFromString(result, "text/xml");
+			let macro = Array.from(doc.documentElement.children).find(elem => (
+				elem.localName == "macro"
+					&& elem.getAttribute("name") == "zotero-narrative-author"
+			));
+			assert.isOk(macro);
+			assert.equal(macro.querySelector("name").getAttribute("and"), "text");
+		});
+	});
+
 	describe("Zotero.Styles.resolveLocale", function () {
 		it("should return available locale unchanged", function () {
 			assert.equal(Zotero.Styles.resolveLocale('de-AT'), 'de-AT');

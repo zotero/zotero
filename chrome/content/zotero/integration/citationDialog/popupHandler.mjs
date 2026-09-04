@@ -126,7 +126,9 @@ export class CitationDialogPopupsHandler {
 			locator: bubbleItem.locator,
 			prefix: bubbleItem.prefix,
 			suffix: bubbleItem.suffix,
-			suppressAuthor: bubbleItem.suppressAuthor
+			suppressAuthor: bubbleItem.suppressAuthor,
+			isNarrativeHead: bubbleItem.isNarrativeHead,
+			citationFormState: this.citationFormStateWhenOpened,
 		};
 		// add locator labels if they don't exist yet
 		if (this._getNode("#label").childElementCount == 0) {
@@ -150,6 +152,7 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#prefix").value = this.bubbleItem.prefix || "";
 		this._getNode("#suffix").value = this.bubbleItem.suffix || "";
 		this._getNode("#suppress-author").checked = !!this.bubbleItem.suppressAuthor;
+		this._getNode("#is-narrative-head").checked = !!this.bubbleItem.isNarrativeHead;
 	}
 
 	// do not close the popup within 300ms of opening to account for potential double clicking
@@ -182,8 +185,10 @@ export class CitationDialogPopupsHandler {
 			this.bubbleItem.prefix = this.itemDetailsWhenOpened.prefix;
 			this.bubbleItem.suffix = this.itemDetailsWhenOpened.suffix;
 			this.bubbleItem.suppressAuthor = this.itemDetailsWhenOpened.suppressAuthor;
+			this.bubbleItem.isNarrativeHead = this.itemDetailsWhenOpened.isNarrativeHead;
+			let restoreCitationFormState = this.itemDetailsWhenOpened.citationFormState;
 			this.itemDetailsWhenOpened = {};
-			this.notifyCitationDialogOfChange();
+			this.notifyCitationDialogOfChange({ restoreCitationFormState });
 		}
 	}
 
@@ -202,15 +207,17 @@ export class CitationDialogPopupsHandler {
 		this.bubbleItem.prefix = this._getNode("#prefix").value;
 		this.bubbleItem.suffix = this._getNode("#suffix").value;
 		this.bubbleItem.suppressAuthor = this._getNode("#suppress-author").checked;
+		this.bubbleItem.isNarrativeHead = this._getNode("#is-narrative-head").checked;
 		this.notifyCitationDialogOfChange();
 	}
 
 	// Tell citation dialog that the item has been updated to refresh the bubble
-	notifyCitationDialogOfChange() {
+	notifyCitationDialogOfChange(detail = {}) {
 		let event = new CustomEvent("item-details-updated", {
 			bubbles: true,
 			detail: {
-				dialogReferenceID: this.bubbleItem.dialogReferenceID
+				dialogReferenceID: this.bubbleItem.dialogReferenceID,
+				...detail,
 			}
 		});
 		this.doc.dispatchEvent(event);

@@ -16,7 +16,7 @@ describe("Citation Dialog", function () {
 		preview: () => {},
 		allCitedDataLoadedPromise: Promise.resolve(),
 	};
-	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler;
+	let dialog, win, doc, IOManager, CitationDataManager, CitationFormManager, SearchHandler;
 
 	before(async function () {
 		// Zotero.Cite.getLocatorString() requires styles to be initialized
@@ -29,6 +29,7 @@ describe("Citation Dialog", function () {
 		doc = dialog.document;
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
+		CitationFormManager = dialog.CitationFormManager;
 		SearchHandler = dialog.SearchHandler;
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
 		while (!dialog.DIALOG_STATE.loaded) {
@@ -164,9 +165,15 @@ describe("Citation Dialog", function () {
 		beforeEach(function () {
 			io.citation.citationItems = [];
 			io.citation.sortable = false;
+			io.citationForm = "ordinary";
+			io.originalCitationForm = "ordinary";
+			io.citationFormChanged = false;
 			dialog.document.getElementById("keepSorted").checked = false;
 			io.sort = () => {};
 			CitationDataManager.items = [];
+			CitationFormManager.form = "ordinary";
+			CitationFormManager.headReferenceID = null;
+			CitationFormManager.updateUI();
 			IOManager.updateBubbleInput();
 		});
 
@@ -345,6 +352,78 @@ describe("Citation Dialog", function () {
 				}
 			];
 			assert.deepEqual(io.citation.citationItems, expected);
+		});
+
+		it("should designate a Narrative Head and serialize the citation form", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+
+			let firstItem = CitationDataManager.items[0];
+			assert.equal(CitationFormManager.headReferenceID, firstItem.dialogReferenceID);
+			assert.isTrue(firstItem.isNarrativeHead);
+			assert.isFalse(doc.getElementById("narrative-fields").hidden);
+
+			CitationDataManager.updateCitationObject(true);
+			assert.equal(io.citation.properties.mode, "suppress-author");
+			assert.isTrue(io.citation.citationItems[0]["is-narrative-head"]);
+		});
+
+		it("should disable sorting only when the Narrative Head changes", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			doc.getElementById("keepSorted").checked = true;
+			let firstItem = CitationDataManager.items[0];
+			let secondItem = CitationDataManager.items[1];
+			let originalState = CitationFormManager.getState();
+
+			CitationFormManager.onItemDetailsUpdated(firstItem.dialogReferenceID);
+			assert.isTrue(doc.getElementById("keepSorted").checked);
+
+			secondItem.isNarrativeHead = true;
+			CitationFormManager.onItemDetailsUpdated(secondItem.dialogReferenceID);
+			assert.isFalse(doc.getElementById("keepSorted").checked);
+			assert.equal(CitationDataManager.items[0], secondItem);
+			assert.isTrue(secondItem.isNarrativeHead);
+			assert.isFalse(firstItem.isNarrativeHead);
+
+			CitationFormManager.restoreState(originalState);
+			assert.isTrue(doc.getElementById("keepSorted").checked);
+			assert.equal(CitationDataManager.items[0], firstItem);
+			assert.equal(CitationFormManager.headReferenceID, firstItem.dialogReferenceID);
+		});
+
+		it("should keep the Narrative Head first during manual reordering", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			let firstItem = CitationDataManager.items[0];
+			let secondItem = CitationDataManager.items[1];
+
+			IOManager._moveItem(secondItem.dialogReferenceID, 0);
+			assert.equal(CitationDataManager.items[0], firstItem);
+			assert.equal(CitationDataManager.items[1], secondItem);
+		});
+
+		it("should return to Ordinary when the Narrative Head designation is removed", async function () {
+			await IOManager.addItemsToCitation([itemOne]);
+			CitationFormManager.setForm("narrative");
+			let headItem = CitationDataManager.items[0];
+			headItem.isNarrativeHead = false;
+			CitationFormManager.onItemDetailsUpdated(headItem.dialogReferenceID);
+			assert.equal(CitationFormManager.form, "ordinary");
+			assert.isNull(CitationFormManager.headReferenceID);
+		});
+
+		it("should restrict Author Only to one designated source", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("author-only");
+			assert.equal(CitationFormManager.form, "ordinary");
+
+			CitationFormManager.setForm("narrative");
+			CitationFormManager.setForm("author-only");
+			CitationDataManager.updateCitationObject(true);
+			assert.equal(CitationFormManager.form, "author-only");
+			assert.equal(io.citation.properties.mode, "author-only");
+			assert.lengthOf(io.citation.citationItems, 1);
 		});
 
 		it("should add a locator to a just added bubble", async function () {

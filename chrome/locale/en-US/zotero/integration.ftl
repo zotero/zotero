@@ -76,6 +76,7 @@ integration-citationDialog-section-cited = { $count ->
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = Omit Author
+integration-citationDialog-details-narrativeHead = Use as Narrative Head
 integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
@@ -96,6 +97,16 @@ integration-citationDialog-lib-message-annotations = { $search ->
    *[other] No selected or open items with annotations
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-form-ordinary = Ordinary
+integration-citationDialog-form-narrative = Narrative
+integration-citationDialog-form-authorOnly = Author Only
+    .title = Author Only is limited to a single source
+integration-citationDialog-narrative-head = Head
+integration-citationDialog-narrative-infix = Infix
+integration-citationDialog-narrative-remainder = Remainder
+integration-citationDialog-narrative-removeHead =
+    .title = Remove Narrative Head
+    .aria-label = Remove Narrative Head
 integration-citationDialog-preview-error = Preview unavailable
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
