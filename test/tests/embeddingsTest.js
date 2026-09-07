@@ -1861,7 +1861,7 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
-		it("should index auxiliary chunks with words and drop bare labels", async function () {
+		it("should skip an attachment's auxiliary blocks", async function () {
 			this.timeout(60000);
 			let item = await createDataObject('item', { title: 'Parent of captioned attachment' });
 			let attachment = await importPDFAttachment(item);
@@ -1890,7 +1890,6 @@ describe("Zotero.Embeddings", function () {
 								flowClass: 'auxiliary'
 							},
 							'More body text about the wintering grounds.',
-							// A standalone label with no words to rank by
 							{ text: 'Figure 4', flowClass: 'auxiliary' }
 						])
 					]
@@ -1904,28 +1903,18 @@ describe("Zotero.Embeddings", function () {
 				// re-embeds, so judge the distinct fulltext passages
 				let passages = [...new Set(texts)]
 					.filter(text => text.startsWith('Results'));
-				// The caption is lifted out into its own chunk, and the body
-				// around it reads straight through
-				assert.lengthOf(passages, 2);
-				let body = passages.find(text => text.includes('Body text'));
-				assert.include(body, 'Body text about owl migration');
-				assert.include(body, 'More body text about the wintering');
-				assert.notInclude(body, 'Figure 3');
-				assert.ok(passages.find(
-					text => text.includes('Figure 3: Owl migration routes across the Baltic.')));
-				// The bare label was dropped
-				assert.isFalse(texts.some(text => text.includes('Figure 4')));
-				// The body chunk references its blocks straight across the
-				// caption's; the caption references exactly its own
+				// The body reads straight through; neither caption is indexed
+				assert.lengthOf(passages, 1);
+				assert.include(passages[0], 'Body text about owl migration');
+				assert.include(passages[0], 'More body text about the wintering');
+				assert.isFalse(texts.some(text => text.includes('Figure')));
+				// The chunk references its blocks straight across the caption's
 				let rows = await Zotero.DB.queryAsync(
 					"SELECT startBlock, endBlock FROM embeddings.itemEmbeddings "
 						+ "WHERE itemID=? ORDER BY chunkIndex",
 					attachment.id
 				);
-				assert.deepEqual(
-					rows.map(row => [row.startBlock, row.endBlock]),
-					[[0, 2], [1, 1]]
-				);
+				assert.deepEqual(rows.map(row => [row.startBlock, row.endBlock]), [[0, 2]]);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());

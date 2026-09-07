@@ -2319,45 +2319,27 @@ Zotero.Embeddings.Indexing = new function () {
 	// The document's sections (see Zotero.SDT.getSections()) as things to
 	// index. Reference entries are dropped: a bibliography is keyword-dense
 	// but says nothing, so it crowds out real matches, and literal search
-	// still covers it via the fulltext index. Auxiliary blocks (captions,
-	// image descriptions) are lifted out into standalone sections: each is
-	// worth finding on its own, but isn't part of the running text it sits in.
+	// still covers it via the fulltext index. Auxiliary blocks are dropped
+	// for now: the class mixes captions with equations, axis labels and
+	// index entries. To revisit once the extractor tells those apart.
 	function _toIndexableSections(sections) {
 		let indexable = [];
 		for (let section of sections) {
-			let body = [];
-			for (let block of section.blocks) {
-				if (block.reference) {
-					continue;
-				}
-				if (block.flowClass === 'auxiliary') {
-					indexable.push(_toIndexableSection(section, [block], true));
-				}
-				else {
-					body.push(block);
-				}
-			}
+			let body = section.blocks.filter(
+				block => !block.reference && block.flowClass !== 'auxiliary');
 			if (body.length) {
-				indexable.push(_toIndexableSection(section, body, false));
+				indexable.push({
+					// The newline joins are part of the chunkSections()
+					// contract: they're what lets a chunk's extent map back
+					// to its blocks
+					text: body.map(block => block.text).join('\n'),
+					outlinePath: section.outlinePath,
+					startBlock: body[0].index,
+					blocks: body
+				});
 			}
 		}
-		// A body section is emitted after the auxiliary blocks it surrounds,
-		// and chunk indexes are document order
-		return indexable.sort((a, b) => a.startBlock - b.startBlock);
-	}
-
-	// One run of blocks as a section for the chunker, located where the run
-	// starts
-	function _toIndexableSection(section, blocks, auxiliary) {
-		return {
-			// The newline joins are part of the chunkSections() contract:
-			// they're what lets a chunk's extent map back to its blocks
-			text: blocks.map(block => block.text).join('\n'),
-			outlinePath: section.outlinePath,
-			startBlock: blocks[0].index,
-			blocks,
-			auxiliary
-		};
+		return indexable;
 	}
 
 	// The embeddable chunks of an attachment's full text: its outline
@@ -2381,11 +2363,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// to rank
 		if (sections.length
 				&& _hasEmbeddableText(sections.map(section => section.text).join(' '))) {
-			let chunks = Zotero.Embeddings.Chunking.chunkSections(sections);
-			// An auxiliary chunk stands alone, so it's held to the same word
-			// minimum as any standalone text -- a bare "Figure 1" gives the
-			// model nothing to rank
-			return chunks.filter(chunk => !chunk.auxiliary || _hasEmbeddableText(chunk.text));
+			return Zotero.Embeddings.Chunking.chunkSections(sections);
 		}
 		Zotero.debug(`Embeddings: no structured text for ${item.libraryKey}`
 			+ (result.ok ? '' : ` (${result.reason})`)
