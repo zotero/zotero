@@ -1766,10 +1766,11 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	
 	let citations;
 	try {
+		let narrativeInfix = (io.narrativeInfix || "").trim();
 		Object.assign(citationContext, {
 			form: io.citationForm,
 			formChanged: io.citationFormChanged,
-			infix: io.narrativeInfix || " "
+			infix: narrativeInfix ? ` ${narrativeInfix} ` : " "
 		});
 		citations = await this._insertCitingResult(
 			fieldIndex, field, io.citation, citationContext);

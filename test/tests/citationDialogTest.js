@@ -507,10 +507,11 @@ describe("Citation Dialog", function () {
 			CitationFormManager.setForm("narrative");
 			let searchValue = SearchHandler.searchValue;
 
-			infixInput.value = " argues ";
+			infixInput.value = "  argues\t ";
 			infixInput.dispatchEvent(new Event("input", { bubbles: true }));
 
 			assert.equal(io.narrativeInfix, " argues ");
+			assert.equal(CitationFormManager.normalizeInfix(" \t "), " ");
 			assert.equal(SearchHandler.searchValue, searchValue);
 		});
 

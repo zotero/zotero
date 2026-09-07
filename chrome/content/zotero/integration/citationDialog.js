@@ -95,8 +95,14 @@ async function onLoad() {
 	// will not conflict with how wide the "citation" dialog will be in list mode.
 	let initialMode = IOManager.getInitialDialogMode();
 	let savedParams = Helpers.fetchStoredWindowParams()[initialMode] || {};
-	let restoredWidth = savedParams.width || window.innerWidth;
-	let restoredHeight = savedParams.height || Helpers.getSearchRowHeight();
+	let chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
+	let chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
+	let restoredWidth = savedParams.innerWidth !== undefined
+		? savedParams.innerWidth + chromeWidth
+		: savedParams.width || window.outerWidth;
+	let restoredHeight = savedParams.innerHeight !== undefined
+		? savedParams.innerHeight + chromeHeight
+		: savedParams.height || Helpers.getSearchRowHeight();
 	window.resizeTo(restoredWidth, restoredHeight);
 	// On windows, after initial window size is set, make sure we don't resize list
 	// mode when search results are ready for a moment to avoid blinking
@@ -204,10 +210,12 @@ function cleanupBeforeDialogClosing() {
 	
 	// Save window params for current layout mode so we can restore it on next dialog open
 	let allParams = Helpers.fetchStoredWindowParams();
-	let params = { width: window.outerWidth };
+	// Store content dimensions. Saving outer dimensions and later restoring them
+	// across changing window chrome can make the dialog grow on every reopen.
+	let params = { innerWidth: window.innerWidth };
 	// Only save height in library mode, since in list mode height varies
 	if (currentLayout.type == "library") {
-		params.height = window.outerHeight;
+		params.innerHeight = window.innerHeight;
 	}
 	allParams[currentLayout.type] = params;
 	// Remember the width of collectionTree, so it can be restored on next open
@@ -1263,7 +1271,7 @@ const CitationFormManager = {
 			if (option) this.setForm(option.getAttribute("value"));
 		});
 		_id("narrative-infix").addEventListener("input", (event) => {
-			io.narrativeInfix = event.target.value;
+			io.narrativeInfix = this.normalizeInfix(event.target.value);
 			CitationPreview.update();
 			dialogNotPristine();
 		});
@@ -1284,6 +1292,11 @@ const CitationFormManager = {
 		CitationDataManager.updateCitationObject();
 		IOManager.updateBubbleInput();
 		dialogNotPristine();
+	},
+
+	normalizeInfix(infix) {
+		infix = (infix || "").trim();
+		return infix ? ` ${infix} ` : " ";
 	},
 
 	canUseAuthorOnly() {
@@ -2389,7 +2402,8 @@ const CitationPreview = {
 				let [headHTML, remainderHTML] = await io.previewNarrative(
 					headItem.getCitationItem(), io.citation, "html");
 				if (io.narrativeInfixAvailable) {
-					let infix = _id("narrative-infix").value || " ";
+					let infix = CitationFormManager.normalizeInfix(
+						_id("narrative-infix").value);
 					html = headHTML + Zotero.Utilities.htmlSpecialChars(infix) + remainderHTML;
 				}
 				else {
@@ -2607,7 +2621,8 @@ const CitationDataManager = {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
 		}
 		io.citationForm = CitationFormManager.form;
-		io.narrativeInfix = _id("narrative-infix").value;
+		io.narrativeInfix = CitationFormManager.normalizeInfix(
+			_id("narrative-infix").value);
 	},
 
 	// Resorts the items in the citation

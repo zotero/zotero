@@ -985,7 +985,7 @@ describe("Zotero.Integration", function () {
 				var doc = applications[docID].doc;
 
 				var insertTextSpy = sinon.spy(doc, 'insertText');
-				setNarrativeItems(testItems.slice(0, 2), 0, ' argues ', true);
+				setNarrativeItems(testItems.slice(0, 2), 0, '  argues\t ', true);
 				await execCommand('addEditCitation', docID);
 
 				assert.isTrue(insertTextSpy.calledWith(' argues '));
