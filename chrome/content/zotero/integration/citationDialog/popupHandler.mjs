@@ -31,6 +31,7 @@ export class CitationDialogPopupsHandler {
 		this.doc = doc;
 
 		this.bubbleItem = null;
+		this.bubble = null;
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
 		this.itemDetailsTimeOpened = null;
@@ -61,7 +62,8 @@ export class CitationDialogPopupsHandler {
 			let event = new CustomEvent("delete-item", {
 				bubbles: true,
 				detail: {
-					dialogReferenceID: this.bubbleItem.dialogReferenceID
+					bubble: this.bubble,
+					dialogReferenceID: this.bubbleItem.dialogReferenceID,
 				}
 			});
 			this.doc.dispatchEvent(event);
@@ -87,10 +89,12 @@ export class CitationDialogPopupsHandler {
 		}, true);
 	}
 
-	openItemDetails(bubbleItem, itemDescription) {
+	openItemDetails(bubbleItem, itemDescription, bubble = null) {
 		this.bubbleItem = bubbleItem;
 
-		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		this.bubble = bubble
+			|| this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		bubble = this.bubble;
 		let bubbleRect = bubble.getBoundingClientRect();
 		let popup = this._getNode("#itemDetails");
 		popup.openPopup(bubble, "after_start", 0, 4, false, false, null);
@@ -127,8 +131,6 @@ export class CitationDialogPopupsHandler {
 			prefix: bubbleItem.prefix,
 			suffix: bubbleItem.suffix,
 			suppressAuthor: bubbleItem.suppressAuthor,
-			isNarrativeHead: bubbleItem.isNarrativeHead,
-			citationFormState: this.citationFormStateWhenOpened,
 		};
 		// add locator labels if they don't exist yet
 		if (this._getNode("#label").childElementCount == 0) {
@@ -152,7 +154,6 @@ export class CitationDialogPopupsHandler {
 		this._getNode("#prefix").value = this.bubbleItem.prefix || "";
 		this._getNode("#suffix").value = this.bubbleItem.suffix || "";
 		this._getNode("#suppress-author").checked = !!this.bubbleItem.suppressAuthor;
-		this._getNode("#is-narrative-head").checked = !!this.bubbleItem.isNarrativeHead;
 	}
 
 	// do not close the popup within 300ms of opening to account for potential double clicking
@@ -174,9 +175,10 @@ export class CitationDialogPopupsHandler {
 
 	// When item details popup is closed, sync it's data to citationItems
 	handleItemDetailsClosure() {
-		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		let bubble = this.bubble;
 		if (!bubble) return;
 		bubble.classList.remove("showingDetails");
+		this.bubble = null;
 		// Restore properties to what they were when popup opened
 		if (this.discardItemDetailsEdits) {
 			this.discardItemDetailsEdits = false;
@@ -185,10 +187,8 @@ export class CitationDialogPopupsHandler {
 			this.bubbleItem.prefix = this.itemDetailsWhenOpened.prefix;
 			this.bubbleItem.suffix = this.itemDetailsWhenOpened.suffix;
 			this.bubbleItem.suppressAuthor = this.itemDetailsWhenOpened.suppressAuthor;
-			this.bubbleItem.isNarrativeHead = this.itemDetailsWhenOpened.isNarrativeHead;
-			let restoreCitationFormState = this.itemDetailsWhenOpened.citationFormState;
 			this.itemDetailsWhenOpened = {};
-			this.notifyCitationDialogOfChange({ restoreCitationFormState });
+			this.notifyCitationDialogOfChange();
 		}
 	}
 
@@ -207,17 +207,15 @@ export class CitationDialogPopupsHandler {
 		this.bubbleItem.prefix = this._getNode("#prefix").value;
 		this.bubbleItem.suffix = this._getNode("#suffix").value;
 		this.bubbleItem.suppressAuthor = this._getNode("#suppress-author").checked;
-		this.bubbleItem.isNarrativeHead = this._getNode("#is-narrative-head").checked;
 		this.notifyCitationDialogOfChange();
 	}
 
 	// Tell citation dialog that the item has been updated to refresh the bubble
-	notifyCitationDialogOfChange(detail = {}) {
+	notifyCitationDialogOfChange() {
 		let event = new CustomEvent("item-details-updated", {
 			bubbles: true,
 			detail: {
 				dialogReferenceID: this.bubbleItem.dialogReferenceID,
-				...detail,
 			}
 		});
 		this.doc.dispatchEvent(event);

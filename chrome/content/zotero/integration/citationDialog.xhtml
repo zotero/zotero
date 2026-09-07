@@ -57,28 +57,20 @@
 				<div id="z-icon-container">
 					<div id="z-icon"></div>
 				</div>
-				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1"/>
+				<div id="citation-inputs" class="hbox flex">
+					<div id="narrative-prefix" class="hbox">
+						<xul:bubble-input id="narrative-head-input" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1" hidden="true"/>
+						<input id="narrative-infix" type="text" data-tabindex="11" data-l10n-id="integration-citationDialog-narrative-infix-input" hidden="true"/>
+						<div id="narrative-infix-separator" role="separator" aria-orientation="vertical" hidden="true"></div>
+					</div>
+					<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="12" tabindex="-1"/>
+				</div>
 				<progress id="progress" max="100" hidden="true"></progress>
 				<div id="top-level-btn-group">
 					<image id="loading-spinner" class="zotero-spinner-16"/>
 					<button id="accept-button" class="btn-icon icon-citation-dialog-accept" data-l10n-id="integration-citationDialog-btn-accept"/>
 					<div class="vertical-separator"></div>
 					<button id="cancel-button" class="btn-icon icon-citation-dialog-cancel" data-l10n-id="integration-citationDialog-btn-cancel"/>
-				</div>
-			</div>
-			<div id="citation-form-area" class="hbox" data-dialog-type="citation">
-				<div id="citation-form-setting" class="segmented-switch" data-arrow-nav="horizontal" data-tabindex="20" role="radiogroup" aria-orientation="horizontal">
-					<div id="citation-form-ordinary" class="option keyboard-clickable" value="ordinary" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-ordinary"></div>
-					<div id="citation-form-narrative" class="option keyboard-clickable" value="narrative" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-narrative"></div>
-					<div id="citation-form-author-only" class="option keyboard-clickable" value="author-only" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-authorOnly"></div>
-				</div>
-				<div id="narrative-fields" class="hbox" data-arrow-nav="horizontal" data-tabindex="21" hidden="true">
-					<span class="narrative-label" data-l10n-id="integration-citationDialog-narrative-head"></span>
-					<button id="narrative-head" class="narrative-head-bubble" type="button" tabindex="-1" data-arrow-nav-enabled="true"></button>
-					<button id="narrative-head-remove" class="btn-icon" type="button" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-narrative-removeHead">×</button>
-					<label class="narrative-label" for="narrative-infix" data-l10n-id="integration-citationDialog-narrative-infix"></label>
-					<input id="narrative-infix" type="text" tabindex="-1" data-arrow-nav-enabled="true"/>
-					<span class="narrative-label" data-l10n-id="integration-citationDialog-narrative-remainder"></span>
 				</div>
 			</div>
 		</div>
@@ -142,6 +134,13 @@
 						<span class="icon icon-css icon-item-type" data-item-type="note"></span>
 					</div>
 				</div>
+				<div id="citation-form-area" class="hbox" data-dialog-type="citation">
+					<div id="citation-form-setting" class="segmented-switch" data-arrow-nav="horizontal" data-tabindex="71" role="radiogroup" aria-orientation="horizontal">
+						<div id="citation-form-ordinary" class="option keyboard-clickable" value="ordinary" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-ordinary"></div>
+						<div id="citation-form-narrative" class="option keyboard-clickable" value="narrative" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-narrative"></div>
+						<div id="citation-form-author-only" class="option keyboard-clickable" value="author-only" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-authorOnly"></div>
+					</div>
+				</div>
 				<div class="hbox" style="flex:1"></div>
 				<div id="bottom-btn-group" class="hbox">
 					<button id="display-preview-button" class="btn-icon" data-dialog-type="citation" data-l10n-id="integration-citationDialog-btn-displayPreview" aria-pressed="false" tabindex="-1" data-tabindex="80"></button>
@@ -186,12 +185,6 @@
 							<div id="suppress-author-container" class="hbox">
 								<input id="suppress-author" type="checkbox"/>
 								<label for="suppress-author" data-l10n-id="integration-citationDialog-details-suppressAuthor"></label>
-							</div>
-
-							<div></div>
-							<div id="narrative-head-container" class="hbox" hidden="true">
-								<input id="is-narrative-head" type="checkbox"/>
-								<label for="is-narrative-head" data-l10n-id="integration-citationDialog-details-narrativeHead"></label>
 							</div>
 					</div>
 					<div class="annotation-detail" data-dialog-type="annotations" hidden="true">
