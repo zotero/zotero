@@ -545,6 +545,12 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 			this._transactionID = null;
 		}
 		
+		// A corruption error from the transaction's own BEGIN or COMMIT is thrown by mozStorage
+		// instead of by one of our query methods, so it hasn't been checked yet
+		if (!e?.corruptionChecked) {
+			await this._checkException(e);
+		}
+		
 		// Function to run once transaction has been committed but before any
 		// permanent callbacks
 		if (options.onRollback) {
@@ -701,7 +707,7 @@ Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options 
 		if (e.errors && e.errors[0]) {
 			var eStr = e + "";
 			eStr = eStr.indexOf("Error: ") == 0 ? eStr.substr(7): e;
-			throw new Error(eStr + ' [QUERY: ' + sql + '] '
+			let newError = new Error(eStr + ' [QUERY: ' + sql + '] '
 				+ (params
 					? '[PARAMS: '
 						+ (Array.isArray(params)
@@ -710,6 +716,8 @@ Zotero.DBConnection.prototype.queryAsync = async function (sql, params, options 
 						) + '] '
 					: '')
 				+ '[ERROR: ' + e.errors[0].message + ']');
+			newError.corruptionChecked = e.corruptionChecked;
+			throw newError;
 		}
 		else {
 			throw e;
@@ -1922,6 +1930,11 @@ Zotero.DBConnection.prototype._revertWALHeader = async function (file) {
  *     check, which detects index inconsistencies that quick_check misses)
  */
 Zotero.DBConnection.prototype._checkException = async function (e, { mainConfirmedCorrupt } = {}) {
+	// Flag the error so that it isn't checked again as it propagates
+	if (e && typeof e == 'object') {
+		e.corruptionChecked = true;
+	}
+	
 	if (this._externalDB || !this.isCorruptionError(e) || this._checkingCorruption
 			|| this._handlingCorruption) {
 		return true;

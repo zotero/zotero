@@ -354,6 +354,108 @@ describe("Zotero.DB", function () {
 			assert.ok(callback1Ran);
 			assert.ok(callback2Ran);
 		});
+		
+		// Corrupt a table's pages, leaving the header, the schema and both table roots
+		// readable so that the database still opens and bar can be written to
+		async function createDatabaseWithCorruptTable() {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE bar (a INTEGER PRIMARY KEY, b TEXT)");
+			await db.queryAsync("CREATE TABLE foo (a INTEGER PRIMARY KEY, b TEXT)");
+			await db.executeTransaction(async function () {
+				for (let i = 0; i < 500; i++) {
+					await db.queryAsync("INSERT INTO foo VALUES (?, ?)", [i, 'x'.repeat(300)]);
+				}
+			});
+			let pageSize = await db.valueQueryAsync("PRAGMA page_size");
+			await db.closeDatabase();
+			for (let suffix of ['-wal', '-shm', '-journal']) {
+				await IOUtils.remove(dbPath + suffix, { ignoreAbsent: true });
+			}
+			
+			let bytes = await IOUtils.read(dbPath);
+			for (let i = 4 * pageSize; i < bytes.length; i++) {
+				bytes[i] = 0xde;
+			}
+			await IOUtils.write(dbPath, bytes);
+			
+			db = new Zotero.DBConnection(dbPath);
+			// Corruption handling is skipped for external databases
+			db._externalDB = false;
+			return db;
+		}
+		
+		it("should detect corruption reported by the commit of a transaction", async function () {
+			let db = await createDatabaseWithCorruptTable();
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			// Decline the offer to recover
+			let promptStub = sinon.stub().returns(1);
+			Services.prompt = { confirmEx: promptStub };
+			var e;
+			try {
+				e = await getPromiseError(db.executeTransaction(async function () {
+					await db.queryAsync("INSERT INTO bar VALUES (1, 'written')");
+					// SQLite prohibits the commit once a statement in the transaction has
+					// hit the corrupt pages, so swallow that error the way a caller doing
+					// optional work would
+					try {
+						await db.valueQueryAsync("SELECT COUNT(*) FROM foo");
+					}
+					catch {}
+				}));
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				Zotero.skipLoading = false;
+				try {
+					await db.closeDatabase();
+				}
+				catch {}
+				Zotero.hideZoteroPaneOverlays();
+			}
+			
+			// The commit is what failed, so the error arrives without the query details
+			// that queryAsync() adds to a statement error
+			assert.include(e.message, "database disk image is malformed");
+			assert.notInclude(e.message, "[QUERY:");
+			assert.equal(promptStub.callCount, 1);
+			assert.include(
+				promptStub.args[0][2],
+				Zotero.getString('db.dbCorrupted', [Zotero.appName, 'test.sqlite'])
+			);
+		});
+		
+		it("shouldn't prompt twice for one corruption error in a transaction", async function () {
+			let db = await createDatabaseWithCorruptTable();
+			let quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			let promptService = Services.prompt;
+			let promptStub = sinon.stub().returns(1);
+			Services.prompt = { confirmEx: promptStub };
+			var e;
+			try {
+				// queryAsync() checks the statement error itself, and the same error then
+				// propagates out of the transaction
+				e = await getPromiseError(db.executeTransaction(async function () {
+					await db.queryAsync("SELECT COUNT(*) FROM foo");
+				}));
+			}
+			finally {
+				quitStub.restore();
+				Services.prompt = promptService;
+				Zotero.skipLoading = false;
+				try {
+					await db.closeDatabase();
+				}
+				catch {}
+				Zotero.hideZoteroPaneOverlays();
+			}
+			
+			assert.include(e.message, "database disk image is malformed");
+			assert.equal(promptStub.callCount, 1);
+		});
 	})
 	
 	
