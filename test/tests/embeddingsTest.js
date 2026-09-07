@@ -478,6 +478,11 @@ describe("Zotero.Embeddings", function () {
 		// chunkText() returns { text, tokens, start, end }; most assertions
 		// here are about the text
 		var texts = chunks => chunks.map(chunk => chunk.text);
+		// A paragraph of `count` sentences, each about 12 estimated tokens.
+		// Sentences start with a capital: segmentation doesn't break on a
+		// period followed by lowercase.
+		var sentences = (tag, count) => Array.from({ length: count },
+			(x, i) => `${tag} sentence number ${i} with several words in it.`).join(' ');
 		var stubs = [];
 
 		beforeEach(function () {
@@ -533,6 +538,37 @@ describe("Zotero.Embeddings", function () {
 			assert.notInclude(chunks[0], 'bravo');
 			assert.include(chunks[1], 'bravo0');
 			assert.notInclude(chunks[1], 'alpha');
+		});
+
+		it("should divide oversized text into even pieces at paragraph boundaries", async function () {
+			// Four paragraphs of about 150 tokens, 600 in all: over the budget,
+			// but only just, so the even division is two pieces of two
+			// paragraphs. Filling each piece to the budget instead would put
+			// three in the first and leave one on its own.
+			let chunks = Zotero.Embeddings.Chunking.chunkText(
+				['Alpha', 'Bravo', 'Charlie', 'Delta'].map(tag => sentences(tag, 12)).join('\n\n'));
+			assert.lengthOf(chunks, 2);
+			// Paragraphs stay whole, and the two pieces come out even
+			assert.include(chunks[0].text, 'Alpha sentence');
+			assert.include(chunks[0].text, 'Bravo sentence');
+			assert.notInclude(chunks[0].text, 'Charlie');
+			assert.include(chunks[1].text, 'Charlie sentence');
+			assert.include(chunks[1].text, 'Delta sentence');
+			assert.closeTo(chunks[0].tokens, chunks[1].tokens, chunks[0].tokens * 0.2);
+		});
+
+		it("should absorb a tail too small to stand alone rather than leaving it a chunk", async function () {
+			// A paragraph filling most of the budget and a short one after it:
+			// keeping the paragraph boundary would leave the tail as a runt, so
+			// the two are divided at sentence boundaries instead
+			let chunks = Zotero.Embeddings.Chunking.chunkText(
+				sentences('Alpha', 32) + '\n\n' + sentences('Bravo', 8));
+			assert.lengthOf(chunks, 2);
+			for (let chunk of chunks) {
+				assert.isAtLeast(chunk.tokens, Zotero.Utilities.Internal.Chunking.MIN_TOKENS);
+				assert.isAtMost(chunk.tokens, BUDGET);
+			}
+			assert.closeTo(chunks[0].tokens, chunks[1].tokens, chunks[0].tokens * 0.35);
 		});
 
 		it("should combine paragraphs too small to embed on their own", async function () {
@@ -651,6 +687,43 @@ describe("Zotero.Embeddings", function () {
 			assert.isTrue(chunks[0].embedText.startsWith('Results > Field studies\n\n'));
 			assert.isTrue(chunks[0].text.startsWith('alpha0'));
 			assert.equal(chunks[0].outlinePath, 'Results > Field studies');
+		});
+
+		it("should carry each merged section's own heading into the embedded text", async function () {
+			// A stub too small to stand alone merges into the section after
+			// it, so one chunk holds text from both. Labelling the whole
+			// chunk with the stub's heading would describe almost none of it.
+			let chunks = Zotero.Embeddings.Chunking.chunkSections([
+				sdtSection('Funding', 0, [words('alpha', 12)]),
+				sdtSection('Methods', 1, wordBlocks('bravo', 4, 30))
+			]);
+			assert.lengthOf(chunks, 1);
+			let embedded = chunks[0].embedText;
+			// Each heading sits with the text it belongs to
+			assert.isBelow(embedded.indexOf('Funding'), embedded.indexOf('alpha0'));
+			assert.isBelow(embedded.indexOf('alpha0'), embedded.indexOf('Methods'));
+			assert.isBelow(embedded.indexOf('Methods'), embedded.indexOf('bravo0'));
+			// The plain text stays free of them, since block offsets index it
+			assert.notInclude(chunks[0].text, 'Funding');
+			assert.notInclude(chunks[0].text, 'Methods');
+			// Both headings are counted against the window
+			assert.isAbove(chunks[0].tokens,
+				Zotero.Embeddings.Chunking.estimateTokens(chunks[0].text));
+		});
+
+		it("should label a chunk with the section it starts in", async function () {
+			// Two small sections merge, then a third large one splits: the
+			// pieces after the first belong to the section they sit in
+			let chunks = Zotero.Embeddings.Chunking.chunkSections([
+				sdtSection('Preface', 0, [words('alpha', 12)]),
+				sdtSection('Discussion', 1, wordBlocks('bravo', 8, 60))
+			]);
+			assert.isAbove(chunks.length, 1);
+			assert.equal(chunks[0].outlinePath, 'Preface');
+			for (let chunk of chunks.slice(1)) {
+				assert.equal(chunk.outlinePath, 'Discussion');
+				assert.notInclude(chunk.embedText, 'Preface');
+			}
 		});
 
 		it("should combine sections too small to embed on their own", async function () {
@@ -1984,6 +2057,35 @@ describe("Zotero.Embeddings", function () {
 			finally {
 				stubs.forEach(stub => stub.restore());
 				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should chunk an attachment that has nothing stored yet", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of derived attachment' });
+			let attachment = await importPDFAttachment(item);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('Results', 0, ['Owls hunt at night. '.repeat(200)]),
+						sdtSection('Discussion', 1, ['Hawks hunt by day. '.repeat(200)])
+					]
+				})
+			];
+			try {
+				assert.isEmpty(await Zotero.Embeddings.getChunks(attachment.id));
+				let chunks = await Zotero.Embeddings.Indexing.getAttachmentChunks(attachment);
+				assert.isAbove(chunks.length, 1);
+				for (let chunk of chunks) {
+					assert.isAbove(chunk.tokens, 0);
+					assert.isNotEmpty(chunk.text);
+				}
+				assert.include(chunks.map(chunk => chunk.outlinePath), 'Results');
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
 			}
 		});
 

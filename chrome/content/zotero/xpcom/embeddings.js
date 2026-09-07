@@ -1687,7 +1687,7 @@ Zotero.Embeddings.Indexing = new function () {
 	const QUEUE_SLICE_SIZE = 32;
 	// Bump when chunking changes, so stored attachment rows are rebuilt (see
 	// _getAttachmentSourceHash())
-	const CHUNKER_VERSION = 1;
+	const CHUNKER_VERSION = 2;
 
 	// The inference process's memory arena only grows: fragmentation from
 	// varying batch shapes accumulates and is never returned to the OS
@@ -2342,19 +2342,22 @@ Zotero.Embeddings.Indexing = new function () {
 		return indexable;
 	}
 
-	// The embeddable chunks of an attachment's full text: its outline
-	// sections (extracted and cached by Zotero.SDT), split to fit the model
-	// window. When structured extraction yields nothing, the flat text falls
-	// back to note-style paragraph chunking -- searchable, just without
-	// section locations. Null when there's no embeddable text at all.
-	//
-	// Only the chunks' source references are stored -- block ranges and
-	// offsets for section chunks, flat-text offsets for fallback ones -- and
-	// the preview text is re-derived from them later (see
-	// getMatchingChunks()). That's also why a stale-processor pack won't do
-	// here: a background regeneration would shift the blocks out from under
-	// the stored references as soon as they were written.
-	async function _getAttachmentChunks(item) {
+	/**
+	 * The embeddable chunks of an attachment's full text: its outline
+	 * sections (extracted by Zotero.SDT), split to fit the model window. A
+	 * document with no structured text falls back to paragraph chunking of
+	 * its plain text, without section locations.
+	 *
+	 * Each chunk locates its text in the document by block and offset rather
+	 * than copying it, so this waits for a current extraction instead of
+	 * accepting one from an older processor, whose blocks it would point
+	 * past.
+	 *
+	 * @param {Zotero.Item} item - A PDF, EPUB or snapshot attachment
+	 * @return {Promise<Object[]|null>} - Null when there's no embeddable
+	 *     text at all
+	 */
+	this.getAttachmentChunks = async function (item) {
 		let result = await Zotero.SDT.getSections(item.id, { allowStale: false });
 		let sections = result.ok ? _toIndexableSections(result.sections) : [];
 		// The word minimum applies to the document as a whole, not each
@@ -2391,7 +2394,7 @@ Zotero.Embeddings.Indexing = new function () {
 			sectionPart: index + 1,
 			sectionParts: chunks.length
 		}));
-	}
+	};
 
 	// The stored source hash of each of the given items that has rows, read
 	// in one query per chunk rather than one per item (every start
@@ -2597,7 +2600,7 @@ Zotero.Embeddings.Indexing = new function () {
 				await Zotero.SDT.ensure(item.id);
 				// Counted while the pack is fresh, through the same derivation
 				// the embedder uses so the two can't disagree
-				let chunks = await _getAttachmentChunks(item);
+				let chunks = await Zotero.Embeddings.Indexing.getAttachmentChunks(item);
 				await _storeChunkCount(item.id, hash, chunks ? chunks.length : 0);
 				progress.done++;
 				await _tick();
@@ -2676,7 +2679,7 @@ Zotero.Embeddings.Indexing = new function () {
 
 		// Derive each entry's chunks. Notes are split to fit the model's
 		// context window; attachments are extracted (see
-		// _getAttachmentChunks()) and split section by section. A title and
+		// getAttachmentChunks()) and split section by section. A title and
 		// abstract, or an annotation's passage and comment, fit the window in
 		// almost all cases, so they're embedded as a single chunk and the
 		// pipeline truncates the rare outlier.
@@ -2691,7 +2694,8 @@ Zotero.Embeddings.Indexing = new function () {
 				return 0;
 			}
 			if (entry.item.isAttachment()) {
-				entry.chunks = await _getAttachmentChunks(entry.item);
+				entry.chunks = await Zotero.Embeddings.Indexing
+					.getAttachmentChunks(entry.item);
 				// Nothing embeddable anywhere in the attachment (missing
 				// file, password-protected, no text layer). Recorded below
 				// anyway, so the item counts as processed and isn't looked

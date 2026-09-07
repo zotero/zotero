@@ -3641,9 +3641,9 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	 * Split a text into passages that each fit the budget. Text that already
 	 * fits comes back as a single passage.
 	 *
-	 * Paragraphs are the topic units, so two never share a passage unless one
-	 * was too small to stand alone; a block over the budget is split into even
-	 * pieces at sentence boundaries.
+	 * Text over the budget is divided into as few and as even passages as
+	 * possible, cut at paragraph boundaries; a paragraph over the budget on
+	 * its own is split at sentence boundaries.
 	 *
 	 * @param {String} text
 	 * @param {Object} [metrics] - The character measure when omitted
@@ -3671,31 +3671,8 @@ Zotero.Utilities.Internal.Chunking = new function () {
 			return [_sliceUnits(text, paragraphs, totalSize)];
 		}
 
-		// Group paragraphs into blocks, combining any too small to stand alone
-		// with those that follow. A paragraph reaching the minimum on its own
-		// becomes its own block, keeping distinct subjects apart.
-		let groups = [];
-		let pending = [];
-		let pendingSize = 0;
-		for (let paragraph of paragraphs) {
-			pending.push(paragraph);
-			pendingSize += paragraph.size;
-			if (pendingSize >= metrics.minSize) {
-				groups.push(pending);
-				pending = [];
-				pendingSize = 0;
-			}
-		}
-		// A trailing group under the minimum joins the previous block rather
-		// than standing alone; the block is split evenly below anyway
-		if (pending.length) {
-			if (groups.length) {
-				groups[groups.length - 1].push(...pending);
-			}
-			else {
-				groups.push(pending);
-			}
-		}
+		let groups = _partitionEvenly(paragraphs, totalSize, budget, joinSize);
+		_absorbUndersized(groups, metrics.minSize, joinSize);
 
 		let chunks = [];
 		for (let group of groups) {
@@ -3710,6 +3687,72 @@ Zotero.Utilities.Internal.Chunking = new function () {
 		return chunks;
 	}
 
+	// Paragraphs divided into as few and as even groups as possible: filling
+	// each to the budget instead would leave a short remainder at the end.
+	// Recomputing the target from what's left spreads the slack rather than
+	// accumulating it, the same way _splitBlockEvenly() spreads sentences.
+	function _partitionEvenly(paragraphs, totalSize, budget, joinSize) {
+		let groups = [];
+		let current = [];
+		let currentSize = 0;
+		let remainingSize = totalSize;
+		let remainingGroups = Math.ceil(totalSize / budget);
+		for (let paragraph of paragraphs) {
+			let withNext = currentSize + joinSize + paragraph.size;
+			// Close at whichever boundary lands nearer the target. On the last
+			// group only the budget closes it.
+			let closeHere = false;
+			if (current.length) {
+				if (withNext > budget) {
+					closeHere = true;
+				}
+				else if (remainingGroups > 1) {
+					let target = remainingSize / remainingGroups;
+					closeHere = Math.abs(withNext - target) > Math.abs(currentSize - target);
+				}
+			}
+			if (closeHere) {
+				groups.push(current);
+				remainingSize -= currentSize + joinSize;
+				remainingGroups = Math.max(1, remainingGroups - 1);
+				current = [];
+				currentSize = 0;
+			}
+			currentSize += (current.length ? joinSize : 0) + paragraph.size;
+			current.push(paragraph);
+		}
+		if (current.length) {
+			groups.push(current);
+		}
+		return groups;
+	}
+
+	// A group under the minimum merges into its smaller neighbor: an item
+	// scores as its best chunk, so a fragment standing alone would inflate
+	// that score. The merged group can exceed the budget, which leaves it to
+	// the sentence splitter -- the only way to divide a paragraph that fills
+	// the budget by itself.
+	function _absorbUndersized(groups, minSize, joinSize) {
+		let i = 0;
+		while (groups.length > 1 && i < groups.length) {
+			if (_sumSizes(groups[i], joinSize) >= minSize) {
+				i++;
+				continue;
+			}
+			let before = i > 0 ? _sumSizes(groups[i - 1], joinSize) : Infinity;
+			let after = i < groups.length - 1
+				? _sumSizes(groups[i + 1], joinSize)
+				: Infinity;
+			if (before <= after) {
+				groups[i - 1].push(...groups[i]);
+			}
+			else {
+				groups[i + 1].unshift(...groups[i]);
+			}
+			groups.splice(i, 1);
+		}
+	}
+
 	/**
 	 * Split a document's outline sections (see Zotero.SDT.getSections()) into
 	 * chunks that each fit the budget. Sections play the role paragraphs play
@@ -3720,9 +3763,10 @@ Zotero.Utilities.Internal.Chunking = new function () {
 	 * too-small merging in both directions, so each stands as its own chunk
 	 * rather than mixing into the running text.
 	 *
-	 * `embedText` is the chunk's text prefixed with its section's outline path
-	 * ("Methods > Participants"), giving a fragment the context of its
-	 * headings at the cost of part of the budget; `text` stays the plain piece.
+	 * `embedText` weaves each section's outline path ("Methods > Participants")
+	 * into the chunk at the point that section's text begins, so a chunk
+	 * spanning merged sections carries the heading of each rather than one
+	 * heading for all of them; `text` stays the plain piece.
 	 *
 	 * Each chunk records where it lives: the block range it covers, with
 	 * offsets into the first and last block, so the text can be re-derived
@@ -3804,29 +3848,21 @@ Zotero.Utilities.Internal.Chunking = new function () {
 
 		let chunks = [];
 		for (let group of groups) {
-			// A merged group takes its first section's outline path -- the
-			// heading its text starts under
-			let outlinePath = group.entries[0].section.outlinePath || '';
-			let prefix = outlinePath ? outlinePath + '\n\n' : '';
-			let prefixSize = prefix ? count(prefix) : 0;
-			// A pathological outline path that would eat a real share of the
-			// window hurts more than it helps
-			if (prefixSize > budget / 4) {
-				prefix = '';
-				prefixSize = 0;
-			}
 			// The group's source string: its sections' texts joined, with the
 			// sections' paragraphs shifted to their place in it and every
 			// block's extent recorded, so each chunk's slice can be mapped
-			// back to the blocks it covers
+			// back to the blocks it covers. Where each section starts is kept
+			// too, for the headings woven in below.
 			let text = '';
 			let paragraphs = [];
 			let blocks = [];
+			let sections = [];
 			for (let entry of group.entries) {
 				if (text) {
 					text += '\n\n';
 				}
 				let base = text.length;
+				sections.push({ start: base, path: entry.section.outlinePath || '' });
 				for (let paragraph of entry.paragraphs) {
 					paragraphs.push({
 						...paragraph,
@@ -3850,7 +3886,29 @@ Zotero.Utilities.Internal.Chunking = new function () {
 				}
 				text += entry.section.text;
 			}
-			let pieces = _chunkParagraphs(text, paragraphs, budget - prefixSize, metrics);
+			// A heading labels its own section only, so it runs to where the
+			// next one starts. One repeating the heading before it says
+			// nothing, and one long enough to eat a real share of the window
+			// hurts more than it helps.
+			let headings = sections
+				.map((section, j) => ({
+					...section,
+					end: sections[j + 1] ? sections[j + 1].start : text.length,
+					size: count(section.path + '\n\n')
+				}))
+				.filter((heading, j) => heading.path
+					&& heading.path !== sections[j - 1]?.path
+					&& count(heading.path) <= budget / 4);
+			// Every heading the group could contribute is held back from the
+			// budget, since which of them a piece carries isn't known until
+			// the pieces exist. Past a quarter of the window only the first
+			// is kept, so the reservation can't crowd out the text.
+			let headingSize = headings.reduce((sum, heading) => sum + heading.size, 0);
+			if (headingSize > budget / 4) {
+				headings = headings.slice(0, 1);
+				headingSize = headings.length ? headings[0].size : 0;
+			}
+			let pieces = _chunkParagraphs(text, paragraphs, budget - headingSize, metrics);
 			for (let i = 0; i < pieces.length; i++) {
 				let piece = pieces[i];
 				// The blocks the piece's extent overlaps. A piece boundary
@@ -3861,11 +3919,31 @@ Zotero.Utilities.Internal.Chunking = new function () {
 					block => block.end > piece.start && block.start < piece.end);
 				let first = covered[0];
 				let last = covered[covered.length - 1];
+				// Each heading the piece reaches, at the point its section
+				// starts -- at the top for the section the piece opens in
+				let embedText = '';
+				let embedSize = piece.size;
+				let emitted = '';
+				let cursor = piece.start;
+				for (let heading of headings) {
+					if (heading.end <= piece.start || heading.start >= piece.end
+							|| heading.path === emitted) {
+						continue;
+					}
+					let at = Math.max(heading.start, piece.start);
+					embedText += text.slice(cursor, at) + heading.path + '\n\n';
+					embedSize += heading.size;
+					emitted = heading.path;
+					cursor = at;
+				}
+				embedText += text.slice(cursor, piece.end);
 				chunks.push({
 					text: piece.text,
-					embedText: prefix + piece.text,
-					size: piece.size + prefixSize,
-					outlinePath,
+					embedText,
+					size: embedSize,
+					outlinePath: headings.find(
+						heading => heading.end > piece.start && heading.start < piece.end
+					)?.path || '',
 					startBlock: first ? first.index : null,
 					endBlock: last ? last.index : null,
 					startOffset: first ? piece.start - first.start : null,
