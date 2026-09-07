@@ -897,7 +897,8 @@ Zotero_Preferences.Sync = {
 			Zotero.alert(
 				window,
 				Zotero.getString('sync.storage.serverConfigurationVerified'),
-				Zotero.getString('sync.storage.fileSyncSetUp')
+				Zotero.getString('sync.storage.fileSyncSetUp'),
+				{ icon: 'success' }
 			);
 		}
 		else {

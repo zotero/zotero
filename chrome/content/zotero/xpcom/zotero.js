@@ -1422,10 +1422,38 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {Window}
 	 * @param {String} title
 	 * @param {String} msg
+	 * @param {Object} [options]
+	 * @param {String} [options.icon] - Name of a Zotero icon to display instead of the
+	 *     default alert icon
 	 */
-	this.alert = function (window, title, msg) {
+	this.alert = function (window, title, msg, options = {}) {
 		this.debug(`Alert:\n\n${msg}`);
-		Services.prompt.alert(window, title, msg);
+
+		if (!options.icon) {
+			Services.prompt.alert(window, title, msg);
+			return;
+		}
+
+		let dialogObserverChangeIcon = subject => {
+			let doc = subject.document;
+			if (doc.title != title
+					|| doc.getElementById('infoBody')?.textContent != msg) {
+				return;
+			}
+			let icon = doc.getElementById('infoIcon');
+			icon?.classList.remove('alert-icon');
+			icon?.setAttribute(
+				'src',
+				`chrome://zotero/skin/20/universal/${options.icon}.svg`
+			);
+		};
+		Services.obs.addObserver(dialogObserverChangeIcon, 'common-dialog-loaded');
+		try {
+			Services.prompt.alert(window, title, msg);
+		}
+		finally {
+			Services.obs.removeObserver(dialogObserverChangeIcon, 'common-dialog-loaded');
+		}
 	}
 	
 	
