@@ -119,6 +119,22 @@
 	}
 }
 
+#semantic-search-diagnostics {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	column-gap: 12px;
+	row-gap: 2px;
+	margin-top: 10px;
+	
+	label:nth-child(odd) {
+		color: var(--fill-secondary);
+	}
+	
+	label:nth-child(even) {
+		white-space: normal;
+	}
+}
+
 #db-maintenance-options {
 	display: flex;
 	gap: 6px;

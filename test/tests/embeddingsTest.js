@@ -1051,6 +1051,28 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
+	describe("Diagnostics", function () {
+		it("should estimate remaining time once the window spans long enough", function () {
+			let diagnostics = Zotero.Embeddings.Diagnostics;
+			try {
+				diagnostics.startRun();
+				let batch = { chunks: 10, tokens: 1000, longest: 100, inferenceMs: 100 };
+				diagnostics.recordBatch(batch);
+				// One batch spans no time, so the window isn't trusted yet
+				assert.isNull(diagnostics.estimateSeconds(300));
+				// A batch a minute ago makes the window a minute wide
+				diagnostics.startRun();
+				diagnostics.recordBatch({ ...batch, time: Date.now() - 60 * 1000 });
+				diagnostics.recordBatch(batch);
+				assert.approximately(diagnostics.estimateSeconds(300), 900, 1);
+				assert.isNull(diagnostics.estimateSeconds(0));
+			}
+			finally {
+				diagnostics.endRun();
+			}
+		});
+	});
+
 	describe("Calibration", function () {
 		// Stub the model rather than setting the pref: writing embeddings.model
 		// kicks off a real model switch, which clears the index and the stored
@@ -1765,6 +1787,73 @@ describe("Zotero.Embeddings", function () {
 				let reads = Zotero.SDT.getSections.callCount;
 				await Zotero.Embeddings.Indexing.startIndexing();
 				assert.equal(Zotero.SDT.getSections.callCount, reads);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexFulltext');
+			}
+		});
+
+		it("should report pipeline diagnostics", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of measured attachment' });
+			let attachment = await importPDFAttachment(item);
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
+				sinon.stub(Zotero.SDT, 'getSections').resolves({
+					ok: true,
+					sections: [
+						sdtSection('', 0, ['Owls hunt at night. '.repeat(200)]),
+						sdtSection('', 1, ['Hawks hunt by day. '.repeat(200)])
+					]
+				})
+			];
+			try {
+				Zotero.Prefs.set('embeddings.indexFulltext', true);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				let { diagnostics } = await Zotero.Embeddings.Indexing.refreshStatus();
+
+				// Every stored chunk carries its size
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=? AND tokens IS NULL",
+					attachment.id
+				), 0);
+
+				// Rates come from the run's batches
+				assert.isAbove(diagnostics.run.batches, 0);
+				assert.isAbove(diagnostics.run.chunksPerSecond, 0);
+				assert.isAbove(diagnostics.run.tokensPerSecond, 0);
+				assert.isAbove(diagnostics.run.paddingEfficiency, 0);
+				assert.isAtMost(diagnostics.run.paddingEfficiency, 1);
+				assert.isAbove(diagnostics.window.chunksPerSecond, 0);
+				assert.isNull(diagnostics.slice);
+				assert.isAtLeast(diagnostics.engine.threads, 1);
+				// Nothing left to embed, so no estimate
+				assert.isNull((await Zotero.Embeddings.Indexing.refreshStatus()).eta);
+
+				// Chunk shape agrees with the tables
+				let { sizes, perDocument } = diagnostics.chunks;
+				assert.equal(sizes.count, await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE sectionParts IS NOT NULL"
+				));
+				assert.equal(sizes.buckets.reduce((sum, b) => sum + b.count, 0), sizes.count);
+				assert.isAbove(sizes.median, 0);
+				assert.equal(perDocument.count, await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemChunkCounts"
+				));
+				assert.equal(perDocument.buckets.reduce((sum, b) => sum + b.count, 0), perDocument.count);
+				assert.isAtLeast(perDocument.max, await Zotero.DB.valueQueryAsync(
+					"SELECT chunks FROM embeddings.itemChunkCounts WHERE itemID=?", attachment.id
+				));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());

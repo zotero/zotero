@@ -287,7 +287,7 @@ Zotero.Embeddings = new function () {
 	// Schema version of the attached embeddings database. The tables are only
 	// created when this is bumped (_setUpDB() drops and recreates everything),
 	// so any schema change needs a bump.
-	const _dbVersion = 4;
+	const _dbVersion = 5;
 
 	let _dbInitPromise = null;
 	let _dbHooksRegistered = false;
@@ -391,8 +391,15 @@ Zotero.Embeddings = new function () {
 			+ "    textCheck TEXT,\n"
 			+ "    sectionPart INTEGER,\n"
 			+ "    sectionParts INTEGER,\n"
+			+ "    tokens INTEGER,\n"
 			+ "    PRIMARY KEY (itemID, chunkIndex)\n"
 			+ ")"
+		);
+		// Chunk-shape diagnostics read this index alone, never the rows with
+		// their vectors (see Indexing._getChunkShape())
+		await Zotero.DB.queryAsync(
+			"CREATE INDEX embeddings.itemEmbeddings_tokens "
+				+ "ON itemEmbeddings (tokens, sectionParts, sectionPart)"
 		);
 		// The localUserKey the vectors were built against and the model that
 		// produced them
@@ -1688,71 +1695,9 @@ Zotero.Embeddings.Indexing = new function () {
 	// gets. Restarting the engine is the only reclaim and costs about a
 	// second, so past this footprint it's restarted between batches.
 	const INFERENCE_MEMORY_CAP = 1.5 * 1024 * 1024 * 1024;
-	// How often process usage is sampled and logged during a run
-	const PROC_SAMPLE_INTERVAL = 10 * 1000;
-	let _procTimer = null;
-	let _procCpuTimes = new Map();
-	let _procLastSample = 0;
-	// The inference process's footprint at the last sample, in bytes --
-	// what the between-batches restart check reads
-	let _inferenceFootprint = 0;
-
-	// One line of process usage for the debug log -- the main and inference
-	// processes' footprint and CPU (in core-fractions, so several busy
-	// threads read over 100%), and the memory still available -- so a
-	// submitted debug log shows what indexing cost while it ran.
-	async function _sampleProcesses() {
-		let info = await ChromeUtils.requestProcInfo();
-		let now = Date.now();
-		let elapsedNS = _procLastSample ? (now - _procLastSample) * 1e6 : 0;
-		_procLastSample = now;
-		let inference = info.children.find(child => child.type == 'inference');
-		_inferenceFootprint = inference ? inference.memory : 0;
-		let procs = [
-			{ label: 'main', pid: info.pid, memory: info.memory, cpuTime: info.cpuTime }
-		];
-		if (inference) {
-			procs.push({
-				label: 'inference',
-				pid: inference.pid,
-				memory: inference.memory,
-				cpuTime: inference.cpuTime
-			});
-		}
-		let parts = procs.map((proc) => {
-			let cpu = '';
-			let prev = _procCpuTimes.get(proc.pid);
-			if (prev !== undefined && elapsedNS) {
-				cpu = ` cpu ${Math.round((proc.cpuTime - prev) / elapsedNS * 100)}%`;
-			}
-			_procCpuTimes.set(proc.pid, proc.cpuTime);
-			return `${proc.label} ${(proc.memory / 1024 / 1024).toFixed(0)} MB${cpu}`;
-		});
-		let available = _availableMemory();
-		Zotero.debug('Embeddings: ' + parts.join(', ')
-			+ (available ? `, ${Math.round(available / 1024 / 1024)} MB available` : ''));
-	}
-
-	function _startProcMonitor() {
-		if (_procTimer) {
-			return;
-		}
-		_procCpuTimes = new Map();
-		_procLastSample = 0;
-		_inferenceFootprint = 0;
-		_procTimer = setInterval(
-			() => _sampleProcesses().catch(e => Zotero.logError(e)),
-			PROC_SAMPLE_INTERVAL
-		);
-	}
-
-	function _stopProcMonitor() {
-		if (!_procTimer) {
-			return;
-		}
-		clearInterval(_procTimer);
-		_procTimer = null;
-	}
+	// Time of the process sample the last cap restart acted on, so each
+	// sample triggers at most one
+	let _restartedOnSample = 0;
 
 	// Serialize model switches so rapid preference changes don't run their
 	// clear/prune/re-index steps concurrently.
@@ -1916,6 +1861,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				return;
 			}
+			Zotero.Embeddings.Diagnostics.recordMemoryPressure();
 			if (_tokenBudget <= DEGRADED_TOKEN_BUDGET_FLOOR) {
 				return;
 			}
@@ -1979,27 +1925,13 @@ Zotero.Embeddings.Indexing = new function () {
 	 * @return {Boolean}
 	 */
 	function _hasMemoryToIndex() {
-		let available = _availableMemory();
+		let available = Zotero.Embeddings.Diagnostics.getAvailableMemory();
 		if (available && available < MIN_AVAILABLE_MEMORY) {
 			Zotero.debug(`Embeddings: only ${Math.round(available / 1024 / 1024)} MB `
 				+ "available -- not indexing yet");
 			return false;
 		}
 		return true;
-	}
-
-	// Physical memory available right now, in bytes -- 0 when the platform
-	// can't say
-	function _availableMemory() {
-		try {
-			return Cc["@mozilla.org/ml-utils;1"]
-				.getService(Ci.nsIMLUtils)
-				.availablePhysicalMemory || 0;
-		}
-		catch (e) {
-			Zotero.logError(e);
-			return 0;
-		}
 	}
 
 	// Put an itemID on the queue its kind of work belongs to. An item the
@@ -2582,8 +2514,8 @@ Zotero.Embeddings.Indexing = new function () {
 			"INSERT INTO embeddings.itemEmbeddings "
 				+ "(itemID, chunkIndex, embedding, sourceHash, "
 				+ "startBlock, endBlock, startOffset, endOffset, "
-				+ "textCheck, sectionPart, sectionParts) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				+ "textCheck, sectionPart, sectionParts, tokens) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			[
 				entry.item.id,
 				chunkIndex,
@@ -2595,7 +2527,8 @@ Zotero.Embeddings.Indexing = new function () {
 				isAttachment ? chunk.endOffset ?? null : null,
 				isAttachment ? Zotero.Embeddings.textCheck(chunk.text) : null,
 				chunk.sectionPart ?? null,
-				chunk.sectionParts ?? null
+				chunk.sectionParts ?? null,
+				chunk.tokens ?? null
 			],
 			{ debugParams: false }
 		);
@@ -2860,6 +2793,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// halves fulltext indexing time versus item-level ordering.
 		units.sort((a, b) => a.entry.chunks[a.chunkIndex].tokens
 			- b.entry.chunks[b.chunkIndex].tokens);
+		Zotero.Embeddings.Diagnostics.startSlice(units.length);
 
 		let done = 0;
 		for (let i = 0; i < units.length;) {
@@ -2881,15 +2815,24 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 			let batch = units.slice(i, i + count);
 			i += count;
+			let started = Date.now();
 			let vectors = await Zotero.Embeddings.embedPassages(
 				batch.map(unit => embedText(unit.entry.chunks[unit.chunkIndex]))
 			);
-			// The arena's only reclaim is a restart (see INFERENCE_MEMORY_CAP);
-			// zeroing the footprint holds the next check until a fresh sample
-			if (_inferenceFootprint > INFERENCE_MEMORY_CAP) {
-				let footprintMB = Math.round(_inferenceFootprint / 1024 / 1024);
-				_inferenceFootprint = 0;
+			Zotero.Embeddings.Diagnostics.recordBatch({
+				chunks: batch.length,
+				tokens: batch.reduce((sum, unit) => sum + unit.entry.chunks[unit.chunkIndex].tokens, 0),
+				longest,
+				inferenceMs: Date.now() - started
+			});
+			// The arena's only reclaim is a restart (see INFERENCE_MEMORY_CAP)
+			let sample = Zotero.Embeddings.Diagnostics.getProcessSample();
+			if (sample?.inference?.memory > INFERENCE_MEMORY_CAP
+					&& sample.time !== _restartedOnSample) {
+				_restartedOnSample = sample.time;
+				let footprintMB = Math.round(sample.inference.memory / 1024 / 1024);
 				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				Zotero.Embeddings.Diagnostics.recordRestart('memory');
 				Zotero.debug(`Embeddings: inference process at ${footprintMB} MB `
 					+ '-- engine restarted to release its memory');
 			}
@@ -2897,6 +2840,7 @@ Zotero.Embeddings.Indexing = new function () {
 			// between batches, never mid-request
 			else if (Zotero.Embeddings.engineThreadsStale()) {
 				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				Zotero.Embeddings.Diagnostics.recordRestart('threads');
 				Zotero.debug('Embeddings: engine restarted to apply new thread count');
 			}
 			let completed = [];
@@ -3001,6 +2945,20 @@ Zotero.Embeddings.Indexing = new function () {
 			extractionProgress: _extractionProgress,
 			items: _itemCounts,
 			chunks: _chunkCounts,
+			// Seconds until the fulltext work is embedded, at the current rate.
+			// Unknown while extraction is still adding to the total.
+			eta: _phase === 'extracting'
+				? null
+				: Zotero.Embeddings.Diagnostics.estimateSeconds(_chunkCounts.total - _chunkCounts.done),
+			diagnostics: {
+				...Zotero.Embeddings.Diagnostics.getStatus(),
+				tokenBudget: _tokenBudget,
+				engine: {
+					threads: this.getEngineThreads(),
+					optimalThreads: Zotero.ML.getOptimalConcurrency(),
+					boosts: [..._threadBoosts]
+				}
+			},
 			error: _lastError ? (_lastError.message || String(_lastError)) : null
 		};
 	};
@@ -3056,6 +3014,7 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 		_itemCounts = { done: await _getIndexedItemCount(), total };
 		_chunkCounts = await _getChunkCounts();
+		await Zotero.Embeddings.Diagnostics.refreshChunkShape();
 		_lastCountRefresh = Date.now();
 		_emitProgress();
 		return Zotero.Embeddings.Indexing.getStatus();
@@ -3072,8 +3031,8 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Progress tick for a run's inner loops: refresh the chunk counts and
 	// emit, at most once per PROGRESS_EMIT_INTERVAL. The indexed item count
-	// costs a scan of the index, so it's recomputed less often; the eligible
-	// count comes from the last full refresh.
+	// and chunk shape each cost an index scan, so they're recomputed less
+	// often; the eligible count comes from the last full refresh.
 	async function _tick() {
 		let now = Date.now();
 		if (now - _lastTick < PROGRESS_EMIT_INTERVAL) {
@@ -3085,6 +3044,7 @@ Zotero.Embeddings.Indexing = new function () {
 			if (now - _lastCountRefresh >= COUNT_REFRESH_INTERVAL) {
 				_lastCountRefresh = now;
 				_itemCounts = { done: await _getIndexedItemCount(), total: _itemCounts.total };
+				await Zotero.Embeddings.Diagnostics.refreshChunkShape();
 			}
 		}
 		catch (e) {
@@ -3198,7 +3158,7 @@ Zotero.Embeddings.Indexing = new function () {
 		_stopping = false;
 		_lastError = null;
 		_lastTick = 0;
-		_startProcMonitor();
+		Zotero.Embeddings.Diagnostics.startRun();
 		_startIdleWatch();
 		try {
 			await Zotero.Embeddings.initDB();
@@ -3247,11 +3207,11 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 		finally {
 			_stopIdleWatch();
-			_stopProcMonitor();
 			_indexing = false;
 			_phase = 'idle';
 			_downloadProgress = null;
 			_extractionProgress = null;
+			Zotero.Embeddings.Diagnostics.endRun();
 			// A run cut short by a stop or an error still reports what's
 			// stored
 			try {
@@ -3326,6 +3286,272 @@ Zotero.Embeddings.Indexing = new function () {
 		Zotero.Embeddings.Indexing.setThreadBoost('user-idle', false);
 	}
 };
+
+/**
+ * Pipeline diagnostics, reported through Indexing.getStatus().
+ * Indexing records what happens -- engine batches, restarts, memory
+ * pressure, process samples, the slice in progress -- and this turns it
+ * into rates and shape summaries. Tokens are the chunker's estimates.
+ */
+Zotero.Embeddings.Diagnostics = new function () {
+	// Throughput window: at least a slice, since the in-slice length sort
+	// makes shorter windows swing
+	const RATE_WINDOW = 120 * 1000;
+	// A window this long is trusted for estimates
+	const ESTABLISHED_WINDOW = 30 * 1000;
+	// How often the main and inference processes are sampled during a run
+	const PROC_SAMPLE_INTERVAL = 10 * 1000;
+	let _samples = [];
+	let _run = _newRun();
+	let _slice = null;
+	let _chunkShape = null;
+	let _pressureEvents = 0;
+	let _procTimer = null;
+	let _procCpuTimes = new Map();
+	let _procLastSample = 0;
+	let _processSample = null;
+
+	function _newRun() {
+		return {
+			batches: 0,
+			chunks: 0,
+			tokens: 0,
+			padded: 0,
+			inferenceMs: 0,
+			restarts: { memory: 0, threads: 0 }
+		};
+	}
+
+	// Reset everything scoped to one indexing run and start sampling the
+	// processes
+	this.startRun = function () {
+		_samples = [];
+		_run = _newRun();
+		_pressureEvents = 0;
+		_slice = null;
+		if (!_procTimer) {
+			_procCpuTimes = new Map();
+			_procLastSample = 0;
+			_procTimer = setInterval(
+				() => _sampleProcesses().catch(e => Zotero.logError(e)),
+				PROC_SAMPLE_INTERVAL
+			);
+		}
+	};
+
+	this.endRun = function () {
+		_slice = null;
+		if (_procTimer) {
+			clearInterval(_procTimer);
+			_procTimer = null;
+		}
+	};
+
+	// Throughput over the last RATE_WINDOW, wall-clock -- so it includes
+	// commits and restarts -- or null before the first batch
+	function _getWindow() {
+		if (!_samples.length) {
+			return null;
+		}
+		let sum = key => _samples.reduce((total, sample) => total + sample[key], 0);
+		let span = Date.now() - _samples[0].time;
+		let seconds = Math.max(1, span / 1000);
+		let tokens = sum('tokens');
+		return {
+			chunksPerSecond: sum('chunks') / seconds,
+			tokensPerSecond: tokens / seconds,
+			paddingEfficiency: tokens / (sum('padded') || 1),
+			established: span >= ESTABLISHED_WINDOW
+		};
+	}
+
+	// Seconds to embed `remaining` chunks at the window's rate, or null when
+	// there's nothing left or the window isn't established
+	this.estimateSeconds = function (remaining) {
+		let window = _getWindow();
+		if (!window?.established || remaining <= 0) {
+			return null;
+		}
+		return remaining / window.chunksPerSecond;
+	};
+
+	// The last process sample: { time, available, main: { memory, cpu },
+	// inference: { memory, cpu } }, with memory in bytes and CPU in
+	// core-fractions (several busy threads read over 100%). Null before the
+	// first sample of a run; inference is absent when no engine is up.
+	this.getProcessSample = function () {
+		return _processSample;
+	};
+
+	// Physical memory available right now, in bytes -- 0 when the platform
+	// can't say
+	this.getAvailableMemory = function () {
+		try {
+			return Cc["@mozilla.org/ml-utils;1"]
+				.getService(Ci.nsIMLUtils)
+				.availablePhysicalMemory || 0;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return 0;
+		}
+	};
+
+
+	async function _sampleProcesses() {
+		let info = await ChromeUtils.requestProcInfo();
+		let now = Date.now();
+		let elapsedNS = _procLastSample ? (now - _procLastSample) * 1e6 : 0;
+		_procLastSample = now;
+		let inference = info.children.find(child => child.type == 'inference');
+		let procs = [
+			{ label: 'main', pid: info.pid, memory: info.memory, cpuTime: info.cpuTime }
+		];
+		if (inference) {
+			procs.push({
+				label: 'inference',
+				pid: inference.pid,
+				memory: inference.memory,
+				cpuTime: inference.cpuTime
+			});
+		}
+		let sample = { time: now, available: Zotero.Embeddings.Diagnostics.getAvailableMemory() };
+		for (let proc of procs) {
+			let prev = _procCpuTimes.get(proc.pid);
+			_procCpuTimes.set(proc.pid, proc.cpuTime);
+			sample[proc.label] = {
+				memory: proc.memory,
+				cpu: prev !== undefined && elapsedNS
+					? Math.round((proc.cpuTime - prev) / elapsedNS * 100)
+					: null
+			};
+		}
+		_processSample = sample;
+	}
+
+	// A slice of `total` chunks is about to be embedded
+	this.startSlice = function (total) {
+		_slice = { done: 0, total };
+	};
+
+	// Record an engine batch that finished at `time` (now by default). Padded
+	// tokens are what the engine computed: every text as long as the longest.
+	this.recordBatch = function ({ chunks, tokens, longest, inferenceMs, time = Date.now() }) {
+		let sample = { time, chunks, tokens, padded: chunks * longest, inferenceMs };
+		_samples.push(sample);
+		while (_samples.length && _samples[0].time < sample.time - RATE_WINDOW) {
+			_samples.shift();
+		}
+		_run.batches++;
+		_run.chunks += chunks;
+		_run.tokens += tokens;
+		_run.padded += sample.padded;
+		_run.inferenceMs += inferenceMs;
+		if (_slice) {
+			_slice.done += chunks;
+		}
+	};
+
+	// @param {String} cause - 'memory' or 'threads'
+	this.recordRestart = function (cause) {
+		_run.restarts[cause]++;
+	};
+
+	this.recordMemoryPressure = function () {
+		_pressureEvents++;
+	};
+
+	// Recount the chunk shape from the database (see _getChunkShape())
+	this.refreshChunkShape = async function () {
+		_chunkShape = await _getChunkShape();
+	};
+
+	// The window is wall-clock throughput; the run's inference speed counts
+	// only time inside the engine, so the gap between them is overhead.
+	this.getStatus = function () {
+		let window = _getWindow();
+		let run = null;
+		if (_run.batches) {
+			let seconds = Math.max(0.001, _run.inferenceMs / 1000);
+			run = {
+				chunksPerSecond: _run.chunks / seconds,
+				tokensPerSecond: _run.tokens / seconds,
+				paddingEfficiency: _run.tokens / (_run.padded || 1),
+				batches: _run.batches,
+				chunksPerBatch: _run.chunks / _run.batches,
+				tokensPerBatch: _run.tokens / _run.batches
+			};
+		}
+		return {
+			window,
+			run,
+			restarts: _run.restarts,
+			pressureEvents: _pressureEvents,
+			processes: _processSample,
+			slice: _slice,
+			chunks: _chunkShape
+		};
+	};
+
+	// The shape of the stored attachment chunks -- sizes from the tokens
+	// index, chunks per document from the ledger -- for judging the
+	// chunker's output. Attachment rows are the ones with sectionParts;
+	// other item types' rows aren't the chunker's work.
+	async function _getChunkShape() {
+		let { BUDGET_TOKENS, MIN_TOKENS } = Zotero.Utilities.Internal.Chunking;
+		let sizeBounds = [MIN_TOKENS, BUDGET_TOKENS / 2, Math.round(BUDGET_TOKENS * 5 / 6), BUDGET_TOKENS];
+		let documentBounds = [1, 11, 51, 201];
+		let bucketSQL = (column, bounds) => bounds.map((bound, i) => (i
+			? `SUM(${column} >= ${bounds[i - 1]} AND ${column} < ${bound}) AS b${i}`
+			: `SUM(${column} < ${bound}) AS b0`
+		)).concat(`SUM(${column} >= ${bounds[bounds.length - 1]}) AS b${bounds.length}`).join(', ');
+		let buckets = (row, bounds) => bounds.map((bound, i) => ({
+			from: i ? bounds[i - 1] : null,
+			to: bound,
+			count: row[`b${i}`] || 0
+		})).concat({ from: bounds[bounds.length - 1], to: null, count: row[`b${bounds.length}`] || 0 });
+		let median = async (sql, count) => (count
+			? Zotero.DB.valueQueryAsync(sql + " LIMIT 1 OFFSET " + Math.floor(count / 2))
+			: 0);
+
+		let sizes = await Zotero.DB.rowQueryAsync(
+			"SELECT COUNT(*) AS count, COALESCE(SUM(tokens), 0) AS tokens, "
+				+ bucketSQL('tokens', sizeBounds) + ", "
+				+ "SUM(sectionParts > 1) AS split, "
+				+ "SUM(sectionParts > 1 AND sectionPart = 1) AS splitSections, "
+				+ "SUM(CASE WHEN sectionParts > 1 AND sectionPart = 1 THEN sectionParts ELSE 0 END) AS splitParts "
+				+ "FROM embeddings.itemEmbeddings WHERE sectionParts IS NOT NULL"
+		);
+		let documents = await Zotero.DB.rowQueryAsync(
+			"SELECT COUNT(*) AS count, COALESCE(SUM(chunks), 0) AS chunks, "
+				+ "COALESCE(MAX(chunks), 0) AS max, " + bucketSQL('chunks', documentBounds)
+				+ " FROM embeddings.itemChunkCounts"
+		);
+		return {
+			sizes: {
+				count: sizes.count,
+				tokens: sizes.tokens,
+				mean: sizes.count ? sizes.tokens / sizes.count : 0,
+				median: await median(
+					"SELECT tokens FROM embeddings.itemEmbeddings WHERE sectionParts IS NOT NULL "
+						+ "ORDER BY tokens",
+					sizes.count),
+				buckets: buckets(sizes, sizeBounds),
+				splitShare: sizes.count ? (sizes.split || 0) / sizes.count : 0,
+				partsPerSplitSection: sizes.splitSections ? sizes.splitParts / sizes.splitSections : 0
+			},
+			perDocument: {
+				count: documents.count,
+				mean: documents.count ? documents.chunks / documents.count : 0,
+				median: await median(
+					"SELECT chunks FROM embeddings.itemChunkCounts ORDER BY chunks", documents.count),
+				max: documents.max,
+				buckets: buckets(documents, documentBounds)
+			}
+		};
+	}
+};
+
 
 /**
  * Zotero.Embeddings.Calibration -- how a model's scoring numbers are derived.

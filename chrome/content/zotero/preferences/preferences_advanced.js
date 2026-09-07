@@ -231,6 +231,69 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('semantic-search-attachments-row').hidden
 			= !Zotero.Prefs.get('embeddings.indexFulltext');
 		this._updateSemanticSearchBar('attachments', status.chunks);
+		this._updateSemanticSearchDiagnostics(status.diagnostics, status.eta);
+	},
+
+
+	// Key/value rows of pipeline diagnostics for developers, so the labels
+	// are plain English rather than localized
+	_updateSemanticSearchDiagnostics: function (diagnostics, eta) {
+		let n = (value, digits = 0) => (value ?? 0).toLocaleString(undefined, {
+			maximumFractionDigits: digits, minimumFractionDigits: digits
+		});
+		let pct = value => Math.round((value || 0) * 100) + '%';
+		let mb = bytes => n(bytes / 1024 / 1024) + ' MB';
+		let speed = rate => `${n(rate.chunksPerSecond, 1)} chunks/s, ${n(rate.tokensPerSecond)} tokens/s`;
+		let bucketList = (buckets, total, unit) => buckets.map(({ from, to, count }) => {
+			let range = from === null ? `< ${n(to)}` : (to === null ? `≥ ${n(from)}` : `${n(from)}–${n(to - 1)}`);
+			return `${range}${unit}: ${n(count)} (${pct(total ? count / total : 0)})`;
+		}).join(' · ');
+		let proc = p => (p ? `${mb(p.memory)}${p.cpu === null ? '' : `, CPU ${p.cpu}%`}` : '—');
+		let duration = (seconds) => {
+			let h = Math.floor(seconds / 3600);
+			let m = Math.floor(seconds % 3600 / 60);
+			return h ? `${h} h ${m} m` : `${m} m ${Math.floor(seconds % 60)} s`;
+		};
+
+		let rows = [];
+		let { window, run, engine, processes, slice, chunks } = diagnostics;
+		rows.push(['ETA', eta === null ? '—' : duration(eta)]);
+		rows.push(['Throughput (2 min)', window ? speed(window) : '—']);
+		rows.push(['Inference speed (run)', run ? speed(run) : '—']);
+		rows.push(['Padding efficiency', window || run
+			? `${window ? pct(window.paddingEfficiency) : '—'} (2 min), ${run ? pct(run.paddingEfficiency) : '—'} (run)`
+			: '—']);
+		rows.push(['Batches (run)', run
+			? `${n(run.batches)} · ${n(run.chunksPerBatch, 1)} chunks · ${n(run.tokensPerBatch)} tokens avg`
+			: '—']);
+		rows.push(['Token budget', `${n(diagnostics.tokenBudget)} · ${n(diagnostics.pressureEvents)} memory-pressure events`]);
+		rows.push(['Engine threads', `${engine.threads} of ${engine.optimalThreads}`
+			+ (engine.boosts.length ? ` (boost: ${engine.boosts.join(', ')})` : '')]);
+		rows.push(['Engine restarts (run)', `memory ${diagnostics.restarts.memory}, threads ${diagnostics.restarts.threads}`]);
+		rows.push(['Inference process', proc(processes?.inference)]);
+		rows.push(['Main process', proc(processes?.main)]);
+		rows.push(['Available memory', processes?.available ? mb(processes.available) : '—']);
+		rows.push(['Slice', slice ? `${n(slice.done)} / ${n(slice.total)} chunks` : '—']);
+		if (chunks) {
+			let { sizes, perDocument } = chunks;
+			rows.push(['Chunks stored', `${n(sizes.count)} · ${n(sizes.tokens)} tokens · mean ${n(sizes.mean)} · median ${n(sizes.median)}`]);
+			rows.push(['Chunk sizes', bucketList(sizes.buckets, sizes.count, '')]);
+			rows.push(['Split sections', `${pct(sizes.splitShare)} of chunks · ${n(sizes.partsPerSplitSection, 1)} parts per split section`]);
+			rows.push(['Chunks per document', `${n(perDocument.count)} documents · mean ${n(perDocument.mean, 1)} · median ${n(perDocument.median)} · max ${n(perDocument.max)}`]);
+			rows.push(['Documents by chunks', bucketList(perDocument.buckets, perDocument.count, '')]);
+		}
+
+		let box = document.getElementById('semantic-search-diagnostics');
+		while (box.childElementCount < rows.length * 2) {
+			box.append(document.createXULElement('label'), document.createXULElement('label'));
+		}
+		while (box.childElementCount > rows.length * 2) {
+			box.lastElementChild.remove();
+		}
+		rows.forEach(([label, value], i) => {
+			box.children[i * 2].value = label;
+			box.children[i * 2 + 1].value = value;
+		});
 	},
 
 
