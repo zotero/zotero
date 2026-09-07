@@ -669,10 +669,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					throw e;
 				}
 				
-				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
-				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
-					+ "\n\n"
-					+ (stack || e);
+				// Report the error unless corruption recovery has already started a quit
+				// or restart
+				if (!Zotero.skipLoading) {
+					let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
+						+ "\n\n"
+						+ (stack || e);
+				}
 				throw e;
 			}
 			finally {
@@ -847,7 +851,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		catch (e) {
 			Zotero.logError(e);
-			if (!Zotero.startupError) {
+			// Report a generic error unless a more specific one was set above or corruption
+			// recovery has already started a quit or restart
+			if (!Zotero.startupError && !Zotero.skipLoading) {
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
 					+ e.message ? (e.message + "\n\n" + e.stack) : e;
