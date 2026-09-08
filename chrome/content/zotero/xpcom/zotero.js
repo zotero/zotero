@@ -672,10 +672,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				// Report the error unless corruption recovery has already started a quit
 				// or restart
 				if (!Zotero.skipLoading) {
-					let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
 					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
 						+ "\n\n"
-						+ (stack || e);
+						+ _formatStartupError(e);
 				}
 				throw e;
 			}
@@ -856,7 +855,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			if (!Zotero.startupError && !Zotero.skipLoading) {
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
-					+ e.message ? (e.message + "\n\n" + e.stack) : e;
+					+ _formatStartupError(e);
 			}
 			return false;
 		}
@@ -914,10 +913,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				Zotero.startupError = Zotero.getString('startupError.databaseInUse');
 			}
 			else {
-				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
-					+ (stack || e);
+					+ _formatStartupError(e);
 			}
 			
 			Zotero.debug(e.toString(), 1);
@@ -928,6 +926,20 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		
 		return true;
 	};
+	
+	
+	/**
+	 * Format an error for a startup error message
+	 *
+	 * SpiderMonkey stacks contain only frames, so the message has to be included with them.
+	 *
+	 * @param {Error|*} e
+	 * @return {String|*}
+	 */
+	function _formatStartupError(e) {
+		var stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+		return [e.message, stack].filter(x => x).join("\n\n") || e;
+	}
 	
 	
 	function _checkDataDirAccessError(e) {
