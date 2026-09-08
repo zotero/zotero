@@ -155,9 +155,7 @@ export class HiddenBrowser {
 		Zotero.debug(`Loading ${uri} in hidden browser`);
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
 		try {
-			// Figure out whether the browser should be remote. We actually
-			// perform the load in PageDataChild, but remoteness changes
-			// need to happen here.
+			// Figure out whether the browser should be remote
 			let oa = E10SUtils.predictOriginAttributes({ browser: this });
 			let remoteType = E10SUtils.getRemoteTypeForURI(
 				uri,
@@ -221,12 +219,18 @@ export class HiddenBrowser {
 				);
 			});
 
-			let loadURISuccess = await this.browsingContext.currentWindowGlobal.getActor("PageData")
-				.sendQuery("loadURI", { uri });
-			if (!loadURISuccess) {
+			let prepared = await this.browsingContext.currentWindowGlobal.getActor("PageData")
+				.sendQuery("prepareLoad");
+			if (!prepared) {
 				Zotero.logError(new Error("Load failed"));
 				return false;
 			}
+			// Start the load from the parent process. A load started by the content process
+			// is restricted to URLs that process could load itself, which excludes blob: URLs
+			// created by chrome code.
+			this._browser.loadURI(Services.io.newURI(uri), {
+				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
+			});
 			await loadCompletePromise;
 		}
 		catch (e) {

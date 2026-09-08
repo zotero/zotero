@@ -496,6 +496,16 @@ describe("Zotero.FullText", function () {
 				);
 			})
 			
+			it("should index an HTML file", async function () {
+				var item = await importFileAttachment('test.html');
+				assert.equal(
+					((await Zotero.Fulltext.getIndexedState(item))),
+					Zotero.Fulltext.INDEX_STATE_INDEXED
+				);
+				var content = await Zotero.File.getContentsAsync(Zotero.Fulltext.getItemCacheFile(item).path);
+				assert.include(content, 'This is a test.');
+			})
+			
 			it("should skip indexing of a PDF if fulltext.textMaxLength is 0", async function () {
 				Zotero.Prefs.set('fulltext.textMaxLength', 0);
 				var item = await importFileAttachment('test.pdf');

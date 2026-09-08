@@ -2,10 +2,10 @@ import { documentIsReady } from "chrome://zotero/content/actors/actorUtils.mjs";
 
 export class PageDataChild extends JSWindowActorChild {
 	async receiveMessage(message) {
-		// Special case for loadURI: don't wait for document to be ready,
+		// Special case for prepareLoad: don't wait for document to be ready,
 		// since we haven't loaded anything yet
-		if (message.name === "loadURI") {
-			return this.loadURI(message.data.uri);
+		if (message.name === "prepareLoad") {
+			return this.prepareLoad();
 		}
 		
 		let document = this.document;
@@ -50,31 +50,13 @@ export class PageDataChild extends JSWindowActorChild {
 		}
 	}
 	
-	loadURI(uri) {
+	prepareLoad() {
 		// https://searchfox.org/mozilla-central/rev/e69f323af80c357d287fb6314745e75c62eab92a/toolkit/actors/BackgroundThumbnailsChild.sys.mjs#44-85
-		let docShell = this.docShell.QueryInterface(Ci.nsIWebNavigation);
 		// Don't allow downloads/external apps
-		docShell.allowContentRetargeting = false;
+		this.docShell.allowContentRetargeting = false;
 
 		// Get the document to force a content viewer to be created, otherwise
 		// the first load can fail.
-		if (!this.document) {
-			return false;
-		}
-		
-		let loadURIOptions = {
-			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-		};
-		
-		try {
-			docShell.loadURI(
-				Services.io.newURI(uri),
-				loadURIOptions
-			);
-			return true;
-		}
-		catch (e) {
-			return false;
-		}
+		return !!this.document;
 	}
 }
