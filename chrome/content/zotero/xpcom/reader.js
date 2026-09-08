@@ -145,6 +145,16 @@ class ReaderInstance {
 		let state = this._iframeWindow?.wrappedJSObject?.getSecondViewState?.();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
 	}
+	
+	/**
+	 * This reader's own primary view state, which the attachment's saved state only matches
+	 * until another reader for the attachment saves its own
+	 *
+	 * @return {Object|undefined}
+	 */
+	getPrimaryViewState() {
+		return this._primaryViewState ? JSON.parse(JSON.stringify(this._primaryViewState)) : undefined;
+	}
 
 	async migrateMendeleyColors(libraryID, annotations) {
 		let colorMap = new Map();
@@ -212,6 +222,7 @@ class ReaderInstance {
 
 		this.annotationItemIDs = annotationItems.map(x => x.id);
 		state = state || (await this._getState());
+		this._primaryViewState = state;
 
 
 		await this._waitForReader();
@@ -389,6 +400,7 @@ class ReaderInstance {
 			onChangeViewState: async (state, primary) => {
 				state = JSON.parse(JSON.stringify(state));
 				if (primary) {
+					this._primaryViewState = state;
 					await this._setState(state);
 				}
 				else if (this.tabID) {
@@ -2056,7 +2068,11 @@ class ReaderTab extends ReaderInstance {
 			}
 		};
 
-		this._open({ location: options.location, secondViewState: options.secondViewState }).then(() => {
+		this._open({
+			state: options.primaryViewState,
+			location: options.location,
+			secondViewState: options.secondViewState
+		}).then(() => {
 			this._tabContainer.addEventListener('tab-bottom-placeholder-resize', (event) => {
 				this.setBottomPlaceholderHeight(event.detail.height);
 			});
@@ -2732,7 +2748,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback, window: ownerWindow } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, primaryViewState, secondViewState, preventJumpback, window: ownerWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
 		let win = ownerWindow || Zotero.getMainWindow();
@@ -2793,6 +2809,7 @@ class Reader {
 			reader = new ReaderTab({
 				item,
 				location,
+				primaryViewState,
 				secondViewState,
 				title,
 				index: tabIndex,

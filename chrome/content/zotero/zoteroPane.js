@@ -609,6 +609,10 @@ var ZoteroPane = new function () {
 	 */
 	function takeWindowState() {
 		let args = getWindowArgs();
+		// Where a tab torn off from another window was dropped
+		if (args.geometry) {
+			restoreWindowGeometry(args.geometry);
+		}
 		if (args.libraryTabState) {
 			_initialLibraryTabState = args.libraryTabState;
 			_initialOtherLibraryTabs = args.otherLibraryTabs || [];
@@ -916,11 +920,11 @@ var ZoteroPane = new function () {
 					});
 			}
 			else if (_initialReaderTabState) {
-				let { itemID, secondViewState, title } = _initialReaderTabState;
+				let { itemID, primaryViewState, secondViewState, title } = _initialReaderTabState;
 				Zotero_Tabs.add({
 					type: 'reader-unloaded',
 					title: title || '',
-					data: { itemID, secondViewState },
+					data: { itemID, primaryViewState, secondViewState },
 					select: true
 				});
 			}

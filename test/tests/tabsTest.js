@@ -861,6 +861,192 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should move a library tab to another window with its collection selection", async function () {
+			let { id } = await addLibraryTab({ collections: ['C' + collection.id] });
+			let refocus = sinon.spy(tabs.tabHooks.refocus, 'library');
+			let newID;
+			try {
+				newID = await tabs.moveToWindow(id, win2);
+				// The window the tab left selects another tab without taking focus from the window
+				// the tab went to
+				await Zotero.Promise.delay(50);
+				assert.isFalse(refocus.called);
+			}
+			finally {
+				refocus.restore();
+			}
+			try {
+				assert.isUndefined(tabs._getTab(id).tab);
+				assert.equal(win2.Zotero_Tabs.selectedID, newID);
+				await waitForCallback(
+					() => win2.ZoteroPane.getLibraryView(newID)?.loaded, 50, 10
+				);
+				let view = win2.ZoteroPane.getLibraryView(newID);
+				await view.waitForLibraryTabState();
+				assert.deepEqual(getRowIDs(view), ['C' + collection.id]);
+			}
+			finally {
+				if (win2.Zotero_Tabs._getTab(newID).tab) {
+					win2.Zotero_Tabs.close(newID);
+				}
+			}
+		});
+		
+		it("should move a tab dropped on another window's tab bar", async function () {
+			let { id } = await addLibraryTab();
+			let tabNode = win.document.querySelector(`#tab-bar-container .tabs-wrapper .tab[data-id="${id}"]`);
+			let tabBar = win2.document.querySelector('#tab-bar-container .tabs-wrapper .tabs');
+			let dataTransfer = new win.DataTransfer();
+			let fire = (target, type) => target.dispatchEvent(
+				new target.ownerDocument.defaultView.DragEvent(type, { bubbles: true, cancelable: true, dataTransfer })
+			);
+			let count = win2.Zotero_Tabs._tabs.length;
+			fire(tabNode, 'dragstart');
+			fire(tabBar, 'dragover');
+			fire(tabBar, 'drop');
+			fire(tabNode, 'dragend');
+			await waitForCallback(() => win2.Zotero_Tabs._tabs.length > count, 50, 10);
+			let newID = win2.Zotero_Tabs.selectedID;
+			try {
+				assert.isUndefined(tabs._getTab(id).tab);
+				assert.isTrue(win2.Zotero_Tabs.isLibraryTab(newID));
+			}
+			finally {
+				win2.Zotero_Tabs.close(newID);
+			}
+		});
+
+		/**
+		 * Drag a library tab out of the window and drop it where nothing takes it
+		 *
+		 * @param {Number} screenX
+		 * @param {Number} screenY
+		 * @return {String} - The id of the dragged tab
+		 */
+		async function dropTabOutsideTabBar(screenX, screenY) {
+			let { id } = await addLibraryTab();
+			let tabNode = win.document.querySelector(`#tab-bar-container .tabs-wrapper .tab[data-id="${id}"]`);
+			let dataTransfer = new win.DataTransfer();
+			tabNode.dispatchEvent(new win.DragEvent('dragstart', { bubbles: true, dataTransfer }));
+			tabNode.dispatchEvent(new win.DragEvent('dragend', { bubbles: true, dataTransfer, screenX, screenY }));
+			return id;
+		}
+
+		it("should tear off a tab dropped outside the tab bar into a new window", async function () {
+			let openWindows = Zotero.getMainWindows();
+			let id = await dropTabOutsideTabBar(win.screenX + 100, win.screenY + win.outerHeight - 50);
+			let newWin;
+			try {
+				await waitForCallback(
+					() => (newWin = Zotero.getMainWindows().find(x => !openWindows.includes(x)))
+						&& newWin.Zotero_Tabs?.numTabs,
+					100,
+					20
+				);
+				assert.isUndefined(tabs._getTab(id).tab);
+				assert.isTrue(newWin.Zotero_Tabs.isLibraryTab(newWin.Zotero_Tabs.selectedID));
+			}
+			finally {
+				newWin?.close();
+			}
+		});
+
+		it("should keep a tab dropped just below its tab bar", async function () {
+			let tabBar = win.document.querySelector('#tab-bar-container .tabs-wrapper .tabs');
+			let { left, bottom } = tabBar.getBoundingClientRect();
+			let openWindows = Zotero.getMainWindows();
+			let id = await dropTabOutsideTabBar(
+				win.mozInnerScreenX + left + 50, win.mozInnerScreenY + bottom + 5
+			);
+			try {
+				await Zotero.Promise.delay(500);
+				assert.ok(tabs._getTab(id).tab);
+				assert.sameMembers(Zotero.getMainWindows(), openWindows);
+			}
+			finally {
+				if (tabs._getTab(id).tab) {
+					tabs.close(id);
+				}
+			}
+		});
+
+		it("should move a reader tab to another window", async function () {
+			let attachment = await importPDFAttachment(otherItem);
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			await reader._initPromise;
+			let newID = await tabs.moveToWindow(reader.tabID, win2);
+			try {
+				assert.isUndefined(tabs._getTab(reader.tabID).tab);
+				assert.equal(win2.Zotero_Tabs.selectedID, newID);
+				await win2.Zotero_Tabs.getLoadPromise(newID);
+				let movedReader = Zotero.Reader.getByTabID(newID);
+				assert.equal(movedReader.itemID, attachment.id);
+				assert.equal(movedReader._window, win2);
+			}
+			finally {
+				if (win2.Zotero_Tabs._getTab(newID).tab) {
+					win2.Zotero_Tabs.close(newID);
+				}
+			}
+		});
+		
+		it("should keep a moved reader's position when another reader saved a different one", async function () {
+			let attachment = await importFileAttachment('wonderland_long.pdf', {
+				contentType: 'application/pdf',
+				parentID: otherItem.id
+			});
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			await reader._initPromise;
+			await reader.navigate({ pageIndex: 3 });
+			await waitForCallback(() => reader.getPrimaryViewState()?.pageIndex === 3, 100, 10);
+			// Let the reader's view state changes settle and its saved state be written
+			await Zotero.Promise.delay(1000);
+			await reader._flushState();
+			assert.notOk(reader._pendingWriteStateFunction);
+			// Another reader for the attachment saves a different position
+			await attachment.setAttachmentLastPageIndex(7);
+			
+			let newID = await tabs.moveToWindow(reader.tabID, win2);
+			try {
+				await win2.Zotero_Tabs.getLoadPromise(newID);
+				let movedReader = Zotero.Reader.getByTabID(newID);
+				assert.equal(movedReader.getPrimaryViewState().pageIndex, 3);
+			}
+			finally {
+				if (win2.Zotero_Tabs._getTab(newID).tab) {
+					win2.Zotero_Tabs.close(newID);
+				}
+			}
+		});
+		
+		it("should close the source window when its last tab is moved", async function () {
+			let openWindows = Zotero.getMainWindows();
+			let win3 = Zotero.openMainWindow({
+				libraryTabState: { collections: ['C' + collection.id] }
+			});
+			let newID;
+			try {
+				await waitForCallback(
+					() => win3.ZoteroPane?.libraryView?.loaded && win3.Zotero_Tabs.numTabs == 1,
+					100,
+					10
+				);
+				await win3.ZoteroPane.libraryView.waitForLibraryTabState();
+				newID = await win3.Zotero_Tabs.moveToWindow(win3.Zotero_Tabs.selectedID, win2);
+				assert.equal(win2.Zotero_Tabs.selectedID, newID);
+				await waitForCallback(() => win3.closed, 50, 10);
+				assert.sameMembers(Zotero.getMainWindows(), openWindows);
+			}
+			finally {
+				if (!win3.closed) {
+					win3.close();
+				}
+				if (newID && win2.Zotero_Tabs._getTab(newID).tab) {
+					win2.Zotero_Tabs.close(newID);
+				}
+			}
+		});
+		
 		it("should show tags in a reinitialized tag selector while another window is open", async function () {
 			await item.addTag('second-window-tag');
 			await item.saveTx();

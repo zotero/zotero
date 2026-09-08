@@ -47,6 +47,20 @@
 		flex-grow: 1;
 	}
 
+	.tab-drop-indicator {
+		position: absolute;
+		width: 2px;
+		transform: translateX(-50%);
+		border-radius: 1px;
+		background: var(--accent-blue);
+		pointer-events: none;
+		z-index: 2;
+
+		&[hidden] {
+			display: none;
+		}
+	}
+
 	.scroll-start-arrow, .scroll-end-arrow {
 		padding: 0 4px;
 		align-items: center;

@@ -105,11 +105,16 @@ var Zotero_Tabs = new function () {
 	this.tabHooks = {
 		load: {
 			reader: async (tab, tabIndex, options) => {
+				// A moved tab's position applies only to its first load, after which the reader
+				// keeps its own
+				let { primaryViewState } = tab.data;
+				delete tab.data.primaryViewState;
 				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
 					allowDuplicate: true,
+					primaryViewState,
 					secondViewState: tab.data.secondViewState,
 					preventJumpback: true,
 					window
@@ -205,21 +210,48 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		moveToNewWindow: {
-			library: async (tab, _tabIndex) => {
-				this._captureLibraryTabState(tab);
-				Zotero_Tabs.close(tab.id);
-				Zotero.openMainWindow({ libraryTabState: tab.data.state });
+			library: async (tab, _tabIndex, { geometry } = {}) => {
+				let { data } = this.tabHooks.transfer.library(tab);
+				// A moved tab isn't reopenable here, and the window it goes to takes focus
+				this.close(tab.id, { skipHistory: true, skipFocus: true });
+				Zotero.openMainWindow({ libraryTabState: data.state, geometry });
 			},
-			reader: async (tab, _tabIndex) => {
-				let { itemID, secondViewState } = tab.data;
-				let { title } = tab;
-				Zotero_Tabs.close(tab.id);
-				Zotero.openMainWindow({ readerTabState: { itemID, secondViewState, title } });
+			reader: async (tab, _tabIndex, { geometry } = {}) => {
+				let { title, data } = this.tabHooks.transfer.reader(tab);
+				this.close(tab.id, { skipHistory: true, skipFocus: true });
+				Zotero.openMainWindow({ readerTabState: { title, ...data }, geometry });
 			},
 			note: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID } = tab.data;
 				await Zotero.Notes.open(itemID, null, { openInWindow: true, window });
+			}
+		},
+		// The data another window needs to recreate the tab, in the form restoreState() takes
+		transfer: {
+			library: (tab) => {
+				this._captureLibraryTabState(tab);
+				return {
+					type: 'library',
+					title: tab.title,
+					data: { icon: tab.data.icon, state: tab.data.state }
+				};
+			},
+			reader: (tab) => {
+				let { itemID, secondViewState } = tab.data;
+				// The reader's own position, since the attachment's saved one may be another
+				// reader's
+				let primaryViewState = Zotero.Reader.getByTabID(tab.id)?.getPrimaryViewState()
+					|| tab.data.primaryViewState;
+				return {
+					type: 'reader',
+					title: tab.title,
+					data: { itemID, primaryViewState, secondViewState }
+				};
+			},
+			note: (tab) => {
+				let { itemID } = tab.data;
+				return { type: 'note', title: tab.title, data: { itemID } };
 			}
 		},
 		duplicate: {
@@ -290,7 +322,7 @@ var Zotero_Tabs = new function () {
 			library: async (tab, tabIndex, _context) => {
 				// Library tabs are added as tabs whose views are created when they're first
 				// shown, with the window's first one keeping the legacy tab id
-				this.add({
+				let { id } = this.add({
 					id: this._tabs.some(x => this._isLibraryTab(x)) ? undefined : 'zotero-pane',
 					type: 'library-unloaded',
 					title: tab.title,
@@ -300,6 +332,7 @@ var Zotero_Tabs = new function () {
 				});
 				return {
 					itemID: null,
+					id
 				};
 			},
 			reader: async (tab, tabIndex) => {
@@ -308,7 +341,7 @@ var Zotero_Tabs = new function () {
 					// ("An invalid or illegal string was specified") -- reproduced with "\u0001"
 					// in a title in session.json
 					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-					this.add({
+					let { id } = this.add({
 						type: 'reader-unloaded',
 						title,
 						index: tabIndex,
@@ -317,6 +350,7 @@ var Zotero_Tabs = new function () {
 					});
 					return {
 						itemID: tab.data.itemID,
+						id
 					};
 				}
 				return {
@@ -326,7 +360,7 @@ var Zotero_Tabs = new function () {
 			note: async (tab, tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					let title = tab.title.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
-					this.add({
+					let { id } = this.add({
 						type: 'note-unloaded',
 						title,
 						index: tabIndex,
@@ -335,6 +369,7 @@ var Zotero_Tabs = new function () {
 					});
 					return {
 						itemID: tab.data.itemID,
+						id
 					};
 				}
 				return {
@@ -699,8 +734,12 @@ var Zotero_Tabs = new function () {
 		ReactDOM.createRoot(document.getElementById('tab-bar-container')).render(
 			<TabBar
 				ref={this._tabBarRef}
+				windowID={this._windowID}
 				onTabSelect={this.select.bind(this)}
 				onTabMove={this.move.bind(this)}
+				onTabDropFromWindow={this._onTabDropFromWindow.bind(this)}
+				onDrawDragThumbnail={this._drawThumbnail.bind(this)}
+				onTabTearOff={this._onTabTearOff.bind(this)}
 				onTabClose={id => this.canClose(id) && this.close(id)}
 				onContextMenu={this._openMenu.bind(this)}
 				onRefocus={this.refocus.bind(this)}
@@ -1009,8 +1048,13 @@ var Zotero_Tabs = new function () {
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.skipHistory=false] - Don't make the tabs reopenable with undoClose()
 	 * @param {Boolean} [options.skipWindowClose=false] - Leave the window open if no tabs are left
+	 * @param {Boolean} [options.skipFocus=false] - Don't focus the tab selected in place of a
+	 *     closed one, which would bring the window to the front
 	 */
-	this.close = function (ids, { skipHistory = false, skipWindowClose = false } = {}) {
+	this.close = function (
+		ids,
+		{ skipHistory = false, skipWindowClose = false, skipFocus = false } = {}
+	) {
 		if (!ids) {
 			ids = [this._selectedID];
 		}
@@ -1043,7 +1087,7 @@ var Zotero_Tabs = new function () {
 						.find(x => !ids.includes(x.id));
 				}
 				if (tabToSelect) {
-					let selectOptions = {};
+					let selectOptions = { skipFocus };
 					// If the tabs menu is visible, let the tab bar handle focus
 					if (this.tabsMenuPanel.visible) {
 						selectOptions.keepTabFocused = true;
@@ -1148,6 +1192,146 @@ var Zotero_Tabs = new function () {
 		this._tabs.splice(tabIndex, 1);
 		this._tabs.splice(newIndex, 0, tab);
 		this._update();
+	};
+
+	/**
+	 * Move a tab to another window, where it's recreated from a snapshot of its state
+	 *
+	 * @param {String} id
+	 * @param {Window} targetWindow - Another main window
+	 * @param {Integer} [index] - Position among the target window's tabs, the end if omitted
+	 * @return {Promise<String|null>} - The id of the tab in the target window, or null if the
+	 *     tab wasn't moved
+	 */
+	this.moveToWindow = async function (id, targetWindow, index) {
+		let { tab } = this._getTab(id);
+		if (!tab || targetWindow === window || !targetWindow.Zotero_Tabs) {
+			return null;
+		}
+		let { tabContentType } = this.parseTabType(tab.type);
+		if (!this._hasHook(tabContentType, 'transfer')) {
+			return null;
+		}
+		let entry = this._getHook(tabContentType, 'transfer')(tab);
+		let newID = await targetWindow.Zotero_Tabs.addTransferredTab(entry, index);
+		if (!newID) {
+			return null;
+		}
+		// A moved tab isn't reopenable here, and the window it goes to takes focus
+		this.close(id, { skipHistory: true, skipFocus: true });
+		this._tabBarRef.current?.endDrag();
+		targetWindow.focus();
+		return newID;
+	};
+
+	/**
+	 * Add and select a tab moved from another window
+	 *
+	 * @param {Object} entry - { type, title, data }, as returned by a transfer hook
+	 * @param {Integer} [index]
+	 * @return {Promise<String|null>} - The new tab's id, or null if the tab couldn't be
+	 *     recreated
+	 */
+	this.addTransferredTab = async function (entry, index) {
+		// Keep the tab's state independent of the window it came from
+		entry = JSON.parse(JSON.stringify(entry));
+		if (index === undefined || index > this._tabs.length) {
+			index = this._tabs.length;
+		}
+		let restoreHook = this._getHook(entry.type, 'restoreState');
+		let result = await restoreHook(Object.assign({ selected: true }, entry), index, {});
+		return result?.id || null;
+	};
+
+	/**
+	 * Draw a selected tab's content into a canvas, cropped to the canvas's aspect ratio from the
+	 * top left
+	 *
+	 * @param {String} id
+	 * @param {HTMLCanvasElement} canvas
+	 * @return {Promise<Boolean>} - Whether the tab was drawn
+	 */
+	this._drawThumbnail = async function (id, canvas) {
+		let panel = this.deck.selectedPanel;
+		if (id !== this._selectedID || panel?.id !== id) {
+			return false;
+		}
+		// A tab with its own browser, such as a reader, is drawn from the browser's document,
+		// leaving out anything of the window's on top of it, such as a stacked context pane, and a
+		// reader just from its view, without its toolbar and sidebar
+		let browser = panel.querySelector(':scope > browser');
+		let rect;
+		if (browser) {
+			let view = browser.contentDocument?.querySelector('.split-view');
+			let { width, height } = browser.getBoundingClientRect();
+			rect = view ? view.getBoundingClientRect() : new DOMRect(0, 0, width, height);
+		}
+		else {
+			rect = panel.getBoundingClientRect();
+		}
+		let width = rect.width;
+		let height = width * canvas.height / canvas.width;
+		if (height > rect.height) {
+			height = rect.height;
+			width = height * canvas.width / canvas.height;
+		}
+		if (!width || !height) {
+			return false;
+		}
+		let windowGlobal = browser
+			? browser.browsingContext?.currentWindowGlobal
+			: window.browsingContext.currentWindowGlobal;
+		if (!windowGlobal) {
+			return false;
+		}
+		let bitmap = await windowGlobal.drawSnapshot(
+			new DOMRect(rect.left, rect.top, width, height), canvas.width / width, 'white'
+		);
+		canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+		return true;
+	};
+
+	/**
+	 * Move a tab dragged out of the window to a new window at the drop point, or move the window
+	 * there if it's the window's only tab
+	 *
+	 * @param {String} id
+	 * @param {Number} screenX - Where the new window's top left corner goes
+	 * @param {Number} screenY
+	 */
+	this._onTabTearOff = function (id, screenX, screenY) {
+		let { tab, tabIndex } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		if (this._tabs.length == 1) {
+			window.moveTo(screenX, screenY);
+			return;
+		}
+		let { tabContentType } = this.parseTabType(tab.type);
+		if (!this._hasHook(tabContentType, 'moveToNewWindow')) {
+			return;
+		}
+		let geometry = { screenX, screenY, width: window.outerWidth, height: window.outerHeight };
+		this._getHook(tabContentType, 'moveToNewWindow')(tab, tabIndex, { geometry })
+			.catch(e => Zotero.logError(e));
+	};
+
+	/**
+	 * Take a tab dropped on the tab bar from another window
+	 *
+	 * @param {String} windowID - The source window's Zotero_Tabs.windowID
+	 * @param {String} id
+	 * @param {Integer} index
+	 */
+	this._onTabDropFromWindow = function (windowID, id, index) {
+		let sourceWindow = Zotero.getMainWindows()
+			.find(win => win.Zotero_Tabs?.windowID === windowID);
+		if (!sourceWindow) {
+			return;
+		}
+		sourceWindow.Zotero_Tabs.moveToWindow(id, window, index)
+			.catch(e => Zotero.logError(e));
 	};
 
 	/**
@@ -1262,22 +1446,24 @@ var Zotero_Tabs = new function () {
 
 		let currentTabContent = this.getTabContent(id);
 
-		if (!isEditorFocused) {
-			if (options.keepTabFocused !== true) {
-				let refocusHook = this._getHook(tabContentType, 'refocus');
-				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
-			}
-			else {
-				let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
-				if (tabNode
-						&& document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
-					// Keep focus on the currently selected tab during keyboard navigation
-					tabNode.focus();
+		if (!options.skipFocus) {
+			if (!isEditorFocused) {
+				if (options.keepTabFocused !== true) {
+					let refocusHook = this._getHook(tabContentType, 'refocus');
+					setTimeout(() => refocusHook(tab, tabIndex, options), 0);
+				}
+				else {
+					let tabNode = document.querySelector(`#tab-bar-container .tab[data-id="${tab.id}"]`);
+					if (tabNode
+							&& document.activeElement.getAttribute('data-id') != tabNode.getAttribute('data-id')) {
+						// Keep focus on the currently selected tab during keyboard navigation
+						tabNode.focus();
+					}
 				}
 			}
-		}
-		else {
-			setTimeout(() => ZoteroContextPane.activeEditor?.focus(), 0);
+			else {
+				setTimeout(() => ZoteroContextPane.activeEditor?.focus(), 0);
+			}
 		}
 		
 		tab.timeSelected = Zotero.Date.getUnixTimestamp();
