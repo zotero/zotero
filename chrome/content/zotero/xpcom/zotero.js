@@ -1162,6 +1162,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 *     returned by ZoteroPane.captureLibraryTabState()
 	 * @param {Object[]} [args.otherLibraryTabs] - { title, icon, state } for library tabs to open
 	 *     in the background after the one for libraryTabState
+	 * @param {Object} [args.readerTabState] - { itemID, secondViewState, title } for a window
+	 *     whose only tab is a reader tab
 	 * @return {ChromeWindow}
 	 */
 	this.openMainWindow = function (args) {

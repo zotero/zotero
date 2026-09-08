@@ -44,7 +44,8 @@
 		"main/library/addNote",
 		// Main window tab context menus
 		"main/tab",
-		// Reader window menubar menus
+		// Main window menubar menus while a reader tab is selected
+		// @deprecated - use main/menubar/* with enableForTabTypes
 		"reader/menubar/file",
 		"reader/menubar/edit",
 		"reader/menubar/view",
@@ -104,7 +105,9 @@
 	 * @type {object}
 	 * @property {string} menuID - The unique ID of the menu
 	 * @property {string} pluginID - The ID of the plugin registering the menu
-	 * @property {string} target - The target for the menu
+	 * @property {string} target - The target for the menu. The `reader/menubar/*` targets are
+	 * deprecated: they apply to the main window menubar while a reader tab is selected, which
+	 * `main/menubar/*` with `enableForTabTypes` also covers.
 	 * @property {MenuData[]} [menus] - The menu items to add to the menu
 	 */
 
@@ -306,14 +309,8 @@
 			if (!removedKeys || removedKeys.length === 0) {
 				return [];
 			}
-			// Remove all custom menu items from the main window and reader window
-			let enumerator = Services.wm.getEnumerator("zotero:reader");
-			let windows = [];
-			while (enumerator.hasMoreElements()) {
-				windows.push(enumerator.getNext());
-			}
-			windows.push(...Zotero.getMainWindows());
-			for (let window of windows) {
+			// Remove all custom menu items from the main windows
+			for (let window of Zotero.getMainWindows()) {
 				// The query selector is like ".CUSTOM_MENU_CLASS:is(.key1, .key2, .key3)"
 				let selector = removedKeys.map(k => `.${CSS.escape(k)}`).join(", ");
 				window.document.querySelectorAll(`.${CUSTOM_MENU_CLASS}:is(${selector})`)
@@ -836,6 +833,14 @@
 
 		updateMenuPopup(popupElem, targetType, args) {
 			let options = this._menuManager.getCustomMenuOptions(targetType);
+			// Menus registered for the reader menubar targets show in the main window menubar
+			// while a reader tab is selected
+			let mainMenubarPrefix = "main/menubar/";
+			if (targetType.startsWith(mainMenubarPrefix) && args?.tabType === "reader") {
+				options = options.concat(this._menuManager.getCustomMenuOptions(
+					"reader/menubar/" + targetType.slice(mainMenubarPrefix.length)
+				));
+			}
 			// Flatten the menus array
 			let menus = [];
 			for (let option of options) {

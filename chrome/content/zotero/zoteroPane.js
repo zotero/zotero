@@ -7256,7 +7256,13 @@ var ZoteroPane = new function () {
 	 */
 	this.updateLayoutConstraints = function () {
 		var paneStack = document.getElementById("zotero-pane-stack");
-		if (paneStack.hidden || !this.libraryView) return;
+		if (paneStack.hidden) return;
+		// A window without a library view is only as wide as the tab bar requires
+		if (!this.libraryView) {
+			document.documentElement.style.setProperty('--width-of-fixed-components', '0px');
+			document.documentElement.style.setProperty('--height-of-fixed-components', '0px');
+			return;
+		}
 
 		var titlebar = document.getElementById('zotero-title-bar');
 		var trees = this.libraryView.getElement('zotero-trees');

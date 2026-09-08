@@ -1102,14 +1102,16 @@ describe("Plugin API", function () {
 			}
 		});
 
-		it("should register reader window menu", async function () {
+		it("should show reader menubar menus in the menubar of a window with a reader tab selected", async function () {
 			let mainMenubarTargetMap = {
 				"reader/menubar/file": "#menu_FilePopup",
 				"reader/menubar/edit": "#menu_EditPopup",
 				"reader/menubar/view": "#menu_viewPopup",
 				"reader/menubar/go": "#menu_goPopup",
-				"reader/menubar/window": "#windowPopup",
 			};
+			if (Zotero.isMac) {
+				mainMenubarTargetMap["reader/menubar/window"] = "#windowPopup";
+			}
 
 			let pdfAttachment = await importFileAttachment('test.pdf');
 			let reader = await Zotero.Reader.open(pdfAttachment.id, undefined, {
@@ -1118,13 +1120,16 @@ describe("Plugin API", function () {
 			await reader._initPromise;
 			
 			let readerWin = reader._window;
-			let readerDoc = readerWin.document;
-
-			for (let [target, popupSelector] of Object.entries(mainMenubarTargetMap)) {
-				await checkMenuContext({ target }, popupSelector, undefined, readerDoc);
+			assert.notEqual(readerWin, win);
+			assert.equal(readerWin.Zotero_Tabs.selectedID, reader.tabID);
+			try {
+				for (let [target, popupSelector] of Object.entries(mainMenubarTargetMap)) {
+					await checkMenuContext({ target }, popupSelector, undefined, readerWin.document);
+				}
 			}
-
-			reader.close();
+			finally {
+				readerWin.close();
+			}
 		});
 
 		it("should remove menu DOM elements on plugin shutdown", async function () {

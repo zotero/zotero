@@ -71,7 +71,11 @@ describe("Zotero.FileHandlers", () => {
 				openInWindow: true
 			});
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
-			assert.isNotEmpty(Zotero.Reader.getWindowStates());
+			let reader = Zotero.Reader._readers.find(r => r.itemID == pdf.id);
+			assert.ok(reader);
+			assert.notEqual(reader._window, win);
+			assert.equal(reader._window.Zotero_Tabs.selectedID, reader.tabID);
+			assert.isNull(reader._window.ZoteroPane.libraryView);
 		});
 		
 		it("should use matching handler", async function () {
@@ -94,7 +98,6 @@ describe("Zotero.FileHandlers", () => {
 			assert.isTrue(wasRun);
 			assert.isFalse(readerOpenSpy.called);
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
-			assert.isEmpty(Zotero.Reader.getWindowStates());
 
 			readerOpenSpy.restore();
 		});
@@ -121,7 +124,6 @@ describe("Zotero.FileHandlers", () => {
 			assert.isTrue(wasRun);
 			assert.isFalse(readerOpenSpy.called);
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
-			assert.isEmpty(Zotero.Reader.getWindowStates());
 
 			readerOpenSpy.restore();
 		});
@@ -153,7 +155,6 @@ describe("Zotero.FileHandlers", () => {
 			assert.isTrue(wasRun);
 			assert.isFalse(readerOpenSpy.called);
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
-			assert.isEmpty(Zotero.Reader.getWindowStates());
 
 			readerOpenSpy.restore();
 			getSystemHandlerStub.restore();
@@ -186,7 +187,6 @@ describe("Zotero.FileHandlers", () => {
 			assert.isFalse(readerOpenSpy.called);
 			assert.isTrue(launchFileStub.called);
 			assert.notOk(Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID));
-			assert.isEmpty(Zotero.Reader.getWindowStates());
 
 			readerOpenSpy.restore();
 			launchFileStub.restore();

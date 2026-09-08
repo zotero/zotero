@@ -319,6 +319,31 @@ describe("Reader", function () {
 			}
 		});
 
+		it('should open a reader in a new main window', async function () {
+			let reader;
+			try {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				await reader._initPromise;
+				let readerWin = reader._window;
+				assert.notEqual(readerWin, win);
+				assert.include(Zotero.getMainWindows(), readerWin);
+				assert.isNull(readerWin.ZoteroPane.libraryView);
+				assert.equal(readerWin.Zotero_Tabs.selectedID, reader.tabID);
+				assert.equal(Zotero.Reader.getByTabID(reader.tabID), reader);
+				assert.equal(reader.itemID, attachment.id);
+				
+				// Opening the item in a window again selects the existing tab
+				let openWindows = Zotero.getMainWindows();
+				let sameReader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				assert.equal(sameReader, reader);
+				assert.sameMembers(Zotero.getMainWindows(), openWindows);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
 		it('should open a reader window while a closed tab reader is pending', async function () {
 			let reader, windowReader, unloadedTabID;
 			let transactionOpen = false;
@@ -338,6 +363,7 @@ describe("Reader", function () {
 				windowReader = await Zotero.Reader.open(
 					attachment.id, null, { openInWindow: true });
 				await windowReader._initPromise;
+				assert.notEqual(windowReader._window, win);
 				assert.equal(win.Zotero_Tabs._getTab(unloadedTabID).tab.type, 'reader-unloaded');
 
 				await Zotero.Notifier.commit();

@@ -798,7 +798,7 @@
 					 <!-- Only on macOS -->
 					<menu id="windowMenu"
 							data-l10n-id="menu-window-menu">
-						<menupopup id="windowPopup">
+						<menupopup id="windowPopup" onpopupshowing="ZoteroStandalone.onWindowMenuOpen(event)">
 							<menuseparator/>
 							<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
 							<menuitem command="zoomWindow"/>

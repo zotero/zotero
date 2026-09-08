@@ -87,6 +87,18 @@ Zotero.Session = new function () {
 		_pendingPaneStates = [state];
 	};
 
+	/**
+	 * Take the saved states of reader windows, which are reopened as main windows holding a
+	 * reader tab
+	 *
+	 * @return {Object[]} - { itemID, title, secondViewState } entries
+	 */
+	this.takeReaderWindowStates = function () {
+		let states = _state.windows.filter(x => x.type == 'reader');
+		_state.windows = _state.windows.filter(x => x.type != 'reader');
+		return states;
+	};
+
 	this.debounceSave = Zotero.Utilities.debounce(() => {
 		this.save();
 	}, DEBOUNCED_SAVING_DELAY);
@@ -121,15 +133,7 @@ Zotero.Session = new function () {
 				.map(x => x.getState())
 				.filter(Boolean);
 			if (panes.length) {
-				panes = [..._pendingPaneStates, ...panes];
-			}
-			let readers = Zotero.Reader.getWindowStates();
-			if (panes.length) {
-				_state.windows = [...readers, ...panes];
-			}
-			else if (readers.length) {
-				_state.windows = _state.windows.filter(x => x.type != 'reader');
-				_state.windows = [..._state.windows, ...readers];
+				_state.windows = [..._pendingPaneStates, ...panes];
 			}
 			let sessionFile = OS.Path.join(Zotero.Profile.dir, SESSION_FILE_NAME);
 			await Zotero.File.putContentsAsync(sessionFile, JSON.stringify(_state));

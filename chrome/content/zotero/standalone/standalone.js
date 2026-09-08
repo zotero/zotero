@@ -591,6 +591,10 @@ const ZoteroStandalone = new function () {
 		this.onUpdateCustomMenus(event, 'help');
 	};
 
+	this.onWindowMenuOpen = function (event) {
+		this.onUpdateCustomMenus(event, 'window');
+	};
+
 	this.onUpdateCustomMenus = function (event, type) {
 		let { type: tabType, subType: tabSubType, id: tabID } = Zotero_Tabs.getTabInfo();
 
@@ -600,7 +604,8 @@ const ZoteroStandalone = new function () {
 			go: '#menu_goPopup',
 			view: '#menu_viewPopup',
 			tools: '#menu_ToolsPopup',
-			help: '#menu_HelpPopup'
+			help: '#menu_HelpPopup',
+			window: '#windowPopup'
 		};
 		let popup = document.querySelector(POPUP_SELECTOR_MAP[type]);
 		if (event.target !== popup) {
