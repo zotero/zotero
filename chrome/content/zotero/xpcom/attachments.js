@@ -1401,7 +1401,12 @@ Zotero.Attachments = new function () {
 									url,
 									{
 										responseType: mode == 'json' ? 'json' : 'document',
-										timeout: 5000
+										timeout: 5000,
+										// Move on to the next resolver instead of waiting on a
+										// failing third-party server, which blocks the rest of
+										// the queue
+										errorDelayMax: 0,
+										noRetryOnThrottle: true
 									}
 								);
 								

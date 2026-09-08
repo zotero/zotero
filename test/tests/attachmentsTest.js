@@ -1489,6 +1489,75 @@ describe("Zotero.Attachments", function () {
 			assert.equal(json.filename, 'Test.pdf');
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
+		
+		it("should not retry a custom resolver that returns a server error", async function () {
+			var doi = doi4;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', doi);
+			await item.saveTx();
+			
+			var requests = 0;
+			httpd.registerPathHandler(
+				"/failing/" + doi,
+				{
+					handle: function (request, response) {
+						requests++;
+						response.setStatusLine(null, 500, "Internal Server Error");
+					}
+				}
+			);
+			
+			var resolvers = [{
+				name: 'Custom',
+				method: 'get',
+				url: baseURL + "failing/{doi}",
+				mode: 'html',
+				selector: '#pdf-link',
+				attribute: 'href'
+			}];
+			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
+			
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
+			
+			assert.isFalse(attachment);
+			assert.equal(requests, 1);
+		});
+		
+		it("should not honor Retry-After from a custom resolver", async function () {
+			var doi = doi4;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', doi);
+			await item.saveTx();
+			
+			var requests = 0;
+			httpd.registerPathHandler(
+				"/throttled/" + doi,
+				{
+					handle: function (request, response) {
+						requests++;
+						response.setStatusLine(null, 429, "Too Many Requests");
+						response.setHeader("Retry-After", "3600");
+					}
+				}
+			);
+			
+			var resolvers = [{
+				name: 'Custom',
+				method: 'get',
+				url: baseURL + "throttled/{doi}",
+				mode: 'html',
+				selector: '#pdf-link',
+				attribute: 'href'
+			}];
+			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
+			
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
+			
+			assert.isFalse(attachment);
+			assert.equal(requests, 1);
+		});
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
