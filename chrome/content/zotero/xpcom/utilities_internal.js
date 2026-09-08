@@ -1451,7 +1451,7 @@ Zotero.Utilities.Internal = {
 	 *
 	 * @param {String} doi
 	 * @param {Object} [options]
-	 * @param {Number} [options.timeout] - Request timeout in milliseconds
+	 * @param {Number} [options.timeout = 10000] - Request timeout in milliseconds
 	 * @return {Object[]} - An array of objects with 'url' and/or 'pageURL' and 'version'
 	 *     ('submittedVersion', 'acceptedVersion', 'publishedVersion')
 	 */
@@ -1466,18 +1466,18 @@ Zotero.Utilities.Internal = {
 		var req = await Zotero.HTTP.request(
 			'POST',
 			url,
-			Object.assign(
-				{
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({ doi }),
-					responseType: 'json'
+			{
+				headers: {
+					'Content-Type': 'application/json'
 				},
-				options.timeout && {
-					timeout: options.timeout
-				}
-			)
+				body: JSON.stringify({ doi }),
+				responseType: 'json',
+				timeout: options.timeout || 10000,
+				// Keep the wait short, since this runs as part of a
+				// user-initiated lookup
+				errorDelayIntervals: [1000, 2000],
+				errorDelayMax: 5000
+			}
 		);
 		var urls = req.response;
 		Zotero.debug(`Found ${urls.length} open-access PDF `
