@@ -526,6 +526,11 @@ var Zotero_Tabs = new function () {
 		return tab && tab.id;
 	};
 
+	// Duplicate reader tabs can share the same itemID
+	this.getTabIDsByItemID = function (itemID) {
+		return this._tabs.filter(tab => tab.data && tab.data.itemID === itemID).map(tab => tab.id);
+	};
+
 	this.setTabData = function (tabID, data) {
 		let { tab } = this._getTab(tabID);
 		Object.assign(tab.data, data);
