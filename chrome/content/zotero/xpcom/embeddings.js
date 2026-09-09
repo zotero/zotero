@@ -197,16 +197,22 @@ Zotero.Embeddings = new function () {
 		}));
 	};
 
+	// Bump when how a model is calibrated changes (see Zotero.Embeddings
+	// .Calibration): stored vectors are centered on the measured mean, so a
+	// new measurement means a reindex of every model
+	const CALIBRATION_VERSION = 1;
+
 	/**
-	 * Identity of the active embedding function: model name plus its revision.
-	 * Any code change that alters the vectors a model produces (dtype, upstream
-	 * weights, prefixes, pooling) must bump that model's `revision`, so that
-	 * stored embeddings are detected as stale and reindexed (see
-	 * Indexing._ensureIndexMatchesModel()).
+	 * Identity of the active embedding function: model name, its revision and
+	 * the calibration version. Any code change that alters the vectors a model
+	 * produces (dtype, upstream weights, prefixes, pooling) must bump that
+	 * model's `revision`, and a change to calibration must bump
+	 * CALIBRATION_VERSION, so that stored embeddings are detected as stale and
+	 * reindexed (see Indexing._ensureIndexMatchesModel()).
 	 * @return {String}
 	 */
 	this.getModelVersion = function () {
-		return this.getModelName() + '/' + _getModel().revision;
+		return `${this.getModelName()}/${_getModel().revision}/${CALIBRATION_VERSION}`;
 	};
 
 	// The active model's entry in MODELS. Throws when no model is selected:
