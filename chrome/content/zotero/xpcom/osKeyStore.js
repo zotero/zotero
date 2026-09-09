@@ -28,6 +28,9 @@
 // on Linux). Encrypted values are returned with a versioned prefix so callers
 // can distinguish them from legacy plaintext values previously written to
 // nsILoginManager.
+
+const KEYRING_KB_URL = 'https://www.zotero.org/support/kb/linux_keyring';
+
 Zotero.OSKeyStore = {
 	_prefix: 'oskv1:',
 	_module: null,
@@ -63,6 +66,10 @@ Zotero.OSKeyStore = {
 			|| Services.wm.getMostRecentWindow('navigator:browser');
 	},
 
+	get _moreInfoLabel() {
+		return Zotero.isLinux ? Zotero.getString('general-more-information') : undefined;
+	},
+
 	// Offer to store credentials unencrypted after a write to the keystore fails. The keystore
 	// can be unusable in ways the user can't fix -- most often on Linux, where the platform
 	// requires a Secret Service that some managed systems don't run.
@@ -76,8 +83,13 @@ Zotero.OSKeyStore = {
 				+ Zotero.getString('os-keystore-save-unencrypted'),
 			button0: Zotero.getString('os-keystore-save-unencrypted-button'),
 			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL,
+			button2: this._moreInfoLabel,
 			defaultButton: 1
 		});
+		if (index == 2) {
+			Zotero.launchURL(KEYRING_KB_URL);
+			return false;
+		}
 		return index == 0;
 	},
 
@@ -94,11 +106,16 @@ Zotero.OSKeyStore = {
 		if (!win) {
 			return;
 		}
-		Zotero.alert(
-			win,
-			Zotero.getString('general-error'),
-			Zotero.getString('os-keystore-migrate-failed')
-		);
+		let index = Zotero.Prompt.confirm({
+			window: win,
+			title: Zotero.getString('general-error'),
+			text: Zotero.getString('os-keystore-migrate-failed'),
+			button0: Zotero.Prompt.BUTTON_TITLE_OK,
+			button1: this._moreInfoLabel
+		});
+		if (index == 1) {
+			Zotero.launchURL(KEYRING_KB_URL);
+		}
 	},
 
 	// Returns whether the store can actually be used. asyncSecretAvailable() isn't enough,
@@ -140,7 +157,13 @@ Zotero.OSKeyStore = {
 			}
 		}
 		Zotero.debug(`OS key store failure (${detail}): ${e}`, 1);
-		return new Zotero.Error(Zotero.getString(stringName), 0, { keyStoreError: e });
+		let data = { keyStoreError: e };
+		let moreInfoLabel = this._moreInfoLabel;
+		if (moreInfoLabel) {
+			data.dialogButtonText = moreInfoLabel;
+			data.dialogButtonCallback = () => Zotero.launchURL(KEYRING_KB_URL);
+		}
+		return new Zotero.Error(Zotero.getString(stringName), 0, data);
 	},
 
 	// Returns prefixed ciphertext. Throws if OSKeyStore is unavailable so we
