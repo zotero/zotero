@@ -287,7 +287,7 @@ Zotero.Embeddings = new function () {
 	// Schema version of the attached embeddings database. The tables are only
 	// created when this is bumped (_setUpDB() drops and recreates everything),
 	// so any schema change needs a bump.
-	const _dbVersion = 5;
+	const _dbVersion = 6;
 
 	let _dbInitPromise = null;
 	let _dbHooksRegistered = false;
@@ -373,11 +373,12 @@ Zotero.Embeddings = new function () {
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemChunkCounts");
-		// One row per chunk of an item's text, each carrying the hash of the
-		// item's full source. For attachments, the block range and offsets
-		// locate the chunk's text in the document (see getMatchingChunks()).
-		// No foreign key: deletions are handled by the notifier and
-		// eligibility pruning.
+		// One row per chunk of an item's text, its vector centered and
+		// quantized to int8 (see Zotero.Embeddings.prepare()), each carrying
+		// the hash of the item's full source. For attachments, the block range
+		// and offsets locate the chunk's text in the document (see
+		// getMatchingChunks()). No foreign key: deletions are handled by the
+		// notifier and eligibility pruning.
 		await Zotero.DB.queryAsync(
 			"CREATE TABLE embeddings.itemEmbeddings (\n"
 			+ "    itemID INTEGER NOT NULL,\n"
@@ -739,9 +740,10 @@ Zotero.Embeddings = new function () {
 	// Vector math
 	//
 	// Shared by scoring and by calibration, which has to measure exactly what
-	// scoring computes -- if the two ever centered or compared differently, the
-	// calibrated bounds would describe a quantity nothing else produces. Public
-	// so Zotero.Embeddings.Calibration uses these rather than its own copies.
+	// scoring computes -- if the two ever centered, quantized or compared
+	// differently, the calibrated bounds would describe a quantity nothing
+	// else produces. Public so Zotero.Embeddings.Calibration uses these rather
+	// than its own copies.
 	//
 
 	/**
@@ -766,30 +768,68 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * Similarity between two vectors that are already centered and of unit
-	 * length, which for those is the cosine between them.
+	 * Round a vector to 8 bits per dimension, scaled so its largest component
+	 * fills the int8 range. Cosine divides the scale out, so nothing else is
+	 * kept: the integers compare as the scaled floats would.
 	 *
-	 * @param {Float32Array} a
-	 * @param {Float32Array} b
-	 * @return {Number}
+	 * @param {Float32Array} vector
+	 * @return {Int8Array}
 	 */
-	this.dot = function (a, b) {
-		let sum = 0;
-		for (let i = 0; i < a.length; i++) {
-			sum += a[i] * b[i];
+	this.quantize = function (vector) {
+		let max = 0;
+		for (let val of vector) {
+			max = Math.max(max, Math.abs(val));
 		}
-		return sum;
+		let out = new Int8Array(vector.length);
+		if (max) {
+			let scale = 127 / max;
+			for (let i = 0; i < vector.length; i++) {
+				out[i] = Math.round(vector[i] * scale);
+			}
+		}
+		return out;
 	};
 
-	// Center against the active model's measured mean, leaving the vector
-	// alone if there's nothing to center against
-	function _center(vector) {
-		let mean = _calibration && _calibration.mean;
-		if (!mean || mean.length !== vector.length) {
-			return vector;
+	/**
+	 * Cosine similarity of two vectors of any numeric type, or 0 if either
+	 * has no length
+	 *
+	 * @param {Float32Array|Int8Array} a
+	 * @param {Float32Array|Int8Array} b
+	 * @return {Number}
+	 */
+	this.cosine = function (a, b) {
+		let dot = 0;
+		let aa = 0;
+		let bb = 0;
+		for (let i = 0; i < a.length; i++) {
+			dot += a[i] * b[i];
+			aa += a[i] * a[i];
+			bb += b[i] * b[i];
 		}
-		return Zotero.Embeddings.center(vector, mean);
-	}
+		return aa && bb ? dot / Math.sqrt(aa * bb) : 0;
+	};
+
+	/**
+	 * Center a raw embedding on the active model's measured mean and quantize
+	 * it: the form every vector is stored and compared in. The calibration
+	 * has to be in memory (see loadCalibration()).
+	 *
+	 * @param {Float32Array} vector
+	 * @return {Int8Array}
+	 */
+	this.prepare = function (vector) {
+		if (!_calibration) {
+			throw new this.IndexNotReadyError(
+				`Model '${this.getModelVersion()}' has no calibration to center on`);
+		}
+		let mean = _calibration.mean;
+		// A mean of a different width than the vector is no mean to center on
+		if (mean.length === vector.length) {
+			vector = this.center(vector, mean);
+		}
+		return this.quantize(vector);
+	};
 
 	function _normalize(vector) {
 		let sum = 0;
@@ -942,9 +982,8 @@ Zotero.Embeddings = new function () {
 			vectors = await run();
 		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
-		// Scoring compares vectors with a plain dot product, which only
-		// measures how closely two of them point in the same direction when
-		// both have a length of 1
+		// Centering subtracts a mean measured over vectors of length 1 (see
+		// center()), so every vector has to be one first
 		return vectors.map(vector => _normalize(new Float32Array(vector)));
 	};
 
@@ -1072,11 +1111,11 @@ Zotero.Embeddings = new function () {
 	 */
 	this.compare = async function ({ query, passage }) {
 		await this.initDB();
-		// Pull the measured mean into memory, so _center() centers with it
+		// Pull the measured mean into memory, so prepare() centers with it
 		await this.loadCalibration();
 		let queryVector = await this.embedQuery(query);
 		let [passageVector] = await this.embedPassages([passage]);
-		return this.dot(_center(queryVector), _center(passageVector));
+		return this.cosine(this.prepare(queryVector), this.prepare(passageVector));
 	};
 
 
@@ -1123,32 +1162,24 @@ Zotero.Embeddings = new function () {
 	};
 
 	// mozStorage returns a BLOB as an array of byte values; reinterpret those
-	// bytes as the stored Float32 embedding vector.
+	// bytes as a Float32 vector (the calibration mean)
 	function _blobToVector(blob) {
 		let bytes = Uint8Array.from(blob);
 		return new Float32Array(bytes.buffer);
 	}
 
-	// The cosine between a stored vector and the query, both centered on the
-	// model's measured mean -- the same score center() and dot() produce in
-	// JS. A mean of a different width than the vectors is no mean to center
-	// on, and is skipped the way center() skips it. Vectors bind as the JSON
-	// text vec_f32() reads rather than as BLOBs: mozStorage reads an object
-	// bound as the first parameter as a set of named parameters.
+	// The cosine between a stored vector and the query, both in the form
+	// prepare() produces -- the same score cosine() computes in JS. The query
+	// binds as the JSON text vec_int8() reads rather than as a BLOB:
+	// mozStorage reads an object bound as the first parameter as a set of
+	// named parameters.
 	//
-	// @return {Object} - { sql, params }: the expression, and the values it
+	// @return {Object} - { sql, params }: the expression, and the value it
 	//     binds ahead of the caller's own
-	function _scoreExpression(mean, query) {
-		let queryJSON = JSON.stringify(Array.from(query));
-		if (!mean || mean.length !== query.length) {
-			return {
-				sql: '1 - vec_distance_cosine(embedding, vec_f32(?))',
-				params: [queryJSON]
-			};
-		}
+	function _scoreExpression(query) {
 		return {
-			sql: '1 - vec_distance_cosine(vec_sub(embedding, vec_f32(?)), vec_f32(?))',
-			params: [JSON.stringify(Array.from(mean)), queryJSON]
+			sql: '1 - vec_distance_cosine(vec_int8(embedding), vec_int8(?))',
+			params: [JSON.stringify(Array.from(query))]
 		};
 	}
 
@@ -1221,8 +1252,8 @@ Zotero.Embeddings = new function () {
 		}
 		let calibration = await _requireReadyIndex();
 		let generation = _modelGeneration;
-		let query = _center(await this.embedQuery(queryText));
-		let scoring = _scoreExpression(calibration.mean, query);
+		let query = this.prepare(await this.embedQuery(queryText));
+		let scoring = _scoreExpression(query);
 		let minScore = calibration.minScore;
 
 		// Score the candidates in chunks (avoids the SQLite bound-parameter
@@ -1256,7 +1287,8 @@ Zotero.Embeddings = new function () {
 				[...scoring.params, ...chunk]
 			);
 			for (let row of rows) {
-				if (row.score < minScore) {
+				// A null score is a stored vector with no length: no match
+				if (!(row.score >= minScore)) {
 					continue;
 				}
 				scores.set(row.itemID, row.score);
@@ -1306,8 +1338,8 @@ Zotero.Embeddings = new function () {
 			return [];
 		}
 		let calibration = await _requireReadyIndex();
-		let query = _center(await this.embedQuery(queryText));
-		let scoring = _scoreExpression(calibration.mean, query);
+		let query = this.prepare(await this.embedQuery(queryText));
+		let scoring = _scoreExpression(query);
 		let scored = await Zotero.DB.queryAsync(
 			"SELECT * FROM ("
 				+ "SELECT " + CHUNK_COLUMNS + ", " + scoring.sql + " AS score "
@@ -1365,12 +1397,12 @@ Zotero.Embeddings = new function () {
 		if (!this.isEnabled() || !texts.length) {
 			return texts.map(() => 0);
 		}
-		// _center() centers with the measured mean, which has to be in memory
+		// prepare() centers with the measured mean, which has to be in memory
 		await this.initDB();
 		await this.loadCalibration();
-		let query = _center(await this.embedQuery(queryText));
+		let query = this.prepare(await this.embedQuery(queryText));
 		let vectors = await this.embedPassages(texts);
-		return vectors.map(vector => this.dot(query, _center(vector)));
+		return vectors.map(vector => this.cosine(query, this.prepare(vector)));
 	};
 
 	// The stored rows of an item's chunks. Attaches the database first, which
@@ -2482,14 +2514,16 @@ Zotero.Embeddings.Indexing = new function () {
 		);
 	}
 
-	// Store one chunk's vector. Source references are stored only for
+	// Store one chunk's vector, centered and quantized (see
+	// Zotero.Embeddings.prepare()). Source references are stored only for
 	// attachments, whose text lives in a file: they're what the search
 	// preview is re-derived from (see getMatchingChunks()). Other item types
 	// are their own preview.
 	async function _insertChunkRow(entry, chunkIndex, vector) {
 		let chunk = entry.chunks[chunkIndex];
 		let isAttachment = entry.item.isAttachment();
-		let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+		let stored = Zotero.Embeddings.prepare(vector);
+		let blob = new Uint8Array(stored.buffer, stored.byteOffset, stored.byteLength);
 		// Keep the embedding blob out of debug output
 		await Zotero.DB.queryAsync(
 			"INSERT INTO embeddings.itemEmbeddings "
@@ -2826,6 +2860,8 @@ Zotero.Embeddings.Indexing = new function () {
 				Zotero.debug('Embeddings: engine restarted to apply new thread count');
 			}
 			let completed = [];
+			// prepare() centers with the measured mean, which has to be in memory
+			await Zotero.Embeddings.loadCalibration();
 			await Zotero.DB.executeTransaction(async function () {
 				let touched = new Set();
 				for (let j = 0; j < batch.length; j++) {
@@ -3979,16 +4015,17 @@ Zotero.Embeddings.Calibration = new function () {
 			}
 		}
 
-		// Scoring compares centered vectors, so calibrate on centered scores,
-		// using the same centering and comparison the search path uses
-		queries = queries.map(vector => Zotero.Embeddings.center(vector, mean));
-		passages = passages.map(vector => Zotero.Embeddings.center(vector, mean));
+		// Scoring compares centered, quantized vectors, so calibrate on those,
+		// using the same transform and comparison the search path uses
+		let prepare = vector => Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, mean));
+		queries = queries.map(prepare);
+		passages = passages.map(prepare);
 		let matched = [];
 		let mismatched = [];
 		for (let i = 0; i < queries.length; i++) {
 			for (let j = 0; j < passages.length; j++) {
 				(i === j ? matched : mismatched)
-					.push(Zotero.Embeddings.dot(queries[i], passages[j]));
+					.push(Zotero.Embeddings.cosine(queries[i], passages[j]));
 			}
 		}
 		let minScore = _percentile(mismatched, NULL_PERCENTILE);

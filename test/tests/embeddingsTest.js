@@ -58,6 +58,57 @@ describe("Zotero.Embeddings", function () {
 		return mean;
 	}
 
+	// A vector as the index stores it: centered on the test mean and
+	// quantized, the way Zotero.Embeddings.prepare() does with a loaded model
+	function storedBlob(vector) {
+		let stored = Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, testMean));
+		return new Uint8Array(stored.buffer, stored.byteOffset, stored.byteLength);
+	}
+
+	describe("#quantize()", function () {
+		it("should keep a vector's direction in 8 bits", function () {
+			let vector = new Float32Array(384);
+			for (let i = 0; i < vector.length; i++) {
+				vector[i] = Math.sin(i * 12.9898) * (i % 7 ? 0.05 : 0.3);
+			}
+			let quantized = Zotero.Embeddings.quantize(vector);
+			assert.equal(quantized.constructor.name, 'Int8Array');
+			assert.lengthOf(quantized, 384);
+			// The largest component fills the range, whichever sign it has
+			assert.equal(Math.max(...Array.from(quantized, val => Math.abs(val))), 127);
+			assert.isAbove(Zotero.Embeddings.cosine(quantized, vector), 0.9999);
+		});
+
+		it("should leave a vector with no length as zeros", function () {
+			let quantized = Zotero.Embeddings.quantize(new Float32Array(8));
+			assert.isTrue(quantized.every(val => val === 0));
+			assert.equal(Zotero.Embeddings.cosine(quantized, quantized), 0);
+		});
+	});
+
+	describe("#prepare()", function () {
+		it("should refuse to prepare a vector for a model with no calibration", async function () {
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('uncalibrated/1');
+			try {
+				await Zotero.Embeddings.loadCalibration();
+				let e;
+				try {
+					Zotero.Embeddings.prepare(new Float32Array(384));
+				}
+				catch (caught) {
+					e = caught;
+				}
+				assert.instanceOf(e, Zotero.Embeddings.IndexNotReadyError);
+			}
+			finally {
+				// Put the test model's calibration back in memory
+				stub.returns('test-model/1');
+				await Zotero.Embeddings.loadCalibration();
+				stub.restore();
+			}
+		});
+	});
+
 	describe("#initDB()", function () {
 		it("should attach the embeddings database and create its tables", async function () {
 			await Zotero.Embeddings.initDB();
@@ -91,6 +142,42 @@ describe("Zotero.Embeddings", function () {
 				stubs.forEach(stub => stub.restore());
 			}
 		});
+
+		it("should score in SQL what cosine() computes in JS", async function () {
+			let passage = Float32Array.from(testMean);
+			passage[0] += 0.4;
+			passage[1] += 0.2;
+			let query = Float32Array.from(testMean);
+			query[0] += 0.3;
+			query[5] += 0.1;
+			let item = await createDataObject('item');
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
+					+ "VALUES (?, 0, ?, 'hash')",
+				[item.id, storedBlob(passage)], { debugParams: false }
+			);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(query)
+			];
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) "
+					+ "VALUES ('modelVersion', 'test-model/1')"
+			);
+			try {
+				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything', [item.id]);
+				let expected = Zotero.Embeddings.cosine(
+					Zotero.Embeddings.prepare(query),
+					Zotero.Embeddings.prepare(passage)
+				);
+				assert.isAbove(expected, 0.5);
+				assert.closeTo(scores.get(item.id), expected, 1e-4);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
 	});
 
 	describe("#scoreItemIDs() floor", function () {
@@ -103,7 +190,7 @@ describe("Zotero.Embeddings", function () {
 				return vector;
 			};
 			let store = async (item, vector) => {
-				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				let blob = storedBlob(vector);
 				await Zotero.DB.queryAsync(
 					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
 						+ "VALUES (?, 0, ?, 'hash')",
@@ -147,7 +234,7 @@ describe("Zotero.Embeddings", function () {
 				return vector;
 			};
 			let store = async (item, chunkIndex, vector) => {
-				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				let blob = storedBlob(vector);
 				await Zotero.DB.queryAsync(
 					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
 						+ "VALUES (?, ?, ?, 'hash')",
@@ -193,7 +280,7 @@ describe("Zotero.Embeddings", function () {
 				return vector;
 			};
 			let store = async (item, chunkIndex, vector, { blocks = false } = {}) => {
-				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				let blob = storedBlob(vector);
 				await Zotero.DB.queryAsync(
 					"REPLACE INTO embeddings.itemEmbeddings "
 						+ "(itemID, chunkIndex, embedding, sourceHash, startBlock, endBlock) "
@@ -253,7 +340,7 @@ describe("Zotero.Embeddings", function () {
 		return vector;
 	};
 	var store = async (item, chunkIndex, vector, props = {}) => {
-		let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+		let blob = storedBlob(vector);
 		await Zotero.DB.queryAsync(
 			"REPLACE INTO embeddings.itemEmbeddings "
 				+ "(itemID, chunkIndex, embedding, sourceHash, startBlock, endBlock, "
@@ -2306,7 +2393,8 @@ describe("Zotero.Embeddings", function () {
 					attachment.id
 				);
 				assert.lengthOf(rows, 1);
-				assert.isNotNull(rows[0].embedding);
+				// One byte per dimension
+				assert.lengthOf(rows[0].embedding, 4);
 				assert.isNull(rows[0].startBlock);
 				assert.equal(rows[0].startOffset, 0);
 				assert.equal(rows[0].endOffset,
@@ -2561,7 +2649,7 @@ describe("Zotero.Embeddings", function () {
 	describe("#scoreItemIDs() centering", function () {
 		it("should score text with nothing to say near zero", async function () {
 			let store = async (item, vector) => {
-				let blob = new Uint8Array(vector.buffer, vector.byteOffset, vector.byteLength);
+				let blob = storedBlob(vector);
 				await Zotero.DB.queryAsync(
 					"REPLACE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, sourceHash) "
 						+ "VALUES (?, 0, ?, 'hash')",
