@@ -184,17 +184,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
-	 * Compute the current index coverage across the selected rows' libraries
-	 * (see Zotero.BestMatch.getIndexState())
+	 * Compute the current index coverage (see Zotero.BestMatch.getIndexState())
 	 *
 	 * @return {Promise<Object|null>}
 	 */
 	async _getBestMatchIndexState() {
-		return Zotero.BestMatch.getIndexState(
-			this.collectionTreeRows
-				.map(row => row.ref?.libraryID)
-				.filter(id => id !== undefined)
-		);
+		return Zotero.BestMatch.getIndexState();
 	}
 
 	/**
@@ -576,12 +571,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this.itemTree._refreshPromise = deferred.promise;
 		
 		try {
-			// A best-match rerank after an embeddings change reuses the cached
-			// search results -- only the ranking depends on the embeddings, so
-			// there's no need to re-run the underlying search
-			if (!options.reuseSearchResults) {
-				this.collectionTreeRows.forEach(row => row.clearCache());
-			}
+			this.collectionTreeRows.forEach(row => row.clearCache());
 			this._bestMatchIndexState = null;
 			// Get the full set of items we want to show, merged across all selected rows
 			let newSearchItemSet = new Set();
@@ -942,7 +932,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 		var madeChanges = false;
 		var refresh = false;
-		var reuseSearchResults = false;
 		var sort = false;
 
 		// Selection strategy
@@ -993,23 +982,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (items.length == 0) return;
 		}
 
-		if (action == 'refresh' && type == 'item' && extraData && extraData.embeddingsUpdate
-				&& collectionTreeRows.some(rowIsBestMatchSearch)) {
-			// The background indexer committed new or changed embeddings, so
-			// rerun the active best-match search to update the scores and ranks.
-			// Only the ranking depends on the embeddings, so unless a selected
-			// row trims membership by score (a top-K cutoff), the underlying
-			// search results are unchanged and can be reused while just the
-			// ranking is recomputed.
-			reuseSearchResults = collectionTreeRows.every((row) => {
-				return typeof row.hasBestMatchCutoff == 'function'
-					&& !row.hasBestMatchCutoff();
-			});
-			this.itemTree.invalidateRowCache(ids);
-			refresh = true;
-			madeChanges = true;
-		}
-		else if (action == 'refresh' && type == 'item' && this._bestMatchSession
+		if (action == 'refresh' && type == 'item' && this._bestMatchSession
 				&& ids.some(id => this._bestMatchSession.getPreviews(parseInt(id)))) {
 			// The invalidation above reset these items' previews, and only a
 			// scoring pass derives previews, so re-run the search
@@ -1292,7 +1265,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 
 		if (refresh) {
-			await this._refresh({ reuseSearchResults });
+			await this._refresh();
 		}
 		if (sort) {
 			await this.itemTree._ensureSortContextReady();

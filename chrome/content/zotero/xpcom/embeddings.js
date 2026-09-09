@@ -1741,12 +1741,6 @@ Zotero.Embeddings.Indexing = new function () {
 	// clear/prune/re-index steps concurrently.
 	let _switchChain = Promise.resolve();
 
-	// Items whose embeddings were written but not yet announced to views, and
-	// the coalescing timer for the announcement (see _notifyIndexed())
-	let _indexedNotifyIDs = new Set();
-	let _indexedNotifyTimer = null;
-	const INDEXED_NOTIFY_DELAY = 2000;
-
 	/**
 	 * Wire up the background indexer. Guarded so multiple windows don't
 	 * double-initialize.
@@ -2208,17 +2202,8 @@ Zotero.Embeddings.Indexing = new function () {
 	// the computed vectors, not the downloaded model files.
 	async function _clearEmbeddings() {
 		await Zotero.Embeddings.initDB();
-		// Announce the removals, so active semantic views refresh after the
-		// notification's coalescing delay (e.g. after disabling or a model
-		// switch)
-		let cleared = await Zotero.DB.columnQueryAsync(
-			"SELECT DISTINCT itemID FROM embeddings.itemEmbeddings"
-		);
 		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings");
 		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemChunkCounts");
-		if (cleared.length) {
-			_notifyIndexed(cleared);
-		}
 	}
 
 	// Indexed items, notes and annotations -- the numerator for their
@@ -2906,10 +2891,7 @@ Zotero.Embeddings.Indexing = new function () {
 					}
 				}
 			});
-			if (completed.length) {
-				_notifyIndexed(completed.map(entry => entry.item.id));
-				done += completed.length;
-			}
+			done += completed.length;
 			if (onProgress) {
 				onProgress({ done, total: toEmbed.length });
 			}
@@ -2922,28 +2904,6 @@ Zotero.Embeddings.Indexing = new function () {
 	function _indexableLibraries() {
 		return Zotero.Libraries.getAll()
 			.filter(library => ['user', 'group'].includes(library.libraryType));
-	}
-
-	// Announce written or removed embeddings with a 'refresh' item event, so
-	// an active best-match search reranks as vectors change (e.g. during
-	// initial indexing, or after a clear). The embeddingsUpdate flag lets the
-	// item tree rerank only for these events, not for every refresh. Coalesced,
-	// so a long indexing run produces an update every couple of seconds rather
-	// than one per committed batch.
-	function _notifyIndexed(itemIDs) {
-		for (let id of itemIDs) {
-			_indexedNotifyIDs.add(id);
-		}
-		if (_indexedNotifyTimer) {
-			return;
-		}
-		_indexedNotifyTimer = setTimeout(() => {
-			_indexedNotifyTimer = null;
-			let ids = [..._indexedNotifyIDs];
-			_indexedNotifyIDs.clear();
-			Zotero.Notifier.trigger('refresh', 'item', ids, { embeddingsUpdate: true })
-				.catch(e => Zotero.logError(e));
-		}, INDEXED_NOTIFY_DELAY);
 	}
 
 	/**

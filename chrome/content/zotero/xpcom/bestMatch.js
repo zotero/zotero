@@ -132,37 +132,33 @@ Zotero.BestMatch = new function () {
 	};
 
 	/**
-	 * Embedding-index coverage over the given libraries, for banners
-	 * explaining incomplete best-match results. Null when the semantic
-	 * engine is disabled or every eligible item is indexed. Never throws --
-	 * the state is informational and shouldn't break a search.
+	 * Embedding-index coverage, for banners explaining incomplete best-match
+	 * results. Null when the semantic engine is disabled or everything
+	 * eligible is indexed. Never throws -- the state is informational and
+	 * shouldn't break a search.
 	 *
-	 * @param {Number[]} [libraryIDs] - Limit coverage to these libraries;
-	 *     all libraries when empty
 	 * @return {Promise<Object|null>} - { type: 'indexing'|'paused', indexed,
-	 *     total }
+	 *     total }, where the counts add items to attachment chunks
 	 */
-	this.getIndexState = async function (libraryIDs = []) {
+	this.getIndexState = async function () {
 		try {
 			let status = Zotero.Embeddings.Indexing.getStatus();
 			if (!status.enabled) {
 				return null;
 			}
 			// Counts aren't populated until the indexer runs in this session
-			if (!status.libraries.length) {
+			if (!status.items.total && !status.chunks.total) {
 				status = await Zotero.Embeddings.Indexing.refreshStatus();
 			}
-			let ids = new Set(libraryIDs);
-			let libraries = status.libraries
-				.filter(lib => !ids.size || ids.has(lib.libraryID));
 			// Coverage is coverage: attachment fulltext is reported separately
 			// in the preferences, but an incomplete index is incomplete
-			// whichever part of it is still filling in
-			let indexed = libraries.reduce(
-				(sum, lib) => sum + lib.indexed + lib.indexedAttachments, 0);
-			let total = libraries.reduce(
-				(sum, lib) => sum + lib.eligible + lib.eligibleAttachments, 0);
-			if (indexed >= total) {
+			// whichever part of it is still filling in. Queued work and
+			// documents still being extracted aren't in the totals yet.
+			let indexed = status.items.done + status.chunks.done;
+			let total = status.items.total + status.chunks.total;
+			let pending = status.queued.items || status.queued.attachments
+				|| status.extractionProgress;
+			if (indexed >= total && !pending) {
 				return null;
 			}
 			// Only an explicit pause reports as paused. Anything else --

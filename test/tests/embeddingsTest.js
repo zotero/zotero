@@ -1285,7 +1285,7 @@ describe("Zotero.Embeddings", function () {
 	});
 
 	describe("Indexing", function () {
-		it("should announce cleared embeddings when the model changes", async function () {
+		it("should clear embeddings when the model changes", async function () {
 			let stubs = [
 				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
 				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves()
@@ -1303,13 +1303,9 @@ describe("Zotero.Embeddings", function () {
 						+ "VALUES (?, ?, 1)",
 					[item.id, 'hash']
 				);
-				// The model switch clears the old vectors and announces the
-				// removals (after the coalescing delay), so active semantic
-				// views refresh
-				let promise = waitForNotifierEvent('refresh', 'item');
+				// The model switch clears the old vectors
 				Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
-				let event = await promise;
-				assert.include(event.ids, item.id);
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				assert.equal(
 					await Zotero.DB.valueQueryAsync(
 						"SELECT COUNT(*) FROM embeddings.itemEmbeddings"

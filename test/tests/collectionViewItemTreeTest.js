@@ -277,13 +277,10 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{
-						libraryID: Zotero.Libraries.userLibraryID,
-						indexed: 0,
-						eligible: 0,
-						indexedAttachments: 0,
-						eligibleAttachments: 0
-					}]
+					items: { done: 1, total: 1 },
+					chunks: { done: 0, total: 0 },
+					queued: { items: 0, attachments: 0 },
+					extractionProgress: null
 				}));
 				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
 			});
@@ -891,13 +888,10 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: true,
 					paused: false,
-					libraries: [{
-						libraryID: Zotero.Libraries.userLibraryID,
-						indexed: 700,
-						eligible: 9000,
-						indexedAttachments: 52,
-						eligibleAttachments: 553
-					}]
+					items: { done: 700, total: 9000 },
+					chunks: { done: 52, total: 553 },
+					queued: { items: 0, attachments: 0 },
+					extractionProgress: null
 				});
 
 				await select(win, col);
@@ -919,13 +913,10 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{
-						libraryID: Zotero.Libraries.userLibraryID,
-						indexed: 700,
-						eligible: 9000,
-						indexedAttachments: 52,
-						eligibleAttachments: 553
-					}]
+					items: { done: 700, total: 9000 },
+					chunks: { done: 52, total: 553 },
+					queued: { items: 0, attachments: 0 },
+					extractionProgress: null
 				});
 				await itemsView.setFilter('search', 'between runs query');
 				banner = win.document.querySelector('.best-match-index-banner');
@@ -934,13 +925,10 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: true,
-					libraries: [{
-						libraryID: Zotero.Libraries.userLibraryID,
-						indexed: 700,
-						eligible: 9000,
-						indexedAttachments: 52,
-						eligibleAttachments: 553
-					}]
+					items: { done: 700, total: 9000 },
+					chunks: { done: 52, total: 553 },
+					queued: { items: 0, attachments: 0 },
+					extractionProgress: null
 				});
 				await itemsView.setFilter('search', 'paused query');
 				banner = win.document.querySelector('.best-match-index-banner');
@@ -951,13 +939,10 @@ describe("CollectionViewItemTree", function () {
 					enabled: true,
 					indexing: false,
 					paused: false,
-					libraries: [{
-						libraryID: Zotero.Libraries.userLibraryID,
-						indexed: 9000,
-						eligible: 9000,
-						indexedAttachments: 553,
-						eligibleAttachments: 553
-					}]
+					items: { done: 9000, total: 9000 },
+					chunks: { done: 553, total: 553 },
+					queued: { items: 0, attachments: 0 },
+					extractionProgress: null
 				});
 				await itemsView.setFilter('search', 'another query');
 				assert.notOk(win.document.querySelector('.best-match-index-banner'));
@@ -1083,28 +1068,7 @@ describe("CollectionViewItemTree", function () {
 				await itemsView.setFilter('advanced-search', null);
 			});
 
-			it("should rerank when the indexer announces changed embeddings", async function () {
-				let col = await createDataObject('collection');
-				let itemA = await createDataObject('item', { title: "rerank A", collections: [col.id] });
-				let itemB = await createDataObject('item', { title: "rerank B", collections: [col.id] });
-				let best = itemA.id;
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
-					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
-				)));
-
-				await select(win, col);
-				itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'some query');
-				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
-
-				// The indexer's coalesced notification after new/removed vectors
-				best = itemB.id;
-				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id], { embeddingsUpdate: true });
-				await itemsView._refreshPromise;
-				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
-			});
-
-			it("shouldn't rerank on a refresh that isn't an embeddings update", async function () {
+			it("shouldn't rerank on a refresh", async function () {
 				let col = await createDataObject('collection');
 				let itemA = await createDataObject('item', { title: "norerank A", collections: [col.id] });
 				let itemB = await createDataObject('item', { title: "norerank B", collections: [col.id] });
@@ -1118,38 +1082,13 @@ describe("CollectionViewItemTree", function () {
 				await itemsView.setFilter('search', 'some query');
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
 
-				// An unrelated refresh (e.g. a field change) leaves the ranking alone
+				// A refresh (e.g. a field change) leaves the ranking alone
 				best = itemB.id;
 				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id]);
 				await itemsView._refreshPromise;
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
 			});
 
-			it("should rerank without re-running the search when embeddings change", async function () {
-				let col = await createDataObject('collection');
-				let itemA = await createDataObject('item', { title: "reuse A", collections: [col.id] });
-				let itemB = await createDataObject('item', { title: "reuse B", collections: [col.id] });
-				let best = itemA.id;
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
-					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
-				)));
-
-				await select(win, col);
-				itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'some query');
-				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
-
-				// The underlying search is dropped and re-run by clearing the row cache
-				let clearCacheSpy = sinon.spy(Zotero.CollectionTreeRow.prototype, 'clearCache');
-				stubs.push(clearCacheSpy);
-
-				best = itemB.id;
-				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id], { embeddingsUpdate: true });
-				await itemsView._refreshPromise;
-
-				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
-				assert.isFalse(clearCacheSpy.called);
-			});
 		});
 
 		it("should expand parent item and attachment for an annotation match", async function () {
