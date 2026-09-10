@@ -24,8 +24,7 @@ attachments-box {
 		}
 	}
 
-	&:not([data-use-preview]),
-	& > collapsible-section[empty] {
+	&:not([data-use-preview]) {
 		attachment-preview {
 			visibility: hidden;
 			display: none;
@@ -34,6 +33,11 @@ attachments-box {
 		.togglePreview {
 			@include svgicon-menu('preview-show', 'universal', '16');
 		}
+	}
+
+	& > collapsible-section[empty] > .body {
+		visibility: hidden;
+		display: none;
 	}
 	
 	& > collapsible-section > .body {
