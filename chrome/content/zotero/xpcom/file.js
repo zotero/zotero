@@ -102,7 +102,9 @@ Zotero.File = new function () {
 			}
 		}
 		catch (e) {
-			if (e.becauseNoSuchFile) {}
+			// A missing file, or a filename too long for the filesystem, might still have
+			// an existing parent directory, so continue below
+			if (e.becauseNoSuchFile || e.message?.includes('NS_ERROR_FILE_NAME_TOO_LONG')) {}
 			// A path that can't be parsed (e.g., a POSIX-style path on Windows) doesn't
 			// exist either
 			else if (e.message?.includes('NS_ERROR_FILE_UNRECOGNIZED_PATH')) {

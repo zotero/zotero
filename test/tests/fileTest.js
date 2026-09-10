@@ -199,6 +199,14 @@ describe("Zotero.File", function () {
 			assert.equal(closest, tmpDir);
 		});
 		
+		it("should return parent directory for a filename too long for the filesystem", async function () {
+			var tmpDir = await getTempDirectory();
+			var closest = await Zotero.File.getClosestDirectory(
+				OS.Path.join(tmpDir, 'a'.repeat(1000) + '.pdf')
+			);
+			assert.equal(closest, tmpDir);
+		});
+		
 		it("should return false for a path that doesn't exist at all", async function () {
 			assert.isFalse(await Zotero.File.getClosestDirectory('/a/b/c'));
 		});
