@@ -42,6 +42,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	name: "ZFS",
 	verified: true,
 	
+	// File syncing runs in the background along with data syncing, so keep
+	// retrying through server maintenance rather than showing an error
+	ERROR_DELAY_MAX: 60 * 60 * 1000,
+	
 	
 	/**
 	 * Begin download process for individual file
@@ -90,6 +94,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						successCodes: [200, 302, 404],
 						headers: this.apiClient.getHeaders(),
 						noCache: true,
+						errorDelayMax: this.ERROR_DELAY_MAX,
 						followRedirects: false,
 					}
 				);
@@ -164,6 +169,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					{
 						displayURL,
 						noCache: true,
+						errorDelayMax: this.ERROR_DELAY_MAX,
 						onProgress(progress, progressMax) {
 							request.onProgress(progress, progressMax);
 						},
@@ -297,7 +303,9 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var params = this._getRequestParams(libraryID, "removestoragefiles");
 		var uri = this.apiClient.buildRequestURI(params);
 		
-		await Zotero.HTTP.request("POST", uri, "");
+		await Zotero.HTTP.request("POST", uri, {
+			errorDelayMax: this.ERROR_DELAY_MAX
+		});
 		
 		var sql = "DELETE FROM settings WHERE setting=? AND key=?";
 		await Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge']);
@@ -627,6 +635,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					headers: {
 						"Content-Type": params.contentType
 					},
+					errorDelayMax: this.ERROR_DELAY_MAX,
 					body: blob,
 					requestObserver: function (req) {
 						request.setChannel(req.channel);

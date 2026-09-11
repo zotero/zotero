@@ -428,7 +428,7 @@ describe("Zotero.HTTP", function () {
 					called++;
 				});
 				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
-				await Zotero.HTTP.request("GET", baseURL + "error");
+				await Zotero.HTTP.request("GET", baseURL + "error", { errorDelayMax: 20000 });
 				assert.equal(3, spy.callCount);
 				// DEBUG: Why are these slightly off?
 				assert.approximately(delayStub.args[0][0], 5 * 1000, 5);

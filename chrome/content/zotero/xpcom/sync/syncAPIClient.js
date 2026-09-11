@@ -48,6 +48,10 @@ Zotero.Sync.APIClient.prototype = {
 	MAX_OBJECTS_PER_REQUEST: 100,
 	MIN_GZIP_SIZE: 1000,
 	UPLOAD_TIMEOUT: 120000,
+	// Sync runs automatically in the background, so keep retrying through
+	// server maintenance instead of showing an error. If a server problem
+	// lasts longer than this, something is actually wrong.
+	ERROR_DELAY_MAX: 60 * 60 * 1000,
 	
 	
 	getKeyInfo: async function (options={}) {
@@ -881,7 +885,9 @@ Zotero.Sync.APIClient.prototype = {
 			}
 		}
 		
-		let opts = {}
+		let opts = {
+			errorDelayMax: this.ERROR_DELAY_MAX
+		};
 		Object.assign(opts, options);
 		opts.headers = this.getHeaders(options.headers);
 		opts.noCache = !options.cache;

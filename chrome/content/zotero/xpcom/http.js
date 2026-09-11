@@ -5,7 +5,7 @@
 Zotero.HTTP = new function () {
 	this.disableErrorRetry = false;
 	var _errorDelayIntervals = [2500, 5000, 10000, 20000, 40000, 60000, 120000, 240000, 300000];
-	var _errorDelayMax = 60 * 60 * 1000; // 1 hour
+	var _errorDelayMax = 7500;
 
 	var { SecurityInfo } = ChromeUtils.importESModule("resource://gre/modules/SecurityInfo.sys.mjs");
 	var { NetUtil } = ChromeUtils.importESModule("resource://gre/modules/NetUtil.sys.mjs");
@@ -208,8 +208,9 @@ Zotero.HTTP = new function () {
 	 *     for no timeout
 	 * @param {Number[]} [options.errorDelayIntervals] - Array of milliseconds to wait before
 	 *     retrying after 429/5xx error; if unspecified, a default set is used
-	 * @param {Number} [options.errorDelayMax = 3600000] - Milliseconds to wait before stopping
-	 *     429/5xx retries; set to 0 to disable retrying
+	 * @param {Number} [options.errorDelayMax = 7500] - Milliseconds to wait before stopping
+	 *     429/5xx retries; set to 0 to disable retrying. Background operations such as
+	 *     syncing set a much longer value.
 	 * @param {Boolean} [options.noRetryOnThrottle] - Don't retry on 429 or 503 with a
 	 *     Retry-After header; instead, throw UnexpectedStatusException to the caller so it
 	 *     can apply its own throttling (e.g., the sync API client, which pauses an entire
@@ -630,7 +631,7 @@ Zotero.HTTP = new function () {
 	 * @param {Number} [options.timeout = 30000] - Timeout in milliseconds (connect and
 	 *     inactivity); 0 to disable
 	 * @param {Number[]} [options.errorDelayIntervals] - Retry delay intervals for 5xx errors
-	 * @param {Number} [options.errorDelayMax] - Max time to spend retrying 5xx errors
+	 * @param {Number} [options.errorDelayMax = 7500] - Max time to spend retrying 5xx errors
 	 * @return {Promise<Response>} - A promise for a fetch Response object
 	 */
 	this.download = async function (uri, path, options = {}) {
