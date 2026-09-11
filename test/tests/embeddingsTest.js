@@ -1167,6 +1167,30 @@ describe("Zotero.Embeddings", function () {
 				stubs.forEach(stub => stub.restore());
 			}
 		});
+		it("should keep only the first dims of a model that truncates", async function () {
+			// 384 raw dimensions from the engine; bekko-a25m stores 256 of them
+			let raw = Array.from({ length: 384 }, (_, i) => Math.sin(i + 1));
+			let engine = fakeEngine(async (engine, { args: [texts] }) => texts.map(() => raw));
+			let stubs = [
+				sinon.stub(Zotero.ML, 'createEngine').resolves(engine),
+				sinon.stub(Zotero.ML, 'shutdown').resolves(),
+				sinon.stub(Zotero.ML, 'getOptimalConcurrency').returns(2),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-truncating/1')
+			];
+			try {
+				let [vector] = await Zotero.Embeddings.embedMany(['some text']);
+				assert.lengthOf(vector, 256);
+				let norm = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+				assert.closeTo(norm, 1, 1e-5);
+				// The head of the raw vector, renormalized
+				assert.closeTo(Zotero.Embeddings.cosine(vector, raw.slice(0, 256)), 1, 1e-6);
+			}
+			finally {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				stubs.forEach(stub => stub.restore());
+			}
+		});
 	});
 
 	describe("#pruneModels()", function () {
@@ -1251,17 +1275,21 @@ describe("Zotero.Embeddings", function () {
 			let en = corpusFor('bge-small-en-v1.5');
 			let zh = corpusFor('bge-small-zh-v1.5');
 			// A model that claims no language of its own is measured on all of them
-			let all = corpusFor('multilingual-e5-small');
-			assert.isAbove(en.length, 0);
-			assert.isAbove(zh.length, 0);
-			assert.isAbove(all.length, en.length + zh.length);
+			let all = corpusFor('bekko-embedding-v1-a8m');
+			for (let corpus of [en, zh]) {
+				assert.isAbove(corpus.short.length, 0);
+				assert.isAbove(corpus.long.length, 0);
+			}
+			assert.isAbove(all.short.length, en.short.length + zh.short.length);
+			assert.isAbove(all.long.length, en.long.length + zh.long.length);
 
 			// Text a model can't tokenize has to stay out of its corpus: it
 			// can't tell two such passages apart, so they score highly against
 			// each other and crowd out the tail that sets the floor
 			let han = /[一-鿿]/;
-			assert.isFalse(en.some(pair => han.test(pair.query) || han.test(pair.passage)));
-			assert.isTrue(zh.every(pair => han.test(pair.query) && han.test(pair.passage)));
+			let pairs = corpus => [...corpus.short, ...corpus.long];
+			assert.isFalse(pairs(en).some(pair => han.test(pair.query) || han.test(pair.passage)));
+			assert.isTrue(pairs(zh).every(pair => han.test(pair.query) && han.test(pair.passage)));
 		});
 
 		it("should only let models claim a language the corpus is written in", function () {
@@ -1275,7 +1303,9 @@ describe("Zotero.Embeddings", function () {
 						assert.include(codes, language, name);
 					}
 					// Whichever it claims, there are pairs to measure it against
-					assert.isAbove(Zotero.Embeddings.Calibration.getCorpus().length, 0, name);
+					let corpus = Zotero.Embeddings.Calibration.getCorpus();
+					assert.isAbove(corpus.short.length, 0, name);
+					assert.isAbove(corpus.long.length, 0, name);
 				}
 			}
 			finally {

@@ -200,7 +200,7 @@ Zotero.Embeddings = new function () {
 	// Bump when how a model is calibrated changes (see Zotero.Embeddings
 	// .Calibration): stored vectors are centered on the measured mean, so a
 	// new measurement means a reindex of every model
-	const CALIBRATION_VERSION = 1;
+	const CALIBRATION_VERSION = 2;
 
 	/**
 	 * Identity of the active embedding function: model name, its revision and
@@ -3545,16 +3545,19 @@ Zotero.Embeddings.Diagnostics = new function () {
  * Those are measured, by running the model over a fixed corpus of query/passage
  * pairs and reading the answers off the resulting distributions.
  *
- * For a corpus of N pairs, measure() does this:
+ * The corpus has short pairs (title- and annotation-length passages) and
+ * long pairs (chunk-length body text). measure() does this:
  *
- *   1. Embed all N queries and all N passages, with the model's own prefixes.
- *   2. Average the passage vectors into the mean, then center all 2N by it --
- *      the same centering scoring uses.
- *   3. Score every query against every passage: an N x N grid.
- *   4. The diagonal holds the N matched pairs, each query with the passage it
- *      was written for; the N*(N-1) cells off it are unrelated text.
- *   5. minScore is NULL_PERCENTILE of those off-diagonal scores, and
- *      maxDisplayScore is MATCH_PERCENTILE of the diagonal.
+ *   1. Embed every query and passage, with the model's own prefixes.
+ *   2. Average the long passage vectors into the mean, then center everything
+ *      by it -- the same centering scoring uses. Chunk-length text is most of
+ *      what the index holds and carries the model's shared direction most
+ *      purely; a mean taken over short text leaves part of it in every stored
+ *      chunk and lifts their scores as one.
+ *   3. Score each set's queries against its passages: two N x N grids, the
+ *      diagonal holding matched pairs and the cells off it unrelated text.
+ *   4. minScore is NULL_PERCENTILE of the short grid's off-diagonal scores;
+ *      maxDisplayScore is MATCH_PERCENTILE of the long grid's diagonal.
  *
  * Zotero.Embeddings calls this once per model version, then stores the result
  * and applies it while scoring.
@@ -3581,356 +3584,28 @@ Zotero.Embeddings.Calibration = new function () {
 	 */
 	this.languages = Object.freeze({ en: 'en', zh: 'zh', other: 'other' });
 
-	// Query/passage pairs spanning fields, languages, and lengths: the titles
-	// and abstracts, note paragraphs, and annotation-style passages that
-	// indexing stores. Each query is what someone might plausibly type to find
-	// its passage, and no two pairs anywhere in the corpus share a subject --
-	// not even as translations of each other, since a model measured on several
-	// languages at once scores a passage's translation like the passage itself,
-	// and a real match sitting in the null distribution raises the floor
-	// against exactly the cross-language searches such a model is for. That
-	// disjointness is what makes a query paired with any *other* passage an
-	// honest example of two texts that have nothing to do with each other. A
-	// language wants enough pairs for the floor to land on a settled stretch of
-	// the unrelated-score tail rather than on its few highest values (see
-	// NULL_PERCENTILE).
-	const CORPUS = {
-		// English. Also the largest set, since it's the one an English-only
-		// model is measured against.
-		en: [
-			{
-				query: 'qualitative research methods',
-				passage: 'Grounded theory methodology in qualitative sociology'
-			},
-			{
-				query: 'gut bacteria and metabolism',
-				passage: 'The gut microbiome influences host metabolism through short-chain fatty acid production'
-			},
-			{
-				query: 'predicting protein structure with deep learning',
-				passage: 'A transformer architecture for protein structure prediction from sequence alone'
-			},
-			{
-				query: 'lack of sleep and memory',
-				passage: 'Sleep deprivation impairs hippocampal memory consolidation in rodents'
-			},
-			{
-				query: 'does peer review work',
-				passage: 'Does peer review improve manuscript quality? Evidence from a randomized trial'
-			},
-			{
-				query: 'reward prediction error dopamine',
-				passage: 'Dopaminergic neurons in the ventral tegmental area encode reward prediction error'
-			},
-			{
-				query: 'speaking two languages and dementia risk',
-				passage: 'Bilingualism and the onset of dementia: a population-based cohort study'
-			},
-			{
-				query: 'amyloid hypothesis alzheimer',
-				passage: 'The amyloid cascade hypothesis of Alzheimer disease revisited'
-			},
-			{
-				query: 'is depression caused by low serotonin',
-				passage: 'Critiques of the serotonin hypothesis of depression'
-			},
-			{
-				query: 'machine learning weather models',
-				passage: 'Machine learning emulation of atmospheric convection'
-			},
-			{
-				query: 'french colonial atlantic history',
-				passage: 'The colonial history of the French Atlantic world, 1660-1800'
-			},
-			{
-				query: 't cell exhaustion crispr screen',
-				passage: 'CRISPR screens identify regulators of T cell exhaustion'
-			},
-			{
-				query: 'higgs boson mass measurement',
-				passage: 'Measurement of the Higgs boson mass in the four-lepton channel'
-			},
-			{
-				query: 'coral reefs and acidifying oceans',
-				passage: 'Ocean acidification reduces coral reef calcification rates'
-			},
-			{
-				query: 'heat deaths in cities',
-				passage: 'Urban heat islands and heat-related mortality in European cities'
-			},
-			{
-				query: 'economics of baroque opera',
-				passage: 'Patronage and the economics of eighteenth-century opera'
-			},
-			{
-				query: 'quantum error correction',
-				passage: 'Quantum error correction with surface codes on superconducting qubits'
-			},
-			{
-				query: 'unions and wage inequality',
-				passage: 'Wage inequality and the decline of labor market institutions'
-			},
-			{
-				query: 'hospital antibiotic resistance',
-				passage: 'Antibiotic resistance in hospital-acquired Klebsiella infections'
-			},
-			{
-				query: 'how the brain handles uncertainty',
-				passage: 'Neural correlates of decision making under uncertainty'
-			},
-			{
-				query: 'farming and declining bees',
-				passage: 'Land use change and pollinator decline in temperate agriculture'
-			},
-			{
-				query: 'evidentiality in indigenous languages',
-				passage: 'A grammar of evidentiality in Amazonian languages'
-			},
-			{
-				query: 'courts and the erosion of democracy',
-				passage: 'Constitutional courts and democratic backsliding'
-			},
-			{
-				query: 'how heavy elements form in stars',
-				passage: 'Stellar nucleosynthesis in asymptotic giant branch stars'
-			},
-			{
-				query: 'himalayan river erosion',
-				passage: 'Tectonic controls on Himalayan river incision'
-			},
-			{
-				query: 'ovid in medieval literature',
-				passage: 'The reception of Ovid in medieval French romance'
-			},
-			{
-				query: 'therapy for insomnia trial',
-				passage: 'Randomized trial of cognitive behavioral therapy for insomnia'
-			},
-			{
-				query: 'supply chains after the pandemic',
-				passage: 'Supply chain resilience after the 2020 disruption'
-			},
-			{
-				query: 'splitting water with sunlight',
-				passage: 'Photocatalytic water splitting with earth-abundant catalysts'
-			},
-			{
-				query: 'neolithic dairy farming',
-				passage: 'Archaeological evidence for early dairying in Neolithic Europe'
-			},
-			{
-				query: 'social media and teenage mental health',
-				passage: 'Social media use and adolescent wellbeing: a longitudinal analysis'
-			},
-			{
-				query: 'solving stiff ODEs numerically',
-				passage: 'Numerical methods for stiff differential equations'
-			},
-			{
-				query: 'long covid prevalence',
-				passage: 'The epidemiology of long COVID in primary care'
-			},
-			{
-				query: 'roman political oratory',
-				passage: 'Rhetoric and citizenship in the Roman republic'
-			},
-			{
-				query: 'segmenting medical images',
-				passage: 'Deep learning for medical image segmentation'
-			},
-			{
-				query: 'interest rates in developing economies',
-				passage: 'Monetary policy transmission in emerging markets'
-			},
-			{
-				query: 'farmed salmon escaping into the wild',
-				passage: 'Gene flow between domestic and wild populations of Atlantic salmon'
-			},
-			{
-				query: 'philosophy of the body',
-				passage: 'Phenomenology of embodiment in twentieth-century philosophy'
-			},
-			{
-				query: 'getting drugs into the brain',
-				passage: 'Nanoparticle drug delivery across the blood-brain barrier'
-			},
-			{
-				query: 'plague mortality in medieval england',
-				passage: 'Historical demography of the Black Death in England'
-			},
-			{
-				query: 'why replication attempts fail',
-				passage: 'The replication attempts collected here differ from the originals in ways '
-					+ 'that are easy to overlook. Sample sizes were larger, but recruitment moved '
-					+ 'online, and the populations are not the same ones the original authors drew '
-					+ 'from. Where an effect failed to replicate, it is rarely possible to say '
-					+ 'whether the original was a false positive or the replication was run under '
-					+ 'conditions that suppress a real effect. Both explanations predict the same '
-					+ 'null result, which is why the debate has not been settled by more data alone.'
-			},
-			{
-				query: 'cost effectiveness of preventive care',
-				passage: 'A recurring finding is that prevention saves lives without saving money. '
-					+ 'Screening programs catch disease earlier and extend life, and the additional '
-					+ 'years carry their own costs of care. The programs that do pay for themselves '
-					+ 'tend to be the narrow ones aimed at populations with high baseline risk, '
-					+ 'where the number needed to screen is small. Broad screening of low-risk '
-					+ 'populations improves outcomes at considerable expense, which is a defensible '
-					+ 'thing to buy but should not be defended on the grounds that it is cheap.'
-			},
-			{
-				query: 'archival silence and colonial records',
-				passage: 'The archive records what the administration found worth recording, which '
-					+ 'means the people it governed appear mostly at moments of friction: tax '
-					+ 'disputes, criminal proceedings, petitions. Reading these documents for '
-					+ 'ordinary life means reading against their purpose, and the silences are not '
-					+ 'random. Whole categories of activity went unwritten precisely because they '
-					+ 'were unremarkable to the clerk, and their absence from the record has been '
-					+ 'mistaken more than once for absence from the world.'
-			},
-			{
-				query: 'attention mechanism computational cost',
-				passage: 'Self-attention compares every position against every other, so its cost '
-					+ 'grows with the square of the sequence length. For short inputs this is '
-					+ 'irrelevant next to the cost of the feedforward layers, but it dominates '
-					+ 'once sequences reach the thousands. The approximations proposed since -- '
-					+ 'sparse patterns, low-rank projections, kernel methods -- all trade some '
-					+ 'exactness for a lower asymptotic cost, and which trade is acceptable '
-					+ 'depends on whether the task needs long-range precision or merely long context.'
-			},
-			{
-				query: 'measurement error in survey research',
-				passage: 'Respondents answer the question they understood, which is not always the '
-					+ 'question that was asked. Small changes in wording move responses by margins '
-					+ 'comparable to the effects under study, and the direction of the shift is '
-					+ 'often predictable from the order of the response options alone. Treating '
-					+ 'these as noise understates the problem: the error is systematic, correlated '
-					+ 'with the characteristics being measured, and does not average out with a '
-					+ 'larger sample.'
-			},
-			{
-				query: 'this assumes stationarity which seems unwarranted',
-				passage: 'The model assumes the underlying distribution is stable over the study '
-					+ 'period. Given the intervening policy change, that seems hard to defend -- '
-					+ 'and the authors never test it.'
-			},
-			{
-				query: 'sample size justification missing',
-				passage: 'No power analysis is reported anywhere in the methods. With n=24 per '
-					+ 'group, the study is only powered to detect effects far larger than the '
-					+ 'literature suggests are plausible.'
-			}
-		],
-		// Chinese.
-		zh: [
-			{
-				query: '青蒿素的抗疟机制',
-				passage: '青蒿素及其衍生物抗疟原虫作用机制的研究进展'
-			},
-			{
-				query: '高铁对区域经济的影响',
-				passage: '高速铁路开通对沿线城市经济发展的影响研究'
-			},
-			{
-				query: '汉语方言的声调差异',
-				passage: '吴语方言声调系统的实验语音学分析'
-			},
-			{
-				query: '稻田的甲烷排放',
-				passage: '水稻田甲烷排放的季节变化及其调控因素'
-			},
-			{
-				query: '大熊猫种群的遗传多样性',
-				passage: '野生大熊猫种群的遗传多样性与栖息地破碎化'
-			},
-			{
-				query: '固态锂电池的界面问题',
-				passage: '固态锂电池电极与电解质界面稳定性研究'
-			},
-			{
-				query: '青藏高原冻土退化',
-				passage: '青藏高原多年冻土退化及其碳释放效应'
-			},
-			{
-				query: '宋代科举与社会流动',
-				passage: '宋代科举制度与士人阶层的社会流动研究'
-			},
-			{
-				query: '明清白话小说的叙事',
-				passage: '明清白话小说叙事视角的演变研究'
-			},
-			{
-				query: '青少年近视与户外活动',
-				passage: '学龄儿童近视患病率上升与户外活动时间的关系'
-			},
-			{
-				query: '敦煌文献整理',
-				passage: '敦煌藏经洞出土文献的整理与断代研究'
-			},
-			{
-				query: '人口老龄化与养老金',
-				passage: '人口老龄化背景下养老保险制度的可持续性分析'
-			},
-			{
-				query: '绿茶多酚的抗氧化作用',
-				passage: '绿茶儿茶素类化合物清除自由基的构效关系研究'
-			},
-			{
-				query: '垃圾分类政策为什么难以推行',
-				passage: '垃圾分类政策的执行效果在不同城市之间差异很大，而这种差异很难用宣传力度来解释。'
-					+ '居民是否坚持分类，更多取决于投放点的便利程度、监督是否持续，'
-					+ '以及分类后的垃圾是否被混装混运——一旦居民发现分好的垃圾被混在一起运走，'
-					+ '参与率会迅速下降，且很难恢复。把执行失败归结为居民素质，'
-					+ '会掩盖收运体系本身的问题，而后者恰恰是政策设计中最容易被忽视的环节。'
-			},
-			{
-				query: '对照组的选择存在偏倚',
-				passage: '对照组全部来自另一家医院，两组患者的基线特征并不可比。'
-					+ '观察到的组间差异有多少来自干预本身，无从判断。'
-			}
-		],
-		// Languages without a code of their own. Only models that claim no
-		// single language -- the multilingual one -- are measured on these,
-		// together with everything above.
-		other: [
-			{
-				query: 'transition énergétique des villes',
-				passage: 'Étude sur la transition énergétique dans les villes européennes'
-			},
-			{
-				query: 'Erinnerung in der Nachkriegsliteratur',
-				passage: 'Die Rolle des Gedächtnisses in der deutschen Nachkriegsliteratur'
-			},
-			{
-				query: 'biodiversidad en bosques tropicales',
-				passage: 'Un estudio sobre la biodiversidad en los bosques tropicales'
-			},
-			{
-				query: '地震の早期警報システム',
-				passage: '地震早期警報システムの精度と即時性に関する研究'
-			},
-			{
-				query: 'деградация чернозёмов',
-				passage: 'Исследование деградации чернозёмных почв при интенсивном земледелии'
-			},
-			{
-				query: 'necropoli etrusche',
-				passage: 'Uno studio archeologico sulle necropoli etrusche in Italia centrale'
-			},
-			{
-				query: 'políticas de saúde no Brasil',
-				passage: 'Estudo sobre políticas públicas de saúde no Brasil'
-			},
-			{
-				query: 'waterbeheer in laaggelegen gebieden',
-				passage: 'Onderzoek naar waterbeheer in laaggelegen gebieden'
-			},
-			{
-				query: 'historia gospodarcza Europy Środkowej',
-				passage: 'Badania nad historią gospodarczą Europy Środkowej'
-			}
-		]
-	};
+	// Query/passage pairs by language, in two sets: `short` pairs are the
+	// titles and annotation-length passages indexing stores, `long` pairs are
+	// chunk-length body text. Each query is what someone might plausibly type
+	// to find its passage, and no two pairs anywhere in the file share a
+	// subject -- not even as translations of each other, since a model measured
+	// on several languages at once scores a passage's translation like the
+	// passage itself, and a real match sitting in the null distribution raises
+	// the floor against exactly the cross-language searches such a model is
+	// for. That disjointness is what makes a query paired with any *other*
+	// passage an honest example of two texts that have nothing to do with each
+	// other. A language wants enough short pairs for the floor to land on a
+	// settled stretch of the unrelated-score tail rather than on its few
+	// highest values (see NULL_PERCENTILE).
+	const CORPUS_URL = 'resource://zotero/embeddings-calibration-corpus.json';
+	let _corpus = null;
+
+	function _getCorpusData() {
+		if (!_corpus) {
+			_corpus = JSON.parse(Zotero.File.getResource(CORPUS_URL));
+		}
+		return _corpus;
+	}
 
 	/**
 	 * The pairs the active model is measured against: its own language's, or
@@ -3942,19 +3617,24 @@ Zotero.Embeddings.Calibration = new function () {
 	 * that sets the floor, raising it against the English results the model is
 	 * actually there to rank.
 	 *
-	 * @return {Object[]} - [{ query, passage }]
+	 * @return {{ short: Object[], long: Object[] }} - { query, passage } pairs
 	 */
 	this.getCorpus = function () {
+		let corpus = _getCorpusData();
 		let language = Zotero.Embeddings.getModelLanguage();
 		if (!language) {
-			return Object.values(CORPUS).flat();
+			let sets = Object.values(corpus);
+			return {
+				short: sets.flatMap(set => set.short),
+				long: sets.flatMap(set => set.long)
+			};
 		}
-		if (!Object.prototype.hasOwnProperty.call(CORPUS, language)) {
+		if (!Object.prototype.hasOwnProperty.call(corpus, language)) {
 			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' claims language `
 				+ `'${language}', which isn't one the corpus is written in `
 				+ `(${Object.keys(this.languages).join(', ')})`);
 		}
-		return CORPUS[language];
+		return corpus[language];
 	};
 
 	/**
@@ -3965,37 +3645,49 @@ Zotero.Embeddings.Calibration = new function () {
 	 * @return {Promise<Object>} - { mean, minScore, maxDisplayScore }
 	 */
 	this.measure = async function () {
-		let corpus = this.getCorpus();
+		let { short, long } = this.getCorpus();
 		let queryPrefix = Zotero.Embeddings.getQueryPrefix();
 		let passagePrefix = Zotero.Embeddings.getPassagePrefix();
-		Zotero.debug(`Embeddings: measuring against ${corpus.length} query/passage pairs`);
-		let queries = await _embedAll(corpus.map(pair => queryPrefix + pair.query));
-		let passages = await _embedAll(corpus.map(pair => passagePrefix + pair.passage));
+		Zotero.debug(`Embeddings: measuring against ${short.length} short `
+			+ `and ${long.length} long query/passage pairs`);
+		let embedPairs = async pairs => ({
+			queries: await _embedAll(pairs.map(pair => queryPrefix + pair.query)),
+			passages: await _embedAll(pairs.map(pair => passagePrefix + pair.passage))
+		});
+		short = await embedPairs(short);
+		long = await embedPairs(long);
 
 		// The direction every embedding shares, which says nothing about the
-		// text. Taken over the passages, since those are what gets stored.
-		let mean = new Float32Array(passages[0].length);
-		for (let vector of passages) {
+		// text. Taken over the long passages: chunk-length text is most of what
+		// gets stored, and shows the direction most purely
+		let mean = new Float32Array(long.passages[0].length);
+		for (let vector of long.passages) {
 			for (let d = 0; d < mean.length; d++) {
-				mean[d] += vector[d] / passages.length;
+				mean[d] += vector[d] / long.passages.length;
 			}
 		}
 
 		// Scoring compares centered, quantized vectors, so calibrate on those,
 		// using the same transform and comparison the search path uses
 		let prepare = vector => Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, mean));
-		queries = queries.map(prepare);
-		passages = passages.map(prepare);
-		let matched = [];
-		let mismatched = [];
-		for (let i = 0; i < queries.length; i++) {
-			for (let j = 0; j < passages.length; j++) {
-				(i === j ? matched : mismatched)
-					.push(Zotero.Embeddings.cosine(queries[i], passages[j]));
+		let grid = ({ queries, passages }) => {
+			queries = queries.map(prepare);
+			passages = passages.map(prepare);
+			let matched = [];
+			let mismatched = [];
+			for (let i = 0; i < queries.length; i++) {
+				for (let j = 0; j < passages.length; j++) {
+					(i === j ? matched : mismatched)
+						.push(Zotero.Embeddings.cosine(queries[i], passages[j]));
+				}
 			}
-		}
-		let minScore = _percentile(mismatched, NULL_PERCENTILE);
-		let maxDisplayScore = _percentile(matched, MATCH_PERCENTILE);
+			return { matched, mismatched };
+		};
+		// Unrelated short pairs set the floor; chunk-length matches set the bar,
+		// since a title-length passage paraphrases its query and scores higher
+		// than any real chunk does
+		let minScore = _percentile(grid(short).mismatched, NULL_PERCENTILE);
+		let maxDisplayScore = _percentile(grid(long).matched, MATCH_PERCENTILE);
 		// A model that rates its own matches no higher than unrelated text
 		// can't rank anything, and every score it produced would clamp to a
 		// full or empty bar. Better to fail loudly than to index with it.
