@@ -36,6 +36,8 @@ preferences-read-aloud-highlight-granularity-sentence =
     .label = sentence
 preferences-read-aloud-highlight-granularity-word =
     .label = word
+preferences-read-aloud-vertical-controls =
+    .label = Show playback controls vertically
 
 preferences-note-title = Notes
 preferences-note-open-in-new-window =
