@@ -62,21 +62,38 @@ Zotero.Embeddings = new function () {
 	//     queryPrefix: '...',            // prepended to every query (see embedQuery())
 	//     passagePrefix: '...',          // prepended to every passage (see embedPassages())
 	//     maxTokens: 512,                // context window; longer text is chunked to fit
+	//     dims: 256,                     // optional: keep only the first N dimensions of every vector
+	//                                    //   (Matryoshka) -- only for a model trained to truncate
 	//     l10nID: '...',                 // optional Fluent id for the menu
 	//     label: '...'                   // optional plain-English menu label, for a model that isn't
 	//                                    //   shipped. The menu prefers l10nID, then label, then modelId.
 	// }
 	const MODELS = {
-		'bge-small-en-v1.5': {
+		'bekko-embedding-v1-a8m': {
 			revision: 1,
-			modelId: 'Xenova/bge-small-en-v1.5',
-			language: 'en',
-			dtype: 'q8',
-			pooling: 'cls',
-			queryPrefix: 'Represent this sentence for searching relevant passages: ',
+			modelId: 'hotchpotch/bekko-embedding-v1-a8m',
+			// The repo's default artifact is onnx/model.onnx (fp32 layers,
+			// int8 embedding table); it has no model_quantized.onnx
+			dtype: 'fp32',
+			pooling: 'mean',
+			queryPrefix: '',
 			passagePrefix: '',
-			maxTokens: 512,
-			l10nID: 'preferences-advanced-semantic-search-english'
+			maxTokens: 8192,
+			dims: 256,
+			l10nID: 'preferences-advanced-semantic-search-multilingual'
+		},
+		'bekko-embedding-v1-a25m': {
+			revision: 1,
+			modelId: 'hotchpotch/bekko-embedding-v1-a25m',
+			// The repo's default artifact is onnx/model.onnx (fp32 layers,
+			// int8 embedding table); it has no model_quantized.onnx
+			dtype: 'fp32',
+			pooling: 'mean',
+			queryPrefix: '',
+			passagePrefix: '',
+			maxTokens: 8192,
+			dims: 256,
+			label: "better but slower multilingual"
 		},
 		'bge-small-zh-v1.5': {
 			revision: 1,
@@ -89,70 +106,7 @@ Zotero.Embeddings = new function () {
 			maxTokens: 512,
 			l10nID: 'preferences-advanced-semantic-search-chinese'
 		},
-		'multilingual-e5-small': {
-			revision: 1,
-			modelId: 'Xenova/multilingual-e5-small',
-			dtype: 'q8',
-			pooling: 'mean',
-			queryPrefix: 'query: ',
-			passagePrefix: 'passage: ',
-			maxTokens: 512,
-			l10nID: 'preferences-advanced-semantic-search-multilingual'
-		},
 		// Models for testing
-		'all-MiniLM-L6-v2': {
-			revision: 1,
-			modelId: 'Xenova/all-MiniLM-L6-v2',
-			dtype: 'q8',
-			pooling: 'mean',
-			queryPrefix: '',
-			passagePrefix: '',
-			maxTokens: 512,
-			language: 'en',
-			label: 'test: English (lightest, fast)'
-		},
-		'bge-base-en-v1.5': {
-			revision: 1,
-			modelId: 'Xenova/bge-base-en-v1.5',
-			language: 'en',
-			dtype: 'q8',
-			pooling: 'cls',
-			queryPrefix: 'Represent this sentence for searching relevant passages: ',
-			passagePrefix: '',
-			maxTokens: 512,
-			label: 'test: English (bge mid-weight)'
-		},
-		'jina-embeddings-v2-small-en': {
-			revision: 1,
-			modelId: 'Xenova/jina-embeddings-v2-small-en',
-			dtype: 'q8',
-			pooling: 'mean',
-			queryPrefix: '',
-			passagePrefix: '',
-			maxTokens: 8192,
-			language: 'en',
-			label: 'test: English (jina mid-weight, large window)'
-		},
-		'multilingual-e5-base': {
-			revision: 1,
-			modelId: 'Xenova/multilingual-e5-base',
-			dtype: 'q8',
-			pooling: 'mean',
-			queryPrefix: 'query: ',
-			passagePrefix: 'passage: ',
-			maxTokens: 512,
-			label: "test: multilingual (mid-weight)"
-		},
-		'bge-m3': {
-			revision: 1,
-			modelId: 'Xenova/bge-m3',
-			dtype: 'q8',
-			pooling: 'cls',
-			queryPrefix: '',
-			passagePrefix: '',
-			maxTokens: 8192,
-			label: 'test: multilingual (very heavy)'
-		},
 	};
 
 	const TASK_NAME = 'feature-extraction';
@@ -988,37 +942,49 @@ Zotero.Embeddings = new function () {
 			vectors = await run();
 		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
-		// Centering subtracts a mean measured over vectors of length 1 (see
-		// center()), so every vector has to be one first
-		return vectors.map(vector => _normalize(new Float32Array(vector)));
+		return vectors.map(vector => _finish(new Float32Array(vector)));
 	};
 
-	const ENDPOINT_ATTEMPTS = 3;
-	// Delay before the first retry; each further retry waits proportionally longer
-	const ENDPOINT_RETRY_DELAY = 2000;
+	// A model's raw output into its embedding: cut to its `dims` if it
+	// truncates, and unit length -- centering subtracts a mean measured over
+	// unit vectors (see center())
+	function _finish(vector) {
+		let dims = _getModel().dims;
+		if (dims && vector.length > dims) {
+			vector = vector.slice(0, dims);
+		}
+		return _normalize(vector);
+	}
 
-	// POST { inputs: [...] } to the endpoint, which returns one vector per
-	// input, as a bare array or under an `embeddings` key. `truncate` tells
-	// a TEI server to cut inputs over the model's window to fit, the way the
-	// local pipeline does, instead of rejecting the batch.
+	// POST { input: [...] } to an OpenAI-style /v1/embeddings endpoint (as
+	// served by llama.cpp, Ollama, TEI and the hosted APIs), which answers
+	// { data: [{ index, embedding }] }. Ordered by index, since the spec
+	// doesn't promise the array comes back in input order.
 	async function _embedViaEndpoint(endpoint, texts) {
 		Zotero.debug(`Embeddings: embedding batch of ${texts.length} via endpoint`);
 		let xmlhttp = await Zotero.HTTP.request('POST', endpoint, {
-			body: JSON.stringify({ inputs: texts, truncate: true }),
+			body: JSON.stringify({ input: texts }),
 			headers: { 'Content-Type': 'application/json' },
 			responseType: 'json',
-			timeout: 120000
+			timeout: 120000,
+			// A 5xx here means this batch can't be embedded remotely (e.g. an
+			// input over the server's window); the caller falls back to the
+			// local engine, so the HTTP layer's hour-long 5xx backoff must not run
+			errorDelayMax: 0
 		});
-		let vectors = xmlhttp.response?.embeddings ?? xmlhttp.response;
-		if (!Array.isArray(vectors) || vectors.length !== texts.length) {
-			let received = Array.isArray(vectors)
+		let data = xmlhttp.response?.data;
+		let vectors = Array.isArray(data)
+			? data.slice().sort((a, b) => a.index - b.index).map(row => row.embedding)
+			: null;
+		if (!vectors || vectors.length !== texts.length || !vectors.every(Array.isArray)) {
+			let received = vectors
 				? `${vectors.length} vectors`
 				: JSON.stringify(xmlhttp.response).substring(0, 200);
 			throw new Error(`Embeddings: endpoint returned ${received} `
 				+ `for ${texts.length} inputs`);
 		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
-		return vectors.map(vector => _normalize(new Float32Array(vector)));
+		return vectors.map(vector => _finish(new Float32Array(vector)));
 	}
 
 	// The last embedded query, reused across the scoring passes a single
@@ -1080,29 +1046,20 @@ Zotero.Embeddings = new function () {
 		let passagePrefix = _getModel().passagePrefix;
 		texts = texts.map(text => passagePrefix + text);
 		// Passages can route to an external endpoint serving the same model;
-		// queries always embed locally. After the retries, only this batch
-		// falls back to the local engine -- the next one tries the endpoint
-		// again.
+		// queries always embed locally. A failed batch embeds locally instead
+		// of waiting on a retry -- the next batch tries the endpoint again.
 		let endpoint = Zotero.Prefs.get('embeddings.endpoint');
 		if (!endpoint) {
 			return this.embedMany(texts);
 		}
-		for (let attempt = 1; attempt <= ENDPOINT_ATTEMPTS; attempt++) {
-			try {
-				return await _embedViaEndpoint(endpoint, texts);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				if (attempt < ENDPOINT_ATTEMPTS) {
-					Zotero.debug(`Embeddings: endpoint attempt ${attempt} failed -- retrying`);
-					await Zotero.Promise.delay(ENDPOINT_RETRY_DELAY * attempt);
-				}
-				else {
-					Zotero.debug('Embeddings: endpoint failed -- embedding this batch locally');
-				}
-			}
+		try {
+			return await _embedViaEndpoint(endpoint, texts);
 		}
-		return this.embedMany(texts);
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.debug('Embeddings: endpoint failed -- embedding this batch locally');
+			return this.embedMany(texts);
+		}
 	};
 
 	/**
@@ -3714,3 +3671,4 @@ Zotero.Embeddings.Calibration = new function () {
 		return sorted[Math.round(fraction * (sorted.length - 1))];
 	}
 };
+
