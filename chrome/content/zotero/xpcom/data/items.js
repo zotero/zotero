@@ -968,6 +968,128 @@ Zotero.Items = function () {
 	
 	
 	/**
+	 * Copy an item to another library, including enabled child items
+	 *
+	 * Requires a transaction
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Integer} targetLibraryID
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.tags]
+	 * @param {Boolean} [options.childNotes]
+	 * @param {Boolean} [options.childLinks]
+	 * @param {Boolean} [options.childFileAttachments]
+	 * @param {Boolean} [options.annotations]
+	 * @return {Promise<Zotero.Item|false>} The copied or existing linked item, or false if an
+	 *     attachment was skipped
+	 */
+	this.copyToLibrary = async function (item, targetLibraryID, options = {}) {
+		Zotero.DB.requireTransaction();
+
+		if (!item.isRegularItem() && !item.isNote() && !item.isAttachment()) {
+			throw new Error("Only regular items, notes, and attachments can be copied between libraries");
+		}
+
+		// Check if there's already a copy of this item in the library
+		let linkedItem = await item.getLinkedItem(targetLibraryID, true);
+		if (linkedItem) {
+			// TODO: Support reconciling tags, related items, attachments, etc.
+			return linkedItem;
+		}
+
+		let targetLibrary = Zotero.Libraries.get(targetLibraryID);
+		let {
+			tags: copyTags = Zotero.Prefs.get('groups.copyTags'),
+			childNotes: copyChildNotes = Zotero.Prefs.get('groups.copyChildNotes'),
+			childLinks: copyChildLinks = Zotero.Prefs.get('groups.copyChildLinks'),
+			childFileAttachments: copyChildFileAttachments
+			= Zotero.Prefs.get('groups.copyChildFileAttachments'),
+			annotations: copyAnnotations = Zotero.Prefs.get('groups.copyAnnotations'),
+		} = options;
+
+		// Standalone attachment
+		if (item.isAttachment()) {
+			// Skip linked files
+			if (item.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Skipping standalone linked file attachment on copy");
+				return false;
+			}
+			if (!targetLibrary.filesEditable) {
+				Zotero.debug("Skipping standalone file attachment on copy");
+				return false;
+			}
+			let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+			if (copyAnnotations) {
+				await this.copyChildItems(item, newAttachment);
+			}
+			return newAttachment;
+		}
+
+		// Create new clone item in target library
+		let newItem = item.clone(targetLibraryID, { skipTags: !copyTags });
+		await newItem.save({ skipSelect: true });
+
+		// Record link
+		await newItem.addLinkedItem(item);
+
+		if (item.isNote()) {
+			if (targetLibrary.filesEditable) {
+				await Zotero.Notes.copyEmbeddedImages(item, newItem);
+			}
+			return newItem;
+		}
+
+		// For regular items, add child items if prefs and permissions allow
+
+		// Child notes
+		if (copyChildNotes) {
+			for (let note of Zotero.Items.get(item.getNotes())) {
+				let newNote = note.clone(targetLibraryID, { skipTags: !copyTags });
+				newNote.parentID = newItem.id;
+				await newNote.save({ skipSelect: true });
+				if (targetLibrary.filesEditable) {
+					await Zotero.Notes.copyEmbeddedImages(note, newNote);
+				}
+				await newNote.addLinkedItem(note);
+			}
+		}
+
+		// Child attachments
+		if (copyChildLinks || copyChildFileAttachments) {
+			for (let attachment of Zotero.Items.get(item.getAttachments())) {
+				let linkMode = attachment.attachmentLinkMode;
+
+				// Skip linked files
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					Zotero.debug("Skipping child linked file attachment on copy");
+					continue;
+				}
+
+				// Skip imported files if we don't have pref and permissions
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					if (!copyChildLinks) {
+						Zotero.debug("Skipping child link attachment on copy");
+						continue;
+					}
+				}
+				else if (!copyChildFileAttachments || !targetLibrary.filesEditable) {
+					Zotero.debug("Skipping child file attachment on copy");
+					continue;
+				}
+				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
+					attachment, targetLibraryID, newItem.id
+				);
+				if (copyAnnotations) {
+					await this.copyChildItems(attachment, newAttachment);
+				}
+			}
+		}
+
+		return newItem;
+	};
+
+
+	/**
 	 * Copy child items from one item to another (e.g., in another library)
 	 *
 	 * Requires a transaction

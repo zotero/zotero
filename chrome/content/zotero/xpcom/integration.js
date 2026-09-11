@@ -25,6 +25,9 @@
 */
 
 const DATA_VERSION = 3;
+// Version 4 is the legacy JSON document-data format. Narrative citations use 5 so that
+// older Zotero versions refuse to rewrite their split-field representation.
+const NARRATIVE_DATA_VERSION = 5;
 
 // Specifies that citations should only be updated if changed
 const FORCE_CITATIONS_FALSE = 0;
@@ -544,8 +547,12 @@ Zotero.Integration = new function () {
 					if (!warning) {
 						throw new Zotero.Exception.UserCancelled("document upgrade");
 					}
-				// Don't throw for version 4(JSON) during the transition from 4.0 to 5.0
-				} else if ((data.dataVersion > DATA_VERSION) && data.dataVersion != 4) {
+				// Don't throw for version 4 (JSON) during the transition from 4.0 to 5.0,
+				// or for version 5, which is used by split-field narrative citations.
+				}
+				else if ((data.dataVersion > DATA_VERSION)
+						&& data.dataVersion != 4
+						&& data.dataVersion != NARRATIVE_DATA_VERSION) {
 					throw new Zotero.Exception.Alert("integration.error.newerDocumentVersion",
 							[data.zoteroVersion, Zotero.version], "integration.error.title");
 				}
@@ -971,7 +978,11 @@ Zotero.Integration.Interface.prototype.setDocPrefs = async function () {
 			var citation = await field.unserialize();
 			if (!citation.properties.dontUpdate) {
 				fieldsToConvert.push(fields[i]);
-				fieldNoteTypes.push(this._session.data.prefs.noteType);
+				// Narrative Heads and standalone Author-Only citations always remain
+				// in body text. Remainders follow the document's normal citation placement.
+				fieldNoteTypes.push(citation.properties.mode == "author-only"
+					? 0
+					: this._session.data.prefs.noteType);
 			}
 		} else if(convertBibliographies
 				&& field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -1220,6 +1231,7 @@ Zotero.Integration.Session.prototype._processFields = async function () {
 			}
 		}
 	}
+	this._refreshNarrativeGroups();
 	if (this._bibliographyFields.length) {
 		var data = await this._bibliographyFields[0].unserialize()
 		this.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0], data);
@@ -1229,6 +1241,35 @@ Zotero.Integration.Session.prototype._processFields = async function () {
 	}
 	// TODO: figure this out
 	// Zotero.Notifier.trigger('add', 'collection', 'document');
+};
+
+/**
+ * Rebuild transient Narrative Group relationships from citation order.
+ * Relationships are deliberately not persisted: a Head belongs to a Remainder only
+ * when the two citations are consecutive and their designated item resolves identically.
+ */
+Zotero.Integration.Session.prototype._refreshNarrativeGroups = function () {
+	this.narrativeGroups = [];
+	let precedingCitation;
+	for (let citation of Object.values(this.citationsByIndex)) {
+		delete citation.narrativeGroup;
+		if (Zotero.Integration.Citation.isNarrativeGroup(precedingCitation, citation)) {
+			let group = { head: precedingCitation, remainder: citation };
+			precedingCitation.narrativeGroup = group;
+			citation.narrativeGroup = group;
+			this.narrativeGroups.push(group);
+		}
+		precedingCitation = citation;
+	}
+
+	// Encountering any part of the new representation upgrades the document even
+	// if a copied field is not currently connected to its companion.
+	if (Object.values(this.citationsByIndex).some(citation => (
+		citation.properties.mode == "author-only"
+		|| Zotero.Integration.Citation.getNarrativeHeadItem(citation)
+	))) {
+		this.data.dataVersion = NARRATIVE_DATA_VERSION;
+	}
 };
 
 /**
@@ -1244,6 +1285,7 @@ Zotero.Integration.Session.prototype.updateDocument = async function (forceCitat
 	this.timer.start();
 	
 	this.progressBar.start();
+	await this._syncSortedNarrativeHeads();
 	await this._updateCitations();
 	this.progressBar.finishSegment();
 	this.progressBar.start();
@@ -1504,12 +1546,72 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 Zotero.Integration.Session.prototype.cite = async function (field, addNote=false, addAnnotations = false) {
 	var newField;
 	var citation;
+	let citationContext = {};
 	
 	if (field) {
 		field = await Zotero.Integration.Field.loadExisting(field);
 
 		if (field.type === INTEGRATION_TYPE_ITEM) {
-			citation = new Zotero.Integration.Citation(field, await field.unserialize(), await field.getNoteIndex());
+			let clickedCitation = new Zotero.Integration.Citation(
+				field, await field.unserialize(), await field.getNoteIndex());
+			let isNarrativeCandidate = ["author-only", "suppress-author"]
+				.includes(clickedCitation.properties.mode);
+
+			if (isNarrativeCandidate) {
+				// Structural membership requires the surrounding citation order, so load the
+				// document before opening a possible Narrative Group for editing.
+				await this.updateFromDocument(FORCE_CITATIONS_FALSE);
+				let loadedCitation;
+				for (let candidate of Object.values(this.citationsByIndex)) {
+					if (await candidate.field._field.equals(field._field)) {
+						loadedCitation = candidate;
+						break;
+					}
+				}
+				if (loadedCitation?.narrativeGroup) {
+					let group = loadedCitation.narrativeGroup;
+					citationContext.narrativeGroup = group;
+					citationContext.clickedRole = loadedCitation === group.head ? "head" : "remainder";
+
+					// Prompt for manual changes only on the field the user actually edited.
+					let editableClicked = new Zotero.Integration.Citation(
+						loadedCitation.field,
+						Zotero.Utilities.deepCopy(loadedCitation.toJSON()),
+						loadedCitation.properties.noteIndex
+					);
+					await editableClicked.prepareForEditing();
+					citationContext.headProperties = Zotero.Utilities.deepCopy(
+						citationContext.clickedRole == "head"
+							? editableClicked.properties
+							: group.head.properties
+					);
+					citation = citationContext.clickedRole == "remainder"
+						? editableClicked
+						: new Zotero.Integration.Citation(
+							group.remainder.field,
+							Zotero.Utilities.deepCopy(group.remainder.toJSON()),
+							group.remainder.properties.noteIndex
+						);
+					field = group.remainder.field;
+				}
+				else if (loadedCitation) {
+					citation = new Zotero.Integration.Citation(
+						loadedCitation.field,
+						Zotero.Utilities.deepCopy(loadedCitation.toJSON()),
+						loadedCitation.properties.noteIndex
+					);
+					field = loadedCitation.field;
+					await citation.prepareForEditing();
+				}
+				else {
+					citation = clickedCitation;
+					await citation.prepareForEditing();
+				}
+			}
+			else {
+				citation = clickedCitation;
+				await citation.prepareForEditing();
+			}
 		}
 		else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			let commandName = this._app.processorName == 'Google Docs'
@@ -1525,14 +1627,31 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 			newField = true;
 			field = new Zotero.Integration.CitationField(field._field);
 			citation = new Zotero.Integration.Citation(field);
+			await citation.prepareForEditing();
 		}
 	} else {
 		newField = true;
-		field = new Zotero.Integration.CitationField(await this.addField(true));
+		// Start in body text. Once the user chooses a form, ordinary citations can
+		// be converted to note placement, while Narrative Heads and Author Only stay here.
+		field = new Zotero.Integration.CitationField(await this.addField(false));
 		citation = new Zotero.Integration.Citation(field);
+		await citation.prepareForEditing();
 	}
-	
-	await citation.prepareForEditing();
+
+	citationContext.newField = !!newField;
+	if (citationContext.narrativeGroup) {
+		citationContext.originalForm = "narrative";
+	}
+	else if (citation.properties.mode == "author-only") {
+		citationContext.originalForm = "author-only";
+	}
+	else if (citation.properties.mode == "suppress-author"
+			&& Zotero.Integration.Citation.getNarrativeHeadItem(citation)) {
+		citationContext.originalForm = "standalone-suppress-author";
+	}
+	else {
+		citationContext.originalForm = "ordinary";
+	}
 
 	// -------------------
 	// Preparing data to pass into CitationEditInterface
@@ -1574,8 +1693,11 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		let citationsPre = citations.slice(0, sliceIdx);
 		let citationsPost = citations.slice(sliceIdx);
 		let citationID = citation.citationID;
+		let citeprocCitation = this._prepareCitationForCiteproc(citation, { clone: true });
 		try {
-			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, format || "rtf");
+			var result = this.style.previewCitationCluster(
+				citeprocCitation, citationsPre, citationsPost, format || "rtf");
+			citation.sortedItems = citeprocCitation.sortedItems;
 		} catch(e) {
 			throw e;
 		} finally {
@@ -1590,6 +1712,25 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		citation, this.style.opt.sort_citations,
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
+	io.citationForm = citationContext.originalForm == "narrative"
+		? "narrative"
+		: citationContext.originalForm == "author-only" ? "author-only" : "ordinary";
+	io.originalCitationForm = citationContext.originalForm;
+	io.narrativeInfixAvailable = citationContext.originalForm != "narrative";
+	io.narrativeInfix = "";
+	io.previewNarrative = async (headItem, remainder, format = "html") => {
+		let head = Zotero.Utilities.deepCopy(remainder);
+		head.citationID = undefined;
+		head.citationItems = [Zotero.Utilities.deepCopy(headItem)];
+		head.properties = Object.assign({}, head.properties, { mode: "author-only" });
+		delete head.citationItems[0]["is-narrative-head"];
+		delete head.citationItems[0]["suppress-author"];
+
+		let remainderPreview = Zotero.Utilities.deepCopy(remainder);
+		remainderPreview.properties = Object.assign({}, remainderPreview.properties,
+			{ mode: "suppress-author" });
+		return [await previewFn(head, format), await previewFn(remainderPreview, format)];
+	};
 	io.isCitingNotes = addNote;
 	io.isAddingAnnotations = addAnnotations;
 	Zotero.debug(`Editing citation:`);
@@ -1625,7 +1766,14 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	
 	let citations;
 	try {
-		citations = await this._insertCitingResult(fieldIndex, field, io.citation);
+		let narrativeInfix = (io.narrativeInfix || "").trim();
+		Object.assign(citationContext, {
+			form: io.citationForm,
+			formChanged: io.citationFormChanged,
+			infix: narrativeInfix ? ` ${narrativeInfix} ` : " "
+		});
+		citations = await this._insertCitingResult(
+			fieldIndex, field, io.citation, citationContext);
 	}
 	catch (e) {
 		if (e instanceof Zotero.Exception.UserCancelled) {
@@ -1637,22 +1785,39 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		}
 		throw e;
 	}
-	if (!this.data.prefs.delayCitationUpdates) {
-		if (citations.length != 1) {
-			// We need to refetch fields because we've inserted multiple.
-			// This is not super optimal, but you're inserting 2+ citations at the time,
-			// so that sets it off
-			var fields = await this.getFields(true);
+	var fields;
+	if (citations.length != 1 || citationContext.structureChanged) {
+		// We need to refetch fields because the operation inserted, removed, or moved fields.
+		fields = await this.getFields(true);
+		// Do not infer the new indices from the old field index. Insertion can happen at
+		// a moved cursor, and delayed updates deliberately provide -1 as the old index.
+		for (let citation of citations) {
+			let fieldIndex = -1;
+			for (let i = 0; i < fields.length; i++) {
+				if (await fields[i].equals(citation.field._field)) {
+					fieldIndex = i;
+					break;
+				}
+			}
+			if (fieldIndex == -1 && citation.fieldIndex >= 0 && fields[citation.fieldIndex]) {
+				// Some document plugins replace the field object during note conversion.
+				fieldIndex = citation.fieldIndex;
+			}
+			if (fieldIndex == -1) {
+				throw new Error("Could not locate an inserted citation field");
+			}
+			citation.fieldIndex = fieldIndex;
+			citation.field = new Zotero.Integration.CitationField(fields[fieldIndex]);
 		}
+	}
+	if (!this.data.prefs.delayCitationUpdates) {
 		// And resync citations with ones in the doc
 		await this.updateFromDocument(FORCE_CITATIONS_FALSE);
 	}
 	for (let citation of citations) {
-		if (fields) {
-			citation.field = new Zotero.Integration.CitationField(fields[citation.fieldIndex]);
-		}
 		await this.addCitation(citation.fieldIndex, await citation.field.getNoteIndex(), citation);
 	}
+	this._refreshNarrativeGroups();
 	return citations;
 };
 
@@ -1670,7 +1835,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
  * @returns {Promise<[]>}
  * @private
  */
-Zotero.Integration.Session.prototype._insertCitingResult = async function (fieldIndex, field, citation) {
+Zotero.Integration.Session.prototype._insertCitingResult = async function (fieldIndex, field, citation, citationContext = {}) {
 	await citation.loadItemData();
 	
 	let allItems = citation.citationItems.map(item => Zotero.Cite.getItem(item.id));
@@ -1691,7 +1856,7 @@ Zotero.Integration.Session.prototype._insertCitingResult = async function (field
 		return this._insertNoteIntoDocument(fieldIndex, field, firstItem);
 	}
 	else {
-		return [await this._insertItemsIntoDocument(fieldIndex++, field, citation)];
+		return this._insertItemsWithCitationForm(fieldIndex, field, citation, citationContext);
 	}
 };
 
@@ -1777,6 +1942,190 @@ Zotero.Integration.Session.prototype._insertItemsIntoDocument = async function (
 	citation.field = field;
 	citation.fieldIndex = fieldIndex;
 	return citation;
+};
+
+Zotero.Integration.Session.prototype._clearNarrativeCitationData = function (citation) {
+	delete citation.properties.mode;
+	for (let citationItem of citation.citationItems) {
+		delete citationItem["is-narrative-head"];
+	}
+};
+
+/**
+ * Add the per-item suppression that citeproc-js requires for note styles.
+ * Keep it transient so a user-set per-item suppression remains distinguishable
+ * from the Narrative Remainder's structural citation-level mode.
+ */
+Zotero.Integration.Session.prototype._prepareCitationForCiteproc = function (
+	citation, { clone = false } = {}) {
+	let headItem = citation.properties?.mode == "suppress-author"
+		&& Zotero.Integration.Citation.getNarrativeHeadItem(citation);
+	if (!headItem) {
+		return clone ? Zotero.Utilities.deepCopy(citation) : citation;
+	}
+	let prepared = citation;
+	if (citation instanceof Zotero.Integration.Citation) {
+		prepared = citation.toJSON();
+	}
+	else if (clone) {
+		prepared = Zotero.Utilities.deepCopy(citation);
+	}
+	Zotero.Integration.Citation.getNarrativeHeadItem(prepared)["suppress-author"] = true;
+	return prepared;
+};
+
+Zotero.Integration.Session.prototype._makeNarrativeHeadCitation = function (
+	remainder, field, fieldIndex, properties = {}) {
+	let markedItem = Zotero.Integration.Citation.getNarrativeHeadItem(remainder)
+		|| remainder.citationItems[0];
+	if (!markedItem) {
+		throw new Error("Cannot create a Narrative Head without a Head Citation Item");
+	}
+	let headItem = Zotero.Utilities.deepCopy(markedItem);
+	delete headItem["is-narrative-head"];
+	delete headItem["suppress-author"];
+	delete headItem["author-only"];
+
+	let headProperties = Zotero.Utilities.deepCopy(properties);
+	headProperties.mode = "author-only";
+	headProperties.noteIndex = 0;
+	let head = new Zotero.Integration.Citation(field, {
+		citationID: properties.citationID,
+		citationItems: [headItem],
+		properties: headProperties
+	}, 0);
+	head.fieldIndex = fieldIndex;
+	return head;
+};
+
+Zotero.Integration.Session.prototype._setNarrativeRemainderData = function (citation) {
+	let markedItem = Zotero.Integration.Citation.getNarrativeHeadItem(citation)
+		|| citation.citationItems[0];
+	if (!markedItem) {
+		throw new Error("Cannot create a Narrative Remainder without a Head Citation Item");
+	}
+	for (let citationItem of citation.citationItems) {
+		delete citationItem["is-narrative-head"];
+	}
+	markedItem["is-narrative-head"] = true;
+	citation.properties.mode = "suppress-author";
+};
+
+Zotero.Integration.Session.prototype._convertCitationFieldPlacement = async function (
+	citation, noteType, citationContext) {
+	let isInNote = await citation.field.getNoteIndex() > 0;
+	if (isInNote == (noteType > 0)) return;
+	await this._doc.convert(
+		[citation.field._field], this.data.prefs.fieldType, [noteType], 1);
+	citationContext.structureChanged = true;
+	citation.properties.noteIndex = noteType > 0 ? 1 : 0;
+};
+
+/**
+ * Apply the citation-level form selected in the dialog. Narrative is a dialog
+ * concept only; persisted citations are an author-only Head and suppress-author Remainder.
+ */
+Zotero.Integration.Session.prototype._insertItemsWithCitationForm = async function (
+	fieldIndex, field, citation, citationContext) {
+	let form = citationContext.form || "ordinary";
+	let group = citationContext.narrativeGroup;
+
+	if (form == "narrative" || form == "author-only") {
+		this.data.dataVersion = NARRATIVE_DATA_VERSION;
+	}
+
+	if (form == "narrative") {
+		this._setNarrativeRemainderData(citation);
+		citation.properties.noteIndex = this.data.prefs.noteType > 0 ? 1 : 0;
+
+		if (group) {
+			citation.field = group.remainder.field;
+			citation.fieldIndex = group.remainder.fieldIndex;
+			let head = this._makeNarrativeHeadCitation(
+				citation,
+				group.head.field,
+				group.head.fieldIndex,
+				citationContext.headProperties || group.head.properties
+			);
+			head.citationID = group.head.citationID;
+			if (!head.properties.dontUpdate
+					&& !Zotero.Integration.Citation.itemMatches(
+						head.citationItems[0], group.head.citationItems[0])) {
+				delete head.properties.formattedCitation;
+				delete head.properties.plainCitation;
+			}
+			return [head, citation];
+		}
+
+		// A new boundary replaces the original single field with Head, plain Infix
+		// text, and Remainder. This follows the same insertText/insertField sequence
+		// used for notes containing citations.
+		await field.delete();
+		this._fields = null;
+		let headField = new Zotero.Integration.CitationField(await this.addField(false));
+		await this._doc.insertText(citationContext.infix || " ");
+		let remainderField = new Zotero.Integration.CitationField(await this.addField(true));
+		citationContext.structureChanged = true;
+
+		citation.field = remainderField;
+		citation.fieldIndex = fieldIndex + 1;
+		let head = this._makeNarrativeHeadCitation(citation, headField, fieldIndex);
+		return [head, citation];
+	}
+
+	if (form == "author-only") {
+		let sourceItem = Zotero.Integration.Citation.getNarrativeHeadItem(citation)
+			|| citation.citationItems[0];
+		citation.citationItems = sourceItem ? [Zotero.Utilities.deepCopy(sourceItem)] : [];
+		for (let citationItem of citation.citationItems) {
+			delete citationItem["is-narrative-head"];
+			delete citationItem["suppress-author"];
+			delete citationItem["author-only"];
+		}
+		citation.properties.mode = "author-only";
+		citation.properties.noteIndex = 0;
+
+		if (group) {
+			let head = this._makeNarrativeHeadCitation(
+				citation,
+				group.head.field,
+				group.head.fieldIndex,
+				citationContext.headProperties || group.head.properties
+			);
+			head.citationID = group.head.citationID;
+			await group.remainder.field.delete();
+			citationContext.structureChanged = true;
+			return [head];
+		}
+
+		citation.field = field;
+		citation.fieldIndex = fieldIndex;
+		await this._convertCitationFieldPlacement(citation, 0, citationContext);
+		return [citation];
+	}
+
+	// Leaving a disconnected marked Remainder untouched preserves its standalone
+	// semantics. Explicitly changing form to Ordinary unsuppresses it and clears
+	// the marker like dissolving a connected Narrative Group.
+	if (!(citationContext.originalForm == "standalone-suppress-author"
+			&& !citationContext.formChanged)) {
+		this._clearNarrativeCitationData(citation);
+	}
+
+	if (group) {
+		await group.head.field.delete();
+		citationContext.structureChanged = true;
+		citation.field = group.remainder.field;
+		citation.fieldIndex = group.head.fieldIndex;
+	}
+	else {
+		citation.field = field;
+		citation.fieldIndex = fieldIndex;
+	}
+	citation.properties.noteIndex = this.data.prefs.noteType > 0 ? 1 : 0;
+	await this._convertCitationFieldPlacement(
+		citation, this.data.prefs.noteType, citationContext);
+	return [citation];
 };
 
 /**
@@ -1982,6 +2331,7 @@ Zotero.Integration.Session.prototype.displayAlert = async function () {
 Zotero.Integration.Session.prototype.setData = async function (data, resetStyle) {
 	var oldStyle = (this.data && this.data.style ? this.data.style : false);
 	this.data = data;
+	const narrativeCitations = true;
 	this.data.sessionID = this.sessionID;
 	if (data.style.styleID && (!oldStyle || oldStyle.styleID != data.style.styleID || resetStyle)) {
 		try {
@@ -1990,6 +2340,7 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			data.style.hasBibliography = getStyle.hasBibliography;
 			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, {
 				automaticJournalAbbreviations: data.prefs.automaticJournalAbbreviations,
+				narrativeCitations,
 			});
 			// Disable wrap_url_and_doi to prevent double-encoding of special characters in DOIs
 			// https://github.com/zotero/zotero/issues/5557
@@ -2162,8 +2513,45 @@ Zotero.Integration.Session.prototype.addCitation = async function (index, noteIn
 	
 	if (adjacentCitations.length) {
 		Zotero.debug(`Merging adjacent citations ${adjacentCitations.map(c => c.citationID)} to citation ${citation.citationID}`);
-		for (let adjacentCitation of adjacentCitations) {
-			citation.mergeCitation(adjacentCitation);
+		let citationsToMerge = [...adjacentCitations, citation];
+		let narrativeHeadIndices = new Set();
+		let narrativeRemainderIndices = new Set();
+		for (let i = 0; i < citationsToMerge.length - 1; i++) {
+			if (Zotero.Integration.Citation.isNarrativeGroup(
+				citationsToMerge[i], citationsToMerge[i + 1])) {
+				narrativeHeadIndices.add(i);
+				narrativeRemainderIndices.add(i + 1);
+			}
+		}
+		if (narrativeHeadIndices.size) {
+			// A Remainder is already the complete logical citation. Preserve its exact
+			// sequence, including duplicate item occurrences, discard separate Heads,
+			// and add any other adjacent citations without deduplicating Remainders.
+			let mergedItems = [];
+			for (let i of narrativeRemainderIndices) {
+				for (let citationItem of citationsToMerge[i].citationItems) {
+					delete citationItem["is-narrative-head"];
+					delete citationItem["suppress-author"];
+					delete citationItem["author-only"];
+					mergedItems.push(citationItem);
+				}
+			}
+			let addedItemIDs = new Set(mergedItems.map(item => `${item.id}`));
+			for (let [i, adjacentCitation] of citationsToMerge.entries()) {
+				if (narrativeHeadIndices.has(i) || narrativeRemainderIndices.has(i)) continue;
+				for (let citationItem of adjacentCitation.citationItems) {
+					if (addedItemIDs.has(`${citationItem.id}`)) continue;
+					addedItemIDs.add(`${citationItem.id}`);
+					mergedItems.push(citationItem);
+				}
+			}
+			citation.citationItems = mergedItems;
+			delete citation.properties.mode;
+		}
+		else {
+			for (let adjacentCitation of adjacentCitations) {
+				citation.mergeCitation(adjacentCitation);
+			}
 		}
 		this.updateIndices[index] = true;
 	}
@@ -2234,6 +2622,72 @@ Zotero.Integration.Session.prototype.addCitation = async function (index, noteIn
 	this.documentCitationIDs[citation.citationID] = index;
 };
 
+Zotero.Integration.Session.prototype._syncSortedNarrativeHeads = async function () {
+	if (!this.narrativeGroups?.length || !this.style?.previewCitationCluster) return;
+
+	let orderedCitations = Object.values(this.citationsByIndex);
+	for (let { head, remainder } of this.narrativeGroups) {
+		if (remainder.properties.unsorted || remainder.citationItems.length < 2) continue;
+
+		let position = orderedCitations.indexOf(remainder);
+		if (position == -1) continue;
+		let isRegistered = citation => citation.citationID
+			&& !(citation.fieldIndex in this.newIndices);
+		let citationsPre = orderedCitations.slice(0, position)
+			.filter(isRegistered)
+			.map(citation => [citation.citationID, citation.properties.noteIndex]);
+		let citationsPost = orderedCitations.slice(position + 1)
+			.filter(isRegistered)
+			.map(citation => [citation.citationID, citation.properties.noteIndex]);
+		let citation = remainder.toJSON();
+		// citeproc-js copies citation items before sorting them. Add a transient
+		// occurrence index so duplicates with the same item ID and different locators
+		// can still be mapped back to the authoritative Remainder sequence.
+		citation.citationItems.forEach((item, index) => item._zoteroNarrativeIndex = index);
+		let citationID = citation.citationID;
+		try {
+			this.style.previewCitationCluster(
+				this._prepareCitationForCiteproc(citation),
+				citationsPre,
+				citationsPost,
+				this.outputFormat
+			);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			continue;
+		}
+		finally {
+			citation.citationID = citationID;
+		}
+
+		let firstSortedItem = citation.sortedItems?.[0]?.[1];
+		let itemIndex = firstSortedItem?._zoteroNarrativeIndex;
+		if (!Number.isInteger(itemIndex) || !citation.citationItems[itemIndex]) continue;
+		let oldHeadItem = Zotero.Integration.Citation.getNarrativeHeadItem(remainder);
+		let newHeadItem = remainder.citationItems[itemIndex];
+		if (newHeadItem === oldHeadItem) continue;
+
+		for (let citationItem of remainder.citationItems) {
+			delete citationItem["is-narrative-head"];
+		}
+		newHeadItem["is-narrative-head"] = true;
+
+		let headItem = Zotero.Utilities.deepCopy(newHeadItem);
+		delete headItem["is-narrative-head"];
+		delete headItem["suppress-author"];
+		head.citationItems = [headItem];
+		head.properties.mode = "author-only";
+
+		// Updating citation data is independent from updating field presentation.
+		// In particular, dontUpdate preserves manually edited text but not a stale
+		// relationship to an item that is no longer first after sorting.
+		this.updateIndices[head.fieldIndex] = true;
+		this.processIndices[head.fieldIndex] = true;
+		this.processIndices[remainder.fieldIndex] = true;
+	}
+};
+
 Zotero.Integration.Session.prototype.getCiteprocLists = function () {
 	var citations = [];
 	var fieldToCitationIdxMapping = {};
@@ -2277,7 +2731,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 			
 			var citation = this.citationsByIndex[index];
 			if (!citation) continue;
-			citation = citation.toJSON();
+			citation = this._prepareCitationForCiteproc(citation);
 
 			let citationsPre = citations.slice(0, citationToFieldIdxMapping[index]);
 			var citationsPost = citations.slice(citationToFieldIdxMapping[index]+1);
@@ -2322,13 +2776,15 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function () {
 	// even after being modified so they're no longer ambiguous. Work around
 	// this by manually clearing the item list first.
 	this.style.updateItems([]);
+	citations = citations.map(citation => this._prepareCitationForCiteproc(citation));
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
 
 
 Zotero.Integration.Session.prototype.writeDelayedCitation = async function (field, citation) {
 	try {
-		var text = citation.properties.custom || this.style.previewCitationCluster(citation, [], [], this.outputFormat);
+		var text = citation.properties.custom || this.style.previewCitationCluster(
+			this._prepareCitationForCiteproc(citation), [], [], this.outputFormat);
 	}
 	catch (e) {
 		throw e;
@@ -2454,6 +2910,85 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
 	return checkbox.value;
 }
 
+
+/**
+ * Relink document and bibliography entries to replacement library items
+ *
+ * @param {{oldItemID: Number|String, item: Zotero.Item}[]} replacements
+ */
+Zotero.Integration.Session.prototype._relinkItems = function (replacements) {
+	let replacementsByID = new Map(
+		replacements.map(({ oldItemID, item }) => [String(oldItemID), item])
+	);
+	let changed = false;
+
+	// Relink every citation occurrence and mark affected fields for update
+	for (let [index, citation] of Object.entries(this.citationsByIndex)) {
+		let citationChanged = false;
+		for (let citationItem of citation.citationItems) {
+			let oldItemID = String(citationItem.cslItemID ?? citationItem.id);
+			let item = replacementsByID.get(oldItemID);
+			if (!item) continue;
+
+			citationItem.id = item.id;
+			delete citationItem.cslItemID;
+			citationItem.uris = this.uriMap.getURIsForItemID(item.id);
+			citationChanged = true;
+		}
+		if (citationChanged) {
+			this.updateIndices[index] = true;
+			changed = true;
+		}
+	}
+
+	// Keep the session index in sync with the mutated citations
+	this.citationsByItemID = {};
+	for (let citation of Object.values(this.citationsByIndex)) {
+		for (let citationItem of citation.citationItems) {
+			let itemID = citationItem.cslItemID ?? citationItem.id;
+			if (!this.citationsByItemID[itemID]) {
+				this.citationsByItemID[itemID] = [];
+			}
+			this.citationsByItemID[itemID].push(citation);
+		}
+	}
+
+	// Relink uncited, omitted, and customized bibliography entries
+	if (this.bibliography) {
+		let bibliographyDataChanged = false;
+		let replaceInSet = (set, skipCited = false) => {
+			for (let [oldItemID, item] of replacementsByID) {
+				if (!set.delete(oldItemID)) continue;
+				if (!skipCited || !this.citationsByItemID[item.id]) {
+					set.add(String(item.id));
+				}
+				changed = true;
+				bibliographyDataChanged = true;
+			}
+		};
+		replaceInSet(this.bibliography.uncitedItemIDs, true);
+		replaceInSet(this.bibliography.omittedItemIDs);
+
+		for (let [oldItemID, item] of replacementsByID) {
+			if (oldItemID in this.bibliography.customEntryText) {
+				this.bibliography.customEntryText[item.id]
+					= this.bibliography.customEntryText[oldItemID];
+				delete this.bibliography.customEntryText[oldItemID];
+				changed = true;
+				bibliographyDataChanged = true;
+			}
+		}
+		if (bibliographyDataChanged) {
+			this.bibliographyDataHasChanged = true;
+		}
+	}
+
+	if (changed) {
+		this.bibliographyHasChanged = true;
+	}
+};
+
+
 /**
  * Opens the citation explorer
  */
@@ -2475,21 +3010,23 @@ Zotero.Integration.Session.prototype.openCitationExplorer = async function () {
 			const data = await citationField.unserialize();
 			return data.citationID === citation.citationID;
 		},
-		updateIndex: index => this.updateIndices[index] = true
+		relinkItems: replacements => this._relinkItems(replacements)
 	};
 	
 	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/citationExplorer.xhtml', 'resizable', io);
 	
 	if (io.openCitationDialog) {
-		let citations = await this.cite(io.openCitationDialog);
-		if (this.data.prefs.delayCitationUpdates) {
-			for (let citation of citations) {
-				await this.writeDelayedCitation(citation.field, citation);
+		try {
+			await this.cite(io.openCitationDialog);
+		}
+		catch (e) {
+			if (!(e instanceof Zotero.Exception.Alert)) {
+				Zotero.debug("An error occurred while citing from Citation Explorer. Document will be updated.");
+				Zotero.logError(e);
 			}
-		} else {
-			return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 		}
 	}
+	return this.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 };
 
 
@@ -2653,14 +3190,20 @@ Zotero.Integration.DocumentData.prototype.serialize = function () {
 			`value="${Zotero.Utilities.htmlSpecialChars(this.prefs[pref].toString())}"/>`;
 	}
 	
-	return '<data data-version="'+Zotero.Utilities.htmlSpecialChars(`${DATA_VERSION}`)+'" '+
-		'zotero-version="'+Zotero.Utilities.htmlSpecialChars(Zotero.version)+'">'+
-			'<session id="'+Zotero.Utilities.htmlSpecialChars(this.sessionID)+'"/>'+
-		'<style id="'+Zotero.Utilities.htmlSpecialChars(this.style.styleID)+'" '+
-			(this.style.locale ? 'locale="' + Zotero.Utilities.htmlSpecialChars(this.style.locale) + '" ': '') +
-			'hasBibliography="'+(this.style.hasBibliography ? "1" : "0")+'" '+
-			'bibliographyStyleHasBeenSet="'+(this.style.bibliographyStyleHasBeenSet ? "1" : "0")+'"/>'+
-		(prefs ? '<prefs>'+prefs+'</prefs>' : '<prefs/>')+'</data>';
+	let dataVersion = this.dataVersion == NARRATIVE_DATA_VERSION
+		? NARRATIVE_DATA_VERSION
+		: DATA_VERSION;
+	return '<data data-version="' + Zotero.Utilities.htmlSpecialChars(`${dataVersion}`) + '" '
+		+ 'zotero-version="' + Zotero.Utilities.htmlSpecialChars(Zotero.version) + '">'
+		+ '<session id="' + Zotero.Utilities.htmlSpecialChars(this.sessionID) + '"/>'
+		+ '<style id="' + Zotero.Utilities.htmlSpecialChars(this.style.styleID) + '" '
+		+ (this.style.locale
+			? 'locale="' + Zotero.Utilities.htmlSpecialChars(this.style.locale) + '" '
+			: '')
+		+ 'hasBibliography="' + (this.style.hasBibliography ? "1" : "0") + '" '
+		+ 'bibliographyStyleHasBeenSet="'
+		+ (this.style.bibliographyStyleHasBeenSet ? "1" : "0") + '"/>'
+		+ (prefs ? '<prefs>' + prefs + '</prefs>' : '<prefs/>') + '</data>';
 };
 
 /**
@@ -3201,6 +3744,30 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 };
 
 Zotero.Integration.Citation = class {
+	static getNarrativeHeadItem(citation) {
+		return citation?.citationItems?.find(item => item["is-narrative-head"]);
+	}
+
+	static itemMatches(itemA, itemB) {
+		if (!itemA || !itemB) return false;
+		if (`${itemA.id}` == `${itemB.id}`) return true;
+		let urisA = itemA.uris || (itemA.uri ? [itemA.uri] : []);
+		let urisB = itemB.uris || (itemB.uri ? [itemB.uri] : []);
+		return urisA.some(uri => urisB.includes(uri));
+	}
+
+	static isNarrativeGroup(head, remainder) {
+		if (head?.properties?.mode != "author-only"
+				|| remainder?.properties?.mode != "suppress-author"
+				|| !head.citationItems?.length) {
+			return false;
+		}
+		return this.itemMatches(
+			head.citationItems[0],
+			this.getNarrativeHeadItem(remainder)
+		);
+	}
+
 	static refreshEmbeddedData(itemData) {
 		if (itemData.shortTitle) {
 			itemData['title-short'] = itemData.shortTitle;
@@ -3416,9 +3983,25 @@ Zotero.Integration.Citation = class {
 	}
 	
 	toJSON() {
-		const saveProperties = ["custom", "unsorted", "formattedCitation", "plainCitation", "dontUpdate", "noteIndex"];
-		const saveCitationItemKeys = ["locator", "label", "suppress-author", "author-only", "prefix",
-			"suffix", "ignoreRetraction"];
+		const saveProperties = [
+			"custom",
+			"unsorted",
+			"formattedCitation",
+			"plainCitation",
+			"dontUpdate",
+			"noteIndex",
+			"mode",
+		];
+		const saveCitationItemKeys = [
+			"locator",
+			"label",
+			"suppress-author",
+			"author-only",
+			"prefix",
+			"suffix",
+			"ignoreRetraction",
+			"is-narrative-head",
+		];
 		
 		var citation = {};
 		
