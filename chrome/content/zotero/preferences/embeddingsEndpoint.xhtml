@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2026 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	data-l10n-id="preferences-advanced-semantic-search-endpoint-dialog"
+	onload="Zotero_EmbeddingsEndpointDialog.init()">
+<dialog
+	id="zotero-embeddings-endpoint"
+	orient="vertical"
+	buttons="cancel,accept,extra2"
+	style="padding: 20px 15px; min-width: 620px">
+
+	<script src="chrome://global/content/globalOverlay.js"/>
+	<script src="chrome://zotero/content/include.js"/>
+
+	<html:link rel="localization" href="preferences.ftl"/>
+
+	<vbox id="zotero-embeddings-endpoint-container">
+		<label data-l10n-id="preferences-advanced-semantic-search-endpoint-intro"/>
+		<separator class="thin"/>
+
+		<label data-l10n-id="preferences-advanced-semantic-search-endpoint-url" control="endpoint-url"/>
+		<html:input type="text" id="endpoint-url" placeholder="http://localhost:8080/v1/embeddings"/>
+		<description class="endpoint-note"
+			data-l10n-id="preferences-advanced-semantic-search-endpoint-privacy"/>
+		<separator class="thin"/>
+
+		<label data-l10n-id="preferences-advanced-semantic-search-endpoint-requirements"/>
+		<html:div class="endpoint-facts">
+			<label data-l10n-id="preferences-advanced-semantic-search-endpoint-model"/>
+			<label id="endpoint-model"/>
+			<label data-l10n-id="preferences-advanced-semantic-search-endpoint-pooling"/>
+			<label id="endpoint-pooling"/>
+			<label data-l10n-id="preferences-advanced-semantic-search-endpoint-file"/>
+			<label id="endpoint-file"/>
+		</html:div>
+		<separator class="thin"/>
+
+		<label data-l10n-id="preferences-advanced-semantic-search-endpoint-llama"/>
+		<hbox align="center">
+			<html:textarea id="endpoint-command" class="endpoint-command" readonly="readonly" rows="2"/>
+			<button id="endpoint-copy" data-l10n-id="preferences-advanced-semantic-search-endpoint-copy"/>
+		</hbox>
+		<label id="endpoint-command-url" class="endpoint-note"/>
+		<separator class="thin"/>
+
+		<hbox id="endpoint-progress" align="center" hidden="true">
+			<image class="zotero-spinner-16"/>
+			<label data-l10n-id="preferences-advanced-semantic-search-endpoint-verifying"/>
+		</hbox>
+		<description id="endpoint-error" class="endpoint-error" hidden="true"/>
+	</vbox>
+
+	<script>
+	<![CDATA[
+		var Zotero_EmbeddingsEndpointDialog = {
+			init() {
+				this.io = window.arguments[0];
+				this.urlInput = document.getElementById('endpoint-url');
+				this.dialog = document.getElementById('zotero-embeddings-endpoint');
+				this.urlInput.value = Zotero.Prefs.get('embeddings.endpoint') || '';
+				document.l10n.setAttributes(this.dialog.getButton('accept'),
+					'preferences-advanced-semantic-search-endpoint-accept');
+				// Offered only while there is an endpoint to remove
+				let remove = this.dialog.getButton('extra2');
+				document.l10n.setAttributes(remove, 'preferences-advanced-semantic-search-endpoint-remove');
+				remove.hidden = !this.urlInput.value;
+				document.addEventListener('dialogextra2', () => this.remove());
+
+				let serving = Zotero.Embeddings.getServing();
+				document.getElementById('endpoint-model').value = Zotero.Embeddings.getModelName();
+				document.getElementById('endpoint-pooling').value = Zotero.Embeddings.getPooling();
+				document.getElementById('endpoint-file').value = `${serving.gguf} (${serving.quant})`;
+				let { command, url } = Zotero.Embeddings.Endpoint.getCommand();
+				document.getElementById('endpoint-command').value = command;
+				document.l10n.setAttributes(document.getElementById('endpoint-command-url'),
+					'preferences-advanced-semantic-search-endpoint-then-use', { url });
+				document.getElementById('endpoint-copy').addEventListener('command', () => {
+					Zotero.Utilities.Internal.copyTextToClipboard(command);
+				});
+
+				// Verification is asynchronous: hold the dialog open until it
+				// has an answer
+				document.addEventListener('dialogaccept', (event) => {
+					event.preventDefault();
+					this.accept();
+				});
+				this.urlInput.addEventListener('input', () => this.showError(null));
+				this.urlInput.focus();
+			},
+
+			// Stop using the endpoint. Nothing stored is affected: the vectors
+			// it produced match the model's, and a later endpoint verifies anew.
+			remove() {
+				Zotero.Prefs.clear('embeddings.endpoint');
+				this.io.ok = true;
+				window.close();
+			},
+
+			async accept() {
+				let url = this.urlInput.value.trim();
+				// An emptied URL turns the endpoint off; nothing to verify
+				if (!url) {
+					this.remove();
+					return;
+				}
+				this.setBusy(true);
+				this.showError(null);
+				let verdict;
+				try {
+					verdict = await Zotero.Embeddings.Endpoint.verify(url);
+				}
+				catch (e) {
+					Zotero.logError(e);
+					verdict = { state: 'unreachable' };
+				}
+				this.setBusy(false);
+				if (verdict.state != 'ok') {
+					this.showError(verdict);
+					return;
+				}
+				Zotero.Prefs.set('embeddings.endpoint', url);
+				this.io.ok = true;
+				window.close();
+			},
+
+			setBusy(busy) {
+				document.getElementById('endpoint-progress').hidden = !busy;
+				this.dialog.getButton('accept').disabled = busy;
+				this.dialog.getButton('cancel').disabled = busy;
+				this.dialog.getButton('extra2').disabled = busy;
+				this.urlInput.disabled = busy;
+			},
+
+			showError(verdict) {
+				let box = document.getElementById('endpoint-error');
+				box.hidden = !verdict;
+				if (!verdict) {
+					return;
+				}
+				document.l10n.setAttributes(box,
+					`preferences-advanced-semantic-search-endpoint-error-${verdict.state}`,
+					{ pooling: Zotero.Embeddings.getPooling() });
+			}
+		};
+	]]>
+	</script>
+</dialog>
+</window>

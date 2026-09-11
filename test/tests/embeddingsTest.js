@@ -1167,6 +1167,35 @@ describe("Zotero.Embeddings", function () {
 				stubs.forEach(stub => stub.restore());
 			}
 		});
+		it("should collapse whitespace and give a model's tokenizer the leading space the runtime omits", async function () {
+			let seen = [];
+			let engine = fakeEngine(async (engine, { args: [texts] }) => {
+				seen.push(...texts);
+				return texts.map(() => Array.from({ length: 384 }, (_, i) => Math.sin(i + 1)));
+			});
+			let modelName = sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m');
+			let stubs = [
+				sinon.stub(Zotero.ML, 'createEngine').resolves(engine),
+				sinon.stub(Zotero.ML, 'shutdown').resolves(),
+				sinon.stub(Zotero.ML, 'getOptimalConcurrency').returns(2),
+				modelName,
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-spacing/1')
+			];
+			try {
+				await Zotero.Embeddings.embedMany(['some text', 'more', 'line one\nline  two\n']);
+				assert.deepEqual(seen, [' some text', ' more', ' line one line two']);
+				// A model whose tokenizer doesn't mark the first word is left alone
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				seen = [];
+				modelName.returns('bge-small-zh-v1.5');
+				await Zotero.Embeddings.embedMany(['some text']);
+				assert.deepEqual(seen, ['some text']);
+			}
+			finally {
+				await Zotero.Embeddings.shutdownEngine({ modelChanged: false });
+				stubs.forEach(stub => stub.restore());
+			}
+		});
 		it("should keep only the first dims of a model that truncates", async function () {
 			// 384 raw dimensions from the engine; bekko-a25m stores 256 of them
 			let raw = Array.from({ length: 384 }, (_, i) => Math.sin(i + 1));
@@ -1311,6 +1340,232 @@ describe("Zotero.Embeddings", function () {
 			finally {
 				stub.restore();
 			}
+		});
+	});
+
+	describe("Endpoint", function () {
+		const URL = 'http://localhost:8080/v1/embeddings';
+		// Deterministic unit vectors, one per text, in the width the served
+		// model stores (bekko keeps 256 of its 384)
+		let vectorFor = (text, dims = 256) => {
+			let state = 0;
+			for (let i = 0; i < text.length; i++) {
+				state = (state * 31 + text.charCodeAt(i)) % 2147483647;
+			}
+			let vector = new Float32Array(dims);
+			for (let d = 0; d < dims; d++) {
+				state = (state * 1103515245 + 12345) % 2147483648;
+				vector[d] = state / 2147483648 - 0.5;
+			}
+			let norm = Math.sqrt(vector.reduce((sum, val) => sum + val * val, 0));
+			return vector.map(val => val / norm);
+		};
+		// A server: answers each request from `remoteFor(text)`, or throws
+		// what `failWith(texts)` returns
+		let serve = ({ remoteFor = vectorFor, model = 'served', failWith = () => null, shape = null } = {}) => {
+			let calls = [];
+			return {
+				calls,
+				stub: sinon.stub(Zotero.HTTP, 'request').callsFake(async (method, url, options) => {
+					let { input } = JSON.parse(options.body);
+					calls.push({ url, input, headers: options.headers });
+					let error = failWith(input);
+					if (error) {
+						throw error;
+					}
+					if (shape) {
+						return { status: 200, response: shape };
+					}
+					return {
+						status: 200,
+						response: {
+							model,
+							data: input.map((text, index) => ({ index, embedding: Array.from(remoteFor(text)) }))
+						}
+					};
+				})
+			};
+		};
+		let status = code => new Zotero.HTTP.UnexpectedStatusException({ status: code }, URL, `HTTP ${code}`);
+		let stubs;
+		beforeEach(async function () {
+			stubs = [
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-endpoint/1'),
+				sinon.stub(Zotero.Embeddings, 'embedMany').callsFake(async texts => texts.map(text => vectorFor(text)))
+			];
+			await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddingsMeta WHERE key='endpoint'");
+			Zotero.Embeddings.Endpoint.reset();
+		});
+		afterEach(async function () {
+			stubs.forEach(stub => stub.restore());
+			Zotero.HTTP.request.restore?.();
+			Zotero.Prefs.clear('embeddings.endpoint');
+			await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddingsMeta WHERE key='endpoint'");
+		});
+
+		it("should describe how to serve the model", function () {
+			let { command, url } = Zotero.Embeddings.Endpoint.getCommand();
+			assert.include(command, 'hotchpotch/bekko-embedding-v1-a8m-GGUF:F16');
+			assert.include(command, '--pooling mean');
+			assert.include(url, 'localhost');
+		});
+
+		it("should accept a server whose vectors match the model's", async function () {
+			let server = serve();
+			let verdict = await Zotero.Embeddings.Endpoint.verify(URL);
+			assert.equal(verdict.state, 'ok');
+			assert.equal(verdict.serverModel, 'served');
+			assert.closeTo(verdict.agreement, 1, 1e-5);
+			// The regular texts in one request, the chunk-length one alone
+			assert.lengthOf(server.calls, 2);
+			assert.isAbove(server.calls[0].input.length, 10);
+			assert.isAbove(server.calls[1].input[0].length, 8000);
+		});
+
+		it("should reject a server serving something else", async function () {
+			serve({ remoteFor: text => vectorFor(text + ' but different') });
+			let verdict = await Zotero.Embeddings.Endpoint.verify(URL);
+			assert.equal(verdict.state, 'low-agreement');
+			assert.isBelow(verdict.agreement, 0.5);
+		});
+
+		it("should reject vectors narrower than the model's", async function () {
+			serve({ remoteFor: text => vectorFor(text, 100) });
+			let verdict = await Zotero.Embeddings.Endpoint.verify(URL);
+			assert.equal(verdict.state, 'width-mismatch');
+		});
+
+		it("should tell an unreachable server, a wrong endpoint, and one wanting credentials apart", async function () {
+			serve({ failWith: () => new Error('connection refused') });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'unreachable');
+			Zotero.HTTP.request.restore();
+			serve({ failWith: () => status(404) });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'not-embeddings');
+			Zotero.HTTP.request.restore();
+			serve({ shape: { choices: [] } });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'not-embeddings');
+			Zotero.HTTP.request.restore();
+			serve({ failWith: () => status(401) });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'unauthorized');
+		});
+
+		it("should reject a server that can't take a chunk-length text", async function () {
+			// llama.cpp rejects it
+			serve({ failWith: texts => (texts[0].length > 8000 ? status(500) : null) });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'context-too-small');
+			Zotero.HTTP.request.restore();
+			// Or embeds what fits and says nothing
+			serve({ remoteFor: text => vectorFor(text.length > 8000 ? text.slice(0, 2000) : text) });
+			assert.equal((await Zotero.Embeddings.Endpoint.verify(URL)).state, 'context-too-small');
+		});
+
+		it("should route passages only to a verified endpoint for this model", async function () {
+			let server = serve();
+			// Configured but unverified: local
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.lengthOf(server.calls, 0);
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'unverified');
+
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			let vectors = await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.lengthOf(server.calls, 3);
+			// The batch plus its sentinel went out; only the batch came back
+			assert.lengthOf(server.calls[2].input, 2);
+			assert.lengthOf(vectors, 1);
+			assert.closeTo(Zotero.Embeddings.cosine(vectors[0], vectorFor('a passage')), 1, 1e-5);
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'ok');
+
+			// Verified for another URL: local
+			Zotero.Prefs.set('embeddings.endpoint', 'http://elsewhere/v1/embeddings');
+			await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.lengthOf(server.calls, 3);
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'unverified');
+
+			// Verified for another model version: local
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			stubs[1].returns('test-endpoint/2');
+			await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.lengthOf(server.calls, 3);
+		});
+
+		it("should stop trusting a server whose model changes mid-run", async function () {
+			let server = serve();
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			Zotero.HTTP.request.restore();
+			server = serve({ model: 'something-else' });
+			let [vector] = await Zotero.Embeddings.embedPassages(['a passage']);
+			// The batch embedded locally, and the endpoint is out
+			assert.lengthOf(server.calls, 1);
+			assert.closeTo(Zotero.Embeddings.cosine(vector, vectorFor('a passage')), 1, 1e-5);
+			let status = Zotero.Embeddings.Endpoint.getStatus();
+			assert.equal(status.state, 'invalid');
+			await Zotero.Embeddings.embedPassages(['another']);
+			assert.lengthOf(server.calls, 1);
+		});
+
+		it("should stop trusting a server whose vectors drift under the same name", async function () {
+			serve();
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			Zotero.HTTP.request.restore();
+			let server = serve({ remoteFor: text => vectorFor(text + ' drifted') });
+			let [vector] = await Zotero.Embeddings.embedPassages(['first', 'a longer second passage']);
+			// Caught on the very batch through its sentinel: nothing served was returned
+			assert.lengthOf(server.calls, 1);
+			assert.closeTo(Zotero.Embeddings.cosine(vector, vectorFor('first')), 1, 1e-5);
+			let status = Zotero.Embeddings.Endpoint.getStatus();
+			assert.equal(status.state, 'invalid');
+		});
+
+		it("should leave a server alone after repeated failures until the next run", async function () {
+			serve();
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			Zotero.HTTP.request.restore();
+			let server = serve({ failWith: () => new Error('timeout') });
+			for (let i = 0; i < 5; i++) {
+				await Zotero.Embeddings.embedPassages([`passage ${i}`]);
+			}
+			assert.lengthOf(server.calls, 3);
+			let status = Zotero.Embeddings.Endpoint.getStatus();
+			assert.equal(status.state, 'unreachable');
+
+			// The next run tries again, and a server that answers is back
+			Zotero.HTTP.request.restore();
+			server = serve();
+			await Zotero.Embeddings.Endpoint.recheck();
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'ok');
+			await Zotero.Embeddings.embedPassages(['again']);
+			assert.lengthOf(server.calls, 2);
+		});
+
+		it("should recheck a verified server when a run starts", async function () {
+			serve();
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			Zotero.HTTP.request.restore();
+			serve({ failWith: () => new Error('connection refused') });
+			await Zotero.Embeddings.Endpoint.recheck();
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'unreachable');
+			Zotero.HTTP.request.restore();
+			serve({ model: 'swapped' });
+			await Zotero.Embeddings.Endpoint.recheck();
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'invalid');
+		});
+
+		it("should embed a failed batch locally and keep the endpoint", async function () {
+			let server = serve();
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			Zotero.HTTP.request.restore();
+			server = serve({ failWith: () => status(500) });
+			let [vector] = await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.closeTo(Zotero.Embeddings.cosine(vector, vectorFor('a passage')), 1, 1e-5);
+			assert.lengthOf(server.calls, 1);
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'ok');
 		});
 	});
 

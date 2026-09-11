@@ -64,13 +64,19 @@ Zotero.Embeddings = new function () {
 	//     maxTokens: 512,                // context window; longer text is chunked to fit
 	//     dims: 256,                     // optional: keep only the first N dimensions of every vector
 	//                                    //   (Matryoshka) -- only for a model trained to truncate
+	//     leadingSpace: true,            // optional: the tokenizer marks the first word with a space
+	//                                    //   the runtime fails to add (see embedMany())
+	//     serving: {                     // optional: how to serve the same model from llama.cpp
+	//         gguf: 'user/repo-GGUF',    //   (see Zotero.Embeddings.Endpoint); a model without it
+	//         quant: 'F16'               //   can't be embedded through an endpoint
+	//     },
 	//     l10nID: '...',                 // optional Fluent id for the menu
 	//     label: '...'                   // optional plain-English menu label, for a model that isn't
 	//                                    //   shipped. The menu prefers l10nID, then label, then modelId.
 	// }
 	const MODELS = {
 		'bekko-embedding-v1-a8m': {
-			revision: 1,
+			revision: 2,
 			modelId: 'hotchpotch/bekko-embedding-v1-a8m',
 			// The repo's default artifact is onnx/model.onnx (fp32 layers,
 			// int8 embedding table); it has no model_quantized.onnx
@@ -80,10 +86,12 @@ Zotero.Embeddings = new function () {
 			passagePrefix: '',
 			maxTokens: 8192,
 			dims: 256,
+			leadingSpace: true,
+			serving: { gguf: 'hotchpotch/bekko-embedding-v1-a8m-GGUF', quant: 'F16' },
 			l10nID: 'preferences-advanced-semantic-search-multilingual'
 		},
 		'bekko-embedding-v1-a25m': {
-			revision: 1,
+			revision: 2,
 			modelId: 'hotchpotch/bekko-embedding-v1-a25m',
 			// The repo's default artifact is onnx/model.onnx (fp32 layers,
 			// int8 embedding table); it has no model_quantized.onnx
@@ -93,6 +101,8 @@ Zotero.Embeddings = new function () {
 			passagePrefix: '',
 			maxTokens: 8192,
 			dims: 256,
+			leadingSpace: true,
+			serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
 			label: "better but slower multilingual"
 		},
 		'bge-small-zh-v1.5': {
@@ -218,6 +228,23 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
+	 * How the active model combines token vectors: 'cls' or 'mean'.
+	 * @return {String}
+	 */
+	this.getPooling = function () {
+		return _getModel().pooling;
+	};
+
+	/**
+	 * How the active model can be served from llama.cpp (see MODELS), or
+	 * null for a model that can't be.
+	 * @return {Object|null} - { gguf, quant }
+	 */
+	this.getServing = function () {
+		return _getModel().serving || null;
+	};
+
+	/**
 	 * Read one of the active model's files (e.g. its tokenizer) from the
 	 * runtime's model cache, fetching it from the model hub if the runtime
 	 * doesn't have it yet.
@@ -331,6 +358,7 @@ Zotero.Embeddings = new function () {
 		}
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
+		Zotero.Embeddings.Endpoint.reset();
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemChunkCounts");
 		// One row per chunk of an item's text, its vector centered and
@@ -914,6 +942,17 @@ Zotero.Embeddings = new function () {
 		if (!texts.length) {
 			return [];
 		}
+		texts = texts.map(_normalizeInput);
+		// A Metaspace tokenizer with prepend_scheme "always" marks the first
+		// word with a space like any other, and the model was trained on that.
+		// The runtime's tokenizer (transformers.js 3.5.1) only prepends it
+		// when the legacy add_prefix_space flag is also set, which a current
+		// tokenizer.json omits -- so the text gets its space here. Without it
+		// the vectors drift from the model's, badly for short texts (cosine
+		// 0.83-0.95 for titles and queries, 0.99+ for chunks).
+		if (_getModel().leadingSpace) {
+			texts = texts.map(text => ' ' + text);
+		}
 		let engine;
 		let run = async () => {
 			engine = await _getEngine();
@@ -945,6 +984,15 @@ Zotero.Embeddings = new function () {
 		return vectors.map(vector => _finish(new Float32Array(vector)));
 	};
 
+	// Text as every embedding path sees it, local or served: runs of
+	// whitespace, newlines included, become one space. Line breaks and
+	// double spaces in extracted text are layout, not language -- and the
+	// runtime's tokenizer reads them differently from the reference
+	// implementation, which moved vectors by up to 0.1 in cosine.
+	function _normalizeInput(text) {
+		return text.replace(/\s+/g, ' ').trim();
+	}
+
 	// A model's raw output into its embedding: cut to its `dims` if it
 	// truncates, and unit length -- centering subtracts a mean measured over
 	// unit vectors (see center())
@@ -956,11 +1004,25 @@ Zotero.Embeddings = new function () {
 		return _normalize(vector);
 	}
 
-	// POST { input: [...] } to an OpenAI-style /v1/embeddings endpoint (as
-	// served by llama.cpp, Ollama, TEI and the hosted APIs), which answers
-	// { data: [{ index, embedding }] }. Ordered by index, since the spec
-	// doesn't promise the array comes back in input order.
-	async function _embedViaEndpoint(endpoint, texts) {
+	/**
+	 * Embed texts through an OpenAI-style /v1/embeddings endpoint, as served
+	 * by llama.cpp: POST { input } and read { model, data: [{ index,
+	 * embedding }] }. Rows are ordered by
+	 * index, since the spec doesn't promise input order. The vectors come
+	 * back finished the way the local engine's do (see _finish()), so the
+	 * two are comparable.
+	 *
+	 * @param {String} endpoint - URL
+	 * @param {String[]} texts - With any prefix already applied
+	 * @return {Promise<Object>} - { vectors, model, width }: the finished
+	 *     vectors, the model string the server reported, and the width of
+	 *     the vectors as served
+	 * @throws {Zotero.HTTP.UnexpectedStatusException} on a non-2xx response
+	 * @throws {Zotero.Embeddings.EndpointResponseError} on a 2xx response that
+	 *     isn't an embeddings response for these inputs
+	 */
+	this.embedViaEndpoint = async function (endpoint, texts) {
+		texts = texts.map(_normalizeInput);
 		Zotero.debug(`Embeddings: embedding batch of ${texts.length} via endpoint`);
 		let xmlhttp = await Zotero.HTTP.request('POST', endpoint, {
 			body: JSON.stringify({ input: texts }),
@@ -980,12 +1042,18 @@ Zotero.Embeddings = new function () {
 			let received = vectors
 				? `${vectors.length} vectors`
 				: JSON.stringify(xmlhttp.response).substring(0, 200);
-			throw new Error(`Embeddings: endpoint returned ${received} `
+			throw new this.EndpointResponseError(`Endpoint returned ${received} `
 				+ `for ${texts.length} inputs`);
 		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
-		return vectors.map(vector => _finish(new Float32Array(vector)));
-	}
+		return {
+			vectors: vectors.map(vector => _finish(new Float32Array(vector))),
+			model: typeof xmlhttp.response.model == 'string' ? xmlhttp.response.model : null,
+			width: vectors[0].length
+		};
+	};
+
+	this.EndpointResponseError = class extends Error {};
 
 	// The last embedded query, reused across the scoring passes a single
 	// search triggers (per-row membership cutoffs plus the merged ranking)
@@ -1045,21 +1113,31 @@ Zotero.Embeddings = new function () {
 	this.embedPassages = async function (texts) {
 		let passagePrefix = _getModel().passagePrefix;
 		texts = texts.map(text => passagePrefix + text);
-		// Passages can route to an external endpoint serving the same model;
-		// queries always embed locally. A failed batch embeds locally instead
-		// of waiting on a retry -- the next batch tries the endpoint again.
-		let endpoint = Zotero.Prefs.get('embeddings.endpoint');
+		// Passages can route to an endpoint verified to serve the same model
+		// (see Zotero.Embeddings.Endpoint); queries always embed locally. A
+		// failed batch embeds locally instead of waiting on a retry -- the
+		// next batch tries the endpoint again.
+		let endpoint = await this.Endpoint.getActive();
 		if (!endpoint) {
 			return this.embedMany(texts);
 		}
+		// Every batch carries a sentinel text whose local vector is known, so
+		// a server that stops matching the model is caught on that batch and
+		// never gets a vector stored (see Endpoint.checkBatch())
+		let sentinel = await this.Endpoint.getSentinel();
+		let served;
 		try {
-			return await _embedViaEndpoint(endpoint, texts);
+			served = await this.embedViaEndpoint(endpoint.url, [...texts, sentinel.text]);
 		}
 		catch (e) {
 			Zotero.logError(e);
+			this.Endpoint.recordFailure(e);
 			Zotero.debug('Embeddings: endpoint failed -- embedding this batch locally');
 			return this.embedMany(texts);
 		}
+		this.Endpoint.recordSuccess();
+		let checked = await this.Endpoint.checkBatch(endpoint, served, sentinel.vector, texts.length);
+		return checked ? served.vectors.slice(0, texts.length) : this.embedMany(texts);
 	};
 
 	/**
@@ -2900,6 +2978,7 @@ Zotero.Embeddings.Indexing = new function () {
 					boosts: [..._threadBoosts]
 				}
 			},
+			endpoint: Zotero.Embeddings.Endpoint.getStatus(),
 			error: _lastError ? (_lastError.message || String(_lastError)) : null
 		};
 	};
@@ -3114,6 +3193,8 @@ Zotero.Embeddings.Indexing = new function () {
 			// the first run for a given model version pays for this; every
 			// later one finds the numbers already in the database.
 			await Zotero.Embeddings.ensureCalibration();
+			// A verified endpoint may have changed or gone away since
+			await Zotero.Embeddings.Endpoint.recheck();
 
 			_downloadProgress = null;
 			let shouldStop = () => _stopping;
@@ -3672,3 +3753,366 @@ Zotero.Embeddings.Calibration = new function () {
 	}
 };
 
+
+/**
+ * Zotero.Embeddings.Endpoint -- embedding passages through a server that
+ * serves the active model, on this machine or another.
+ *
+ * A server is trusted because its vectors match the local model's, never
+ * because of its name: verify() embeds a fixed set of texts both ways and
+ * compares them, and the verdict is stored keyed to the URL and the model
+ * version it was measured for. Passages route to the endpoint only while a
+ * matching verdict says so (see Zotero.Embeddings.embedPassages()); queries
+ * always embed locally, and so does any batch the endpoint fails.
+ */
+Zotero.Embeddings.Endpoint = new function () {
+	// Least per-text cosine between served and local vectors for the two to
+	// count as the same model. Measured for bekko-a8m against llama.cpp at
+	// BF16 on 162 real library chunks: none below 0.9998. A Q8 GGUF of the
+	// same weights sits around 0.997; the same model with the wrong pooling
+	// lands near 0.7, a different model below 0.5.
+	const AGREEMENT_MIN = 0.98;
+	// Texts the probe embeds both ways, drawn from the calibration corpus
+	const PROBE_SHORT = 8;
+	const PROBE_LONG = 12;
+	// The probe's longest text, in characters -- a chunk near the indexer's
+	// worst case, so a server whose window is too small for real chunks is
+	// found out here rather than mid-run
+	const PROBE_PADDED_CHARS = 8000;
+	// Context and batch size baked into the command shown to the user, for
+	// the same reason
+	const SERVER_CONTEXT = 4096;
+	// Consecutive failed requests before the endpoint is left alone for the
+	// rest of the run, rather than waiting out a timeout per batch
+	const MAX_FAILURES = 3;
+	const META_KEY = 'endpoint';
+
+	// The stored verdict: undefined until read, null when there is none
+	let _verdict;
+	// The sentinel text and its local vector, for the active model version
+	let _sentinel = null;
+	// Consecutive failed requests
+	let _failures = 0;
+	// Whether the endpoint is being skipped for the rest of this run
+	let _suspended = false;
+
+	/**
+	 * Whether the active model can be served at all (see `serving` in MODELS).
+	 * @return {Boolean}
+	 */
+	this.isSupported = function () {
+		return !!Zotero.Embeddings.getServing();
+	};
+
+	/**
+	 * The llama.cpp command that serves the active model with the settings
+	 * its vectors depend on, and the URL it serves at.
+	 *
+	 * @return {Object|null} - { command, url }, or null for a model that
+	 *     can't be served
+	 */
+	this.getCommand = function () {
+		let serving = Zotero.Embeddings.getServing();
+		if (!serving) {
+			return null;
+		}
+		return {
+			command: `llama serve -hf ${serving.gguf}:${serving.quant} --embeddings `
+				+ `--pooling ${Zotero.Embeddings.getPooling()} `
+				+ `-c ${SERVER_CONTEXT} -ub ${SERVER_CONTEXT} -b ${SERVER_CONTEXT} --port 8080`,
+			url: 'http://localhost:8080/v1/embeddings'
+		};
+	};
+
+	/**
+	 * Embed a fixed set of texts locally and through the endpoint, compare
+	 * them, and store the verdict for the current model version.
+	 *
+	 * @param {String} url
+	 * @return {Promise<Object>} - { state, url, modelVersion, serverModel,
+	 *     agreement, time }. state is 'ok', or why not: 'unreachable' (no
+	 *     usable response), 'unauthorized' (the server wants credentials,
+	 *     which aren't supported), 'not-embeddings' (not an OpenAI-style
+	 *     embeddings endpoint), 'width-mismatch' (a different model),
+	 *     'low-agreement' (a different model, or the wrong pooling), or
+	 *     'context-too-small' (the server can't take a chunk-length text).
+	 *     agreement is the least per-text cosine, once there are vectors to
+	 *     compare.
+	 */
+	this.verify = async function (url) {
+		let E = Zotero.Embeddings;
+		_suspended = false;
+		_failures = 0;
+		let verdict = {
+			state: null, url, modelVersion: E.getModelVersion(),
+			serverModel: null, agreement: null, time: Date.now()
+		};
+		let fail = async (state, detail) => {
+			Zotero.debug(`Embeddings: endpoint ${url} failed verification -- ${state}: ${detail}`);
+			verdict.state = state;
+			await _save(verdict);
+			return verdict;
+		};
+		let prefix = E.getPassagePrefix();
+		let { regular, padded } = _probeTexts();
+		let local = await E.embedMany([...regular, padded].map(text => prefix + text));
+		let localPadded = local.pop();
+
+		let served;
+		try {
+			served = await E.embedViaEndpoint(url, regular.map(text => prefix + text));
+		}
+		catch (e) {
+			return fail(_classifyFailure(e), e.message);
+		}
+		verdict.serverModel = served.model;
+		let dims = local[0].length;
+		if (served.width < dims) {
+			return fail('width-mismatch', `served ${served.width} dimensions, model has ${dims}`);
+		}
+		verdict.agreement = Math.min(...served.vectors.map((vector, i) => E.cosine(vector, local[i])));
+		if (verdict.agreement < AGREEMENT_MIN) {
+			return fail('low-agreement', `agreement ${verdict.agreement.toFixed(3)}`);
+		}
+		// A server whose window is too small for a chunk rejects it, or embeds
+		// what fits and says nothing
+		try {
+			let { vectors } = await E.embedViaEndpoint(url, [prefix + padded]);
+			let agreement = E.cosine(vectors[0], localPadded);
+			if (agreement < AGREEMENT_MIN) {
+				return fail('context-too-small', `long text agreement ${agreement.toFixed(3)}`);
+			}
+		}
+		catch (e) {
+			// A server that took the other texts and rejects this one is
+			// short of window, not of network
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				return fail('context-too-small', e.message);
+			}
+			return fail(_classifyFailure(e), e.message);
+		}
+		verdict.state = 'ok';
+		await _save(verdict);
+		return verdict;
+	};
+
+	/**
+	 * The endpoint passages route to: the configured URL, when a stored
+	 * verdict says it serves the active model.
+	 *
+	 * @return {Promise<Object|null>} - { url, serverModel }
+	 */
+	this.getActive = async function () {
+		let url = Zotero.Prefs.get('embeddings.endpoint');
+		if (!url || _suspended) {
+			return null;
+		}
+		let verdict = await _load();
+		if (!_applies(verdict, url) || verdict.state != 'ok') {
+			return null;
+		}
+		return { url, serverModel: verdict.serverModel };
+	};
+
+	/**
+	 * A short text sent along with every batch, and the active model's own
+	 * vector for it, embedded once per model version. Checking the server's
+	 * vector for it costs no local inference per batch.
+	 *
+	 * @return {Promise<Object>} - { text, vector }
+	 */
+	this.getSentinel = async function () {
+		let modelVersion = Zotero.Embeddings.getModelVersion();
+		if (_sentinel?.modelVersion !== modelVersion) {
+			let text = Zotero.Embeddings.getPassagePrefix() + _probeTexts().regular[0];
+			let [vector] = await Zotero.Embeddings.embedMany([text]);
+			_sentinel = { modelVersion, text, vector };
+		}
+		return _sentinel;
+	};
+
+	/**
+	 * Whether a served batch can be stored: the server still reports the
+	 * model it was verified with, and its vector for the text at `index`
+	 * matches the local model's. Anything else invalidates the endpoint.
+	 *
+	 * @param {Object} endpoint - As getActive() returned it
+	 * @param {Object} served - As Zotero.Embeddings.embedViaEndpoint() returned it
+	 * @param {Float32Array} local - The local vector for that text
+	 * @param {Number} index
+	 * @return {Promise<Boolean>}
+	 */
+	this.checkBatch = async function (endpoint, served, local, index) {
+		if (served.model !== endpoint.serverModel) {
+			await this.invalidate(`served model changed from '${endpoint.serverModel}' to '${served.model}'`);
+			return false;
+		}
+		let agreement = Zotero.Embeddings.cosine(served.vectors[index], local);
+		if (agreement < AGREEMENT_MIN) {
+			await this.invalidate(`served vectors stopped matching (agreement ${agreement.toFixed(3)})`);
+			return false;
+		}
+		return true;
+	};
+
+	/**
+	 * Note a failed request. After MAX_FAILURES in a row the endpoint is
+	 * skipped until the next run (see recheck()) or verification.
+	 * @param {Error} e
+	 */
+	this.recordFailure = function (e) {
+		if (++_failures >= MAX_FAILURES && !_suspended) {
+			_suspended = true;
+			Zotero.debug(`Embeddings: endpoint skipped for the rest of this run -- `
+				+ `${MAX_FAILURES} requests failed in a row, the last with: ${e.message}`);
+		}
+	};
+
+	this.recordSuccess = function () {
+		_failures = 0;
+	};
+
+	/**
+	 * At the start of a run: try the endpoint again if it was skipped, and
+	 * confirm a verified one still serves the model, on one text.
+	 */
+	this.recheck = async function () {
+		_suspended = false;
+		_failures = 0;
+		let active = await this.getActive();
+		if (!active) {
+			return;
+		}
+		let sentinel = await this.getSentinel();
+		let served;
+		try {
+			served = await Zotero.Embeddings.embedViaEndpoint(active.url, [sentinel.text]);
+		}
+		catch (e) {
+			_suspended = true;
+			Zotero.debug(`Embeddings: endpoint skipped for this run -- unreachable: ${e.message}`);
+			return;
+		}
+		await this.checkBatch(active, served, sentinel.vector, 0);
+	};
+
+	/**
+	 * Stop routing to the endpoint until it's verified again.
+	 * @param {String} detail - For the debug log
+	 */
+	this.invalidate = async function (detail) {
+		let verdict = await _load();
+		if (!verdict) {
+			return;
+		}
+		Zotero.debug(`Embeddings: endpoint no longer trusted -- ${detail}`);
+		await _save(Object.assign(verdict, { state: 'invalid' }));
+	};
+
+	/**
+	 * The endpoint as the preferences show it. Synchronous, from the verdict
+	 * last read; 'unknown' until one has been.
+	 *
+	 * @return {Object} - { url, state, serverModel }: state is 'off' with no
+	 *     URL configured, 'unverified' with a URL no stored verdict covers,
+	 *     'unreachable' while a verified endpoint is being skipped this run,
+	 *     or the verdict's own state
+	 */
+	this.getStatus = function () {
+		let url = Zotero.Prefs.get('embeddings.endpoint') || '';
+		let status = { url, state: 'off', serverModel: null };
+		if (!url) {
+			return status;
+		}
+		if (_verdict === undefined) {
+			status.state = 'unknown';
+		}
+		else if (!_applies(_verdict, url)) {
+			status.state = 'unverified';
+		}
+		else {
+			Object.assign(status, {
+				state: _verdict.state == 'ok' && _suspended ? 'unreachable' : _verdict.state,
+				serverModel: _verdict.serverModel
+			});
+		}
+		return status;
+	};
+
+	/**
+	 * Read the stored verdict into memory, so getStatus() can answer.
+	 * @return {Promise<Object|null>}
+	 */
+	this.load = function () {
+		return _load();
+	};
+
+	/**
+	 * Forget the verdict read into memory, after the table holding it was
+	 * rebuilt (see Zotero.Embeddings.initDB())
+	 */
+	this.reset = function () {
+		_verdict = undefined;
+		_sentinel = null;
+		_suspended = false;
+		_failures = 0;
+	};
+
+	// Whether a stored verdict is about this URL and the active model
+	function _applies(verdict, url) {
+		return !!verdict && verdict.url === url
+			&& verdict.modelVersion === Zotero.Embeddings.getModelVersion();
+	}
+
+	async function _load() {
+		if (_verdict === undefined) {
+			await Zotero.Embeddings.initDB();
+			let json = await Zotero.DB.valueQueryAsync(
+				"SELECT value FROM embeddings.itemEmbeddingsMeta WHERE key=?", [META_KEY]);
+			_verdict = json ? JSON.parse(json) : null;
+		}
+		return _verdict;
+	}
+
+	async function _save(verdict) {
+		await Zotero.Embeddings.initDB();
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.itemEmbeddingsMeta (key, value) VALUES (?, ?)",
+			[META_KEY, JSON.stringify(verdict)]);
+		_verdict = verdict;
+	}
+
+	// What went wrong with a request, as a verdict state
+	function _classifyFailure(e) {
+		if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+			if (e.status == 401 || e.status == 403) {
+				return 'unauthorized';
+			}
+			if (e.status == 404 || e.status == 405) {
+				return 'not-embeddings';
+			}
+			return 'unreachable';
+		}
+		if (e instanceof Zotero.Embeddings.EndpointResponseError) {
+			return 'not-embeddings';
+		}
+		return 'unreachable';
+	}
+
+	// Short and long passages from the calibration corpus, and one long
+	// enough to overrun a small server window, its tail distinct so that a
+	// silently truncated embedding no longer matches the local one
+	function _probeTexts() {
+		let { short, long } = Zotero.Embeddings.Calibration.getCorpus();
+		let regular = [
+			...short.slice(0, PROBE_SHORT).map(pair => pair.passage),
+			...long.slice(0, PROBE_LONG).map(pair => pair.passage)
+		];
+		let padded = '';
+		for (let i = 0; padded.length < PROBE_PADDED_CHARS; i++) {
+			padded += long[i % long.length].passage + ' ';
+		}
+		padded += 'The closing sentence names the Antikythera mechanism and the lighthouse at Alexandria.';
+		return { regular, padded };
+	}
+};

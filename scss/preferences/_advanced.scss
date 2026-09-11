@@ -155,3 +155,32 @@
 #semantic-search-libraries {
 	padding-top: 10px;
 }
+
+#semantic-search-endpoint-row {
+	margin: 4px 0;
+}
+
+#zotero-embeddings-endpoint-container {
+	.endpoint-note {
+		opacity: 0.7;
+		font-size: 0.9em;
+	}
+
+	.endpoint-facts {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		column-gap: 8px;
+		margin: 4px 0 4px 12px;
+	}
+
+	.endpoint-command {
+		flex: 1;
+		font-family: monospace;
+		font-size: 0.9em;
+		resize: none;
+	}
+
+	.endpoint-error {
+		color: var(--accent-red);
+	}
+}

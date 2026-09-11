@@ -110,6 +110,15 @@ Zotero_Preferences.Advanced = {
 			Zotero.Embeddings.Indexing.stopIndexing();
 		});
 
+		document.getElementById('semantic-search-endpoint-configure').addEventListener('command', () => {
+			this.openSemanticSearchEndpointDialog();
+		});
+		// The endpoint's stored verdict is read lazily; have it in memory
+		// before the status line first renders
+		Zotero.Embeddings.Endpoint.load().then(() => {
+			this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+		});
+
 		// Render current state, then compute up-to-date per-library counts
 		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
 		Zotero.Embeddings.Indexing.refreshStatus();
@@ -160,6 +169,8 @@ Zotero_Preferences.Advanced = {
 		if (!status.enabled) {
 			return;
 		}
+
+		this.updateSemanticSearchEndpointUI(status.endpoint);
 
 		// Phase / status message
 		let phaseLabel = document.getElementById('semantic-search-phase');
@@ -232,6 +243,39 @@ Zotero_Preferences.Advanced = {
 			= !Zotero.Prefs.get('embeddings.indexFulltext');
 		this._updateSemanticSearchBar('attachments', status.chunks);
 		this._updateSemanticSearchDiagnostics(status.diagnostics, status.eta);
+	},
+
+
+	// Whether the active model can be served at all, and how the configured
+	// server stands (see Zotero.Embeddings.Endpoint.getStatus())
+	updateSemanticSearchEndpointUI: function (endpoint) {
+		let row = document.getElementById('semantic-search-endpoint-row');
+		row.hidden = !Zotero.Embeddings.Endpoint.isSupported();
+		if (row.hidden) {
+			return;
+		}
+		let label = document.getElementById('semantic-search-endpoint-status');
+		let id = {
+			off: 'off',
+			unknown: null,
+			unverified: 'unverified',
+			ok: 'valid',
+			unreachable: 'unreachable'
+		}[endpoint.state];
+		if (id === null) {
+			label.removeAttribute('data-l10n-id');
+			label.value = '';
+			return;
+		}
+		document.l10n.setAttributes(label, `preferences-advanced-semantic-search-endpoint-${id || 'invalid'}`);
+	},
+
+
+	openSemanticSearchEndpointDialog: function () {
+		let io = { ok: false };
+		window.openDialog('chrome://zotero/content/preferences/embeddingsEndpoint.xhtml',
+			'zotero-preferences-embeddingsEndpoint', 'chrome,modal,centerscreen', io);
+		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
 	},
 
 

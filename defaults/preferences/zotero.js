@@ -123,6 +123,9 @@ pref("extensions.zotero.embeddings.model", "");
 pref("extensions.zotero.embeddings.indexingPaused", false);
 // Also index the full text of PDF/EPUB/snapshot attachments
 pref("extensions.zotero.embeddings.indexFulltext", false);
+// An OpenAI-style /v1/embeddings URL to send indexing to, used only once
+// verified to serve the active model (see Zotero.Embeddings.Endpoint)
+pref("extensions.zotero.embeddings.endpoint", "");
 
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");
