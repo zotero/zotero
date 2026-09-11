@@ -252,6 +252,91 @@ describe("Zotero.HTTP", function () {
 				assert.isTrue(delayStub.notCalled);
 			});
 			
+			it("shouldn't obey a Retry-After longer than errorDelayMax", async function () {
+				var called = 0;
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						if (called < 1) {
+							req.respond(503, { "Retry-After": "3600" }, "");
+						}
+						else {
+							req.respond(200, {}, "");
+						}
+					}
+					called++;
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var e = await getPromiseError(
+					Zotero.HTTP.request("GET", baseURL + "error", { errorDelayMax: 7500 })
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.isTrue(spy.calledOnce);
+				assert.isTrue(delayStub.notCalled);
+			});
+			
+			it("should stop obeying Retry-After once errorDelayMax is used up", async function () {
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						req.respond(429, { "Retry-After": "3" }, "");
+					}
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var e = await getPromiseError(
+					Zotero.HTTP.request("GET", baseURL + "error", { errorDelayMax: 7500 })
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				// 3s + 3s fits within 7.5s; a third would not
+				assert.equal(spy.callCount, 3);
+				assert.isTrue(delayStub.calledTwice);
+				assert.equal(delayStub.args[0][0], 3000);
+				assert.equal(delayStub.args[1][0], 3000);
+			});
+			
+			it("should wait at least a second for a Retry-After of 0", async function () {
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						req.respond(429, { "Retry-After": "0" }, "");
+					}
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var e = await getPromiseError(
+					Zotero.HTTP.request("GET", baseURL + "error", { errorDelayMax: 2500 })
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				assert.equal(spy.callCount, 3);
+				assert.deepEqual(delayStub.args.map(x => x[0]), [1000, 1000]);
+			});
+			
+			it("should count Retry-After and backoff delays against the same errorDelayMax", async function () {
+				var called = 0;
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url == baseURL + "error") {
+						if (called < 2) {
+							req.respond(500, {}, "");
+						}
+						else {
+							req.respond(429, { "Retry-After": "3" }, "");
+						}
+					}
+					called++;
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var e = await getPromiseError(
+					Zotero.HTTP.request(
+						"GET",
+						baseURL + "error",
+						{
+							errorDelayIntervals: [2500, 5000],
+							errorDelayMax: 7500
+						}
+					)
+				);
+				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+				// 2.5s + 5s uses up the budget, so the Retry-After isn't honored
+				assert.equal(spy.callCount, 3);
+				assert.deepEqual(delayStub.args.map(x => x[0]), [2500, 5000]);
+			});
+			
 			it("should provide cancellerReceiver a callback to cancel while waiting to retry a 5xx error", async function () {
 				delayStub.restore();
 				setResponse({

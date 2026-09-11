@@ -1556,16 +1556,6 @@ Zotero.HTTP = new function () {
 		return parseInt(retryAfter);
 	}
 
-	async function _checkRetry(req) {
-		var retryAfter = _getRetryAfter(req);
-		if (retryAfter === null) {
-			return false;
-		}
-		Zotero.debug(`Delaying ${retryAfter} seconds for Retry-After`);
-		await Zotero.Promise.delay(retryAfter * 1000);
-		return true;
-	}
-
 
 	/**
 	 * Call `fn` and automatically retry on 429/5xx errors, honoring Retry-After
@@ -1579,7 +1569,13 @@ Zotero.HTTP = new function () {
 	 * @return {Promise} - Result of fn()
 	 */
 	async function _retryOnServerError(fn, url, options) {
-		var errorDelayGenerator;
+		var errorDelayIntervals = (options.errorDelayIntervals || _errorDelayIntervals).slice();
+		var errorDelayMax = options.errorDelayMax !== undefined
+			? options.errorDelayMax
+			: _errorDelayMax;
+		var interval;
+		// Retry-After waits and backoff intervals share one budget
+		var totalDelay = 0;
 
 		while (true) {
 			try {
@@ -1600,30 +1596,38 @@ Zotero.HTTP = new function () {
 
 					if (e.status == 429 || e.is5xx()) {
 						Zotero.logError(e);
-						// Check for Retry-After header on 429 or 503
-						if ((e.status == 429 || e.status == 503)
-								&& (await _checkRetry(e.xmlhttp))) {
-							continue;
-						}
 						// Don't retry if errorDelayMax is 0
-						if (options.errorDelayMax === 0
+						if (errorDelayMax === 0
 								|| Zotero.HTTP.disableErrorRetry) {
 							throw e;
 						}
-						// Automatically retry other 429/5xx errors by default
-						if (!errorDelayGenerator) {
-							// Keep trying for up to an hour
-							errorDelayGenerator
-								= Zotero.Utilities.Internal.delayGenerator(
-									options.errorDelayIntervals
-										|| _errorDelayIntervals,
-									options.errorDelayMax !== undefined
-										? options.errorDelayMax
-										: _errorDelayMax
-								);
+						let retryAfter = (e.status == 429 || e.status == 503)
+							? _getRetryAfter(e.xmlhttp)
+							: null;
+						let delay;
+						if (retryAfter !== null) {
+							// Wait at least a second, so that a Retry-After of 0
+							// still uses up the budget
+							delay = Math.max(retryAfter, 1) * 1000;
 						}
-						let delayPromise = errorDelayGenerator.next().value;
-						let keepGoing;
+						// Otherwise back off, repeating the last interval once
+						// the list is used up
+						else {
+							interval = errorDelayIntervals.shift() || interval;
+							delay = interval;
+						}
+						if (!delay || totalDelay + delay > errorDelayMax) {
+							Zotero.logError("Failed too many times");
+							throw e;
+						}
+						totalDelay += delay;
+						if (retryAfter !== null) {
+							Zotero.debug(`Delaying ${retryAfter} seconds for Retry-After`);
+						}
+						else {
+							Zotero.debug(`Delaying ${delay} ms`);
+						}
+						let delayPromise = Zotero.Promise.delay(delay);
 						// Provide caller with a callback to cancel
 						// while waiting to retry
 						if (options.cancellerReceiver) {
@@ -1639,9 +1643,7 @@ Zotero.HTTP = new function () {
 							);
 							options.cancellerReceiver(reject);
 							try {
-								keepGoing = await Promise.race(
-									[delayPromise, cancelPromise]
-								);
+								await Promise.race([delayPromise, cancelPromise]);
 							}
 							catch (e) {
 								Zotero.debug("Request cancelled");
@@ -1650,11 +1652,7 @@ Zotero.HTTP = new function () {
 							resolve();
 						}
 						else {
-							keepGoing = await delayPromise;
-						}
-						if (!keepGoing) {
-							Zotero.logError("Failed too many times");
-							throw e;
+							await delayPromise;
 						}
 						continue;
 					}
