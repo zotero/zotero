@@ -1257,7 +1257,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 				}
 				
-				svc.loadURI(Services.io.newURI(url, null, null));
+				svc.loadURI(
+					Services.io.newURI(url, null, null),
+					Services.scriptSecurityManager.getSystemPrincipal(),
+				);
 				return;
 			}
 		}
