@@ -45,10 +45,11 @@ Zotero.Embeddings = new function () {
 	// Key order is the display order in the preferences model menu.
 	//
 	// Every field is a fact about the model, read off its model card or its
-	// config. Anything that can only be learned by running it -- the mean vector
-	// its embeddings share, the score below which nothing is a match, the score
-	// at which the Relevance bar fills -- is measured instead, on first use (see
-	// Zotero.Embeddings.Calibration). Adding a model fits nothing by hand.
+	// config, except `calibration`: what can only be learned by running it --
+	// the mean vector its embeddings share, the score below which nothing is a
+	// match, the score at which the Relevance bar fills -- measured once with
+	// Zotero.Embeddings.Calibration.record() and pasted in. Nothing is fitted
+	// by hand, and a `revision` bump means measuring again.
 	//
 	// What each field is for, documented here:
 	//
@@ -71,8 +72,13 @@ Zotero.Embeddings = new function () {
 	//         quant: 'F16'               //   can't be embedded through an endpoint
 	//     },
 	//     l10nID: '...',                 // optional Fluent id for the menu
-	//     label: '...'                   // optional plain-English menu label, for a model that isn't
+	//     label: '...',                  // optional plain-English menu label, for a model that isn't
 	//                                    //   shipped. The menu prefers l10nID, then label, then modelId.
+	//     calibration: {                 // Calibration.record() for this revision:
+	//         minScore: 0.31,            //   the score below which nothing is a match,
+	//         maxDisplayScore: 0.48,     //   the score at which the Relevance bar fills,
+	//         mean: 'AAAA...'            //   the mean stored vectors are centered on (base64 Float32Array)
+	//     }
 	// }
 	const MODELS = {
 		'bekko-embedding-v1-a8m': {
@@ -88,7 +94,12 @@ Zotero.Embeddings = new function () {
 			dims: 256,
 			leadingSpace: true,
 			serving: { gguf: 'hotchpotch/bekko-embedding-v1-a8m-GGUF', quant: 'F16' },
-			l10nID: 'preferences-advanced-semantic-search-multilingual'
+			l10nID: 'preferences-advanced-semantic-search-multilingual',
+			calibration: {
+				minScore: 0.3079,
+				maxDisplayScore: 0.4839,
+				mean: 'vFCZvItQMDvToS29PG8HvS9AUb1Z5wC9b68qPZowaLz5Aca7kbdQPHUhtLyEeyC8DDPOvBpiYL0y1oa9txIEvZdenL2pNu+78fpRvRpyxrwMxpm9SHRlve5ZOb0GQcK8xr2Iulg31bwWmwW9WtiqvMQk8LylJAI9OModvbyXGbuSO408fxEAvctW+bxZzfC8YRcJvZ98Gr0EaGu9aDkCPc0RiLyNwWi6Bm9zuqTVar0vkNe8PPjOvBSoxbxRzag881sSvQGVjDzpAke93ImlvLBhn7zXnp+7Sb4rvbDDFrw+wYG9bgrAPVSM+DuUfDm8ZynNu9tIFb1veU29WSOEvNARyDx3lZa8SqknvSbr2LxRNdy8BeiiO0wSI70y99683tgUvWat0LvsdcU6FFdIu/mPkbzN5fq8gGo7vGNSL7iLcFi8CBodvAKyYLzugYO8o77vvKiTT7xZHti7b6K1u9jBl7xnq2C8ZQ7MuxbzqzxmDWi6yYBZu9QjybwiEbs7JuH5vCD+6byCZgu9ARIDvdODHL2IlnS9WE/AvOD36bznxJ28tlicO7SxCb0S/C68rCy3vCDq4TlZfIG8u5kOPECTZrxKLRO90R2oOwup0rz4BBS9het3vDKlDjqNTj28RVRWvEyu7ruUI7S76VamvCVQ27sh7my8SIK9vGOj2bwVkNK7y2fSvMnugbtU1L27YfMiPH6W3rwG3uW7oIoCvb6i+zp20A+9YKUXvcTkTrp1Q6G82RtfvOVojTx/gR683aSrvK/XBb01neK6OQI5vTuJC7yEOpq8ygArvY2kwLx/jcO8ickcvGmnvbuqehI9GoSau7razbwmSzK9aiXzuxQrd7qjnsS8hKNIOySZj7uDQsa8R4QsvNyQ3zlB1tS8kxyQvMjsN7x4SvS8xx8oveQJqryv03W8V0cuO66i+zuFG5u8zjepu5MF8ryHzNi8fr5mvJHGg7wNgbq7XSeavGr+tbzQlN28zz0dO09rUbyP+7u8y89ZvLRfMrwqASa9raCpvOfXUzuSSN+8/wCivMs+G71qg4a8Wv1SPMVHorwW1Ay9CJb1vLeLwDyR1Ay9kiL9u1ys/LzfTdC8cnWHvCm2Brrrq2u8svPaO+y/Db3S4vE6wf0yOl9cWbyBcJ+8Ysd+vFWJGTyyq9O8OEzhO+ZKAb1V/t26e2WgvDj+o7zrsNy6KngYvR+fsjtl0sq7COf2Oxg7ML2+b6+8d4ABvSx0LL1pw968THdYvXFn5LtmUT29Hxo0vagptjkYkXu8TprmvJumy7wIPkS7UjaIOye6grxBady7YDkfvbQvZDxORxa9nuW6vGPvYbvbz927XKrvvJhimTzS2k27hq8bvA=='
+			}
 		},
 		'bekko-embedding-v1-a25m': {
 			revision: 2,
@@ -103,7 +114,12 @@ Zotero.Embeddings = new function () {
 			dims: 256,
 			leadingSpace: true,
 			serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
-			label: "better but slower multilingual"
+			label: "better but slower multilingual",
+			calibration: {
+				minScore: 0.3404,
+				maxDisplayScore: 0.5322,
+				mean: 'PqFavOYNOLx1IDi9qH2BvaxQ27zU/qW8nE/ePJtGxrwYwuy7SX+buykW8Lsjc5A7mABAvAlBG70BiY07Sa1avVx+mrt0/L+8NpaMvKjWir26UIa9lVP/vI7A+ry4KAa90fU/OwSdUTvTOJu8Z5oivXZ8RL274v68yHldvZqXhTxkAYA8aV5MvQ5LujprwUW7KTSEvfQLFb2rw1O93Yj+u1g2Tjwz98E6pGYOPFxXi72pUPu84J0HvZaF3bwbx+w705kvvW3/cj2W2SG8wBcZu5Q6G7xd0xm8uPhEvKBjm7zLtwK9Q57HPSPjg7xobXK8B0PavG+ylLxTEiC9uK+tPOMgH7zpzZW5CMXsu3quQTzOLym9q9nLvHaPl7r50JO81+kEvKzyNbvquoK8AfZ6u0KBLrtFooA7fp2QvEVedLxHDaW8llSFvFNiz7z8Nxk8NPnyvJOjMLk6J1m7CRHuvFNnmDuhqge8Fz+9vLbqCbxQ0qK7VlqfvI8J9LwVPVu8AWwJvcc0xby6HbW8GHUuvIhAO73H7/a8l9OjvFUoH7zHnNO8rKcnPBakq7z5vZu8kwsMvYaV3zzrHYS8VTyLPFRX5byS6La8tKLGO/Y1wboh6qC8oxdCvDuaGTxuSuk7MYzYvLonNjsrLWO7sioCvfs4ALxFNzS9/tWPvFTs1zvRHU86vy0gurIR4rwu/1U8qMacvMyg2Lyc6pq8tuPxu9WfCTxS6Z28svKjvB9Esju0aGW83viTO6QqmDve/rM8m2IeO/bW6bylzB28vpG6vPpTzLtNRpG8qwCdvBJMObxTsBi6MOj9Ork9EL0cDis9bQIcvdMt4bzyTrK8rEzBvFfh2jzxYOS81FIEvO6TgLwNGBi9z3Xquh2GkrzNpIm7biGDu1iVsrxjvJy8zS1dPDlBCbyqYBa9piRivGh/hLyfszM8ydtpPErN+LzMNeW8yCogvO/noLt625E7GngBvRUK+LzAQt27fKM3vMqcDbxW9py8P/AMvYPW4Lsp8Rg8gPJKvMNQWDyJVxW5yWCBvBpeD73XJRS8R8sYvJFa1rsD97Q5WU0tvPTvBj20Z1a805+duyWUxLynXlG6eP2ZO3kYxLzlJTm9vcItvPGWtrxwqlu8+spCvDE+mbnuYua8K6C0vCh/hLyUGkY7B4GOvK6KALwij2E84fvFvCax57yPjgw9FXjxvL2aKrw6JM07qxSsO8NZwLxmn7i89tPWvGlCxLyNzD+7ooAkvfpjTTsX4Zy8wMwjvZDi0bzwK+U7kc1svMFOsDuewtq7Z/7dO83wlLypIKi8sTUPvEUMb7v7eUi9WkVUvBgojDom5Qu9HJchPH1EDbzUevu8rUZEvQ=='
+			}
 		},
 		'bge-small-zh-v1.5': {
 			revision: 1,
@@ -114,7 +130,12 @@ Zotero.Embeddings = new function () {
 			queryPrefix: '为这个句子生成表示以用于检索相关文章：',
 			passagePrefix: '',
 			maxTokens: 512,
-			l10nID: 'preferences-advanced-semantic-search-chinese'
+			l10nID: 'preferences-advanced-semantic-search-chinese',
+			calibration: {
+				minScore: 0.3037,
+				maxDisplayScore: 0.3771,
+				mean: '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'
+			}
 		},
 		// Models for testing
 	};
@@ -175,22 +196,16 @@ Zotero.Embeddings = new function () {
 		}));
 	};
 
-	// Bump when how a model is calibrated changes (see Zotero.Embeddings
-	// .Calibration): stored vectors are centered on the measured mean, so a
-	// new measurement means a reindex of every model
-	const CALIBRATION_VERSION = 2;
-
 	/**
-	 * Identity of the active embedding function: model name, its revision and
-	 * the calibration version. Any code change that alters the vectors a model
-	 * produces (dtype, upstream weights, prefixes, pooling) must bump that
-	 * model's `revision`, and a change to calibration must bump
-	 * CALIBRATION_VERSION, so that stored embeddings are detected as stale and
+	 * Identity of the active embedding function: model name and revision. Any
+	 * code change that alters the vectors a model produces (dtype, upstream
+	 * weights, prefixes, pooling, the mean they're centered on) must bump that
+	 * model's `revision`, so that stored embeddings are detected as stale and
 	 * reindexed (see Indexing._ensureIndexMatchesModel()).
 	 * @return {String}
 	 */
 	this.getModelVersion = function () {
-		return `${this.getModelName()}/${_getModel().revision}/${CALIBRATION_VERSION}`;
+		return `${this.getModelName()}/${_getModel().revision}`;
 	};
 
 	// The active model's entry in MODELS. Throws when no model is selected:
@@ -288,7 +303,7 @@ Zotero.Embeddings = new function () {
 	// Schema version of the attached embeddings database. The tables are only
 	// created when this is bumped (_setUpDB() drops and recreates everything),
 	// so any schema change needs a bump.
-	const _dbVersion = 6;
+	const _dbVersion = 7;
 
 	let _dbInitPromise = null;
 	let _dbHooksRegistered = false;
@@ -373,7 +388,6 @@ Zotero.Embeddings = new function () {
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddings");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemEmbeddingsMeta");
 		Zotero.Embeddings.Endpoint.reset();
-		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.modelCalibration");
 		await Zotero.DB.queryAsync("DROP TABLE IF EXISTS embeddings.itemChunkCounts");
 		// One row per chunk of an item's text, its vector centered and
 		// quantized to int8 (see Zotero.Embeddings.prepare()), each carrying
@@ -410,16 +424,6 @@ Zotero.Embeddings = new function () {
 			"CREATE TABLE embeddings.itemEmbeddingsMeta (\n"
 			+ "    key TEXT PRIMARY KEY,\n"
 			+ "    value NOT NULL\n"
-			+ ")"
-		);
-		// Per-model measurements (see ensureCalibration()), keyed by version
-		// so a revision bump measures again
-		await Zotero.DB.queryAsync(
-			"CREATE TABLE embeddings.modelCalibration (\n"
-			+ "    modelVersion TEXT PRIMARY KEY,\n"
-			+ "    meanVector BLOB NOT NULL,\n"
-			+ "    minScore REAL NOT NULL,\n"
-			+ "    maxDisplayScore REAL NOT NULL\n"
 			+ ")"
 		);
 		// How many chunks each attachment's current source splits into,
@@ -557,16 +561,14 @@ Zotero.Embeddings = new function () {
 
 
 	/**
-	 * Delete everything we hold for models other than the active one (for all of
-	 * them when disabled): their cached files, freeing disk space after a model
-	 * switch, and what calibration measured about them.
+	 * Delete the cached files of models other than the active one (of all of
+	 * them when disabled), freeing disk space after a model switch.
 	 *
 	 * @return {Promise}
 	 */
 	this.pruneModels = async function () {
 		let enabled = this.isEnabled();
 		let keepModelId = enabled ? _getModel().modelId : null;
-		let keepVersion = enabled ? this.getModelVersion() : null;
 		for (let model of await Zotero.ML.listModels({ taskName: TASK_NAME })) {
 			if (model.modelId !== keepModelId) {
 				await Zotero.ML.deleteModels({
@@ -575,20 +577,6 @@ Zotero.Embeddings = new function () {
 					revision: model.revision
 				});
 			}
-		}
-		await this.initDB();
-		if (keepVersion) {
-			// Clean calibration records
-			await Zotero.DB.queryAsync(
-				"DELETE FROM embeddings.modelCalibration WHERE modelVersion!=?",
-				[keepVersion]
-			);
-		}
-		else {
-			// Semantic search is off, so there's no model to keep anything for
-			await Zotero.DB.queryAsync("DELETE FROM embeddings.modelCalibration");
-			// ...and nothing should render a relevance band
-			_calibration = null;
 		}
 	};
 
@@ -718,9 +706,6 @@ Zotero.Embeddings = new function () {
 		// unusable, so a shutdown to release memory leaves scoring alone
 		if (modelChanged) {
 			_modelGeneration++;
-			// The old model's measurements don't describe the new one, and the
-			// bar renders straight off them
-			_calibration = null;
 		}
 		if (engine) {
 			await engine.terminate();
@@ -813,19 +798,14 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * Center a raw embedding on the active model's measured mean and quantize
-	 * it: the form every vector is stored and compared in. The calibration
-	 * has to be in memory (see loadCalibration()).
+	 * Center a raw embedding on the active model's mean and quantize it: the
+	 * form every vector is stored and compared in.
 	 *
 	 * @param {Float32Array} vector
 	 * @return {Int8Array}
 	 */
 	this.prepare = function (vector) {
-		if (!_calibration) {
-			throw new this.IndexNotReadyError(
-				`Model '${this.getModelVersion()}' has no calibration to center on`);
-		}
-		let mean = _calibration.mean;
+		let mean = this.getCalibration().mean;
 		// A mean of a different width than the vector is no mean to center on
 		if (mean.length === vector.length) {
 			vector = this.center(vector, mean);
@@ -850,87 +830,39 @@ Zotero.Embeddings = new function () {
 	//
 	// Model calibration
 	//
-	// Three numbers govern scoring, and none of them can be read off a model
-	// card: the mean vector its embeddings share, the score below which nothing
-	// counts as a match, and the score at which the Relevance bar fills. They
-	// aren't choices so much as properties of the model, so they're measured
-	// rather than configured -- once per model version, against a fixed corpus
-	// of queries, each with a passage that answers it and one from the same
-	// field that doesn't, written to resemble real searches over a library.
-	//
-	// Measuring takes a few seconds of inference, so it runs from the indexing
-	// pass, which has the engine loaded anyway, and the result is cached in the
-	// database. Keying the cache by model version means switching models and
-	// back doesn't measure again, while a `revision` bump does -- the same
-	// signal that invalidates the stored vectors.
-	//
-	// How the numbers are derived, and the corpus they're derived from, live in
-	// Zotero.Embeddings.Calibration. What's here is where they're kept and how
-	// they're applied.
+	// Three numbers govern scoring, and none can be read off a model card: the
+	// mean vector its embeddings share, the score below which nothing counts as
+	// a match, and the score at which the Relevance bar fills. Each model's
+	// were measured once with Zotero.Embeddings.Calibration and recorded in
+	// MODELS (see `calibration` there).
 	//
 
-	// Measured calibration for the active model, or null if it hasn't been
-	// measured or loaded yet.
-	let _calibration = null;
+	// Decoded calibrations by model name
+	let _calibrations = new Map();
 
 	/**
-	 * The active model's calibration, read from the database and kept in memory
-	 * for getScoreFraction(), or null if the model hasn't been measured yet. A
-	 * single row read with no engine involved, so it's safe on the search path.
+	 * The active model's calibration, with its mean decoded.
 	 *
-	 * @return {Promise<Object|null>} - { mean, minScore, maxDisplayScore }
+	 * @return {Object} - { mean: Float32Array, minScore, maxDisplayScore }
 	 */
-	this.loadCalibration = async function () {
-		let modelVersion = Zotero.Embeddings.getModelVersion();
-		if (_calibration && _calibration.modelVersion === modelVersion) {
-			return _calibration;
-		}
-		let row = await Zotero.DB.rowQueryAsync(
-			"SELECT meanVector, minScore, maxDisplayScore FROM embeddings.modelCalibration "
-				+ "WHERE modelVersion=?",
-			[modelVersion]
-		);
-		_calibration = row
-			? {
-				modelVersion,
-				mean: _blobToVector(row.meanVector),
-				minScore: row.minScore,
-				maxDisplayScore: row.maxDisplayScore
+	this.getCalibration = function () {
+		let name = this.getModelName();
+		let calibration = _calibrations.get(name);
+		if (!calibration) {
+			let recorded = _getModel().calibration;
+			if (!recorded) {
+				throw new Error(`Model '${name}' has no calibration -- record one with `
+					+ 'Zotero.Embeddings.Calibration.record()');
 			}
-			: null;
-		return _calibration;
-	};
-
-	/**
-	 * Measure the active model's calibration unless it's already been measured.
-	 * Needs the engine, so this belongs to the indexing pass rather than to
-	 * database setup: the search path only ever reads the cached result.
-	 *
-	 * @return {Promise}
-	 */
-	this.ensureCalibration = async function () {
-		if (await this.loadCalibration()) {
-			return;
+			let bytes = Uint8Array.from(atob(recorded.mean), c => c.charCodeAt(0));
+			calibration = {
+				mean: new Float32Array(bytes.buffer),
+				minScore: recorded.minScore,
+				maxDisplayScore: recorded.maxDisplayScore
+			};
+			_calibrations.set(name, calibration);
 		}
-		let modelVersion = this.getModelVersion();
-		Zotero.debug(`Embeddings: calibrating ${modelVersion}`);
-		let measured = await Zotero.Embeddings.Calibration.measure();
-		await Zotero.DB.queryAsync(
-			"REPLACE INTO embeddings.modelCalibration "
-				+ "(modelVersion, meanVector, minScore, maxDisplayScore) VALUES (?, ?, ?, ?)",
-			[
-				modelVersion,
-				new Uint8Array(measured.mean.buffer, measured.mean.byteOffset,
-					measured.mean.byteLength),
-				measured.minScore,
-				measured.maxDisplayScore
-			],
-			{ debugParams: false }
-		);
-		_calibration = { modelVersion, ...measured };
-		Zotero.debug(`Embeddings: calibrated ${modelVersion} -- matches start at `
-			+ `${measured.minScore.toFixed(4)}, the bar fills at `
-			+ `${measured.maxDisplayScore.toFixed(4)}`);
+		return calibration;
 	};
 
 
@@ -1166,9 +1098,6 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise<Number>}
 	 */
 	this.compare = async function ({ query, passage }) {
-		await this.initDB();
-		// Pull the measured mean into memory, so prepare() centers with it
-		await this.loadCalibration();
 		let queryVector = await this.embedQuery(query);
 		let [passageVector] = await this.embedPassages([passage]);
 		return this.cosine(this.prepare(queryVector), this.prepare(passageVector));
@@ -1180,9 +1109,7 @@ Zotero.Embeddings = new function () {
 	 * the Relevance column's bar. The band runs from the score where matches
 	 * begin to the score where they're as good as this model gets, both
 	 * measured (see the calibration section): scores at or below the floor
-	 * render as an empty bar, at or above the ceiling as a full one. Nothing to
-	 * render before the model has been calibrated, which is also before there
-	 * are any scores.
+	 * render as an empty bar, at or above the ceiling as a full one.
 	 *
 	 * Pass clamped: false to keep scores above the ceiling apart -- for a
 	 * consumer ordering by the fraction rather than displaying it, a strong
@@ -1195,10 +1122,7 @@ Zotero.Embeddings = new function () {
 	 * @return {Number} - 0-1, or above 1 unclamped
 	 */
 	this.getScoreFraction = function (score, { clamped = true } = {}) {
-		if (!_calibration) {
-			return 0;
-		}
-		let { minScore, maxDisplayScore } = _calibration;
+		let { minScore, maxDisplayScore } = this.getCalibration();
 		let fraction = (score - minScore) / (maxDisplayScore - minScore);
 		return clamped ? Math.min(1, Math.max(0, fraction)) : Math.max(0, fraction);
 	};
@@ -1217,12 +1141,6 @@ Zotero.Embeddings = new function () {
 		])];
 	};
 
-	// mozStorage returns a BLOB as an array of byte values; reinterpret those
-	// bytes as a Float32 vector (the calibration mean)
-	function _blobToVector(blob) {
-		let bytes = Uint8Array.from(blob);
-		return new Float32Array(bytes.buffer);
-	}
 
 	// The cosine between a stored vector and the query, both in the form
 	// prepare() produces -- the same score cosine() computes in JS. The query
@@ -1250,11 +1168,7 @@ Zotero.Embeddings = new function () {
 	// another's vectors, and confirm the stored vectors were produced by the
 	// active model -- during a switch, or a reindex after a revision bump,
 	// the database isn't stamped for the new model until the indexer starts
-	// filling it. Returns the model's calibration: indexing calibrates the
-	// model before it writes a single vector, so a database stamped for this
-	// model always has one to go with it -- but the numbers still have to be
-	// read into memory, since getScoreFraction() reads them synchronously
-	// while rendering.
+	// filling it. Returns the model's calibration for the scoring that follows.
 	async function _requireReadyIndex() {
 		await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 		await Zotero.Embeddings.initDB();
@@ -1268,14 +1182,7 @@ Zotero.Embeddings = new function () {
 					+ `but the active model is '${modelVersion}'`
 			);
 		}
-		let calibration = await Zotero.Embeddings.loadCalibration();
-		if (!calibration) {
-			throw new Zotero.Embeddings.IndexNotReadyError(
-				`Embeddings index is stamped for '${modelVersion}' but the model `
-					+ `has no calibration`
-			);
-		}
-		return calibration;
+		return Zotero.Embeddings.getCalibration();
 	}
 
 	/**
@@ -1453,9 +1360,6 @@ Zotero.Embeddings = new function () {
 		if (!this.isEnabled() || !texts.length) {
 			return texts.map(() => 0);
 		}
-		// prepare() centers with the measured mean, which has to be in memory
-		await this.initDB();
-		await this.loadCalibration();
 		let query = this.prepare(await this.embedQuery(queryText));
 		let vectors = await this.embedPassages(texts);
 		return vectors.map(vector => this.cosine(query, this.prepare(vector)));
@@ -2904,8 +2808,6 @@ Zotero.Embeddings.Indexing = new function () {
 				Zotero.debug('Embeddings: engine restarted to apply new thread count');
 			}
 			let completed = [];
-			// prepare() centers with the measured mean, which has to be in memory
-			await Zotero.Embeddings.loadCalibration();
 			await Zotero.DB.executeTransaction(async function () {
 				let touched = new Set();
 				for (let j = 0; j < batch.length; j++) {
@@ -3207,10 +3109,6 @@ Zotero.Embeddings.Indexing = new function () {
 			// embed, so the model isn't held in memory through the extraction
 			// step below
 			await Zotero.Embeddings.download(_onDownloadProgress);
-			// Measure the model before storing anything scored against it. Only
-			// the first run for a given model version pays for this; every
-			// later one finds the numbers already in the database.
-			await Zotero.Embeddings.ensureCalibration();
 			// A verified endpoint may have changed or gone away since
 			await Zotero.Embeddings.Endpoint.recheck();
 
@@ -3614,8 +3512,8 @@ Zotero.Embeddings.Diagnostics = new function () {
  *   4. minScore is MISS_PERCENTILE of the near-miss scores; maxDisplayScore is
  *      MATCH_PERCENTILE of the passage scores.
  *
- * Zotero.Embeddings calls this once per model version, then stores the result
- * and applies it while scoring.
+ * record() formats the result for a MODELS `calibration` entry; it's run by
+ * hand when a model is added or its revision bumped.
  */
 Zotero.Embeddings.Calibration = new function () {
 	// Where the score floor goes, as a percentile of the near-miss scores --
@@ -3730,6 +3628,17 @@ Zotero.Embeddings.Calibration = new function () {
 				+ `(${minScore.toFixed(4)}) -- it can't rank search results`);
 		}
 		return { mean, minScore, maxDisplayScore };
+	};
+
+	/**
+	 * measure(), formatted for a MODELS `calibration` entry.
+	 *
+	 * @return {Promise<Object>} - { minScore, maxDisplayScore, mean } with the mean as base64
+	 */
+	this.record = async function () {
+		let { mean, minScore, maxDisplayScore } = await this.measure();
+		let bytes = new Uint8Array(mean.buffer, mean.byteOffset, mean.byteLength);
+		return { minScore, maxDisplayScore, mean: btoa(String.fromCharCode(...bytes)) };
 	};
 
 	async function _embedAll(texts) {

@@ -4,10 +4,19 @@ describe("Zotero.Embeddings", function () {
 	// The mean vector of the stand-in calibration below, which tests build
 	// their stored vectors around
 	var testMean;
+	var calibrationStub;
 
-	before(async function () {
+	before(function () {
 		Zotero.Embeddings.Indexing.init();
-		testMean = await calibrateTestModel();
+		testMean = testCalibrationMean();
+		// Stands in for a recorded model, which the test environment has no
+		// downloaded model to measure, for every test in the file
+		calibrationStub = sinon.stub(Zotero.Embeddings, 'getCalibration')
+			.returns({ mean: testMean, minScore: 0.2, maxDisplayScore: 0.6 });
+	});
+
+	after(function () {
+		calibrationStub.restore();
 	});
 
 	// A Zotero.SDT.getSections() section, built from its blocks -- which are
@@ -27,34 +36,14 @@ describe("Zotero.Embeddings", function () {
 		};
 	}
 
-	// Stands in for a measured model (see Zotero.Embeddings.ensureCalibration()),
-	// which the test environment has no downloaded model to measure. The mean
-	// is shaped like a real one -- mixed signs, and shorter than unit length,
-	// since it averages vectors that don't all point the same way -- so that
-	// centering behaves here as it does in production.
-	//
-	// Written once for the whole file: nothing here resets the embeddings
-	// database, and a model switch clears only the stored vectors.
-	async function calibrateTestModel(
-		{ modelVersion = 'test-model/1', minScore = 0.2, maxDisplayScore = 0.6,
-			dimensions = 384 } = {}
-	) {
-		await Zotero.Embeddings.initDB();
+	// A mean shaped like a real one -- mixed signs, and shorter than unit
+	// length, since it averages vectors that don't all point the same way --
+	// so that centering behaves here as it does in production
+	function testCalibrationMean(dimensions = 384) {
 		let mean = new Float32Array(dimensions);
 		for (let i = 0; i < dimensions; i++) {
 			mean[i] = i % 4 < 2 ? 0.03 : -0.03;
 		}
-		await Zotero.DB.queryAsync(
-			"REPLACE INTO embeddings.modelCalibration "
-				+ "(modelVersion, meanVector, minScore, maxDisplayScore) VALUES (?, ?, ?, ?)",
-			[
-				modelVersion,
-				new Uint8Array(mean.buffer, mean.byteOffset, mean.byteLength),
-				minScore,
-				maxDisplayScore
-			],
-			{ debugParams: false }
-		);
 		return mean;
 	}
 
@@ -86,24 +75,21 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
-	describe("#prepare()", function () {
-		it("should refuse to prepare a vector for a model with no calibration", async function () {
-			let stub = sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('uncalibrated/1');
+	describe("#getCalibration()", function () {
+		it("should decode every model's recorded calibration to a mean of its own width", function () {
+			let recorded = calibrationStub.wrappedMethod;
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelName');
 			try {
-				await Zotero.Embeddings.loadCalibration();
-				let e;
-				try {
-					Zotero.Embeddings.prepare(new Float32Array(384));
+				for (let { name } of Zotero.Embeddings.getAvailableModels()) {
+					stub.returns(name);
+					let { mean, minScore, maxDisplayScore } = recorded.call(Zotero.Embeddings);
+					// Built in the module's global, so not this scope's Float32Array
+					assert.equal(mean.constructor.name, 'Float32Array', name);
+					assert.include([256, 384, 512, 768, 1024], mean.length, name);
+					assert.isBelow(minScore, maxDisplayScore, name);
 				}
-				catch (caught) {
-					e = caught;
-				}
-				assert.instanceOf(e, Zotero.Embeddings.IndexNotReadyError);
 			}
 			finally {
-				// Put the test model's calibration back in memory
-				stub.returns('test-model/1');
-				await Zotero.Embeddings.loadCalibration();
 				stub.restore();
 			}
 		});
@@ -979,23 +965,12 @@ describe("Zotero.Embeddings", function () {
 	});
 
 	describe("#getScoreFraction()", function () {
-		it("should clamp scores into the measured display range", async function () {
-			let stub = sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1');
-			try {
-				await Zotero.Embeddings.loadCalibration();
-				assert.equal(Zotero.Embeddings.getScoreFraction(0), 0);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.2), 0);
-				assert.approximately(Zotero.Embeddings.getScoreFraction(0.4), 0.5, 0.001);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.6), 1);
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
-				// An unmeasured model has no band to place a score in -> empty bar
-				stub.returns('unmeasured-model/1');
-				await Zotero.Embeddings.loadCalibration();
-				assert.equal(Zotero.Embeddings.getScoreFraction(0.9), 0);
-			}
-			finally {
-				stub.restore();
-			}
+		it("should clamp scores into the recorded display range", function () {
+			assert.equal(Zotero.Embeddings.getScoreFraction(0), 0);
+			assert.equal(Zotero.Embeddings.getScoreFraction(0.2), 0);
+			assert.approximately(Zotero.Embeddings.getScoreFraction(0.4), 0.5, 0.001);
+			assert.equal(Zotero.Embeddings.getScoreFraction(0.6), 1);
+			assert.equal(Zotero.Embeddings.getScoreFraction(0.99), 1);
 		});
 	});
 
@@ -1224,48 +1199,6 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
-	describe("#pruneModels()", function () {
-		it("should drop calibration for the models it no longer keeps", async function () {
-			await calibrateTestModel({ modelVersion: 'kept-model/1' });
-			await calibrateTestModel({ modelVersion: 'dropped-model/1' });
-			let measured = () => Zotero.DB.columnQueryAsync(
-				"SELECT modelVersion FROM embeddings.modelCalibration"
-			);
-			// No cached files to prune -- this is only about what we measured --
-			// and no real indexing run from the model switches the pref writes
-			// below kick off
-			let stubs = [
-				sinon.stub(Zotero.ML, 'listModels').resolves([]),
-				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('kept-model/1'),
-				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves()
-			];
-			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
-			try {
-				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
-				await Zotero.Embeddings.pruneModels();
-				assert.sameMembers(await measured(), ['kept-model/1']);
-
-				// Disabling keeps nothing, so re-enabling measures afresh
-				// rather than reusing numbers taken against an older corpus
-				Zotero.Prefs.clear('embeddings.model');
-				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
-				await Zotero.Embeddings.pruneModels();
-				assert.isEmpty(await measured());
-			}
-			finally {
-				Zotero.Prefs.clear('embeddings.model');
-				// Wait out the switches the pref writes kicked off, so a
-				// straggling disabled-model prune can't delete the calibration
-				// again after it's restored below
-				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
-				stubs.forEach(stub => stub.restore());
-				Zotero.Prefs.clear('embeddings.indexingPaused');
-				// Pruning cleared the row the rest of the file scores against
-				testMean = await calibrateTestModel();
-			}
-		});
-	});
-
 	describe("#ensureModelAvailable()", function () {
 		it("should disable semantic search and drop the index when the selected model no longer exists", async function () {
 			let stubs = [
@@ -1301,9 +1234,6 @@ describe("Zotero.Embeddings", function () {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				stubs.forEach(stub => stub.restore());
 				Zotero.Prefs.clear('embeddings.indexingPaused');
-				// The disabled-model prune cleared the row the rest of the
-				// file scores against
-				testMean = await calibrateTestModel();
 			}
 		});
 	});
@@ -1721,7 +1651,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
@@ -1762,7 +1691,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				// These fake an active model rather than selecting one (which
 				// would kick off a model switch), so name one to keep the
 				// window and passage prefix chunking reads consistent with it
@@ -1819,7 +1747,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
@@ -1874,7 +1801,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
@@ -1926,7 +1852,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
@@ -1968,7 +1893,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				// The extraction itself is sdt.js's concern (see sdtTest.js);
 				// what's under test is what indexing does with the sections
@@ -2087,7 +2011,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
@@ -2155,7 +2078,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
@@ -2255,7 +2177,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
@@ -2312,7 +2233,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
@@ -2383,7 +2303,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
@@ -2444,7 +2363,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
@@ -2568,7 +2486,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
@@ -2629,7 +2546,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				ensureStub,
 				getSectionsStub
@@ -2680,7 +2596,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				ensureStub,
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
@@ -2722,7 +2637,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: false, reason: 'failed' })
@@ -2790,7 +2704,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(Float32Array.from(testMean)),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
@@ -2847,7 +2760,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
 			];
 			let queries = [];
 			let queryStub = sinon.stub(Zotero.DB, 'queryAsync')
