@@ -1287,11 +1287,11 @@ describe("Zotero.Embeddings", function () {
 	});
 
 	describe("Calibration", function () {
-		// Stub the model rather than setting the pref: writing embeddings.model
-		// kicks off a real model switch, which clears the index and the stored
-		// calibration out from under the tests that follow
-		let corpusFor = (model) => {
-			let stub = sinon.stub(Zotero.Embeddings, 'getModelName').returns(model);
+		// Stub the language rather than setting the model pref: writing
+		// embeddings.model kicks off a real model switch, which clears the
+		// index and the stored calibration out from under the tests that follow
+		let corpusFor = (language) => {
+			let stub = sinon.stub(Zotero.Embeddings, 'getModelLanguage').returns(language);
 			try {
 				return Zotero.Embeddings.Calibration.getCorpus();
 			}
@@ -1300,25 +1300,48 @@ describe("Zotero.Embeddings", function () {
 			}
 		};
 
-		it("should measure each model against the pairs it can read", function () {
-			let en = corpusFor('bge-small-en-v1.5');
-			let zh = corpusFor('bge-small-zh-v1.5');
-			// A model that claims no language of its own is measured on all of them
-			let all = corpusFor('bekko-embedding-v1-a8m');
-			for (let corpus of [en, zh]) {
-				assert.isAbove(corpus.short.length, 0);
-				assert.isAbove(corpus.long.length, 0);
+		it("should give every query a passage and a near miss of chunk length", function () {
+			for (let triple of corpusFor(null)) {
+				assert.isString(triple.passage, triple.query);
+				assert.isString(triple.nearMiss, triple.query);
+				// The floor measured on near misses has to gate chunks of the
+				// passages' length, so a near miss can't be a short paraphrase
+				assert.isAtLeast(triple.nearMiss.length, triple.passage.length / 2, triple.query);
 			}
-			assert.isAbove(all.short.length, en.short.length + zh.short.length);
-			assert.isAbove(all.long.length, en.long.length + zh.long.length);
+		});
+
+		it("should not build a near miss on its passage's wording", function () {
+			// A near miss that reuses the passage's sentences with the nouns
+			// swapped scores close to it for the phrasing alone, so the floor
+			// it sets says nothing about the subject
+			let grams = (text) => {
+				let words = text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
+				return new Set(words.slice(3).map((_, i) => words.slice(i, i + 4).join(' ')));
+			};
+			for (let triple of corpusFor(null)) {
+				let passage = grams(triple.passage);
+				let nearMiss = grams(triple.nearMiss);
+				let shared = [...nearMiss].filter(gram => passage.has(gram)).length;
+				assert.isBelow(shared / Math.min(passage.size, nearMiss.size), 0.08, triple.query);
+			}
+		});
+
+		it("should measure each model against the triples it can read", function () {
+			let en = corpusFor('en');
+			let zh = corpusFor('zh');
+			// A model that claims no language of its own is measured on all of them
+			let all = corpusFor(null);
+			assert.isAbove(en.length, 0);
+			assert.isAbove(zh.length, 0);
+			assert.isAbove(all.length, en.length + zh.length);
 
 			// Text a model can't tokenize has to stay out of its corpus: it
-			// can't tell two such passages apart, so they score highly against
-			// each other and crowd out the tail that sets the floor
+			// can't tell a passage from its near miss, so both numbers would
+			// describe that rather than what the model is there to rank
 			let han = /[一-鿿]/;
-			let pairs = corpus => [...corpus.short, ...corpus.long];
-			assert.isFalse(pairs(en).some(pair => han.test(pair.query) || han.test(pair.passage)));
-			assert.isTrue(pairs(zh).every(pair => han.test(pair.query) && han.test(pair.passage)));
+			let texts = triple => [triple.query, triple.passage, triple.nearMiss];
+			assert.isFalse(en.some(triple => texts(triple).some(text => han.test(text))));
+			assert.isTrue(zh.every(triple => texts(triple).every(text => han.test(text))));
 		});
 
 		it("should only let models claim a language the corpus is written in", function () {
@@ -1331,10 +1354,8 @@ describe("Zotero.Embeddings", function () {
 					if (language !== null) {
 						assert.include(codes, language, name);
 					}
-					// Whichever it claims, there are pairs to measure it against
-					let corpus = Zotero.Embeddings.Calibration.getCorpus();
-					assert.isAbove(corpus.short.length, 0, name);
-					assert.isAbove(corpus.long.length, 0, name);
+					// Whichever it claims, there are triples to measure it against
+					assert.isAbove(Zotero.Embeddings.Calibration.getCorpus().length, 0, name);
 				}
 			}
 			finally {

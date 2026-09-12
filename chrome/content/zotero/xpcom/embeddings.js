@@ -56,7 +56,7 @@ Zotero.Embeddings = new function () {
 	//     revision: 1,                   // bump when a change alters the vectors, to force a reindex
 	//     modelId: 'Org/repo',           // HF repo id, and the transformers.js pipeline id
 	//     language: 'en',                // optional: a code from Calibration.languages, and the only
-	//                                    //   pairs it's calibrated against. Omit to use all of them.
+	//                                    //   triples it's calibrated against. Omit to use all of them.
 	//     dtype: 'q8',                   // weights variant; 'q8' is onnx/model_quantized.onnx
 	//     pooling: 'cls',                // how token vectors combine: 'cls' or 'mean'
 	//     queryPrefix: '...',            // prepended to every query (see embedQuery())
@@ -841,7 +841,8 @@ Zotero.Embeddings = new function () {
 	// counts as a match, and the score at which the Relevance bar fills. They
 	// aren't choices so much as properties of the model, so they're measured
 	// rather than configured -- once per model version, against a fixed corpus
-	// of query/passage pairs written to resemble real searches over a library.
+	// of queries, each with a passage that answers it and one from the same
+	// field that doesn't, written to resemble real searches over a library.
 	//
 	// Measuring takes a few seconds of inference, so it runs from the indexing
 	// pass, which has the engine loaded anyway, and the result is cached in the
@@ -3580,36 +3581,34 @@ Zotero.Embeddings.Diagnostics = new function () {
  *
  * A model can't tell you the mean vector its embeddings share, the score below
  * which nothing is a match, or the score at which the Relevance bar fills.
- * Those are measured, by running the model over a fixed corpus of query/passage
- * pairs and reading the answers off the resulting distributions.
+ * Those are measured, by running the model over a fixed corpus and reading the
+ * answers off the resulting score distributions.
  *
- * The corpus has short pairs (title- and annotation-length passages) and
- * long pairs (chunk-length body text). measure() does this:
+ * The corpus is a list of triples: a query, a chunk-length passage that answers
+ * it, and a near miss -- a passage of the same length from the same field that
+ * doesn't. measure() does this:
  *
- *   1. Embed every query and passage, with the model's own prefixes.
- *   2. Average the long passage vectors into the mean, then center everything
- *      by it -- the same centering scoring uses. Chunk-length text is most of
+ *   1. Embed every query, passage and near miss, with the model's own prefixes.
+ *   2. Average the passage vectors into the mean, then center everything by
+ *      it -- the same centering scoring uses. Chunk-length text is most of
  *      what the index holds and carries the model's shared direction most
- *      purely; a mean taken over short text leaves part of it in every stored
- *      chunk and lifts their scores as one.
- *   3. Score each set's queries against its passages: two N x N grids, the
- *      diagonal holding matched pairs and the cells off it unrelated text.
- *   4. minScore is NULL_PERCENTILE of the short grid's off-diagonal scores;
- *      maxDisplayScore is MATCH_PERCENTILE of the long grid's diagonal.
+ *      purely.
+ *   3. Score each query against its own passage and against its own near miss.
+ *   4. minScore is MISS_PERCENTILE of the near-miss scores; maxDisplayScore is
+ *      MATCH_PERCENTILE of the passage scores.
  *
  * Zotero.Embeddings calls this once per model version, then stores the result
  * and applies it while scoring.
  */
 Zotero.Embeddings.Calibration = new function () {
-	// Where the score floor goes, as a percentile of the null distribution --
-	// what this model scores between texts with nothing to do with each other
-	// (`mismatched` in measure()). At 0.999 only the top 0.1 of unrelated pairs
-	// reach it; raising it cuts more noise and more weak-but-real matches along
-	// with it, lowering it keeps both.
-	const NULL_PERCENTILE = 0.999;
-	// Where the Relevance bar fills, as a percentile of the other distribution
-	// measure() collects -- `matched`, each query against its own passage. At
-	// 0.5 a full bar means "as good as this model's typical real match".
+	// Where the score floor goes, as a percentile of the near-miss scores --
+	// what this model gives a query against same-field text that doesn't
+	// answer it. At 0.9 one near miss in ten still clears the floor; raising
+	// it cuts more of them, and more weak-but-real matches along with them.
+	const MISS_PERCENTILE = 0.95;
+	// Where the Relevance bar fills, as a percentile of the passage scores,
+	// each query against the passage that answers it. At 0.5 a full bar means
+	// "as good as this model's typical real match".
 	const MATCH_PERCENTILE = 0.5;
 	// Texts per engine call while calibrating, matching the indexer's default
 	// batch (see Indexing._indexItems())
@@ -3622,19 +3621,13 @@ Zotero.Embeddings.Calibration = new function () {
 	 */
 	this.languages = Object.freeze({ en: 'en', zh: 'zh', other: 'other' });
 
-	// Query/passage pairs by language, in two sets: `short` pairs are the
-	// titles and annotation-length passages indexing stores, `long` pairs are
-	// chunk-length body text. Each query is what someone might plausibly type
-	// to find its passage, and no two pairs anywhere in the file share a
-	// subject -- not even as translations of each other, since a model measured
-	// on several languages at once scores a passage's translation like the
-	// passage itself, and a real match sitting in the null distribution raises
-	// the floor against exactly the cross-language searches such a model is
-	// for. That disjointness is what makes a query paired with any *other*
-	// passage an honest example of two texts that have nothing to do with each
-	// other. A language wants enough short pairs for the floor to land on a
-	// settled stretch of the unrelated-score tail rather than on its few
-	// highest values (see NULL_PERCENTILE).
+	// Triples by language: a query someone might plausibly type, the
+	// chunk-length passage it finds, and a near miss -- a passage of the same
+	// length from the same field that doesn't touch the query's subject. Only
+	// the three texts of a triple are scored together, so triples needn't be
+	// disjoint from one another. A language wants enough of them for the two
+	// percentiles to land on a settled stretch of their distributions rather
+	// than on a single passage.
 	const CORPUS_URL = 'resource://zotero/embeddings-calibration-corpus.json';
 	let _corpus = null;
 
@@ -3646,26 +3639,21 @@ Zotero.Embeddings.Calibration = new function () {
 	}
 
 	/**
-	 * The pairs the active model is measured against: its own language's, or
+	 * The triples the active model is measured against: its own language's, or
 	 * every language when it claims none (see `language` in MODELS).
 	 *
 	 * A model is never measured on text it can't read. An English model shown
-	 * Chinese passages doesn't merely waste them -- it can't tell two of them
-	 * apart, so they score highly against each other and crowd out the tail
-	 * that sets the floor, raising it against the English results the model is
-	 * actually there to rank.
+	 * Chinese text can't tell a passage from its near miss, so the two
+	 * distributions would run together and both numbers would describe that
+	 * rather than the English results the model is there to rank.
 	 *
-	 * @return {{ short: Object[], long: Object[] }} - { query, passage } pairs
+	 * @return {Object[]} - { query, passage, nearMiss } triples
 	 */
 	this.getCorpus = function () {
 		let corpus = _getCorpusData();
 		let language = Zotero.Embeddings.getModelLanguage();
 		if (!language) {
-			let sets = Object.values(corpus);
-			return {
-				short: sets.flatMap(set => set.short),
-				long: sets.flatMap(set => set.long)
-			};
+			return Object.values(corpus).flat();
 		}
 		if (!Object.prototype.hasOwnProperty.call(corpus, language)) {
 			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' claims language `
@@ -3678,60 +3666,50 @@ Zotero.Embeddings.Calibration = new function () {
 	/**
 	 * Run the active model over its corpus and derive its three numbers: the
 	 * mean of the passage embeddings, and the two ends of the score band, read
-	 * off the distributions of matched and mismatched pairs.
+	 * off the distributions of matched and near-miss scores.
 	 *
 	 * @return {Promise<Object>} - { mean, minScore, maxDisplayScore }
 	 */
 	this.measure = async function () {
-		let { short, long } = this.getCorpus();
+		let triples = this.getCorpus();
 		let queryPrefix = Zotero.Embeddings.getQueryPrefix();
 		let passagePrefix = Zotero.Embeddings.getPassagePrefix();
-		Zotero.debug(`Embeddings: measuring against ${short.length} short `
-			+ `and ${long.length} long query/passage pairs`);
-		let embedPairs = async pairs => ({
-			queries: await _embedAll(pairs.map(pair => queryPrefix + pair.query)),
-			passages: await _embedAll(pairs.map(pair => passagePrefix + pair.passage))
-		});
-		short = await embedPairs(short);
-		long = await embedPairs(long);
+		Zotero.debug(`Embeddings: measuring against ${triples.length} `
+			+ `query/passage/near-miss triples`);
+		let queries = await _embedAll(triples.map(triple => queryPrefix + triple.query));
+		let passages = await _embedAll(triples.map(triple => passagePrefix + triple.passage));
+		let nearMisses = await _embedAll(triples.map(triple => passagePrefix + triple.nearMiss));
 
 		// The direction every embedding shares, which says nothing about the
-		// text. Taken over the long passages: chunk-length text is most of what
+		// text. Taken over the passages: chunk-length text is most of what
 		// gets stored, and shows the direction most purely
-		let mean = new Float32Array(long.passages[0].length);
-		for (let vector of long.passages) {
+		let mean = new Float32Array(passages[0].length);
+		for (let vector of passages) {
 			for (let d = 0; d < mean.length; d++) {
-				mean[d] += vector[d] / long.passages.length;
+				mean[d] += vector[d] / passages.length;
 			}
 		}
 
 		// Scoring compares centered, quantized vectors, so calibrate on those,
 		// using the same transform and comparison the search path uses
 		let prepare = vector => Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, mean));
-		let grid = ({ queries, passages }) => {
-			queries = queries.map(prepare);
-			passages = passages.map(prepare);
-			let matched = [];
-			let mismatched = [];
-			for (let i = 0; i < queries.length; i++) {
-				for (let j = 0; j < passages.length; j++) {
-					(i === j ? matched : mismatched)
-						.push(Zotero.Embeddings.cosine(queries[i], passages[j]));
-				}
-			}
-			return { matched, mismatched };
-		};
-		// Unrelated short pairs set the floor; chunk-length matches set the bar,
-		// since a title-length passage paraphrases its query and scores higher
-		// than any real chunk does
-		let minScore = _percentile(grid(short).mismatched, NULL_PERCENTILE);
-		let maxDisplayScore = _percentile(grid(long).matched, MATCH_PERCENTILE);
-		// A model that rates its own matches no higher than unrelated text
-		// can't rank anything, and every score it produced would clamp to a
-		// full or empty bar. Better to fail loudly than to index with it.
+		queries = queries.map(prepare);
+		let scores = vectors => vectors.map(
+			(vector, i) => Zotero.Embeddings.cosine(queries[i], prepare(vector))
+		);
+		let matched = scores(passages);
+		let missed = scores(nearMisses);
+		let minScore = _percentile(missed, MISS_PERCENTILE);
+		let maxDisplayScore = _percentile(matched, MATCH_PERCENTILE);
+		let inverted = matched.filter((score, i) => score <= missed[i]).length;
+		Zotero.debug(`Embeddings: ${inverted} of ${triples.length} near misses `
+			+ `score at least as high as their passage`);
+		// A model that rates its matches no higher than near misses can't rank
+		// anything, and every score it produced would clamp to a full or empty
+		// bar. Better to fail loudly than to index with it.
 		if (maxDisplayScore <= minScore) {
 			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' scores matched text `
-				+ `(${maxDisplayScore.toFixed(4)}) no higher than unrelated text `
+				+ `(${maxDisplayScore.toFixed(4)}) no higher than near misses `
 				+ `(${minScore.toFixed(4)}) -- it can't rank search results`);
 		}
 		return { mean, minScore, maxDisplayScore };
@@ -3772,9 +3750,10 @@ Zotero.Embeddings.Endpoint = new function () {
 	// same weights sits around 0.997; the same model with the wrong pooling
 	// lands near 0.7, a different model below 0.5.
 	const AGREEMENT_MIN = 0.98;
-	// Texts the probe embeds both ways, drawn from the calibration corpus
-	const PROBE_SHORT = 8;
-	const PROBE_LONG = 12;
+	// Texts the probe embeds both ways, drawn from the calibration corpus:
+	// queries for short text, passages for chunk-length
+	const PROBE_QUERIES = 8;
+	const PROBE_PASSAGES = 12;
 	// The probe's longest text, in characters -- a chunk near the indexer's
 	// worst case, so a server whose window is too small for real chunks is
 	// found out here rather than mid-run
@@ -4099,18 +4078,18 @@ Zotero.Embeddings.Endpoint = new function () {
 		return 'unreachable';
 	}
 
-	// Short and long passages from the calibration corpus, and one long
-	// enough to overrun a small server window, its tail distinct so that a
-	// silently truncated embedding no longer matches the local one
+	// Short and long texts from the calibration corpus, and one long enough
+	// to overrun a small server window, its tail distinct so that a silently
+	// truncated embedding no longer matches the local one
 	function _probeTexts() {
-		let { short, long } = Zotero.Embeddings.Calibration.getCorpus();
+		let triples = Zotero.Embeddings.Calibration.getCorpus();
 		let regular = [
-			...short.slice(0, PROBE_SHORT).map(pair => pair.passage),
-			...long.slice(0, PROBE_LONG).map(pair => pair.passage)
+			...triples.slice(0, PROBE_QUERIES).map(triple => triple.query),
+			...triples.slice(0, PROBE_PASSAGES).map(triple => triple.passage)
 		];
 		let padded = '';
 		for (let i = 0; padded.length < PROBE_PADDED_CHARS; i++) {
-			padded += long[i % long.length].passage + ' ';
+			padded += triples[i % triples.length].passage + ' ';
 		}
 		padded += 'The closing sentence names the Antikythera mechanism and the lighthouse at Alexandria.';
 		return { regular, padded };
