@@ -43,7 +43,7 @@ describe("Zotero.BestMatch", function () {
 
 	describe("#scoreItemIDs()", function () {
 		it("should return lexical scores directly when no semantic model is enabled", async function () {
-			let lexicalScores = new Map([[1, 0.8], [2, 0.3]]);
+			let lexicalScores = new Map([[1, 0.8], [2, 0.5]]);
 			let semanticStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs');
 			stubs.push(semanticStub);
 			stubEngines({
@@ -53,7 +53,7 @@ describe("Zotero.BestMatch", function () {
 
 			let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
 			assert.isFalse(semanticStub.called);
-			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.3]]);
+			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.5]]);
 		});
 
 		it("should fuse the engines' rankings reciprocally over their union", async function () {
@@ -210,7 +210,7 @@ describe("Zotero.BestMatch", function () {
 		});
 
 		it("should rank lexically when the semantic index isn't ready", async function () {
-			let lexicalScores = new Map([[1, 0.8], [2, 0.3]]);
+			let lexicalScores = new Map([[1, 0.8], [2, 0.5]]);
 			stubEngines({
 				enabled: true,
 				lexical: async () => lexicalScores,
@@ -220,7 +220,7 @@ describe("Zotero.BestMatch", function () {
 			});
 
 			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
-			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.3]]);
+			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.5]]);
 			// The engine that didn't rank shows matches in nothing
 			assert.equal(matches.semantic.size, 0);
 			assert.sameMembers([...matches.lexical], [1, 2]);
@@ -278,6 +278,135 @@ describe("Zotero.BestMatch", function () {
 			});
 			let e = await getPromiseError(Zotero.BestMatch.scoreItemIDs('owl', [1]));
 			assert.equal(e.message, 'model exploded');
+		});
+
+		describe("margin", function () {
+			let margin = (value) => {
+				Zotero.Prefs.set('search.bestMatchMargin', value);
+			};
+
+			afterEach(function () {
+				Zotero.Prefs.clear('search.bestMatchMargin');
+			});
+
+			it("should cut an engine's tail against its own strongest match", async function () {
+				margin(50);
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map(),
+					// Item 3 sits at a tenth of the top; item 2 at half of it stays
+					semantic: async () => new Map([[1, 0.9], [2, 0.5], [3, 0.09]])
+				});
+
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+				assert.sameMembers([...scores.keys()], [1, 2]);
+			});
+
+			it("should keep items tied at the boundary together", async function () {
+				margin(50);
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map([[1, 1], [2, 0.5], [3, 0.5]]),
+					semantic: async () => new Map()
+				});
+
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+				assert.sameMembers([...scores.keys()], [1, 2, 3]);
+			});
+
+			it("should never cut a lone result", async function () {
+				margin(10);
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map([[1, 0.06]]),
+					semantic: async () => new Map([[2, 0.01]])
+				});
+
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+				assert.sameMembers([...scores.keys()], [1, 2]);
+			});
+
+			it("should keep everything above the floor at a margin of 1", async function () {
+				margin(100);
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map([[1, 0.9], [2, 0.05]]),
+					semantic: async () => new Map([[3, 0.9], [4, 0.001]])
+				});
+
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3, 4]);
+				assert.sameMembers([...scores.keys()], [1, 2, 3, 4]);
+			});
+
+			it("should measure the semantic cut on the display band, not the raw score", async function () {
+				margin(50);
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map(),
+					// Raw scores 0.6 and 0.4 look close; on a band starting at
+					// 0.35 they are fractions 1.0 and 0.2, and the second is cut
+					semantic: async () => new Map([[1, 0.6], [2, 0.4]]),
+					fraction: score => Math.max(0, (score - 0.35) / 0.25)
+				});
+
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+				assert.sameMembers([...scores.keys()], [1]);
+			});
+
+			it("should take an item's semantic voice and match away when only lexical keeps it", async function () {
+				margin(50);
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
+					.callsFake(score => score));
+				stubs.push(sinon.stub(Zotero.Lexical, 'getScoringTermCount').resolves(1));
+				stubs.push(sinon.stub(Zotero.Lexical, 'isFullyQuotedQuery').returns(false));
+				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
+					.resolves(new Map([[1, 0.8], [2, 0.9]])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').resolves({
+					scores: new Map([[1, 0.9], [2, 0.05]]),
+					previewableIDs: new Set([1, 2])
+				}));
+
+				let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+				// Item 2 stays, on its lexical evidence alone
+				assert.closeTo(scores.get(2), rrf([0.9, 1]), 1e-12);
+				assert.closeTo(scores.get(1), rrf([0.8, 2], [0.9, 1]), 1e-12);
+				assert.sameMembers([...matches.lexical], [1, 2]);
+				assert.sameMembers([...matches.semantic], [1]);
+			});
+
+			it("should cut the tail in single-engine modes too", async function () {
+				margin(50);
+				let saved = Zotero.Prefs.get('search.bestMatchEngine');
+				try {
+					Zotero.Prefs.set('search.bestMatchEngine', 'semantic');
+					stubEngines({
+						enabled: true,
+						semantic: async () => new Map([[1, 1.8], [2, 1.2], [3, 0.3]]),
+						fraction: (score, options) => (options && options.clamped === false
+							? score
+							: Math.min(1, score))
+					});
+					let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+					assert.sameMembers([...scores.keys()], [1, 2]);
+					// Rescaled by the strongest kept fraction
+					assert.equal(scores.get(1), 1);
+					assert.closeTo(scores.get(2), 1.2 / 1.8, 1e-12);
+
+					Zotero.Prefs.set('search.bestMatchEngine', 'lexical');
+					stubs.forEach(stub => stub.restore());
+					stubs = [];
+					stubEngines({
+						enabled: true,
+						lexical: async () => new Map([[1, 0.9], [2, 0.3]])
+					});
+					({ scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]));
+					assert.sameMembers([...scores.keys()], [1]);
+				}
+				finally {
+					Zotero.Prefs.set('search.bestMatchEngine', saved);
+				}
+			});
 		});
 	});
 

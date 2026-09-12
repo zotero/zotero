@@ -112,6 +112,7 @@ preferences-advanced-best-match-engine-lexical =
     .label = Lexical
 preferences-advanced-best-match-engine-semantic =
     .label = Semantic
+preferences-advanced-best-match-margin = Drop results scoring more than this far below the best result (%):
 preferences-advanced-semantic-search-downloading = Downloading…
 preferences-advanced-semantic-search-downloading-progress = Downloading… { $percent }%
 preferences-advanced-semantic-search-extracting = Preparing documents…

@@ -328,6 +328,13 @@
 					</menupopup>
 				</menulist>
 			</hbox>
+			<hbox align="center">
+				<label data-l10n-id="preferences-advanced-best-match-margin"
+					control="best-match-margin"/>
+				<html:input id="best-match-margin" class="html-input" type="number"
+					min="1" max="100" step="1" size="3"
+					data-preference="search.bestMatchMargin"/>
+			</hbox>
 			<checkbox id="semantic-search-index-fulltext"
 				data-l10n-id="preferences-advanced-semantic-search-index-fulltext"
 				preference="extensions.zotero.embeddings.indexFulltext"

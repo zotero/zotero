@@ -211,26 +211,31 @@ Zotero.BestMatch = new function () {
 			let engine = Zotero.Prefs.get('search.bestMatchEngine');
 			if (engine == 'semantic') {
 				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
+				let kept = _nearTop(semantic.scores, _semanticFraction);
 				// On the model's display band, so scores are 0-1 like the other
 				// modes' -- but unclamped and rescaled by the strongest score,
 				// so a top tier past the band's ceiling keeps its ordering
 				// instead of flattening into a tie
-				let fractions = new Map([...semantic.scores].map(([itemID, score]) => [
-					itemID,
-					Zotero.Embeddings.getScoreFraction(score, { clamped: false })
-				]));
+				let fractions = new Map([...kept].map(
+					([itemID, score]) => [itemID, _semanticFraction(score)]
+				));
 				let scale = Math.max(1, ...fractions.values());
 				return {
 					scores: new Map([...fractions].map(
 						([itemID, fraction]) => [itemID, fraction / scale]
 					)),
-					matches: { lexical: new Set(), semantic: semantic.previewableIDs }
+					matches: {
+						lexical: new Set(),
+						semantic: new Set([...semantic.previewableIDs].filter(id => kept.has(id)))
+					}
 				};
 			}
 			// A query the semantic engine can't embed ranks lexically alone
 			if (engine == 'lexical' || !_useSemantic()
 					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
-				let scores = await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
+				let scores = _nearTop(
+					await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options), share => share
+				);
 				return {
 					scores,
 					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
@@ -261,9 +266,10 @@ Zotero.BestMatch = new function () {
 						+ semantic.reason.message);
 					// With no model to read the fulltext, the lexical engine
 					// covers all of it, whatever the query's length
-					let scores = allSources
+					let scores = _nearTop(allSources
 						? lexical.value
-						: await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
+						: await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options),
+					share => share);
 					return {
 						scores,
 						matches: {
@@ -274,11 +280,17 @@ Zotero.BestMatch = new function () {
 				}
 				throw semantic.reason;
 			}
+			// Each engine's tail is cut against its own strongest match, so
+			// an item enters fusion only with the evidence that stood up
+			let lexicalScores = _nearTop(lexical.value, share => share);
+			let semanticScores = _nearTop(semantic.value.scores, _semanticFraction);
 			return {
-				scores: _fuse(lexical.value, semantic.value.scores),
+				scores: _fuse(lexicalScores, semanticScores),
 				matches: {
-					lexical: new Set(lexical.value.keys()),
-					semantic: semantic.value.previewableIDs
+					lexical: new Set(lexicalScores.keys()),
+					semantic: new Set(
+						[...semantic.value.previewableIDs].filter(id => semanticScores.has(id))
+					)
 				}
 			};
 		}
@@ -849,6 +861,31 @@ Zotero.BestMatch = new function () {
 		return { start, end };
 	}
 
+	// The semantic engine's raw score as an unclamped fraction of the display
+	// band (see Zotero.Embeddings.getScoreFraction()): the strength fusion
+	// and the margin read
+	function _semanticFraction(score) {
+		return Zotero.Embeddings.getScoreFraction(score, { clamped: false });
+	}
+
+	// An engine's results that stand within the margin of its strongest: the
+	// items whose fraction is at least (1 - margin) of the top fraction.
+	// Every engine returns a tail of items barely above its floor -- for a
+	// query with a few strong answers, hundreds of them -- that aren't
+	// matches for that query in any sense a reader would accept. Measuring
+	// the cut from the top rather than by count lets a broad query keep
+	// hundreds of comparable results while a specific one keeps a handful.
+	// A lone result is never cut. The margin is a pref, in percent.
+	function _nearTop(scores, toFraction) {
+		let margin = Zotero.Prefs.get('search.bestMatchMargin') / 100;
+		if (scores.size < 2 || !(margin < 1)) {
+			return scores;
+		}
+		let fractions = new Map([...scores].map(([itemID, score]) => [itemID, toFraction(score)]));
+		let cutoff = Math.max(...fractions.values()) * (1 - margin);
+		return new Map([...scores].filter(([itemID]) => fractions.get(itemID) >= cutoff));
+	}
+
 	// Fuse the two engines' scores with strength-weighted Reciprocal Rank
 	// Fusion: an item's fused score sums fraction / (RRF_K + rank) over the
 	// engines that matched it, where fraction is that engine's own 0-1
@@ -876,10 +913,7 @@ Zotero.BestMatch = new function () {
 	function _fuse(lexicalScores, semanticScores) {
 		let engines = [
 			[lexicalScores, score => Math.min(1, Math.max(0, score))],
-			[
-				semanticScores,
-				score => Zotero.Embeddings.getScoreFraction(score, { clamped: false })
-			]
+			[semanticScores, _semanticFraction]
 		];
 		let scores = new Map();
 		for (let [engineScores, toFraction] of engines) {

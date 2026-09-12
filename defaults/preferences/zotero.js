@@ -111,6 +111,10 @@ pref("extensions.zotero.search.quicksearch-mode", "fields");
 // Temporary, for testing: which engine best-match search runs -- 'lexical',
 // 'semantic', or 'hybrid' (both, fused)
 pref("extensions.zotero.search.bestMatchEngine", "hybrid");
+// How far below an engine's strongest match an item may fall and still count
+// as one of its results, as a percentage of that strongest score -- 10 keeps
+// items within 10 percent of the top, 100 keeps everything above the floor
+pref("extensions.zotero.search.bestMatchMargin", 50);
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
