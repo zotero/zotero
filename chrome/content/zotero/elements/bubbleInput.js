@@ -142,12 +142,17 @@
 		 * Return the focus to an input. Try to focus on the previously active input first.
 		 * Otherwise, focus the last non-empty input in the editor.
 		 * If all inputs are empty, focus the last one.
+		 * @param {Boolean} [options.focusLast=false] - Forget the previously active input
+		 * and focus the last input, e.g. after all bubbles were replaced
 		 */
-		refocusInput() {
-			let input = this.getCurrentInput();
+		refocusInput({ focusLast = false } = {}) {
+			let input;
 			let allInputs = [...this._body.querySelectorAll('.input')];
-			if (!input) {
-				input = allInputs.find(inp => inp.value.length);
+			if (focusLast) {
+				this._lastFocusedInput = null;
+			}
+			else {
+				input = this.getCurrentInput() || allInputs.find(inp => inp.value.length);
 			}
 			if (!input) {
 				input = allInputs[allInputs.length - 1];
@@ -713,7 +718,10 @@
 					remainingInput.value = combinedValue;
 					inputToDelete.remove();
 					// Ensure the width of the combined input is correct
-					remainingInput.style.width = Utils.getContentWidth(node) + 'px';
+					remainingInput.style.width = Utils.getContentWidth(remainingInput) + 'px';
+					// Check the combined input again, in case more inputs follow it
+					node = remainingInput;
+					continue;
 				}
 				node = node.nextElementSibling;
 			}

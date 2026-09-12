@@ -214,9 +214,9 @@ function cleanupBeforeDialogClosing() {
 	// Only library mode in annotations dialog
 	if (!DIALOG_STATE.isAddingAnnotations()) {
 		Zotero.Prefs.set("integration.citationDialogLastUsedMode", currentLayout.type);
-		if (currentLayout.type == "library") {
-			Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
-		}
+	}
+	if (currentLayout.type == "library") {
+		Zotero.Prefs.set("integration.citationDialogCollectionLastSelected", libraryLayout.collectionsView.selectedTreeRow.id);
 	}
 	libraryLayout.collectionsView.unregister();
 	libraryLayout.itemsView.unregister();
@@ -238,6 +238,7 @@ async function setDialogType(type) {
 	if (DIALOG_STATE.loaded && io.disableDialogTypeSwitch) return;
 	// If there is a running search, do nothing to avoid window resizing conflicts
 	if (SearchHandler.searching) return;
+	let previousType = DIALOG_STATE.type;
 	DIALOG_STATE.type = type;
 	document.documentElement.setAttribute("dialog-type", DIALOG_STATE.type);
 
@@ -293,6 +294,8 @@ async function setDialogType(type) {
 	}
 	
 	if (DIALOG_STATE.loaded) {
+		// Prevent focus handler from interfering - input is explicitly refocused below
+		IOManager._noRefocusing = true;
 		// Completely reset itemTree to have right dragAndDrop, regularOnly, multiselect behavior
 		libraryLayout.itemsView.unregister();
 		_id("zotero-items-tree").replaceChildren();
@@ -300,11 +303,24 @@ async function setDialogType(type) {
 		await libraryLayout._initItemTree();
 		libraryLayout._onCollectionSelection();
 
-		// Rerun the search and update bubble-input
+		// When switching from annotations to citation dialog type, the annotations are carried over
+		// as their top-level items with page locators, so they can be rearranged
+		// or previewed like any other citation.
+		let bubbleItems = [];
+		if (previousType == "annotations" && DIALOG_STATE.isCitingItems()) {
+			bubbleItems = CitationDataManager.buildParentCitationBubbleItems();
+		}
+		CitationDataManager.clearAll();
+		await CitationDataManager.addItems({ bubbleItems });
+		IOManager.updateBubbleInput();
+		IOManager._noRefocusing = false;
+		_id("bubble-input").refocusInput({ focusLast: true });
+		// The new itemTree highlighted rows of the previous citation when it was initialized
+		libraryLayout.refreshItemsView();
+
+		// Rerun the search
 		SearchHandler.clearNonLibraryItemsCache();
 		currentLayout.search(SearchHandler.searchValue);
-		CitationDataManager.clearAll();
-		IOManager.updateBubbleInput();
 	}
 }
 
@@ -1020,11 +1036,11 @@ class LibraryLayout extends Layout {
 
 	// Highlight/de-highlight selected rows
 	async _refreshItemsViewHighlightedRows() {
-		let selectedIDs = CitationDataManager.getCitedLibraryItemIDs();
 		// Wait for the tree to fully load to avoid a logged error that the tree is undefined
 		while (!this.itemsView.tree) {
 			await Zotero.Promise.delay(10);
 		}
+		let selectedIDs = CitationDataManager.getCitedLibraryItemIDs();
 		this.itemsView.setHighlightedRows([...selectedIDs]);
 	}
 
@@ -2287,6 +2303,30 @@ const CitationDataManager = {
 		if (io.sortable) {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
 		}
+	},
+
+	// Build bubble items for the top-level parent items of the annotations in the citation,
+	// cited at the annotation's page. Annotations whose attachment has no parent item are dropped,
+	// and annotations of the same item on the same page are merged into one bubble item.
+	buildParentCitationBubbleItems() {
+		let bubbleItems = [];
+		let addedKeys = new Set();
+		for (let { item } of this.items) {
+			// For an annotation of a standalone attachment, the top-level item is the attachment itself
+			let topLevelItem = item.topLevelItem;
+			if (!topLevelItem.isRegularItem()) continue;
+			let locator = (item.annotationPageLabel || "").trim();
+			let key = `${topLevelItem.id}|${locator}`;
+			if (addedKeys.has(key)) continue;
+			addedKeys.add(key);
+			let bubbleItem = BubbleItem.fromItem(topLevelItem);
+			if (locator) {
+				bubbleItem.locator = locator;
+				bubbleItem.label = "page";
+			}
+			bubbleItems.push(bubbleItem);
+		}
+		return bubbleItems;
 	},
 
 	// Resorts the items in the citation
