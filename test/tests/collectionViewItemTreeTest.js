@@ -219,37 +219,45 @@ describe("CollectionViewItemTree", function () {
 			});
 
 			it("should rank items lexically", async function () {
-				let col = await createDataObject('collection');
-				// Unrelated items, so the query words the matches share still
-				// separate documents in this corpus -- in a corpus of nothing
-				// but matches, FTS5 floors their idf as separating nothing
-				// and no match earns a score
-				for (let i = 0; i < 6; i++) {
-					await createDataObject('item', { title: `unrelated filler number ${i}` });
+				// Ranking is under test, not membership: keep the two-word
+				// match that the result margin would otherwise cut
+				Zotero.Prefs.set('search.bestMatchMargin', 100);
+				try {
+					let col = await createDataObject('collection');
+					// Unrelated items, so the query words the matches share still
+					// separate documents in this corpus -- in a corpus of nothing
+					// but matches, FTS5 floors their idf as separating nothing
+					// and no match earns a score
+					for (let i = 0; i < 6; i++) {
+						await createDataObject('item', { title: `unrelated filler number ${i}` });
+					}
+					let full = await createDataObject('item',
+						{ title: 'Lexint owl migration patterns', collections: [col.id] });
+					// Three of the query's four terms, ranked below the full match
+					let partial = await createDataObject('item',
+						{ title: 'Lexint owl migration handbook', collections: [col.id] });
+					// Two of four, ranked below both
+					let sparse = await createDataObject('item',
+						{ title: 'Lexint owl guidebook', collections: [col.id] });
+
+					await select(win, col);
+					let itemsView = zp.itemsView;
+					await itemsView.setFilter('search', 'lexint owl migration patterns');
+
+					// Scored items only, ranked by coverage, most relevant first
+					assert.deepEqual(itemsView._rows.map(row => row.id),
+						[full.id, partial.id, sparse.id]);
+					assert.equal(itemsView.getSortField(), 'relevance');
+					// The bars carry the lexical scores directly
+					let fractions = itemsView.rowProvider.getBestMatchBarFractions();
+					assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
+					assert.isAbove(fractions.get(partial.id), fractions.get(sparse.id));
+					assert.isAtMost(fractions.get(full.id), 1);
+					assert.isAbove(fractions.get(sparse.id), 0);
 				}
-				let full = await createDataObject('item',
-					{ title: 'Lexint owl migration patterns', collections: [col.id] });
-				// Three of the query's four terms, ranked below the full match
-				let partial = await createDataObject('item',
-					{ title: 'Lexint owl migration handbook', collections: [col.id] });
-				// Two of four, ranked below both
-				let sparse = await createDataObject('item',
-					{ title: 'Lexint owl guidebook', collections: [col.id] });
-
-				await select(win, col);
-				let itemsView = zp.itemsView;
-				await itemsView.setFilter('search', 'lexint owl migration patterns');
-
-				// Scored items only, ranked by coverage, most relevant first
-				assert.deepEqual(itemsView._rows.map(row => row.id),
-					[full.id, partial.id, sparse.id]);
-				assert.equal(itemsView.getSortField(), 'relevance');
-				// The bars carry the lexical scores directly
-				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
-				assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
-				assert.isAbove(fractions.get(partial.id), fractions.get(sparse.id));
-				assert.isAtMost(fractions.get(full.id), 1);
-				assert.isAbove(fractions.get(sparse.id), 0);
+				finally {
+					Zotero.Prefs.clear('search.bestMatchMargin');
+				}
 			});
 		});
 

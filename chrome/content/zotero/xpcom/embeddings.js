@@ -145,6 +145,20 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
+	 * Disable semantic search if the selected model isn't one this build has:
+	 * a model removed from MODELS after a user chose it leaves the pref naming
+	 * something nothing can run. Clearing the pref switches to Disabled, which
+	 * drops the stored index and the downloaded files with it.
+	 */
+	this.ensureModelAvailable = function () {
+		let name = this.getModelName();
+		if (name && !this.isEnabled()) {
+			Zotero.debug(`Embeddings: model '${name}' is no longer available -- disabling semantic search`);
+			Zotero.Prefs.clear('embeddings.model');
+		}
+	};
+
+	/**
 	 * Available models, in display order, for the preferences UI.
 	 *
 	 * A model added to try out rather than to ship may have no `l10nID`; the
@@ -1792,6 +1806,9 @@ Zotero.Embeddings.Indexing = new function () {
 		Zotero.Prefs.registerObserver('embeddings.model', () => {
 			_switchModel();
 		});
+		// Through the observer above, a model this build no longer has is
+		// switched off, and its index and files dropped
+		Zotero.Embeddings.ensureModelAvailable();
 
 		// Toggling fulltext indexing changes what's eligible: on, the newly
 		// eligible attachments get indexed; off, their stored chunks are

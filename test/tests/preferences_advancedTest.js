@@ -166,17 +166,17 @@ describe("Advanced Preferences", function () {
 			try {
 				// Enabling from Disabled prompts nothing (the test would hang on
 				// an unexpected modal prompt)
-				menu.value = 'bge-small-en-v1.5';
+				menu.value = 'bekko-embedding-v1-a8m';
 				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
-				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
+				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bekko-embedding-v1-a8m');
 
 				// Cancelling a switch restores the menu and leaves the pref alone
 				var promise = waitForDialog(null, 'cancel');
-				menu.value = 'multilingual-e5-small';
+				menu.value = 'bekko-embedding-v1-a25m';
 				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
 				await promise;
-				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
-				assert.equal(menu.value, 'bge-small-en-v1.5');
+				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bekko-embedding-v1-a8m');
+				assert.equal(menu.value, 'bekko-embedding-v1-a8m');
 
 				// Confirming applies the change
 				promise = waitForDialog();

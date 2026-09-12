@@ -572,8 +572,9 @@ describe("Zotero.Embeddings", function () {
 			(x, i) => `${tag} sentence number ${i} with several words in it.`).join(' ');
 		var stubs = [];
 
+		// A model with a 512-token window, which the fixtures are sized to
 		beforeEach(function () {
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-zh-v1.5'));
 		});
 
 		afterEach(function () {
@@ -728,8 +729,9 @@ describe("Zotero.Embeddings", function () {
 	describe("#chunkSections()", function () {
 		var stubs = [];
 
+		// A model with a 512-token window, which the fixtures are sized to
 		beforeEach(function () {
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-zh-v1.5'));
 		});
 
 		afterEach(function () {
@@ -1007,7 +1009,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves(),
 				embedStub
 			];
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			try {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				assert.ok(await getPromiseError(Zotero.Embeddings.embedQuery('retry query')));
@@ -1031,7 +1033,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves(),
 				embedStub
 			];
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			try {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				// Whitespace around the quotes doesn't defeat the stripping
@@ -1058,7 +1060,7 @@ describe("Zotero.Embeddings", function () {
 			];
 			// Select a model so the query prefix and model version resolve; the
 			// switch's indexing side effects are stubbed out above
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			try {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				let promise1 = Zotero.Embeddings.embedQuery('concurrent query');
@@ -1095,7 +1097,7 @@ describe("Zotero.Embeddings", function () {
 				createEngine,
 				sinon.stub(Zotero.ML, 'shutdown').resolves(),
 				sinon.stub(Zotero.ML, 'getOptimalConcurrency').returns(2),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1')
 			];
 		}
@@ -1237,7 +1239,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('kept-model/1'),
 				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves()
 			];
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			try {
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				await Zotero.Embeddings.pruneModels();
@@ -1259,6 +1261,48 @@ describe("Zotero.Embeddings", function () {
 				stubs.forEach(stub => stub.restore());
 				Zotero.Prefs.clear('embeddings.indexingPaused');
 				// Pruning cleared the row the rest of the file scores against
+				testMean = await calibrateTestModel();
+			}
+		});
+	});
+
+	describe("#ensureModelAvailable()", function () {
+		it("should disable semantic search and drop the index when the selected model no longer exists", async function () {
+			let stubs = [
+				sinon.stub(Zotero.ML, 'listModels').resolves([]),
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves()
+			];
+			let item = await createDataObject('item');
+			try {
+				// As if a build removed the model a user had selected
+				Zotero.Prefs.set('embeddings.model', 'removed-model');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				await Zotero.Embeddings.initDB();
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemEmbeddings "
+						+ "(itemID, chunkIndex, embedding, sourceHash) VALUES (?, 0, ?, ?)",
+					[item.id, new Uint8Array([0, 0, 0, 0]), 'hash']
+				);
+				assert.isFalse(Zotero.Embeddings.isEnabled());
+
+				Zotero.Embeddings.ensureModelAvailable();
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				assert.equal(Zotero.Embeddings.getModelName(), '');
+				assert.equal(
+					await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM embeddings.itemEmbeddings"),
+					0
+				);
+				// Nothing to do for a model that exists, or none
+				Zotero.Embeddings.ensureModelAvailable();
+				assert.equal(Zotero.Embeddings.getModelName(), '');
+			}
+			finally {
+				Zotero.Prefs.clear('embeddings.model');
+				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				// The disabled-model prune cleared the row the rest of the
+				// file scores against
 				testMean = await calibrateTestModel();
 			}
 		});
@@ -1610,7 +1654,7 @@ describe("Zotero.Embeddings", function () {
 					[item.id, 'hash']
 				);
 				// The model switch clears the old vectors
-				Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+				Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
 				assert.equal(
 					await Zotero.DB.valueQueryAsync(
@@ -1678,7 +1722,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1722,7 +1766,7 @@ describe("Zotero.Embeddings", function () {
 				// These fake an active model rather than selecting one (which
 				// would kick off a model switch), so name one to keep the
 				// window and passage prefix chunking reads consistent with it
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1776,7 +1820,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1831,7 +1875,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1883,7 +1927,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -1925,7 +1969,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				// The extraction itself is sdt.js's concern (see sdtTest.js);
 				// what's under test is what indexing does with the sections
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
@@ -2044,7 +2088,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
@@ -2112,7 +2156,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
 			];
@@ -2212,7 +2256,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: true, sections })
 			];
@@ -2269,7 +2313,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
@@ -2340,7 +2384,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
@@ -2401,7 +2445,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
@@ -2454,7 +2498,7 @@ describe("Zotero.Embeddings", function () {
 			let item = await createDataObject('item', { title: 'Parent of derived attachment' });
 			let attachment = await importPDFAttachment(item);
 			let stubs = [
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
 					sections: [
@@ -2525,7 +2569,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').callsFake(async (itemID) => {
 					// Sections are read once to count chunks and again to
@@ -2586,7 +2630,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				ensureStub,
 				getSectionsStub
 			];
@@ -2637,7 +2681,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				ensureStub,
 				sinon.stub(Zotero.SDT, 'getSections').resolves({
 					ok: true,
@@ -2679,7 +2723,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getSections').resolves({ ok: false, reason: 'failed' })
 			];
@@ -2747,7 +2791,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
 				sinon.stub(Zotero.Embeddings, 'ensureCalibration').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bge-small-en-v1.5'),
+				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a8m'),
 				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(Float32Array.from(testMean)),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				getSectionsStub
@@ -2844,7 +2888,7 @@ describe("Zotero.Embeddings", function () {
 			// The runtime's model cache resolves navigator.storage via the most
 			// recent browser window
 			await loadZoteroPane();
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			await Zotero.Embeddings.preloadModel();
 
 			let [related, unrelated] = await Zotero.Embeddings.embedPassages([
@@ -2863,7 +2907,7 @@ describe("Zotero.Embeddings", function () {
 		it("should report a cached model as downloaded and keep it when pruning", async function () {
 			this.timeout(1800000);
 			await loadZoteroPane();
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			await Zotero.Embeddings.preloadModel();
 
 			assert.isTrue(await Zotero.Embeddings.isDownloaded());
@@ -2875,7 +2919,7 @@ describe("Zotero.Embeddings", function () {
 		it("should chunk within the model's real window", async function () {
 			this.timeout(1800000);
 			await loadZoteroPane();
-			Zotero.Prefs.set('embeddings.model', 'bge-small-en-v1.5');
+			Zotero.Prefs.set('embeddings.model', 'bekko-embedding-v1-a8m');
 			await Zotero.Embeddings.download();
 
 			// The model's real tokenizer, built from the same files the
