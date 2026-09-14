@@ -1389,6 +1389,7 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-endpoint/1'),
 				sinon.stub(Zotero.Embeddings, 'embedMany').callsFake(async texts => texts.map(text => vectorFor(text)))
 			];
+			await Zotero.Embeddings.initDB();
 			await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddingsMeta WHERE key='endpoint'");
 			Zotero.Embeddings.Endpoint.reset();
 		});
@@ -1397,6 +1398,14 @@ describe("Zotero.Embeddings", function () {
 			Zotero.HTTP.request.restore?.();
 			Zotero.Prefs.clear('embeddings.endpoint');
 			await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddingsMeta WHERE key='endpoint'");
+		});
+
+		it("should report a configured endpoint as off while no model is selected", async function () {
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			Zotero.Embeddings.getModelName.returns('');
+			Zotero.Embeddings.getModelVersion.throws(new Error("Unknown embeddings model ''"));
+			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'off');
+			assert.doesNotThrow(() => Zotero.Embeddings.Indexing.getStatus());
 		});
 
 		it("should describe how to serve the model", function () {

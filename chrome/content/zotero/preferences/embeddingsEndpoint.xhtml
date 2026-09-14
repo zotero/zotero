@@ -33,7 +33,7 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	data-l10n-id="preferences-advanced-semantic-search-endpoint-dialog"
-	onload="Zotero_EmbeddingsEndpointDialog.init()">
+	onload="init()">
 <dialog
 	id="zotero-embeddings-endpoint"
 	orient="vertical"
@@ -50,7 +50,7 @@
 		<separator class="thin"/>
 
 		<label data-l10n-id="preferences-advanced-semantic-search-endpoint-url" control="endpoint-url"/>
-		<html:input type="text" id="endpoint-url" placeholder="http://localhost:8080/v1/embeddings"/>
+		<html:input type="text" id="endpoint-url"/>
 		<description class="endpoint-note"
 			data-l10n-id="preferences-advanced-semantic-search-endpoint-privacy"/>
 		<separator class="thin"/>
@@ -82,98 +82,101 @@
 	</vbox>
 
 	<script>
-	<![CDATA[
-		var Zotero_EmbeddingsEndpointDialog = {
-			init() {
-				this.io = window.arguments[0];
-				this.urlInput = document.getElementById('endpoint-url');
-				this.dialog = document.getElementById('zotero-embeddings-endpoint');
-				this.urlInput.value = Zotero.Prefs.get('embeddings.endpoint') || '';
-				document.l10n.setAttributes(this.dialog.getButton('accept'),
-					'preferences-advanced-semantic-search-endpoint-accept');
-				// Offered only while there is an endpoint to remove
-				let remove = this.dialog.getButton('extra2');
-				document.l10n.setAttributes(remove, 'preferences-advanced-semantic-search-endpoint-remove');
-				remove.hidden = !this.urlInput.value;
-				document.addEventListener('dialogextra2', () => this.remove());
+		let io;
+		let urlInput;
+		let dialog;
 
-				let serving = Zotero.Embeddings.getServing();
-				document.getElementById('endpoint-model').value = Zotero.Embeddings.getModelName();
-				document.getElementById('endpoint-pooling').value = Zotero.Embeddings.getPooling();
-				document.getElementById('endpoint-file').value = `${serving.gguf} (${serving.quant})`;
-				let { command, url } = Zotero.Embeddings.Endpoint.getCommand();
-				document.getElementById('endpoint-command').value = command;
-				document.l10n.setAttributes(document.getElementById('endpoint-command-url'),
-					'preferences-advanced-semantic-search-endpoint-then-use', { url });
-				document.getElementById('endpoint-copy').addEventListener('command', () => {
-					Zotero.Utilities.Internal.copyTextToClipboard(command);
-				});
+		function init() {
+			io = window.arguments[0];
+			urlInput = document.getElementById('endpoint-url');
+			dialog = document.getElementById('zotero-embeddings-endpoint');
+			let { command, url } = Zotero.Embeddings.Endpoint.getCommand();
+			let stored = Zotero.Prefs.get('embeddings.endpoint');
+			// Where the suggested command serves, so a server started as
+			// suggested is accepted as is
+			urlInput.value = stored || url;
+			document.l10n.setAttributes(dialog.getButton('accept'),
+				'preferences-advanced-semantic-search-endpoint-accept');
+			// Offered only while there is an endpoint to remove
+			let remove = dialog.getButton('extra2');
+			document.l10n.setAttributes(remove, 'preferences-advanced-semantic-search-endpoint-remove');
+			remove.hidden = !stored;
+			document.addEventListener('dialogextra2', removeEndpoint);
 
-				// Verification is asynchronous: hold the dialog open until it
-				// has an answer
-				document.addEventListener('dialogaccept', (event) => {
-					event.preventDefault();
-					this.accept();
-				});
-				this.urlInput.addEventListener('input', () => this.showError(null));
-				this.urlInput.focus();
-			},
+			let serving = Zotero.Embeddings.getServing();
+			document.getElementById('endpoint-model').value = Zotero.Embeddings.getModelName();
+			document.getElementById('endpoint-pooling').value = Zotero.Embeddings.getPooling();
+			document.getElementById('endpoint-file').value = `${serving.gguf} (${serving.quant})`;
+			document.getElementById('endpoint-command').value = command;
+			document.l10n.setAttributes(document.getElementById('endpoint-command-url'),
+				'preferences-advanced-semantic-search-endpoint-then-use', { url });
+			document.getElementById('endpoint-copy').addEventListener('command', () => {
+				Zotero.Utilities.Internal.copyTextToClipboard(command);
+			});
 
-			// Stop using the endpoint. Nothing stored is affected: the vectors
-			// it produced match the model's, and a later endpoint verifies anew.
-			remove() {
-				Zotero.Prefs.clear('embeddings.endpoint');
-				this.io.ok = true;
-				window.close();
-			},
+			// Verification is asynchronous: hold the dialog open until it
+			// has an answer
+			document.addEventListener('dialogaccept', (event) => {
+				event.preventDefault();
+				accept();
+			});
+			urlInput.addEventListener('input', () => showError(null));
+			urlInput.focus();
+		}
 
-			async accept() {
-				let url = this.urlInput.value.trim();
-				// An emptied URL turns the endpoint off; nothing to verify
-				if (!url) {
-					this.remove();
-					return;
-				}
-				this.setBusy(true);
-				this.showError(null);
-				let verdict;
-				try {
-					verdict = await Zotero.Embeddings.Endpoint.verify(url);
-				}
-				catch (e) {
-					Zotero.logError(e);
-					verdict = { state: 'unreachable' };
-				}
-				this.setBusy(false);
-				if (verdict.state != 'ok') {
-					this.showError(verdict);
-					return;
-				}
-				Zotero.Prefs.set('embeddings.endpoint', url);
-				this.io.ok = true;
-				window.close();
-			},
+		// Stop using the endpoint. Nothing stored is affected: the vectors
+		// it produced match the model's, and a later endpoint verifies anew.
+		function removeEndpoint() {
+			Zotero.Prefs.clear('embeddings.endpoint');
+			io.ok = true;
+			window.close();
+		}
 
-			setBusy(busy) {
-				document.getElementById('endpoint-progress').hidden = !busy;
-				this.dialog.getButton('accept').disabled = busy;
-				this.dialog.getButton('cancel').disabled = busy;
-				this.dialog.getButton('extra2').disabled = busy;
-				this.urlInput.disabled = busy;
-			},
-
-			showError(verdict) {
-				let box = document.getElementById('endpoint-error');
-				box.hidden = !verdict;
-				if (!verdict) {
-					return;
-				}
-				document.l10n.setAttributes(box,
-					`preferences-advanced-semantic-search-endpoint-error-${verdict.state}`,
-					{ pooling: Zotero.Embeddings.getPooling() });
+		async function accept() {
+			let url = urlInput.value.trim();
+			// An emptied URL turns the endpoint off; nothing to verify
+			if (!url) {
+				removeEndpoint();
+				return;
 			}
-		};
-	]]>
+			setBusy(true);
+			showError(null);
+			let verdict;
+			try {
+				verdict = await Zotero.Embeddings.Endpoint.verify(url);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				verdict = { state: 'unreachable' };
+			}
+			setBusy(false);
+			if (verdict.state != 'ok') {
+				showError(verdict);
+				return;
+			}
+			Zotero.Prefs.set('embeddings.endpoint', url);
+			io.ok = true;
+			window.close();
+		}
+
+		function setBusy(busy) {
+			document.getElementById('endpoint-progress').hidden = !busy;
+			dialog.getButton('accept').disabled = busy;
+			dialog.getButton('cancel').disabled = busy;
+			dialog.getButton('extra2').disabled = busy;
+			urlInput.disabled = busy;
+		}
+
+		function showError(verdict) {
+			let box = document.getElementById('endpoint-error');
+			box.hidden = !verdict;
+			if (!verdict) {
+				return;
+			}
+			document.l10n.setAttributes(box,
+				`preferences-advanced-semantic-search-endpoint-error-${verdict.state}`,
+				{ pooling: Zotero.Embeddings.getPooling() });
+		}
 	</script>
 </dialog>
 </window>

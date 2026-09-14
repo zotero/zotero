@@ -309,37 +309,27 @@
 					</menupopup>
 				</menulist>
 			</hbox>
-			<description id="semantic-search-model-description"
-				data-l10n-id="preferences-advanced-semantic-search-model-description"/>
-			<!-- Temporary, for testing: pin best-match search to one engine -->
-			<hbox align="center">
-				<label data-l10n-id="preferences-advanced-best-match-engine"
-					control="best-match-engine"/>
-				<menulist id="best-match-engine"
-						preference="extensions.zotero.search.bestMatchEngine"
-						native="true">
-					<menupopup>
-						<menuitem value="hybrid"
-							data-l10n-id="preferences-advanced-best-match-engine-hybrid"/>
-						<menuitem value="lexical"
-							data-l10n-id="preferences-advanced-best-match-engine-lexical"/>
-						<menuitem value="semantic"
-							data-l10n-id="preferences-advanced-best-match-engine-semantic"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-			<hbox align="center">
-				<label data-l10n-id="preferences-advanced-best-match-margin"
-					control="best-match-margin"/>
-				<html:input id="best-match-margin" class="html-input" type="number"
-					min="1" max="100" step="1" size="3"
-					data-preference="search.bestMatchMargin"/>
-			</hbox>
 			<checkbox id="semantic-search-index-fulltext"
 				data-l10n-id="preferences-advanced-semantic-search-index-fulltext"
 				preference="extensions.zotero.embeddings.indexFulltext"
 				native="true"/>
+			<hbox align="center">
+				<label data-l10n-id="preferences-advanced-best-match-margin"
+					control="best-match-margin"/>
+				<html:input id="best-match-margin" class="html-input" type="number"
+					min="0" max="100" step="1" size="3"
+					data-preference="search.bestMatchMargin"/>
+			</hbox>
+			<description class="semantic-search-hint"
+				data-l10n-id="preferences-advanced-best-match-margin-description"/>
+			<hbox id="semantic-search-endpoint-row" align="center" hidden="true">
+				<label id="semantic-search-endpoint-status"/>
+				<button id="semantic-search-endpoint-configure"
+					data-l10n-id="preferences-advanced-semantic-search-endpoint-configure"/>
+			</hbox>
+
 			<vbox id="semantic-search-status" hidden="true">
+				<separator class="thin"/>
 				<hbox align="center">
 					<label data-l10n-id="preferences-advanced-semantic-search-status"/>
 					<label id="semantic-search-phase"/>
@@ -349,11 +339,6 @@
 					<button id="semantic-search-stop"
 						data-l10n-id="preferences-advanced-semantic-search-stop"
 						hidden="true"/>
-				</hbox>
-				<hbox id="semantic-search-endpoint-row" align="center" hidden="true">
-					<label id="semantic-search-endpoint-status"/>
-					<button id="semantic-search-endpoint-configure"
-						data-l10n-id="preferences-advanced-semantic-search-endpoint-configure"/>
 				</hbox>
 				<html:div id="semantic-search-progress">
 					<html:div id="semantic-search-items-row" class="semantic-search-progress-row">
@@ -367,7 +352,30 @@
 						<label id="semantic-search-attachments-value"/>
 					</html:div>
 				</html:div>
-				<html:div id="semantic-search-diagnostics"/>
+				<button id="semantic-search-diagnostics-toggle"
+					data-l10n-id="preferences-advanced-semantic-search-diagnostics-show"/>
+				<html:div id="semantic-search-diagnostics" hidden="true"/>
+			</vbox>
+
+			<!-- Temporary, for testing: pin best-match search to one engine -->
+			<vbox>
+				<separator class="thin"/>
+				<hbox align="center">
+					<label data-l10n-id="preferences-advanced-best-match-engine"
+						control="best-match-engine"/>
+					<menulist id="best-match-engine"
+							preference="extensions.zotero.search.bestMatchEngine"
+							native="true">
+						<menupopup>
+							<menuitem value="hybrid"
+								data-l10n-id="preferences-advanced-best-match-engine-hybrid"/>
+							<menuitem value="lexical"
+								data-l10n-id="preferences-advanced-best-match-engine-lexical"/>
+							<menuitem value="semantic"
+								data-l10n-id="preferences-advanced-best-match-engine-semantic"/>
+						</menupopup>
+					</menulist>
+				</hbox>
 			</vbox>
 		</groupbox>
 	</vbox>

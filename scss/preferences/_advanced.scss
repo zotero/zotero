@@ -98,40 +98,78 @@
 	margin-inline-start: 6px;
 }
 
-#semantic-search-progress {
-	display: grid;
-	grid-template-columns: max-content 1fr max-content;
-	align-items: center;
-	column-gap: 8px;
-	row-gap: 4px;
-	margin-top: 4px;
+#semantic-search {
+	// One gap between rows; the controls' own block margins would make
+	// the gap depend on which control a row holds
+	row-gap: 6px;
 	
-	.semantic-search-progress-row {
-		display: contents;
+	> hbox > :is(menulist, button, .html-input),
+	> vbox > hbox > :is(menulist, button) {
+		margin-block: 0;
+	}
+	
+	// Sized to its first item at construction, before the models are added
+	#semantic-search-model {
+		min-width: 150px;
+	}
+	
+	#best-match-margin {
+		width: 5em;
+	}
+	
+	.semantic-search-hint {
+		opacity: 0.7;
+		font-size: 0.9em;
+	}
+	
+	#semantic-search-status {
+		row-gap: 6px;
+	}
+	
+	#semantic-search-diagnostics-toggle {
+		align-self: flex-start;
+		margin-inline: 0;
+	}
+	
+	// Bars and figures share one label column
+	#semantic-search-progress,
+	#semantic-search-diagnostics {
+		display: grid;
+		align-items: center;
+		column-gap: 12px;
+		row-gap: 4px;
+	}
+	
+	#semantic-search-progress {
+		grid-template-columns: max-content 1fr max-content;
+		
+		.semantic-search-progress-row {
+			display: contents;
+			
+			&[hidden] {
+				display: none;
+			}
+		}
+		
+		progress {
+			width: 100%;
+		}
+	}
+	
+	#semantic-search-diagnostics {
+		grid-template-columns: max-content 1fr;
 		
 		&[hidden] {
 			display: none;
 		}
-	}
-	
-	progress {
-		width: 100%;
-	}
-}
-
-#semantic-search-diagnostics {
-	display: grid;
-	grid-template-columns: max-content 1fr;
-	column-gap: 12px;
-	row-gap: 2px;
-	margin-top: 10px;
-	
-	label:nth-child(odd) {
-		color: var(--fill-secondary);
-	}
-	
-	label:nth-child(even) {
-		white-space: normal;
+		
+		label:nth-child(odd) {
+			color: var(--fill-secondary);
+		}
+		
+		label:nth-child(even) {
+			white-space: normal;
+		}
 	}
 }
 
@@ -146,18 +184,6 @@
 	button {
 		margin-inline-start: 6px;
 	}
-}
-
-#semantic-search-model-description {
-	margin-bottom: 10px;
-}
-
-#semantic-search-libraries {
-	padding-top: 10px;
-}
-
-#semantic-search-endpoint-row {
-	margin: 4px 0;
 }
 
 #zotero-embeddings-endpoint-container {

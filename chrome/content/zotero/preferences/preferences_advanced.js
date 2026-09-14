@@ -113,6 +113,15 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('semantic-search-endpoint-configure').addEventListener('command', () => {
 			this.openSemanticSearchEndpointDialog();
 		});
+
+		let diagnostics = document.getElementById('semantic-search-diagnostics');
+		let toggle = document.getElementById('semantic-search-diagnostics-toggle');
+		toggle.addEventListener('command', () => {
+			diagnostics.hidden = !diagnostics.hidden;
+			document.l10n.setAttributes(toggle, diagnostics.hidden
+				? 'preferences-advanced-semantic-search-diagnostics-show'
+				: 'preferences-advanced-semantic-search-diagnostics-hide');
+		});
 		// The endpoint's stored verdict is read lazily; have it in memory
 		// before the status line first renders
 		Zotero.Embeddings.Endpoint.load().then(() => {
@@ -166,11 +175,10 @@ Zotero_Preferences.Advanced = {
 		statusBox.hidden = !status.enabled;
 		// Fulltext indexing only means something with a model selected
 		document.getElementById('semantic-search-index-fulltext').disabled = !status.enabled;
+		this.updateSemanticSearchEndpointUI(status.endpoint, status.enabled);
 		if (!status.enabled) {
 			return;
 		}
-
-		this.updateSemanticSearchEndpointUI(status.endpoint);
 
 		// Phase / status message
 		let phaseLabel = document.getElementById('semantic-search-phase');
@@ -242,15 +250,16 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('semantic-search-attachments-row').hidden
 			= !Zotero.Prefs.get('embeddings.indexFulltext');
 		this._updateSemanticSearchBar('attachments', status.chunks);
-		this._updateSemanticSearchDiagnostics(status.diagnostics, status.eta);
+		this._updateSemanticSearchDiagnostics(status);
 	},
 
 
 	// Whether the active model can be served at all, and how the configured
 	// server stands (see Zotero.Embeddings.Endpoint.getStatus())
-	updateSemanticSearchEndpointUI: function (endpoint) {
+	updateSemanticSearchEndpointUI: function (endpoint, enabled) {
 		let row = document.getElementById('semantic-search-endpoint-row');
-		row.hidden = !Zotero.Embeddings.Endpoint.isSupported();
+		// Nothing can be said about serving without a model
+		row.hidden = !enabled || !Zotero.Embeddings.Endpoint.isSupported();
 		if (row.hidden) {
 			return;
 		}
@@ -281,7 +290,7 @@ Zotero_Preferences.Advanced = {
 
 	// Key/value rows of pipeline diagnostics for developers, so the labels
 	// are plain English rather than localized
-	_updateSemanticSearchDiagnostics: function (diagnostics, eta) {
+	_updateSemanticSearchDiagnostics: function ({ items, chunks: indexed, diagnostics, eta }) {
 		let n = (value, digits = 0) => (value ?? 0).toLocaleString(undefined, {
 			maximumFractionDigits: digits, minimumFractionDigits: digits
 		});
@@ -301,6 +310,8 @@ Zotero_Preferences.Advanced = {
 
 		let rows = [];
 		let { window, run, engine, processes, slice, chunks } = diagnostics;
+		rows.push(['Items indexed', `${n(items.done)} / ${n(items.total)}`]);
+		rows.push(['Attachment chunks indexed', `${n(indexed.done)} / ${n(indexed.total)}`]);
 		rows.push(['ETA', eta === null ? '—' : duration(eta)]);
 		rows.push(['Throughput (2 min)', window ? speed(window) : '—']);
 		rows.push(['Inference speed (run)', run ? speed(run) : '—']);
@@ -341,8 +352,8 @@ Zotero_Preferences.Advanced = {
 	},
 
 
-	// Fill one progress row with done out of total. The percentage is
-	// rounded down, so it reads 100% only when everything is done.
+	// Fill one progress bar. The percentage is rounded down, so it reads
+	// 100% only when everything is done.
 	_updateSemanticSearchBar: function (name, { done, total }) {
 		let bar = document.getElementById(`semantic-search-${name}-progress`);
 		bar.max = Math.max(total, 1);
@@ -350,7 +361,7 @@ Zotero_Preferences.Advanced = {
 		document.l10n.setAttributes(
 			document.getElementById(`semantic-search-${name}-value`),
 			'preferences-advanced-semantic-search-progress-value',
-			{ done, total, percent: total ? Math.floor(done / total * 100) : 0 }
+			{ percent: total ? Math.floor(done / total * 100) : 0 }
 		);
 	},
 	

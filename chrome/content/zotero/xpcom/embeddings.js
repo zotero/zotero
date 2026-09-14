@@ -3926,7 +3926,8 @@ Zotero.Embeddings.Endpoint = new function () {
 	this.getStatus = function () {
 		let url = Zotero.Prefs.get('embeddings.endpoint') || '';
 		let status = { url, state: 'off', serverModel: null };
-		if (!url) {
+		// A verdict is about a model, so there is none to report without one
+		if (!url || !Zotero.Embeddings.isEnabled()) {
 			return status;
 		}
 		if (_verdict === undefined) {
