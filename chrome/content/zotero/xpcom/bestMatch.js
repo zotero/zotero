@@ -29,27 +29,15 @@
  * scores; when a semantic model is enabled (Zotero.Embeddings), both engines
  * score and their rankings are fused with Reciprocal Rank Fusion, so an item
  * can match by its words, by its meaning, or -- ranking highest -- by both.
- * What text the lexical engine reads depends on the query's shape (see
- * KEYWORD_QUERY_TERMS): everything for a keyword lookup, the items' own
- * text for longer queries. The facade owns everything a consumer would
- * otherwise need engine knowledge for: what counts as an empty query, how
- * results map onto the relevance bar, and what the failure modes are.
+ * The facade owns everything a consumer would otherwise need engine
+ * knowledge for: what counts as an empty query, how results map onto the
+ * relevance bar, and what the failure modes are.
  */
 Zotero.BestMatch = new function () {
 	// The constant in a Reciprocal Rank Fusion contribution, 1 / (RRF_K +
 	// rank): high enough that a handful of rank positions in one engine
 	// can't drown out the other engine's opinion entirely
 	const RRF_K = 60;
-	// A query of this many scoring terms or fewer is a keyword lookup, and
-	// the lexical engine searches everything for it -- exact presence is the
-	// intent, wherever the words appear. A longer query states an intent the
-	// words only gesture at: there the lexical engine searches the items'
-	// own text (titles, abstracts, notes), where saying most of the query
-	// still means answering it, and leaves the attachment fulltext -- where
-	// BM25 can carry a document to the top on one rare word said often -- to
-	// the model, which reads the query whole. A fully quoted query asks for
-	// its literal words outright and searches everything at any length.
-	const KEYWORD_QUERY_TERMS = 2;
 	// How a passage's two kinds of evidence weigh against each other. The
 	// model's reading leads: it is the calibrated signal, and it chose which
 	// passages are worth showing. Saying the query's own words lifts a
@@ -241,20 +229,11 @@ Zotero.BestMatch = new function () {
 					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
 				};
 			}
-			// What the lexical engine reads for this query (see
-			// KEYWORD_QUERY_TERMS): everything for a keyword lookup or a fully
-			// quoted query, the items' own text for anything longer
-			let allSources = Zotero.Lexical.isFullyQuotedQuery(queryText)
-				|| (await Zotero.Lexical.getScoringTermCount(queryText))
-					<= KEYWORD_QUERY_TERMS;
 			// Both engines score the same candidates concurrently. allSettled
 			// rather than all, so one engine's failure still leaves the
 			// other's rejection observed rather than unhandled
 			let [lexical, semantic] = await Promise.allSettled([
-				Zotero.Lexical.scoreItemIDs(queryText, itemIDs, {
-					...options,
-					sources: allSources ? undefined : ['itemText']
-				}),
+				Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options),
 				Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options)
 			]);
 			if (lexical.status == 'rejected') {
@@ -264,12 +243,7 @@ Zotero.BestMatch = new function () {
 				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
 					Zotero.debug("Semantic index not ready -- ranking lexically: "
 						+ semantic.reason.message);
-					// With no model to read the fulltext, the lexical engine
-					// covers all of it, whatever the query's length
-					let scores = _nearTop(allSources
-						? lexical.value
-						: await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options),
-					share => share);
+					let scores = _nearTop(lexical.value, share => share);
 					return {
 						scores,
 						matches: {

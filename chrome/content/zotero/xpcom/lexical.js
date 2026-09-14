@@ -26,42 +26,28 @@
 /**
  * Zotero.Lexical -- ranked lexical search over the library's own text.
  *
- * Scores how well a text answers a query rather than whether it contains every
- * word of it: any term can match, and the score accumulates the evidence, so a
- * document about owl migration in Norway still scores for "owl migration in the
- * united states" -- below the documents that cover all of it.
+ * Scores how well a text answers a query: any term can match and the
+ * evidence adds up, so a document missing a word still ranks, below one
+ * that has them all.
  *
- * The ranking is FTS5's own BM25, asked one question per index rather than one
- * per query term. parseQuery() breaks a query into terms, buildExpression()
- * assembles them into a single OR expression, and the index scores every
- * document against it in one pass. BM25 already weighs a term by how rare it is
- * in the corpus it indexes, saturates repetition, and discounts long documents,
- * so a term filling half the library moves a score barely at all -- no
- * stoplist, no weights of our own, nothing curated by hand.
+ * The ranking is FTS5's BM25. parseQuery() breaks the query into terms and
+ * buildExpression() joins them into one OR expression, which each index
+ * scores in a single pass. BM25 weighs a term by its rarity in the corpus,
+ * saturates repetition and discounts long documents, so there is no stoplist
+ * and no hand-tuned term weights. On top of it:
  *
- * Two things the query asks for that a bag of words wouldn't:
+ * - Consecutive query words are added as phrase terms, so adjacent words
+ *   earn above scattered ones.
+ * - The item-text index is scored with per-column weights, so a title match
+ *   counts for more than one in a note.
+ * - An attachment's fulltext counts only where the query's terms occur
+ *   close together (see buildProximityExpression()); an item's own text is
+ *   short enough to count as is.
  *
- * - Adjacency. Consecutive query words are added to the expression as phrase
- *   terms, so a text saying "special education" earns above one with the words
- *   scattered. A phrase is rarer than either of its words, so BM25 would let it
- *   decide the ranking by itself; the word terms are repeated
- *   ADJACENCY_REPETITION times to hold it to a share of the score.
- * - Where the words landed. A title names a work and an abstract summarizes it,
- *   so the item-text index is scored with per-column weights (see
- *   COLUMN_WEIGHTS), which is BM25's own mechanism for the same idea.
- *
- * Raw BM25 is unbounded and its scale shifts with the query, so it can't be
- * shown or compared as it stands. Every score is divided by the most the
- * expression could earn, which BM25's shape makes calculable from the terms'
- * inverse document frequencies alone (see _getCeiling()). What's left is a 0-1
- * reading of how strongly a document carries the query, weighted toward its
- * rarer terms: a document missing a term forfeits that term's share, and the
- * top of the range belongs to a text about nothing else.
- *
- * Scores from the two indexes are comparable because both are that same
- * fraction, and because BM25 normalizes each by its own corpus's typical
- * document length -- the reason a one-line title and a 400-page PDF can be read
- * on one scale at all.
+ * Raw BM25 is unbounded, so each score is divided by the most the expression
+ * could earn (see _getCeiling()), giving the 0-1 share of the query a document
+ * carries. Both indexes are on that scale, and BM25 normalizes each by its
+ * own typical document length, so a title and a 400-page PDF compare.
  */
 Zotero.Lexical = new function () {
 	// CJK scripts (Han/Hiragana/Katakana/Hangul), the same set the full-text
@@ -73,37 +59,20 @@ Zotero.Lexical = new function () {
 	// word token as the index's unicode61 tokenizer produces them -- a run of
 	// letters and digits, with everything else a separator. The lookahead
 	// keeps CJK characters (which are also \p{L}) out of word tokens, so
-	// 'covid疫情' splits into a word and a run rather than reading as one word.
+	// 'covid疫情' splits into a word and a run.
 	const TOKEN_RE = new RegExp(
 		`(?<cjk>[${CJK_CLASS}]+)|(?<word>(?:(?![${CJK_CLASS}])[\\p{L}\\p{N}])+)`,
 		'gu'
 	);
-	// How many times a word term is repeated in the expression, against one
-	// occurrence of each adjacency phrase (see buildExpression()). BM25 sums a
-	// contribution per term in the expression and counts a repeat again, which
-	// is the only way to weigh one term against another in it. A phrase can
-	// only match texts that match both its words, so it is always the rarer
-	// term and BM25 would otherwise let it decide the ranking: unrepeated, an
-	// accidental adjacency straddling two concepts ("change adaptation" in
-	// "climate change adaptation in bangladesh") outweighs what the query is
-	// about. Repetition trades adjacency for coverage smoothly, and this is
-	// the point on that curve where a query's words still decide it.
-	const ADJACENCY_REPETITION = 3;
 	// What a match in each column of the item-text index is worth, in the
 	// order the index declares them (see fulltext.js): a title names the work,
 	// an abstract summarizes it, everything else speaks with equal voice.
 	// Passed to bm25(), which spends them on how fast a match approaches the
-	// ceiling rather than on the ceiling itself, so a weight can favour a
-	// column without letting it score above a full match.
+	// ceiling, so a weight can favour a column without letting it score
+	// above a full match.
 	const COLUMN_WEIGHTS = { title: 6, abstract: 4, note: 1, annotation: 2 };
-	// The indexes a query is scored against: the attachment content index and
-	// the item-text index, each with the CJK 2-gram table covering the same
-	// documents, and the item-text tables' columns in declaration order
-	// FTS5's BM25 constants, mirrored so a score built here is on the same
-	// footing as one the index produced: the saturation constant K1 and the
-	// (K1 + 1) factor its numerator carries, the length normalization B, and
-	// the floor FTS5 puts under an inverse document frequency -- its way of
-	// saying a term in more than about half a corpus separates nothing there.
+	// BM25 as FTS5's bm25() computes it: the standard k1 and b, and the
+	// floor it puts under a non-positive idf (a term in over half the corpus)
 	const FTS5_K1 = 1.2;
 	const FTS5_B = 0.75;
 	const FTS5_MIN_IDF = 1e-6;
@@ -111,18 +80,25 @@ Zotero.Lexical = new function () {
 	// context, narrow enough to fit on a row
 	const EXCERPT_WINDOW = 200;
 
+	// The indexes a query is scored against. Each source is a word table and
+	// a CJK 2-gram table over the same documents. `columns` names a
+	// multi-column table's columns in the order the table declares them.
 	const SOURCES = [
 		{
 			name: 'content',
 			word: 'fulltextContent',
 			cjk: 'fulltextContentCJK',
-			columns: null
+			columns: null,
+			// A whole document: matches count only where they are close together
+			proximity: true
 		},
 		{
 			name: 'itemText',
 			word: 'fulltextItemText',
 			cjk: 'fulltextItemTextCJK',
-			columns: ['title', 'abstract', 'note', 'annotation']
+			columns: ['title', 'abstract', 'note', 'annotation'],
+			// Short texts: a title, an abstract, an annotation
+			proximity: false
 		}
 	];
 
@@ -219,9 +195,8 @@ Zotero.Lexical = new function () {
 	 * Every term is joined with OR, so any of them can match and BM25 sums
 	 * what each contributes. The word family additionally carries a phrase
 	 * term for each consecutive pair of query words -- what the query asked
-	 * for beyond the words themselves -- and repeats each word term
-	 * ADJACENCY_REPETITION times to keep those phrases from deciding the
-	 * ranking on their own.
+	 * for beyond the words themselves -- with the word terms repeated to
+	 * keep those phrases from deciding the ranking on their own.
 	 *
 	 * Terms are all letters and digits (parseQuery tokenized them), so
 	 * quoting them into FTS phrases needs no escaping.
@@ -250,12 +225,17 @@ Zotero.Lexical = new function () {
 			}
 		}
 		else {
+			// Times each word is repeated against one occurrence of each phrase.
+			// A repeat counts again in BM25, the only way to weigh terms in an
+			// expression; unrepeated, an accidental adjacency ("change adaptation"
+			// in "climate change adaptation in bangladesh") outweighs the words.
+			const WORD_REPETITION = 3;
 			let words = terms.filter(term => term.type == 'word');
 			for (let term of terms) {
 				if (term.type == 'word') {
 					pieces.push({
 						match: '"' + term.text + '"' + (term.prefix ? '*' : ''),
-						repetitions: ADJACENCY_REPETITION
+						repetitions: WORD_REPETITION
 					});
 				}
 				else if (term.type == 'phrase') {
@@ -282,6 +262,39 @@ Zotero.Lexical = new function () {
 	};
 
 	/**
+	 * The FTS5 expression a document matches only where enough of a query's
+	 * terms occur within a window of each other: a NEAR group over the
+	 * required number of the family's terms, one group per way of choosing
+	 * them, joined with OR. Callers pass the terms BM25 scores with, so a
+	 * word the corpus is full of isn't required.
+	 *
+	 * @param {Object[]} terms - Terms from parseQuery()
+	 * @param {String} family - 'word' or 'cjk', as for buildExpression()
+	 * @return {String|null} - Null when the family has fewer than two terms,
+	 *     which have nothing to be close to
+	 */
+	this.buildProximityExpression = function (terms, family) {
+		// Tokens the terms may span: about a page
+		const WINDOW = 200;
+		// Share of the terms the window must hold: all of them up to three,
+		// so a short query gets the words it names; a longer one may miss one
+		const COVERAGE = 0.75;
+		// Terms past this are ignored, bounding the number of groups
+		const MAX_TERMS = 8;
+		let matches = terms
+			.filter(term => (term.type == 'cjk') == (family == 'cjk'))
+			.slice(0, MAX_TERMS)
+			.map(_termMatch);
+		if (matches.length < 2) {
+			return null;
+		}
+		let required = Math.ceil(matches.length * COVERAGE);
+		return _combinations(matches, required)
+			.map(group => 'NEAR(' + group.join(' ') + ', ' + WINDOW + ')')
+			.join(' OR ');
+	};
+
+	/**
 	 * Score a given set of items by how well their text answers a query.
 	 *
 	 * Each index is asked once, for every document matching any of the query's
@@ -290,8 +303,12 @@ Zotero.Lexical = new function () {
 	 * as the share of the query a document carries: rarer terms move it most,
 	 * a document missing a term forfeits that term's share, and repetition
 	 * beyond the point where a text is clearly about a term adds nothing.
-	 * An item's score is its best across the indexes, and items below
-	 * SCORE_FLOOR aren't matches and aren't returned.
+	 * An attachment's fulltext is a whole document, and matches scattered
+	 * through it say nothing together, so it counts only where the query's
+	 * terms occur close together (see buildProximityExpression()); an
+	 * item's own text is short enough to count as is. An item's score is its
+	 * best across the indexes, and items below SCORE_FLOOR aren't matches and
+	 * aren't returned.
 	 *
 	 * Notes edited since their last index update, and notes not indexed yet,
 	 * can't be scored from the index at all; their current text is read and
@@ -303,12 +320,9 @@ Zotero.Lexical = new function () {
 	 * @param {Object} [options]
 	 * @param {Function} [options.shouldCancel] - Checked between indexes;
 	 *     return true to abandon scoring with a ScoringCancelledError
-	 * @param {String[]} [options.sources] - Limit scoring to these sources by
-	 *     name: 'content' (attachment fulltext) and/or 'itemText' (titles,
-	 *     abstracts, notes, annotations). All sources when omitted.
 	 * @return {Promise<Map>} - itemID -> score (0-1, higher is better)
 	 */
-	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel, sources } = {}) {
+	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		// Scores below this aren't matches and aren't returned: measured
 		// against what the query could earn, this is the share of it a
 		// document has to carry. Provisional until tuned against a real
@@ -327,6 +341,7 @@ Zotero.Lexical = new function () {
 				throw new this.ScoringCancelledError();
 			}
 		};
+		let scoring = await _getScoringTerms(terms);
 		let candidates = new Set(itemIDs);
 		let best = new Map();
 		let keep = (itemID, fraction) => {
@@ -335,9 +350,6 @@ Zotero.Lexical = new function () {
 			}
 		};
 		for (let source of SOURCES) {
-			if (sources && !sources.includes(source.name)) {
-				continue;
-			}
 			for (let family of ['word', 'cjk']) {
 				checkCancel();
 				let built = this.buildExpression(terms, family);
@@ -366,6 +378,19 @@ Zotero.Lexical = new function () {
 					.filter(row => candidates.has(row.rowid));
 				if (!rows.length) {
 					continue;
+				}
+				let proximity = source.proximity
+					&& this.buildProximityExpression(scoring, family);
+				if (proximity) {
+					let close = new Set(await Zotero.DB.columnQueryAsync(
+						"SELECT rowid FROM ftindex." + table
+							+ " WHERE " + table + " MATCH ?",
+						[proximity]
+					));
+					rows = rows.filter(row => close.has(row.rowid));
+					if (!rows.length) {
+						continue;
+					}
 				}
 				let ceiling = await _getCeiling(built.pieces, table);
 				// rank is negative, better more negative. The ceiling normally
@@ -406,10 +431,9 @@ Zotero.Lexical = new function () {
 	 * excerpts.
 	 *
 	 * Only the terms BM25 can score with are shown (see _getScoringTerms()),
-	 * so an excerpt points at what actually ranked the item rather than at
-	 * every word of the query. Each excerpt's `strength` is the share of those
-	 * terms it shows, so excerpts can be ordered against other relevance
-	 * evidence for the item.
+	 * so an excerpt points at what actually ranked the item. Each excerpt's
+	 * `strength` is the share of those terms it shows, so excerpts can be
+	 * ordered against other relevance evidence for the item.
 	 *
 	 * @param {String} queryText
 	 * @param {Number} itemID
@@ -468,30 +492,6 @@ Zotero.Lexical = new function () {
 	};
 
 	/**
-	 * How many terms of a query BM25 can score with (see
-	 * _getScoringTerms()) -- a reading of the query's size that ignores the
-	 * corpus-filling words the ranking ignores too
-	 *
-	 * @param {String} queryText
-	 * @return {Promise<Number>}
-	 */
-	this.getScoringTermCount = async function (queryText) {
-		return (await _getScoringTerms(this.parseQuery(queryText))).length;
-	};
-
-	/**
-	 * Whether every part of a query is quoted -- the query's way of asking
-	 * for its literal words and nothing else, wherever they appear
-	 *
-	 * @param {String} queryText
-	 * @return {Boolean}
-	 */
-	this.isFullyQuotedQuery = function (queryText) {
-		let parts = Zotero.SearchConditions.parseSearchString(queryText || '');
-		return parts.length > 0 && parts.every(part => part.inQuotes);
-	};
-
-	/**
 	 * How much of a query each of the given texts carries, on the same 0-1
 	 * scale as scoreItemIDs(): each text's BM25 score over the terms BM25 can
 	 * score with, divided by what a text about nothing but the query could
@@ -504,8 +504,7 @@ Zotero.Lexical = new function () {
 	 * document is about appears in every passage, so it says nothing about
 	 * which passage answers the query -- however rare it is in the corpus
 	 * that surfaced the document. Length is normalized against the texts'
-	 * own average, so a passage is long or short relative to its siblings
-	 * rather than to whole documents.
+	 * own average, so a passage is long or short relative to its siblings.
 	 *
 	 * @param {String} queryText
 	 * @param {String[]} texts
@@ -535,7 +534,7 @@ Zotero.Lexical = new function () {
 		});
 		// The smoothed BM25 idf (the +1 keeps it positive), so a term in
 		// every text still separates texts of one and of many occurrences a
-		// little, rather than flipping negative
+		// little
 		let weighted = terms.map((term) => {
 			let df = counts.reduce((sum, perText) => sum + (perText.has(term) ? 1 : 0), 0);
 			return {
@@ -602,6 +601,20 @@ Zotero.Lexical = new function () {
 		}
 		return best.bounds;
 	};
+
+	// Every way of choosing `size` of the items, in order
+	function _combinations(items, size) {
+		if (size == 0) {
+			return [[]];
+		}
+		let groups = [];
+		items.forEach((item, i) => {
+			for (let rest of _combinations(items.slice(i + 1), size - 1)) {
+				groups.push([item, ...rest]);
+			}
+		});
+		return groups;
+	}
 
 	// The FTS5 MATCH expression matching one term, as buildExpression() writes
 	// it, for counting the documents a term is in
@@ -878,7 +891,7 @@ Zotero.Lexical = new function () {
 				m => m.start < best.bounds.start || m.end > best.bounds.end
 			);
 			// A match wider than the window sits outside every window's
-			// bounds; nothing can show it, so drop it rather than loop on it
+			// bounds; nothing can show it, so drop it
 			if (left.length == remaining.length) {
 				left = remaining.slice(1);
 			}

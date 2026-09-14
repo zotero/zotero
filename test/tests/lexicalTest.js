@@ -153,6 +153,45 @@ describe("Zotero.Lexical", function () {
 		});
 	});
 
+	describe("#buildProximityExpression()", function () {
+		function expression(queryText, family = 'word') {
+			return Zotero.Lexical.buildProximityExpression(
+				Zotero.Lexical.parseQuery(queryText), family);
+		}
+
+		it("should gather every word of a short query in one window", function () {
+			assert.equal(expression("fall communism "),
+				'NEAR("fall" "communism", 200)');
+			assert.equal(expression("owl migration patterns "),
+				'NEAR("owl" "migration" "patterns", 200)');
+		});
+
+		it("should let a longer query miss a word, in any position", function () {
+			assert.equal(expression("a1 b2 c3 d4 "), [
+				'NEAR("a1" "b2" "c3", 200)',
+				'NEAR("a1" "b2" "d4", 200)',
+				'NEAR("a1" "c3" "d4", 200)',
+				'NEAR("b2" "c3" "d4", 200)'
+			].join(' OR '));
+		});
+
+		it("should carry prefixes and phrases as terms", function () {
+			assert.equal(expression('owl* "barn owl" '),
+				'NEAR("owl"* "barn owl", 200)');
+		});
+
+		it("should gate each family on its own terms", function () {
+			assert.equal(expression("owl 猫头鹰 ", 'word'), null);
+			assert.equal(expression("猫头鹰 迁徙 ", 'cjk'),
+				'NEAR("猫头 头鹰" "迁徙", 200)');
+		});
+
+		it("should return null for a single term, which gathers anywhere", function () {
+			assert.isNull(expression("owl "));
+			assert.isNull(expression(""));
+		});
+	});
+
 	describe("#scoreItemIDs()", function () {
 		const BASE_ROWID = 940000000;
 		var inserted = [];
@@ -171,6 +210,19 @@ describe("Zotero.Lexical", function () {
 			return rowid;
 		}
 
+		// A corpus of unrelated documents and items, so a test's words are
+		// rare in it: in a corpus of two, every query word is in more than
+		// half of it, and FTS5 weighs such a word as nothing
+		before(async function () {
+			let subjects = ['tides', 'granite', 'sonnets', 'bridges', 'yeast',
+				'glaciers', 'violins', 'ledgers', 'orchards', 'compasses'];
+			for (let i = 0; i < subjects.length; i++) {
+				await addContentDoc(900 + i,
+					`notes on ${subjects[i]} and their study through the years`);
+				await createDataObject('item', { title: `A survey of ${subjects[i]}` });
+			}
+		});
+
 		after(async function () {
 			for (let rowid of inserted) {
 				await Zotero.DB.queryAsync(
@@ -180,34 +232,38 @@ describe("Zotero.Lexical", function () {
 			}
 		});
 
-		it("should limit scoring to the given sources", async function () {
-			let doc = await addContentDoc(46, 'lexsource in fulltext alone');
-			let item = await createDataObject('item', { title: 'Lexsource in a title' });
+		it("should match a document only where the query's words share a passage", async function () {
+			let near = await addContentDoc(60,
+				'the lexproxfall of lexproxcommunism in eastern europe');
+			let far = await addContentDoc(61,
+				'lexproxcommunism spread widely ' + 'filler '.repeat(300)
+					+ 'in the lexproxfall season the leaves drop');
+			// An item's own text is a passage already, so one word matches it
+			let item = await createDataObject('item',
+				{ title: 'Lexproxcommunism in the twentieth century' });
 
-			let all = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id]);
-			assert.isTrue(all.has(doc));
-			assert.isTrue(all.has(item.id));
-
-			// The items' own text doesn't include attachment fulltext
-			let own = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id],
-				{ sources: ['itemText'] });
-			assert.isFalse(own.has(doc));
-			assert.isTrue(own.has(item.id));
+			let scores = await Zotero.Lexical.scoreItemIDs(
+				'lexproxfall lexproxcommunism', [near, far, item.id]);
+			assert.isTrue(scores.has(near));
+			assert.isFalse(scores.has(far));
+			assert.isTrue(scores.has(item.id));
 		});
 
-		it("should limit scoring to the given sources", async function () {
-			let doc = await addContentDoc(46, 'lexsource in fulltext alone');
-			let item = await createDataObject('item', { title: 'Lexsource in a title' });
+		it("should admit a document saying most of a longer query in one passage", async function () {
+			let most = await addContentDoc(62,
+				'lexpcova lexpcovb and lexpcovc discussed here');
+			let half = await addContentDoc(63,
+				'lexpcova lexpcovb discussed here');
+			let scattered = await addContentDoc(64,
+				'lexpcova lexpcovb ' + 'filler '.repeat(300) + 'lexpcovc lexpcovd');
 
-			let all = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id]);
-			assert.isTrue(all.has(doc));
-			assert.isTrue(all.has(item.id));
-
-			// The items' own text doesn't include attachment fulltext
-			let own = await Zotero.Lexical.scoreItemIDs('lexsource', [doc, item.id],
-				{ sources: ['itemText'] });
-			assert.isFalse(own.has(doc));
-			assert.isTrue(own.has(item.id));
+			let scores = await Zotero.Lexical.scoreItemIDs(
+				'lexpcova lexpcovb lexpcovc lexpcovd', [most, half, scattered]);
+			// Three of four words in one passage is saying the query...
+			assert.isTrue(scores.has(most));
+			// ...two of four isn't, and neither is all four spread apart
+			assert.isFalse(scores.has(half));
+			assert.isFalse(scores.has(scattered));
 		});
 
 		it("should return scores as 0-1 fractions", async function () {
@@ -333,24 +389,6 @@ describe("Zotero.Lexical", function () {
 			let e = await getPromiseError(Zotero.Lexical.scoreItemIDs(
 				'lexscancel ', [item.id], { shouldCancel: () => true }));
 			assert.instanceOf(e, Zotero.Lexical.ScoringCancelledError);
-		});
-	});
-
-	describe("#getScoringTermCount()", function () {
-		it("should count the terms BM25 can score with", async function () {
-			assert.equal(
-				await Zotero.Lexical.getScoringTermCount('lexcountaaa lexcountbbb'), 2);
-			assert.equal(await Zotero.Lexical.getScoringTermCount(''), 0);
-		});
-	});
-
-	describe("#isFullyQuotedQuery()", function () {
-		it("should be true only when every part is quoted", function () {
-			assert.isTrue(Zotero.Lexical.isFullyQuotedQuery('"owl migration"'));
-			assert.isTrue(Zotero.Lexical.isFullyQuotedQuery('"owl" "migration"'));
-			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery('"owl" migration'));
-			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery('owl migration'));
-			assert.isFalse(Zotero.Lexical.isFullyQuotedQuery(''));
 		});
 	});
 

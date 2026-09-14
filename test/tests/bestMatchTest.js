@@ -11,7 +11,7 @@ describe("Zotero.BestMatch", function () {
 			(sum, [fraction, rank]) => sum + fraction / (60 + rank), 0) / (2 / 61);
 	}
 
-	function stubEngines({ enabled, lexical, semantic, fraction, termCount, quoted }) {
+	function stubEngines({ enabled, lexical, semantic, fraction }) {
 		stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(enabled));
 		// Semantic scores pass through the display band unchanged unless a
 		// test maps them, so expected fused values compute from the stubbed
@@ -21,12 +21,6 @@ describe("Zotero.BestMatch", function () {
 		if (lexical) {
 			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').callsFake(lexical));
 		}
-		// A keyword query unless the test says otherwise, so the lexical
-		// engine searches everything
-		stubs.push(sinon.stub(Zotero.Lexical, 'getScoringTermCount')
-			.resolves(termCount ?? 1));
-		stubs.push(sinon.stub(Zotero.Lexical, 'isFullyQuotedQuery')
-			.returns(quoted ?? false));
 		// Per-test semantic fakes return bare score Maps; wrap them in the
 		// engine's { scores, previewableIDs } envelope
 		if (semantic) {
@@ -72,61 +66,6 @@ describe("Zotero.BestMatch", function () {
 			// Strong matches in both engines beat topping either one alone
 			assert.isAbove(scores.get(2), scores.get(1));
 			assert.isAbove(scores.get(1), scores.get(3));
-		});
-
-		it("should search only the items' own text for a longer query", async function () {
-			let lexicalStub = sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves(new Map());
-			stubs.push(lexicalStub);
-			stubEngines({
-				enabled: true,
-				semantic: async () => new Map(),
-				termCount: 3
-			});
-
-			await Zotero.BestMatch.scoreItemIDs('owl migration patterns', [1]);
-			assert.deepEqual(lexicalStub.firstCall.args[2].sources, ['itemText']);
-
-			// A keyword query searches everything
-			lexicalStub.resetHistory();
-			Zotero.Lexical.getScoringTermCount.resolves(2);
-			await Zotero.BestMatch.scoreItemIDs('owl migration', [1]);
-			assert.isUndefined(lexicalStub.firstCall.args[2].sources);
-		});
-
-		it("should search everything for a fully quoted query", async function () {
-			let lexicalStub = sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves(new Map());
-			stubs.push(lexicalStub);
-			stubEngines({
-				enabled: true,
-				semantic: async () => new Map(),
-				termCount: 3,
-				quoted: true
-			});
-
-			await Zotero.BestMatch.scoreItemIDs('"owl" "migration" "patterns"', [1]);
-			assert.isUndefined(lexicalStub.firstCall.args[2].sources);
-		});
-
-		it("should fall back to lexical over everything when the index isn't ready", async function () {
-			stubEngines({
-				enabled: true,
-				// The items' own text holds one match; the fulltext another
-				lexical: async (queryText, itemIDs, options) => (
-					options.sources
-						? new Map([[1, 0.5]])
-						: new Map([[1, 0.5], [2, 0.4]])
-				),
-				semantic: async () => {
-					throw new Zotero.Embeddings.IndexNotReadyError('test');
-				},
-				termCount: 3
-			});
-
-			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
-				'owl migration patterns', [1, 2]);
-			// With no model to read the fulltext, lexical covers all of it
-			assert.deepEqual([...scores.entries()], [[1, 0.5], [2, 0.4]]);
-			assert.sameMembers([...matches.lexical], [1, 2]);
 		});
 
 		it("should keep the model's ordering above the display band", async function () {
@@ -358,8 +297,6 @@ describe("Zotero.BestMatch", function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
 					.callsFake(score => score));
-				stubs.push(sinon.stub(Zotero.Lexical, 'getScoringTermCount').resolves(1));
-				stubs.push(sinon.stub(Zotero.Lexical, 'isFullyQuotedQuery').returns(false));
 				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
 					.resolves(new Map([[1, 0.8], [2, 0.9]])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').resolves({
