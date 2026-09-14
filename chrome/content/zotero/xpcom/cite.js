@@ -310,23 +310,6 @@ Zotero.Cite = {
 			// One of the characters is usually a period, so we can adjust this down a bit
 			maxOffset = Math.max(1, maxOffset - 2);
 			
-			// Force a minimum line height
-			if(lineSpacing <= 1.35) lineSpacing = 1.35;
-			
-			var style = div.getAttribute("style");
-			if(!style) style = "";
-			style += "line-height: " + lineSpacing + "; ";
-			
-			if(hangingIndent) {
-				if (multiField && !secondFieldAlign) {
-					throw ("second-field-align=false and hangingindent=true combination is not currently supported");
-				}
-				// If only one field, apply hanging indent on root
-				else if (!multiField) {
-					style += "margin-left: 2em; text-indent:-2em;";
-				}
-			}
-			
 			if(style) div.setAttribute("style", style);
 			
 			// csl-entry
