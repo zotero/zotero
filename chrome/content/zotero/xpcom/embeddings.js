@@ -952,27 +952,32 @@ Zotero.Embeddings = new function () {
 	}
 
 	/**
-	 * Embed texts through an OpenAI-style /v1/embeddings endpoint, as served
-	 * by llama.cpp: POST { input } and read { model, data: [{ index,
-	 * embedding }] }. Rows are ordered by
-	 * index, since the spec doesn't promise input order. The vectors come
-	 * back finished the way the local engine's do (see _finish()), so the
-	 * two are comparable.
+	 * Embed texts through an embeddings server, in one of two formats:
+	 *
+	 *  - 'openai': /v1/embeddings as llama.cpp serves it. POST { input } and
+	 *    read { model, data: [{ index, embedding }] }, ordering rows by
+	 *    index, since the spec doesn't promise input order.
+	 *  - 'tei': Hugging Face text-embeddings-inference. POST { inputs } and
+	 *    read a bare array of vectors in input order; no model is reported.
+	 *
+	 * The vectors come back finished the way the local engine's do (see
+	 * _finish()), so the two are comparable.
 	 *
 	 * @param {String} endpoint - URL
 	 * @param {String[]} texts - With any prefix already applied
+	 * @param {String} [format='openai']
 	 * @return {Promise<Object>} - { vectors, model, width }: the finished
-	 *     vectors, the model string the server reported, and the width of
-	 *     the vectors as served
+	 *     vectors, the model string the server reported (null if none), and
+	 *     the width of the vectors as served
 	 * @throws {Zotero.HTTP.UnexpectedStatusException} on a non-2xx response
 	 * @throws {Zotero.Embeddings.EndpointResponseError} on a 2xx response that
 	 *     isn't an embeddings response for these inputs
 	 */
-	this.embedViaEndpoint = async function (endpoint, texts) {
+	this.embedViaEndpoint = async function (endpoint, texts, format = 'openai') {
 		texts = texts.map(_normalizeInput);
-		Zotero.debug(`Embeddings: embedding batch of ${texts.length} via endpoint`);
+		Zotero.debug(`Embeddings: embedding batch of ${texts.length} via endpoint (${format})`);
 		let xmlhttp = await Zotero.HTTP.request('POST', endpoint, {
-			body: JSON.stringify({ input: texts }),
+			body: JSON.stringify(format == 'tei' ? { inputs: texts } : { input: texts }),
 			headers: { 'Content-Type': 'application/json' },
 			responseType: 'json',
 			timeout: 120000,
@@ -981,21 +986,25 @@ Zotero.Embeddings = new function () {
 			// local engine, so the HTTP layer's hour-long 5xx backoff must not run
 			errorDelayMax: 0
 		});
-		let data = xmlhttp.response?.data;
-		let vectors = Array.isArray(data)
-			? data.slice().sort((a, b) => a.index - b.index).map(row => row.embedding)
-			: null;
+		let response = xmlhttp.response;
+		let vectors = null;
+		if (Array.isArray(response)) {
+			vectors = response;
+		}
+		else if (Array.isArray(response?.data)) {
+			vectors = response.data.slice().sort((a, b) => a.index - b.index).map(row => row.embedding);
+		}
 		if (!vectors || vectors.length !== texts.length || !vectors.every(Array.isArray)) {
 			let received = vectors
 				? `${vectors.length} vectors`
-				: JSON.stringify(xmlhttp.response).substring(0, 200);
+				: JSON.stringify(response).substring(0, 200);
 			throw new this.EndpointResponseError(`Endpoint returned ${received} `
 				+ `for ${texts.length} inputs`);
 		}
 		Zotero.debug(`Embeddings: batch of ${texts.length} done`);
 		return {
 			vectors: vectors.map(vector => _finish(new Float32Array(vector))),
-			model: typeof xmlhttp.response.model == 'string' ? xmlhttp.response.model : null,
+			model: typeof response.model == 'string' ? response.model : null,
 			width: vectors[0].length
 		};
 	};
@@ -1074,18 +1083,31 @@ Zotero.Embeddings = new function () {
 		let sentinel = await this.Endpoint.getSentinel();
 		let served;
 		try {
-			served = await this.embedViaEndpoint(endpoint.url, [...texts, sentinel.text]);
+			served = await this.embedViaEndpoint(endpoint.url, [...texts, sentinel.text], endpoint.format);
 		}
 		catch (e) {
 			Zotero.logError(e);
 			this.Endpoint.recordFailure(e);
 			Zotero.debug('Embeddings: endpoint failed -- embedding this batch locally');
-			return this.embedMany(texts);
+			return _embedInParts(texts);
 		}
 		this.Endpoint.recordSuccess();
 		let checked = await this.Endpoint.checkBatch(endpoint, served, sentinel.vector, texts.length);
-		return checked ? served.vectors.slice(0, texts.length) : this.embedMany(texts);
+		return checked ? served.vectors.slice(0, texts.length) : _embedInParts(texts);
 	};
+
+	// A batch cut for a remote server can be several times what the local
+	// engine's memory allows (see Indexing), so it embeds locally in parts.
+	// Even quarters are near enough for a fallback.
+	async function _embedInParts(texts) {
+		const PARTS = 4;
+		let size = Math.ceil(texts.length / PARTS);
+		let vectors = [];
+		for (let i = 0; i < texts.length; i += size) {
+			vectors.push(...await Zotero.Embeddings.embedMany(texts.slice(i, i + size)));
+		}
+		return vectors;
+	}
 
 	/**
 	 * Similarity between an arbitrary query and passage, computed the way
@@ -1657,6 +1679,10 @@ Zotero.Embeddings.Indexing = new function () {
 	const DEFAULT_TOKEN_BUDGET = 3000;
 	const DEGRADED_TOKEN_BUDGET_FLOOR = 400;
 	let _tokenBudget = DEFAULT_TOKEN_BUDGET;
+	// A remote server's cost is mostly the round trip, so its batches are
+	// this many times the local budget; a failed one embeds locally in parts
+	// (see Zotero.Embeddings.embedPassages())
+	const REMOTE_BUDGET_FACTOR = 3;
 
 	// Don't start a run that would load the model with less than this much
 	// memory available, since inference needs room well beyond the model files
@@ -2604,16 +2630,16 @@ Zotero.Embeddings.Indexing = new function () {
 	// @param {Function} [options.onProgress] - Called after every batch as
 	//     { done, total } items
 	// @param {Number} [options.maxBatchItems=20] - Most items per engine call
-	// @param {Number} [options.batchTokenBudget=3000] - Most tokens per engine
-	//     call, counting every text in the batch as long as its longest one,
-	//     since they're padded to that length.
+	// @param {Function} [options.batchTokenBudget] - Returns the most tokens
+	//     per engine call, counting every text in the batch as long as its
+	//     longest one, since they're padded to that length. Read per batch.
 	// @param {Function} [options.shouldStop] - Called before each batch;
 	//     return true to stop early
 	// @return {Promise<Number>} - Number of embeddings stored
 	async function _indexItems(items, {
 		onProgress,
 		maxBatchItems = 20,
-		batchTokenBudget = 3000,
+		batchTokenBudget = () => 3000,
 		shouldStop
 	} = {}) {
 		await Zotero.Items.loadDataTypes(items, ['itemData', 'note', 'annotation']);
@@ -2766,12 +2792,13 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 			// Take as many of the next texts as fit the budget, always at
 			// least one
+			let budget = batchTokenBudget();
 			let longest = 0;
 			let count = 0;
 			while (i + count < units.length && count < maxBatchItems) {
 				let unit = units[i + count];
 				let tokens = Math.max(longest, unit.entry.chunks[unit.chunkIndex].tokens);
-				if (count && tokens * (count + 1) > batchTokenBudget) {
+				if (count && tokens * (count + 1) > budget) {
 					break;
 				}
 				longest = tokens;
@@ -3114,11 +3141,12 @@ Zotero.Embeddings.Indexing = new function () {
 
 			_downloadProgress = null;
 			let shouldStop = () => _stopping;
-			// Built per call: memory pressure can shrink the token budget
-			// between chunks
+			// The budget is read per batch: memory pressure can shrink it
+			// between chunks, and the endpoint can drop out mid-run
 			let indexOptions = () => ({
 				shouldStop,
-				batchTokenBudget: _tokenBudget,
+				batchTokenBudget: () => _tokenBudget
+					* (Zotero.Embeddings.Endpoint.isRemoteActive() ? REMOTE_BUDGET_FACTOR : 1),
 				onProgress: () => _tick()
 			});
 			// One step at a time, in a fixed order: the regular queue, then
@@ -3665,9 +3693,11 @@ Zotero.Embeddings.Calibration = new function () {
  * A server is trusted because its vectors match the local model's, never
  * because of its name: verify() embeds a fixed set of texts both ways and
  * compares them, and the verdict is stored keyed to the URL and the model
- * version it was measured for. Passages route to the endpoint only while a
- * matching verdict says so (see Zotero.Embeddings.embedPassages()); queries
- * always embed locally, and so does any batch the endpoint fails.
+ * version it was measured for, along with the request format the server
+ * answered (see Zotero.Embeddings.embedViaEndpoint()). Passages route to
+ * the endpoint only while a matching verdict says so (see
+ * Zotero.Embeddings.embedPassages()); queries always embed locally, and so
+ * does any batch the endpoint fails.
  */
 Zotero.Embeddings.Endpoint = new function () {
 	// Least per-text cosine between served and local vectors for the two to
@@ -3676,6 +3706,8 @@ Zotero.Embeddings.Endpoint = new function () {
 	// same weights sits around 0.997; the same model with the wrong pooling
 	// lands near 0.7, a different model below 0.5.
 	const AGREEMENT_MIN = 0.98;
+	// Request formats verify() tries, in order (see Zotero.Embeddings.embedViaEndpoint())
+	const FORMATS = ['openai', 'tei'];
 	// Texts the probe embeds both ways, drawn from the calibration corpus:
 	// queries for short text, passages for chunk-length
 	const PROBE_QUERIES = 8;
@@ -3734,11 +3766,12 @@ Zotero.Embeddings.Endpoint = new function () {
 	 * them, and store the verdict for the current model version.
 	 *
 	 * @param {String} url
-	 * @return {Promise<Object>} - { state, url, modelVersion, serverModel,
-	 *     agreement, time }. state is 'ok', or why not: 'unreachable' (no
-	 *     usable response), 'unauthorized' (the server wants credentials,
-	 *     which aren't supported), 'not-embeddings' (not an OpenAI-style
-	 *     embeddings endpoint), 'width-mismatch' (a different model),
+	 * @return {Promise<Object>} - { state, url, modelVersion, format,
+	 *     serverModel, agreement, time }. state is 'ok', or why not:
+	 *     'unreachable' (no usable response), 'unauthorized' (the server
+	 *     wants credentials, which aren't supported), 'not-embeddings' (not
+	 *     an embeddings endpoint in a format Zotero speaks, see
+	 *     Zotero.Embeddings.embedViaEndpoint()), 'width-mismatch' (a different model),
 	 *     'low-agreement' (a different model, or the wrong pooling), or
 	 *     'context-too-small' (the server can't take a chunk-length text).
 	 *     agreement is the least per-text cosine, once there are vectors to
@@ -3749,7 +3782,7 @@ Zotero.Embeddings.Endpoint = new function () {
 		_suspended = false;
 		_failures = 0;
 		let verdict = {
-			state: null, url, modelVersion: E.getModelVersion(),
+			state: null, url, modelVersion: E.getModelVersion(), format: null,
 			serverModel: null, agreement: null, time: Date.now()
 		};
 		let fail = async (state, detail) => {
@@ -3763,12 +3796,20 @@ Zotero.Embeddings.Endpoint = new function () {
 		let local = await E.embedMany([...regular, padded].map(text => prefix + text));
 		let localPadded = local.pop();
 
+		// The first format the server answers is the one it speaks
 		let served;
-		try {
-			served = await E.embedViaEndpoint(url, regular.map(text => prefix + text));
-		}
-		catch (e) {
-			return fail(_classifyFailure(e), e.message);
+		for (let format of FORMATS) {
+			try {
+				served = await E.embedViaEndpoint(url, regular.map(text => prefix + text), format);
+				verdict.format = format;
+				break;
+			}
+			catch (e) {
+				let state = _classifyFailure(e);
+				if (state != 'not-embeddings' || format == FORMATS.at(-1)) {
+					return fail(state, e.message);
+				}
+			}
 		}
 		verdict.serverModel = served.model;
 		let dims = local[0].length;
@@ -3782,7 +3823,7 @@ Zotero.Embeddings.Endpoint = new function () {
 		// A server whose window is too small for a chunk rejects it, or embeds
 		// what fits and says nothing
 		try {
-			let { vectors } = await E.embedViaEndpoint(url, [prefix + padded]);
+			let { vectors } = await E.embedViaEndpoint(url, [prefix + padded], verdict.format);
 			let agreement = E.cosine(vectors[0], localPadded);
 			if (agreement < AGREEMENT_MIN) {
 				return fail('context-too-small', `long text agreement ${agreement.toFixed(3)}`);
@@ -3791,7 +3832,8 @@ Zotero.Embeddings.Endpoint = new function () {
 		catch (e) {
 			// A server that took the other texts and rejects this one is
 			// short of window, not of network
-			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException
+					|| e instanceof E.EndpointResponseError) {
 				return fail('context-too-small', e.message);
 			}
 			return fail(_classifyFailure(e), e.message);
@@ -3805,7 +3847,7 @@ Zotero.Embeddings.Endpoint = new function () {
 	 * The endpoint passages route to: the configured URL, when a stored
 	 * verdict says it serves the active model.
 	 *
-	 * @return {Promise<Object|null>} - { url, serverModel }
+	 * @return {Promise<Object|null>} - { url, format, serverModel }
 	 */
 	this.getActive = async function () {
 		let url = Zotero.Prefs.get('embeddings.endpoint');
@@ -3816,7 +3858,7 @@ Zotero.Embeddings.Endpoint = new function () {
 		if (!_applies(verdict, url) || verdict.state != 'ok') {
 			return null;
 		}
-		return { url, serverModel: verdict.serverModel };
+		return { url, format: verdict.format || 'openai', serverModel: verdict.serverModel };
 	};
 
 	/**
@@ -3861,6 +3903,19 @@ Zotero.Embeddings.Endpoint = new function () {
 	};
 
 	/**
+	 * Whether passages are routing to a server on another machine right now:
+	 * a verified endpoint, not being skipped, not on this host. Synchronous,
+	 * from the verdict last read (see getActive()).
+	 *
+	 * @return {Boolean}
+	 */
+	this.isRemoteActive = function () {
+		let url = Zotero.Prefs.get('embeddings.endpoint');
+		return !!url && !_suspended && _applies(_verdict, url) && _verdict.state == 'ok'
+			&& !_isLocalhost(url);
+	};
+
+	/**
 	 * Note a failed request. After MAX_FAILURES in a row the endpoint is
 	 * skipped until the next run (see recheck()) or verification.
 	 * @param {Error} e
@@ -3891,7 +3946,7 @@ Zotero.Embeddings.Endpoint = new function () {
 		let sentinel = await this.getSentinel();
 		let served;
 		try {
-			served = await Zotero.Embeddings.embedViaEndpoint(active.url, [sentinel.text]);
+			served = await Zotero.Embeddings.embedViaEndpoint(active.url, [sentinel.text], active.format);
 		}
 		catch (e) {
 			_suspended = true;
@@ -3964,6 +4019,17 @@ Zotero.Embeddings.Endpoint = new function () {
 		_failures = 0;
 	};
 
+	function _isLocalhost(url) {
+		let host;
+		try {
+			host = new URL(url).hostname;
+		}
+		catch (e) {
+			return false;
+		}
+		return host == 'localhost' || host == '[::1]' || host.startsWith('127.');
+	}
+
 	// Whether a stored verdict is about this URL and the active model
 	function _applies(verdict, url) {
 		return !!verdict && verdict.url === url
@@ -3994,7 +4060,7 @@ Zotero.Embeddings.Endpoint = new function () {
 			if (e.status == 401 || e.status == 403) {
 				return 'unauthorized';
 			}
-			if (e.status == 404 || e.status == 405) {
+			if ([400, 404, 405, 422].includes(e.status)) {
 				return 'not-embeddings';
 			}
 			return 'unreachable';

@@ -1356,13 +1356,19 @@ describe("Zotero.Embeddings", function () {
 			return vector.map(val => val / norm);
 		};
 		// A server: answers each request from `remoteFor(text)`, or throws
-		// what `failWith(texts)` returns
-		let serve = ({ remoteFor = vectorFor, model = 'served', failWith = () => null, shape = null } = {}) => {
+		// what `failWith(texts)` returns. Speaks llama.cpp's OpenAI-style
+		// format, or TEI's with `format: 'tei'`, rejecting the other's body
+		// the way the real server does
+		let serve = ({ remoteFor = vectorFor, model = 'served', failWith = () => null, shape = null, format = 'openai' } = {}) => {
 			let calls = [];
 			return {
 				calls,
 				stub: sinon.stub(Zotero.HTTP, 'request').callsFake(async (method, url, options) => {
-					let { input } = JSON.parse(options.body);
+					let body = JSON.parse(options.body);
+					let input = format == 'tei' ? body.inputs : body.input;
+					if (!input) {
+						throw status(422);
+					}
 					calls.push({ url, input, headers: options.headers });
 					let error = failWith(input);
 					if (error) {
@@ -1370,6 +1376,9 @@ describe("Zotero.Embeddings", function () {
 					}
 					if (shape) {
 						return { status: 200, response: shape };
+					}
+					if (format == 'tei') {
+						return { status: 200, response: input.map(text => Array.from(remoteFor(text))) };
 					}
 					return {
 						status: 200,
@@ -1419,12 +1428,31 @@ describe("Zotero.Embeddings", function () {
 			let server = serve();
 			let verdict = await Zotero.Embeddings.Endpoint.verify(URL);
 			assert.equal(verdict.state, 'ok');
+			assert.equal(verdict.format, 'openai');
 			assert.equal(verdict.serverModel, 'served');
 			assert.closeTo(verdict.agreement, 1, 1e-5);
 			// The regular texts in one request, the chunk-length one alone
 			assert.lengthOf(server.calls, 2);
 			assert.isAbove(server.calls[0].input.length, 10);
 			assert.isAbove(server.calls[1].input[0].length, 8000);
+		});
+
+		it("should accept a server speaking TEI's format and keep speaking it", async function () {
+			let server = serve({ format: 'tei' });
+			let verdict = await Zotero.Embeddings.Endpoint.verify(URL);
+			assert.equal(verdict.state, 'ok');
+			assert.equal(verdict.format, 'tei');
+			assert.isNull(verdict.serverModel);
+			assert.closeTo(verdict.agreement, 1, 1e-5);
+			// The OpenAI-style probe was refused, then the regular texts and
+			// the chunk-length one went through in TEI's format
+			assert.lengthOf(server.calls, 2);
+
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			server.calls.length = 0;
+			await Zotero.Embeddings.embedPassages(['a passage']);
+			assert.lengthOf(server.calls, 1);
+			assert.include(server.calls[0].input, 'a passage');
 		});
 
 		it("should reject a server serving something else", async function () {
@@ -1560,16 +1588,45 @@ describe("Zotero.Embeddings", function () {
 			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'invalid');
 		});
 
-		it("should embed a failed batch locally and keep the endpoint", async function () {
+		it("should embed a failed batch locally in parts and keep the endpoint", async function () {
 			let server = serve();
 			Zotero.Prefs.set('embeddings.endpoint', URL);
 			await Zotero.Embeddings.Endpoint.verify(URL);
 			Zotero.HTTP.request.restore();
 			server = serve({ failWith: () => status(500) });
-			let [vector] = await Zotero.Embeddings.embedPassages(['a passage']);
-			assert.closeTo(Zotero.Embeddings.cosine(vector, vectorFor('a passage')), 1, 1e-5);
+			let texts = Array.from({ length: 10 }, (_, i) => `passage ${i}`);
+			// The sentinel's local vector is computed once, on first use
+			await Zotero.Embeddings.Endpoint.getSentinel();
+			Zotero.Embeddings.embedMany.resetHistory();
+			let vectors = await Zotero.Embeddings.embedPassages(texts);
+			assert.lengthOf(vectors, 10);
+			assert.closeTo(Zotero.Embeddings.cosine(vectors[7], vectorFor('passage 7')), 1, 1e-5);
 			assert.lengthOf(server.calls, 1);
+			// A batch cut for the server is too big for the local engine in
+			// one go: quarters, in order
+			assert.equal(Zotero.Embeddings.embedMany.callCount, 4);
+			assert.deepEqual(Zotero.Embeddings.embedMany.firstCall.args[0], texts.slice(0, 3));
+			assert.deepEqual(Zotero.Embeddings.embedMany.lastCall.args[0], texts.slice(9));
 			assert.equal(Zotero.Embeddings.Endpoint.getStatus().state, 'ok');
+		});
+
+		it("should count a verified server on another machine as remote", async function () {
+			let remote = 'https://example.com/prod/invoke';
+			serve();
+			// Verified, but on this machine
+			Zotero.Prefs.set('embeddings.endpoint', URL);
+			await Zotero.Embeddings.Endpoint.verify(URL);
+			assert.isFalse(Zotero.Embeddings.Endpoint.isRemoteActive());
+			// Configured elsewhere but not yet verified there
+			Zotero.Prefs.set('embeddings.endpoint', remote);
+			assert.isFalse(Zotero.Embeddings.Endpoint.isRemoteActive());
+			await Zotero.Embeddings.Endpoint.verify(remote);
+			assert.isTrue(Zotero.Embeddings.Endpoint.isRemoteActive());
+			// Skipped after repeated failures
+			for (let i = 0; i < 3; i++) {
+				Zotero.Embeddings.Endpoint.recordFailure(new Error('down'));
+			}
+			assert.isFalse(Zotero.Embeddings.Endpoint.isRemoteActive());
 		});
 	});
 
