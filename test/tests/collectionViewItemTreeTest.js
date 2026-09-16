@@ -2275,6 +2275,51 @@ describe("CollectionViewItemTree", function () {
 			assert.isFalse(itemsView.isContainerEmpty(itemsView.getRowIndexByID(item2.id)));
 		});
 		
+		it("should move a child item when the drag only allows copying", async function () {
+			var collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			var item1 = await createDataObject('item', { title: "A", collections: [collection.id] });
+			var item2 = await createDataObject('item', { title: "B", collections: [collection.id] });
+			var attachment = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			
+			await itemsView.selectItem(attachment.id);
+			
+			var dataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['zotero/item'],
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return attachment.id + "";
+					}
+					return "";
+				},
+				mozItemCount: 1
+			};
+			var index = itemsView.getRowIndexByID(item2.id);
+			var rowEl = {
+				classList: { contains: () => false },
+				getBoundingClientRect: () => ({ y: 0, height: 100 })
+			};
+			Zotero.DragDrop.currentDragSource = itemsView.collectionTreeRows[0];
+			itemsView.onDragOver({
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: rowEl,
+				target: rowEl,
+				clientY: 50,
+				dataTransfer
+			}, index);
+			// The requested move has to be sent as an allowed effect for the drop to happen
+			assert.equal(dataTransfer.dropEffect, 'copy');
+			
+			var promise = itemsView.waitForSelect();
+			await drop(index, 0, dataTransfer);
+			await promise;
+			
+			assert.equal(attachment.parentItemID, item2.id);
+		});
+		
 		it("should move a child item from last item in list to another", async function () {
 			var collection = await createDataObject('collection');
 			await waitForItemsLoad(win);
