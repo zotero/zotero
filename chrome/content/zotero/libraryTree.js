@@ -276,6 +276,19 @@ var LibraryTree = class LibraryTree extends React.Component {
 		// the same action as the dropEffect. This allows the dropEffect setting
 		// (which we use in the tree's canDrop() and drop() to determine the desired
 		// action) to be changed, even if the cursor doesn't reflect the new setting.
+		//
+		// The effect also has to be one of the actions allowed at drag start: on Windows,
+		// OLE refuses the drop entirely if it isn't. Some drags allow only 'copy' (see
+		// Zotero.Utilities.Internal.onDragItems()), so a 'move' within Zotero has to be sent
+		// as a 'copy'. The trees' onDrop() handlers act on the effect set here, kept in
+		// Zotero.DragDrop.currentDropEffect, rather than on the drop event's dropEffect, so
+		// the drop still moves.
+		Zotero.DragDrop.currentDropEffect = effect;
+		let allowed = event.dataTransfer.effectAllowed;
+		if (effect != 'none' && allowed && !['uninitialized', 'all'].includes(allowed)
+				&& !allowed.toLowerCase().includes(effect)) {
+			effect = ['copy', 'move', 'link'].find(x => allowed.toLowerCase().includes(x)) || 'none';
+		}
 		if (Zotero.isWin || Zotero.isLinux) {
 			event.dataTransfer.effectAllowed = effect;
 		}

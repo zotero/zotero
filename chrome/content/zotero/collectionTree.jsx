@@ -1580,6 +1580,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		try {
 			// Prevent modifier keys from doing their normal things
 			event.preventDefault();
+			Zotero.DragDrop.currentDropEffect = null;
 			var previousOrientation = Zotero.DragDrop.currentOrientation;
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
 
@@ -2294,7 +2295,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._flashingRow = null;
 		this.tree.invalidateRow(oldFlashing);
 
-		if (!dataTransfer.dropEffect || dataTransfer.dropEffect == "none"
+		// Use the effect set in onDragOver(), which the drop event's dropEffect may not reflect
+		// (see LibraryTreeView::setDropEffect())
+		var dropEffect = Zotero.DragDrop.currentDropEffect || dataTransfer.dropEffect;
+		Zotero.DragDrop.currentDropEffect = null;
+		if (!dropEffect || dropEffect == "none"
 				|| !(await this.canDropCheckAsync(row, orient, dataTransfer))) {
 			return false;
 		}
@@ -2303,7 +2308,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			Zotero.debug("No drag data");
 			return false;
 		}
-		var dropEffect = dragData.dropEffect;
 		var dataType = dragData.dataType;
 		var data = dragData.data;
 		var sourceTreeRow = Zotero.DragDrop.getDragSource(dataTransfer);

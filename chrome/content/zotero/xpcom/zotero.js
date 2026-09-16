@@ -2338,6 +2338,9 @@ Zotero.VersionHeader = {
 Zotero.DragDrop = {
 	currentEvent: null,
 	currentOrientation: 0,
+	// The effect set by the tree's last onDragOver() via LibraryTreeView::setDropEffect(), which
+	// can differ from the drop event's dropEffect
+	currentDropEffect: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;
