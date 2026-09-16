@@ -3285,6 +3285,11 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 		.filter(path => path);
 
 	if (files.length) {
+		if (Zotero.isWin) {
+			// Copies from earlier drags are no longer in use
+			Zotero.TempFileDragDataProvider.removeCopies();
+		}
+
 		// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
 		// Windows but not Linux) and auxiliary snapshot file copying on macOS
 		let dataProvider;
@@ -3307,14 +3312,29 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
 			}
 
-			// Allow dragging to web targets (e.g., Gmail)
+			// Allow dragging to the filesystem and web targets (e.g., Gmail). On Windows, hand
+			// targets a copy in the temp directory, since File Explorer moves a dropped file for
+			// an unmodified drag and would otherwise move it out of storage.
 			Zotero.debug("Adding application/x-moz-file " + i);
-			event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
+			event.dataTransfer.mozSetDataAt(
+				"application/x-moz-file",
+				Zotero.isWin ? new Zotero.TempFileDragDataProvider(files[i]) : file,
+				i
+			);
 
-			if (Zotero.isWin || Zotero.isLinux) {
-				// Copy rather than move (Windows) or symlink (Linux) for an unmodified drag
+			if (Zotero.isLinux) {
+				// Copy rather than symlink for an unmodified drag. Drops within Zotero can still
+				// move -- see LibraryTreeView::setDropEffect().
 				event.dataTransfer.effectAllowed = 'copy';
 			}
+		}
+
+		if (Zotero.isWin) {
+			event.currentTarget.addEventListener(
+				'dragend',
+				() => Zotero.TempFileDragDataProvider.onDragEnd(),
+				{ once: true }
+			);
 		}
 	}
 
