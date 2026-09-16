@@ -46,6 +46,18 @@ const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readA
 // Whether the Read Aloud audio cache has been pruned of stale versions this session
 let readAloudCachePruned = false;
 
+/**
+ * Return the custom reader themes from the synced setting
+ *
+ * Plugins can write to the setting, and the reader fails to load if the value isn't an array.
+ *
+ * @return {Object[]}
+ */
+function getCustomThemes() {
+	let customThemes = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes');
+	return Array.isArray(customThemes) ? customThemes : [];
+}
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -251,7 +263,7 @@ class ReaderInstance {
 			ftl,
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
-			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
+			customThemes: getCustomThemes(),
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
@@ -2868,7 +2880,7 @@ class Reader {
 		else if (type === 'setting') {
 			let id = ids[0];
 			if (id === `${Zotero.Libraries.userLibraryID}/readerCustomThemes`) {
-				let newCustomThemes = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [];
+				let newCustomThemes = getCustomThemes();
 				this._readers.forEach((reader) => {
 					reader._internalReader.setCustomThemes(
 						Components.utils.cloneInto(newCustomThemes, reader._iframeWindow)

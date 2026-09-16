@@ -352,6 +352,25 @@ describe("Reader", function () {
 			}
 		});
 
+		it('should open with an invalid custom themes setting', async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			// Plugins can write anything to a synced setting
+			await Zotero.SyncedSettings.set(
+				Zotero.Libraries.userLibraryID,
+				'readerCustomThemes',
+				{ 0: { id: 'custom1', label: 'Custom', background: '#FFFFFF', foreground: '#000000' } }
+			);
+			
+			try {
+				var reader = await Zotero.Reader.open(attachment.itemID);
+				await reader._initPromise;
+				assert.ok(reader._internalReader);
+			}
+			finally {
+				await Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, 'readerCustomThemes');
+			}
+		});
+		
 		describe("#importFromEPUB()", function () {
 			let bookEpubPath; // The EPUB itself
 			let bookSdrPath; // The KOReader "sidecar" folder
