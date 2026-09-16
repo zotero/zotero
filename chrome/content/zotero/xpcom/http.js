@@ -294,7 +294,15 @@ Zotero.HTTP = new function () {
 		if (!options.foreground) {
 			xmlhttp.mozBackgroundRequest = true;
 		}
-		xmlhttp.open(method, url, true, options.username, options.password);
+		// Necko percent-decodes credentials passed to open(), so encode them to preserve
+		// literal %HH sequences in the password
+		xmlhttp.open(
+			method,
+			url,
+			true,
+			options.username && encodeURIComponent(options.username),
+			options.password && encodeURIComponent(options.password)
+		);
 		
 		// Isolate cookies into a separate jar via userContextId
 		if (options.userContextId && xmlhttp.setOriginAttributes) {

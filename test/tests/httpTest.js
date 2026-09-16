@@ -625,6 +625,21 @@ describe("Zotero.HTTP", function () {
 				xmlhttp.getResponseHeader("X-Echo-Auth")
 			);
 		});
+
+		it("should preserve literal %HH sequences in the password in request() and download()", async function () {
+			let username = "user";
+			let password = "example%41pass";
+			let expected = "Basic " + btoa(username + ":" + password);
+			let url = `http://${username}:${encodeURIComponent(password)}`
+				+ `@127.0.0.1:${port}/download/auth`;
+			
+			let xmlhttp = await Zotero.HTTP.request("GET", url);
+			assert.equal(xmlhttp.getResponseHeader("X-Echo-Auth"), expected);
+			
+			let dest = PathUtils.join(tmpDir, "auth-percent.bin");
+			let req = await Zotero.HTTP.download(Services.io.newURI(url), dest);
+			assert.equal(req.headers.get("X-Echo-Auth"), expected);
+		});
 	});
 
 
