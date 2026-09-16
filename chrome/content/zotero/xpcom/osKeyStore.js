@@ -58,6 +58,12 @@ Zotero.OSKeyStore = {
 	isEncrypted: function (value) {
 		return typeof value == 'string' && value.startsWith(this._prefix);
 	},
+	
+	// Whether an error from encrypting or decrypting a credential came from the key store itself,
+	// as opposed to the login manager entry that holds the encrypted value
+	isKeyStoreError: function (e) {
+		return e instanceof Zotero.Error && !!e.keyStoreError;
+	},
 
 	// The settings window, where credentials are usually saved from, or the main window when
 	// they're saved during a sync
@@ -171,7 +177,7 @@ Zotero.OSKeyStore = {
 	encrypt: async function (plaintext) {
 		let mod = this._load();
 		if (!mod) {
-			throw new Error("OSKeyStore unavailable");
+			throw await this._error(new Error("OSKeyStore unavailable"), 'os-keystore-save-failed');
 		}
 		let ciphertext;
 		try {
@@ -193,7 +199,10 @@ Zotero.OSKeyStore = {
 		}
 		let mod = this._load();
 		if (!mod) {
-			throw new Error("OSKeyStore unavailable but stored value is encrypted");
+			throw await this._error(
+				new Error("OSKeyStore unavailable but stored value is encrypted"),
+				'os-keystore-read-failed'
+			);
 		}
 		// OSKeyStore.encrypt() encodes the string as UTF-8 before encrypting, but
 		// OSKeyStore.decrypt() returns the decrypted bytes as a binary string, so

@@ -82,7 +82,12 @@ Zotero.Sync.Data.Local = {
 				catch (e) {
 					Zotero.logError(e);
 					if (!Zotero.Sync.Runner.backgroundSync) {
-						Zotero.OSKeyStore.alertMigrateFailed();
+						if (Zotero.OSKeyStore.isKeyStoreError(e)) {
+							Zotero.OSKeyStore.alertMigrateFailed();
+						}
+						else {
+							await this.alertLoginManagerCorrupted();
+						}
 					}
 				}
 			}
@@ -205,6 +210,14 @@ Zotero.Sync.Data.Local = {
 			catch (e) {
 				Zotero.logError(e);
 			}
+		}
+		// The login manager can fail to store a value even when the keystore works -- e.g., if
+		// the key database is read-only -- and storing the key unencrypted wouldn't help
+		if (!Zotero.OSKeyStore.isKeyStoreError(error)) {
+			if (!Zotero.Sync.Runner.backgroundSync) {
+				await this.alertLoginManagerCorrupted();
+			}
+			throw error;
 		}
 		// An automatic sync can reach this via the legacy credential upgrade in
 		// _getAPIKeyFromLogin(), so don't interrupt one with a dialog
@@ -593,18 +606,36 @@ Zotero.Sync.Data.Local = {
 			if (await this.repairLoginManager()) {
 				return false;
 			}
-			if (!this._lastLoginManagerErrorTime
-					|| this._lastLoginManagerErrorTime < Date.now() - 60000) {
-				let msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-					+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
-				Zotero.alert(null, Zotero.getString('general.error'), msg);
-				this._lastLoginManagerErrorTime = Date.now();
-			}
+			await this.alertLoginManagerCorrupted();
 			return false;
 		}
 		
 		// Get API from returned array of nsILoginInfo objects
 		return logins.length ? logins[0] : false;
+	},
+	
+	
+	/**
+	 * Tell the user how to fix a login manager that can't read or write credentials, at most
+	 * once a minute, and offer to show the files to delete
+	 */
+	alertLoginManagerCorrupted: async function () {
+		if (this._lastLoginManagerErrorTime
+				&& this._lastLoginManagerErrorTime >= Date.now() - 60000) {
+			return;
+		}
+		this._lastLoginManagerErrorTime = Date.now();
+		let index = Zotero.Prompt.confirm({
+			title: Zotero.getString('general.error'),
+			text: Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+				+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName),
+			button0: Zotero.getString('login-manager-open-profile-directory'),
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL
+		});
+		if (index != 0) {
+			return;
+		}
+		Zotero.launchFile(Zotero.Profile.dir);
 	},
 	
 	

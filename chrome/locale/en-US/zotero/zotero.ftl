@@ -1190,6 +1190,8 @@ data-dir-unsupported-storage = This can happen if the { -app-name } data directo
 
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
 
+login-manager-open-profile-directory = Open Profile Directory
+
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.

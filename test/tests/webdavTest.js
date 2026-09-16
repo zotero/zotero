@@ -267,9 +267,9 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			}
 			await controller.setPassword("password");
 			var decryptStub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
-				.rejects(new Error("User canceled OS unlock entry"));
+				.rejects(keyStoreError());
 			var encryptStub = sinon.stub(Zotero.OSKeyStore._module, "encrypt")
-				.rejects(new Error("User canceled OS unlock entry"));
+				.rejects(keyStoreError());
 			try {
 				let e = await getPromiseError(controller.getPassword());
 				assert.equal(e.message, Zotero.getString('os-keystore-read-failed'));
@@ -287,7 +287,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			}
 			await controller.setPassword("password");
 			var stub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
-				.rejects(new Error("User canceled OS unlock entry"));
+				.rejects(keyStoreError());
 			try {
 				let e = await getPromiseError(controller.getPassword());
 				assert.equal(e.message, Zotero.getString('os-keystore-read-unrecoverable'));
@@ -298,9 +298,18 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		})
 		
 		
+		function keyStoreError() {
+			return new Zotero.Error(
+				"Key store unavailable",
+				0,
+				{ keyStoreError: new Error("User canceled OS unlock entry") }
+			);
+		}
+		
+		
 		it("shouldn't store a password that would read back as encrypted", async function () {
 			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
-				.rejects(new Error("User canceled OS unlock entry"));
+				.rejects(keyStoreError());
 			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
 				.returns(true);
 			try {
@@ -317,7 +326,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		it("should return a password stored without encryption after a keystore failure", async function () {
 			var password = "p\u00e4ssw\u20acrd";
 			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
-				.rejects(new Error("User canceled OS unlock entry"));
+				.rejects(keyStoreError());
 			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
 				.returns(true);
 			try {

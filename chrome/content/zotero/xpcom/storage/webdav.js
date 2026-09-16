@@ -261,7 +261,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 					catch (e) {
 						Zotero.logError(e);
 						if (!Zotero.Sync.Runner.backgroundSync) {
-							Zotero.OSKeyStore.alertMigrateFailed();
+							if (Zotero.OSKeyStore.isKeyStoreError(e)) {
+								Zotero.OSKeyStore.alertMigrateFailed();
+							}
+							else {
+								await Zotero.Sync.Data.Local.alertLoginManagerCorrupted();
+							}
 						}
 					}
 				}
@@ -393,6 +398,12 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			catch (e) {
 				Zotero.logError(e);
 			}
+		}
+		// The login manager can fail to store a value even when the keystore works -- e.g., if
+		// the key database is read-only -- and storing the password unencrypted wouldn't help
+		if (!Zotero.OSKeyStore.isKeyStoreError(error)) {
+			await Zotero.Sync.Data.Local.alertLoginManagerCorrupted();
+			throw error;
 		}
 		// A password that would read back as ciphertext can't be stored unencrypted
 		if (Zotero.OSKeyStore.isEncrypted(password)) {
