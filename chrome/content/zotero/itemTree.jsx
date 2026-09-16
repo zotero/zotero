@@ -2250,6 +2250,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.classList.remove('tight');
 		}
 		
+		let { firstColumn } = columns.reduce((acc, column) => {
+			return !column.hidden && column.ordinal < acc.lowestOrdinal
+				? { lowestOrdinal: column.ordinal, firstColumn: column }
+				: acc;
+		}, { lowestOrdinal: Infinity, firstColumn: null });
+
+		this._renderCtx.firstColumn = firstColumn;
+		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
+
+		row.renderRow(div, index, columns, rowData, this._renderCtx);
+		
 		if (this._dropRow == index) {
 			let span;
 			if (Zotero.DragDrop.currentOrientation != 0) {
@@ -2261,17 +2272,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				div.classList.add('drop');
 			}
 		}
-
-		let { firstColumn } = columns.reduce((acc, column) => {
-			return !column.hidden && column.ordinal < acc.lowestOrdinal
-				? { lowestOrdinal: column.ordinal, firstColumn: column }
-				: acc;
-		}, { lowestOrdinal: Infinity, firstColumn: null });
-
-		this._renderCtx.firstColumn = firstColumn;
-		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
-
-		row.renderRow(div, index, columns, rowData, this._renderCtx);
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {
