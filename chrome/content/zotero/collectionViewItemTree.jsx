@@ -679,6 +679,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let selectInActiveWindow = false;
 		let restoreSelection = true;
 		let restoreScroll = true;
+		let preserveViewport = false;
 		let rowsToSelect = null;
 		let items = null;
 
@@ -859,6 +860,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						// Close container to remove any sub-items
 						this._closeContainer(row, true);
 						this._removeRow(row);
+						preserveViewport = true;
 					}
 					// If moved from under another item to top level, remove old row and add new one
 					else if (parentIndex != -1 && !parentItemID) {
@@ -869,6 +871,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						this._addRow(this.createRow(item, 0, false), beforeRow);
 
 						sort = id;
+						preserveViewport = true;
 					}
 					// If moved from one parent to another, remove from old parent
 					else if (parentItemID && parentIndex != -1 && this._rowMap[parentItemID] != parentIndex) {
@@ -878,6 +881,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 						if (newParentIndex !== undefined) {
 							this._refreshContainer(newParentIndex);
 						}
+						preserveViewport = true;
 					}
 					// If Unfiled Items and item was added to a collection, remove from view
 					else if (this.itemTree.isContainer(row) && this.viewMode == 'unfiled' && item.getCollections().length) {
@@ -1101,6 +1105,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			await this.runListeners('update', true, {
 				restoreSelection,
 				restoreScroll,
+				preserveViewport,
 				selectInActiveWindow,
 				selection: rowsToSelect
 			});

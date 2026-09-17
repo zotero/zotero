@@ -302,6 +302,7 @@ class ItemTreeRowProvider {
 			restoreSelection: !preserveDetachedFocus,
 			expandCollapsedParents: false,
 			restoreScroll: true,
+			preserveViewport: true,
 		});
 		if (preserveDetachedFocus) {
 			// Collapsing a container with selected descendants moves their selection to the
@@ -360,6 +361,7 @@ class ItemTreeRowProvider {
 			restoreSelection: true,
 			expandCollapsedParents: false,
 			restoreScroll: true,
+			preserveViewport: true,
 		});
 	}
 
@@ -394,6 +396,7 @@ class ItemTreeRowProvider {
 			restoreSelection: true,
 			expandCollapsedParents: false,
 			restoreScroll: true,
+			preserveViewport: true,
 		});
 	}
 
@@ -1246,6 +1249,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param {boolean} options.restoreSelection - Whether to restore the cached selection.
 	 * @param {boolean} options.ensureRowsAreVisible - Whether to ensure selected rows are visible.
 	 * @param {boolean} options.restoreScroll - Whether to restore the cached scroll position.
+	 * @param {boolean} options.preserveViewport - Whether to restore the scroll position by
+	 *     keeping the first visible row in place rather than the selected row.
 	 * @param {boolean} options.loading - Whether to show loading state (hides tree, shows message).
 	 * @param {string} options.message - Optional message to display (for loading, errors, intro text).
 	 */
@@ -1256,6 +1261,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		expandCollapsedParents: true,
 		ensureRowsAreVisible: true,
 		restoreScroll: false,
+		preserveViewport: false,
 		loading: false,
 		message: null,
 	}) {
@@ -1304,7 +1310,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (options.restoreScroll) {
-			this._restoreScrollPosition();
+			this._restoreScrollPosition(null, options.preserveViewport);
 		}
 
 		// Allow selection events to propagate and redraw the needed rows
@@ -2684,26 +2690,42 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * If scrollPosition is provided, restores from it without touching the cache.
 	 *
 	 * @param {Object|null} scrollPosition - Scroll position to restore, or null to use cached
+	 * @param {Boolean} preserveViewport - Keep the first visible row in position rather than the
+	 *     selected row, for changes the user made in this view (e.g. expanding a container or
+	 *     dragging an attachment to another item), which shouldn't shift what's on screen
 	 */
-	_restoreScrollPosition(scrollPosition = null) {
+	_restoreScrollPosition(scrollPosition = null, preserveViewport = false) {
 		if (scrollPosition === null) {
 			scrollPosition = this._cachedScrollPosition;
 			this._cachedScrollPosition = null;
 		}
-		if (!scrollPosition || !scrollPosition.id || !this._treebox) {
+		if (!scrollPosition || !this._treebox) {
 			return;
 		}
-		var row = this._rowMap[scrollPosition.id];
-		if (row === undefined) {
+		let anchors = preserveViewport
+			? [scrollPosition.viewport, scrollPosition.selection]
+			: [scrollPosition.selection, scrollPosition.viewport];
+		// Use the first anchor that's still in the view
+		for (let anchor of anchors) {
+			if (!anchor) {
+				continue;
+			}
+			let row = this._rowMap[anchor.id];
+			if (row === undefined) {
+				continue;
+			}
+			this._treebox.scrollTo(this._treebox.getRowPosition(row) - anchor.offset);
 			return;
 		}
-		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0), true);
 	}
 
 	/**
 	 * Return an object describing the current scroll position to restore after changes
 	 *
-	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 * @return {Object|Boolean} - Object with .selection and .viewport anchors, each with .id (a
+	 *     treeViewID) and .offset (pixels between the top of the view and the top of the row,
+	 *     so that a partly scrolled row is restored where it was), or false if there's nothing
+	 *     to anchor to
 	 */
 	_saveScrollPosition() {
 		if (!this._treebox) return false;
@@ -2713,15 +2735,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return false;
 		}
 		var last = treebox.getLastVisibleRow();
+		var scrollOffset = treebox.scrollOffset;
+
+		// If an object is selected, keep the first selected one in position
+		var selection = null;
 		for (let i = first; i <= last; i++) {
-			// If an object is selected, keep the first selected one in position
 			if (this.selection.isSelected(i)) {
 				let row = this.getRow(i);
-				if (!row) return false;
-				return {
-					id: row.ref.treeViewID,
-					offset: i - first
-				};
+				if (row) {
+					selection = {
+						id: row.ref.treeViewID,
+						offset: treebox.getRowPosition(i) - scrollOffset
+					};
+				}
+				break;
 			}
 		}
 
@@ -2729,17 +2756,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// view is already at the top of the list. Otherwise restoring after an
 		// insertion would pin the previously-top row in place (pushing the view
 		// down) instead of leaving the list scrolled to its new top.
-		if (!first) {
+		if (!selection && !first) {
 			return false;
 		}
 
-		// Otherwise keep the first visible row in position
-		let row = this.getRow(first);
-		if (!row) return false;
-		return {
-			id: row.ref.treeViewID,
-			offset: 0
-		};
+		// Keep the first visible row in position, for changes that shouldn't shift what's on
+		// screen even when the selected row moves
+		var viewport = null;
+		let firstRow = this.getRow(first);
+		if (firstRow) {
+			viewport = {
+				id: firstRow.ref.treeViewID,
+				offset: treebox.getRowPosition(first) - scrollOffset
+			};
+		}
+
+		if (!selection && !viewport) {
+			return false;
+		}
+		return { selection, viewport };
 	}
 
 	/**
