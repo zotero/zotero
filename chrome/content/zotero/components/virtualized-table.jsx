@@ -898,7 +898,7 @@ class VirtualizedTable extends React.Component {
 				&& this._getSectionHeaderIndices().some(i => i < index)) {
 			topOffset = this._rowHeight;
 		}
-		this._jsWindow.scrollToRow(index, false, topOffset);
+		this._jsWindow.scrollToRow(index, topOffset);
 	}
 
 	/**

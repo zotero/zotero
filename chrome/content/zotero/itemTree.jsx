@@ -2714,7 +2714,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (row === undefined) {
 				continue;
 			}
-			this._treebox.scrollToRow(Math.max(row - anchor.offset, 0), true);
+			this._treebox.scrollTo(this._treebox.getRowPosition(row) - anchor.offset);
 			return;
 		}
 	}
@@ -2723,7 +2723,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * Return an object describing the current scroll position to restore after changes
 	 *
 	 * @return {Object|Boolean} - Object with .selection and .viewport anchors, each with .id (a
-	 *     treeViewID) and .offset, or false if there's nothing to anchor to
+	 *     treeViewID) and .offset (pixels between the top of the view and the top of the row,
+	 *     so that a partly scrolled row is restored where it was), or false if there's nothing
+	 *     to anchor to
 	 */
 	_saveScrollPosition() {
 		if (!this._treebox) return false;
@@ -2733,6 +2735,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return false;
 		}
 		var last = treebox.getLastVisibleRow();
+		var scrollOffset = treebox.scrollOffset;
 
 		// If an object is selected, keep the first selected one in position
 		var selection = null;
@@ -2742,7 +2745,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (row) {
 					selection = {
 						id: row.ref.treeViewID,
-						offset: i - first
+						offset: treebox.getRowPosition(i) - scrollOffset
 					};
 				}
 				break;
@@ -2764,7 +2767,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (firstRow) {
 			viewport = {
 				id: firstRow.ref.treeViewID,
-				offset: 0
+				offset: treebox.getRowPosition(first) - scrollOffset
 			};
 		}
 

@@ -785,8 +785,8 @@ describe("CollectionViewItemTree", function () {
 			await waitForItemsLoad(win);
 			
 			var parentRow = itemsView.getRowIndexByID(parentItem.id);
-			treebox.scrollToRow(parentRow);
-			var firstVisibleBefore = treebox.getFirstVisibleRow();
+			treebox.scrollTo(treebox.getRowPosition(parentRow));
+			var scrollOffsetBefore = treebox.scrollOffset;
 			
 			// Select a visible row below the container
 			await itemsView.selectItem(itemsView.getRow(parentRow + 2).ref.id);
@@ -796,7 +796,7 @@ describe("CollectionViewItemTree", function () {
 			await itemsView.waitForLoad();
 			
 			assert.isTrue(itemsView.isContainerOpen(parentRow));
-			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
+			assert.equal(treebox.scrollOffset, scrollOffsetBefore);
 			assert.isTrue(itemsView.tree.rowIsVisible(parentRow));
 		});
 	});
@@ -1308,9 +1308,9 @@ describe("CollectionViewItemTree", function () {
 			await waitForItemsLoad(win);
 			
 			itemsView.expandAllRows(true);
-			treebox.scrollToRow(0);
+			// Scroll partway into a row, which should be preserved as is
+			treebox.scrollTo(7);
 			await itemsView.selectItem(attachment.id);
-			var firstVisibleBefore = treebox.getFirstVisibleRow();
 			assert.isTrue(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(parentItem2.id)));
 			
 			// Move the attachment to the parent below
@@ -1322,7 +1322,7 @@ describe("CollectionViewItemTree", function () {
 				itemsView.getRowIndexByID(attachment.id),
 				itemsView.getRowIndexByID(parentItem2.id) + 1
 			);
-			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
+			assert.equal(treebox.scrollOffset, 7);
 		});
 		
 		it("should update search results when items are added", async function () {
