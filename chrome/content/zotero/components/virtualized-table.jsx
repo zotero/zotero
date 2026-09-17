@@ -1557,7 +1557,7 @@ class VirtualizedTable extends React.Component {
 		let currentIndex = -1;
 		let nextIndex = -1;
 		for (let index of headerIndices) {
-			if (this._jsWindow._getItemPosition(index) <= scrollTop) {
+			if (this._jsWindow.getRowPosition(index) <= scrollTop) {
 				currentIndex = index;
 			}
 			else {
@@ -1568,7 +1568,7 @@ class VirtualizedTable extends React.Component {
 		// Show the pinned copy only once the header row has scrolled up past the top edge of
 		// the view
 		let stuck = currentIndex != -1
-			&& scrollTop > this._jsWindow._getItemPosition(currentIndex);
+			&& scrollTop > this._jsWindow.getRowPosition(currentIndex);
 		if (!stuck) {
 			clip.style.display = 'none';
 			this._stickyHeaderIndex = null;
@@ -1597,7 +1597,7 @@ class VirtualizedTable extends React.Component {
 		// Push the pinned header up as the next section's header approaches the top
 		let translateY = 0;
 		if (nextIndex != -1) {
-			let nextTop = this._jsWindow._getItemPosition(nextIndex) - scrollTop;
+			let nextTop = this._jsWindow.getRowPosition(nextIndex) - scrollTop;
 			if (nextTop < this._rowHeight) {
 				translateY = nextTop - this._rowHeight;
 			}
