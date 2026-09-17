@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!--
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					 https://zotero.org
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+
+<window
+	id="citation-explorer-wizard-window"
+	width="1000"
+	height="650"
+	persist="screenX screenY width height"
+	data-l10n-id="integration-citationExplorerWizard-window"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	onload="ZoteroCitationExplorerWizard.init()"
+	onunload="ZoteroCitationExplorerWizard.unload()"
+>
+	<linkset>
+		<html:link rel="localization" href="branding/brand.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+		<html:link rel="localization" href="integration.ftl"/>
+	</linkset>
+
+	<script>
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/citationExplorerWizard.js", this);
+	</script>
+
+	<!-- Add the View menu before ItemTree initializes so it appears on first open -->
+	<item-tree-menu-bar/>
+
+	<wizard id="citation-explorer-wizard" class="citation-explorer-wizard zotero-dialog-window">
+		<wizardpage pageid="choose-operation" data-header-label-id="integration-citationExplorerWizard-choose-header">
+			<html:p class="page-description" data-l10n-id="integration-citationExplorerWizard-choose-description"/>
+			<radiogroup id="item-operation" align="start">
+				<radio id="item-operation-relink" value="relink" data-l10n-id="integration-citationExplorerWizard-operation-relink"/>
+				<html:p id="item-operation-relink-description" class="option-description" data-l10n-id="integration-citationExplorerWizard-operation-relink-description"/>
+				<radio value="addToTarget" data-l10n-id="integration-citationExplorerWizard-operation-add-to-target"/>
+				<html:p class="option-description" data-l10n-id="integration-citationExplorerWizard-operation-add-to-target-description"/>
+			</radiogroup>
+
+			<vbox class="target-picker">
+				<label control="item-target" data-l10n-id="integration-citationExplorerWizard-target"/>
+				<menulist id="item-target" native="true">
+					<menupopup id="item-target-menu"/>
+				</menulist>
+			</vbox>
+		</wizardpage>
+
+		<wizardpage class="review-page" pageid="review-actions" data-header-label-id="integration-citationExplorerWizard-review-header">
+			<html:p class="page-description" data-l10n-id="integration-citationExplorerWizard-review-description"/>
+			<html:div class="virtualized-table-container flex">
+				<html:div id="zotero-items-tree" class="citation-explorer-item-tree"/>
+			</html:div>
+		</wizardpage>
+	</wizard>
+</window>

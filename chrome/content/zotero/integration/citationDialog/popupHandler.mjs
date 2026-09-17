@@ -31,6 +31,7 @@ export class CitationDialogPopupsHandler {
 		this.doc = doc;
 
 		this.bubbleItem = null;
+		this.bubble = null;
 		this.discardItemDetailsEdits = false;
 		this.itemDetailsWhenOpened = {};
 		this.itemDetailsTimeOpened = null;
@@ -61,7 +62,8 @@ export class CitationDialogPopupsHandler {
 			let event = new CustomEvent("delete-item", {
 				bubbles: true,
 				detail: {
-					dialogReferenceID: this.bubbleItem.dialogReferenceID
+					bubble: this.bubble,
+					dialogReferenceID: this.bubbleItem.dialogReferenceID,
 				}
 			});
 			this.doc.dispatchEvent(event);
@@ -87,10 +89,12 @@ export class CitationDialogPopupsHandler {
 		}, true);
 	}
 
-	openItemDetails(bubbleItem, itemDescription) {
+	openItemDetails(bubbleItem, itemDescription, bubble = null) {
 		this.bubbleItem = bubbleItem;
 
-		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		this.bubble = bubble
+			|| this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		bubble = this.bubble;
 		let bubbleRect = bubble.getBoundingClientRect();
 		let popup = this._getNode("#itemDetails");
 		popup.openPopup(bubble, "after_start", 0, 4, false, false, null);
@@ -126,7 +130,7 @@ export class CitationDialogPopupsHandler {
 			locator: bubbleItem.locator,
 			prefix: bubbleItem.prefix,
 			suffix: bubbleItem.suffix,
-			suppressAuthor: bubbleItem.suppressAuthor
+			suppressAuthor: bubbleItem.suppressAuthor,
 		};
 		// add locator labels if they don't exist yet
 		if (this._getNode("#label").childElementCount == 0) {
@@ -171,9 +175,10 @@ export class CitationDialogPopupsHandler {
 
 	// When item details popup is closed, sync it's data to citationItems
 	handleItemDetailsClosure() {
-		let bubble = this._getNode(`[dialogReferenceID='${this.bubbleItem.dialogReferenceID}']`);
+		let bubble = this.bubble;
 		if (!bubble) return;
 		bubble.classList.remove("showingDetails");
+		this.bubble = null;
 		// Restore properties to what they were when popup opened
 		if (this.discardItemDetailsEdits) {
 			this.discardItemDetailsEdits = false;
@@ -210,7 +215,7 @@ export class CitationDialogPopupsHandler {
 		let event = new CustomEvent("item-details-updated", {
 			bubbles: true,
 			detail: {
-				dialogReferenceID: this.bubbleItem.dialogReferenceID
+				dialogReferenceID: this.bubbleItem.dialogReferenceID,
 			}
 		});
 		this.doc.dispatchEvent(event);

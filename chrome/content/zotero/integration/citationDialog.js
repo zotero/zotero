@@ -95,8 +95,14 @@ async function onLoad() {
 	// will not conflict with how wide the "citation" dialog will be in list mode.
 	let initialMode = IOManager.getInitialDialogMode();
 	let savedParams = Helpers.fetchStoredWindowParams()[initialMode] || {};
-	let restoredWidth = savedParams.width || window.innerWidth;
-	let restoredHeight = savedParams.height || Helpers.getSearchRowHeight();
+	let chromeWidth = Math.max(0, window.outerWidth - window.innerWidth);
+	let chromeHeight = Math.max(0, window.outerHeight - window.innerHeight);
+	let restoredWidth = savedParams.innerWidth !== undefined
+		? savedParams.innerWidth + chromeWidth
+		: savedParams.width || window.outerWidth;
+	let restoredHeight = savedParams.innerHeight !== undefined
+		? savedParams.innerHeight + chromeHeight
+		: savedParams.height || Helpers.getSearchRowHeight();
 	window.resizeTo(restoredWidth, restoredHeight);
 	// On windows, after initial window size is set, make sure we don't resize list
 	// mode when search results are ready for a moment to avoid blinking
@@ -119,6 +125,7 @@ async function onLoad() {
 
 	// citation has to be built before libraryLayout.init to so itemTree knows which items to highlight
 	await CitationDataManager.buildCitation();
+	CitationFormManager.init();
 	IOManager.updateBubbleInput();
 	// init library layout after bubble input is built since bubble-input's height is a factor
 	// determining initial library layout height
@@ -153,14 +160,16 @@ async function onLoad() {
 
 
 async function accept() {
-	if (accepted || SearchHandler.searching || !CitationDataManager.items.length) return;
+	if (accepted || SearchHandler.searching || !CitationDataManager.items.length
+			|| (CitationFormManager.form == "narrative"
+				&& !CitationFormManager.headReferenceID)) return;
 	accepted = true;
 	Zotero.debug("Citation Dialog: accepted");
 
 	cleanupBeforeDialogClosing();
 	_id("library-layout").hidden = true;
 	_id("list-layout").hidden = true;
-	_id("bubble-input").hidden = true;
+	_id("citation-inputs").hidden = true;
 	_id("bottom-area").hidden = true;
 	_id("progress").hidden = false;
 	let progressHeight = Helpers.getSearchRowHeight();
@@ -196,14 +205,17 @@ function onUnload() {
 }
 
 function cleanupBeforeDialogClosing() {
+	IOManager._narrativePrefixResizeObserver?.disconnect();
 	if (!currentLayout || !libraryLayout) return;
 	
 	// Save window params for current layout mode so we can restore it on next dialog open
 	let allParams = Helpers.fetchStoredWindowParams();
-	let params = { width: window.outerWidth };
+	// Store content dimensions. Saving outer dimensions and later restoring them
+	// across changing window chrome can make the dialog grow on every reopen.
+	let params = { innerWidth: window.innerWidth };
 	// Only save height in library mode, since in list mode height varies
 	if (currentLayout.type == "library") {
-		params.height = window.outerHeight;
+		params.innerHeight = window.innerHeight;
 	}
 	allParams[currentLayout.type] = params;
 	// Remember the width of collectionTree, so it can be restored on next open
@@ -256,7 +268,9 @@ async function setDialogType(type) {
 	}
 
 	// Set proper settings availability depending on the type
-	_id("bubble-input").sortable = DIALOG_STATE.isCitingItems();
+	for (let bubbleInput of doc.querySelectorAll("bubble-input")) {
+		bubbleInput.sortable = DIALOG_STATE.isCitingItems();
+	}
 	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
 	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	if (DIALOG_STATE.isCitingItems()) {
@@ -400,7 +414,7 @@ class Layout {
 			}
 		}
 		// Pre-select the item to be added on Enter of an input
-		else if (_id("bubble-input").contains(doc.activeElement)) {
+		else if (doc.activeElement.closest?.("bubble-input")) {
 			this.markPreSelected();
 		}
 		// Ensure focus is never lost
@@ -620,7 +634,7 @@ class LibraryLayout extends Layout {
 			await new Promise((resolve) => {
 				Helpers.smoothResize(targetWidth, targetHeight, {
 					onComplete: () => {
-						_id("bubble-input").refocusInput();
+						IOManager._getActiveBubbleInput().refocusInput();
 						doc.documentElement.style.minHeight = `${minHeight}px`;
 						document.documentElement.setAttribute("dialog-layout", this.type);
 						ignoreWindowResizing = false;
@@ -703,7 +717,6 @@ class LibraryLayout extends Layout {
 		this.itemsView = await CollectionViewItemTree.init(itemsTree, {
 			id: "citationDialog",
 			dragAndDrop: DIALOG_STATE.isCitingItems(),
-			persistColumns: true,
 			columnPicker: true,
 			onSelectionChange: () => {
 				libraryLayout.updateSelectedItems();
@@ -736,7 +749,7 @@ class LibraryLayout extends Layout {
 					this._scrollItemTreeToRow(row.id, rowTopBeforeRefresh);
 					// move focus to bubble-input after virtualized-table steals focus on double-click
 					setTimeout(() => {
-						_id("bubble-input").refocusInput();
+						IOManager._getActiveBubbleInput().refocusInput();
 						doc.querySelector("#item-tree-container").classList.remove("no-focus-ring");
 					}, 5);
 				});
@@ -1197,7 +1210,7 @@ class ListLayout extends Layout {
 			setTimeout(() => {
 				Helpers.smoothResize(targetWidth, autoHeight, {
 					onComplete: () => {
-						_id("bubble-input").refocusInput();
+						IOManager._getActiveBubbleInput().refocusInput();
 						doc.documentElement.style.minHeight = `${minHeight}px`;
 						document.documentElement.setAttribute("dialog-layout", this.type);
 						ignoreWindowResizing = false;
@@ -1239,6 +1252,118 @@ class ListLayout extends Layout {
 	}
 }
 
+// Citation-level form and Narrative Head selection. Narrative items are stored
+// once in CitationDataManager and the Head is duplicated only in the UI.
+const CitationFormManager = {
+	form: "ordinary",
+	headReferenceID: null,
+
+	init() {
+		this.form = io.citationForm || "ordinary";
+		let markedHead = CitationDataManager.items.find(item => item.isNarrativeHead);
+		this.headReferenceID = markedHead?.dialogReferenceID || null;
+		if (this.form == "narrative" && !this.headReferenceID && CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+
+		_id("citation-form-setting").addEventListener("click", (event) => {
+			let option = event.target.closest(".option");
+			if (option) this.setForm(option.getAttribute("value"));
+		});
+		_id("narrative-infix").addEventListener("input", (event) => {
+			io.narrativeInfix = this.normalizeInfix(event.target.value);
+			CitationPreview.update();
+			dialogNotPristine();
+		});
+		_id("narrative-infix").value = io.narrativeInfix || "";
+		this.updateUI();
+	},
+
+	setForm(form) {
+		if (form == this.form) return;
+		if (form == "author-only" && !this.canUseAuthorOnly()) return;
+		this.form = form;
+		io.citationForm = form;
+		io.citationFormChanged = true;
+		if (form == "narrative" && !this.headReferenceID && CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+		this.updateUI();
+		CitationDataManager.updateCitationObject();
+		IOManager.updateBubbleInput();
+		dialogNotPristine();
+	},
+
+	normalizeInfix(infix) {
+		infix = (infix || "").trim();
+		return infix ? ` ${infix} ` : " ";
+	},
+
+	canUseAuthorOnly() {
+		return CitationDataManager.items.length <= 1;
+	},
+
+	setHead(dialogReferenceID, { userInitiated = false } = {}) {
+		if (dialogReferenceID
+				&& !CitationDataManager.getItem({ dialogReferenceID })) {
+			return;
+		}
+		this.headReferenceID = dialogReferenceID;
+		for (let item of CitationDataManager.items) {
+			item.isNarrativeHead = item.dialogReferenceID == dialogReferenceID;
+		}
+		if (userInitiated && dialogReferenceID) {
+			let index = CitationDataManager.getItemIndex({ dialogReferenceID });
+			if (index > 0) {
+				CitationDataManager.moveItem(dialogReferenceID, 0);
+			}
+			_id("keepSorted").checked = false;
+		}
+		this.updateUI();
+	},
+
+	onItemDeleted(dialogReferenceID) {
+		if (dialogReferenceID == this.headReferenceID) {
+			this.setHead(null);
+		}
+	},
+
+	onItemsSorted() {
+		if (this.form == "narrative" && _id("keepSorted").checked
+				&& CitationDataManager.items.length) {
+			this.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
+	},
+
+	updateUI() {
+		for (let option of _id("citation-form-setting").querySelectorAll(".option")) {
+			let active = option.getAttribute("value") == this.form;
+			option.classList.toggle("active", active);
+			option.setAttribute("aria-checked", active ? "true" : "false");
+		}
+		let authorOnly = _id("citation-form-author-only");
+		authorOnly.setAttribute("aria-disabled", this.canUseAuthorOnly() ? "false" : "true");
+
+		let narrative = this.form == "narrative";
+		let headItem = this.headReferenceID
+			? CitationDataManager.getItem({ dialogReferenceID: this.headReferenceID })
+			: null;
+		let infixAvailable = narrative && !!io.narrativeInfixAvailable;
+		_id("citation-inputs").classList.toggle("narrative", narrative);
+		_id("narrative-head-input").hidden = !narrative;
+		_id("narrative-infix").hidden = !infixAvailable;
+		_id("narrative-infix").disabled = !infixAvailable;
+		_id("narrative-infix-separator").hidden = !narrative || infixAvailable;
+
+		for (let bubble of doc.querySelectorAll("#bubble-input .bubble")) {
+			bubble.classList.toggle("narrative-head-item",
+				bubble.getAttribute("dialogReferenceID") == this.headReferenceID && narrative);
+		}
+		_id("accept-button").disabled = !CitationDataManager.items.length
+			|| (narrative && !headItem);
+	},
+};
+
 //
 // Handling of user IO
 //
@@ -1258,16 +1383,31 @@ const IOManager = {
 
 	init() {
 		// handle input receiving focus or something being typed
-		doc.addEventListener("handle-input", ({ detail: { query, eventType } }) => this._handleInput({ query, eventType }));
+		doc.addEventListener("handle-input", (event) => {
+			let { query, eventType } = event.detail;
+			this._activeBubbleInput = event.target;
+			this._handleInput({ query, eventType });
+		});
 		// handle input keypress on an input of bubbleInput. It's handled here and not in bubbleInput
 		// because we may need to set a locator or add a pre-selected item to the citation
 		doc.addEventListener("input-enter", ({ detail: { input } }) => this._handleInputEnter(input));
 		// handle a bubble being moved or deleted
-		doc.addEventListener("delete-item", ({ detail: { dialogReferenceID } }) => this._deleteItem(dialogReferenceID));
-		doc.addEventListener("move-item", ({ detail: { dialogReferenceID, index } }) => this._moveItem(dialogReferenceID, index));
-		doc.addEventListener("add-dragged-item", ({ detail: { itemIDs, index } }) => this._handleItemDrop(itemIDs, index));
+		doc.addEventListener("delete-item", (event) => {
+			let bubbleInput = event.detail.bubble?.closest("bubble-input") || event.target;
+			this._deleteItem(event.detail.dialogReferenceID, bubbleInput);
+		});
+		doc.addEventListener("move-item", (event) => {
+			let { dialogReferenceID, index } = event.detail;
+			this._moveItem(dialogReferenceID, index, event.target);
+		});
+		doc.addEventListener("add-dragged-item", (event) => {
+			let { itemIDs, index } = event.detail;
+			this._handleItemDrop(itemIDs, index, event.target);
+		});
 		// display details popup for the bubble
-		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID } }) => this._openItemDetailsPopup(dialogReferenceID));
+		doc.addEventListener("show-details-popup", ({ detail: { dialogReferenceID, bubble } }) => {
+			this._openItemDetailsPopup(dialogReferenceID, bubble);
+		});
 		// mark item nodes as selected to highlight them and mark relevant bubbles
 		doc.addEventListener("select-items", ({ detail: { startNode, endNode } }) => this.selectItemNodesRange(startNode, endNode));
 		// focus the item tree from citation dialog keyboard navigation
@@ -1307,9 +1447,57 @@ const IOManager = {
 		});
 		// clear record of just-added bubbles to which next locator would go
 		doc.addEventListener("keydown", event => this._clearJustAddedBubbles(event));
-		_id("bubble-input").addEventListener("focusout", event => this._clearJustAddedBubbles(event));
-		// handle cmd/ctrl-z pressed from the input to undo added locator to a just-added bubble
-		_id("bubble-input").addEventListener("keydown", event => this._handleInputUndo(event));
+		for (let bubbleInput of doc.querySelectorAll("bubble-input")) {
+			bubbleInput.addEventListener("focusout", event => this._clearJustAddedBubbles(event));
+			// handle cmd/ctrl-z pressed from the input to undo added locator to a just-added bubble
+			bubbleInput.addEventListener("keydown", event => this._handleInputUndo(event));
+		}
+
+		this._narrativePrefixResizeObserver = new ResizeObserver(
+			() => this._updateNarrativePrefixWidth());
+		for (let node of [
+			_id("narrative-prefix"),
+			_id("narrative-head-input"),
+			_id("narrative-infix"),
+			_id("narrative-infix-separator"),
+		]) {
+			this._narrativePrefixResizeObserver.observe(node);
+		}
+		this._updateNarrativePrefixWidth();
+	},
+
+	_updateNarrativePrefixWidth() {
+		let citationInputs = _id("citation-inputs");
+		let prefix = _id("narrative-prefix");
+		let endNode = !_id("narrative-infix").hidden
+			? _id("narrative-infix")
+			: _id("narrative-infix-separator");
+		if (!citationInputs.classList.contains("narrative") || endNode.hidden) {
+			citationInputs.style.removeProperty("--narrative-prefix-width");
+			return;
+		}
+		let prefixRect = prefix.getBoundingClientRect();
+		let endRect = endNode.getBoundingClientRect();
+		let occupiedWidth = Zotero.rtl
+			? prefixRect.right - endRect.left
+			: endRect.right - prefixRect.left;
+		let gap = parseFloat(getComputedStyle(prefix).columnGap) || 0;
+		let endMargin = parseFloat(getComputedStyle(endNode).marginInlineEnd) || 0;
+		let width = `${occupiedWidth + endMargin + gap}px`;
+		if (citationInputs.style.getPropertyValue("--narrative-prefix-width") != width) {
+			citationInputs.style.setProperty("--narrative-prefix-width", width);
+		}
+	},
+
+	_getActiveBubbleInput() {
+		let focusedBubbleInput = doc.activeElement.closest?.("bubble-input");
+		if (focusedBubbleInput) {
+			this._activeBubbleInput = focusedBubbleInput;
+		}
+		if (this._activeBubbleInput && !this._activeBubbleInput.hidden) {
+			return this._activeBubbleInput;
+		}
+		return _id("bubble-input");
 	},
 
 	// switch between list and library modes
@@ -1377,14 +1565,41 @@ const IOManager = {
 		for (let item of CitationDataManager.items) {
 			item.updateBubbleString();
 		}
-		_id("bubble-input").refresh(CitationDataManager.items.map((item) => {
+		let narrative = CitationFormManager.form == "narrative";
+		let bubbleConfig = CitationDataManager.items.map((item) => {
 			return {
 				dialogReferenceID: item.dialogReferenceID,
-				bubbleString: item.bubbleString,
+				bubbleString: narrative && item.dialogReferenceID == CitationFormManager.headReferenceID
+					? Helpers.buildBubbleString(item, { narrativePart: "remainder" })
+					: item.bubbleString,
 				selected: item.selected,
 			};
-		}), DIALOG_STATE.type);
+		});
+		_id("bubble-input").refresh(bubbleConfig, DIALOG_STATE.type,
+			narrative ? "integration-citationDialog-narrative-remainder-input" : null);
+		let headConfig = narrative
+			? bubbleConfig.filter(({ dialogReferenceID }) => (
+				dialogReferenceID == CitationFormManager.headReferenceID
+			))
+			: [];
+		let headInput = _id("narrative-head-input");
+		for (let config of headConfig) {
+			config.bubbleString = Helpers.buildBubbleString(
+				CitationDataManager.getItem({ dialogReferenceID: config.dialogReferenceID }),
+				{ narrativePart: "head" });
+		}
+		headInput.style.width = "";
+		headInput.refresh(headConfig, DIALOG_STATE.type,
+			"integration-citationDialog-narrative-head-input");
+		let headBubble = headInput.querySelector(".bubble");
+		if (headBubble) headBubble.draggable = false;
+		if (headBubble && headBubble.scrollWidth > headBubble.clientWidth) {
+			headInput.style.width = `${headInput.clientWidth
+				+ headBubble.scrollWidth - headBubble.clientWidth}px`;
+		}
+		this._updateNarrativePrefixWidth();
 		_id("accept-button").disabled = !CitationDataManager.items.length;
+		CitationFormManager.updateUI();
 		CitationPreview.update();
 	},
 
@@ -1394,8 +1609,19 @@ const IOManager = {
 		if (!Array.isArray(items)) {
 			items = [items];
 		}
+		let bubbleInput = this._getActiveBubbleInput();
+		let addingNarrativeHead = CitationFormManager.form == "narrative"
+			&& bubbleInput.id == "narrative-head-input";
+		if (addingNarrativeHead) {
+			items = items.slice(0, 1);
+		}
 		if (DIALOG_STATE.isAddingAnnotations()) {
 			items = items.filter(item => item.isAnnotation());
+		}
+		if (DIALOG_STATE.isCitingItems()
+				&& CitationFormManager.form == "author-only"
+				&& CitationDataManager.items.length) {
+			return;
 		}
 		// if selecting a note, add it and immediately accept the dialog
 		if (DIALOG_STATE.isAddingNote()) {
@@ -1420,12 +1646,28 @@ const IOManager = {
 		}
 
 		// If the last input has a locator, add it into the item
-		let input = _id("bubble-input").getCurrentInput();
+		let input = bubbleInput.getCurrentInput();
 		let inputValue = SearchHandler.cleanSearchQuery(input?.value || "");
 		let locator = Helpers.extractLocator(inputValue);
+		// Selecting an item already in the Remainder from the Head input changes
+		// the Head without duplicating the citation item.
+		let existingHeadItem = addingNarrativeHead && items[0]?.id
+			? CitationDataManager.getItems({ itemID: items[0].id })[0]
+			: null;
+		if (existingHeadItem) {
+			if (input) input.remove();
+			CitationFormManager.setHead(existingHeadItem.dialogReferenceID, { userInitiated: true });
+			this.updateBubbleInput();
+			if (!noInputRefocus) bubbleInput.refocusInput();
+			dialogNotPristine();
+			return;
+		}
 		// Add the item at a position based on current input if it is not explicitly specified
-		if (index === null && input) {
-			index = _id("bubble-input").getFutureBubbleIndex();
+		if (addingNarrativeHead) {
+			index = 0;
+		}
+		else if (index === null && input) {
+			index = bubbleInput.getFutureBubbleIndex();
 		}
 		// If there was an input used to run the search, clear it
 		if (input) {
@@ -1446,9 +1688,10 @@ const IOManager = {
 			// If no locator is provided, record the just-added bubble.
 			// If a locator is typed next, that bubble will receive it.
 			this._justAddedBubbles = bubbleItems;
+			this._justAddedBubbleInput = bubbleInput;
 			// Only show the placeholder guidance on the first add -- after
 			// that, the user presumably knows about the shortcut
-			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
+			bubbleInput.showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
 				&& this._timesItemsAdded < 1;
 		}
 		else {
@@ -1457,7 +1700,16 @@ const IOManager = {
 			this._clearJustAddedBubbles();
 		}
 		this._timesItemsAdded++;
+		let previousFirstItem = CitationDataManager.items[0];
+		let hadNarrativeHead = !!CitationFormManager.headReferenceID;
 		await CitationDataManager.addItems({ bubbleItems, index });
+		if (addingNarrativeHead && bubbleItems.length) {
+			CitationFormManager.setHead(bubbleItems[0].dialogReferenceID, { userInitiated: true });
+		}
+		else if (CitationFormManager.form == "narrative" && hadNarrativeHead
+				&& CitationDataManager.items[0] !== previousFirstItem) {
+			CitationFormManager.setHead(CitationDataManager.items[0].dialogReferenceID);
+		}
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
@@ -1467,9 +1719,10 @@ const IOManager = {
 
 		// Show guidance panel on the first run
 		if (DIALOG_STATE.isCitingItems() && !Zotero.Prefs.get("firstRunGuidanceShown.citationDialog")) {
-			doc.querySelector(".bubble").id = "first-bubble";
+			let firstBubble = bubbleInput.querySelector(".bubble") || doc.querySelector(".bubble");
+			firstBubble.id = "first-bubble";
 			// Center the panel on the first bubble
-			let width = doc.querySelector(".bubble").getBoundingClientRect().width;
+			let width = firstBubble.getBoundingClientRect().width;
 			doc.querySelector("guidance-panel").setAttribute("x", Math.round(width / 2));
 			IOManager.showFirstRunDialog();
 		}
@@ -1479,7 +1732,7 @@ const IOManager = {
 		// Always refresh items list to make sure the opened and selected items are up to date
 		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
-			_id("bubble-input").refocusInput();
+			bubbleInput.refocusInput();
 		}
 		dialogNotPristine();
 	},
@@ -1644,7 +1897,7 @@ const IOManager = {
 	resetSelectedAfterFocus(event) {
 		if (currentLayout.type == "list") return;
 		let focused = event.target;
-		if (_id("bubble-input").contains(focused)) {
+		if (focused.closest?.("bubble-input")) {
 			if (!doc.querySelector(".item.selected")) {
 				currentLayout.markPreSelected();
 			}
@@ -1706,11 +1959,12 @@ const IOManager = {
 	},
 
 	// add into the citation items drag-dropped into the bubble-input
-	_handleItemDrop(itemIDs, index) {
+	_handleItemDrop(itemIDs, index, bubbleInput = _id("bubble-input")) {
 		// fetch items based on their IDs. Check SearchHandler for cited items and
 		// search results. Items dragged from itemTree would not be in SearchHandler.results,
 		// so check Zotero.Items as a fallback
 		let items = itemIDs.map(id => SearchHandler.getItem(id) || Zotero.Items.get(id));
+		this._activeBubbleInput = bubbleInput;
 		this.addItemsToCitation(items, { index });
 	},
 
@@ -1780,13 +2034,23 @@ const IOManager = {
 			bubbleItem.locator = null;
 			bubbleItem.label = null;
 		}
-		_id("bubble-input").getCurrentInput().value = locatorValue;
+		let bubbleInput = event.target.closest("bubble-input");
+		bubbleInput.getCurrentInput().value = locatorValue;
 		this._clearJustAddedBubbles();
 		this._handleInput({ query: locatorValue, eventType: "focus" });
 		this.updateBubbleInput();
 	},
 
-	_deleteItem(dialogReferenceID) {
+	_deleteItem(dialogReferenceID, bubbleInput = _id("bubble-input")) {
+		if (CitationFormManager.form == "narrative"
+				&& bubbleInput.id == "narrative-head-input") {
+			CitationFormManager.setHead(null);
+			this._clearJustAddedBubbles();
+			this.updateBubbleInput();
+			dialogNotPristine();
+			return;
+		}
+		CitationFormManager.onItemDeleted(dialogReferenceID);
 		CitationDataManager.deleteItem({ dialogReferenceID });
 		// If the citation is emptied, show the placeholder guidance again on the next add
 		if (!CitationDataManager.items.length) {
@@ -1810,22 +2074,35 @@ const IOManager = {
 		dialogNotPristine();
 	},
 
-	_moveItem(dialogReferenceID, newIndex) {
+	_moveItem(dialogReferenceID, newIndex, bubbleInput = _id("bubble-input")) {
+		if (CitationFormManager.form == "narrative"
+				&& bubbleInput.id == "narrative-head-input") {
+			CitationFormManager.setHead(dialogReferenceID, { userInitiated: true });
+			this.updateBubbleInput();
+			dialogNotPristine();
+			return;
+		}
+		let hadNarrativeHead = CitationFormManager.form == "narrative"
+			&& !!CitationFormManager.headReferenceID;
 		let moved = CitationDataManager.moveItem(dialogReferenceID, newIndex);
 		if (moved) {
 			_id("keepSorted").checked = false;
+			if (hadNarrativeHead) {
+				CitationFormManager.setHead(CitationDataManager.items[0].dialogReferenceID);
+			}
 		}
 		this.updateBubbleInput();
 		dialogNotPristine();
 	},
 
-	_openItemDetailsPopup(dialogReferenceID) {
+	_openItemDetailsPopup(dialogReferenceID, bubble) {
 		let bubbleItem = CitationDataManager.getItem({ dialogReferenceID });
 		let topLevelItem = bubbleItem.item;
 		if (DIALOG_STATE.isAddingAnnotations()) {
 			topLevelItem = bubbleItem.item.topLevelItem;
 		}
-		PopupsHandler.openItemDetails(bubbleItem, Helpers.buildItemDescription(topLevelItem));
+		PopupsHandler.openItemDetails(
+			bubbleItem, Helpers.buildItemDescription(topLevelItem), bubble);
 	},
 
 	_handleInput({ query, eventType }) {
@@ -1868,9 +2145,9 @@ const IOManager = {
 			return;
 		}
 
-		let input = _id("bubble-input").getCurrentInput();
+		let input = IOManager._justAddedBubbleInput?.getCurrentInput();
 		// If the input is empty, hide the spinner and do nothing
-		if (!input.value) {
+		if (!input?.value) {
 			IOManager._hideLoadingSpinner();
 			return;
 		}
@@ -1925,7 +2202,10 @@ const IOManager = {
 		if (event && event.type == "focusout" && !doc.hasFocus()) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
-		_id("bubble-input").showJustAddedPlaceholder = false;
+		if (this._justAddedBubbleInput) {
+			this._justAddedBubbleInput.showJustAddedPlaceholder = false;
+		}
+		this._justAddedBubbleInput = null;
 		this.updateBubbleInput();
 	},
 
@@ -1955,6 +2235,7 @@ const IOManager = {
 	_resortItems() {
 		if (!_id("keepSorted").checked) return;
 		CitationDataManager.sort().then(() => {
+			CitationFormManager.onItemsSorted();
 			this.updateBubbleInput();
 		});
 	},
@@ -2001,7 +2282,7 @@ const IOManager = {
 			}
 		}
 		// If the focus did not set, or there is no node to focus, refocus bubble-input
-		_id("bubble-input").refocusInput();
+		this._getActiveBubbleInput().refocusInput();
 	},
 
 	// We want to not place focus on some of the focusable nodes on mouse click.
@@ -2018,9 +2299,10 @@ const IOManager = {
 		// That way, one can click a button without moving focus onto it.
 		doc.addEventListener("focusout", (_) => {
 			setTimeout(() => {
-				// bubble-input and itemTree/collectionTree are the main interactable elements,
+				// Citation inputs and itemTree/collectionTree are the main interactable elements,
 				// so don't move focus from them
-				if (_id("bubble-input").contains(doc.activeElement)) return;
+				if (doc.activeElement.closest?.("bubble-input")) return;
+				if (doc.activeElement == _id("narrative-infix")) return;
 				if (_id("library-trees").contains(doc.activeElement)) return;
 				// cmd-click on suggester items in library mode should focus them
 				if (currentLayout.type == "library" && doc.activeElement.closest(".itemsContainer")) return;
@@ -2082,11 +2364,13 @@ const CitationPreview = {
 		let isCitingItems = DIALOG_STATE.isCitingItems();
 		let hasPreview = !!io.preview;
 		let isEmpty = !CitationDataManager.items.length;
+		let isNarrativeMissingHead = CitationFormManager.form == "narrative"
+			&& !CitationFormManager.headReferenceID;
 		// The preview pane appears when citing at least one item and the caller has
-		// provided a preview function
-		let isRelevant = isCitingItems && hasPreview && !isEmpty;
+		// provided a preview function. A Narrative citation without a Head is incomplete.
+		let isRelevant = isCitingItems && hasPreview && !isEmpty && !isNarrativeMissingHead;
 		_id("citation-preview").hidden = !(isRelevant && prefShown);
-		if (isEmpty) {
+		if (isEmpty || isNarrativeMissingHead) {
 			_id("citation-preview-content").innerHTML = "";
 			_id("citation-preview-error").hidden = true;
 		}
@@ -2095,7 +2379,7 @@ const CitationPreview = {
 		let toggleBtn = _id("display-preview-button");
 		toggleBtn.hidden = !isRelevant;
 		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
-		if (!isEmpty) {
+		if (isRelevant) {
 			CitationPreview._renderDebounced();
 		}
 	},
@@ -2104,11 +2388,33 @@ const CitationPreview = {
 		if (!DIALOG_STATE.isCitingItems()) return;
 		if (!CitationDataManager.items.length) return;
 		if (!io.preview) return;
+		if (CitationFormManager.form == "narrative"
+				&& !CitationFormManager.headReferenceID) return;
 
 		CitationDataManager.updateCitationObject();
 		let html;
 		try {
-			html = await io.preview("html");
+			if (CitationFormManager.form == "narrative" && io.previewNarrative) {
+				let headItem = CitationDataManager.getItem({
+					dialogReferenceID: CitationFormManager.headReferenceID
+				});
+				if (!headItem) return;
+				let [headHTML, remainderHTML] = await io.previewNarrative(
+					headItem.getCitationItem(), io.citation, "html");
+				if (io.narrativeInfixAvailable) {
+					let infix = CitationFormManager.normalizeInfix(
+						_id("narrative-infix").value);
+					html = headHTML + Zotero.Utilities.htmlSpecialChars(infix) + remainderHTML;
+				}
+				else {
+					html = `<span class="narrative-preview-part">${headHTML}</span>`
+					+ `<span class="narrative-preview-separator"> … </span>`
+					+ `<span class="narrative-preview-part">${remainderHTML}</span>`;
+				}
+			}
+			else {
+				html = await io.preview("html");
+			}
 		}
 		catch (e) {
 			// A preview failure usually means the citation itself won't process, but that
@@ -2157,6 +2463,7 @@ class BubbleItem {
 		this.suffix = citationItem.suffix;
 		this.prefix = citationItem.prefix;
 		this.suppressAuthor = citationItem["suppress-author"];
+		this.isNarrativeHead = !!citationItem["is-narrative-head"];
 		
 		this.bubbleString = "";
 		this.selected = false;
@@ -2193,6 +2500,9 @@ class BubbleItem {
 		}
 		if (this.suppressAuthor) {
 			citationItem["suppress-author"] = this.suppressAuthor;
+		}
+		if (this.isNarrativeHead) {
+			citationItem["is-narrative-head"] = true;
 		}
 		if (this.cslItemData) {
 			citationItem.itemData = this.cslItemData;
@@ -2283,10 +2593,36 @@ const CitationDataManager = {
 
 	// Update io citation object based on Citation.items array
 	updateCitationObject(final = false) {
-		io.citation.citationItems = this.items.map(item => item.getCitationItem({ includeDialogReferenceID: !final }));
+		let items = this.items;
+		if (CitationFormManager.form == "author-only") {
+			let headItem = CitationFormManager.headReferenceID
+				? this.getItem({ dialogReferenceID: CitationFormManager.headReferenceID })
+				: items[0];
+			items = headItem ? [headItem] : [];
+		}
+		io.citation.citationItems = items.map(item => (
+			item.getCitationItem({ includeDialogReferenceID: !final })
+		));
+
+		if (CitationFormManager.form == "narrative") {
+			io.citation.properties.mode = "suppress-author";
+		}
+		else if (CitationFormManager.form == "author-only") {
+			io.citation.properties.mode = "author-only";
+		}
+		else if (io.originalCitationForm == "standalone-suppress-author"
+				&& !io.citationFormChanged) {
+			io.citation.properties.mode = "suppress-author";
+		}
+		else {
+			delete io.citation.properties.mode;
+		}
 		if (io.sortable) {
 			io.citation.properties.unsorted = !_id("keepSorted").checked;
 		}
+		io.citationForm = CitationFormManager.form;
+		io.narrativeInfix = CitationFormManager.normalizeInfix(
+			_id("narrative-infix").value);
 	},
 
 	// Resorts the items in the citation
@@ -2326,6 +2662,7 @@ const CitationDataManager = {
 			return this.items.find(item => item.dialogReferenceID === sortedItem.dialogReferenceID);
 		});
 		this.items = sortedItems;
+		CitationFormManager.onItemsSorted();
 	},
 	
 	// Construct citation upon initial load
@@ -2342,6 +2679,7 @@ const CitationDataManager = {
 
 // Explicitly expose singletons to global window for tests
 window.CitationDataManager = CitationDataManager;
+window.CitationFormManager = CitationFormManager;
 window.IOManager = IOManager;
 
 // Top level listeners
@@ -2397,4 +2735,3 @@ window.addEventListener("focus", async () => {
 	libraryLayout.itemsView.tree?.invalidate();
 	doc.querySelector("#item-tree-container").classList.remove("no-focus-ring");
 });
-
