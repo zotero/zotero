@@ -757,6 +757,48 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
 			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
 		});
+		
+		it("shouldn't scroll when opening a container above the selected row", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
+			
+			// Sort the container to the top, with more rows below than fit in the view
+			var num = numVisibleRows + 10;
+			var parentItem = await createDataObject('item', {
+				title: String(0).padStart(num, '0'),
+				collections: [collection.id]
+			});
+			await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 1; i < num; i++) {
+					let item = createUnsavedDataObject('item', {
+						title: String(i).padStart(num, '0'),
+						collections: [collection.id]
+					});
+					await item.save();
+				}
+			});
+			await waitForItemsLoad(win);
+			
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			treebox.scrollToRow(parentRow);
+			var firstVisibleBefore = treebox.getFirstVisibleRow();
+			
+			// Select a visible row below the container
+			await itemsView.selectItem(itemsView.getRow(parentRow + 2).ref.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
+			assert.isTrue(itemsView.tree.rowIsVisible(parentRow));
+		});
 	});
 	
 	describe("#sort()", function () {
@@ -1234,6 +1276,53 @@ describe("CollectionViewItemTree", function () {
 			
 			// Make sure the first row is still at the top
 			assert.equal(treebox.getFirstVisibleRow(), 0);
+		});
+		
+		it("shouldn't scroll items list when a child item is moved to a parent further down", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
+			
+			var num = numVisibleRows + 10;
+			var parentItem1 = await createDataObject('item', {
+				title: String(0).padStart(num, '0'),
+				collections: [collection.id]
+			});
+			var parentItem2 = await createDataObject('item', {
+				title: String(3).padStart(num, '0'),
+				collections: [collection.id]
+			});
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 4; i < num; i++) {
+					let item = createUnsavedDataObject('item', {
+						title: String(i).padStart(num, '0'),
+						collections: [collection.id]
+					});
+					await item.save();
+				}
+			});
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem1.id });
+			await waitForItemsLoad(win);
+			
+			itemsView.expandAllRows(true);
+			treebox.scrollToRow(0);
+			await itemsView.selectItem(attachment.id);
+			var firstVisibleBefore = treebox.getFirstVisibleRow();
+			assert.isTrue(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(parentItem2.id)));
+			
+			// Move the attachment to the parent below
+			attachment.parentItemID = parentItem2.id;
+			await attachment.saveTx();
+			await itemsView.waitForLoad();
+			
+			assert.equal(
+				itemsView.getRowIndexByID(attachment.id),
+				itemsView.getRowIndexByID(parentItem2.id) + 1
+			);
+			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
 		});
 		
 		it("should update search results when items are added", async function () {
