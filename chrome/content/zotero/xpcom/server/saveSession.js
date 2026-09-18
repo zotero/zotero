@@ -49,9 +49,9 @@ Zotero.Server.Connector.SessionManager = {
 		var ttl = this._sessions.size >= 10 ? 60 : 600;
 		var deleteBefore = new Date() - ttl * 1000;
 
-		for (let session of this._sessions) {
+		for (let [id, session] of this._sessions) {
 			if (session.created < deleteBefore) {
-				this._session.delete(session.id);
+				this._sessions.delete(id);
 			}
 		}
 	}
@@ -147,7 +147,7 @@ Zotero.Server.Connector.SaveSession = class {
 	}
 
 	remove() {
-		delete Zotero.Server.Connector.SessionManager._sessions[this.id];
+		Zotero.Server.Connector.SessionManager._sessions.delete(this.id);
 	}
 
 	/**
