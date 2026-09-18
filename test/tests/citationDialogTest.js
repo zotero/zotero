@@ -953,11 +953,13 @@ describe("Citation Dialog", function () {
 			highlightAnnotation = await createAnnotation('highlight', attachment);
 			highlightAnnotation.annotationText = 'highlighted text';
 			highlightAnnotation.annotationComment = 'highlight comment';
+			highlightAnnotation.annotationPageLabel = '5';
 			await highlightAnnotation.saveTx();
 
 			underlineAnnotation = await createAnnotation('underline', attachment);
 			underlineAnnotation.annotationText = 'underlined text';
 			underlineAnnotation.annotationComment = 'underline';
+			underlineAnnotation.annotationPageLabel = '7';
 			await underlineAnnotation.saveTx();
 		});
 
@@ -993,6 +995,82 @@ describe("Citation Dialog", function () {
 			let bubbles = dialog.document.querySelector("bubble-input").getAllBubbles();
 			assert.equal(bubbles.length, 1);
 			assert.equal(bubbles[0].textContent, `Last_One “highlighted text”`);
+		});
+
+		it("should carry annotations over as cited parent items when switching to citation mode", async function () {
+			// Second annotation on the same page as the highlight, to be merged with it
+			let samePageAnnotation = await createAnnotation('highlight', attachment);
+			samePageAnnotation.annotationPageLabel = '5';
+			await samePageAnnotation.saveTx();
+			// Annotation of a standalone attachment has no item to cite
+			let standaloneAttachment = await importFileAttachment('test.pdf');
+			let standaloneAnnotation = await createAnnotation('highlight', standaloneAttachment);
+			await standaloneAnnotation.saveTx();
+
+			let waitForSearch = async () => {
+				while (SearchHandler.searching) {
+					await Zotero.Promise.delay(10);
+				}
+			};
+			try {
+				await IOManager.addItemsToCitation([highlightAnnotation, underlineAnnotation, samePageAnnotation, standaloneAnnotation]);
+				assert.equal(CitationDataManager.items.length, 4);
+				await dialog.setDialogType("citation");
+				await waitForSearch();
+
+				// Annotations become their parent item with page locators
+				let citationItems = CitationDataManager.items
+					.map(bubbleItem => bubbleItem.getCitationItem())
+					.sort((a, b) => a.locator - b.locator);
+				assert.deepEqual(citationItems, [
+					{ id: parentItem.id, locator: '5', label: 'page' },
+					{ id: parentItem.id, locator: '7', label: 'page' }
+				]);
+				let bubbles = dialog.document.querySelector("bubble-input").getAllBubbles();
+				assert.equal(bubbles.length, 2);
+				assert.isFalse(dialog.document.getElementById("accept-button").disabled);
+				// Focus is placed into the last input
+				let inputs = [...dialog.document.querySelectorAll("bubble-input .input")];
+				assert.equal(dialog.document.activeElement, inputs[inputs.length - 1]);
+				// The parent item's row is highlighted in the rebuilt itemTree
+				while (dialog.currentLayout.itemsView.getRowIndexByID(parentItem.id) === false) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.isTrue(dialog.currentLayout.itemsView._highlightedRows.has(parentItem.id));
+			}
+			finally {
+				await samePageAnnotation.eraseTx();
+				await standaloneAttachment.eraseTx();
+				// Go back to the annotations dialog type and wait for the rebuilt itemTree to load
+				await dialog.setDialogType("annotations");
+				await waitForSearch();
+				while (dialog.currentLayout.itemsView.getRowIndexByID(parentItem.id) === false) {
+					await Zotero.Promise.delay(10);
+				}
+			}
+		});
+
+		it("should merge all neighboring inputs when bubbles are replaced", async function () {
+			await IOManager.addItemsToCitation([highlightAnnotation, underlineAnnotation]);
+			let bubbleInput = dialog.document.getElementById("bubble-input");
+			let inputs = [...bubbleInput.querySelectorAll(".input")];
+			assert.equal(inputs.length, 3);
+			inputs[0].value = "one";
+			inputs[1].value = "two";
+			inputs[2].value = "three";
+
+			// Replace all bubbles, which leaves the three inputs next to each other
+			CitationDataManager.items = CitationDataManager.buildParentCitationBubbleItems();
+			IOManager.updateBubbleInput();
+
+			// There must be exactly one input between bubbles, with all values combined
+			let nodes = [...bubbleInput.querySelector(".body").children];
+			assert.equal(nodes.filter(node => node.classList.contains("bubble")).length, 2);
+			assert.equal(nodes.filter(node => node.classList.contains("input")).length, 3);
+			for (let i = 1; i < nodes.length; i++) {
+				assert.notEqual(nodes[i].classList.contains("input"), nodes[i - 1].classList.contains("input"));
+			}
+			assert.equal(nodes[0].value, "one two three");
 		});
 
 		it("should select itemTree row on click of selected non-annotation item", async function () {
