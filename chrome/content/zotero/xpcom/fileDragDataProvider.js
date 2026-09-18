@@ -66,7 +66,8 @@ Zotero.FileDragDataProvider.prototype = {
 					continue;
 				}
 
-				if (draggedItems[i].getFile()) {
+				let path = draggedItems[i].getFilePath();
+				if (path && Zotero.File.pathToFile(path).exists()) {
 					items.push(draggedItems[i]);
 				}
 				else {
@@ -242,3 +243,103 @@ Zotero.FileDragDataProvider.prototype = {
 	}
 }
 
+
+/**
+ * Implements nsIFlavorDataProvider for a single dragged attachment file, handing drop targets a
+ * copy in the temp directory instead of the file in storage. The copy is made only when a target
+ * asks for the file, so drags within Zotero don't copy anything, and a target that moves the
+ * dropped file (e.g., File Explorer on Windows for an unmodified drag) moves the copy.
+ *
+ * A target can still be working on the copy after the drag ends -- e.g., while a replace/skip
+ * dialog is open -- and gives no signal when it's done, so a copy's directory is removed only
+ * once it's empty (the target moved the file), at the start of the next drag, or with the temp
+ * directory at shutdown.
+ *
+ * @param {String} path
+ */
+Zotero.TempFileDragDataProvider = function (path) {
+	this._path = path;
+	this._file = null;
+};
+
+Zotero.TempFileDragDataProvider._copiedSinceDragEnd = false;
+
+/**
+ * Remove directories created for copies
+ *
+ * @param {Object} [options]
+ * @param {Boolean} [options.onlyEmpty=false] - Remove only directories whose file the target has
+ *     moved away, which is safe while a target may still be using another copy
+ */
+Zotero.TempFileDragDataProvider.removeCopies = async function ({ onlyEmpty = false } = {}) {
+	let tmpDir = Zotero.getTempDirectory().path;
+	let children;
+	try {
+		children = await IOUtils.getChildren(tmpDir);
+	}
+	catch (e) {
+		Zotero.debug(e, 2);
+		return;
+	}
+	for (let dir of children) {
+		if (!/^drag(-\d+)?$/.test(PathUtils.filename(dir))) {
+			continue;
+		}
+		try {
+			if (onlyEmpty) {
+				if ((await IOUtils.getChildren(dir)).length) {
+					continue;
+				}
+				// Non-recursive, so a copy made in the meantime is never removed
+				await IOUtils.remove(dir);
+			}
+			else {
+				await IOUtils.remove(dir, { recursive: true });
+			}
+			Zotero.debug(`Removed drag copy directory ${dir}`);
+		}
+		// A target may still have a copy open
+		catch (e) {
+			Zotero.debug(e, 2);
+		}
+	}
+};
+
+/**
+ * Call when a drag that offered files through these providers ends
+ */
+Zotero.TempFileDragDataProvider.onDragEnd = function () {
+	if (!this._copiedSinceDragEnd) {
+		return;
+	}
+	this._copiedSinceDragEnd = false;
+	// An unmodified drop in File Explorer moves the copy right away, so remove the emptied
+	// directory shortly after, with a later pass for a target that took longer
+	for (let delay of [2000, 30000]) {
+		setTimeout(() => this.removeCopies({ onlyEmpty: true }), delay);
+	}
+};
+
+Zotero.TempFileDragDataProvider.prototype = {
+	QueryInterface: ChromeUtils.generateQI(["nsIFlavorDataProvider"]),
+	
+	getFlavorData(_transferable, flavor, data) {
+		if (flavor != 'application/x-moz-file') {
+			return;
+		}
+		// Targets ask for the file repeatedly during a drag, so make the copy once
+		if (!this._file) {
+			let file = Zotero.File.pathToFile(this._path);
+			// Copy into a directory of its own so that the copy keeps its filename
+			let dir = Zotero.getTempDirectory();
+			dir.append('drag');
+			dir.createUnique(Ci.nsIFile.DIRECTORY_TYPE, 0o755);
+			Zotero.debug(`Copying ${this._path} to ${dir.path} for drag`);
+			file.copyTo(dir, null);
+			Zotero.TempFileDragDataProvider._copiedSinceDragEnd = true;
+			dir.append(file.leafName);
+			this._file = dir;
+		}
+		data.value = this._file;
+	}
+};

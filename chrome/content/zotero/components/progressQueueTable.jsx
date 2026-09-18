@@ -75,10 +75,10 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 		for (let column of columns) {
 			if (column.dataKey === 'success') {
 				let span = document.createElement('span');
-				if (!span.ownerGlobal) {
+				if (!span.documentGlobal) {
 					// If this script was imported from a non-window context, we'll have a global object that looks like
 					// a Window and document.createElement() will succeed, but the returned Element object won't have
-					// an ownerGlobal. Trying to append a child or set its innerHTML will segfault Zotero. For now,
+					// an documentGlobal. Trying to append a child or set its innerHTML will segfault Zotero. For now,
 					// let's just abort if we get an invalid Element.
 					// TODO: Remove once we're using ES modules
 					return div;

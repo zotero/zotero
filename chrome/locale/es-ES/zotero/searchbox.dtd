@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nombre:">
 
-<!ENTITY zotero.search.searchInLibrary "Buscar en biblioteca:">
-
 <!ENTITY zotero.search.joinMode.prefix "Patrón">
 <!ENTITY zotero.search.joinMode.any "cualquiera de">
 <!ENTITY zotero.search.joinMode.all "todos">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "días">
 <!ENTITY zotero.search.date.units.months "meses">
 <!ENTITY zotero.search.date.units.years "años">
-
-<!ENTITY zotero.search.search "Buscar">
-<!ENTITY zotero.search.clear "Borrar">
-<!ENTITY zotero.search.saveSearch "Guardar búsqueda">

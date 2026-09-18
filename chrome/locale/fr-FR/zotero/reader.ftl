@@ -226,7 +226,7 @@ reader-read-aloud-quota-exceeded-message =
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Une erreur indéterminée est survenue.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-network = Impossible de se connecter au service de lecture à haute voix. Veuillez vérifier votre connexion Internet.
 reader-read-aloud-error-daily-limit-exceeded = Vous avez dépassé votre limite quotidienne pour les voix de { -app-name }.
 reader-read-aloud-retry = Essayer à nouveau
 reader-read-aloud-first-run-title = Choisissez la voix de lecture à haute voix que vous préférez :

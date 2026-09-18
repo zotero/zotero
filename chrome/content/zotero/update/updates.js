@@ -354,6 +354,36 @@ var gUpdates = {
 
 	/**
 	 * Helper function for onLoad
+	 * Adds the extra1 and extra2 buttons to the wizard's button box, since the
+	 * platform wizard only provides the back, next, finish, and cancel buttons,
+	 * and dispatches an event of the same name on the current page when one of
+	 * them is clicked
+	 */
+	_addExtraButtons() {
+		var buttons = this.wiz.shadowRoot.querySelector("wizard-buttons");
+		var buttonBox = buttons.querySelector(
+			".wizard-buttons-btm, .wizard-buttons-box-2"
+		);
+		// Insert extra2 first so that extra1 ends up leftmost
+		for (let dlgType of ["extra2", "extra1"]) {
+			let button = document.createXULElement("button");
+			button.className = "wizard-button";
+			button.setAttribute("dlgtype", dlgType);
+			button.hidden = true;
+			button.addEventListener("command", () => {
+				let page = this.wiz.currentPage;
+				if (page) {
+					page.dispatchEvent(
+						new CustomEvent(dlgType, { bubbles: true, cancelable: true })
+					);
+				}
+			});
+			buttonBox.prepend(button);
+		}
+	},
+
+	/**
+	 * Helper function for onLoad
 	 * Saves default button label & accesskey for use by _setButton
 	 */
 	_cacheButtonStrings(buttonName) {
@@ -382,6 +412,8 @@ var gUpdates = {
 				this._pages[page.pageid] = eval(page.getAttribute("object"));
 			}
 		}
+
+		this._addExtraButtons();
 
 		// Cache the standard button labels in case we need to restore them
 		this._cacheButtonStrings("next");
@@ -941,7 +973,11 @@ var gDownloadingPage = {
 			if (activeUpdate.state == STATE_PENDING
 					|| activeUpdate.state == STATE_PENDING_ELEVATE
 					|| activeUpdate.state == STATE_PENDING_SERVICE) {
-				if (!activeUpdate.getProperty("stagingFailed")) {
+				// Wait for the update if it's currently being staged. If staging
+				// isn't in progress -- because the installation directory isn't
+				// writable or staging is disabled -- the update is already ready to
+				// install.
+				if (gAUS.currentState == Ci.nsIApplicationUpdateService.STATE_STAGING) {
 					gUpdates.setButtons("hideButton", null, null, false);
 					gUpdates.wiz.getButton("extra1").focus();
 
@@ -972,18 +1008,15 @@ var gDownloadingPage = {
 			gUpdates.update.QueryInterface(Ci.nsIWritablePropertyBag);
 			gUpdates.update.setProperty("foregroundDownload", "true");
 
-			let state = gAUS.downloadUpdate(gUpdates.update, false);
-			if (state == "failed") {
-				// We've tried as hard as we could to download a valid update -
-				// we fell back from a partial patch to a complete patch and even
-				// then we couldn't validate. Show a validation error with instructions
-				// on how to manually update.
+			// Add this UI as a listener for active downloads
+			gAUS.addDownloadListener(this);
+
+			let result = await gAUS.downloadUpdate(gUpdates.update);
+			if (result != Ci.nsIApplicationUpdateService.DOWNLOAD_SUCCESS) {
 				this.cleanUp();
 				gUpdates.wiz.goTo("errors");
 				return;
 			}
-			// Add this UI as a listener for active downloads
-			gAUS.addDownloadListener(this);
 
 			if (activeUpdate) {
 				this._downloadProgress.removeAttribute("value");
@@ -1096,7 +1129,7 @@ var gDownloadingPage = {
 			"gDownloadingPage",
 			"onHide - continuing download in background at full speed"
 		);
-		gAUS.downloadUpdate(gUpdates.update, false);
+		gAUS.downloadUpdate(gUpdates.update);
 		gUpdates.wiz.cancel();
 	},
 
@@ -1104,8 +1137,6 @@ var gDownloadingPage = {
 	 * When the data transfer begins
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 */
 	onStartRequest(request) {
 		this._downloadProgress.removeAttribute("value");
@@ -1116,14 +1147,12 @@ var gDownloadingPage = {
 	 * When new data has been downloaded
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 progress
 	 *					The current number of bytes transferred
 	 * @param	 maxProgress
 	 *					The total number of bytes that must be transferred
 	 */
-	onProgress(request, context, progress, maxProgress) {
+	onProgress(request, progress, maxProgress) {
 		let status = this._updateDownloadStatus(progress, maxProgress);
 		var currentProgress = Math.round(100 * (progress / maxProgress));
 
@@ -1154,14 +1183,12 @@ var gDownloadingPage = {
 	 * When we have new status text
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 status
 	 *					A status code
 	 * @param	 statusText
 	 *					Human readable version of |status|
 	 */
-	onStatus(request, context, status, statusText) {
+	onStatus(request, status, statusText) {
 		this._setStatus(statusText);
 	},
 
@@ -1169,8 +1196,6 @@ var gDownloadingPage = {
 	 * When data transfer ceases
 	 * @param	 request
 	 *					The nsIRequest object for the transfer
-	 * @param	 context
-	 *					Additional data
 	 * @param	 status
 	 *					Status code containing the reason for the cessation.
 	 */
@@ -1393,11 +1418,11 @@ var gFinishedPage = {
 			let moreElevated = document.getElementById(
 				"finishedBackgroundMoreElevated"
 			);
-			moreElevated.setAttribute("hidden", "false");
+			moreElevated.removeAttribute("hidden");
 			let moreElevatedLink = document.getElementById(
 				"finishedBackgroundMoreElevatedLink"
 			);
-			moreElevatedLink.setAttribute("hidden", "false");
+			moreElevatedLink.removeAttribute("hidden");
 			let moreElevatedLinkLabel = document.getElementById(
 				"finishedBackgroundMoreElevatedLinkLabel"
 			);
@@ -1406,7 +1431,7 @@ var gFinishedPage = {
 			);
 			moreElevatedLinkLabel.value = manualURL;
 			moreElevatedLinkLabel.setAttribute("url", manualURL);
-			moreElevatedLinkLabel.setAttribute("hidden", "false");
+			moreElevatedLinkLabel.removeAttribute("hidden");
 		}
 	},
 

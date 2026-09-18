@@ -111,8 +111,13 @@
 						accesskey="&aboutProduct.accesskey;"
 						label="&aboutProduct.label;"
 						oncommand="openAbout()"/>
+				<!-- macOS 13 changed "Preferences" to "Settings" so one of these gets picked -->
 				<menuitem id="menu_preferences"
 						label="&preferencesCmdMac.label;"
+						key="key_preferencesCmdMac"
+						oncommand="openPreferences()"/>
+				<menuitem id="menu_settings"
+						data-l10n-id="menu-application-settings"
 						key="key_preferencesCmdMac"
 						oncommand="openPreferences()"/>
 				<menuitem id="menu_mac_services"

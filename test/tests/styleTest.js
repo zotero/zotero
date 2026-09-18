@@ -123,16 +123,25 @@ describe("Zotero.Styles", function () {
 			var style = new Zotero.Style(eventStyleXML);
 			var cslEngine = style.getCiteProc('en-US', 'text');
 			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
-			cslEngine.free();
 			assert.equal(text, 'Conference - Conference - Place\n');
 		});
 	});
 
+	describe("Zotero.Styles.resolveLocale", function () {
+		it("should return available locale unchanged", function () {
+			assert.equal(Zotero.Styles.resolveLocale('de-AT'), 'de-AT');
+		});
+
+		it("should return primary dialect for a language code", function () {
+			assert.equal(Zotero.Styles.resolveLocale('fa'), 'fa-IR');
+		});
+
+		it("should return closest available locale for locale without a CSL locale", function () {
+			assert.equal(Zotero.Styles.resolveLocale('sr-RS'), 'sr-Cyrl-RS');
+		});
+	});
+
 	describe("Cached CSL.Engine instances", function () {
-		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-			this.skip();
-		}
-		
 		it("should correctly handle disambiguation", async function () {
 			let style = Zotero.Styles.get('http://www.zotero.org/styles/apa');
 			
@@ -237,6 +246,32 @@ describe("Zotero.Styles", function () {
 			let style = new Zotero.Style(xml);
 			assert.isNull(style.locale);
 			assert.equal(style.effectiveLocale, "en-US");
+		});
+	});
+
+	describe("CSL 0.8 styles", function () {
+		var csl08Style = `<?xml version="1.0" encoding="utf-8"?>
+		<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" xml:lang="en">
+		  <info>
+			<title>Test 0.8 Style</title>
+			<id>http://www.zotero.org/styles/test-08</id>
+			<updated>2010-01-01T00:00:00+00:00</updated>
+		  </info>
+		  <bibliography>
+			<layout>
+			  <text variable="title"/>
+			</layout>
+		  </bibliography>
+		</style>
+		`;
+		
+		it("should upgrade a style to CSL 1.0 and format a bibliography", async function () {
+			var item = await createDataObject('item', { title: 'Foo Bar' });
+			var style = new Zotero.Style(csl08Style);
+			assert.equal(style._version, "0.8");
+			var cslEngine = style.getCiteProc('en-US', 'text');
+			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			assert.equal(text, 'Foo Bar\n');
 		});
 	});
 });

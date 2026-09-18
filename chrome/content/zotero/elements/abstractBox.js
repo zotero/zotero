@@ -138,7 +138,13 @@
 					throw new Error('Item has not been added to library');
 				}
 				this._item.setField('abstractNote', this._abstractField.value);
-				await this._item.saveTx();
+				await this._item.saveTx({
+					undoAction: 'undo-action-edit-field',
+					undoActionArgs: {
+						field: Zotero.ItemFields.getLocalizedString('abstractNote'),
+						count: 1
+					}
+				});
 			}
 			this._forceRenderAll();
 		}

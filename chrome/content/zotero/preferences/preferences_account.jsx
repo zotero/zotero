@@ -233,7 +233,25 @@ Zotero_Preferences.Sync = {
 		}
 
 		// Validate and store the API key
-		await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
+		try {
+			await Zotero.Sync.Runner.checkLoginSession(sessionToken, result);
+		}
+		catch (e) {
+			// The session already created a key on the server, so revoke it rather than
+			// leaving an active key we can't use
+			if (result.apiKey) {
+				try {
+					await Zotero.Sync.Runner.getAPIClient({ apiKey: result.apiKey })
+						.deleteAPIKey();
+				}
+				catch (e2) {
+					Zotero.logError(e2);
+				}
+			}
+			this._pendingSessionToken = null;
+			this._showLoginDefault();
+			throw e;
+		}
 
 		// Handle secmod.db issue when storing the API key
 		// This can happen when people have a very old profile directory (e.g., from 2013)
@@ -914,19 +932,15 @@ Zotero_Preferences.Sync = {
 		//
 		var libraryMenu = document.getElementById('sync-reset-library-menu');
 		// Some options need to be disabled when certain libraries are selected
-		libraryMenu.onchange = (event) => {
-			this.onResetLibraryChange(parseInt(event.target.value));
-		}
+		libraryMenu.addEventListener('command', () => {
+			this.onResetLibraryChange(parseInt(libraryMenu.value));
+		});
 		this.onResetLibraryChange(Zotero.Libraries.userLibraryID);
 		document.querySelectorAll('#sync-reset-radiogroup radio')
 			.forEach(radio => radio.removeAttribute('selected'));
 		var libraries = Zotero.Libraries.getAll()
 			.filter(x => x.libraryType == 'user' || x.libraryType == 'group');
 		Zotero.Utilities.Internal.buildLibraryMenu(libraryMenu, libraries);
-		// Disable read-only libraries, at least until there are options that make sense for those
-		Array.from(libraryMenu.querySelectorAll('menuitem'))
-			.filter(x => x.getAttribute('data-editable') == 'false')
-			.forEach(x => x.disabled = true);
 		
 		for (let row of document.querySelectorAll('#sync-reset-radiogroup > *')) {
 			row.addEventListener('click', function (event) {
@@ -943,18 +957,29 @@ Zotero_Preferences.Sync = {
 	
 	onResetLibraryChange: function (libraryID) {
 		var library = Zotero.Libraries.get(libraryID);
-		var section = document.getElementById('reset-file-sync-history');
+		this.toggleResetOption('reset-file-sync-history', true);
+		this.toggleResetOption('restore-to-server', library.editable);
+	},
+	
+	
+	toggleResetOption: function (id, enabled) {
+		var section = document.getElementById(id);
 		var radio = section.querySelector('radio');
-		if (library.filesEditable) {
+		if (enabled) {
 			section.removeAttribute('disabled');
 			radio.disabled = false;
 		}
 		else {
 			section.setAttribute('disabled', '');
-			// If radio we're disabling is already selected, select the first one in the list
-			// instead
+			// If the radio we're disabling is already selected, move the selection to the first
+			// enabled one instead.
 			if (radio.selected) {
-				document.querySelector('#sync-reset-radiogroup > div:first-child radio').selected = true;
+				let enabledRadio = document.querySelector(
+					'#sync-reset-radiogroup > div:not([disabled]) radio'
+				);
+				if (enabledRadio) {
+					document.getElementById('sync-reset-radiogroup').selectedItem = enabledRadio;
+				}
 			}
 			radio.disabled = true;
 		}

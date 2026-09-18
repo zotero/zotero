@@ -78,7 +78,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
 <!ENTITY zotero.preferences.sync.reset "Adderaouekaat">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Diskouez an dibarzhioù adloc'hañ...">
 <!ENTITY zotero.preferences.sync.reset.button "Adderaouekaat...">
 
 

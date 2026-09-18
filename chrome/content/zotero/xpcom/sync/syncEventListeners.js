@@ -331,7 +331,7 @@ Zotero.Sync.EventListeners.StorageFileOpenListener = {
 	},
 	
 	notify: function (event, type, ids, extraData) {
-		if (event == 'open' && type == 'file') {
+		if ((event == 'open' || event == 'reveal') && type == 'file') {
 			let timestamp = new Date().getTime();
 			
 			for (let i = 0; i < ids.length; i++) {

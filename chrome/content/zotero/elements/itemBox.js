@@ -54,6 +54,8 @@
 			this.eventHandlers = [];
 			this.itemTypeMenu = null;
 			
+			this._extraItems = [];
+			this._unionFieldDescriptors = null;
 			this._mode = 'view';
 			this._visibleFields = [];
 			this._hiddenFields = [];
@@ -67,6 +69,9 @@
 			this._selectFieldValue = null;
 			this._selectFieldSelection = null;
 			this._addCreatorRow = false;
+			this._addingCreatorRowsInBulk = false;
+			this._needsUnsavedCreatorRemoval = false;
+			this._pendingCreatorSizing = [];
 			this._switchedModeOfCreator = null;
 			this._popupNode = null;
 
@@ -126,7 +131,7 @@
 		}
 		
 		get _renderDependencies() {
-			return [...super._renderDependencies, this.collectionTreeRow?.id];
+			return [...super._renderDependencies, this.collectionTreeRows?.map(o => o.id).join(',')];
 		}
 		
 		init() {
@@ -279,6 +284,19 @@
 				this.updateCustomRowProperty(rowElem);
 			}
 		}
+
+		get extraItems() {
+			return this._extraItems;
+		}
+
+		set extraItems(val) {
+			if (!Array.isArray(val)) {
+				return;
+			}
+			this._extraItems = val.filter(item => item instanceof Zotero.Item && item.isRegularItem());
+			this._unionFieldDescriptors = null;
+			this._resetRenderedFlags();
+		}
 		
 		// .ref is an alias for .item
 		get ref() {
@@ -404,7 +422,8 @@
 				this.renderCustomRows(ids);
 				return;
 			}
-			if (event == 'modify' && this.item?.id && ids.includes(this.item.id)) {
+			if (event == 'modify' && this.item?.id
+					&& (ids.includes(this.item.id) || this._extraItems?.some(item => ids.includes(item.id)))) {
 				this._forceRenderAll();
 			}
 			if (event === 'select' && type === 'tab' && ids.length > 0) {
@@ -442,8 +461,60 @@
 			}
 		}
 
+		/**
+		 * Compute the union of fields across all selected item types for cross-type
+		 * batch editing. Returns null if all items share the same type (caller should
+		 * fall back to the normal single-type field list).
+		 *
+		 * Each descriptor in the returned array has:
+		 *   canonicalName -- base field name if base-mapped, else the original field name
+		 *   label -- localized label per the labeling rules
+		 */
+		_computeUnionFieldList() {
+			let allItems = [this.item, ...this._extraItems];
+			let allTypeIDs = [...new Set(allItems.map(i => i.itemTypeID))];
+
+			// Same-type batch -- use normal single-type logic
+			if (allTypeIDs.length === 1) return null;
+
+			let fieldMap = new Map(); // canonicalName -> descriptor
+			let orderCounter = 0;
+
+			for (let typeID of allTypeIDs) {
+				let typeFieldIDs = Zotero.ItemFields.getItemTypeFields(typeID);
+				for (let fieldID of typeFieldIDs) {
+					let fieldName = Zotero.ItemFields.getName(fieldID);
+
+					// Resolve to base field name if a mapping exists
+					let baseID = Zotero.ItemFields.getBaseIDFromTypeAndField(typeID, fieldID);
+					let canonicalName = baseID
+						? Zotero.ItemFields.getName(baseID)
+						: fieldName;
+
+					if (fieldMap.has(canonicalName)) {
+						// Shared by multiple types -- use base field label
+						fieldMap.get(canonicalName).label
+							= Zotero.ItemFields.getLocalizedString(canonicalName);
+					}
+					else {
+						fieldMap.set(canonicalName, {
+							canonicalName,
+							firstOrder: orderCounter++,
+							// Use type-specific label until another type shares this field
+							label: Zotero.ItemFields.getLocalizedString(fieldName),
+						});
+					}
+				}
+			}
+
+			let result = [...fieldMap.values()];
+			result.sort((a, b) => a.firstOrder - b.firstOrder);
+			return result;
+		}
+
 		_renderInternal() {
 			this._saveFieldFocus();
+			this._unionFieldDescriptors = null;
 
 			delete this._linkMenu.dataset.link;
 
@@ -466,7 +537,9 @@
 			}
 
 			// Item type menu
-			this.addItemTypeMenu();
+			if (!this._extraItems?.length) {
+				this.addItemTypeMenu();
+			}
 			this.updateItemTypeMenuSelection();
 			var fieldNames = [];
 			
@@ -477,15 +550,35 @@
 				}
 			}
 			// Get field order from database
+			else if (this._extraItems.length) {
+				// Batch editing -- compute field list
+				let unionFields = this._computeUnionFieldList();
+				if (unionFields) {
+					// Cross-type batch: use union of fields from all item types
+					this._unionFieldDescriptors = new Map();
+					for (let desc of unionFields) {
+						fieldNames.push(desc.canonicalName);
+						this._unionFieldDescriptors.set(desc.canonicalName, desc);
+					}
+				}
+				else {
+					// Same-type batch: use the shared item type's fields
+					let fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
+					for (let i = 0; i < fields.length; i++) {
+						fieldNames.push(Zotero.ItemFields.getName(fields[i]));
+					}
+				}
+				fieldNames.push("dateAdded", "dateModified");
+			}
 			else {
 				var fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
-				
+
 				for (let i = 0; i < fields.length; i++) {
 					fieldNames.push(Zotero.ItemFields.getName(fields[i]));
 				}
 
 				if (this.item instanceof Zotero.FeedItem) {
-					let row = ZoteroPane.getCollectionTreeRow();
+					let row = ZoteroPane.getCollectionTreeRows()[0];
 					if (row && row.isFeeds()) {
 						fieldNames.unshift("feed");
 					}
@@ -500,10 +593,14 @@
 					continue;
 				}
 				let val = '';
+				let extraFieldValues = [];
 				
 				if (fieldName) {
 					var fieldID = Zotero.ItemFields.getID(fieldName);
-					if (fieldID && !Zotero.ItemFields.isValidForType(fieldID, this.item.itemTypeID)) {
+					// In cross-type batch mode, union fields are pre-validated
+					if (!this._unionFieldDescriptors
+							&& fieldID
+							&& !Zotero.ItemFields.isValidForType(fieldID, this.item.itemTypeID)) {
 						fieldName = null;
 					}
 				}
@@ -523,11 +620,20 @@
 					else if (fieldName == 'feed') {
 						val = Zotero.Feeds.get(this.item.libraryID)?.name;
 					}
+					else if (this._unionFieldDescriptors) {
+						val = this.item.getField(fieldName, false, true);
+						extraFieldValues = this._extraItems.map(item => item.getField(fieldName, false, true));
+					}
 					else {
 						val = this.item.getField(fieldName);
+
+						if (this._extraItems.length) {
+							extraFieldValues = this._extraItems.map(item => item.getField(fieldName));
+						}
 					}
 					
-					if (!val && this.hideEmptyFields
+					if (!val && !extraFieldValues.some(v => v)
+							&& this.hideEmptyFields
 							&& this._visibleFields.indexOf(fieldName) == -1
 							&& (this.mode != 'fieldmerge' || typeof this._fieldAlternatives[fieldName] == 'undefined')) {
 						continue;
@@ -540,7 +646,10 @@
 							&& Zotero.ItemFields.isDate(fieldName)
 							// TEMP - NSF
 							&& fieldName != 'dateSent') {
-						this.addDateRow(fieldName, this.item.getField(fieldName, true));
+						let dateVal = this._unionFieldDescriptors
+							? this.item.getField(fieldName, true, true)
+							: this.item.getField(fieldName, true);
+						this.addDateRow(fieldName, dateVal, extraFieldValues);
 						continue;
 					}
 				}
@@ -548,14 +657,21 @@
 				let rowLabel = document.createElement("div");
 				rowLabel.className = "meta-label";
 				rowLabel.setAttribute('fieldname', fieldName);
+				// Augment the fieldname attribute with a class so querySelectors for
+				// label elements use fast indexed class lookups
+				if (fieldName) {
+					rowLabel.classList.add(`meta-label-${fieldName}`);
+				}
 				
 				let valueElement = this.createFieldValueElement(
-					val, fieldName
+					val, fieldName, extraFieldValues
 				);
 				
 				if (fieldName) {
+					let labelText = this._unionFieldDescriptors?.get(fieldName)?.label
+						?? Zotero.ItemFields.getLocalizedString(fieldName);
 					let label = this.createLabelElement({
-						text: Zotero.ItemFields.getLocalizedString(fieldName),
+						text: labelText,
 						id: `itembox-field-${fieldName}-label`,
 					});
 					rowLabel.appendChild(label);
@@ -564,8 +680,12 @@
 				let openLinkButton;
 				let link = val;
 				let addLinkContextMenu = false;
+				// Don't show View Online button in batch edit mode
+				if (this._extraItems.length) {
+					// No open-link button in batch edit mode
+				}
 				// TEMP - NSF (homepage)
-				if ((fieldName == 'url' || fieldName == 'homepage')
+				else if ((fieldName == 'url' || fieldName == 'homepage')
 						// Only make plausible HTTP URLs clickable
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					openLinkButton = this.createOpenLinkIcon(val, fieldName);
@@ -640,8 +760,8 @@
 					onContextMenu = this.createContextMenuHandler(fieldName, () => {
 						let menupopup = ZoteroPane.buildFieldTransformMenu({
 							target: valueElement,
-							onTransform: (newValue) => {
-								this._setFieldTransformedValue(valueElement, newValue);
+							onTransform: (newValues) => {
+								this._setFieldTransformedValue(valueElement, newValues);
 							}
 						});
 						this.querySelector('#info-box > popupset').append(menupopup);
@@ -654,7 +774,7 @@
 					optionsButton.addEventListener("click", onContextMenu);
 					rowData.appendChild(optionsButton);
 					// Options button is always created for focus management but if the field is empty, it is hidden
-					if (!val) optionsButton.hidden = true;
+					if (!val && !extraFieldValues.some(v => v)) optionsButton.hidden = true;
 				}
 
 				rowData.oncontextmenu = onContextMenu;
@@ -715,6 +835,11 @@
 						labelKey = 'items-column-modified-by';
 					}
 					if (userID) {
+						let hasMultipleUsers = fieldName === 'dateAdded'
+							? this._extraItems.some(item => item.createdByUserID !== userID)
+							: this._extraItems.some(
+								item => (item.lastModifiedByUserID || item.createdByUserID) !== userID
+							);
 						let userLabel = document.createElement("div");
 						userLabel.className = "meta-label";
 						userLabel.setAttribute("fieldname", userFieldName);
@@ -724,9 +849,22 @@
 						}));
 						let userData = document.createElement("div");
 						userData.className = "meta-data";
-						userData.appendChild(this.createValueElement({
-							text: Zotero.Users.getName(userID),
-						}));
+						let valueElem = this.createValueElement({
+							text: hasMultipleUsers ? '' : Zotero.Users.getName(userID),
+							id: `itembox-field-value-${userFieldName}`,
+							attributes: { fieldname: userFieldName },
+						});
+						// Only treat the field as having multiple values -- which shows the
+						// "Multiple" placeholder and makes it non-focusable -- when the users
+						// actually differ. With a single shared value, leave it as a normal
+						// read-only field so keyboard users can still focus it.
+						if (this._extraItems.length && hasMultipleUsers) {
+							valueElem.multipleValues = true;
+							valueElem.placeholder = Zotero.getString(
+								'item-pane-batch-editing-multiple-values-placeholder'
+							);
+						}
+						userData.appendChild(valueElem);
 						this.addDynamicRow(userLabel, userData);
 					}
 				}
@@ -735,107 +873,116 @@
 			//
 			// Creators
 			//
-			
-			// Creator type menu
-			if (this.editable) {
-				while (this._creatorTypeMenu.hasChildNodes()) {
-					this._creatorTypeMenu.removeChild(this._creatorTypeMenu.firstChild);
-				}
-				
-				var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(this.item.itemTypeID);
-	
-				var localized = {};
-				for (let i = 0; i < creatorTypes.length; i++) {
-					localized[creatorTypes[i].name]
-						= Zotero.CreatorTypes.getLocalizedString(creatorTypes[i].name);
-				}
-				
-				for (let i in localized) {
-					var menuitem = document.createXULElement("menuitem");
-					menuitem.setAttribute("label", localized[i]);
-					menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
-					this._creatorTypeMenu.appendChild(menuitem);
-				}
-				this._creatorTypeMenu.addEventListener('popuphidden', () => {
-					// If the popup was opened with a mouse click, blur the field to hide icons
-					if (this._creatorTypeMenu.getAttribute("blur-on-hidden")) {
-						document.activeElement.blur();
-						this._creatorTypeMenu.removeAttribute("blur-on-hidden");
+			let max;
+			// If batch-editing, skip creators (for now)
+			if (!this._extraItems?.length) {
+				// Creator type menu
+				if (this.editable) {
+					while (this._creatorTypeMenu.hasChildNodes()) {
+						this._creatorTypeMenu.removeChild(this._creatorTypeMenu.firstChild);
 					}
-				});
-			}
-			
-			// Creator rows
-			
-			// Place, in order of preference, after title, after type,
-			// or at beginning
-			var field = this.getTitleField();
-			if (!field) {
-				field = this._infoTable.querySelector('[fieldName="itemType"]');
-			}
-			if (field) {
-				this._firstRowBeforeCreators = field.closest(".meta-row").nextSibling;
-			}
-			else {
-				this._firstRowBeforeCreators = this._infoTable.firstChild;
-			}
-			
-			this._creatorCount = 0;
-			var num = this.item.numCreators();
-			if (num > 0) {
-				// Limit number of creators display
-				var max = Math.min(num, this._initialVisibleCreators);
-				// If only 1 or 2 more, just display
-				if (num < max + 3 || this._displayAllCreators) {
-					max = num;
-				}
-				for (let i = 0; i < max; i++) {
-					let data = this.item.getCreator(i);
-					this.addCreatorRow(data, data.creatorTypeID, false);
-				}
-				if (this._draggedCreator) {
-					this._draggedCreator = false;
-					// Block hover effects on creators, enable them back on first mouse movement.
-					// See comment in creatorDragPlaceholder() for explanation
-					for (let label of document.querySelectorAll(".meta-label[fieldname^='creator-']")) {
-						label.closest(".meta-row").classList.add("noHover");
+					
+					var creatorTypes = Zotero.CreatorTypes.getTypesForItemType(this.item.itemTypeID);
+		
+					var localized = {};
+					for (let i = 0; i < creatorTypes.length; i++) {
+						localized[creatorTypes[i].name]
+							= Zotero.CreatorTypes.getLocalizedString(creatorTypes[i].name);
 					}
-					let removeHoverBlock = () => {
-						let noHoverRows = document.querySelectorAll('.noHover');
-						noHoverRows.forEach(el => el.classList.remove('noHover'));
-						document.removeEventListener('mousemove', removeHoverBlock);
-					};
-					document.addEventListener('mousemove', removeHoverBlock);
+					
+					for (let i in localized) {
+						var menuitem = document.createXULElement("menuitem");
+						menuitem.setAttribute("label", localized[i]);
+						menuitem.setAttribute("typeid", Zotero.CreatorTypes.getID(i));
+						this._creatorTypeMenu.appendChild(menuitem);
+					}
+					this._creatorTypeMenu.addEventListener('popuphidden', () => {
+						// If the popup was opened with a mouse click, blur the field to hide icons
+						if (this._creatorTypeMenu.getAttribute("blur-on-hidden")) {
+							document.activeElement.blur();
+							this._creatorTypeMenu.removeAttribute("blur-on-hidden");
+						}
+					});
 				}
 				
-				// Additional creators not displayed
-				if (num > max) {
-					this.addMoreCreatorsRow(num - max);
+				// Creator rows
+				
+				// Place, in order of preference, after title, after type,
+				// or at beginning
+				var field = this.getTitleField();
+				if (!field) {
+					field = this._infoTable.querySelector('.meta-label-itemType');
+				}
+				if (field) {
+					this._firstRowBeforeCreators = field.closest(".meta-row").nextSibling;
 				}
 				else {
-					// If we didn't start with creators truncated,
-					// don't truncate for as long as we're viewing
-					// this item, so that added creators aren't
-					// immediately hidden
-					this._displayAllCreators = true;
+					this._firstRowBeforeCreators = this._infoTable.firstChild;
+				}
+				
+				this._addCreatorRowsBulk(() => {
+					this._creatorCount = 0;
+					var num = this.item.numCreators();
+					if (num > 0) {
+						// Limit number of creators display
+						max = Math.min(num, this._initialVisibleCreators);
+						// If only 1 or 2 more, just display
+						if (num < max + 3 || this._displayAllCreators) {
+							max = num;
+						}
+						for (let i = 0; i < max; i++) {
+							let data = this.item.getCreator(i);
+							this.addCreatorRow(data, data.creatorTypeID, false);
+						}
+						if (this._draggedCreator) {
+							this._draggedCreator = false;
+							// Block hover effects on creators, enable them back on first mouse movement.
+							// See comment in creatorDragPlaceholder() for explanation
+							for (let creatorValue of document.querySelectorAll(".creator-type-value")) {
+								creatorValue.closest(".meta-row").classList.add("noHover");
+							}
+							let removeHoverBlock = () => {
+								let noHoverRows = document.querySelectorAll('.noHover');
+								noHoverRows.forEach(el => el.classList.remove('noHover'));
+								document.removeEventListener('mousemove', removeHoverBlock);
+							};
+							document.addEventListener('mousemove', removeHoverBlock);
+						}
+
+						// Additional creators not displayed
+						if (num > max) {
+							this.addMoreCreatorsRow(num - max);
+						}
+						else {
+							// If we didn't start with creators truncated,
+							// don't truncate for as long as we're viewing
+							// this item, so that added creators aren't
+							// immediately hidden
+							this._displayAllCreators = true;
+						}
+					}
+					else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
+						// Add default row
+						this.addCreatorRow(false, false, false);
+					}
+				});
+
+
+				if (this._showCreatorTypeGuidance) {
+					let creatorTypeLabels = this.querySelectorAll(".creator-type-label");
+					this._id("zotero-author-guidance").show({
+						forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
+					});
+					this._showCreatorTypeGuidance = false;
 				}
 			}
-			else if (this.editable && Zotero.CreatorTypes.itemTypeHasCreators(this.item.itemTypeID)) {
-				// Add default row
-				this.addCreatorRow(false, false, false);
+			else {
+				// In batch-editing mode creator rows are skipped, so the bulk
+				// rendering that makes buttons focusable and refreshes their
+				// status never runs -- do it here for the remaining field buttons
+				this._ensureButtonsFocusable();
+				this._updateCreatorButtonsStatus();
 			}
-			
-			
-			if (this._showCreatorTypeGuidance) {
-				let creatorTypeLabels = this.querySelectorAll(".creator-type-label");
-				this._id("zotero-author-guidance").show({
-					forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
-				});
-				this._showCreatorTypeGuidance = false;
-			}
-
-			this._ensureButtonsFocusable();
-			this._updateCreatorButtonsStatus();
 
 			// Set focus on the last focused field
 			this._restoreFieldFocus();
@@ -869,7 +1016,7 @@
 			// If rowIDs are provided, always update them
 			if (rowIDs?.length > 0) {
 				for (let rowID of rowIDs) {
-					let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"]`);
+					let rowElem = this._infoTable.querySelector(`.meta-row[data-custom-row-id="${CSS.escape(rowID)}"]`);
 					if (!rowElem) continue;
 					this.updateCustomRowData(rowElem);
 				}
@@ -887,7 +1034,7 @@
 
 			// Add rows that are in the target rows but not in the current rows
 			for (let row of targetRows) {
-				let rowElem = this._infoTable.querySelector(`[data-custom-row-id="${CSS.escape(row.rowID)}"]`);
+				let rowElem = this._infoTable.querySelector(`.meta-row[data-custom-row-id="${CSS.escape(row.rowID)}"]`);
 				if (rowElem) {
 					// If the row is already in the table, and not already updated, update it
 					if (!rowIDs?.includes(row.rowID)) {
@@ -984,7 +1131,7 @@
 				}
 				case "end":
 				default: {
-					let dateAddedRow = this._infoTable.querySelector(".meta-label[fieldname=dateAdded]")?.parentElement;
+					let dateAddedRow = this._infoTable.querySelector(".meta-label-dateAdded")?.parentElement;
 					if (dateAddedRow) {
 						this._infoTable.insertBefore(rowElem, dateAddedRow);
 					}
@@ -1063,7 +1210,7 @@
 			var row = document.createElement('div');
 			row.className = "meta-row";
 			var labelWrapper = document.createElement('div');
-			labelWrapper.className = "meta-label";
+			labelWrapper.className = "meta-label meta-label-itemType";
 			labelWrapper.setAttribute("fieldname", "itemType");
 			var label = this.createLabelElement({
 				id: "itembox-field-itemType-label",
@@ -1150,6 +1297,39 @@
 			return row;
 		}
 		
+		_addCreatorRowsBulk(fn) {
+			this._addingCreatorRowsInBulk = true;
+			// Remove unsaved creator row in the first addCreatorRow() invocation
+			this._needsUnsavedCreatorRemoval = true;
+			try {
+				fn();
+			}
+			finally {
+				this._addingCreatorRowsInBulk = false;
+				this._needsUnsavedCreatorRemoval = false;
+				this._finishCreatorRowChanges();
+			}
+		}
+
+		/**
+		 * Perform final work after adding one or more creator rows:
+		 * - Size added name fields to their content
+		 * - Ensure button focusability
+		 * - Update hidden/disabled status of each button
+		 */
+		_finishCreatorRowChanges() {
+			if (this._addingCreatorRowsInBulk) {
+				return;
+			}
+			let fieldsToSize = this._pendingCreatorSizing;
+			this._pendingCreatorSizing = [];
+			if (fieldsToSize.length) {
+				customElements.get("editable-text").batchSizeToContent(fieldsToSize);
+			}
+			this._ensureButtonsFocusable();
+			this._updateCreatorButtonsStatus();
+		}
+
 		addCreatorRow(creatorData, creatorTypeIDOrName, unsaved, before) {
 			// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 			// may need need to be adjusted if this DOM structure changes
@@ -1237,7 +1417,7 @@
 					fieldName,
 				)
 			);
-			
+			lastNameElem.classList.add("creator-last-name");
 			lastNameElem.placeholder = this._defaultLastName;
 			fieldName = 'creator-' + rowIndex + '-firstName';
 			var firstNameElem = firstlast.appendChild(
@@ -1246,6 +1426,7 @@
 					fieldName,
 				)
 			);
+			firstNameElem.classList.add("creator-first-name");
 			firstNameElem.placeholder = this._defaultFirstName;
 			if (fieldMode > 0) {
 				firstlast.lastChild.hidden = true;
@@ -1319,8 +1500,18 @@
 			
 			this._creatorCount++;
 			
-			// Delete existing unsaved creator row if any
-			this.removeUnsavedCreatorRow();
+			// Delete existing unsaved creator row, if any.
+			// During a bulk add, this only needs to run once, on the first row, rather than
+			// repeating the slow removeUnsavedCreatorRow() procedure for every row in the loop.
+			if (this._addingCreatorRowsInBulk) {
+				if (this._needsUnsavedCreatorRemoval) {
+					this._needsUnsavedCreatorRemoval = false;
+					this.removeUnsavedCreatorRow();
+				}
+			}
+			else {
+				this.removeUnsavedCreatorRow();
+			}
 
 			// If this creator row's type was just switched, remove ".show-on-hover" to avoid buttons appearing
 			// and then immediately disappearing when the css rule kicks in if the row is hovered.
@@ -1335,8 +1526,6 @@
 			}
 			let row = this.addDynamicRow(rowLabel, rowData, before);
 
-			this._ensureButtonsFocusable();
-			
 			/**
 			 * Events handling creator drag-drop reordering
 			 */
@@ -1385,10 +1574,14 @@
 				this.switchCreatorMode(rowData.parentNode, 0, true, false, rowIndex);
 			}
 			
-			lastNameElem.sizeToContent();
-			firstNameElem.sizeToContent();
+			// Queue the name fields to be sized to their content. The actual sizing is batched in
+			// _finishCreatorRowChanges() so that all fields added in one operation are measured and
+			// resized together, which is many orders of magnitude faster than sizing each field
+			// individually.
+			this._pendingCreatorSizing.push(lastNameElem, firstNameElem);
 
 			if (!this.editable) {
+				this._finishCreatorRowChanges();
 				return;
 			}
 
@@ -1407,11 +1600,14 @@
 			// Focus unsaved empty creator row
 			if (unsaved) {
 				rowData.setAttribute("unsaved", true);
+				// Mirror the unsaved attribute with a class so we never have to match on [unsaved=true]
+				rowData.classList.add("unsaved-creator");
 				lastNameElem.focus();
 			}
-			// Refresh creator buttons status, e.g. to disable + button of a row that just added
-			// a new creator
-			this._updateCreatorButtonsStatus();
+
+			// Finalize sizing/button state. A no-op during a bulk add, which finalizes once at the
+			// end (see _addCreatorRowsBulk()).
+			this._finishCreatorRowChanges();
 		}
 		
 		addMoreCreatorsRow(num) {
@@ -1437,12 +1633,14 @@
 			this.addDynamicRow(rowLabel, rowData);
 		}
 		
-		addDateRow(field, value) {
+		addDateRow(field, value, extraFieldValues) {
 			var rowLabel = document.createElement("div");
 			rowLabel.className = "meta-label";
 			rowLabel.setAttribute("fieldname", field);
+			let labelText = this._unionFieldDescriptors?.get(field)?.label
+				?? Zotero.ItemFields.getLocalizedString(field);
 			let label = this.createLabelElement({
-				text: Zotero.ItemFields.getLocalizedString(field),
+				text: labelText,
 				id: `itembox-field-${field}-label`
 			});
 			rowLabel.appendChild(label);
@@ -1452,18 +1650,21 @@
 			
 			var elem = this.createFieldValueElement(
 				Zotero.Date.multipartToStr(value),
-				field
+				field,
+				extraFieldValues
 			);
 
 			elem.setAttribute('aria-labelledby', label.id);
-			// y-m-d status indicator
-			var ymd = document.createElement('span');
-			ymd.id = 'zotero-date-field-status';
-			ymd.textContent = Zotero.Date.strToDate(Zotero.Date.multipartToStr(value))
-					.order.split('').join(' ');
-			ymd.className = "show-on-hover";
 			rowData.appendChild(elem);
-			rowData.appendChild(ymd);
+			// Don't show y-m-d status indicator in batch edit mode
+			if (!this._extraItems.length) {
+				var ymd = document.createElement('span');
+				ymd.id = 'zotero-date-field-status';
+				ymd.textContent = Zotero.Date.strToDate(Zotero.Date.multipartToStr(value))
+						.order.split('').join(' ');
+				ymd.className = "show-on-hover";
+				rowData.appendChild(ymd);
+			}
 			
 			rowData.oncontextmenu = this.createContextMenuHandler(field);
 			
@@ -1541,7 +1742,7 @@
 				firstName.sizeToContent();
 				lastName.sizeToContent();
 				this.modifyCreator(rowIndex, fields);
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 		
@@ -1563,8 +1764,13 @@
 				return true;
 			}
 			
+			// Flush any pending field edits as a separate undo step
+			// before changing the item type
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({
+					undoAction: 'undo-action-edit-metadata',
+					undoActionArgs: { count: 1 }
+				});
 			}
 			
 			var fieldsToDelete = this.item.getFieldsNotInType(itemTypeID, true);
@@ -1621,7 +1827,7 @@
 				this.item.setType(itemTypeID);
 				
 				if (this.saveOnEdit) {
-					await this.item.saveTx();
+					await this.item.saveTx({ undoAction: 'undo-action-change-type' });
 				}
 				else {
 					this._forceRenderAll();
@@ -1754,8 +1960,9 @@
 			return valueElement;
 		}
 
-		createFieldValueElement(valueText, fieldName) {
+		createFieldValueElement(valueText, fieldName, extraFieldValues = []) {
 			valueText += '';
+			let rawValueText = valueText;
 
 			if (fieldName) {
 				var fieldID = Zotero.ItemFields.getID(fieldName);
@@ -1790,10 +1997,9 @@
 			}
 			
 			let tooltipText;
-			if (fieldID) {
+			if (fieldID && !this._extraItems.length) {
 				// Display the SQL date as a tooltip for date fields
-				// TEMP - filingDate
-				if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
+				if (Zotero.ItemFields.isDate(fieldID)) {
 					tooltipText = Zotero.Date.multipartToSQL(this.item.getField(fieldName, true));
 				}
 			}
@@ -1827,6 +2033,54 @@
 				// autocomplete for creator names is added in addCreatorRow
 				this.addAutocompleteToElement(valueElement);
 			}
+			
+			valueElement.values = [valueText, ...extraFieldValues];
+			const hasMultipleValues = extraFieldValues.length && extraFieldValues.some(v => (v + '') !== rawValueText);
+			if (hasMultipleValues) {
+				let allValues = [valueText, ...extraFieldValues];
+				let optionCounts = {};
+				for (let v of allValues) {
+					if (v.length > 0) {
+						optionCounts[v] = (optionCounts[v] || 0) + 1;
+					}
+				}
+				let options = Object.keys(optionCounts);
+				// Sort by frequency (most common first), then alphanumerically
+				options.sort((a, b) =>
+					optionCounts[b] - optionCounts[a]
+					|| a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true }));
+				valueElement.multipleValues = true;
+				valueElement.value = '';
+				valueElement.placeholder = Zotero.getString('item-pane-batch-editing-multiple-values-placeholder');
+				if (this._fieldIsClickable(fieldName)) {
+					valueElement.initialValue = valueText;
+					valueElement.autocomplete = {
+						minResultsForPopup: 1,
+						noRollupOnEmptySearch: true,
+						completeSelectedIndex: true,
+						ignoreBlurWhileSearching: false,
+						search: 'zotero-options',
+						searchParam: JSON.stringify({
+							search: 'zotero-options',
+							options: options,
+							includeNoValue: true
+						}),
+						popup: 'PopupAutoComplete',
+					};
+					valueElement.onTextEntered = () => {
+						let input = valueElement.ref;
+						let controller = input?.controller;
+						if (!controller?.matchCount) return;
+						let selectedIndex = input.popup?.selectedIndex ?? -1;
+						if (selectedIndex >= 0
+								&& controller.getStyleAt(selectedIndex) === 'options-ac-no-value') {
+							valueElement._clearValue = true;
+							valueElement.blur();
+						}
+					};
+				}
+			}
+
 			return valueElement;
 		}
 		
@@ -1852,11 +2106,11 @@
 				return;
 			}
 			this.item.removeCreator(index);
-			await this.item.saveTx();
+			await this.item.saveTx({ undoAction: 'undo-action-remove-creator' });
 		}
 		
 		removeUnsavedCreatorRow(onlyIfEmpty = false) {
-			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value[unsaved=true]");
+			let unsavedCreatorData = this._infoTable.querySelector(".creator-type-value.unsaved-creator");
 			if (!unsavedCreatorData) return;
 			let { firstName, lastName } = this.getCreatorFields(unsavedCreatorData.parentNode);
 			let isEmpty = firstName == "" && lastName == "";
@@ -1864,7 +2118,7 @@
 			
 			unsavedCreatorData.closest(".meta-row").remove();
 			this._creatorCount--;
-			this._updateCreatorButtonsStatus();
+			this._finishCreatorRowChanges();
 		}
 		
 		dateTimeFromUTC(valueText) {
@@ -1919,7 +2173,9 @@
 				}
 			}
 			else {
-				value = this.item.getField(fieldName);
+				value = this._unionFieldDescriptors
+					? this.item.getField(fieldName, false, true)
+					: this.item.getField(fieldName);
 				// Access date needs to be converted from UTC
 				if (value != '') {
 					let localDate;
@@ -2055,11 +2311,11 @@
 				var fields = this.getCreatorFields(row);
 				fields[creatorField] = creator[creatorField];
 				fields[otherField] = creator[otherField];
-
+				
 				this.modifyCreator(creatorIndex, fields);
 				if (this.saveOnEdit) {
 					this.ignoreBlur = true;
-					this.item.saveTx().then(() => {
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' }).then(() => {
 						this.ignoreBlur = false;
 					});
 				}
@@ -2102,7 +2358,7 @@
 					this._forceRenderAll();
 				}
 			}
-			if (event.key == "Escape" && row.querySelector(".creator-type-value[unsaved=true]")) {
+			if (event.key == "Escape" && row.querySelector(".creator-type-value.unsaved-creator")) {
 				// Escape on an unsaved row deletes it and focuses previous creator
 				event.stopPropagation();
 				row.previousElementSibling.querySelector("editable-text").focus();
@@ -2150,7 +2406,7 @@
 				this._selectField = `itembox-field-value-creator-${newCreator.position}-lastName`;
 				
 				if (this.saveOnEdit) {
-					this.item.saveTx();
+					this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 				}
 			}
 		}
@@ -2159,7 +2415,7 @@
 			if (this.ignoreBlur || !textbox) {
 				return;
 			}
-
+			
 			var fieldName = textbox.getAttribute('fieldname');
 
 			let isMultiline = Zotero.ItemFields.isMultiline(fieldName);
@@ -2171,6 +2427,10 @@
 
 			if (isMultiline) {
 				textbox.setAttribute("min-lines", 1);
+			}
+
+			if (textbox.cancelled) {
+				return;
 			}
 
 			if (isCustomRow) {
@@ -2219,10 +2479,14 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			
 			// Creator fields
+			let isCreatorField = false;
+			let isCreatorUnsaved = false;
 			if (field == 'creator') {
+				isCreatorField = true;
 				var row = textbox.closest('.meta-row');
 				
 				var otherFields = this.getCreatorFields(row);
+				isCreatorUnsaved = otherFields.isUnsaved;
 				otherFields[creatorField] = value;
 				this.modifyCreator(creatorIndex, otherFields);
 				
@@ -2284,9 +2548,9 @@
 							break;
 						
 						default:
-							// TODO: generalize to all date rows/fields
-							if (Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
-								// Parse 'yesterday'/'today'/'tomorrow'
+							// Parse 'yesterday'/'today'/'tomorrow' for date fields -- not applied to Original Date
+							if (Zotero.ItemFields.isDate(fieldName)
+									&& !Zotero.ItemFields.isFieldOfBase(fieldName, 'originalDate')) {
 								value = Zotero.Date.parseDescriptiveString(value);
 							}
 					}
@@ -2296,7 +2560,20 @@
 			}
 			
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				let saveOptions = {};
+				if (isCreatorField) {
+					saveOptions.undoAction = isCreatorUnsaved
+						? 'undo-action-add-creator'
+						: 'undo-action-edit-creator';
+				}
+				else {
+					saveOptions.undoAction = 'undo-action-edit-field';
+					saveOptions.undoActionArgs = {
+						field: Zotero.ItemFields.getLocalizedString(fieldName),
+						count: 1 + this._extraItems.length
+					};
+				}
+				await this._saveItems(saveOptions);
 			}
 		}
 		
@@ -2312,37 +2589,85 @@
 					|| this._clickableFields.indexOf(fieldName) != -1);
 		}
 		
-		_modifyField(field, value) {
-			this.item.setField(field, value);
+		/**
+		 * Check whether a field can be set on an item, considering base field mappings.
+		 */
+		_canSetFieldOnItem(field, item) {
+			let fieldID = Zotero.ItemFields.getID(field);
+			if (!fieldID) return false;
+			if (Zotero.ItemFields.isValidForType(fieldID, item.itemTypeID)) return true;
+			return !!Zotero.ItemFields.getFieldIDFromTypeAndBase(item.itemTypeID, fieldID);
+		}
+
+		_modifyField(field, value, item = null) {
+			let items = item ? [item] : [this.item, ...this._extraItems];
+			for (let i of items) {
+				if (this._unionFieldDescriptors && !this._canSetFieldOnItem(field, i)) {
+					continue;
+				}
+				i.setField(field, value);
+			}
 		}
 		
-		async _setFieldTransformedValue(label, newValue) {
-			label.value = newValue;
-			var fieldName = label.getAttribute('fieldname');
-			this._modifyField(fieldName, newValue);
+		async _saveItems(saveOptions = {}) {
+			// Cache item and extra items to avoid a race condition where, after `hideEditor`,
+			// while we yield for `await Zotero.DB.executeTransaction`, itemBox is rendered for
+			// the new item and this.item is no longer relevant
+			let item = this.item;
+			let extraItems = this._extraItems;
 			
-			if (Zotero.ItemFields.isFieldOfBase(fieldName, 'title')) {
-				let shortTitleVal = this.item.getField('shortTitle');
-				if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
-					this._modifyField('shortTitle', newValue.substring(0, shortTitleVal.length));
+			await Zotero.DB.executeTransaction(async () => {
+				await item.save(saveOptions);
+				for (let extraItem of extraItems) {
+					await extraItem.save(saveOptions);
 				}
+			});
+			if (extraItems.length) {
+				this._forceRenderAll();
 			}
+		}
+		
+		async _setFieldTransformedValue(label, newValues) {
+			let fieldName = label.getAttribute('fieldname');
+			// In batch mode, don't update the label -- it shows a "Multiple" placeholder
+			// that should remain unchanged.
+			if (!this._extraItems.length) {
+				label.value = newValues[0];
+			}
+			let items = [this.item, ...this._extraItems];
+			items.forEach((item, index) => {
+				let newValue = newValues[index];
+				this._modifyField(fieldName, newValue, item);
+				
+				if (Zotero.ItemFields.isFieldOfBase(fieldName, 'title')) {
+					let shortTitleVal = item.getField('shortTitle');
+					if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+						this._modifyField('shortTitle', newValue.substring(0, shortTitleVal.length), item);
+					}
+				}
+			});
 
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this._saveItems({
+					undoAction: 'undo-action-edit-field',
+					undoActionArgs: {
+						field: Zotero.ItemFields.getLocalizedString(fieldName),
+						count: 1 + this._extraItems.length
+					}
+				});
 			}
 		}
-		
+
 
 		// Make sure that irrelevant creators +/- buttons are disabled
 		_updateCreatorButtonsStatus() {
-			let creatorValues = [...this.querySelectorAll(".creator-type-value")];
+			let creatorValues = this.querySelectorAll(".creator-type-value");
 			let row;
 			for (let creatorValue of creatorValues) {
 				row = creatorValue.closest(".meta-row");
 				let { lastName, firstName } = this.getCreatorFields(row);
 				let isEmpty = lastName == "" && firstName == "";
-				let isNextRowUnsavedCreator = row.nextSibling?.querySelector(".creator-type-value[unsaved=true]");
+				let isNextRowUnsavedCreator = row.nextSibling?.querySelector(".creator-type-value.unsaved-creator");
 				let isDefaultEmptyRow = isEmpty && creatorValues.length == 1;
 		
 				if (!this.editable) {
@@ -2359,26 +2684,38 @@
 		}
 
 		getCreatorFields(row) {
-			var typeID = row.querySelector('[typeid]').getAttribute('typeid');
+			var typeID = row.querySelector('.meta-label').getAttribute('typeid');
 			var [label1, label2] = row.querySelectorAll('editable-text');
-			var fieldMode = row.querySelector('[fieldMode]')?.getAttribute('fieldMode');
-			let isUnsavedRow = !!row.querySelector("[unsaved=true]");
-			// Calculate the index this row will occupy after the new row (if it exists) is saved.
-			// This is used for focus management.
-			let creatorsData = [...this.querySelectorAll(".creator-type-value")];
-			let position = creatorsData.findIndex(node => node.parentNode == row);
-			if (position == -1) {
-				position = null;
-			}
-			var fields = {
+			var fieldMode = label1?.getAttribute('fieldMode');
+			let isUnsavedRow = !!row.querySelector(".creator-type-value.unsaved-creator");
+			let position;
+			
+			let fields = {
 				lastName: label1.value.trim(),
 				firstName: label2.value.trim(),
 				fieldMode: fieldMode ? parseInt(fieldMode) : 0,
 				creatorTypeID: parseInt(typeID),
-				position: position,
 				isUnsaved: isUnsavedRow
 			};
-			
+			Object.defineProperty(fields, 'position', {
+				// Calculate the index this row will occupy after the new row (if it exists) is saved.
+				// This is used for focus management.
+				// (We compute this lazily, since the procedure is relatively slow and most callers
+				// don't need it. Needs to be a lambda to avoid aliasing `this`.)
+				get: () => {
+					if (position === undefined) {
+						let creatorsData = [...this.querySelectorAll(".creator-type-value")];
+						position = creatorsData.findIndex(node => node.parentNode == row);
+						if (position == -1) {
+							position = null;
+						}
+					}
+					return position;
+				},
+				set: () => {
+					throw new Error('position is read-only');
+				},
+			});
 			return fields;
 		}
 		
@@ -2410,7 +2747,7 @@
 		 */
 		async swapNames(_event) {
 			var row = this._popupNode.closest('.meta-row');
-			var typeBox = row.querySelector('[fieldname]');
+			var typeBox = row.querySelector('.meta-label');
 			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 			var fields = this.getCreatorFields(row);
 			var lastName = fields.lastName;
@@ -2420,7 +2757,7 @@
 			this.modifyCreator(creatorIndex, fields);
 			
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 		
@@ -2437,13 +2774,13 @@
 			var row = this._popupNode.closest('.meta-row');
 			let label = row.querySelector('.meta-label');
 			var creatorIndex = parseInt(label.getAttribute('fieldname').split('-')[1]);
-			let [lastName, firstName] = [...row.querySelectorAll("editable-text")];
+			let [lastName, firstName] = row.querySelectorAll("editable-text");
 			lastName.value = Zotero.Utilities.capitalizeName(lastName.value);
 			firstName.value = Zotero.Utilities.capitalizeName(firstName.value);
 			var fields = this.getCreatorFields(row);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		}
 
@@ -2478,8 +2815,8 @@
 				// after creator is dropped, the hover effect often stays at
 				// the row's old location. To workaround that, set noHover class to block all
 				// hover effects on creator rows and then remove it on the first mouse movement in refresh().
-				for (let label of document.querySelectorAll(".meta-label[fieldname^='creator-']")) {
-					label.closest(".meta-row").classList.add("noHover");
+				for (let creatorValue of document.querySelectorAll(".creator-type-value")) {
+					creatorValue.closest(".meta-row").classList.add("noHover");
 				}
 				// Un-hide the moved creator row
 				this.querySelector(".drag-hidden-creator").classList.remove("drag-hidden-creator");
@@ -2557,7 +2894,7 @@
 				this.item.setCreator(i, creators[i]);
 			}
 			if (this.saveOnEdit && !skipSave) {
-				this.item.saveTx();
+				this.item.saveTx({ undoAction: 'undo-action-reorder-creator' });
 			}
 		}
 		
@@ -2620,7 +2957,7 @@
 				return;
 			}
 			
-			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}:not([disabled="true"])`);
+			let refocusField = this.querySelector(`#${CSS.escape(this._selectField)}:not([disabled])`);
 			// For creator rows, if a focusable node with desired id does not exist, try to focus
 			// the same component from the last available creator row
 			if (!refocusField && this._selectField.startsWith("creator-")) {
@@ -2655,6 +2992,9 @@
 		}
 
 		getTitleField() {
+			if (this._unionFieldDescriptors) {
+				return this._infoTable.querySelector('editable-text[fieldname="title"]');
+			}
 			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
 			return this._infoTable.querySelector(`editable-text[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"]`);
 		}
@@ -2910,7 +3250,7 @@
 			
 			this.modifyCreator(index, fields);
 			if (this.saveOnEdit) {
-				await this.item.saveTx();
+				await this.item.saveTx({ undoAction: 'undo-action-edit-creator' });
 			}
 		};
 
@@ -2920,7 +3260,7 @@
 			var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 			var item = this.item;
 			var exists = item.hasCreatorAt(index);
-			var fieldMode = row.querySelector("[fieldMode]").getAttribute("fieldMode");
+			var fieldMode = row.querySelector(".creator-last-name").getAttribute("fieldMode");
 			
 			var moreCreators = item.numCreators() > index + 1;
 			
@@ -2932,10 +3272,10 @@
 			
 			this._id('creator-transform-swap-names').hidden = hideNameSwap;
 			this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(row);
-			this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
-			this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
-			this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
-			this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
+			this._id('zotero-creator-move-sep').toggleAttribute('hidden', hideMoveSep);
+			this._id('zotero-creator-move-to-top').toggleAttribute('hidden', hideMoveToTop);
+			this._id('zotero-creator-move-up').toggleAttribute('hidden', hideMoveUp);
+			this._id('zotero-creator-move-down').toggleAttribute('hidden', hideMoveDown);
 		};
 
 		_handleCreatorTransformMenuCommand = async (event) => {
@@ -3018,7 +3358,7 @@
 				this._clearSavedFieldFocus();
 			}
 			// If user moves focus outside of empty unsaved creator row, remove it.
-			let unsavedCreatorRow = this.querySelector(".creator-type-value[unsaved=true]")?.closest(".meta-row");
+			let unsavedCreatorRow = this.querySelector(".creator-type-value.unsaved-creator")?.closest(".meta-row");
 			// But not if these parent components receive focus which happens when menus are opened
 			if (["zotero-view-item", "main-window"].includes(focused.id) || !unsavedCreatorRow) return;
 			let focusLeftUnsavedCreatorRow = !unsavedCreatorRow.contains(focused);

@@ -235,7 +235,7 @@ describe("Connector Server", function () {
 			// My Library be selected, and the item should be in it
 			var ids = await promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			assert.lengthOf(ids, 1);
@@ -246,7 +246,36 @@ describe("Connector Server", function () {
 			var req = await reqPromise;
 			assert.equal(req.status, 201);
 		});
-		
+
+		it("should target only the focused row for a cross-library multiple-collection selection", async function () {
+			// A collection in My Library plus a collection in a group library, with the group
+			// collection focused. The Connector saves to a single target, so it should use the
+			// focused row and not the collection from the other library.
+			var group = await createGroup();
+			var userCollection = await createDataObject('collection');
+			var groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			var cv = win.ZoteroPane.collectionsView;
+
+			// Reveal the group collection, then focus the My Library collection and toggle the
+			// group collection so it becomes the focused row
+			await select(win, groupCollection);
+			await select(win, userCollection);
+			var groupRow = cv.getRowIndexByID(groupCollection.treeViewID);
+			cv.selection.toggleSelect(groupRow);
+			await waitForItemsLoad(win);
+
+			// Sanity check: both rows selected, with the group collection focused
+			assert.equal(cv.selection.focused, groupRow);
+			assert.sameMembers(
+				win.ZoteroPane.getCollectionTreeRows().map(r => r.ref.libraryID),
+				[Zotero.Libraries.userLibraryID, group.libraryID]
+			);
+
+			var target = Zotero.Server.Connector.getSaveTarget();
+			assert.equal(target.library.libraryID, group.libraryID);
+			assert.equal(target.collection.id, groupCollection.id);
+		});
+
 		it("should use the provided proxy to deproxify item url", async function () {
 			await selectLibrary(win, Zotero.Libraries.userLibraryID);
 			await waitForItemsLoad(win);
@@ -520,7 +549,7 @@ describe("Connector Server", function () {
 			// My Library be selected, and the item should be in it
 			var ids = await promise;
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			assert.lengthOf(ids, 1);
@@ -666,6 +695,52 @@ describe("Connector Server", function () {
 						itemType: "journalArticle",
 						title: "Test Article with DOI",
 						DOI: "10.1234/example.doi",
+					}
+				]
+			};
+			
+			let response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/saveItems", 
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(body)
+				}
+			);
+			
+			assert.equal(response.status, 201);
+			
+			response = await httpRequest(
+				"POST",
+				connectorServerPath + "/connector/hasAttachmentResolvers",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						itemID
+					}),
+				}
+			);
+			
+			assert.equal(response.status, 200);
+			assert.isTrue(JSON.parse(response.responseText));
+		});
+
+		it("should respond with 'true' if the item has a PMCID", async function () {
+			const sessionID = Zotero.Utilities.randomString();
+			const itemID = Zotero.Utilities.randomString();
+			const body = {
+				sessionID,
+				items: [
+					{
+						id: itemID,
+						itemType: "journalArticle",
+						title: "Test Article with PMCID",
+						PMCID: "PMC9262588",
 					}
 				]
 			};
@@ -1784,7 +1859,7 @@ describe("Connector Server", function () {
 			
 			assert.equal(req.status, 201);
 			assert.equal(
-				win.ZoteroPane.collectionsView.getSelectedLibraryID(),
+				win.ZoteroPane.collectionsView.getSelectedLibraryIDs()[0],
 				Zotero.Libraries.userLibraryID
 			);
 			

@@ -866,6 +866,50 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should save uploaded object to cache after upload on 'unchanged' response", async function () {
+			({ engine, client, caller } = await setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			await library.saveTx();
+			
+			var item = await createDataObject('item', { version: 1, title: "A" });
+			
+			server.respond(function (req) {
+				if (req.method == "POST" && req.url == baseURL + "users/1/items") {
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": ++lastLibraryVersion
+						},
+						JSON.stringify({
+							successful: {},
+							unchanged: {
+								"0": item.key
+							},
+							failed: {}
+						})
+					);
+					return;
+				}
+			});
+			
+			await engine.start();
+			
+			// Uploaded data should be saved to the cache with the new library version
+			var version = await Zotero.Sync.Data.Local.getLatestCacheObjectVersion(
+				'item', library.id, item.key
+			);
+			assert.equal(version, lastLibraryVersion);
+			var json = await Zotero.Sync.Data.Local.getCacheObject(
+				'item', library.id, item.key, lastLibraryVersion
+			);
+			assert.propertyVal(json.data, 'title', 'A');
+		});
+		
+		
 		it("should upload child collection after parent collection", async function () {
 			({ engine, client, caller } = await setup());
 			

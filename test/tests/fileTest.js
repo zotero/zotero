@@ -199,6 +199,14 @@ describe("Zotero.File", function () {
 			assert.equal(closest, tmpDir);
 		});
 		
+		it("should return parent directory for a filename too long for the filesystem", async function () {
+			var tmpDir = await getTempDirectory();
+			var closest = await Zotero.File.getClosestDirectory(
+				OS.Path.join(tmpDir, 'a'.repeat(1000) + '.pdf')
+			);
+			assert.equal(closest, tmpDir);
+		});
+		
 		it("should return false for a path that doesn't exist at all", async function () {
 			assert.isFalse(await Zotero.File.getClosestDirectory('/a/b/c'));
 		});
@@ -326,7 +334,16 @@ describe("Zotero.File", function () {
 			var tmpPath = await getTempDirectory();
 			var destPath = OS.Path.join(tmpPath, 'missing');
 			var linkPath = OS.Path.join(tmpPath, 'link');
-			await OS.File.unixSymLink(destPath, linkPath);
+			var isSymlink = false;
+			try {
+				await OS.File.unixSymLink(destPath, linkPath);
+				isSymlink = Zotero.File.pathToFile(linkPath).isSymlink();
+			}
+			catch (e) {}
+			if (!isSymlink) {
+				// Symlink couldn't be created or isn't visible as one (e.g., on CIFS)
+				this.skip();
+			}
 			
 			assert.throws(() => Zotero.File.createDirectoryIfMissing(linkPath), /^Broken symlink/);
 		});
@@ -341,7 +358,16 @@ describe("Zotero.File", function () {
 			var tmpPath = await getTempDirectory();
 			var destPath = OS.Path.join(tmpPath, 'missing');
 			var linkPath = OS.Path.join(tmpPath, 'link');
-			await OS.File.unixSymLink(destPath, linkPath);
+			var isSymlink = false;
+			try {
+				await OS.File.unixSymLink(destPath, linkPath);
+				isSymlink = Zotero.File.pathToFile(linkPath).isSymlink();
+			}
+			catch (e) {}
+			if (!isSymlink) {
+				// Symlink couldn't be created or isn't visible as one (e.g., on CIFS)
+				this.skip();
+			}
 			
 			var e = await getPromiseError(Zotero.File.createDirectoryIfMissingAsync(linkPath));
 			assert.ok(e);
@@ -491,7 +517,7 @@ describe("Zotero.File", function () {
 			var e = {
 				operation: 'open',
 				becauseAccessDenied: true,
-				path: '/tmp/test'
+				path: PathUtils.join(Zotero.getTempDirectory().path, 'test')
 			};
 			try {
 				Zotero.File.checkFileAccessError(e, e.path, 'create');

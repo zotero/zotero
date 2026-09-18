@@ -180,7 +180,6 @@ Zotero.Sync.Server = new function () {
 					var ids = Zotero.DB.columnQuery(sql, [Zotero.Attachments.LINK_MODE_IMPORTED_FILE, Zotero.Attachments.LINK_MODE_IMPORTED_URL]);
 					if (ids) {
 						var items = Zotero.Items.get(ids);
-						var rolledBack = false;
 						for (let item of items) {
 							var file = item.getFile();
 							if (!file) {
@@ -191,9 +190,6 @@ Zotero.Sync.Server = new function () {
 								// TODO: move stripping logic (copied from _xmlize()) to Utilities
 								var xmlfn = file.leafName.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '');
 								if (fn != xmlfn) {
-									if (!rolledBack) {
-										Zotero.DB.rollbackAllTransactions();
-									}
 									Zotero.debug("Changing invalid filename to " + xmlfn);
 									item.renameAttachmentFile(xmlfn);
 								}

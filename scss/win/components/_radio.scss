@@ -3,7 +3,7 @@
 		@include focus-states using ($color) {
 			background-image: url('chrome://zotero/skin/win/#{$color}/radio-#{$state}.svg');
 	
-			&[selected=true] {
+			&[selected] {
 				background-image: url('chrome://zotero/skin/win/#{$color}/radio-selected-#{$state}.svg');
 			}
 		}

@@ -123,7 +123,7 @@ var Zotero_Tabs = new function () {
 		focusFirst: {
 			library: async () => {
 				let collectionsPane = document.getElementById("zotero-collections-pane");
-				if (collectionsPane.getAttribute("collapsed")) {
+				if (collectionsPane.hasAttribute("collapsed")) {
 					document.getElementById('zotero-tb-add').focus();
 					return;
 				}
@@ -202,12 +202,12 @@ var Zotero_Tabs = new function () {
 			}
 		},
 		undoClose: {
-			reader: async (tab, _tabIndex) => {
+			reader: async (tab, tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					await Zotero.Reader.open(tab.data.itemID,
 						null,
 						{
-							tabIndex: tab.index,
+							tabIndex,
 							openInBackground: true,
 							allowDuplicate: true
 						}
@@ -216,12 +216,12 @@ var Zotero_Tabs = new function () {
 				}
 				return false;
 			},
-			note: async (tab, _tabIndex) => {
+			note: async (tab, tabIndex) => {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					await Zotero.Notes.open(tab.data.itemID,
 						null,
 						{
-							tabIndex: tab.index,
+							tabIndex,
 							openInBackground: true,
 							allowDuplicate: true
 						}
@@ -404,7 +404,7 @@ var Zotero_Tabs = new function () {
 		}));
 		// Disable File > Close menuitem if multiple tabs are open
 		const multipleTabsOpen = this._tabs.length > 1;
-		document.getElementById('cmd_close').setAttribute('disabled', multipleTabsOpen);
+		document.getElementById('cmd_close').toggleAttribute('disabled', multipleTabsOpen);
 		var { tab } = this._getTab(this._selectedID);
 		if (!tab) {
 			return;
@@ -441,7 +441,7 @@ var Zotero_Tabs = new function () {
 		if (width) {
 			let sidebarWidth = `${width}px`;
 			let placeholder = document.getElementById('zotero-reader-sidebar-pane');
-			placeholder.setAttribute('collapsed', sidebarWidth ? 'false' : 'true');
+			placeholder.toggleAttribute('collapsed', !sidebarWidth);
 			placeholder.setAttribute('width', sidebarWidth);
 		}
 
@@ -697,7 +697,7 @@ var Zotero_Tabs = new function () {
 	};
 	
 	this.setAudioStatus = function (id, status) {
-		if (typeof title != 'object' || !('active' in status && 'paused' in status)) {
+		if (!status || typeof status != 'object' || !('active' in status && 'paused' in status)) {
 			throw new Error(`'status' should be an object with { active, paused } properties`);
 		}
 		var { tab } = this._getTab(id);
@@ -722,8 +722,10 @@ var Zotero_Tabs = new function () {
 	 * Close tabs
 	 *
 	 * @param {String|Array<String>|undefined} ids One or more ids, or empty for the current tab
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.skipHistory=false] - Don't make the tabs reopenable with undoClose()
 	 */
-	this.close = function (ids) {
+	this.close = function (ids, { skipHistory = false } = {}) {
 		if (!ids) {
 			ids = [this._selectedID];
 		}
@@ -779,7 +781,9 @@ var Zotero_Tabs = new function () {
 				}
 			});
 		}
-		this._history.push(historyEntry);
+		if (!skipHistory) {
+			this._history.push(historyEntry);
+		}
 		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
 		this._update();
 	};
@@ -990,7 +994,8 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		var { tab, tabIndex } = this._getTab(id);
-		this.close(tab.id);
+		// The tab stays open, so it isn't reopenable
+		this.close(tab.id, { skipHistory: true });
 		this.add({
 			id: tab.id,
 			type: `${tab.type}-unloaded`,
@@ -1197,7 +1202,7 @@ var Zotero_Tabs = new function () {
 			// Move to start
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
-			menuitem.setAttribute('disabled', tabIndex == 1);
+			menuitem.toggleAttribute('disabled', tabIndex == 1);
 			menuitem.addEventListener('command', () => {
 				this.move(id, 1);
 			});
@@ -1205,7 +1210,7 @@ var Zotero_Tabs = new function () {
 			// Move to end
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
-			menuitem.setAttribute('disabled', tabIndex == this._tabs.length - 1);
+			menuitem.toggleAttribute('disabled', tabIndex == this._tabs.length - 1);
 			menuitem.addEventListener('command', () => {
 				this.move(id, this._tabs.length);
 			});
@@ -1214,7 +1219,7 @@ var Zotero_Tabs = new function () {
 			if (this._hasHook(tabContentType, 'moveToNewWindow')) {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
-				menuitem.setAttribute('disabled', false);
+				menuitem.removeAttribute('disabled');
 				menuitem.addEventListener('command', () => {
 					let { tabContentType } = this.parseTabType(tab.type);
 					let moveHook = this._getHook(tabContentType, 'moveToNewWindow');
@@ -1266,7 +1271,7 @@ var Zotero_Tabs = new function () {
 					this._history.length ? this._history[this._history.length - 1].length : 1
 				)
 			);
-			menuitem.setAttribute('disabled', !this._history.length);
+			menuitem.toggleAttribute('disabled', !this._history.length);
 			menuitem.addEventListener('command', () => {
 				this.undoClose();
 			});

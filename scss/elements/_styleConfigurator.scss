@@ -52,7 +52,7 @@ style-configurator {
 		}
 		
 		@media (-moz-platform: macos) {
-			&:not(:focus) richlistitem[selected="true"] {
+			&:not(:focus) richlistitem[selected] {
 				background-color: -moz-mac-secondaryhighlight;
 			}
 		}

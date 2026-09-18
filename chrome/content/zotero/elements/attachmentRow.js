@@ -39,7 +39,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 					<html:span class="icon"/>
 					<html:span class="label"/>
 				</html:div>
-				<toolbarbutton class="zotero-clicky zotero-clicky-minus" tabindex="0" data-l10n-id="section-button-remove" disabled="false">
+				<toolbarbutton class="zotero-clicky zotero-clicky-minus" tabindex="0" data-l10n-id="section-button-remove">
 					<image class="toolbarbutton-icon"/>
 					<label class="toolbarbutton-text" />
 				</toolbarbutton>

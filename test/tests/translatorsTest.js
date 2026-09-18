@@ -1,6 +1,10 @@
 "use strict";
 
 describe("Zotero.Translators", function () {
+	before(async function () {
+		await Zotero.Translators.init();
+	});
+
 	describe("#init()", function () {
 		async function testUpdateCache({ translatorID, label1, label2, lastUpdated1, lastUpdated2, expect }) {
 			var translator1 = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {

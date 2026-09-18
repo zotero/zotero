@@ -26,6 +26,11 @@
 	onload="Zotero_Preferences.General.init()"
 	onunload="Zotero_Preferences.General.uninit()"
 >
+	<linkset>
+		<!-- Load file renaming dialog strings for search keywords -->
+		<html:link rel="localization" href="fileRenaming.ftl"/>
+	</linkset>
+	
 	<vbox class="main-section">
 		<groupbox aria-labelledby="preferences-appearance-title">
 			<label><html:h2 id="preferences-appearance-title" data-l10n-id="preferences-appearance-title"/></label>
@@ -215,6 +220,23 @@
 					native="true"
 				/>
 			</vbox>
+		</groupbox>
+
+		<groupbox id="zotero-prefpane-read-aloud-groupbox" aria-labelledby="preferences-read-aloud-title">
+			<label><html:h2 id="preferences-read-aloud-title" data-l10n-id="preferences-read-aloud-title"/></label>
+
+			<hbox align="center">
+				<label data-l10n-id="preferences-read-aloud-highlight-granularity" control="read-aloud-highlight-granularity-menulist"/>
+				<menulist id="read-aloud-highlight-granularity-menulist"
+						preference="extensions.zotero.reader.readAloud.highlightGranularity"
+						native="true">
+					<menupopup>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-paragraph" value="paragraph"/>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-sentence" value="sentence"/>
+						<menuitem data-l10n-id="preferences-read-aloud-highlight-granularity-word" value="word"/>
+					</menupopup>
+				</menulist>
+			</hbox>
 		</groupbox>
 
 		<groupbox id="zotero-prefpane-note-groupbox" aria-labelledby="preferences-note-title">

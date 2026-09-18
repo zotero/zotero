@@ -20,8 +20,8 @@ merge-group {
 			flex: 1;
 		}
 
-		&[selected=true] h2,
-		&[selected=true] attachment-box #title {
+		&[selected] h2,
+		&[selected] attachment-box #title {
 			color: red;
 			font-weight: 600;
 			text-decoration: underline;
@@ -54,10 +54,10 @@ merge-group {
 		}
 	}
 
-	#left-pane:hover:not([selected=true]) h2,
-	#left-pane groupbox:focus:not([selected=true]) h2,
-	#right-pane:hover:not([selected=true]) h2,
-	#right-pane groupbox:focus:not([selected=true]) h2 {
+	#left-pane:hover:not([selected]) h2,
+	#left-pane groupbox:focus:not([selected]) h2,
+	#right-pane:hover:not([selected]) h2,
+	#right-pane groupbox:focus:not([selected]) h2 {
 		text-decoration: underline;
 	}
 

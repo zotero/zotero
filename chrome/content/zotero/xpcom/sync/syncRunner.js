@@ -35,10 +35,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
-			return _apiKey || Zotero.Sync.Data.Local.hasCredentials();
+			return !!_apiKey || Zotero.Sync.Data.Local.hasCachedCredentials;
 		}
 	});
 	Zotero.defineProperty(this, 'syncInProgress', { get: () => _syncInProgress });
+	Zotero.defineProperty(this, 'backgroundSync', { get: () => _backgroundSync });
 	Zotero.defineProperty(this, 'lastSyncStatus', { get: () => _lastSyncStatus });
 	
 	Zotero.defineProperty(this, 'RESET_MODE_FROM_SERVER', { value: 1 });
@@ -73,6 +74,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _delayPromises = new Set();
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _backgroundSync = false;
 	var _queuedSyncOptions = [];
 	var _stopping = false;
 	var _canceller;
@@ -116,13 +118,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this.sync = Zotero.serial(function (options = {}) {
 		return this._sync(options);
 	});
-	
-	
+
+
 	this._sync = async function (options) {
 		// Clear message list
 		_errors = [];
 		_tooltipMessages = [];
-		
+
 		// Shouldn't be possible because of serial()
 		if (_syncInProgress) {
 			let msg = Zotero.getString('sync.error.syncInProgress');
@@ -131,7 +133,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			return false;
 		}
 		_syncInProgress = true;
+		_backgroundSync = !!options.background;
 		_stopping = false;
+
+		// Reset remote-change tracking for this sync; the undo stack is
+		// cleared lazily at the end only if remote mutations were applied.
+		Zotero.Sync.Data.Local.resetRemoteChangesApplied();
 		
 		try {
 			await Zotero.Notifier.trigger('start', 'sync', []);
@@ -321,7 +328,14 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		finally {
 			await this.end(options);
-			
+
+			// Clear undo history if this iteration applied remote changes.
+			// Done before any restart/queued recursive call so the inner
+			// sync's reset doesn't lose the decision made here.
+			if (Zotero.Sync.Data.Local.remoteChangesApplied) {
+				Zotero.UndoHistory.clear();
+			}
+
 			if (options.restartSync) {
 				delete options.restartSync;
 				Zotero.debug("Restarting sync");
@@ -334,7 +348,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				await this._sync(JSON.parse(_queuedSyncOptions.shift()));
 				return;
 			}
-			
+
 			Zotero.debug("Done syncing");
 			Zotero.Notifier.trigger('finish', 'sync', librariesToSync || []);
 		}
@@ -696,6 +710,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 */
 	var _doFileSync = async function (libraries, options) {
 		Zotero.debug("Starting file syncing");
+		// Drain file change events and run the modification check on the changed files across
+		// all libraries
+		await Zotero.Sync.Storage.FileChangeWatcher.snapshot();
 		var resyncLibraries = []
 		for (let libraryID of libraries) {
 			_stopCheck();
@@ -907,6 +924,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	
 	this.end = async function (options) {
 		_syncInProgress = false;
+		_backgroundSync = false;
 		await this.checkErrors(_errors, options);
 		if (!options.restartSync) {
 			let showOnSyncButton = !options.background

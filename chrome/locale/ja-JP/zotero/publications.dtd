@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "私の出版物">
 
-<!ENTITY zotero.publications.intro "「私の出版物」に追加したアイテムは、zotero.org のプロフィールページに表示されます。添付ファイルを含めることを選択した場合、それらは指定したライセンスの下で公開されます。あなた自身が作成した著作物のみを加えてください。また、配布を希望し、かつ配布する権利を持つファイルのみを含めてください。">
+<!ENTITY zotero.publications.intro "「私の出版物」に追加した項目は、zotero.org のプロフィールページに表示されます。添付ファイルを含めることを選択した場合、それらは指定したライセンスの下で公開されます。あなた自身が作成した著作物のみを加えてください。また、配布を希望し、かつ配布する権利を持つファイルのみを含めてください。">
 <!ENTITY zotero.publications.include.checkbox.files "ファイルを含める">
 <!ENTITY zotero.publications.include.checkbox.notes "メモを含める">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "「私の出版物」コレクションから、いつでも表示するものを調整できます。">

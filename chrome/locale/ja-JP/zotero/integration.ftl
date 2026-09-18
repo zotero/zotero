@@ -23,7 +23,7 @@ integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
 integration-citationDialog-section-selectedAnnotations = Selected Annotations
-integration-citationDialog-section-selectedItems = 選択されたアイテム
+integration-citationDialog-section-selectedItems = 選択された項目
 integration-citationDialog-section-cited =
     { $count ->
         [0] Cited Items
@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Prefix
 integration-citationDialog-details-suppressAuthor = 著者名を省略
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -54,12 +55,16 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
+integration-citationDialog-preview-empty = プレビュー
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = ライブラリ
 integration-citationDialog-mode-list = List
 integration-citationDialog-btn-type-citation =
-    .title = Add/Edit Citation
+    .title = 引用文献の追加/編集
 integration-citationDialog-btn-type-add-note =
     .title = メモを追加
 integration-citationDialog-btn-type-annotations =
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -102,28 +112,28 @@ integration-citationDialog-add-to-citation = Add to Citation
 integration-citationDialog-annotations-filter =
     .placeholder = Filter annotations
 integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
-integration-prefs-displayAs-label = Display Citations As:
+integration-prefs-displayAs-label = 引用文献の出力形式 :
 integration-prefs-footnotes =
     .label = 脚注
 integration-prefs-endnotes =
     .label = 文末注
 integration-prefs-bookmarks =
     .label = Store citation as bookmarks
-integration-prefs-bookmarks-description = ブックマークはWordとLibreOfficeの間で共有できますが、意図せずに変更された場合にエラーを生じる場合があり、また脚注に挿入することが出来ません。
+integration-prefs-bookmarks-description = ブックマークは Word と LibreOffice の間で共有できますが、意図せずに変更された場合にエラーが発生する場合があり、また脚注に挿入することが出来ません。
 integration-prefs-bookmarks-formatNotice =
     { $show ->
         [true] The document must be saved as .doc or .docx.
        *[other] { "" }
     }
 integration-prefs-automaticCitationUpdates =
-    .label = Automatically update citations
-    .tooltip = Citations with pending updates will be highlighted in the document
-integration-prefs-automaticCitationUpdates-description = Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.
+    .label = 引用文献を自動的に更新
+    .tooltip = 更新待ちの引用文献は文書内で強調表示されます。
+integration-prefs-automaticCitationUpdates-description = 更新を無効化すれば大きな文書への引用文献の挿入が高速化できます。引用文献を手動で更新するためには更新ボタンをクリックしてください。
 integration-prefs-automaticJournalAbbeviations =
     .label = MEDLINEの略誌名を使用する
-integration-prefs-automaticJournalAbbeviations-description = 「雑誌略誌名」のフィールドは無視されます。
+integration-prefs-automaticJournalAbbeviations-description = 「雑誌略語」のフィールドは無視されます。
 integration-prefs-exportDocument =
-    .label = Switch to a Different Word Processor…
+    .label = 別のワードプロセッサに切り替え...
 integration-error-unable-to-find-winword = { -app-name } could not find a running Word instance.
 integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
 integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
@@ -131,8 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = You have made cha
 integration-warning-discard-changes = Discard Changes
 integration-warning-command-is-running = A word processor integration command is already running.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
     You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

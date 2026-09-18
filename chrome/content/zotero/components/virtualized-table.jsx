@@ -259,6 +259,63 @@ class TreeSelection {
 	}
 
 	/**
+	 * Adjusts selection indexes after a row is removed. A removed selected row is
+	 * dropped from the selection, or remapped to the previous row when remapToPrevious
+	 * is true (e.g., when collapsing a container remaps removed descendants to the
+	 * container row, which precedes them). If the removal leaves nothing selected, the
+	 * previous row is selected. If the focused or pivot row is removed, it moves to
+	 * the previous row.
+	 *
+	 * @param {Number} index Removed row index
+	 * @param {Boolean} [remapToPrevious=false] Select the previous row in place of a
+	 * 		removed selected row instead of dropping it from the selection
+	 */
+	adjustForRowRemoval(index, remapToPrevious = false) {
+		let previousIndex = Math.max(index - 1, 0);
+		let selected = new Set();
+		for (let selectedIndex of this.selected) {
+			if (selectedIndex == index) {
+				if (remapToPrevious) {
+					selected.add(previousIndex);
+				}
+			}
+			else {
+				selected.add(selectedIndex > index ? selectedIndex - 1 : selectedIndex);
+			}
+		}
+		if (this.selected.size && !selected.size) {
+			selected.add(previousIndex);
+		}
+		this.selected = selected;
+		this.focused = this.focused == index
+			? previousIndex
+			: this.focused > index ? this.focused - 1 : this.focused;
+		this.pivot = this.pivot == index
+			? previousIndex
+			: this.pivot > index ? this.pivot - 1 : this.pivot;
+	}
+
+	/**
+	 * Adjusts selection indexes after rows are inserted after a given row.
+	 *
+	 * @param {Number} index Row after which rows were inserted
+	 * @param {Number} count Number of inserted rows
+	 */
+	adjustForRowInsertion(index, count) {
+		let selected = new Set();
+		for (let selectedIndex of this.selected) {
+			selected.add(selectedIndex > index ? selectedIndex + count : selectedIndex);
+		}
+		this.selected = selected;
+		if (this.focused > index) {
+			this.focused += count;
+		}
+		if (this.pivot > index) {
+			this.pivot += count;
+		}
+	}
+
+	/**
 	 * Calls the onSelectionChange prop on the tree
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 * @private
@@ -379,6 +436,17 @@ class VirtualizedTable extends React.Component {
 
 		multiSelect: false,
 
+		// When true, the last selected row can't be toggled off, so the selection
+		// never becomes empty through user action
+		requireSelection: false,
+
+		// When true, the header row of the section currently at the top of the view is
+		// pinned to the top while scrolling (see isSectionHeader)
+		stickySectionHeaders: false,
+		// Returns whether the row at the given index begins a section, i.e., should be
+		// pinned to the top while its section is scrolled through
+		isSectionHeader: () => false,
+
 		onSelectionChange: noop,
 
 		// The below are for arrow-key navigation
@@ -442,6 +510,11 @@ class VirtualizedTable extends React.Component {
 		hide: PropTypes.bool,
 
 		multiSelect: PropTypes.bool,
+
+		requireSelection: PropTypes.bool,
+
+		stickySectionHeaders: PropTypes.bool,
+		isSectionHeader: PropTypes.func,
 
 		onSelectionChange: PropTypes.func,
 
@@ -553,7 +626,7 @@ class VirtualizedTable extends React.Component {
 	 *
 	 * @param {Event} e
 	 */
-	_onKeyDown = (e) => {
+	_onKeyDown = async (e) => {
 		if (this.props.onKeyDown && this.props.onKeyDown(e) === false) return;
 
 		this._preventKeyboardScrolling(e);
@@ -647,6 +720,25 @@ class VirtualizedTable extends React.Component {
 		}
 		
 		if (shiftSelect || moveFocused) return;
+
+		// If selection count is greater than 1 and the focused row wasn't
+		// moved out of the selection - toggle open/closed all rows in that selection
+		// Otherwise if the focused row has moved out of the selection, toggle state
+		// of the focused row (handled below)
+		if (this.selection.count > 1
+				&& this.selection.isSelected(this.selection.focused)
+				&& [Zotero.arrowPreviousKey, Zotero.arrowNextKey].includes(e.key)) {
+			let open = e.key == Zotero.arrowNextKey;
+			let rows = Array.from(this.selection.selected)
+				.filter(index => this.props.isContainer(index)
+					&& !this.props.isContainerEmpty(index)
+					&& (open ? !this.props.isContainerOpen(index) : this.props.isContainerOpen(index)))
+				.sort((a, b) => b - a);
+			for (let index of rows) {
+				await this.toggleOpenState(index);
+			}
+			return;
+		}
 		
 		switch (e.key) {
 		case Zotero.arrowPreviousKey:
@@ -797,7 +889,16 @@ class VirtualizedTable extends React.Component {
 	 * @param index {Number}
 	 */
 	scrollToRow(index) {
-		this._jsWindow && this._jsWindow.scrollToRow(index);
+		if (!this._jsWindow) return;
+		// When a sticky section header is pinned at the top of the view, it overlays the rows
+		// below it. Reserve a row's worth of space so a row scrolled up into view lands below the
+		// pinned header rather than behind it.
+		let topOffset = 0;
+		if (this.props.stickySectionHeaders && !this.props.isSectionHeader(index)
+				&& this._getSectionHeaderIndices().some(i => i < index)) {
+			topOffset = this._rowHeight;
+		}
+		this._jsWindow.scrollToRow(index, false, topOffset);
 	}
 
 	/**
@@ -823,6 +924,11 @@ class VirtualizedTable extends React.Component {
 			this.selection.shiftSelect(index, toggleSelection, shouldDebounce);
 		}
 		else if (toggleSelection) {
+			// Don't allow toggling off the last selected row when a selection is required
+			if (this.props.requireSelection
+					&& this.selection.count === 1 && this.selection.isSelected(index)) {
+				return;
+			}
 			this.selection.toggleSelect(index, shouldDebounce);
 		}
 		else if (moveFocused) {
@@ -835,7 +941,9 @@ class VirtualizedTable extends React.Component {
 		}
 		// Normal selection
 		else if (!toggleSelection) {
-			if (index > 0 && !this.props.isSelectable(index)) {
+			// Non-selectable rows (e.g. a sticky library header) are a no-op, including no
+			// scroll-to-row below -- otherwise clicking the header at index 0 jumps to the top
+			if (!this.props.isSelectable(index)) {
 				return;
 			}
 			this.selection.select(index, shouldDebounce);
@@ -1070,12 +1178,24 @@ class VirtualizedTable extends React.Component {
 		this._setXulTooltip();
 
 		this._topDiv.style.setProperty("--first-column-extra-width", `${this.firstColumnExtraWidth}px`);
-		window.addEventListener("resize", () => {
-			this._debouncedRerender();
-		});
+		this._resizeObserver = new ResizeObserver(() => this.rerender());
+		this._resizeObserver.observe(this._jsWindow.targetElement);
+
+		if (this.props.stickySectionHeaders) {
+			this._jsWindow.targetElement.addEventListener('scroll', this._updateStickySectionHeader, { passive: true });
+			// The pinned header overlays the rows, so reject drops on it rather than letting
+			// them reach the body's drop handler (which would treat them as a list drop)
+			this._stickyHeader.addEventListener('dragover', this._rejectStickyHeaderDrop);
+			this._stickyHeader.addEventListener('drop', this._rejectStickyHeaderDrop);
+			this._updateStickySectionHeader();
+		}
 	}
-	
+
 	componentWillUnmount() {
+		this._resizeObserver?.disconnect();
+		if (this.props.stickySectionHeaders && this._jsWindow) {
+			this._jsWindow.targetElement.removeEventListener('scroll', this._updateStickySectionHeader);
+		}
 		this._jsWindow.destroy();
 	}
 	
@@ -1148,8 +1268,12 @@ class VirtualizedTable extends React.Component {
 		}
 		node.style.height = (index in this._customRowHeightMap ? this._customRowHeightMap[index] : this._rowHeight) + 'px';
 		node.id = this.props.id + "-row-" + index;
-		node.classList.toggle('odd', index % 2 == 1);
-		node.classList.toggle('even', index % 2 == 0);
+		// Row striping restarts at each section header, so every section's first row is
+		// the same shade (see _sectionRelativeIndex); without section headers this is just
+		// the row index
+		let stripeIndex = this._sectionRelativeIndex(index);
+		node.classList.toggle('odd', stripeIndex % 2 == 1);
+		node.classList.toggle('even', stripeIndex % 2 == 0);
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
 		}
@@ -1279,7 +1403,12 @@ class VirtualizedTable extends React.Component {
 		}
 		let jsWindowProps = {
 			id: this._jsWindowID,
-			className: "virtualized-table-body",
+			// Reserve a scrollbar gutter when there are sticky section headers (see CSS), so the
+			// scrollbar doesn't float over the content. Without it a macOS overlay scrollbar
+			// overlaps the rows, and the opaque pinned header -- which must paint above the rows
+			// to occlude them, and so above the scrollbar -- covers the scrollbar's edge.
+			className: "virtualized-table-body"
+				+ (this.props.stickySectionHeaders ? " has-sticky-section-headers" : ""),
 			onFocus: (e) => {
 				if (e.target.id == this._jsWindowID) {
 					// Focus should always remain on the list itself.
@@ -1292,7 +1421,23 @@ class VirtualizedTable extends React.Component {
 			<div {...props}>
 				{columnDragMarker}
 				{header}
-				<div {...jsWindowProps} />
+				<div {...jsWindowProps}>
+					{/* Pinned copy of the current section's header. Lives inside the scrolling
+					    body (as its first child, before the windowed-list) and pins with
+					    position: sticky, so its width tracks the body's content box automatically
+					    and it lines up with the rows without any JS geometry. */}
+					{this.props.stickySectionHeaders
+						&& <div
+							className="virtualized-table-sticky-section-header"
+							ref={ref => this._stickyHeader = ref}
+							aria-hidden="true"
+						>
+							<div
+								className="virtualized-table-sticky-section-header-content"
+								ref={ref => this._stickyHeaderContent = ref}
+							/>
+						</div>}
+				</div>
 			</div>
 		);
 	}
@@ -1304,6 +1449,7 @@ class VirtualizedTable extends React.Component {
 		if (!this._jsWindow) return;
 		this._jsWindow.invalidate();
 		this._updateWidth();
+		this._refreshStickySectionHeader();
 	}
 
 	/**
@@ -1314,6 +1460,149 @@ class VirtualizedTable extends React.Component {
 		if (!this._jsWindow) return;
 		this._jsWindow.render();
 		this._updateWidth();
+		this._refreshStickySectionHeader();
+	}
+
+	// ------------------------ Sticky Section Headers ------------------------ //
+
+	/**
+	 * Make a drop on the pinned header a no-op. Not preventing the default on dragover leaves
+	 * it an invalid drop target (so no drop fires), and stopping propagation keeps the event
+	 * from the body's handlers, which would otherwise allow the drop and treat it as a drop on
+	 * the list. The header occludes a row, but dropping on it shouldn't act on that row.
+	 */
+	_rejectStickyHeaderDrop = (e) => {
+		e.stopPropagation();
+		if (e.type == 'dragover' && e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'none';
+		}
+	}
+
+	/**
+	 * The set of section-header rows can change whenever the row model changes, so drop
+	 * the cached indices and repin. Called after the list is invalidated/rerendered.
+	 */
+	_refreshStickySectionHeader() {
+		if (!this.props.stickySectionHeaders) return;
+		this._sectionHeaderIndices = null;
+		this._stickyHeaderIndex = null;
+		this._updateStickySectionHeader();
+	}
+
+	/**
+	 * The stripe index of a row, so striping restarts at each section header. The header
+	 * counts as the section's first (unstriped) row, so the data row right below it is
+	 * striped; subsequent rows alternate. Without section headers this is just the row
+	 * index, preserving the normal whole-list striping (first row unstriped).
+	 */
+	_sectionRelativeIndex(index) {
+		let base = -1;
+		for (let headerIndex of this._getSectionHeaderIndices()) {
+			if (headerIndex <= index) {
+				base = headerIndex;
+			}
+			else {
+				break;
+			}
+		}
+		// No header above: stripe from the top (first row unstriped). With a header above,
+		// the header is the unstriped row 0, so the row below it (index - base == 1) is striped.
+		return base === -1 ? index : index - base;
+	}
+
+	/**
+	 * Indices of all section-header rows, ascending. Cached until the row model changes.
+	 */
+	_getSectionHeaderIndices() {
+		// Only trees that opt into section headers have them
+		if (!this.props.stickySectionHeaders) {
+			return [];
+		}
+		if (this._sectionHeaderIndices) {
+			return this._sectionHeaderIndices;
+		}
+		let indices = [];
+		let count = this.props.getRowCount();
+		for (let i = 0; i < count; i++) {
+			if (this.props.isSectionHeader(i)) {
+				indices.push(i);
+			}
+		}
+		this._sectionHeaderIndices = indices;
+		return indices;
+	}
+
+	/**
+	 * Pin the header of the section currently at the top of the view, pushing it up as
+	 * the next section's header scrolls into it, and reuse the consumer's renderItem so the
+	 * pinned copy matches the real header row's appearance.
+	 *
+	 * The pinned header is the first child of the scrolling body and stays put via position:
+	 * sticky, taking its width from the body's content box so it lines up with the rows. The
+	 * outer element has zero height (so it adds no space to the flow); the inner (opaque)
+	 * element holds the rendered header, overflows downward over the rows, and is the part that
+	 * translates, so a header pushed up by the next section is clipped at the top of the body
+	 * (by the body's own overflow) rather than spilling over the column header.
+	 */
+	_updateStickySectionHeader = () => {
+		if (!this.props.stickySectionHeaders || !this._stickyHeader || !this._jsWindow) {
+			return;
+		}
+		let clip = this._stickyHeader;
+		let content = this._stickyHeaderContent;
+		let headerIndices = this._getSectionHeaderIndices();
+		let scrollTop = this._jsWindow.targetElement.scrollTop;
+		// The section in view is the last header at or above the top of the view; the
+		// next header (if any) is what pushes it up
+		let currentIndex = -1;
+		let nextIndex = -1;
+		for (let index of headerIndices) {
+			if (this._jsWindow._getItemPosition(index) <= scrollTop) {
+				currentIndex = index;
+			}
+			else {
+				nextIndex = index;
+				break;
+			}
+		}
+		// Show the pinned copy only once the header row has scrolled up past the top edge of
+		// the view
+		let stuck = currentIndex != -1
+			&& scrollTop > this._jsWindow._getItemPosition(currentIndex);
+		if (!stuck) {
+			clip.style.display = 'none';
+			this._stickyHeaderIndex = null;
+			return;
+		}
+		clip.style.display = '';
+		clip.classList.add('stuck');
+		// Re-render only when the pinned section changes. Use _renderItem (not the raw
+		// renderItem prop) so the pinned copy gets the same post-processing as a real row
+		// (e.g. the tree's indent/twisty spacer), then drop its id to avoid duplicating the
+		// real row's.
+		if (this._stickyHeaderIndex !== currentIndex) {
+			this._stickyHeaderIndex = currentIndex;
+			let node = this._renderItem(currentIndex);
+			node.removeAttribute('id');
+			// Strip the focus ring: focus defaults to row 0, which can be a header, but a
+			// pinned header shouldn't show focus
+			node.classList.remove('focused');
+			content.textContent = '';
+			content.appendChild(node);
+		}
+		// Geometry is all CSS now: the clip is the first child of the scrolling body, has zero
+		// height (so it takes no space in the flow and the rows below aren't shifted down), and
+		// pins itself with position: sticky. Its content overflows downward over the rows and
+		// gets its width from the body's content box, so it lines up with the real rows.
+		// Push the pinned header up as the next section's header approaches the top
+		let translateY = 0;
+		if (nextIndex != -1) {
+			let nextTop = this._jsWindow._getItemPosition(nextIndex) - scrollTop;
+			if (nextTop < this._rowHeight) {
+				translateY = nextTop - this._rowHeight;
+			}
+		}
+		content.style.transform = `translateY(${translateY}px)`;
 	}
 	
 	updateFontSize = () => {
@@ -1375,8 +1664,6 @@ class VirtualizedTable extends React.Component {
 		document.documentElement.removeChild(div);
 		return parseFloat(height.split('px')[0]);
 	}
-	
-	_debouncedRerender = Zotero.Utilities.debounce(this.rerender, 200);
 	
 	_updateWidth() {
 		if (!this.props.showHeader) return;
@@ -2000,12 +2287,10 @@ function makeRowRenderer(getRowData) {
 				else {
 					div.appendChild(renderCell(index, rowData[column.dataKey], column));
 				}
-				let columnName = column.label;
-				if (column.label in Zotero.Intl.strings) {
-					columnName = Zotero.getString(column.label);
-				}
-				if (typeof rowData[column.dataKey] === "string") {
-					ariaLabel += `${columnName}: ${rowData[column.dataKey]} `;
+				let columnName = formatColumnName(column);
+				let value = rowData[column.dataKey];
+				if (typeof value === "string" || typeof value === "number") {
+					ariaLabel += `${columnName}: ${value} `;
 				}
 				else {
 					ariaLabel += `${columnName} `;

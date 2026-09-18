@@ -11,7 +11,7 @@ fi
 
 version="$1"
 
-for arch in x86_64 aarch64 i686; do
+for arch in x86_64 aarch64; do
 	package="firefox-${version}.en-US.linux-${arch}.tar.xz"
 	if [ $arch = 'aarch64' ]; then
 		arch="arm64"
@@ -36,8 +36,8 @@ if [ `uname` = "Darwin" ]; then
 else
 	tar=tar
 fi
-$tar --owner=0 --group=0 --numeric-owner --no-xattrs --mode=0755 -cJvf updater.tar.xz updater-x86_64 updater-arm64 updater-i686
+$tar --owner=0 --group=0 --numeric-owner --no-xattrs --mode=0755 -cJvf updater.tar.xz updater-x86_64 updater-arm64
 
-rm updater-x86_64 updater-arm64 updater-i686
+rm updater-x86_64 updater-arm64
 
 echo "Done: updater.tar.xz created"

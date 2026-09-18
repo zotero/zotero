@@ -1,3 +1,10 @@
+// An autocomplete popup keeps focus in the field it completes, so its selected
+// row is the active one, rather than the platform's unfocused selection
+panel[type="autocomplete-richlistbox"] .autocomplete-richlistitem[selected] {
+	background-color: var(--color-accent);
+	color: var(--color-accent-text);
+}
+
 richlistbox {
 	background: var(--material-background);
 	border: var(--material-panedivider);
@@ -27,7 +34,7 @@ richlistbox {
 		}
 
 		// Selected but not focused
-		&[selected="true"] {
+		&[selected] {
 			background-color: var(--color-quarternary-on-sidepane);
 			color: var(--color-accent-text);
 		}
@@ -36,7 +43,7 @@ richlistbox {
 	&:focus {
 		& > richlistitem {
 			// Selected and focused
-			&[selected="true"] {
+			&[selected] {
 				background-color: var(--color-accent);
 				color: var(--color-accent-text);
 			}
@@ -44,7 +51,7 @@ richlistbox {
 
 		// Add focus ring to richlistbox if the richlistbox is multi-select
 		&[seltype="multiple"] > richlistitem {
-			&[selected="true"][current="true"] {
+			&[selected][current] {
 				outline: var(--default-focusring);
 				outline-color: currentColor;
 				outline-offset: calc(-1 * var(--default-focusring-width));

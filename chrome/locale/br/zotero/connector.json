@@ -68,11 +68,41 @@
   "progressWindow_detailsBtnHide": {
     "message": "Kuzhat ar munudoù"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Diuzer dastumad pal"
+  },
+  "progressWindow_savingItems": {
+    "message": "Oc'h enrollañ $1 a elfennoù. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Oc'h enrollañ an elfenn $1"
+  },
   "progressWindow_saveItem": {
     "message": "Elfenn $1: $2"
   },
+  "progressWindow_downloadComplete": {
+    "message": "$1 enrollet"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "$1 enrollet evit an elfenn $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Fazi en ur bellgargañ $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Fazi en ur bellgargañ adalek $1 ar restr $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Enrollañ echuet. Ar prenestr zo o vont da serriñ bremañ."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Elfennoù a zo bet enrollet endeo diouzh ar bajenn web-mañ."
+  },
   "progressWindow_tagPlaceholder": {
     "message": "Balizoù (skejet gant virgulennoù)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Silañ an dastumadegoù"
   },
   "progressWindow_error_translation": {
     "message": "Ur fazi a zo c'hoarvezet en ur enrollañ an elfenn-mañ. Sellit ouzh $1 evit kaout muioc'h a ditouroù."
@@ -95,11 +125,17 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "stumm diwezhañ"
   },
+  "itemSelector_title": {
+    "message": "Diuzit peseurt elfennoù ho peus c'hoant da ouzhpennañ d'ho levraoueg:"
+  },
   "extensionIsDisabled": {
-    "message": "$1 a zo lazhet"
+    "message": "N'eo ket hegerz ar c'hevreer $1 war ar bajenn-mañ"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "N'eo ket hegerz ar c'hevreer $1 evit an URLioù restroù"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1 a zo lazhet war ar pajennoù astenn"
+    "message": "N'eo ket hegerz ar c'hevreer $1 war ar bajenn an astennoù"
   },
   "appConnector": {
     "message": "Kevreer $1"
@@ -109,6 +145,9 @@
   },
   "firstRun_title": {
     "message": "Staliet ho peus ar c'hevreer $1!"
+  },
+  "firstRun_text2": {
+    "message": "Ma n'ho peus ket graet c'hoazh, <a href=\"$2\">pellgargit</a> an arload $1 evit kaout ur skiant-prenet eus ar c'hentañ."
   },
   "firstRun_acceptButton": {
     "message": "Komprenet"
@@ -124,6 +163,9 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Enaouiñ an enrollañ e-barzh al levraoueg enlinenn"
+  },
+  "reports_debug_output_submitted": {
+    "message": "Kaset eo bet ho tanevell diveugiñ.\n\nAn ID diveugiñ zo $1."
   },
   "integration_error_clientUpgrade": {
     "message": "An arroudennañ diwar ar Web a c'houlenn $1 pe nevesoc'h."

@@ -41,16 +41,10 @@ describe("Zotero.DataObjects", function () {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 				var obj;
-				try {
-					await Zotero.DB.executeTransaction(async function () {
-						obj = createUnsavedDataObject(type);
-						await obj.save();
-						throw 'Aborting transaction -- ignore';
-					});
-				}
-				catch (e) {
-					if (typeof e != 'string' || !e.startsWith('Aborting transaction')) throw e;
-				}
+				await executeTransactionWithForcedRollback(async function () {
+					obj = createUnsavedDataObject(type);
+					await obj.save();
+				});
 				
 				// The registered identifiers should be reset in a rollback handler
 				var libraryKey = objectsClass.getLibraryAndKeyFromID(obj.id);

@@ -37,6 +37,10 @@ ChromeUtils.defineESModuleGetters(globalThis, {
 
 const progressListeners = new Set();
 
+// From nsSandboxFlags.h
+const SANDBOXED_ORIGIN = 0x10;
+const SANDBOXED_SCRIPTS = 0x80;
+
 /**
  * Functions for creating and destroying hidden browser objects
  **/
@@ -54,6 +58,7 @@ export class HiddenBrowser {
 	 */
 	constructor(options = {}) {
 		this._destroyed = false;
+		this._allowJavaScript = options.allowJavaScript !== false;
 		this._createdPromise = (async () => {
 			let doc;
 			if (options.useHiddenFrame !== false) {
@@ -61,7 +66,6 @@ export class HiddenBrowser {
 				this._frame = frame;
 
 				var windowlessBrowser = await frame.get();
-				windowlessBrowser.browsingContext.allowJavascript = options.allowJavaScript !== false;
 				windowlessBrowser.docShell.allowImages = false;
 				if (options.docShell) {
 					Object.assign(windowlessBrowser.docShell, options.docShell);
@@ -100,7 +104,14 @@ export class HiddenBrowser {
 			if (options.customUserAgent) {
 				browser.browsingContext.customUserAgent = options.customUserAgent;
 			}
-			
+
+			if (!this._allowJavaScript) {
+				// A system-principal document (e.g., a blob: URL created by chrome code) can run
+				// scripts even when scripting is otherwise disabled, so sandbox it with a null
+				// principal and no scripts.
+				browser.browsingContext.sandboxFlags |= SANDBOXED_ORIGIN | SANDBOXED_SCRIPTS;
+			}
+
 			this._browser = browser;
 		})();
 
@@ -144,18 +155,12 @@ export class HiddenBrowser {
 		Zotero.debug(`Loading ${uri} in hidden browser`);
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
 		try {
-			// Figure out whether the browser should be remote. We actually
-			// perform the load in PageDataChild, but remoteness changes
-			// need to happen here.
-			let oa = E10SUtils.predictOriginAttributes({ browser: this });
-			let remoteType = E10SUtils.getRemoteTypeForURI(
-				uri,
-				true,
-				false,
-				E10SUtils.DEFAULT_REMOTE_TYPE,
-				null,
-				oa
-			);
+			// Figure out whether the browser should be remote
+			let remoteType = ChromeUtils.predictRemoteTypeForURI(uri, {
+				preferredRemoteType: E10SUtils.DEFAULT_REMOTE_TYPE,
+				useRemoteTabs: true,
+				useRemoteSubframes: false
+			});
 			if (this.remoteType !== remoteType) {
 				// The following functions need to be called on the <browser> directly,
 				// not through our proxy (aka 'this')
@@ -210,12 +215,18 @@ export class HiddenBrowser {
 				);
 			});
 
-			let loadURISuccess = await this.browsingContext.currentWindowGlobal.getActor("PageData")
-				.sendQuery("loadURI", { uri });
-			if (!loadURISuccess) {
+			let prepared = await this.browsingContext.currentWindowGlobal.getActor("PageData")
+				.sendQuery("prepareLoad");
+			if (!prepared) {
 				Zotero.logError(new Error("Load failed"));
 				return false;
 			}
+			// Start the load from the parent process. A load started by the content process
+			// is restricted to URLs that process could load itself, which excludes blob: URLs
+			// created by chrome code.
+			this._browser.loadURI(Services.io.newURI(uri), {
+				triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
+			});
 			await loadCompletePromise;
 		}
 		catch (e) {
@@ -255,12 +266,22 @@ export class HiddenBrowser {
 	
 	/**
 	 * @param {String[]} props - 'characterSet', 'title', 'bodyText', 'documentHTML', 'cookie', 'channelInfo'
+	 * @param {Object} [options]
+	 * @param {Number} [options.timeout=30000] - Time to wait for each property in milliseconds.
+	 *     The queries wait for the document to be ready, so a page that never finishes loading
+	 *     would otherwise hang the query forever.
 	 */
-	async getPageData(props) {
+	async getPageData(props, { timeout = 30000 } = {}) {
 		var actor = this.browsingContext.currentWindowGlobal.getActor("PageData");
 		var data = {};
 		for (let prop of props) {
-			data[prop] = await actor.sendQuery(prop);
+			let timeoutPromise = new Promise((_, reject) => {
+				setTimeout(
+					() => reject(new Error(`Timed out getting '${prop}' from hidden browser`)),
+					timeout
+				);
+			});
+			data[prop] = await Promise.race([actor.sendQuery(prop), timeoutPromise]);
 		}
 		return data;
 	}

@@ -29,6 +29,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Przyrostek
 integration-citationDialog-details-prefix = Przedrostek
 integration-citationDialog-details-suppressAuthor = Pomiń autora
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Dołącz komentarze
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -51,6 +52,10 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = Utrzymaj źródła posortowane
+integration-citationDialog-preview-empty = Podgląd
+integration-citationDialog-preview-error = Podgląd nie jest dostępny
+integration-citationDialog-btn-displayPreview =
+    .title = Wyświetl podgląd cytowania
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Biblioteka
@@ -73,6 +78,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Wciśnij Tab, aby wybrać elementy, które mają być dodane do tego cytowania. Wciśnij Escape, aby zapobiec zmianom i zamknąć ten komunikat.
+integration-citationDialog-just-added-input-placeholder = Wpisz "10-15", aby zacytować strony lub wyszukaj elementy
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -98,7 +108,7 @@ integration-citationDialog-bubble-empty = (brak tytułu)
 integration-citationDialog-add-to-citation = Dodaj do cytowania
 integration-citationDialog-annotations-filter =
     .placeholder = Filtruj adnotacje
-integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
+integration-citationDialog-annotations-empty = Wybierz element, załącznik lub adnotację, aby wyświetlić szczegóły adnotacji
 integration-prefs-displayAs-label = Wyświetl cytowania jako:
 integration-prefs-footnotes =
     .label = Przypisy dolne
@@ -128,8 +138,6 @@ integration-warning-documentPreferences-changes-will-be-lost = Dokonano zmian w 
 integration-warning-discard-changes = Porzuć zmiany
 integration-warning-command-is-running = Polecenie integracji z edytorem tekstów jest już uruchomione.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
     You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

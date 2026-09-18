@@ -41,12 +41,22 @@
 	background: var(--color-sidepane);
 	border-radius: 5px;
 	border: var(--color-panedivider);
-	height: 30px;
+	min-height: 30px;
 	width: 300px;
 }
 
 #zotero-pane-progressmeter-container {
 	padding: 10px;
+	justify-content: center;
+}
+
+#zotero-pane-progress-label {
+	margin: 0;
+}
+
+#zotero-pane-progressmeter {
+	width: 100%;
+	margin-top: 4px;
 }
 
 #zotero-layout-switcher {

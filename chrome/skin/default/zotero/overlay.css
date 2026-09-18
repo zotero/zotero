@@ -17,6 +17,11 @@
 	text-align: left;
 }
 
+/* Single-paragraph status messages stay centered when they wrap */
+.items-tree-message > p:only-child {
+	text-align: center;
+}
+
 .items-tree-message div.publications p {
 	font-size: 1.2em;
 }
@@ -37,7 +42,7 @@
 /* 
 	Fix to odd fx115 behavior that gives an un-collapsed pane the initial width of min-width + last width
 */
-#zotero-collections-pane[collapsed=true] {
+#zotero-collections-pane[collapsed] {
 	min-width: 0px !important;
 	width: 0px !important;
 }
@@ -180,4 +185,32 @@
 .autocomplete-richlistitem[selected] {
 	background-color: Highlight;
 	color: HighlightText;
+}
+
+.autocomplete-richlistitem[type="options-ac-value"],
+.autocomplete-richlistitem[type="options-ac-no-value"] {
+	height: auto;
+	min-height: auto;
+}
+
+.autocomplete-richlistitem[type="options-ac-value"] > .ac-title,
+.autocomplete-richlistitem[type="options-ac-no-value"] > .ac-title {
+	height: 2em;
+	min-height: 2em;
+	padding-inline: 8px;
+}
+
+.autocomplete-richlistitem[type="options-ac-value"] > .ac-title > .ac-text-overflow-container,
+.autocomplete-richlistitem[type="options-ac-no-value"] > .ac-title > .ac-text-overflow-container {
+	max-width: 100%;
+	overflow: hidden;
+}
+
+.autocomplete-richlistitem[type="options-ac-no-value"] {
+	color: var(--fill-secondary);
+}
+
+.autocomplete-richlistitem[type="options-ac-value"]:not([selected]):hover,
+.autocomplete-richlistitem[type="options-ac-no-value"]:not([selected]):hover {
+	background-color: var(--fill-quinary);
 }

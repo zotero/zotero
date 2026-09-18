@@ -341,4 +341,48 @@ describe("Item Tags Box", function () {
 			await item.eraseTx();
 		});
 	});
+
+
+	describe("Tag Autocomplete", function () {
+		function getTagSuggestions(searchString, params) {
+			let search = Components.classes["@mozilla.org/autocomplete/search;1?name=zotero"]
+				.getService(Components.interfaces.nsIAutoCompleteSearch);
+			return new Promise((resolve) => {
+				let listener = {
+					onSearchResult(_, result) {
+						let status = result.searchResult;
+						let done = status == Components.interfaces.nsIAutoCompleteResult.RESULT_SUCCESS
+							|| status == Components.interfaces.nsIAutoCompleteResult.RESULT_NOMATCH
+							|| status == Components.interfaces.nsIAutoCompleteResult.RESULT_FAILURE;
+						if (!done) {
+							return;
+						}
+						let values = [];
+						for (let i = 0; i < result.matchCount; i++) {
+							values.push(result.getValueAt(i));
+						}
+						resolve(values);
+					}
+				};
+				search.startSearch(searchString, JSON.stringify(params), null, listener);
+			});
+		}
+
+		it("should not suggest tags only on trashed items", async function () {
+			var prefix = Zotero.Utilities.randomString().toLowerCase();
+			var liveTag = prefix + 'live';
+			var trashedTag = prefix + 'trashed';
+
+			await createDataObject('item', { tags: [{ tag: liveTag }] });
+			var trashed = await createDataObject('item', { tags: [{ tag: trashedTag }] });
+			trashed.deleted = true;
+			await trashed.saveTx();
+
+			var suggestions = await getTagSuggestions(
+				prefix, { fieldName: 'tag', libraryID: Zotero.Libraries.userLibraryID }
+			);
+			assert.include(suggestions, liveTag);
+			assert.notInclude(suggestions, trashedTag);
+		});
+	});
 })

@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Назва:">
 
-<!ENTITY zotero.search.searchInLibrary "Шукати в бібліотеці:">
-
 <!ENTITY zotero.search.joinMode.prefix "Збігаються з">
 <!ENTITY zotero.search.joinMode.any "будь-яким">
 <!ENTITY zotero.search.joinMode.all "всіма">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "дні">
 <!ENTITY zotero.search.date.units.months "місяці">
 <!ENTITY zotero.search.date.units.years "роки">
-
-<!ENTITY zotero.search.search "Шукати">
-<!ENTITY zotero.search.clear "Очистити">
-<!ENTITY zotero.search.saveSearch "Зберегти пошук">

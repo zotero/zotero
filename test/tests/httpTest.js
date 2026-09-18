@@ -454,15 +454,16 @@ describe("Zotero.HTTP", function () {
 				'/download/auth',
 				{
 					handle: function (request, response) {
-						let val;
-						try {
-							val = request.getHeader("Authorization");
-						}
-						catch (e) {
-							val = "";
+						if (!request.hasHeader("Authorization")) {
+							response.setStatusLine(null, 401, "Unauthorized");
+							response.setHeader("WWW-Authenticate", 'Basic realm="Test"', false);
+							response.write("denied");
+							return;
 						}
 						response.setStatusLine(null, 200, "OK");
-						response.setHeader("X-Echo-Auth", val, false);
+						response.setHeader(
+							"X-Echo-Auth", request.getHeader("Authorization"), false
+						);
 						response.write("ok");
 					}
 				}
@@ -608,6 +609,35 @@ describe("Zotero.HTTP", function () {
 			let nsUri = Services.io.newURI(url);
 			let req = await Zotero.HTTP.download(nsUri, dest);
 			assert.equal(req.status, 200);
+			assert.equal(req.headers.get("X-Echo-Auth"), expected);
+		});
+
+		it("should encode non-ASCII credentials the same way as request()", async function () {
+			let url = `http://user:p%C3%A4ssw%E2%82%ACrd`
+				+ `@127.0.0.1:${port}/download/auth`;
+			let dest = PathUtils.join(tmpDir, "auth-utf8.bin");
+			let req = await Zotero.HTTP.download(Services.io.newURI(url), dest);
+			assert.equal(req.status, 200);
+			
+			let xmlhttp = await Zotero.HTTP.request("GET", url);
+			assert.equal(
+				req.headers.get("X-Echo-Auth"),
+				xmlhttp.getResponseHeader("X-Echo-Auth")
+			);
+		});
+
+		it("should preserve literal %HH sequences in the password in request() and download()", async function () {
+			let username = "user";
+			let password = "example%41pass";
+			let expected = "Basic " + btoa(username + ":" + password);
+			let url = `http://${username}:${encodeURIComponent(password)}`
+				+ `@127.0.0.1:${port}/download/auth`;
+			
+			let xmlhttp = await Zotero.HTTP.request("GET", url);
+			assert.equal(xmlhttp.getResponseHeader("X-Echo-Auth"), expected);
+			
+			let dest = PathUtils.join(tmpDir, "auth-percent.bin");
+			let req = await Zotero.HTTP.download(Services.io.newURI(url), dest);
 			assert.equal(req.headers.get("X-Echo-Auth"), expected);
 		});
 	});

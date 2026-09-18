@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = ملحق
 integration-citationDialog-details-prefix = بداية
 integration-citationDialog-details-suppressAuthor = حذف المؤلف
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Include Comments
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -54,6 +55,10 @@ integration-citationDialog-lib-message-annotations =
        *[other] No selected or open items with annotations
     }
 integration-citationDialog-settings-keepSorted = الحفاظ على ترتيب المصادر
+integration-citationDialog-preview-empty = معاينة
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = مكتبة
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = اضغط على Tab لتحديد العناصر المراد إضافتها إلى هذا الاستشهاد. اضغط على Escape لإلغاء التغييرات وإغلاق مربع الحوار.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -131,8 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = لقد أجريت
 integration-warning-discard-changes = تجاهل التغييرات
 integration-warning-command-is-running = يتم الآن تشغيل أمر دمج معالج النصوص.
 first-run-guidance-citationDialog =
-    Type a title, author, and/or year to search for a reference.
-    
-    After you’ve made your selection, click the bubble or select it via the keyboard and press ↓/Space to show citation options such as page number, prefix, and suffix.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
     You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

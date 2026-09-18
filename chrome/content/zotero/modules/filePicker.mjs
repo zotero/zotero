@@ -121,7 +121,8 @@ FilePicker.prototype.filterAllowURLs = 0x80;
 FilePicker.prototype.filterAudio = 0x100;
 FilePicker.prototype.filterVideo = 0x200;
 
-['addToRecentDocs', 'defaultExtension', 'defaultString', 'displayDirectory', 'filterIndex'].forEach((prop) => {
+['addToRecentDocs', 'defaultExtension', 'defaultString', 'displayDirectory', 'filterIndex',
+		'okButtonLabel'].forEach((prop) => {
 	/**
 	 * @name FilePicker#addToRecentDocs
 	 * @type Boolean
@@ -153,6 +154,12 @@ FilePicker.prototype.filterVideo = 0x200;
 	 * @type Integer
 	 * @desc The (0-based) index of the filter which is currently selected in the file picker dialog.
 	 *   Set this to choose a particular filter to be selected by default.
+	 */
+	/**
+	 * @name FilePicker#okButtonLabel
+	 * @type String
+	 * @desc A custom label for the button the user uses to accept the file picker, if supported
+	 *   by the platform. This should be set before calling show().
 	 */
 	Object.defineProperty(FilePicker.prototype, prop, {
 		// TODO: Others

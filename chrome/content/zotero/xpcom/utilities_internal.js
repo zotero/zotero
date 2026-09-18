@@ -36,6 +36,100 @@ ChromeUtils.defineESModuleGetters(globalThis, {
 Zotero.Utilities.Internal = {
 	SNAPSHOT_SAVE_TIMEOUT: 30000,
 
+	// Characters that NFKD leaves in a non-ASCII form: letters with no decomposition (letter
+	// ligatures and others) and the fraction slash NFKD introduces (½ -> "1⁄2"). Converted via an
+	// explicit map applied after NFKD/lowercasing, so that e.g. a search for "soren" matches
+	// "Søren" and "1/2" matches "½". Typographic ligatures (ﬁ, ﬂ, ...), superscripts, full-width
+	// forms, etc. don't need an entry -- NFKD already reduces those to ASCII.
+	_searchNormalizeMap: {
+		'ø': 'o',
+		'œ': 'oe',
+		'æ': 'ae',
+		'ł': 'l',
+		'đ': 'd',
+		'ð': 'd',
+		'þ': 'th',
+		'ß': 'ss',
+		'ı': 'i',
+		'⁄': '/'
+	},
+
+	// The rich-text formatting tags Zotero supports in item fields (see the rich-text bibliography
+	// support page). Stripped when normalizing so search matches the field's plain text: a phrase
+	// isn't broken across a formatted word (e.g., an italicized species name) and the tag markup
+	// itself isn't matchable. Only this whitelist is stripped, so literal angle brackets in a value
+	// stay searchable.
+	_searchFormattingTagRE: /<\/?(?:i|b|sub|sup)>|<span (?:style="font-variant:small-caps;"|class="nocase")>|<\/span>/g,
+
+
+	/**
+	 * Normalize a string to a case- and accent-insensitive form for searching
+	 *
+	 * Strips Zotero's supported field formatting tags (see _searchFormattingTagRE), then uses
+	 * Unicode NFKD compatibility decomposition (ICU-backed) to split combining marks off their base
+	 * letters and reduce presentation variants (typographic ligatures, superscripts, full-width
+	 * forms, etc.) to plain ASCII, strips the marks, converts a few non-decomposing letters via
+	 * _searchNormalizeMap, and folds typographic quotes and dashes to their ASCII forms. This is the
+	 * form stored in the normalized search columns and applied to search terms, so that e.g.
+	 * "seance" matches "séance", "x2" matches "x²", and "children's" matches a curly apostrophe.
+	 *
+	 * If you change this function or _searchNormalizeMap, add a userdata migration step that
+	 * re-normalizes existing rows whose raw value contains the affected characters (scan with
+	 * GLOB/LIKE).
+	 *
+	 * @param {String} str
+	 * @return {String}
+	 */
+	normalizeForSearch: function (str) {
+		if (!str) {
+			return str;
+		}
+		let map = Zotero.Utilities.Internal._searchNormalizeMap;
+		// Strip supported formatting tags so they don't break phrase matches or match themselves
+		if (str.includes('<')) {
+			str = str.replace(Zotero.Utilities.Internal._searchFormattingTagRE, '');
+		}
+		return str.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+			.replace(/[\u00f8\u0153\u00e6\u0142\u0111\u00f0\u00fe\u00df\u0131\u2044]/g, c => map[c])
+			// Fold typographic quotes and dashes to their ASCII forms, which NFKD leaves alone, so
+			// curly quotes and en/em dashes in stored text (from a word processor or translator)
+			// match the straight quotes and hyphens typed in a search. Dashes all fold to a single
+			// hyphen, since that's what a search is typed with.
+			.replace(/[\u2018\u2019\u201a\u201b\u2032]/g, "'")
+			.replace(/[\u201c\u201d\u201e\u201f\u2033]/g, '"')
+			.replace(/[\u2010\u2011\u2012\u2013\u2014\u2015\u2212]/g, '-')
+			// Recompose (NFC) so kana and Hangul that NFKD split apart -- が into か + dakuten,
+			// 한 into jamo -- are put back together. Otherwise their decomposed forms would
+			// substring-match shorter ones under LIKE/instr (か matching が, 하 matching 한). Latin
+			// folding is unaffected: its diacritics were already stripped above, so nothing is
+			// left to recompose.
+			.normalize('NFC');
+	},
+
+
+	/**
+	 * Compute the value to store in a normalized search column for a given source value
+	 *
+	 * Returns the normalized form only when normalizing changes more than the case of ASCII letters,
+	 * which is all SQLite's default LIKE folds; otherwise returns null, so the bulk of plain-ASCII
+	 * values cost nothing and queries fall back to the raw column via COALESCE. A value with folded
+	 * diacritics, folded forms, or non-ASCII case (Greek, Cyrillic, ...) that LIKE wouldn't fold is
+	 * stored, so a normalized search term still matches it.
+	 *
+	 * @param {String} value
+	 * @return {String|null}
+	 */
+	normalizeForSearchStorage: function (value) {
+		if (typeof value != 'string' || !value) {
+			return null;
+		}
+		let normalized = Zotero.Utilities.Internal.normalizeForSearch(value);
+		// Lowercasing only the ASCII letters, so the comparison treats a case difference as
+		// significant unless LIKE would fold it
+		let asciiLowercased = value.replace(/[A-Z]/g, c => c.toLowerCase());
+		return normalized === asciiLowercased ? null : normalized;
+	},
+
 	/**
 	 * Run a function on chunks of a given size of an array's elements.
 	 *
@@ -134,14 +228,18 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Get the MD5 hash of a file, reading it via an off-main-thread stream and hashing it
+	 * a segment at a time so that the main thread is never blocked for the whole file
+	 *
 	 * @param {nsIFile|String} file  File or file path
+	 * @return {Promise<String|false>}  Lowercase hex string, or false if the file doesn't exist
 	 */
 	md5Async: async function (file) {
 		function toHexString(charCode) {
 			return ("0" + charCode.toString(16)).slice(-2);
 		}
 		
-		var file = Zotero.File.pathToFile(file);
+		file = Zotero.File.pathToFile(file);
 		try {
 			let { size } = await IOUtils.stat(file.path);
 			if (size === 0) {
@@ -163,29 +261,45 @@ Zotero.Utilities.Internal = {
 		
 		var is = Cc["@mozilla.org/network/file-input-stream;1"]
 			.createInstance(Ci.nsIFileInputStream);
-		try {
-			is.init(Zotero.File.pathToFile(file), -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF);
-			ch.updateFromStream(is, -1);
-			// Get binary string and convert to hex string
-			let hash = ch.finish(false);
-			let hexStr = "";
-			for (let i = 0; i < hash.length; i++) {
-				hexStr += toHexString(hash.charCodeAt(i));
-			}
-			return hexStr;
-		}
-		catch (e) {
-			try {
-				ch.finish(false);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-			throw e;
-		}
-		finally {
-			is.close();
-		}
+		// DEFER_OPEN so that the file is opened on the pump's background thread rather than
+		// synchronously here
+		is.init(file, -1, -1, Ci.nsIFileInputStream.CLOSE_ON_EOF | Ci.nsIFileInputStream.DEFER_OPEN);
+		
+		var pump = Cc["@mozilla.org/network/input-stream-pump;1"]
+			.createInstance(Ci.nsIInputStreamPump);
+		pump.init(is, 0, 0, true);
+		
+		return new Promise((resolve, reject) => {
+			pump.asyncRead({
+				onStartRequest: function (_request) {},
+				
+				onDataAvailable: function (request, inputStream, offset, count) {
+					ch.updateFromStream(inputStream, count);
+				},
+				
+				onStopRequest: function (_request, status) {
+					if (!Components.isSuccessCode(status)) {
+						try {
+							ch.finish(false);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+						reject(new Components.Exception("Error reading " + file.path, status));
+						return;
+					}
+					// Get binary string and convert to hex string
+					let hash = ch.finish(false);
+					let hexStr = "";
+					for (let i = 0; i < hash.length; i++) {
+						hexStr += toHexString(hash.charCodeAt(i));
+					}
+					resolve(hexStr);
+				},
+				
+				QueryInterface: ChromeUtils.generateQI(["nsIStreamListener", "nsIRequestObserver"])
+			});
+		});
 	},
 	
 	
@@ -388,13 +502,13 @@ Zotero.Utilities.Internal = {
 	},
 	
 	containsEmoji: function (str) {
-		let re = /\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]]/gv;
+		let re = /\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]]/gv;
 		return !!str.match(re);
 	},
 
 	includesEmoji: function (str) {
 		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and compare lengths
-		const re = /(?:(?:\p{RGI_Emoji}|[\p{Extended_Pictographic}--[©®™]])(?!\uFE0F)|.\uFE0F)+/gv;
+		const re = /(?:(?:\p{RGI_Emoji}|[[\p{Extended_Pictographic}[\p{So}&&[☀-➿\u{1F000}-\u{1FAFF}]]]--[©®™\u{1F1E6}-\u{1F1FF}]])(?!\uFE0F)|.\uFE0F)+/gv;
 		return str.replace(re, '').length !== str.length;
 	},
 	
@@ -632,6 +746,51 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
+	 * Run a Gatekeeper assessment of the running app bundle
+	 *
+	 * Safari computes a code signing dictionary for the bundled Safari extension each time it
+	 * launches, and blocks the extension if that fails, which leaves the connector missing from
+	 * Safari's extensions list. The computation can start failing when the app is updated, and it
+	 * keeps failing on every subsequent launch. An assessment refreshes the system state that the
+	 * computation depends on, and Safari loads the extension again the next time it starts.
+	 *
+	 * macOS only. Does nothing for source builds, which don't bundle the extension.
+	 *
+	 * @return {Promise}
+	 */
+	assessAppBundle: async function () {
+		if (!Zotero.isMac || Zotero.isSourceBuild) {
+			return;
+		}
+		
+		let bundle = Services.dirsvc.get("XREExeF", Ci.nsIFile).parent.parent.parent;
+		
+		Zotero.debug("Running Gatekeeper assessment of " + bundle.path);
+		
+		let proc = await Subprocess.call({
+			command: '/usr/sbin/spctl',
+			arguments: ['-a', '-vv', bundle.path],
+			stderr: 'pipe'
+		});
+		
+		// spctl writes its verdict to stderr
+		let output = "";
+		let str;
+		while ((str = await proc.stderr.readString())) {
+			output += str;
+		}
+		let { exitCode } = await proc.wait();
+		
+		let message = "Gatekeeper assessment returned " + exitCode + "\n\n" + output.trim();
+		if (exitCode) {
+			Zotero.warn(message);
+		}
+		else {
+			Zotero.debug(message);
+		}
+	},
+	
+	/**
 	 * Get string data from the clipboard
 	 * @param {String[]} mimeType MIME type of data to get
 	 * @return {String|null} Clipboard data, or null if none was available
@@ -832,12 +991,6 @@ Zotero.Utilities.Internal = {
 	},
 	
 	blobToText: async function (blob, charset = null) {
-		if (!charset) {
-			var matches = blob.type && blob.type.match(/charset=([a-z0-9\-_+])/i);
-			if (matches) {
-				charset = matches[1];
-			}
-		}
 		return new Promise(function (resolve) {
 			let fr = new FileReader();
 			fr.addEventListener("loadend", function () {
@@ -1621,6 +1774,10 @@ Zotero.Utilities.Internal = {
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
 	 *
+	 * When the menu belongs to a <menulist>, typing while the menu is closed selects the
+	 * first matching target at any depth, since the platform's own find-as-you-type only
+	 * reaches the items of the open popup.
+	 *
 	 * @param {Library|Collection} libraryOrCollection
 	 * @param {Node<menupopup>} elem Parent element
 	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
@@ -1628,22 +1785,24 @@ Zotero.Utilities.Internal = {
 	 * 		Receives the event and libraryOrCollection for given item.
 	 * @param {Function} disabledPred If provided, called on each library/collection
 	 * 		to determine whether disabled
+	 * @param {Object} [options]
+	 * @param {Function} [options.filter] If provided, called on each library/collection to
+	 * 		determine whether to include it. An excluded target is replaced by its subcollections.
 	 *
-	 * @return {Node<menuitem>|Node<menu>} appended node
+	 * @return {Node<menuitem>|Node<menu>|null} appended node, or null if the target was excluded
 	 */
-	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
+	createMenuForTarget: function (libraryOrCollection, elem, currentTarget, clickAction, disabledPred, options = {}) {
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute("label", label);
 			if (value == currentTarget) {
-				// type="checkbox" hides icon, so only set if checked
-				menuitem.setAttribute("type", "checkbox");
+				// Not type="checkbox", which suppresses the icon
 				menuitem.setAttribute("checked", "true");
 			}
 			menuitem.setAttribute("value", value);
 			menuitem.setAttribute("image", icon);
-			menuitem.setAttribute("disabled", disabled);
+			menuitem.toggleAttribute("disabled", disabled);
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
 			return menuitem;
@@ -1666,54 +1825,172 @@ Zotero.Utilities.Internal = {
 			return menu;
 		}
 		
-		var imageSrc = libraryOrCollection.treeViewImage;
-		
-		// Create menuitem for library or collection itself, to be placed either directly in the
-		// containing menu or as the top item in a submenu
-		var menuitem = _createMenuitem(
-			libraryOrCollection.name,
-			libraryOrCollection.treeViewID,
-			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
-			},
-			disabledPred && disabledPred(libraryOrCollection)
-		);
-		
-		var collections;
-		if (libraryOrCollection.objectType == 'collection') {
-			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
-		}
-		else {
-			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
-		}
-		
-		// If no subcollections, place menuitem for target directly in containing men
-		if (collections.length == 0) {
-			elem.appendChild(menuitem);
-			return menuitem;
-		}
-		
-		// Otherwise create a submenu for the target's subcollections
-		var menu = _createMenu(
-			libraryOrCollection.name,
-			libraryOrCollection.treeViewID,
-			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
+		// The menu isn't rebuilt between openings, so move the checkmark to the target
+		// that's activated. A <menulist> marks the item clicked in its own popup as
+		// selected, drawing a checkmark of its own, and can't clear it when the next
+		// pick is in a submenu, so clear that too.
+		function _setCurrentTarget(target) {
+			if (!currentTarget) {
+				return;
 			}
-		);
-		var menupopup = menu.firstChild;
-		menupopup.appendChild(menuitem);
-		menupopup.appendChild(doc.createXULElement('menuseparator'));
-		for (let collection of collections) {
-			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction, disabledPred
-			);
-			menupopup.appendChild(collectionMenu);
+			for (let menuitem of elem.querySelectorAll('menuitem[checked], menuitem[selected]')) {
+				menuitem.removeAttribute('checked');
+				menuitem.removeAttribute('selected');
+			}
+			let menuitem = elem.querySelector(`menuitem[value="${target.treeViewID}"]`);
+			if (menuitem) {
+				menuitem.setAttribute('checked', 'true');
+			}
 		}
-		elem.appendChild(menu);
-		return menu;
+		
+		function _appendTarget(target, parent) {
+			let collections = target.objectType == 'collection'
+				? Zotero.Collections.getByParent(target.id)
+				: Zotero.Collections.getByLibrary(target.libraryID);
+			
+			// Subcollections move up to take the place of an excluded target
+			if (options.filter && !options.filter(target)) {
+				for (let collection of collections) {
+					_appendTarget(collection, parent);
+				}
+				return null;
+			}
+			
+			let command = (event) => {
+				_setCurrentTarget(target);
+				clickAction(event, target);
+			};
+			let imageSrc = target.treeViewImage;
+			
+			// Create menuitem for library or collection itself, to be placed either directly in
+			// the containing menu or as the top item in a submenu
+			let menuitem = _createMenuitem(
+				target.name,
+				target.treeViewID,
+				imageSrc,
+				command,
+				disabledPred && disabledPred(target)
+			);
+			
+			// If no subcollections, place menuitem for target directly in containing menu
+			if (collections.length == 0) {
+				parent.appendChild(menuitem);
+				return menuitem;
+			}
+			
+			// Otherwise create a submenu for the target's subcollections
+			let menu = _createMenu(target.name, target.treeViewID, imageSrc, command);
+			let menupopup = menu.firstChild;
+			menupopup.appendChild(menuitem);
+			menupopup.appendChild(doc.createXULElement('menuseparator'));
+			for (let collection of collections) {
+				_appendTarget(collection, menupopup);
+			}
+			parent.appendChild(menu);
+			return menu;
+		}
+		
+		var node = _appendTarget(libraryOrCollection, elem);
+		this.addMenuFindAsYouType(elem);
+		return node;
+	},
+	
+	
+	MENU_FIND_AS_YOU_TYPE_TIMEOUT: 1000,
+	
+	
+	/**
+	 * Whether typing in `menulist` is currently building up a find-as-you-type search
+	 *
+	 * @param {Node<menulist>} menulist
+	 * @return {Boolean}
+	 */
+	isMenuFindAsYouTypeActive: function (menulist) {
+		let state = menulist._findAsYouType;
+		return !!state?.buffer
+			&& Date.now() - state.time <= this.MENU_FIND_AS_YOU_TYPE_TIMEOUT;
+	},
+	
+	
+	/**
+	 * Select an item by typing on the closed <menulist> whose menu is `elem``
+	 *
+	 * A menulist's built-in find-as-you-type only looks at the direct children of its
+	 * menupopup, so an item in a submenu can't be reached from the keyboard without opening
+	 * the menu. This matches on every menuitem in the menu instead, and cycles through the
+	 * matches when the same character is typed repeatedly.
+	 *
+	 * @param {Node<menupopup>} elem
+	 * @param {Function} [getLabel] Given a menuitem, the text to match it on, for a menu
+	 *     whose items are shown with a different label than the menulist gives them
+	 */
+	addMenuFindAsYouType: function (elem, getLabel = item => item.label) {
+		var menulist = elem.closest('menulist');
+		if (!menulist) {
+			return;
+		}
+		// The search is kept on the menulist so that the space-opens-a-menulist handler in
+		// customElements.js can see one in progress
+		if (menulist._findAsYouType) {
+			Object.assign(menulist._findAsYouType, { popup: elem, getLabel, buffer: '', time: 0 });
+			return;
+		}
+		let state = menulist._findAsYouType = { popup: elem, getLabel, buffer: '', time: 0 };
+		
+		menulist.addEventListener('keydown', (event) => {
+			// A later call can replace the menu, so take these from the state rather than
+			// from this call's arguments
+			let { popup, getLabel: getItemLabel } = state;
+			// The menu has been replaced by one this doesn't know about
+			if (menulist.menupopup != popup) {
+				return;
+			}
+			// Let the platform handle typing while the popup is open, and ignore in-progress
+			// IME composition (event.key is "Process")
+			if (menulist.open || event.isComposing
+					|| event.ctrlKey || event.metaKey || event.altKey) {
+				return;
+			}
+			// Only act on a single printable character. Count code points rather than UTF-16
+			// units so supplementary-plane characters aren't treated as multi-key sequences.
+			if (Array.from(event.key).length != 1) {
+				return;
+			}
+			
+			// Start a new search if enough time has passed since the last keystroke
+			let now = Date.now();
+			if (now - state.time > this.MENU_FIND_AS_YOU_TYPE_TIMEOUT) {
+				state.buffer = '';
+			}
+			state.time = now;
+			
+			// With no search to continue, leave the space to open the menu
+			if (event.key == ' ' && !state.buffer) {
+				return;
+			}
+			state.buffer += event.key.toLowerCase();
+			// Keep the platform's own incremental search from acting on the same keystroke
+			event.preventDefault();
+			
+			// When the same character is typed repeatedly, cycle through the matching items,
+			// starting after the current one
+			let items = [...popup.querySelectorAll('menuitem:not([disabled], [hidden])')];
+			let cycling = state.buffer.length > 1
+				&& [...state.buffer].every(c => c == state.buffer[0]);
+			let prefix = cycling ? state.buffer[0] : state.buffer;
+			let startIndex = cycling
+				? items.findIndex(item => item.hasAttribute('checked')) + 1
+				: 0;
+			
+			for (let i = 0; i < items.length; i++) {
+				let item = items[(startIndex + i) % items.length];
+				if (getItemLabel(item).toLowerCase().startsWith(prefix)) {
+					event.stopPropagation();
+					item.doCommand();
+					break;
+				}
+			}
+		}, true);
 	},
 	
 	openPreferences: function (paneID, options = {}) {
@@ -1789,7 +2066,7 @@ Zotero.Utilities.Internal = {
 		
 		// Pull window to foreground
 		Zotero.Utilities.Internal.activate(pane.document.defaultView);
-		pane.document.ownerGlobal.focus();
+		pane.document.documentGlobal.focus();
 	},
 	
 	
@@ -2097,6 +2374,14 @@ Zotero.Utilities.Internal = {
 			}
 			ev.listeners.delete(listener);
 		};
+		
+		/**
+		 * Remove all listeners from all events, so that an object being torn down doesn't
+		 * keep its listeners' closures alive
+		 */
+		cls.prototype.clearEventListeners = function () {
+			this._events = null;
+		};
 
 		cls.prototype._waitForEvent = async function (event) {
 			return new Zotero.Promise((resolve) => {
@@ -2107,224 +2392,12 @@ Zotero.Utilities.Internal = {
 
 	
 	/**
-	 * Splits a string by outer-most brackets (`{{` and '}}' by default, configurable).
-	 *
-	 * @param {string} input - The input string to split.
-	 * @returns {string[]} An array of strings split by outer-most brackets.
-	 */
-	splitByOuterBrackets: function (input, left = '{{', right = '}}') {
-		const result = [];
-		let startIndex = 0;
-		let depth = 0;
-
-		for (let i = 0; i < input.length; i++) {
-			if (input.slice(i, i + 2) === left) {
-				if (depth === 0) {
-					result.push(input.slice(startIndex, i));
-					startIndex = i;
-				}
-				depth++;
-			}
-			else if (input.slice(i, i + 2) === right) {
-				depth--;
-				if (depth === 0) {
-					result.push(input.slice(startIndex, i + 2));
-					startIndex = i + 2;
-				}
-			}
-		}
-
-		if (startIndex < input.length) {
-			result.push(input.slice(startIndex));
-		}
-
-		return result;
-	},
-
-	/**
-	 * A basic templating engine
-	 *
-	 * - 'if' statement does case-insensitive string comparison
-	 * -  functions can be called from if statements but must be wrapped in {{}} if arguments are passed (e.g. {{myFunction arg1="foo" arg2="bar"}})
-	 *
-	 * Vars example:
-	 *  {
-	 * 	  color: '#ff6666',
-	 * 	  highlight: '<span class="highlight">This is a highlight</span>,
-	 *    comment: 'This is a comment',
-	 *    citation: '<span class="citation">(Author, 1900)</citation>',
-	 *    image: '<img src="…"/>',
-	 *    tags: (attrs) => ['tag1', 'tag2'].map(tag => tag.name).join(attrs.join || ' ')
-	 *  }
-	 *
-	 * Template example:
-	 *  {{if color == '#ff6666'}}
-	 *    <h2>{{highlight}}</h2>
-	 *  {{elseif color == '#2ea8e5'}}
-	 *    {{if comment}}<p>{{comment}}:</p>{{endif}}<blockquote>{{highlight}}</blockquote><p>{{citation}}</p>
-	 *  {{else}}
-	 *    <p>{{highlight}} {{citation}} {{comment}} {{if tags}} #{{tags join=' #'}}{{endif}}</p>
-	 *  {{endif}}
-	 *
-	 * @param {String} template
-	 * @param {Object} vars
-	 * @returns {String} HTML
+	 * @deprecated Use generateHTMLFromTemplate() from modules/templates.mjs
 	 */
 	generateHTMLFromTemplate: function (template, vars) {
-		const hyphenToCamel = varName => varName.replace(/-(.)/g, (_, g1) => g1.toUpperCase());
-
-		const getAttributes = (part) => {
-			let attrsRegexp = new RegExp(/(([\w-]*) *=+ *(['"])((\\\3|[^\3])*?)\3)/g);
-			let attrs = {};
-			let match;
-			while ((match = attrsRegexp.exec(part))) {
-				if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
-					attrs[hyphenToCamel(match[2])] = match[4];
-				}
-			}
-			return attrs;
-		};
-
-		
-		const evaluateIdentifier = (ident, args = {}) => {
-			ident = hyphenToCamel(ident);
-
-			if (!(ident in vars)) {
-				return '';
-			}
-
-			const identValue = typeof vars[ident] === 'function' ? vars[ident](args) : vars[ident];
-
-			if (Array.isArray(identValue)) {
-				return identValue.length ? identValue.join(',') : '';
-			}
-
-			if (typeof identValue !== 'string') {
-				throw new Error(`Identifier "${ident}" does not evaluate to a string`);
-			}
-			
-			return identValue;
-		};
-		
-		// evaluates extracted (i.e. without brackets) statement (e.g. `sum a="1" b="2"`) into a string value
-		const evaluateStatement = (statement) => {
-			statement = statement.trim();
-			const operator = statement.split(' ', 1)[0].trim();
-			const args = statement.slice(operator.length).trim();
-
-			return evaluateIdentifier(operator, getAttributes(args));
-		};
-
-		// splits raw (i.e. bracketed) statement (e.g. `{{ sum a="1" b="2" }}) into operator and arguments (e.g. ['sum', 'a="1" b="2"'])
-		const splitStatement = (statement) => {
-			statement = statement.slice(2, -2).trim();
-			const operator = statement.split(' ', 1)[0].trim();
-			const args = statement.slice(operator.length).trim();
-			return [operator, args];
-		};
-
-		// We allow unquoted numbers in conditions, e.g. `a == 1` or `a == 1.0`  but not `a == 1.0.0` or `a == 1st edition`
-		const asNumber = (string) => {
-			if (typeof string === 'number') {
-				return string;
-			}
-			const number = parseFloat(string);
-			if (!Number.isNaN(number) && string?.trim().match(/^[+-]?\d+(\.\d+)?$/)) {
-				return number;
-			}
-			return null;
-		};
-
-		// evaluates a condition (e.g. `a == "b"`) into a boolean value
-		const evaluateCondition = (condition) => {
-			const comparators = ['==', '!=', "<=", ">=", '<', '>'];
-			condition = condition.trim();
-			
-			// Regular expression breakdown for condition matching:
-			// - `match[1]`: Left operand if it's a statement enclosed in `{{...}}`.
-			// - `match[3]`: Left operand if it's a string literal, extracted without quotes.
-			// - `match[4]`: Left operand if it's a standalone identifier (e.g., a variable) or a number
-			// - `match[6]`: Right operand if it's a statement enclosed in `{{...}}`.
-			// - `match[8]`: Right operand if it's a string literal, extracted without quotes.
-			// - `match[9]`: Right operand if it's a standalone identifier or a number.
-			// - `match[2]` and `match[7]`: Captured quotes around string literals, used to ensure matching pairs.
-			// - `match[5]`: The comparator (e.g., `==`, `!=`, `<`, `>`, etc.), extracted from `comparators.join('|')`.
-			const match = condition.match(new RegExp(String.raw`(?:{{(.*?)}}|(?:(['"])(.*?)\2)|([^ ]+)) *(${comparators.join('|')}) *(?:{{(.*?)}}|(?:(['"])(.*?)\7)|([^ ]+))`));
-			
-			if (!match) {
-				// condition is a statement or identifier without a comparator
-				if (condition.startsWith('{{')) {
-					const [operator, args] = splitStatement(condition);
-					return !!evaluateIdentifier(operator, getAttributes(args));
-				}
-				return !!evaluateIdentifier(condition);
-			}
-
-			const left = match[1] ? evaluateStatement(match[1]) : match[3] ?? asNumber(match[4]) ?? evaluateIdentifier(match[4]) ?? '';
-			const comparator = match[5];
-			const right = match[6] ? evaluateStatement(match[6]) : match[8] ?? asNumber(match[9]) ?? evaluateIdentifier(match[9]) ?? '';
-
-			switch (comparator) {
-				default:
-				case '==':
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() == right.toLowerCase() : asNumber(left) == asNumber(right);
-				case '!=':
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() != right.toLowerCase() : asNumber(left) != asNumber(right);
-				case ">=":
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() >= right.toLowerCase() : asNumber(left) >= asNumber(right);
-				case "<=":
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() <= right.toLowerCase() : asNumber(left) <= asNumber(right);
-				case '>':
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() > right.toLowerCase() : asNumber(left) > asNumber(right);
-				case '<':
-					return (asNumber(left) === null || asNumber(right === null)) ? left.toLowerCase() < right.toLowerCase() : asNumber(left) < asNumber(right);
-			}
-		};
-
-		let html = '';
-		const levels = [{ condition: true }];
-		const parts = this.splitByOuterBrackets(template);
-
-		for (let i = 0; i < parts.length; i++) {
-			let part = parts[i];
-			let level = levels[levels.length - 1];
-
-			if (part.startsWith('{{')) {
-				const [operator, args] = splitStatement(part);
-			
-				if (operator === 'if') {
-					level = { condition: false, executed: false, parentCondition: levels[levels.length - 1].condition };
-					levels.push(level);
-				}
-				if (['if', 'elseif'].includes(operator)) {
-					if (!level.executed) {
-						level.condition = level.parentCondition && evaluateCondition(args);
-						level.executed = level.condition;
-					}
-					else {
-						level.condition = false;
-					}
-					continue;
-				}
-				else if (operator === 'else') {
-					level.condition = level.parentCondition && !level.executed;
-					level.executed = level.condition;
-					continue;
-				}
-				else if (operator === 'endif') {
-					levels.pop();
-					continue;
-				}
-				if (level.condition) {
-					const attrs = getAttributes(part);
-					html += evaluateIdentifier(operator, attrs);
-				}
-			}
-			else if (level.condition) {
-				html += part;
-			}
-		}
-		return html;
+		Zotero.debug("Zotero.Utilities.Internal.generateHTMLFromTemplate() is deprecated -- use modules/templates.mjs");
+		let { generateHTMLFromTemplate } = ChromeUtils.importESModule("chrome://zotero/content/modules/templates.mjs");
+		return generateHTMLFromTemplate(template, vars);
 	},
 
 	/**
@@ -2576,18 +2649,21 @@ Zotero.Utilities.Internal = {
 	},
 
 	/**
-	 * Check whether an object belongs to a closed window, and is therefore
-	 * keeping it alive.
+	 * Check whether an object or function belongs to a closed window, and is
+	 * therefore keeping it alive.
+	 *
+	 * A window only counts as leaked once it's closed and detached from its
+	 * docShell, which happens after its 'unload' handlers have run.
 	 *
 	 * @param {any} obj
 	 * @returns {boolean}
 	 */
 	isObjectLeakingWindow(obj) {
-		if (typeof obj !== 'object' || obj === null) {
+		if (obj === null || (typeof obj !== 'object' && typeof obj !== 'function')) {
 			return false;
 		}
 		let global = Cu.getGlobalForObject(obj);
-		return global.constructor.name === 'Window' && global.closed;
+		return global.constructor.name === 'Window' && global.closed && !global.docShell;
 	}
 };
 
@@ -3361,9 +3437,16 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 	let files = items
 		.filter(item => item.isAttachment())
 		.map(item => item.getFilePath())
-		.filter(path => path);
+		.filter(path => path)
+		.map(path => Zotero.File.pathToFile(path))
+		.filter(file => file.exists());
 
 	if (files.length) {
+		if (Zotero.isWin) {
+			// Copies from earlier drags are no longer in use
+			Zotero.TempFileDragDataProvider.removeCopies();
+		}
+
 		// Advanced multi-file drag (with unique filenames, which otherwise happen automatically on
 		// Windows but not Linux) and auxiliary snapshot file copying on macOS
 		let dataProvider;
@@ -3372,32 +3455,43 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 		}
 
 		for (let i = 0; i < files.length; i++) {
-			let file = Zotero.File.pathToFile(files[i]);
+			let file = files[i];
 
 			if (dataProvider) {
 				Zotero.debug("Adding application/x-moz-file-promise");
 				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise", dataProvider, i);
 			}
 
-			// Allow dragging to filesystem on Linux and Windows
-			let uri;
-			if (!Zotero.isMac) {
+			// Allow dragging to filesystem on Linux
+			if (Zotero.isLinux) {
 				Zotero.debug("Adding text/x-moz-url " + i);
-				uri = Zotero.File.pathToFileURI(file);
+				let uri = Zotero.File.pathToFileURI(file);
 				event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
 			}
 
-			// Allow dragging to web targets (e.g., Gmail)
+			// Allow dragging to the filesystem and web targets (e.g., Gmail). On Windows, hand
+			// targets a copy in the temp directory, since File Explorer moves a dropped file for
+			// an unmodified drag and would otherwise move it out of storage.
 			Zotero.debug("Adding application/x-moz-file " + i);
-			event.dataTransfer.mozSetDataAt("application/x-moz-file", file, i);
+			event.dataTransfer.mozSetDataAt(
+				"application/x-moz-file",
+				Zotero.isWin ? new Zotero.TempFileDragDataProvider(files[i]) : file,
+				i
+			);
 
-			if (Zotero.isWin) {
-				event.dataTransfer.mozSetDataAt("application/x-moz-file-promise-url", uri, i);
-			}
-			else if (Zotero.isLinux) {
-				// Don't create a symlink for an unmodified drag
+			if (Zotero.isLinux) {
+				// Copy rather than symlink for an unmodified drag. Drops within Zotero can still
+				// move -- see LibraryTreeView::setDropEffect().
 				event.dataTransfer.effectAllowed = 'copy';
 			}
+		}
+
+		if (Zotero.isWin) {
+			event.currentTarget.addEventListener(
+				'dragend',
+				() => Zotero.TempFileDragDataProvider.onDragEnd(),
+				{ once: true }
+			);
 		}
 	}
 

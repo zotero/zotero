@@ -37,11 +37,14 @@ win_path="$STAGE_DIR/Zotero_win-x64"
 linux_path="$STAGE_DIR/Zotero_linux-x86_64"
 
 added=0
+build_id=$(date +%Y%m%d%H%M%S)
 for path in "$mac_path" "$win_path" "$linux_path"; do
 	if [ -d "$path" ]; then
 		echo "$path/app/omni.ja"
 		echo "Updating $(basename $(dirname $(dirname $path)))"
 		zip "$path/app/omni.ja" $files
+		# Bump BuildID so that startup caches are invalidated
+		perl -pi -e "s/^BuildID=.*/BuildID=$build_id/" "$path/app/application.ini"
 		added=1
 	fi
 done

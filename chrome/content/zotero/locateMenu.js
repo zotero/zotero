@@ -29,7 +29,7 @@ var { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUti
  * This object contains the various functions for the interface
  */
 var Zotero_LocateMenu = new function () {
-	XPCOMUtils.defineLazyServiceGetter(this, "ios", "@mozilla.org/network/io-service;1", "nsIIOService");
+	XPCOMUtils.defineLazyServiceGetter(this, "ios", "@mozilla.org/network/io-service;1", Ci.nsIIOService);
 	
   	/**
   	 * Clear and build the locate menu

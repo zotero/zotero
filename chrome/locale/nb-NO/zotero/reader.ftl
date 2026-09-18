@@ -86,7 +86,7 @@ reader-toggle-sidebar = Slå av/på sidepanel
 reader-find-in-document = Finn i dokument
 reader-toggle-context-pane = Slå av/på kontekstruten
 reader-highlight-all = Uthev alle
-reader-match-case = Sorter etter
+reader-match-case = Bruk store og små bokstaver
 reader-whole-words = Hele ord
 reader-appearance = Utseende
 reader-epub-appearance-line-height = Linjeavstand
@@ -144,7 +144,7 @@ reader-a11y-resize-annotation = Hvis du vil endre størrelsen på kommentaren, h
 reader-a11y-annotation-popup-appeared = Bruk Tab for å navigere i popup-vinduet for kommentarer.
 reader-a11y-annotation-created = { $type } opprettet.
 reader-a11y-annotation-selected = { $type } valgt.
--reader-a11y-textual-annotation-instruction = For å kommentere tekst via tastaturet, bruk først “{ reader-find-in-document }” for å finne frasen, og trykk deretter { general-key-control }-{ option-or-alt }-{ $number } for å gjøre søkeresultatet om til en kommentar.
+-reader-a11y-textual-annotation-instruction = For å kommentere tekst via tastaturet, bruk først «{ reader-find-in-document }» for å finne frasen, og trykk deretter { general-key-control }-{ option-or-alt }-{ $number } for å gjøre søkeresultatet om til en kommentar.
 -reader-a11y-annotation-instruction = For å legge til denne kommentaren i dokumentet, fokuserer du på dokumentet og trykker { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -183,7 +183,7 @@ reader-import-from-epub-no-annotations-current-file =
     
     { -app-name } kan importere e-bok kommentarer som er opprettet i Calibre og KOReader.
 reader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” ser ikke ut til å inneholde noen Calibre- eller KOReader-kommentarer.
+    «{ $filename }» ser ikke ut til å inneholde noen Calibre- eller KOReader-kommentarer.
     
     Hvis denne e-boken har kommentarer opprettet i KOReader, kan du prøve å velge en "metadata.epub.lua"-fil direkte.
 reader-import-from-epub-select-other = Velg annen fil…
@@ -223,7 +223,7 @@ reader-read-aloud-quota-exceeded-message =
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = En ukjent feil har oppstått.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-network = Kan ikke koble til høytlesingstjenesten. Sjekk internettforbindelsen din.
 reader-read-aloud-error-daily-limit-exceeded = Du har overskredet den daglige grensen din for stemmer i { -app-name }.
 reader-read-aloud-retry = Prøv på nytt
 reader-read-aloud-first-run-title = Velg den foretrukne høytlesningsstemmen din:

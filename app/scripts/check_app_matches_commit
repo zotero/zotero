@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+# Check that app/ in this checkout matches app/ in the commit being built.
+#
+# The build-and-deploy scripts run the build scripts and config from the local
+# checkout but build source files from the tip of the remote branch, so a stale
+# checkout can silently build with the wrong Gecko version or omni patches.
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 commit-hash" >&2
+	exit 1
+fi
+hash=$1
+
+cd "$ROOT_DIR"
+
+if ! git cat-file -e "$hash^{commit}" 2>/dev/null; then
+	git fetch -q origin
+fi
+if ! git cat-file -e "$hash^{commit}" 2>/dev/null; then
+	echo "Commit $hash not found locally after fetching -- aborting" >&2
+	exit 1
+fi
+
+if ! git diff --quiet HEAD "$hash" -- app/; then
+	echo >&2
+	echo "app/ files in this checkout differ from app/ in $hash:" >&2
+	echo >&2
+	git --no-pager diff --stat HEAD "$hash" -- app/ >&2
+	echo >&2
+	echo "Update this checkout (e.g., 'git pull') and try again" >&2
+	exit 1
+fi

@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Namn:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
-
 <!ENTITY zotero.search.joinMode.prefix "Finn">
 <!ENTITY zotero.search.joinMode.any "minst ein">
 <!ENTITY zotero.search.joinMode.all "alle">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dagar">
 <!ENTITY zotero.search.date.units.months "månader">
 <!ENTITY zotero.search.date.units.years "år">
-
-<!ENTITY zotero.search.search "Søk">
-<!ENTITY zotero.search.clear "Fjern">
-<!ENTITY zotero.search.saveSearch "Lagra søk">

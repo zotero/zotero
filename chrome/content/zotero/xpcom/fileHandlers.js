@@ -381,86 +381,28 @@ Zotero.FileHandlers = {
 	},
 	
 	_getSystemHandlerWin(mimeType) {
-		// Based on getPDFReader() in ZotFile (GPL)
-		// https://github.com/jlegewie/zotfile/blob/a6c9e02e17b60cbc1f9bb4062486548d9ef583e3/chrome/content/zotfile/utils.js
-
-		var wrk = Components.classes["@mozilla.org/windows-registry-key;1"]
-			.createInstance(Components.interfaces.nsIWindowsRegKey);
-		// Get handler
-		var extension = Zotero.MIME.getPrimaryExtension(mimeType);
-		var tryKeys = [
-			{
-				root: wrk.ROOT_KEY_CURRENT_USER,
-				path: `Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\.${extension}\\UserChoice`,
-				value: 'Progid'
-			},
-			{
-				root: wrk.ROOT_KEY_CLASSES_ROOT,
-				path: `.${extension}`,
-				value: ''
-			}
-		];
-		var progId;
-		for (let key of tryKeys) {
-			try {
-				wrk.open(key.root, key.path, wrk.ACCESS_READ);
-				progId = wrk.readStringValue(key.value);
-				if (progId) {
-					break;
-				}
-			}
-			catch (e) {}
+		// Resolve the default handler via the OS shell, which reflects the
+		// user's effective choice regardless of where Windows stores it
+		var executable;
+		try {
+			let extension = Zotero.MIME.getPrimaryExtension(mimeType);
+			let mimeService = Cc["@mozilla.org/mime;1"].getService(Ci.nsIMIMEService);
+			let mimeInfo = mimeService.getFromTypeAndExtension(mimeType, extension);
+			executable = mimeInfo.defaultExecutable;
 		}
-
-		if (!progId) {
-			wrk.close();
+		catch (e) {
+			Zotero.debug("Couldn't get default executable for " + mimeType, 2);
+			Zotero.debug(e, 2);
 			return false;
 		}
-
-		// Get version specific handler, if it exists
-		try {
-			wrk.open(
-				wrk.ROOT_KEY_CLASSES_ROOT,
-				progId + '\\CurVer',
-				wrk.ACCESS_READ
-			);
-			progId = wrk.readStringValue('') || progId;
-		}
-		catch (e) {}
-
-		// Get command
-		var success = false;
-		tryKeys = [
-			progId + '\\shell\\Read\\command',
-			progId + '\\shell\\Open\\command'
-		];
-		for (let key of tryKeys) {
-			try {
-				wrk.open(
-					wrk.ROOT_KEY_CLASSES_ROOT,
-					key,
-					wrk.ACCESS_READ
-				);
-				success = true;
-				break;
-			}
-			catch (e) {}
-		}
-
-		if (!success) {
-			wrk.close();
+		// A Microsoft Store app resolves to its DelegateExecute COM server
+		// (a DLL), which can't be launched directly -- return false so that
+		// the file is opened with the system default via ShellExecute
+		if (!executable.path.toLowerCase().endsWith('.exe')) {
+			Zotero.debug(`Default handler ${executable.path} isn't directly launchable`);
 			return false;
 		}
-
-		try {
-			var command = wrk.readStringValue('').match(/^(?:".+?"|[^"]\S+)/);
-		}
-		catch (e) {}
-
-		wrk.close();
-
-		if (!command) return false;
-		return command[0].replace(/"/g, '');
+		return executable.path;
 	},
 	
 	_getSystemHandlerPOSIX(mimeType) {

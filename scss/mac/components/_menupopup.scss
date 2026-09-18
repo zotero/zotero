@@ -28,7 +28,7 @@ menulist > menupopup {
 			font-weight: bold;
 		}
 
-		&:is([checked="true"], [selected="true"])::before {
+		&:is([checked], [selected])::before {
 			visibility: inherit;
 		}
 	}

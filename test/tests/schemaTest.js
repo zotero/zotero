@@ -16,12 +16,59 @@ describe("Zotero.Schema", function () {
 		it("should set last client version", async function () {
 			var sql = "REPLACE INTO settings (setting, key, value) VALUES ('client', 'lastVersion', ?)";
 			await Zotero.DB.queryAsync(sql, "5.0old");
-			
+
 			await Zotero.Schema.updateSchema();
-			
+
 			var sql = "SELECT value FROM settings WHERE setting='client' AND key='lastVersion'";
 			var lastVersion = await Zotero.DB.valueQueryAsync(sql);
 			assert.equal(await Zotero.DB.valueQueryAsync(sql), Zotero.version);
+		});
+
+		it("shouldn't repeat forced backup when retrying a failed update", async function () {
+			// Backups are disabled in the test profile
+			Zotero.Prefs.set('backup.numBackups', 2);
+			await Zotero.DB.queryAsync(
+				"DELETE FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+			);
+
+			await Zotero.Schema.setIntegrityCheckRequired(true);
+
+			var backupSpy = sinon.spy(Zotero.DB, 'backUpDatabase');
+			var integrityCheckStub = sinon.stub(Zotero.Schema, 'integrityCheck')
+				.rejects(new Error("Simulated failure"));
+			try {
+				// First attempt makes a forced backup and fails
+				var e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 1);
+
+				// Retrying with the same pending state doesn't make another backup
+				e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 1);
+
+				// If the backup no longer exists, retrying makes a new one
+				await IOUtils.remove(Zotero.DB.path + '.bak');
+				e = await getPromiseError(Zotero.Schema.updateSchema());
+				assert.equal(e.message, "Simulated failure");
+				assert.equal(backupSpy.callCount, 2);
+
+				// A successful update clears the stored state
+				integrityCheckStub.restore();
+				await Zotero.Schema.updateSchema();
+				assert.isFalse(await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM settings WHERE setting='backup' AND key='lastSchemaUpdateState'"
+				));
+
+				// A new pending state makes a fresh backup
+				await Zotero.Schema.setIntegrityCheckRequired(true);
+				await Zotero.Schema.updateSchema();
+				assert.equal(backupSpy.callCount, 3);
+			}
+			finally {
+				integrityCheckStub.restore();
+				backupSpy.restore();
+			}
 		});
 	});
 	
@@ -47,8 +94,44 @@ describe("Zotero.Schema", function () {
 			});
 		});
 		
+		describe("date-type field conversion", function () {
+			it("should convert stored text values of date-type fields to multipart dates", async function () {
+				var item = await createDataObject('item', { itemType: 'patent' });
+				// A value stored while the field was a text field
+				var fieldID = Zotero.ItemFields.getID('priorityDate');
+				var valueID = Zotero.ID.get('itemDataValues');
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES (?, ?, ?)",
+					[valueID, '1969-04-20', null]
+				);
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemData VALUES (?, ?, ?)",
+					[item.id, fieldID, valueID]
+				);
+
+				schema.version++;
+				await Zotero.Schema._updateGlobalSchemaForTest(schema);
+				await item.reload(['itemData'], true);
+
+				var stored = await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM itemData JOIN itemDataValues USING (valueID) "
+						+ "WHERE itemID=? AND fieldID=?",
+					[item.id, fieldID]
+				);
+				assert.isTrue(Zotero.Date.isMultipart(stored));
+				assert.equal(item.getField('priorityDate'), '1969-04-20');
+
+				// The converted value matches a date search on the base field
+				var s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('originalDate', 'isBefore', '1970');
+				var matches = await s.search();
+				assert.include(matches, item.id);
+			});
+		});
+
 		describe("#migrateExtraFields()", function () {
-			async function migrate() {
+			async function migrate(options) {
 				schema.version++;
 				schema.itemTypes.find(x => x.itemType == 'book').fields.splice(0, 1, { field: 'fooBar' })
 				var newLocales = {};
@@ -58,7 +141,7 @@ describe("Zotero.Schema", function () {
 					newLocales[locale] = o;
 				});
 				await Zotero.Schema._updateGlobalSchemaForTest(schema);
-				await Zotero.Schema.migrateExtraFields();
+				await Zotero.Schema.migrateExtraFields(options);
 			}
 			
 			it("should add a new field and migrate values from Extra", async function () {
@@ -146,6 +229,21 @@ describe("Zotero.Schema", function () {
 				assert.isNumber(Zotero.ItemFields.getID('fooBar'));
 				assert.equal(item.getField('fooBar'), '');
 				assert.equal(item.getField('extra'), 'Foo Bar: This is a value.');
+				assert.isTrue(item.synced);
+			});
+			
+			it("shouldn't report progress if Extra fields can't be migrated", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				item.setField('numPages', "10");
+				item.setField('extra', 'number-of-pages: 11');
+				item.synced = true;
+				await item.saveTx();
+				
+				var onProgress = sinon.spy();
+				await migrate({ onProgress });
+				
+				assert.isFalse(onProgress.called);
+				assert.equal(item.getField('extra'), 'number-of-pages: 11');
 				assert.isTrue(item.synced);
 			});
 			
@@ -488,11 +586,18 @@ describe("Zotero.Schema", function () {
 			await resetDB({
 				thisArg: this,
 				skipBundledFiles: true,
-				dbFile: OS.Path.join(getTestDataDirectory().path, 'zotero-4.0.sqlite.zip')
+				dbFile: OS.Path.join(getTestDataDirectory().path, 'zotero-4.0.sqlite.zip'),
+				// Backups are disabled in the test profile
+				prefs: { 'backup.numBackups': 2 }
 			});
 			// Make sure we can open the Zotero pane without errors
 			win = await loadZoteroPane();
 			win.close();
+			
+			// A backup should have been made before the upgrade
+			assert.isTrue(
+				await IOUtils.exists(PathUtils.join(Zotero.DataDirectory.dir, 'zotero.sqlite.bak'))
+			);
 		});
 	});
 })

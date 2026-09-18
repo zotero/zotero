@@ -234,7 +234,6 @@ var Zotero_CSL_Editor = new function () {
 			this.updateIframe(Zotero.getString('styles.editor.warning.renderError') + '<div>' + e + '</div>', 'error');
 			throw e;
 		}
-		styleEngine.free();
 	};
 
 	this.generateBibliographyDebounced = Zotero.Utilities.debounce(this.generateBibliography, 250);

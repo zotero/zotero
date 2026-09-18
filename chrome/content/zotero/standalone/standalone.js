@@ -237,8 +237,50 @@ const ZoteroStandalone = new function () {
 		this.updateQuickCopyOptions();
 		// goUpdateGlobalEditMenuItems(true) is necessary to update Edit menu when contenteditable is focused
 		window.goUpdateGlobalEditMenuItems(true);
+		this._updateUndoRedoLabels();
 
 		this.onUpdateCustomMenus(event, 'edit');
+	};
+
+	this._updateUndoRedoLabels = function () {
+		let undoItem = document.getElementById('menu_undo');
+		let redoItem = document.getElementById('menu_redo');
+		if (!undoItem || !redoItem) return;
+
+		// When a native text-editing controller handles undo/redo
+		// (e.g. focused input), show generic labels and let it take over
+		let nativeUndo = Zotero.UndoHistory.hasNativeUndo(document);
+		let nativeRedo = Zotero.UndoHistory.hasNativeRedo(document);
+
+		let undoAction = !nativeUndo && Zotero.UndoHistory.getUndoAction();
+		if (undoAction) {
+			let actionLabel = Zotero.ftl.formatValueSync(
+				undoAction.action, undoAction.actionArgs || undefined
+			);
+			let fullLabel = Zotero.ftl.formatValueSync(
+				'menu-edit-undo-action', { action: actionLabel }
+			);
+			undoItem.removeAttribute('data-l10n-id');
+			undoItem.setAttribute('label', fullLabel);
+		}
+		else {
+			document.l10n.setAttributes(undoItem, 'text-action-undo');
+		}
+
+		let redoAction = !nativeRedo && Zotero.UndoHistory.getRedoAction();
+		if (redoAction) {
+			let actionLabel = Zotero.ftl.formatValueSync(
+				redoAction.action, redoAction.actionArgs || undefined
+			);
+			let fullLabel = Zotero.ftl.formatValueSync(
+				'menu-edit-redo-action', { action: actionLabel }
+			);
+			redoItem.removeAttribute('data-l10n-id');
+			redoItem.setAttribute('label', fullLabel);
+		}
+		else {
+			document.l10n.setAttributes(redoItem, 'text-action-redo');
+		}
 	};
 	
 	/**
@@ -466,15 +508,15 @@ const ZoteroStandalone = new function () {
 		// Panes
 		this.updateMenuItemCheckmark(
 			'view-menuitem-collections-pane',
-			document.getElementById('zotero-collections-pane').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-collections-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-item-pane',
-			document.getElementById('zotero-item-pane').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-item-pane').hasAttribute('collapsed')
 		);
 		this.updateMenuItemCheckmark(
 			'view-menuitem-tag-selector',
-			document.getElementById('zotero-tag-selector-container').getAttribute('collapsed') != 'true'
+			!document.getElementById('zotero-tag-selector-container').hasAttribute('collapsed')
 		);
 		
 		// Font size
@@ -594,9 +636,9 @@ const ZoteroStandalone = new function () {
 			case 'collections-pane':
 				var collectionsPane = document.getElementById('zotero-collections-pane');
 				// Show
-				if (collectionsPane.getAttribute('collapsed') == 'true') {
+				if (collectionsPane.hasAttribute('collapsed')) {
 					document.getElementById('zotero-collections-splitter').setAttribute('state', 'open');
-					collectionsPane.setAttribute('collapsed', false);
+					collectionsPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {
@@ -609,9 +651,9 @@ const ZoteroStandalone = new function () {
 			case 'item-pane':
 				var itemPane = document.getElementById('zotero-item-pane');
 				// Show
-				if (itemPane.getAttribute('collapsed') == 'true') {
+				if (itemPane.hasAttribute('collapsed')) {
 					document.getElementById('zotero-items-splitter').setAttribute('state', 'open');
-					itemPane.setAttribute('collapsed', false);
+					itemPane.removeAttribute('collapsed');
 				}
 				// Hide
 				else {
@@ -794,13 +836,13 @@ const ZoteroStandalone = new function () {
 		
 		// Make our own removal prompt instead of using BrowserAddonUI.promptRemoveExtension() from
 		// browser-addons.js
-		doc.ownerGlobal.promptRemoveExtension = function (addon) {
+		doc.documentGlobal.promptRemoveExtension = function (addon) {
 			var { name } = addon;
 			var ps = Services.prompt;
 			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 			var result = ps.confirmEx(
-				doc.ownerGlobal,
+				doc.documentGlobal,
 				Zotero.getString('addons.remove.title', name),
 				Zotero.getString('addons.remove.text', [name, Zotero.appName]),
 				buttonFlags,

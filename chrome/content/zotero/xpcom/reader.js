@@ -43,6 +43,9 @@ const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 const READ_ALOUD_ENABLED_VOICES_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudEnabledVoices.json');
 const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudVoiceDefaults.json');
 
+// Whether the Read Aloud audio cache has been pruned of stale versions this session
+let readAloudCachePruned = false;
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -59,9 +62,11 @@ class ReaderInstance {
 			this._rejectInitPromise = reject;
 		});
 		this._isUninitialized = false;
+		this._isTabClosed = false;
 		this._customEventHandler = null;
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
+		this._readAloudGuidancePanel = null;
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -136,7 +141,10 @@ class ReaderInstance {
 				let item = Zotero.Items.getByLibraryAndKey(libraryID, key);
 				if (item && item.isEditable()) {
 					item.annotationColor = color;
-					await item.saveTx({ skipDateModifiedUpdate: true, notifierQueue });
+					await item.saveTx({
+						skipDateModifiedUpdate: true,
+						notifierQueue
+					});
 				}
 			}
 		}
@@ -252,10 +260,13 @@ class ReaderInstance {
 			autoDisableTextTool: Zotero.Prefs.get('reader.autoDisableTool.text'),
 			autoDisableImageTool: Zotero.Prefs.get('reader.autoDisableTool.image'),
 			sidebarView: Zotero.Prefs.get('reader.lastSidebarTab'),
+			popupPositions: this._getPopupPositions(),
 			enableReadAloud: true,
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
+			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
+			getSDTPack: this._createGetSDTPack(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -392,6 +403,9 @@ class ReaderInstance {
 			},
 			onChangeSidebarView: (view) => {
 				Zotero.Prefs.set('reader.lastSidebarTab', view);
+			},
+			onSetPopupPosition: (id, position) => {
+				this._setPopupPosition(id, position);
 			},
 			onFocusContextPane: () => {
 				if (this instanceof ReaderWindow || !this._window.ZoteroContextPane.focus()) {
@@ -652,7 +666,9 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
+			Zotero.Prefs.registerObserver('reader.popupPositions', this._handlePopupPositionsPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
+			Zotero.Prefs.registerObserver('reader.readAloud.highlightGranularity', this._handleReadAloudHighlightGranularityChange),
 		];
 
 		return true;
@@ -710,6 +726,7 @@ class ReaderInstance {
 
 	async updateTitle() {
 		this._title = await this._item.getTabTitle();
+		if (this._isTabClosed) return;
 		this._setTitleValue(this._title);
 		this._internalReader?.setTitle(this._title);
 	}
@@ -723,11 +740,15 @@ class ReaderInstance {
 			}
 		}
 		if (annotations.length) {
+			// Annotations can be added before the reader finishes initializing -- e.g., when
+			// embedded annotations are imported right after opening a newly added file
+			await this._initPromise;
 			this._internalReader.setAnnotations(Components.utils.cloneInto(annotations, this._iframeWindow));
 		}
 	}
 
-	unsetAnnotations(keys) {
+	async unsetAnnotations(keys) {
+		await this._initPromise;
 		this._internalReader.unsetAnnotations(Components.utils.cloneInto(keys, this._iframeWindow));
 	}
 
@@ -1133,6 +1154,40 @@ class ReaderInstance {
 		return state;
 	}
 
+	// Returns the function passed to the reader as options.getSDTPack, which
+	// resolves with the SDT pack for the displayed attachment, generating it
+	// if necessary. The reader decides when to pull (currently at init, so
+	// the pack is ready when a feature needs it), and a reader build without
+	// SDT support never triggers extraction. The pack bytes are passed by
+	// value, so a held pack can't be affected by a later regeneration and
+	// always matches the document the reader is displaying.
+	_createGetSDTPack(targetWindow) {
+		if (!Zotero.SDT || !this.itemID || this._isTransient()) {
+			return null;
+		}
+		// Wrap the return value in a child window Promise to avoid
+		// permissions errors (as in _getReadAloudRemoteInterface()).
+		// getPack() never rejects
+		return (options = {}) => new targetWindow.Promise(async (resolve) => {
+			let contentOptions = Cu.waiveXrays(options);
+			let onProgress = typeof contentOptions.onProgress === 'function'
+				? progress => {
+					if (!Components.utils.isDeadWrapper(targetWindow)) {
+						contentOptions.onProgress(progress);
+					}
+				}
+				: null;
+			let result = await Zotero.SDT.getPack(this.itemID, {
+				isPriority: true,
+				onProgress,
+			});
+			if (Components.utils.isDeadWrapper(targetWindow)) {
+				return;
+			}
+			resolve(Cu.cloneInto(result, targetWindow));
+		});
+	}
+
 	_isTransient() {
 		return false;
 	}
@@ -1175,8 +1230,18 @@ class ReaderInstance {
 		this._internalReader.setAutoDisableImageTool(Zotero.Prefs.get('reader.autoDisableTool.image'));
 	};
 	
+	_handlePopupPositionsPrefChange = () => {
+		this._internalReader.setPopupPositions(Cu.cloneInto(this._getPopupPositions(), this._iframeWindow));
+	};
+
 	_handleReadAloudVoicesPrefChange = () => {
 		this._internalReader.setReadAloudVoices(Cu.cloneInto(this._getReadAloudVoices(), this._iframeWindow));
+	};
+
+	_handleReadAloudHighlightGranularityChange = () => {
+		this._internalReader.setReadAloudHighlightGranularity(
+			Zotero.Prefs.get('reader.readAloud.highlightGranularity')
+		);
 	};
 
 	_handleReadAloudEnabledVoicesChange = async (voices) => {
@@ -1290,14 +1355,14 @@ class ReaderInstance {
 					else {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('label', item.label);
-						menuitem.setAttribute('disabled', item.disabled);
+						menuitem.toggleAttribute('disabled', item.disabled);
 						if (item.color) {
 							menuitem.className = 'menuitem-iconic';
 							menuitem.setAttribute('image', this._getColorIcon(item.color, item.checked));
 						}
 						else if (item.checked) {
 							menuitem.setAttribute('type', 'checkbox');
-							menuitem.setAttribute('checked', item.checked);
+							menuitem.toggleAttribute('checked', item.checked);
 						}
 						menuitem.addEventListener('command', () => item.onCommand());
 						parentNode.appendChild(menuitem);
@@ -1335,7 +1400,7 @@ class ReaderInstance {
 			return;
 		}
 
-		let iframeWindow = event.target.ownerGlobal;
+		let iframeWindow = event.target.documentGlobal;
 
 		this._window.MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
 		this._window.MozXULElement.insertFTLIfNeeded("browser/menubar.ftl");
@@ -1370,7 +1435,7 @@ class ReaderInstance {
 		menuitemSwitchTextDirection.hidden = !showSwitchTextDirection;
 		menuitemSwitchTextDirection.previousElementSibling.hidden = !showSwitchTextDirection;
 
-		let selection = event.target.ownerGlobal.getSelection();
+		let selection = event.target.documentGlobal.getSelection();
 		if (!selection || !selection.anchorNode) {
 			return;
 		}
@@ -1391,7 +1456,7 @@ class ReaderInstance {
 			// Check Spelling
 			var menuitem = popup.ownerDocument.createXULElement('menuitem');
 			menuitem.setAttribute('data-l10n-id', 'text-action-spell-check-toggle');
-			menuitem.setAttribute('checked', !!Zotero.Prefs.get('layout.spellcheckDefault', true));
+			menuitem.toggleAttribute('checked', !!Zotero.Prefs.get('layout.spellcheckDefault', true));
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.addEventListener('command', () => {
 				spellChecker.toggleEnabled();
@@ -1631,6 +1696,28 @@ class ReaderInstance {
 		}
 	}
 
+	/**
+	 * Positions of draggable reader popups, keyed by popup ID
+	 *
+	 * @returns {Object}
+	 */
+	_getPopupPositions() {
+		try {
+			let positions = JSON.parse(Zotero.Prefs.get('reader.popupPositions'));
+			return positions && typeof positions == 'object' ? positions : {};
+		}
+		catch {
+			return {};
+		}
+	}
+
+	_setPopupPosition(id, position) {
+		Zotero.Prefs.set('reader.popupPositions', JSON.stringify({
+			...this._getPopupPositions(),
+			[id]: { x: Math.round(position.x), y: Math.round(position.y) },
+		}));
+	}
+
 	_getReadAloudVoices() {
 		try {
 			return JSON.parse(Zotero.Prefs.get('reader.readAloudVoices'));
@@ -1669,19 +1756,35 @@ class ReaderInstance {
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 					let result = await client.getReadAloudVoices();
 					resolve(Cu.cloneInto(result, targetWindow));
+					// Prune cache entries with outdated versions once per session,
+					// after the voices (and their current cache versions) are known
+					if (!readAloudCachePruned && result.voices) {
+						this._pruneReadAloudCache(audioCache, result.voices);
+					}
 				});
 			},
 
 			getAudio: (segment, voice) => {
 				return new targetWindow.Promise(async (resolve) => {
-					let cacheURL = 'https://read-aloud.zotero.invalid/audio?'
-						+ new URLSearchParams({ voice: voice.id, text: segment.text });
+					let cacheURL = this._getReadAloudCacheURL(segment, voice);
 					let cache;
 					try {
 						cache = await audioCache;
 						let cached = await cache.match(cacheURL);
 						if (cached) {
-							resolve(Cu.cloneInto({ audio: await cached.blob() }, targetWindow));
+							// Word-level timestamps are cached in a response header
+							// alongside the audio (see below)
+							let timestamps;
+							let timestampsHeader = cached.headers.get('X-Zotero-Timestamps');
+							if (timestampsHeader) {
+								try {
+									timestamps = JSON.parse(timestampsHeader);
+								}
+								catch (e) {
+									Zotero.logError(e);
+								}
+							}
+							resolve(Cu.cloneInto({ audio: await cached.blob(), timestamps }, targetWindow));
 							return;
 						}
 					}
@@ -1691,9 +1794,17 @@ class ReaderInstance {
 					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
 					let result = await client.getReadAloudAudio(segment, voice.id);
-					if (result.audio && cache) {
+					// Skip caching when the server forbids it (e.g., error responses
+					// returned with Cache-Control: no-store)
+					if (result.audio && cache && !result.noStore) {
 						try {
-							await cache.put(cacheURL, new Response(result.audio));
+							// Put word-level timestamps in a header so they
+							// get cached with the audio response
+							let headers = {};
+							if (result.timestamps) {
+								headers['X-Zotero-Timestamps'] = JSON.stringify(result.timestamps);
+							}
+							await cache.put(cacheURL, new Response(result.audio, { headers }));
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -1719,6 +1830,45 @@ class ReaderInstance {
 				});
 			},
 		};
+	}
+
+	// Build the local cache key for a Read Aloud audio segment. The voice's
+	// cacheVersion is included so that a server-side version bump changes the
+	// key, causing old entries to miss and the correct audio to be re-fetched.
+	_getReadAloudCacheURL(segment, voice) {
+		let params = { voice: voice.id, text: segment.text, cacheVersion: voice.cacheVersion, timestamps: 1 };
+		return 'https://read-aloud.zotero.invalid/audio?' + new URLSearchParams(params);
+	}
+
+	// Delete cached audio whose cacheVersion is no longer offered by the server,
+	// reclaiming space that key mismatches alone would leave behind. Runs once
+	// per session.
+	async _pruneReadAloudCache(audioCache, voices) {
+		readAloudCachePruned = true;
+		try {
+			let validVersions = new Set();
+			for (let configs of Object.values(voices)) {
+				if (!Array.isArray(configs)) continue;
+				for (let config of configs) {
+					validVersions.add(String(config.cacheVersion));
+				}
+			}
+			if (!validVersions.size) {
+				return;
+			}
+			let cache = await audioCache;
+			for (let request of await cache.keys()) {
+				let params = new URL(request.url).searchParams;
+				// Drop entries stored in the pre-timestamp format, plus those
+				// whose cacheVersion is no longer offered by the server
+				if (params.get('timestamps') !== '1' || !validVersions.has(params.get('cacheVersion'))) {
+					await cache.delete(request);
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 
 	async _showReadAloudGuidance() {
@@ -1805,6 +1955,8 @@ class ReaderTab extends ReaderInstance {
 		this._contextPaneOpen = options.contextPaneOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showContextPaneToggle = true;
+		this._readAloudPlaying = false;
+		this._pointerDownWindow = null;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
@@ -1812,6 +1964,12 @@ class ReaderTab extends ReaderInstance {
 		// Otherwise, create a new tab
 		if (existingTabID) {
 			this.tabID = existingTabID;
+			let { tab } = this._window.Zotero_Tabs._getTab(existingTabID);
+			let onClose = tab.onClose;
+			tab.onClose = () => {
+				onClose?.call(tab);
+				this._handleTabClose();
+			};
 			this._tabContainer = this._window.document.getElementById(existingTabID);
 		}
 		else {
@@ -1823,6 +1981,7 @@ class ReaderTab extends ReaderInstance {
 				data: {
 					itemID: this._item.id
 				},
+				onClose: this._handleTabClose,
 				select,
 				preventJumpback: options.preventJumpback
 			});
@@ -1838,6 +1997,10 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
+		// Derive the initial docShell activity here, because tabs opened in
+		// the background, unlike deselected tabs, don't go through a tab
+		// 'select' notification
+		this._updateDocShellActivity();
 		
 		this._popupset = this._window.document.createXULElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
@@ -1888,6 +2051,14 @@ class ReaderTab extends ReaderInstance {
 			}
 		});
 	}
+
+	_handleTabClose = () => {
+		this._isTabClosed = true;
+		if (this._blockingObserver) {
+			this._blockingObserver.dispose();
+			this._blockingObserver = null;
+		}
+	};
 
 	uninit() {
 		if (this._window) {
@@ -1981,16 +2152,26 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 
+	// Keep the docShell active only while the tab has to stay responsive:
+	// when it's selected or playing Read Aloud. An inactive docShell throttles
+	// rAF and timers, and lets the reader see document.visibilityState
+	// 'hidden' and release rendered pages
+	_updateDocShellActivity() {
+		this._iframe.docShellIsActive = this._window.Zotero_Tabs.selectedID == this.tabID
+			|| this._readAloudPlaying;
+	}
+
 	_setReadAloudStatus(status) {
+		this._readAloudPlaying = status.active && !status.paused;
+		// Wake up the docShell even if this tab is in the background,
+		// so event-loop tasks run immediately. Without this, playing
+		// sometimes doesn't take effect immediately.
+		this._updateDocShellActivity();
 		if (status.active) {
 			this._hideReadAloudGuidance();
 		}
-		if (status.active && !status.paused) {
-			// Wake up the docShell even if this tab is in the background,
-			// so event-loop tasks run immediately. Without this, playing
-			// sometimes doesn't take effect immediately.
-			this._iframe.docShellIsActive = true;
-
+		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
+		if (this._readAloudPlaying) {
 			// If this tab was unpaused, pause all others
 			for (let reader of Zotero.Reader._readers) {
 				if (reader === this) continue;
@@ -2006,7 +2187,6 @@ class ReaderTab extends ReaderInstance {
 				}
 			}
 		}
-		this._window.Zotero_Tabs.setAudioStatus(this.tabID, status);
 	}
 	
 	toggleReadAloudPaused(paused = undefined) {
@@ -2100,8 +2280,8 @@ class ReaderWindow extends ReaderInstance {
 			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 			let annotations = item.getAnnotations();
 			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
-			transferFromPDFMenuitem.setAttribute('disabled', !canTransferFromPDF);
-			importFromEPUBMenuitem.setAttribute('disabled', false);
+			transferFromPDFMenuitem.toggleAttribute('disabled', !canTransferFromPDF);
+			importFromEPUBMenuitem.removeAttribute('disabled');
 		}
 		else {
 			transferFromPDFMenuitem.setAttribute('disabled', true);
@@ -2125,25 +2305,25 @@ class ReaderWindow extends ReaderInstance {
 			return;
 		}
 		if (this._type === 'pdf' || this._type === 'epub') {
-			this._window.document.getElementById('view-menuitem-no-spreads').setAttribute('checked', this._internalReader.spreadMode === 0);
-			this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this._internalReader.spreadMode === 1);
-			this._window.document.getElementById('view-menuitem-even-spreads').setAttribute('checked', this._internalReader.spreadMode === 2);
+			this._window.document.getElementById('view-menuitem-no-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 0);
+			this._window.document.getElementById('view-menuitem-odd-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 1);
+			this._window.document.getElementById('view-menuitem-even-spreads').toggleAttribute('checked', this._internalReader.spreadMode === 2);
 		}
 		if (this._type === 'pdf') {
-			this._window.document.getElementById('view-menuitem-vertical-scrolling').setAttribute('checked', this._internalReader.scrollMode === 0);
-			this._window.document.getElementById('view-menuitem-horizontal-scrolling').setAttribute('checked', this._internalReader.scrollMode === 1);
-			this._window.document.getElementById('view-menuitem-wrapped-scrolling').setAttribute('checked', this._internalReader.scrollMode === 2);
-			this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this._internalReader.toolType === 'hand');
-			this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this._internalReader.zoomAutoEnabled);
-			this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this._internalReader.zoomPageWidthEnabled);
-			this._window.document.getElementById('view-menuitem-zoom-page-height').setAttribute('checked', this._internalReader.zoomPageHeightEnabled);
+			this._window.document.getElementById('view-menuitem-vertical-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 0);
+			this._window.document.getElementById('view-menuitem-horizontal-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 1);
+			this._window.document.getElementById('view-menuitem-wrapped-scrolling').toggleAttribute('checked', this._internalReader.scrollMode === 2);
+			this._window.document.getElementById('view-menuitem-hand-tool').toggleAttribute('checked', this._internalReader.toolType === 'hand');
+			this._window.document.getElementById('view-menuitem-zoom-auto').toggleAttribute('checked', this._internalReader.zoomAutoEnabled);
+			this._window.document.getElementById('view-menuitem-zoom-page-width').toggleAttribute('checked', this._internalReader.zoomPageWidthEnabled);
+			this._window.document.getElementById('view-menuitem-zoom-page-height').toggleAttribute('checked', this._internalReader.zoomPageHeightEnabled);
 		}
 		else if (this._type === 'epub') {
-			this._window.document.getElementById('view-menuitem-scrolled').setAttribute('checked', this._internalReader.flowMode === 'scrolled');
-			this._window.document.getElementById('view-menuitem-paginated').setAttribute('checked', this._internalReader.flowMode === 'paginated');
+			this._window.document.getElementById('view-menuitem-scrolled').toggleAttribute('checked', this._internalReader.flowMode === 'scrolled');
+			this._window.document.getElementById('view-menuitem-paginated').toggleAttribute('checked', this._internalReader.flowMode === 'paginated');
 		}
-		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this._internalReader.splitType === 'vertical');
-		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this._internalReader.splitType === 'horizontal');
+		this._window.document.getElementById('view-menuitem-split-vertically').toggleAttribute('checked', this._internalReader.splitType === 'vertical');
+		this._window.document.getElementById('view-menuitem-split-horizontally').toggleAttribute('checked', this._internalReader.splitType === 'horizontal');
 
 		this.onUpdateCustomMenus(event, 'view', popup);
 	}
@@ -2174,11 +2354,11 @@ class ReaderWindow extends ReaderInstance {
 		menuItemForward.setAttribute('key', 'key_forward');
 
 		if (['pdf', 'epub'].includes(this._type)) {
-			this._window.document.getElementById('go-menuitem-first-page').setAttribute('disabled', !this._internalReader.canNavigateToFirstPage);
-			this._window.document.getElementById('go-menuitem-last-page').setAttribute('disabled', !this._internalReader.canNavigateToLastPage);
+			this._window.document.getElementById('go-menuitem-first-page').toggleAttribute('disabled', !this._internalReader.canNavigateToFirstPage);
+			this._window.document.getElementById('go-menuitem-last-page').toggleAttribute('disabled', !this._internalReader.canNavigateToLastPage);
 		}
-		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this._internalReader.canNavigateBack);
-		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this._internalReader.canNavigateForward);
+		this._window.document.getElementById('go-menuitem-back').toggleAttribute('disabled', !this._internalReader.canNavigateBack);
+		this._window.document.getElementById('go-menuitem-forward').toggleAttribute('disabled', !this._internalReader.canNavigateForward);
 
 		this.onUpdateCustomMenus(event, 'go', popup);
 	}
@@ -2630,14 +2810,13 @@ class Reader {
 			}
 			else if (event === 'select') {
 				for (let reader of this._readers) {
-					if (reader instanceof ReaderTab && reader._window.Zotero_Tabs.canUnload(reader.tabID)) {
-						reader._iframe.docShellIsActive = false;
+					if (reader instanceof ReaderTab) {
+						reader._updateDocShellActivity();
 					}
 				}
 
 				let reader = Zotero.Reader.getByTabID(ids[0]);
 				if (reader) {
-					reader._iframe.docShellIsActive = true;
 					this.triggerAnnotationsImportCheck(reader.itemID);
 				}
 			}
@@ -2742,7 +2921,9 @@ class Reader {
 		let reader;
 		// If duplicating is not allowed, and no reader instance is loaded for itemID,
 		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
-		if (!allowDuplicate && !this._readers.find(r => r.itemID === itemID)) {
+		if (!allowDuplicate && !this._readers.find(
+			r => r.itemID === itemID && (openInWindow || !r._isTabClosed)
+		)) {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
@@ -2756,7 +2937,7 @@ class Reader {
 			reader = this._readers.find(r => r.itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else if (!allowDuplicate) {
-			reader = this._readers.find(r => r.itemID === itemID);
+			reader = this._readers.find(r => r.itemID === itemID && !r._isTabClosed);
 		}
 
 		if (reader) {

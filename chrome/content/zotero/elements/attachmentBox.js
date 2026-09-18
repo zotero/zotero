@@ -593,7 +593,7 @@
 				}
 				
 				if (show) {
-					reindexButton.setAttribute('hidden', false);
+					reindexButton.removeAttribute('hidden');
 				}
 				else {
 					reindexButton.setAttribute('hidden', true);
@@ -765,7 +765,13 @@
 
 		_handleTitleBlur = () => {
 			this.item.setField('title', this._id('title').value);
-			this.item.saveTx();
+			this.item.saveTx({
+				undoAction: 'undo-action-edit-field',
+				undoActionArgs: {
+					field: Zotero.ItemFields.getLocalizedString('title'),
+					count: 1
+				}
+			});
 		};
 
 		_handleFileNameFocus = () => {

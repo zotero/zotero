@@ -440,35 +440,31 @@ Zotero.DataObjectUtilities = {
 		return changeset;
 	},
 	
-	_conditionsDiff: function (data1, data2 = {}) {
-		var changeset = [];
-		outer:
-		for (let i = 0; i < data1.length; i++) {
-			for (let j = 0; j < data2.length; j++) {
-				if (Zotero.SearchConditions.equals(data1[i], data2[j])) {
-					continue outer;
-				}
+	/**
+	 * Conditions are an ordered list -- with condition groups, the position of conditions and
+	 * the pairing of group markers (groupStart/groupEnd) are load-bearing -- so diff them as a
+	 * single unit, like creators, rather than as an unordered member set. A member-style diff
+	 * during a sync merge could reorder conditions or add/drop indistinguishable group markers,
+	 * corrupting the structure.
+	 */
+	_conditionsDiff: function (data1, data2 = []) {
+		if (!data2 || !data2.length) {
+			if (!data1 || !data1.length) {
+				return [];
 			}
-			changeset.push({
+			return [{
 				field: "conditions",
-				op: "member-remove",
-				value: data1[i]
-			});
+				op: "delete"
+			}];
 		}
-		outer:
-		for (let i = 0; i < data2.length; i++) {
-			for (let j = 0; j < data1.length; j++) {
-				if (Zotero.SearchConditions.equals(data2[i], data1[j])) {
-					continue outer;
-				}
-			}
-			changeset.push({
+		if (this._conditionsChanged(data1, data2)) {
+			return [{
 				field: "conditions",
-				op: "member-add",
-				value: data2[i]
-			});
+				op: "modify",
+				value: data2
+			}];
 		}
-		return changeset;
+		return [];
 	},
 	
 	_htmlDiff: function (field, html1, html2 = "") {
@@ -624,12 +620,10 @@ Zotero.DataObjectUtilities = {
 						throw new Error("Unimplemented");
 						break;
 					
-					case 'conditions':
 					case 'tags':
 						let found = false;
-						let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
 						for (let i = 0; i < json[c.field].length; i++) {
-							if (f.equals(json[c.field][i], c.value)) {
+							if (Zotero.Tags.equals(json[c.field][i], c.value)) {
 								found = true;
 								break;
 							}
@@ -657,11 +651,9 @@ Zotero.DataObjectUtilities = {
 						throw new Error("Unimplemented");
 						break;
 					
-					case 'conditions':
 					case 'tags':
-						let f = c.field == 'conditions' ? Zotero.SearchConditions : Zotero.Tags;
 						for (let i = 0; i < json[c.field].length; i++) {
-							if (f.equals(json[c.field][i], c.value)) {
+							if (Zotero.Tags.equals(json[c.field][i], c.value)) {
 								json[c.field].splice(i, 1);
 								break;
 							}

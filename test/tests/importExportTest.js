@@ -69,6 +69,67 @@ describe("Import/Export", function () {
 			);
 		});
 		
+		it("should reproduce the collection hierarchy of a collection export", async function () {
+			var collection = await createDataObject('collection', { name: 'Top' });
+			var subcollection = await createDataObject(
+				'collection', { name: 'Sub', parentID: collection.id }
+			);
+			var subsubcollection = await createDataObject(
+				'collection', { name: 'Subsub', parentID: subcollection.id }
+			);
+			var topItem = await createDataObject(
+				'item', { title: 'Top', collections: [collection.id] }
+			);
+			var topAndSubItem = await createDataObject(
+				'item', { title: 'TopAndSub', collections: [collection.id, subcollection.id] }
+			);
+			var subsubItem = await createDataObject(
+				'item', { title: 'Subsub', collections: [subsubcollection.id] }
+			);
+			
+			// Export the collection
+			var file = OS.Path.join(await getTempDirectory(), 'export.rdf');
+			var translation = new Zotero.Translate.Export();
+			translation.setCollection(collection);
+			translation.setLocation(Zotero.File.pathToFile(file));
+			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9');
+			await translation.translate();
+			
+			// Import it into another collection
+			var targetCollection = await createDataObject('collection');
+			translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(file));
+			translation.setTranslator((await translation.getTranslators())[0]);
+			await translation.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: [targetCollection.id]
+			});
+			
+			var titles = c => c.getChildItems().map(i => i.getField('title')).sort();
+			
+			// Items belong to the imported collections, not to the collection they were
+			// imported into
+			assert.lengthOf(titles(targetCollection), 0);
+			
+			var newCollections = targetCollection.getChildCollections();
+			assert.lengthOf(newCollections, 1);
+			assert.equal(newCollections[0].name, collection.name);
+			assert.sameMembers(
+				titles(newCollections[0]),
+				[topItem.getField('title'), topAndSubItem.getField('title')]
+			);
+			
+			newCollections = newCollections[0].getChildCollections();
+			assert.lengthOf(newCollections, 1);
+			assert.equal(newCollections[0].name, subcollection.name);
+			assert.sameMembers(titles(newCollections[0]), [topAndSubItem.getField('title')]);
+			
+			newCollections = newCollections[0].getChildCollections();
+			assert.lengthOf(newCollections, 1);
+			assert.equal(newCollections[0].name, subsubcollection.name);
+			assert.sameMembers(titles(newCollections[0]), [subsubItem.getField('title')]);
+		});
+		
 		// Not currently supported
 		it.skip("should import related items", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;

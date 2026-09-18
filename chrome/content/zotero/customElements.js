@@ -33,6 +33,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 {
 	// https://searchfox.org/mozilla-central/rev/8e885f04a0a4ff6d64ea59741c10d9b8e45d9ff8/toolkit/content/customElements.js#826-832
 	for (let [tag, script] of [
+		['advanced-search-deck', 'chrome://zotero/content/elements/advancedSearchDeck.js'],
+		['advanced-search-pane', 'chrome://zotero/content/elements/advancedSearchPane.js'],
 		['attachment-box', 'chrome://zotero/content/elements/attachmentBox.js'],
 		['attachment-preview', 'chrome://zotero/content/elements/attachmentPreview.js'],
 		['attachment-preview-box', 'chrome://zotero/content/elements/attachmentPreviewBox.js'],
@@ -49,8 +51,10 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['note-box', 'chrome://zotero/content/elements/noteBox.js'],
 		['note-editor', 'chrome://zotero/content/elements/noteEditor.js'],
 		['notes-box', 'chrome://zotero/content/elements/notesBox.js'],
+		['query-textbox', 'chrome://zotero/content/elements/queryTextbox.js'],
 		['quick-search-textbox', 'chrome://zotero/content/elements/quickSearchTextbox.js'],
 		['related-box', 'chrome://zotero/content/elements/relatedBox.js'],
+		['search-textbox', 'chrome://zotero/content/elements/searchTextbox.js'],
 		['shadow-autocomplete-input', 'chrome://zotero/content/elements/shadowAutocompleteInput.js'],
 		['split-menu-button', 'chrome://zotero/content/elements/splitMenuButton.js'],
 		['tabs-menu-panel', 'chrome://zotero/content/elements/tabsMenuPanel.js'],
@@ -344,6 +348,8 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		if (target.tagName !== "menulist") return;
 		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 		if (event.key !== " ") return;
+		// A find-as-you-type search in progress is typing a name with a space in it
+		if (Zotero.Utilities.Internal.isMenuFindAsYouTypeActive(target)) return;
 
 		if (target.open) {
 			// Simulate blinking of the selected menuitem on macOS (same as on Return keypress)
@@ -438,7 +444,6 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 			}
 		],
 		mac: [
-			"wizard",
 			{
 				element: "dialog",
 				// The `attachShadow` are cleared in <dialog>, we need to monkey-patch after `connectedCallback`.

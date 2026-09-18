@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "ازالة العنصر...">
 <!ENTITY zotero.toolbar.newGroup "مجموعة مشاركة جديدة...">
 <!ENTITY zotero.toolbar.newSubcollection.label "مجموعة عناصر فرعية جديدة...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "بحث محفوظ جديد...">
 <!ENTITY zotero.toolbar.emptyTrash.label "افراغ سلة المحذوفات">
 <!ENTITY zotero.toolbar.tagSelector.label "عرض/اخفاء محدد الأوسمة">
 <!ENTITY zotero.toolbar.actions.label "عمليات">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "التفضيلات...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "الدعم و الوثائق">
 <!ENTITY zotero.toolbar.about.label "حول زوتيرو">
-<!ENTITY zotero.toolbar.advancedSearch "البحث المتقدم">
 <!ENTITY zotero.toolbar.openURL.label "تحديد موقع العنصر">
 <!ENTITY zotero.toolbar.openURL.tooltip "البحث في مكتبتك المحلية">
 

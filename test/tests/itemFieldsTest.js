@@ -45,6 +45,16 @@ describe("Zotero.ItemFields", function () {
 		});
 	});
 	
+	describe("#isDate()", function () {
+		it("should treat base and mapped date-type fields as dates", function () {
+			assert.isTrue(Zotero.ItemFields.isDate('date'));
+			assert.isTrue(Zotero.ItemFields.isDate('dateDecided'));
+			assert.isTrue(Zotero.ItemFields.isDate('originalDate'));
+			assert.isTrue(Zotero.ItemFields.isDate('priorityDate'));
+			assert.isFalse(Zotero.ItemFields.isDate('title'));
+		});
+	});
+
 	describe("#getDirection()", function () {
 		it("should follow app locale for primary field", function () {
 			assert.equal(Zotero.ItemFields.getDirection('book', 'dateAdded', ''), Zotero.dir)

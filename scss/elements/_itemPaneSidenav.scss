@@ -80,7 +80,7 @@ item-pane-sidenav {
 		box-sizing: border-box;
 
 		&:disabled,
-		&[disabled="true"] {
+		&[disabled] {
 			opacity: 60%;
 			pointer-events: none;
 		}

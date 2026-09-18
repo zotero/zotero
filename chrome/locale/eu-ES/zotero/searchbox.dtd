@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Izena:">
 
-<!ENTITY zotero.search.searchInLibrary "Liburutegian bilatu:">
-
 <!ENTITY zotero.search.joinMode.prefix "Bat etortzea">
 <!ENTITY zotero.search.joinMode.any "edozein">
 <!ENTITY zotero.search.joinMode.all "guztiak">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "egun">
 <!ENTITY zotero.search.date.units.months "hilabete">
 <!ENTITY zotero.search.date.units.years "urte">
-
-<!ENTITY zotero.search.search "Bilatu">
-<!ENTITY zotero.search.clear "Garbitu">
-<!ENTITY zotero.search.saveSearch "Bilaketa gorde">

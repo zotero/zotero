@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Remover Item...">
 <!ENTITY zotero.toolbar.newGroup "Novo Grupo...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova Subcolecção...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nova Procura Guardada...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Esvaziar Lixo">
 <!ENTITY zotero.toolbar.tagSelector.label "Mostrar/Esconder Selector de Etiquetas">
 <!ENTITY zotero.toolbar.actions.label "Acções">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Preferências...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suporte e Documentação">
 <!ENTITY zotero.toolbar.about.label "Acerca do Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Procura Avançada">
 <!ENTITY zotero.toolbar.openURL.label "Localizar">
 <!ENTITY zotero.toolbar.openURL.tooltip "Encontrar através da sua biblioteca local">
 

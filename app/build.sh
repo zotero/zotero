@@ -42,7 +42,7 @@ Options
  -f FILE             ZIP file to build from (cannot be used with -d)
  -t                  add devtools
  -p PLATFORMS        build for platforms PLATFORMS (m=Mac, w=Windows, l=Linux)
- -a ARCH             architecture to build (arm64, x64, i686, win32)
+ -a ARCH             architecture to build (arm64, x64, win32)
                      * Ignored for Mac (always universal)
                      * If omitted on Windows/Linux, all standard archs are built
  -c CHANNEL          use update channel CHANNEL
@@ -58,6 +58,17 @@ function cleanup {
 	rm -rf $BUILD_DIR
 }
 trap cleanup EXIT
+
+# Copy the contents of a directory into another directory, which may already exist,
+# using rsync if it's available (not on Windows)
+function copy_dir {
+	if command -v rsync > /dev/null; then
+		rsync -a "$1/" "$2/"
+	else
+		mkdir -p "$2"
+		cp -a "$1/." "$2/"
+	fi
+}
 
 function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
@@ -210,7 +221,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
 		check_xulrunner_hash l $(get_canonical_arch l $arch)
 	else
-		for _a in x64 arm64 i686; do
+		for _a in x64 arm64; do
 			check_xulrunner_hash l "$_a"
 		done
 	fi
@@ -296,7 +307,7 @@ elif [[ $BUILD_LINUX == 1 ]]; then
 	if [[ -n $arch ]]; then
 		omni_arch=$(get_canonical_arch l $arch)
 	else
-		for cand in x86_64 arm64 i686; do
+		for cand in x86_64 arm64; do
 			[[ -d "${LINUX_RUNTIME_PATH_PREFIX}${cand}" ]] && { omni_arch="$cand"; break; }
 		done
 	fi
@@ -311,7 +322,6 @@ cd $omni_dir
 rm actors/AboutLogins{Parent,Child}.sys.mjs
 rm actors/AboutMessagePreview{Parent,Child}.sys.mjs
 rm actors/AboutNewTab{Parent,Child}.sys.mjs
-rm actors/AboutPocket{Parent,Child}.sys.mjs
 rm actors/AboutPrivateBrowsing{Parent,Child}.sys.mjs
 rm actors/AboutProtections{Parent,Child}.sys.mjs
 rm actors/AboutReader{Parent,Child}.sys.mjs
@@ -350,11 +360,10 @@ browser_keep=(
 	content/browser/parent/ext-browser.js
 	# For spellchecking
 	content/browser/built_in_addons.json
+	# Statically imported by BackupService, which SelectableProfileService pulls in when it's
+	# instantiated as a command-line handler at startup
+	content/browser/backup/backup-constants.mjs
 )
-if [ $BUILD_WIN == 1 ]; then
-	# Windows window controls
-	browser_keep+=(skin/classic/browser/window-controls)
-fi
 for file in "${browser_keep[@]}"; do
 	mkdir -p "$(dirname "chrome/browser-fx/$file")"
 	mv "chrome/browser/$file" "chrome/browser-fx/$file"
@@ -376,11 +385,18 @@ if [ -n "$ZIP_FILE" ]; then
 	echo "Building from $ZIP_FILE"
 	unzip -q $ZIP_FILE -d "$omni_dir"
 else
-	rsync_params=""
-	if [ $include_tests -eq 0 ]; then
-		rsync_params="--exclude /test"
+	if command -v rsync > /dev/null; then
+		rsync_params=""
+		if [ $include_tests -eq 0 ]; then
+			rsync_params="--exclude /test"
+		fi
+		rsync -a $rsync_params "$SOURCE_DIR/" ./
+	else
+		copy_dir "$SOURCE_DIR" .
+		if [ $include_tests -eq 0 ]; then
+			rm -rf ./test
+		fi
 	fi
-	rsync -a $rsync_params "$SOURCE_DIR/" ./
 fi
 
 mv defaults defaults-z
@@ -406,6 +422,8 @@ echo "" >> $prefs_file
 echo "# Zotero extension prefs" >> $prefs_file
 echo "" >> $prefs_file
 cat defaults-z/preferences/zotero.js >> $prefs_file
+# Babel strips the trailing newline, so anything appended below would share a line
+echo "" >> $prefs_file
 
 rm -rf defaults-z
 
@@ -574,11 +592,11 @@ fi
 
 # Copy platform-specific assets
 if [ $BUILD_MAC == 1 ]; then
-	rsync -a "$CALLDIR/assets/mac/" ./
+	copy_dir "$CALLDIR/assets/mac" .
 elif [ $BUILD_WIN == 1 ]; then
-	rsync -a "$CALLDIR/assets/win/" ./
+	copy_dir "$CALLDIR/assets/win" .
 elif [ $BUILD_LINUX == 1 ]; then
-	rsync -a "$CALLDIR/assets/unix/" ./
+	copy_dir "$CALLDIR/assets/unix" .
 fi
 
 # Add word processor plug-ins
@@ -676,8 +694,8 @@ if [ $BUILD_MAC == 1 ]; then
 	
 	# Merge relevant assets from Firefox
 	mkdir "$CONTENTSDIR/MacOS"
-	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashreporter.app|minidump-analyzer|nmhproxy|pingsender|updater.app) "$CONTENTSDIR/MacOS"
-	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
+	cp -r "$MAC_RUNTIME_PATH/Contents/MacOS/"!(firefox|firefox-bin|crashhelper|crashreporter.app|minidump-analyzer|nmhproxy|pingsender|updater.app) "$CONTENTSDIR/MacOS"
+	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|Assets.car|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
 	
 	# Add our custom ChannelPrefs.framework and change channel if not a source build
 	mkdir "$CONTENTSDIR/Frameworks"
@@ -721,7 +739,7 @@ if [ $BUILD_MAC == 1 ]; then
 	echo
 	
 	# Copy app files
-	rsync -a "$base_dir/" "$CONTENTSDIR/Resources/"
+	copy_dir "$base_dir" "$CONTENTSDIR/Resources"
 	
 	# Add word processor plug-ins
 	mkdir "$CONTENTSDIR/Resources/integration"
@@ -732,12 +750,66 @@ if [ $BUILD_MAC == 1 ]; then
 	find "$CONTENTSDIR" -depth -type d -name .git -exec rm -rf {} \;
 	find "$CONTENTSDIR" \( -name .DS_Store -or -name update.rdf \) -exec rm -f {} \;
 	
-	# Add Safari App Extension -- this depends on signing but needs to be done before generating
+	# Add Safari extensions -- this depends on signing but needs to be done before generating
 	# the precomplete file
+	#
+	# $SAFARI_APPEX is a stub appex built from the safari-web-extension wrapper project. The web
+	# extension itself comes from $SAFARI_EXT_RESOURCES (a zotero-connectors build/safari
+	# directory), which replaces the stub's placeholder resources here before signing.
+	#
+	# $SAFARI_APP_EXTENSION is an optional prebuilt legacy Safari App Extension, embedded
+	# alongside the web extension for Safari versions that can't load Developer ID web
+	# extensions (supported in Safari 18.4 and later). On Safari versions that can load the
+	# web extension, the SFSafariAppExtensionBundleIdentifiersToReplace key causes it to
+	# replace the App Extension.
 	if [[ $SIGN == 1 ]] && [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		if [[ -z "${SAFARI_EXT_RESOURCES:-}" ]] || [[ ! -f "$SAFARI_EXT_RESOURCES/manifest.json" ]]; then
+			echo "SAFARI_EXT_RESOURCES doesn't contain a web extension -- aborting" 2>&1
+			exit 1
+		fi
+		bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
 		mkdir "$APPDIR/Contents/PlugIns"
-		cp -R $SAFARI_APPEX "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		rm -rf "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Resources/safari/test/"
+		
+		webext_appex="$APPDIR/Contents/PlugIns/ZoteroSafariWebExtension.appex"
+		cp -R "$SAFARI_APPEX" "$webext_appex"
+		appex_resources="$webext_appex/Contents/Resources"
+		rm -rf "$appex_resources"
+		mkdir "$appex_resources"
+		cp -R "$SAFARI_EXT_RESOURCES/." "$appex_resources/"
+		
+		# Show the connector version in Safari
+		connector_version=$(python3 -c "import json, sys; print(json.load(open(sys.argv[1]))['version'])" "$appex_resources/manifest.json")
+		if [[ $connector_version == *999* ]] && [ "$UPDATE_CHANNEL" != "test" ]; then
+			echo "Placeholder connector version $connector_version not allowed for '$UPDATE_CHANNEL' channel -- aborting" 2>&1
+			exit 1
+		fi
+		/usr/libexec/PlistBuddy -c "Set CFBundleShortVersionString $connector_version" \
+			"$webext_appex/Contents/Info.plist"
+		/usr/libexec/PlistBuddy -c "Set CFBundleVersion $connector_version" \
+			"$webext_appex/Contents/Info.plist"
+		
+		# Give the appex the same bundle identifier prefix as the parent app
+		/usr/libexec/PlistBuddy -c "Set CFBundleIdentifier $bundle_identifier.SafariWebExtension" \
+			"$webext_appex/Contents/Info.plist"
+		
+		# Replace the legacy App Extension on Safari versions that can load the web extension
+		/usr/libexec/PlistBuddy -c "Add :NSExtension:SFSafariAppExtensionBundleIdentifiersToReplace array" \
+			"$webext_appex/Contents/Info.plist"
+		/usr/libexec/PlistBuddy -c "Add :NSExtension:SFSafariAppExtensionBundleIdentifiersToReplace:0 string $bundle_identifier.SafariExtension" \
+			"$webext_appex/Contents/Info.plist"
+		
+		# Add legacy Safari App Extension
+		if [[ -n "${SAFARI_APP_EXTENSION:-}" ]]; then
+			if [[ ! -d "$SAFARI_APP_EXTENSION" ]]; then
+				echo "SAFARI_APP_EXTENSION not found at $SAFARI_APP_EXTENSION -- aborting" 2>&1
+				exit 1
+			fi
+			appext_appex="$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
+			cp -R "$SAFARI_APP_EXTENSION" "$appext_appex"
+			rm -rf "$appext_appex/Contents/Resources/safari/test"
+			/usr/libexec/PlistBuddy -c "Set CFBundleIdentifier $bundle_identifier.SafariExtension" \
+				"$appext_appex/Contents/Info.plist"
+		fi
 	fi
 	
 	# Copy over removed-files and make a precomplete file
@@ -773,34 +845,36 @@ if [ $BUILD_MAC == 1 ]; then
 		
 		# Sign .jnilib (Java native shared library) within LibreOffice extension, since notarization
 		# started failing without this. The .jnilib is within a .jar within the .oxt, so we have to
-		# extract both, sign the library, and then update each ZIP.
+		# extract both, sign the libraries, and then update each ZIP.
+		#
+		# TODO: Remove this block once the plugin ships a jna.jar without the macOS native
+		# libraries, which are never loaded (JNA is used only on Windows)
 		pushd "$BUILD_DIR"
 		mkdir libreoffice-repack
 		cd libreoffice-repack
 		unzip -q "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
-		unzip -q external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
-		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" com/sun/jna/darwin/libjnidispatch.jnilib
-		zip -u external_jars/jna.jar com/sun/jna/darwin/libjnidispatch.jnilib
+		unzip -q external_jars/jna.jar 'com/sun/jna/darwin*/libjnidispatch.jnilib'
+		/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" com/sun/jna/darwin*/libjnidispatch.jnilib
+		zip -u external_jars/jna.jar com/sun/jna/darwin*/libjnidispatch.jnilib
 		zip -u "$APPDIR/Contents/Resources/integration/libreoffice/Zotero_LibreOffice_Integration.oxt" external_jars/jna.jar
 		cd ..
 		rm -rf libreoffice-repack
 		popd
 		
-		# Sign Safari App Extension
+		# Sign Safari extensions
 		#
-		# Even though it's signed by Xcode, we sign it again to make sure it matches the parent app signature
-		if [ -d "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex" ]; then
+		# Even though they're signed by Xcode, we sign them again to make sure they match the parent app signature
+		for appex in "$APPDIR"/Contents/PlugIns/*.appex; do
+			if [ ! -d "$appex" ]; then
+				continue
+			fi
 			echo
 			# Extract entitlements, which differ from parent app
-			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$SAFARI_APPEX"
+			/usr/bin/codesign -d --entitlements "$BUILD_DIR/safari-entitlements.plist" --xml "$appex"
 			
-			# Change appex bundle identifier to have same prefix as parent app
-			bundle_identifier=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$APPDIR/Contents/Info.plist")
-			perl -pi -e "s/org\.zotero\.SafariExtensionApp\.SafariExtension/$bundle_identifier.SafariExtension/" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents/Info.plist"
-
-			find "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
-			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		fi
+			find "$appex/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
+			/usr/bin/codesign --force --options runtime --entitlements "$BUILD_DIR/safari-entitlements.plist" --sign "$DEVELOPER_ID" "$appex"
+		done
 		
 		# Sign final app package
 		echo
@@ -808,11 +882,14 @@ if [ $BUILD_MAC == 1 ]; then
 		
 		# Verify app
 		/usr/bin/codesign --verify -vvvv "$APPDIR"
-		# Verify Safari App Extension
-		if [[ -n "$SAFARI_APPEX" ]] && [[ -d "$SAFARI_APPEX" ]]; then
+		# Verify Safari extensions
+		for appex in "$APPDIR"/Contents/PlugIns/*.appex; do
+			if [ ! -d "$appex" ]; then
+				continue
+			fi
 			echo
-			/usr/bin/codesign --verify -vvvv "$APPDIR/Contents/PlugIns/ZoteroSafariExtension.appex"
-		fi
+			/usr/bin/codesign --verify -vvvv "$appex"
+		done
 	fi
 	
 	# Build and notarize disk image
@@ -885,7 +962,7 @@ if [ $BUILD_WIN == 1 ]; then
 		#
 		# 'i686' is a huge directory containing x86 versions of xul.dll and other files in
 		# Firefox ARM64 builds for use with the EME DRM plugins
-		cp -R "$runtime_path"/!(application.ini|browser|crashreporter*|default-browser-agent.exe|defaultagent*|defaults|devtools-files|firefox*|i686|maintenanceservice*|minidump-analyzer.exe|pingsender.exe|private_browsing*|precomplete|removed-files|uninstall|update*) "$APPDIR"
+		cp -R "$runtime_path"/!(application.ini|browser|crashhelper.exe|crashreporter*|default-browser-agent.exe|defaultagent*|defaults|desktop-launcher|devtools-files|firefox*|i686|maintenanceservice*|minidump-analyzer.exe|nmhproxy.exe|pingsender.exe|private_browsing*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
@@ -910,11 +987,11 @@ if [ $BUILD_WIN == 1 ]; then
 		fi
 		
 		# Copy app files
-		rsync -a "$base_dir/" "$APPDIR/"
+		copy_dir "$base_dir" "$APPDIR"
 		#mv "$APPDIR/app/application.ini" "$APPDIR/"
 		
 		# Copy in common files
-		rsync -a "$COMMON_APPDIR/" "$APPDIR/"
+		copy_dir "$COMMON_APPDIR" "$APPDIR"
 		
 		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
@@ -1056,7 +1133,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
 		archs=("$(get_canonical_arch l $arch)")
 	else
-		archs=(x64 arm64 i686)
+		archs=(x64 arm64)
 	fi
 	for arch in "${archs[@]}"; do
 		[[ $arch == x64 ]] && arch="x86_64"
@@ -1070,7 +1147,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		mkdir "$APPDIR"
 		
 		# Merge relevant assets from Firefox
-		cp -r "$runtime_path/"!(application.ini|browser|defaults|devtools-files|crashreporter|crashreporter.ini|firefox|pingsender|precomplete|removed-files|run-mozilla.sh|update-settings.ini|updater|updater.ini) "$APPDIR"
+		cp -r "$runtime_path/"!(application.ini|browser|crashhelper|crashreporter|crashreporter.ini|defaults|devtools-files|firefox|pingsender|precomplete|removed-files|run-mozilla.sh|update-settings.ini|updater|updater.ini) "$APPDIR"
 		
 		# Use our own launcher that calls the original Firefox executable with -app
 		mv "$APPDIR"/firefox-bin "$APPDIR"/zotero-bin
@@ -1086,7 +1163,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		chmod 755 "$APPDIR/updater"
 
 		# Copy app files
-		rsync -a "$base_dir/" "$APPDIR/"
+		copy_dir "$base_dir" "$APPDIR"
 		
 		# Add word processor plug-ins
 		mkdir "$APPDIR/integration"

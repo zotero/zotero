@@ -30,6 +30,9 @@
  * @param {Object} options
  *         <li>libraryID - ID of library in which items should be saved</li>
  *         <li>collections - New collections to create (used during Import translation</li>
+ *         <li>autoCreatedCollectionID - ID of a collection in 'collections' that was created to
+ *             hold this import, and so can be used for the imported data's own top-level
+ *             collection instead of being made its parent</li>
  *         <li>attachmentMode - One of Zotero.Translate.ItemSaver.ATTACHMENT_* specifying how attachments should be saved</li>
  *         <li>linkFiles - Save attachments as linked files instead of stored files</li>
  *         <li>forceTagType - Force tags to specified tag type</li>
@@ -49,6 +52,7 @@ Zotero.Translate.ItemSaver = function (options) {
 	}
 	
 	this._collections = options.collections || false;
+	this._autoCreatedCollectionID = options.autoCreatedCollectionID || false;
 	
 	// If group filesEditable==false, don't save attachments
 	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
@@ -301,6 +305,25 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 
 	/**
+	 * Expand a resolver list into URL objects, running any function resolvers
+	 *
+	 * @param {(Object|Function)[]} resolvers - See downloadFirstAvailableFile()
+	 * @return {Promise<Object[]>}
+	 */
+	async _getURLObjectsFromResolvers(resolvers) {
+		let urlObjects = [];
+		for (let resolver of resolvers) {
+			if (typeof resolver == 'function') {
+				urlObjects.push(...await resolver());
+			}
+			else {
+				urlObjects.push(resolver);
+			}
+		}
+		return urlObjects;
+	},
+
+	/**
 	 * Gets a list of OA PDF URLs for items that did not receive a PDF attachment
 	 * from the translator
 	 *
@@ -326,7 +349,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (!resolvers.length) {
 				return urlObjects;
 			}
-			urlObjects = await resolvers[0]();
+			urlObjects = await this._getURLObjectsFromResolvers(resolvers);
 			// If there are possible URLs, create a status line for the PDF
 			if (urlObjects.length) {
 				let title = Zotero.getString('findPDF.openAccessPDF');
@@ -384,9 +407,14 @@ Zotero.Translate.ItemSaver.prototype = {
 			// Translated attachment failed, so we didn't check for OA PDFs yet and didn't
 			// update the status line
 			// Look for OA PDFs now
-			resolvers = Zotero.Attachments.getPDFResolvers(item, ['oa']);
-			if (resolvers.length) {
-				resolvers = await resolvers[0]();
+			try {
+				resolvers = await this._getURLObjectsFromResolvers(
+					Zotero.Attachments.getPDFResolvers(item, ['oa'])
+				);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				resolvers = [];
 			}
 
 			// Add custom resolvers
@@ -450,6 +478,42 @@ Zotero.Translate.ItemSaver.prototype = {
 	},
 	
 	
+	/**
+	 * Determine whether the collection created to hold an import can be used for the imported
+	 * data's own top-level collection, instead of being made its parent
+	 *
+	 * @param {Object[]} collections - Top-level collections from the translator
+	 * @param {Integer|null} rootCollectionID
+	 * @return {Integer|null} - The collection to use, or null to nest within it as usual
+	 */
+	_getCollectionToReuse: function (collections, rootCollectionID) {
+		if (!this._autoCreatedCollectionID || this._autoCreatedCollectionID != rootCollectionID
+				|| collections.length != 1) {
+			return null;
+		}
+		
+		// Items are added to the collection as they're saved, so it can only stand in for the
+		// imported collection if everything in it belongs somewhere in that collection
+		var itemIDs = new Set();
+		var collectionsToProcess = [collections[0]];
+		while (collectionsToProcess.length) {
+			for (let child of collectionsToProcess.shift().children) {
+				if (child.type === "collection") {
+					collectionsToProcess.push(child);
+				}
+				else if (this._IDMap[child.id]) {
+					itemIDs.add(this._IDMap[child.id]);
+				}
+			}
+		}
+		
+		var collection = Zotero.Collections.get(rootCollectionID);
+		return collection.getChildItems(true).every(itemID => itemIDs.has(itemID))
+			? rootCollectionID
+			: null;
+	},
+	
+	
 	"saveCollections": async function (collections) {
 		var collectionsToProcess = collections.slice();
 		// Use first collection passed to translate process as the root
@@ -457,21 +521,28 @@ Zotero.Translate.ItemSaver.prototype = {
 			? this._collections[0] : null;
 		var parentIDs = collections.map(c => null);
 		var topLevelCollections = [];
+		var itemsInCollections = new Set();
+		var reusedCollectionID = this._getCollectionToReuse(collections, rootCollectionID);
+		var reusedCollectionItems = new Set();
 
 		await Zotero.DB.executeTransaction(async function () {
 			while(collectionsToProcess.length) {
 				var collection = collectionsToProcess.shift();
 				var parentID = parentIDs.shift();
 
-				var newCollection = new Zotero.Collection;
-				newCollection.libraryID = this._libraryID;
-				newCollection.name = collection.name;
-				if (parentID) {
-					newCollection.parentID = parentID;
+				var newCollection;
+				if (!parentID && reusedCollectionID) {
+					newCollection = Zotero.Collections.get(reusedCollectionID);
+					newCollection.name = collection.name;
 				}
 				else {
-					newCollection.parentID = rootCollectionID;
-					topLevelCollections.push(newCollection)
+					newCollection = new Zotero.Collection;
+					newCollection.libraryID = this._libraryID;
+					newCollection.name = collection.name;
+					newCollection.parentID = parentID ? parentID : rootCollectionID;
+				}
+				if (!parentID) {
+					topLevelCollections.push(newCollection);
 				}
 				await newCollection.save(this._saveOptions);
 
@@ -496,6 +567,23 @@ Zotero.Translate.ItemSaver.prototype = {
 				if(toAdd.length) {
 					Zotero.debug("Translate: Adding " + toAdd, 5);
 					await newCollection.addItems(toAdd);
+					toAdd.forEach(itemID => itemsInCollections.add(itemID));
+					if (newCollection.id === reusedCollectionID) {
+						toAdd.forEach(itemID => reusedCollectionItems.add(itemID));
+					}
+				}
+			}
+
+			// Items are added to the collections passed to the translate process as they're
+			// saved, so remove the ones that belong to an imported collection
+			if (itemsInCollections.size && this._collections) {
+				for (let collectionID of this._collections) {
+					// The reused collection keeps the items that belong to it
+					let itemIDs = collectionID === reusedCollectionID
+						? [...itemsInCollections].filter(id => !reusedCollectionItems.has(id))
+						: [...itemsInCollections];
+					let collection = Zotero.Collections.get(collectionID);
+					await collection.removeItems(itemIDs, this._saveOptions);
 				}
 			}
 		}.bind(this));
@@ -1084,19 +1172,38 @@ Zotero.Translate.ItemGetter.prototype = {
 	},
 	
 	setCollection: function (collection, getChildCollections) {
-		// get items in this collection
-		var items = new Set(collection.getChildItems());
+		this.setCollections([collection], getChildCollections);
+	},
+	
+	setCollections: function (collections, getChildCollections) {
+		// get items in these collections
+		var items = new Set();
+		for (let collection of collections) {
+			collection.getChildItems().forEach(item => items.add(item));
+			
+			if (getChildCollections) {
+				// Get items in all descendant collections
+				let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
+				for (let descendantCollection of descendantCollections) {
+					let childItems = descendantCollection.getChildItems();
+					childItems.forEach(item => items.add(item));
+				}
+			}
+		}
 		
 		if (getChildCollections) {
-			// Get child collections
-			this._collectionsLeft = Zotero.Collections.getByParent(collection.id);
-			
-			// Get items in all descendant collections
-			let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
-			for (let collection of descendantCollections) {
-				let childItems = collection.getChildItems();
-				childItems.forEach(item => items.add(item));
-			}
+			// Collections below other given collections are exported as descendants of those
+			let ids = new Set(collections.map(collection => collection.id));
+			this._collectionsLeft = collections.filter((collection) => {
+				let parentID = collection.parentID;
+				while (parentID) {
+					if (ids.has(parentID)) {
+						return false;
+					}
+					parentID = Zotero.Collections.get(parentID).parentID;
+				}
+				return true;
+			});
 		}
 		
 		this._itemsLeft = Array.from(items.values());

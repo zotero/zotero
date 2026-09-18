@@ -37,6 +37,7 @@ const { directAuth } = mendeleyAPIUtils;
 const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	file: null,
 	folder: null,
+	importAbortController: null,
 	isZotfileInstalled: false,
 	libraryID: null,
 	mendeleyAuth: null,
@@ -91,12 +92,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			.addEventListener('keyup', (ev) => {
 				document.getElementById('import-other').checked = ev.currentTarget.value.length > 0;
 			});
-		document
-			.querySelector('a')
-			.addEventListener('click', this.onURLInteract.bind(this));
-		document
-			.querySelector('a')
-			.addEventListener('keydown', this.onURLInteract.bind(this));
+		document.addEventListener('click', this.onURLInteract.bind(this));
+		document.addEventListener('keydown', this.onURLInteract.bind(this));
 		document
 			.querySelector('#page-done-error > button')
 			.addEventListener('click', this.onReportErrorInteract.bind(this));
@@ -154,20 +151,23 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		}
 	},
 
-	skipToDonePage(label, description, showReportErrorButton = false, isMendeleyError = false) {
+	// Mendeley errors are shown in their own element, which links to the relevant
+	// documentation, so they're passed as an l10n id rather than as a description
+	skipToDonePage(label, description, showReportErrorButton = false, mendeleyErrorId = null) {
 		this.wizard.getPageById('page-done').dataset.headerLabelId = label;
 
-		if (!isMendeleyError) {
-			if (Array.isArray(description)) {
-				document.getElementById('page-done-description').dataset.l10nId = description[0];
-				document.getElementById('page-done-description').dataset.l10nArgs = JSON.stringify(description[1]);
-			}
-			else {
-				document.getElementById('page-done-description').dataset.l10nId = description;
-			}
+		if (mendeleyErrorId) {
+			document.getElementById('page-done-error-mendeley').dataset.l10nId = mendeleyErrorId;
+		}
+		else if (Array.isArray(description)) {
+			document.getElementById('page-done-description').dataset.l10nId = description[0];
+			document.getElementById('page-done-description').dataset.l10nArgs = JSON.stringify(description[1]);
+		}
+		else {
+			document.getElementById('page-done-description').dataset.l10nId = description;
 		}
 
-		document.getElementById('page-done-error-mendeley').style.display = isMendeleyError ? 'block' : 'none';
+		document.getElementById('page-done-error-mendeley').style.display = mendeleyErrorId ? 'block' : 'none';
 		document.getElementById('page-done-error').style.display = showReportErrorButton ? 'block' : 'none';
 
 		const doneQueueContainer = document.getElementById('done-queue-container');
@@ -215,6 +215,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 		const rv = await fp.show();
 		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
+			// Re-enable "continue", disabled while the file picker was up
+			this.wizard.canAdvance = true;
 			return;
 		}
 
@@ -231,6 +233,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 		const rv = await fp.show();
 		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
+			// Re-enable "continue", disabled while the file picker was up
+			this.wizard.canAdvance = true;
 			return;
 		}
 
@@ -408,9 +412,16 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	onURLInteract(ev) {
+		let link = ev.target.closest?.('a[href]');
+		if (!link) {
+			return;
+		}
 		if (ev.type === 'click' || (ev.type === 'keydown' && ev.key === ' ')) {
-			Zotero.launchURL(ev.currentTarget.getAttribute('href'));
-			window.close();
+			Zotero.launchURL(link.getAttribute('href'));
+			// Closing mid-wizard would lose progress, so only close once done
+			if (link.closest('wizardpage')?.getAttribute('pageid') == 'page-done') {
+				window.close();
+			}
 			ev.preventDefault();
 		}
 	},
@@ -423,6 +434,10 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	onCancel() {
+		// The file can still be getting prepared, e.g. an encrypted Mendeley database
+		// being decrypted, in which case there's no translation to interrupt yet
+		this.importAbortController?.abort();
+
 		if (this.translation && this.translation.interrupt) {
 			this.translation.interrupt();
 		}
@@ -435,6 +450,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	async startImport() {
 		this.wizard.canAdvance = false;
 		this.wizard.canRewind = false;
+		this.importAbortController = new AbortController();
 
 		const fileHandling = document.getElementById('file-handling').value;
 		const linkFiles = fileHandling === 'link';
@@ -465,7 +481,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 				newItemsOnly,
 				onBeforeImport: this.onBeforeImport.bind(this),
 				recreateStructure,
-				relinkOnly
+				relinkOnly,
+				signal: this.importAbortController.signal
 			});
 
 			// Cancelled by user or due to error
@@ -484,8 +501,14 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			);
 		}
 		catch (e) {
-			if (e.message == 'Encrypted Mendeley database') {
-				this.skipToDonePage('general-error', [], false, true);
+			if (e.message == 'Mendeley database in use') {
+				this.skipToDonePage('general-error', 'import-mendeley-db-in-use');
+			}
+			else if (e.message == 'Cannot derive Mendeley database key') {
+				this.skipToDonePage('general-error', null, false, 'import-mendeley-cannot-decrypt');
+			}
+			else if (e.message == 'Unsupported Mendeley database encryption') {
+				this.skipToDonePage('general-error', null, false, 'import-mendeley-unsupported');
 			}
 			else {
 				const translatorLabel = this.translation?.translator?.[0]?.label;

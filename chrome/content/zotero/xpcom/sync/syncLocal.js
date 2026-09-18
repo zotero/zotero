@@ -30,57 +30,213 @@ if (!Zotero.Sync.Data) {
 Zotero.Sync.Data.Local = {
 	_syncQueueIntervals: [0.5, 1, 4, 16, 16, 16, 16, 16, 16, 16, 64], // hours
 	_loginManagerHost: 'chrome://zotero',
-	_loginManagerRealm: 'Zotero Web API',
+	_loginManagerRealm: 'Zotero Web API (encrypted)',
+	_loginManagerRealmLegacy: 'Zotero Web API',
 	_lastSyncTime: null,
 	_lastClassicSyncTime: null,
-	
+	// Cached hasCredentials() result, for the synchronous Zotero.Sync.Runner.enabled getter
+	_hasCredentials: false,
+	// Item/Collection-only -- synced settings can't affect the undo stack
+	_remoteChangesApplied: false,
+
+	get remoteChangesApplied() {
+		return this._remoteChangesApplied;
+	},
+
+	resetRemoteChangesApplied: function () {
+		this._remoteChangesApplied = false;
+	},
+
+	markRemoteChangesApplied: function () {
+		this._remoteChangesApplied = true;
+	},
+
 	init: async function () {
 		await this._loadLastSyncTime();
 		if (!_lastSyncTime) {
 			await this._loadLastClassicSyncTime();
 		}
+		await this.hasCredentials();
 	},
 	
 	
 	/**
 	 * @return {Promise}
 	 */
-	getAPIKey: function () {
-		var login = this._getAPIKeyLoginInfo();
-		return login
-			? login.password
-			// Fallback to old username/password
-			: this._getAPIKeyFromLogin();
+	getAPIKey: async function () {
+		// Prefer the legacy realm during the transition window: an older version
+		// may have written a fresh value there after we migrated, and we want
+		// to use the most recent value. Mirror it to the encrypted realm but
+		// keep the legacy entry so a downgrade can still read it. The legacy
+		// realm will be cleared in a future version once downgrades are
+		// unlikely.
+		var legacyLogin = await this._getLegacyAPIKeyLoginInfo();
+		if (legacyLogin) {
+			let apiKey = legacyLogin.password;
+			if (!this._mirroredAPIKey) {
+				try {
+					Zotero.debug("Mirroring plaintext API key to encrypted storage");
+					await this._writeEncryptedAPIKey(apiKey);
+					this._mirroredAPIKey = true;
+				}
+				catch (e) {
+					Zotero.logError(e);
+					if (!Zotero.Sync.Runner.backgroundSync) {
+						if (Zotero.OSKeyStore.isKeyStoreError(e)) {
+							Zotero.OSKeyStore.alertMigrateFailed();
+						}
+						else {
+							await this.alertLoginManagerCorrupted();
+						}
+					}
+				}
+			}
+			return apiKey;
+		}
+		var login = await this._getAPIKeyLoginInfo();
+		if (login) {
+			if (Zotero.OSKeyStore.isEncrypted(login.password)) {
+				return Zotero.OSKeyStore.decrypt(login.password);
+			}
+			// Key stored without encryption after a failed write -- encrypt it now, in case
+			// the keystore has since become usable
+			if (!this._reencryptedAPIKey) {
+				this._reencryptedAPIKey = true;
+				try {
+					Zotero.debug("Encrypting unencrypted API key");
+					await this._writeEncryptedAPIKey(login.password);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			return login.password;
+		}
+		// If the login manager had to be reset, the stored API key is gone, so tell the user
+		// to log in again
+		if (this._loginManagerRepaired && !this._loginManagerRepairAlertShown) {
+			this._loginManagerRepairAlertShown = true;
+			Zotero.alert(
+				null,
+				Zotero.getString('general-error'),
+				Zotero.getString('login-manager-reset')
+			);
+		}
+		// Fallback to old username/password
+		return this._getAPIKeyFromLogin();
 	},
 	
 	
 	/**
 	 * Check for an API key or a legacy username/password (which may or may not be valid)
+	 *
+	 * @return {Promise<Boolean>}
 	 */
-	hasCredentials: function () {
-		var login = this._getAPIKeyLoginInfo();
-		if (login) {
+	hasCredentials: async function () {
+		this._hasCredentials = await this._checkCredentials();
+		return this._hasCredentials;
+	},
+	
+	
+	/**
+	 * The result of the last hasCredentials() call, for callers that can't await
+	 *
+	 * @return {Boolean}
+	 */
+	get hasCachedCredentials() {
+		return this._hasCredentials;
+	},
+	
+	
+	_checkCredentials: async function () {
+		if ((await this._getAPIKeyLoginInfo()) || (await this._getLegacyAPIKeyLoginInfo())) {
 			return true;
 		}
 		// If no API key, check for legacy login
 		var username = Zotero.Prefs.get('sync.server.username');
-		return username && !!this.getLegacyPassword(username)
+		return !!username && !!(await this.getLegacyPassword(username));
 	},
 	
 	
 	setAPIKey: async function (apiKey) {
-		var oldLoginInfo = this._getAPIKeyLoginInfo();
+		var oldLoginInfo = await this._getAPIKeyLoginInfo();
+		var legacyLoginInfo = await this._getLegacyAPIKeyLoginInfo();
 		
 		// Clear old login
 		if ((!apiKey || apiKey === "")) {
 			if (oldLoginInfo) {
 				Zotero.debug("Clearing old API key");
-				Services.logins.removeLogin(oldLoginInfo);
+				await Services.logins.removeLoginAsync(oldLoginInfo);
 			}
+			if (legacyLoginInfo) {
+				await Services.logins.removeLoginAsync(legacyLoginInfo);
+			}
+			this._hasCredentials = false;
 			Zotero.Notifier.trigger('delete', 'api-key', []);
 			return;
 		}
 		
+		await this._saveAPIKey(apiKey);
+		// Drop any leftover plaintext entry from the legacy realm
+		if (legacyLoginInfo) {
+			await Services.logins.removeLoginAsync(legacyLoginInfo);
+		}
+		this._hasCredentials = true;
+		Zotero.Notifier.trigger('modify', 'api-key', []);
+	},
+	
+	
+	/**
+	 * Store the API key, retrying after a login manager repair and, if the keystore still
+	 * can't be used, offering to store the key without it
+	 */
+	_saveAPIKey: async function (apiKey) {
+		var error;
+		try {
+			await this._writeEncryptedAPIKey(apiKey);
+			return;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			error = e;
+		}
+		// If the write failed because the key database was unusable, reset the login manager
+		// and retry, so that logging in works without a manual fix
+		if (await this.repairLoginManager()) {
+			try {
+				await this._writeEncryptedAPIKey(apiKey);
+				return;
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		// The login manager can fail to store a value even when the keystore works -- e.g., if
+		// the key database is read-only -- and storing the key unencrypted wouldn't help
+		if (!Zotero.OSKeyStore.isKeyStoreError(error)) {
+			if (!Zotero.Sync.Runner.backgroundSync) {
+				await this.alertLoginManagerCorrupted();
+			}
+			throw error;
+		}
+		// An automatic sync can reach this via the legacy credential upgrade in
+		// _getAPIKeyFromLogin(), so don't interrupt one with a dialog
+		if (Zotero.Sync.Runner.backgroundSync || !Zotero.OSKeyStore.confirmUnencryptedFallback()) {
+			throw error;
+		}
+		await this._writeAPIKey(apiKey);
+		// The keystore is unusable, so don't try to encrypt again on the next read
+		this._reencryptedAPIKey = true;
+	},
+	
+	
+	_writeEncryptedAPIKey: async function (apiKey) {
+		await this._writeAPIKey(await Zotero.OSKeyStore.encrypt(apiKey));
+	},
+	
+	
+	_writeAPIKey: async function (storedValue) {
+		var oldLoginInfo = await this._getAPIKeyLoginInfo();
 		var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
 		var loginInfo = new nsLoginInfo(
@@ -88,7 +244,7 @@ Zotero.Sync.Data.Local = {
 			null,
 			this._loginManagerRealm,
 			'API Key',
-			apiKey,
+			storedValue,
 			'',
 			''
 		);
@@ -98,9 +254,8 @@ Zotero.Sync.Data.Local = {
 		}
 		else {
 			Zotero.debug("Replacing API key");
-			Services.logins.modifyLogin(oldLoginInfo, loginInfo);
+			await Services.logins.modifyLoginAsync(oldLoginInfo, loginInfo);
 		}
-		Zotero.Notifier.trigger('modify', 'api-key', []);
 	},
 	
 	
@@ -289,7 +444,7 @@ Zotero.Sync.Data.Local = {
 		var library = Zotero.Libraries.get(libraryID);
 		library.libraryVersion = -1;
 		await library.saveTx();
-		
+
 		await this.resetUnsyncedLibraryFiles(libraryID);
 	},
 	
@@ -349,8 +504,9 @@ Zotero.Sync.Data.Local = {
 					skipDeleteLog: true
 				}
 			);
+			this.markRemoteChangesApplied();
 		}
-		
+
 		// Deleted objects
 		keys = await Zotero.Sync.Data.Local.getDeleted(objectType, libraryID);
 		await this.removeObjectsFromDeleteLog(objectType, libraryID, keys);
@@ -402,28 +558,101 @@ Zotero.Sync.Data.Local = {
 	
 	
 	/**
-	 * @return {nsILoginInfo|false}
+	 * Reset the login manager if the NSS key database is unusable
+	 *
+	 * Zotero never sets a primary password, so if one is set on the key database, it was either
+	 * corrupted or copied in from a Firefox profile, and stored logins can never be decrypted,
+	 * since there's no primary-password prompt. Clear stored logins and reset the key database
+	 * so that credentials can be saved again.
+	 *
+	 * @return {Promise<Boolean>} - True if the login manager was reset
 	 */
-	_getAPIKeyLoginInfo: function () {
+	repairLoginManager: async function () {
 		try {
-			var logins = Services.logins.findLogins(
-				this._loginManagerHost,
-				null,
-				this._loginManagerRealm
-			);
+			let token = Cc["@mozilla.org/security/internalkeytoken;1"]
+				.createInstance(Ci.nsIPKCS11Token);
+			if (!token.hasPassword) {
+				return false;
+			}
+			Zotero.debug("Primary password set on NSS key database -- resetting login manager", 1);
+			await Services.logins.removeAllLoginsAsync();
+			this._hasCredentials = false;
+			token.reset();
+			token.changePassword("", "");
 		}
 		catch (e) {
 			Zotero.logError(e);
-			if (this._lastLoginManagerErrorTime > Date.now() - 60000) {
-				let msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-					+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
-				Zotero.alert(null, Zotero.getString('general.error'), msg);
-				this._lastLoginManagerErrorTime = Date.now();
+			return false;
+		}
+		this._loginManagerRepaired = true;
+		return true;
+	},
+
+
+	/**
+	 * @return {Promise<nsILoginInfo|false>}
+	 */
+	_getAPIKeyLoginInfo: async function () {
+		try {
+			var logins = await Services.logins.searchLoginsAsync({
+				origin: this._loginManagerHost,
+				httpRealm: this._loginManagerRealm
+			});
+		}
+		catch (e) {
+			Zotero.logError(e);
+			// If the key database was unusable, reset the login manager so that credentials
+			// can be saved again
+			if (await this.repairLoginManager()) {
+				return false;
 			}
+			await this.alertLoginManagerCorrupted();
 			return false;
 		}
 		
 		// Get API from returned array of nsILoginInfo objects
+		return logins.length ? logins[0] : false;
+	},
+	
+	
+	/**
+	 * Tell the user how to fix a login manager that can't read or write credentials, at most
+	 * once a minute, and offer to show the files to delete
+	 */
+	alertLoginManagerCorrupted: async function () {
+		if (this._lastLoginManagerErrorTime
+				&& this._lastLoginManagerErrorTime >= Date.now() - 60000) {
+			return;
+		}
+		this._lastLoginManagerErrorTime = Date.now();
+		let index = Zotero.Prompt.confirm({
+			title: Zotero.getString('general.error'),
+			text: Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+				+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName),
+			button0: Zotero.getString('login-manager-open-profile-directory'),
+			button1: Zotero.Prompt.BUTTON_TITLE_CANCEL
+		});
+		if (index != 0) {
+			return;
+		}
+		Zotero.launchFile(Zotero.Profile.dir);
+	},
+	
+	
+	/**
+	 * @return {Promise<nsILoginInfo|false>}
+	 */
+	_getLegacyAPIKeyLoginInfo: async function () {
+		try {
+			var logins = await Services.logins.searchLoginsAsync({
+				origin: this._loginManagerHost,
+				httpRealm: this._loginManagerRealmLegacy
+			});
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
 		return logins.length ? logins[0] : false;
 	},
 	
@@ -433,20 +662,20 @@ Zotero.Sync.Data.Local = {
 		if (username) {
 			// Check for legacy password if no password set in current session
 			// and no API keys stored yet
-			let password = this.getLegacyPassword(username);
+			let password = await this.getLegacyPassword(username);
 			if (!password) {
 				return "";
 			}
 			
 			let json = await Zotero.Sync.Runner.createAPIKeyFromCredentials(username, password);
-			this.removeLegacyLogins();
+			await this.removeLegacyLogins();
 			return json.key;
 		}
 		return "";
 	},
 	
 	
-	getLegacyPassword: function (username) {
+	getLegacyPassword: async function (username) {
 		var loginManagerHost = 'chrome://zotero';
 		var loginManagerRealm = 'Zotero Sync Server';
 		
@@ -455,7 +684,10 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
+			var logins = await loginManager.searchLoginsAsync({
+				origin: loginManagerHost,
+				httpRealm: loginManagerRealm
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -470,7 +702,7 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41,
-		var logins = loginManager.findLogins(loginManagerHost, "", null);
+		var logins = await loginManager.searchLoginsAsync({ origin: loginManagerHost });
 		for (let i = 0; i < logins.length; i++) {
 			if (logins[i].username == username
 					&& logins[i].formSubmitURL == "Zotero Sync Server") {
@@ -481,7 +713,7 @@ Zotero.Sync.Data.Local = {
 	},
 	
 	
-	removeLegacyLogins: function () {
+	removeLegacyLogins: async function () {
 		var loginManagerHost = 'chrome://zotero';
 		var loginManagerRealm = 'Zotero Sync Server';
 		
@@ -490,7 +722,10 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
+			var logins = await loginManager.searchLoginsAsync({
+				origin: loginManagerHost,
+				httpRealm: loginManagerRealm
+			});
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -499,7 +734,7 @@ Zotero.Sync.Data.Local = {
 		
 		// Remove all legacy users
 		for (let login of logins) {
-			loginManager.removeLogin(login);
+			await loginManager.removeLoginAsync(login);
 		}
 		// Remove the legacy pref
 		Zotero.Prefs.clear('sync.server.username');
@@ -779,9 +1014,7 @@ Zotero.Sync.Data.Local = {
 	 *         {Object[]} [conflicts] - An array of conflicting fields that can't be resolved automatically
 	 */
 	processObjectsFromJSON: async function (objectType, libraryID, json, options = {}) {
-		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
-		var ObjectType = Zotero.Utilities.capitalize(objectType);
 		var libraryName = Zotero.Libraries.get(libraryID).name;
 		
 		var knownErrors = new Set([
@@ -815,360 +1048,134 @@ Zotero.Sync.Data.Local = {
 			});
 		}
 		
-		var batchSize = options.getNotifierBatchSize ? options.getNotifierBatchSize() : json.length;
 		var notifierQueues = [];
 		
 		try {
-			for (let i = 0; i < json.length; i++) {
-				// Batch notifier updates
-				if (notifierQueues.length == batchSize) {
-					await Zotero.Notifier.commit(notifierQueues);
-					notifierQueues = [];
-					// Get the current batch size, which might have increased
-					if (options.getNotifierBatchSize) {
-						batchSize = options.getNotifierBatchSize()
-					}
-				}
-				let notifierQueue = new Zotero.Notifier.Queue({
-					skipAutoSync: true
-				});
+			for (let i = 0; i < json.length;) {
+				// Batch size for the save transaction and notifier updates, increased as processing
+				// progresses so that new objects start coming in one by one but then switch to
+				// larger chunks
+				let batchSize = options.getNotifierBatchSize ? options.getNotifierBatchSize() : json.length;
+				let batch = json.slice(i, i + batchSize);
+				i += batch.length;
 				
-				let jsonObject = json[i];
-				let jsonData = jsonObject.data;
-				let objectKey = jsonObject.key;
-				
-				let saveOptions = {};
-				Object.assign(saveOptions, options);
-				saveOptions.isNewObject = false;
-				saveOptions.skipCache = false;
-				saveOptions.storageDetailsChanged = false;
-				saveOptions.notifierQueue = notifierQueue;
-				
-				Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
-				Zotero.debug(jsonObject);
-				
-				// Skip objects with unmet dependencies
-				if (objectType == 'item' || objectType == 'collection') {
-					// Missing parent collection or item
-					let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
-					let parentKey = jsonData[parentProp];
-					if (parentKey) {
-						let parentObj = await objectsClass.getByLibraryAndKeyAsync(
-							libraryID, parentKey, { noCache: true }
-						);
-						if (!parentObj) {
-							let error = new Error("Parent of " + objectType + " "
-								+ libraryID + "/" + jsonData.key + " not found -- skipping");
-							error.name = "ZoteroMissingObjectError";
-							Zotero.debug(error.message);
-							results.push({
-								key: objectKey,
-								processed: false,
-								error,
-								retry: true
-							});
-							continue;
-						}
-					}
-					
-					// Missing collection -- this could happen if the collection was deleted
-					// locally and an item in it was modified remotely
-					if (objectType == 'item' && jsonData.collections) {
-						let error;
-						for (let key of jsonData.collections) {
-							let collection = Zotero.Collections.getByLibraryAndKey(libraryID, key);
-							if (!collection) {
-								error = new Error(`Collection ${libraryID}/${key} not found `
-									+ `-- skipping item`);
-								error.name = "ZoteroMissingObjectError";
-								Zotero.debug(error.message);
-								results.push({
-									key: objectKey,
-									processed: false,
-									error,
-									retry: false
+				// Try to process the batch in a single transaction
+				let batchSaved = false;
+				if (batch.length > 1) {
+					let batchResults = [];
+					let batchQueues = [];
+					try {
+						await Zotero.DB.executeTransaction(async function () {
+							for (let jsonObject of batch) {
+								let notifierQueue = new Zotero.Notifier.Queue({
+									skipAutoSync: true
 								});
-								
-								// If the collection is in the delete log, the deletion will upload
-								// after downloads are done. Otherwise, we somehow missed
-								// downloading it and should add it to the queue to try again.
-								if (!((await this.getDateDeleted('collection', libraryID, key)))) {
-									await this.addObjectsToSyncQueue('collection', libraryID, [key]);
+								// Pass a deep copy, since the object can be modified during
+								// processing and a failed batch is reprocessed with the
+								// original data
+								await this._processObjectFromJSON(
+									objectType,
+									libraryID,
+									JSON.parse(JSON.stringify(jsonObject)),
+									options,
+									notifierQueue,
+									batchResults
+								);
+								if (notifierQueue.size) {
+									batchQueues.push(notifierQueue);
 								}
-								break;
 							}
-						}
-						if (error) {
-							continue;
-						}
+						}.bind(this));
+						results.push(...batchResults);
+						notifierQueues.push(...batchQueues);
+						batchSaved = true;
+					}
+					catch (e) {
+						Zotero.debug(`Batch save of ${batch.length} ${objectTypePlural} failed `
+							+ "-- reprocessing individually", 2);
+						Zotero.debug(e, 2);
 					}
 				}
 				
-				// Errors have to be thrown in order to roll back the transaction, so catch those here
-				// and continue
-				try {
-					await Zotero.DB.executeTransaction(async function () {
-						let obj = await objectsClass.getByLibraryAndKeyAsync(
-							libraryID, objectKey, { noCache: true }
-						);
-						let restored = false;
-						if (obj) {
-							Zotero.debug("Matching local " + objectType + " exists", 4);
-							
-							let jsonDataLocal = obj.toJSON();
-							
-							// For items, check if mtime or file hash changed in metadata,
-							// which would indicate that a remote storage sync took place and
-							// a download is needed
-							if (objectType == 'item' && obj.isStoredFileAttachment()) {
-								if (jsonDataLocal.mtime != jsonData.mtime
-										|| jsonDataLocal.md5 != jsonData.md5) {
-									saveOptions.storageDetailsChanged = true;
-								}
-								if (jsonDataLocal.filename != jsonData.filename) {
-									saveOptions.renameFile = true;
-									saveOptions.previousFilename = obj.attachmentFilename;
-								}
-							}
-							
-							// Local object has been modified since last sync
-							if (!obj.synced) {
-								Zotero.debug("Local " + objectType + " " + obj.libraryKey
-										+ " has been modified since last sync", 4);
-								
-								let cachedJSON = await this.getCacheObject(
-									objectType, obj.libraryID, obj.key, obj.version
-								);
-								let result = this._reconcileChanges(
-									objectType,
-									cachedJSON.data,
-									jsonDataLocal,
-									jsonData,
-									['mtime', 'md5', 'dateAdded', 'dateModified']
-								);
-								
-								// If local object became a child item and remote was added to any
-								// collections, we need to remove the 'collections' changes and add
-								// the parent item to those collections instead
-								if (objectType == 'item'
-										&& !obj.isTopLevelItem()
-										&& (obj.isNote() || obj.isAttachment())) {
-									let collections = result.changes
-										.filter(x => x.field == 'collections' && x.op == 'member-add')
-										.map(x => x.value);
-									if (collections.length) {
-										result.changes = result.changes
-											.filter(x => !(x.field == 'collections' && x.op == 'member-add'));
-										saveOptions.newParentItemCollections = collections;
-									}
-								}
-								
-								// If no changes, just update local version number and mark as synced
-								if (!result.changes.length && !result.conflicts.length) {
-									Zotero.debug("No remote changes to apply to local "
-										+ objectType + " " + obj.libraryKey);
-									saveOptions.skipData = true;
-									// If either there were additional local changes after cancelling
-									// out equivalent changes on both sides or the local object was
-									// different but we ignored the changes (e.g., ISBN hyphenation),
-									// keep as unsynced. In the latter case, since we're skipping
-									// data, the local fields won't be overwritten.
-									if (result.localChanged) {
-										saveOptions.saveAsUnsynced = true;
-									}
-									let saveResults = await this._saveObjectFromJSON(
-										obj,
-										jsonObject,
-										saveOptions
-									);
-									results.push(saveResults);
-									if (!saveResults.processed) {
-										throw saveResults.error;
-									}
-									return;
-								}
-								
-								if (result.conflicts.length) {
-									if (objectType != 'item') {
-										throw new Error(`Unexpected conflict on ${objectType} object`);
-									}
-									
-									// Skip conflict resolution if there are invalid fields
-									try {
-										let testObj = obj.clone();
-										testObj.fromJSON(jsonData, { strict: true });
-									}
-									catch (e) {
-										results.push({
-											key: objectKey,
-											processed: false,
-											error: e,
-											retry: false
-										});
-										throw e;
-									}
-									
-									Zotero.debug("Conflict!", 2);
-									Zotero.debug(jsonDataLocal);
-									Zotero.debug(jsonData);
-									Zotero.debug(result);
-									results.push({
-										libraryID,
-										key: objectKey,
-										processed: false,
-										conflict: true,
-										left: jsonDataLocal,
-										right: jsonData,
-										changes: result.changes,
-										conflicts: result.conflicts
-									});
-									return;
-								}
-								
-								// If no conflicts, apply remote changes automatically
-								Zotero.debug(`Applying remote changes to ${objectType} `
-									+ obj.libraryKey);
-								Zotero.debug(result.changes);
-								// If there were local changes as well, keep object as unsynced and
-								// save the remote version to the sync cache rather than the merged
-								// version
-								if (result.localChanged) {
-									saveOptions.saveAsUnsynced = true;
-									saveOptions.cacheObject = jsonObject.data;
-								}
-								Zotero.DataObjectUtilities.applyChanges(
-									jsonDataLocal, result.changes
-								);
-								// Transfer properties that aren't in the changeset
-								['version', 'dateAdded', 'dateModified'].forEach(x => {
-									if (jsonData[x] === undefined) return;
-									if (jsonDataLocal[x] !== jsonData[x]) {
-										Zotero.debug(`Applying remote '${x}' value`);
-									}
-									jsonDataLocal[x] = jsonData[x];
-								})
-								jsonObject.data = jsonDataLocal;
-							}
-						}
-						// Object doesn't exist locally
-						else {
-							Zotero.debug(ObjectType + " doesn't exist locally");
-							
-							saveOptions.isNewObject = true;
-							
-							// Check if object has been deleted locally
-							let dateDeleted = await this.getDateDeleted(
-								objectType, libraryID, objectKey
-							);
-							if (dateDeleted) {
-								Zotero.debug(ObjectType + " was deleted locally");
-								
-								switch (objectType) {
-									case 'item':
-										if (jsonData.deleted) {
-											Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
-											results.push({
-												libraryID,
-												key: objectKey,
-												processed: true
-											});
-											return;
-										}
-										
-										results.push({
-											libraryID,
-											key: objectKey,
-											processed: false,
-											conflict: true,
-											left: {
-												deleted: true,
-												dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
-											},
-											right: jsonData
-										});
-										return;
-									
-									// Auto-restore some locally deleted objects that have changed remotely
-									case 'collection':
-									case 'search':
-										Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
-											+ '-- restoring');
-										await this.removeObjectsFromDeleteLog(
-											objectType,
-											libraryID,
-											[objectKey]
-										);
-										restored = true;
-										break;
-									
-									default:
-										throw new Error("Unknown object type '" + objectType + "'");
-								}
-							}
-							
-							// Create new object
-							obj = new Zotero[ObjectType];
-							obj.libraryID = libraryID;
-							obj.key = objectKey;
-							await obj.loadPrimaryData();
-							
-							// Don't cache new items immediately, which skips reloading after save
-							saveOptions.skipCache = true;
-						}
-						
-						let saveResults = await this._saveObjectFromJSON(obj, jsonObject, saveOptions);
-						if (restored) {
-							saveResults.restored = true;
-						}
-						results.push(saveResults);
-						if (!saveResults.processed) {
-							throw saveResults.error;
-						}
-					}.bind(this));
-					
-					if (notifierQueue.size) {
-						notifierQueues.push(notifierQueue);
-					}
-				}
-				catch (e) {
-					// This allows errors handled by syncRunner to know the library in question
-					e.libraryID = libraryID;
-					
-					// Display nicer debug line for known errors
-					if (knownErrors.has(e.name)) {
-						let desc = e.name
-							.replace(/^Zotero/, "")
-							// Convert "MissingObjectError" to "missing object error"
-							.split(/([a-z]+)/).join(' ').trim()
-							.replace(/([A-Z]) ([a-z]+)/g, "$1$2").toLowerCase();
-						let msg = Zotero.Utilities.capitalize(desc) + " for "
-							+ `${objectType} ${jsonObject.key} in ${Zotero.Libraries.get(libraryID).name}`;
-						Zotero.debug(msg, 2);
-						Zotero.debug(e, 2);
-						Components.utils.reportError(msg + ": " + e.message);
-					}
-					else {
-						Zotero.logError(e);
-					}
-					
-					if (options.onError) {
-						options.onError(e);
-					}
-					
-					if (Zotero.DB.closed) {
-						e.fatal = true;
-					}
-					if (options.stopOnError || e.fatal) {
-						throw e;
-					}
-				}
-				finally {
+				if (batchSaved) {
 					if (options.onObjectProcessed) {
-						options.onObjectProcessed();
+						for (let j = 0; j < batch.length; j++) {
+							options.onObjectProcessed();
+						}
+					}
+				}
+				// Process objects individually if the batch was a single object or the batch
+				// transaction failed, so that an error rolls back only that object's save
+				else {
+					for (let jsonObject of batch) {
+						let notifierQueue = new Zotero.Notifier.Queue({
+							skipAutoSync: true
+						});
+						
+						// Errors have to be thrown in order to roll back the transaction, so catch
+						// those here and continue
+						try {
+							await Zotero.DB.executeTransaction(async function () {
+								await this._processObjectFromJSON(
+									objectType,
+									libraryID,
+									jsonObject,
+									options,
+									notifierQueue,
+									results
+								);
+							}.bind(this));
+							
+							if (notifierQueue.size) {
+								notifierQueues.push(notifierQueue);
+							}
+						}
+						catch (e) {
+							// This allows errors handled by syncRunner to know the library in question
+							e.libraryID = libraryID;
+							
+							// Display nicer debug line for known errors
+							if (knownErrors.has(e.name)) {
+								let desc = e.name
+									.replace(/^Zotero/, "")
+									// Convert "MissingObjectError" to "missing object error"
+									.split(/([a-z]+)/).join(' ').trim()
+									.replace(/([A-Z]) ([a-z]+)/g, "$1$2").toLowerCase();
+								let msg = Zotero.Utilities.capitalize(desc) + " for "
+									+ `${objectType} ${jsonObject.key} in ${Zotero.Libraries.get(libraryID).name}`;
+								Zotero.debug(msg, 2);
+								Zotero.debug(e, 2);
+								Components.utils.reportError(msg + ": " + e.message);
+							}
+							else {
+								Zotero.logError(e);
+							}
+							
+							if (options.onError) {
+								options.onError(e);
+							}
+							
+							if (Zotero.DB.closed) {
+								e.fatal = true;
+							}
+							if (options.stopOnError || e.fatal) {
+								throw e;
+							}
+						}
+						finally {
+							if (options.onObjectProcessed) {
+								options.onObjectProcessed();
+							}
+						}
 					}
 				}
 				
 				await Zotero.Promise.delay(10);
+				
+				if (notifierQueues.length) {
+					await Zotero.Notifier.commit(notifierQueues);
+					notifierQueues = [];
+				}
 			}
 		}
 		finally {
@@ -1187,6 +1194,314 @@ Zotero.Sync.Data.Local = {
 			+ " in " + libraryName);
 		
 		return results;
+	},
+	
+	
+	/**
+	 * Process a single downloaded object and update or create the local object
+	 *
+	 * Must be called within a transaction. Errors are thrown so that the transaction can be
+	 * rolled back.
+	 *
+	 * @param {String} objectType
+	 * @param {Integer} libraryID
+	 * @param {Object} jsonObject - Downloaded JSON API object
+	 * @param {Object} options - Options passed to processObjectsFromJSON()
+	 * @param {Zotero.Notifier.Queue} notifierQueue
+	 * @param {Object[]} results - Array to add a result object to
+	 */
+	_processObjectFromJSON: async function (objectType, libraryID, jsonObject, options, notifierQueue, results) {
+		Zotero.DB.requireTransaction();
+		
+		var objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
+		var ObjectType = Zotero.Utilities.capitalize(objectType);
+		
+		var jsonData = jsonObject.data;
+		var objectKey = jsonObject.key;
+		
+		var saveOptions = {};
+		Object.assign(saveOptions, options);
+		saveOptions.isNewObject = false;
+		saveOptions.skipCache = false;
+		saveOptions.storageDetailsChanged = false;
+		saveOptions.notifierQueue = notifierQueue;
+		
+		Zotero.debug(`Processing ${objectType} ${libraryID}/${objectKey}`);
+		Zotero.debug(jsonObject);
+		
+		// Skip objects with unmet dependencies
+		if (objectType == 'item' || objectType == 'collection') {
+			// Missing parent collection or item
+			let parentProp = 'parent' + objectType[0].toUpperCase() + objectType.substr(1);
+			let parentKey = jsonData[parentProp];
+			if (parentKey) {
+				let parentObj = await objectsClass.getByLibraryAndKeyAsync(
+					libraryID, parentKey, { noCache: true }
+				);
+				if (!parentObj) {
+					let error = new Error("Parent of " + objectType + " "
+						+ libraryID + "/" + jsonData.key + " not found -- skipping");
+					error.name = "ZoteroMissingObjectError";
+					Zotero.debug(error.message);
+					results.push({
+						key: objectKey,
+						processed: false,
+						error,
+						retry: true
+					});
+					return;
+				}
+			}
+			
+			// Missing collection -- this could happen if the collection was deleted
+			// locally and an item in it was modified remotely
+			if (objectType == 'item' && jsonData.collections) {
+				let error;
+				for (let key of jsonData.collections) {
+					let collection = Zotero.Collections.getByLibraryAndKey(libraryID, key);
+					if (!collection) {
+						error = new Error(`Collection ${libraryID}/${key} not found `
+							+ `-- skipping item`);
+						error.name = "ZoteroMissingObjectError";
+						Zotero.debug(error.message);
+						results.push({
+							key: objectKey,
+							processed: false,
+							error,
+							retry: false
+						});
+						
+						// If the collection is in the delete log, the deletion will upload
+						// after downloads are done. Otherwise, we somehow missed
+						// downloading it and should add it to the queue to try again.
+						if (!((await this.getDateDeleted('collection', libraryID, key)))) {
+							await this.addObjectsToSyncQueue('collection', libraryID, [key]);
+						}
+						break;
+					}
+				}
+				if (error) {
+					return;
+				}
+			}
+		}
+		
+		let obj = await objectsClass.getByLibraryAndKeyAsync(
+			libraryID, objectKey, { noCache: true }
+		);
+		let restored = false;
+		if (obj) {
+			Zotero.debug("Matching local " + objectType + " exists", 4);
+			
+			let jsonDataLocal = obj.toJSON();
+			
+			// For items, check if mtime or file hash changed in metadata,
+			// which would indicate that a remote storage sync took place and
+			// a download is needed
+			if (objectType == 'item' && obj.isStoredFileAttachment()) {
+				if (jsonDataLocal.mtime != jsonData.mtime
+						|| jsonDataLocal.md5 != jsonData.md5) {
+					saveOptions.storageDetailsChanged = true;
+				}
+				if (jsonDataLocal.filename != jsonData.filename) {
+					saveOptions.renameFile = true;
+					saveOptions.previousFilename = obj.attachmentFilename;
+				}
+			}
+			
+			// Local object has been modified since last sync
+			if (!obj.synced) {
+				Zotero.debug("Local " + objectType + " " + obj.libraryKey
+						+ " has been modified since last sync", 4);
+				
+				let cachedJSON = await this.getCacheObject(
+					objectType, obj.libraryID, obj.key, obj.version
+				);
+				let result = this._reconcileChanges(
+					objectType,
+					cachedJSON.data,
+					jsonDataLocal,
+					jsonData,
+					['mtime', 'md5', 'dateAdded', 'dateModified']
+				);
+				
+				// If local object became a child item and remote was added to any
+				// collections, we need to remove the 'collections' changes and add
+				// the parent item to those collections instead
+				if (objectType == 'item'
+						&& !obj.isTopLevelItem()
+						&& (obj.isNote() || obj.isAttachment())) {
+					let collections = result.changes
+						.filter(x => x.field == 'collections' && x.op == 'member-add')
+						.map(x => x.value);
+					if (collections.length) {
+						result.changes = result.changes
+							.filter(x => !(x.field == 'collections' && x.op == 'member-add'));
+						saveOptions.newParentItemCollections = collections;
+					}
+				}
+				
+				// If no changes, just update local version number and mark as synced
+				if (!result.changes.length && !result.conflicts.length) {
+					Zotero.debug("No remote changes to apply to local "
+						+ objectType + " " + obj.libraryKey);
+					saveOptions.skipData = true;
+					// If either there were additional local changes after cancelling
+					// out equivalent changes on both sides or the local object was
+					// different but we ignored the changes (e.g., ISBN hyphenation),
+					// keep as unsynced. In the latter case, since we're skipping
+					// data, the local fields won't be overwritten.
+					if (result.localChanged) {
+						saveOptions.saveAsUnsynced = true;
+					}
+					let saveResults = await this._saveObjectFromJSON(
+						obj,
+						jsonObject,
+						saveOptions
+					);
+					results.push(saveResults);
+					if (!saveResults.processed) {
+						throw saveResults.error;
+					}
+					return;
+				}
+				
+				if (result.conflicts.length) {
+					if (objectType != 'item') {
+						throw new Error(`Unexpected conflict on ${objectType} object`);
+					}
+					
+					// Skip conflict resolution if there are invalid fields
+					try {
+						let testObj = obj.clone();
+						testObj.fromJSON(jsonData, { strict: true });
+					}
+					catch (e) {
+						results.push({
+							key: objectKey,
+							processed: false,
+							error: e,
+							retry: false
+						});
+						throw e;
+					}
+					
+					Zotero.debug("Conflict!", 2);
+					Zotero.debug(jsonDataLocal);
+					Zotero.debug(jsonData);
+					Zotero.debug(result);
+					results.push({
+						libraryID,
+						key: objectKey,
+						processed: false,
+						conflict: true,
+						left: jsonDataLocal,
+						right: jsonData,
+						changes: result.changes,
+						conflicts: result.conflicts
+					});
+					return;
+				}
+				
+				// If no conflicts, apply remote changes automatically
+				Zotero.debug(`Applying remote changes to ${objectType} `
+					+ obj.libraryKey);
+				Zotero.debug(result.changes);
+				// If there were local changes as well, keep object as unsynced and
+				// save the remote version to the sync cache rather than the merged
+				// version
+				if (result.localChanged) {
+					saveOptions.saveAsUnsynced = true;
+					saveOptions.cacheObject = jsonObject.data;
+				}
+				Zotero.DataObjectUtilities.applyChanges(
+					jsonDataLocal, result.changes
+				);
+				// Transfer properties that aren't in the changeset
+				['version', 'dateAdded', 'dateModified'].forEach(x => {
+					if (jsonData[x] === undefined) return;
+					if (jsonDataLocal[x] !== jsonData[x]) {
+						Zotero.debug(`Applying remote '${x}' value`);
+					}
+					jsonDataLocal[x] = jsonData[x];
+				})
+				jsonObject.data = jsonDataLocal;
+			}
+		}
+		// Object doesn't exist locally
+		else {
+			Zotero.debug(ObjectType + " doesn't exist locally");
+			
+			saveOptions.isNewObject = true;
+			
+			// Check if object has been deleted locally
+			let dateDeleted = await this.getDateDeleted(
+				objectType, libraryID, objectKey
+			);
+			if (dateDeleted) {
+				Zotero.debug(ObjectType + " was deleted locally");
+				
+				switch (objectType) {
+					case 'item':
+						if (jsonData.deleted) {
+							Zotero.debug("Remote item is in trash -- allowing local deletion to propagate");
+							results.push({
+								libraryID,
+								key: objectKey,
+								processed: true
+							});
+							return;
+						}
+						
+						results.push({
+							libraryID,
+							key: objectKey,
+							processed: false,
+							conflict: true,
+							left: {
+								deleted: true,
+								dateDeleted: Zotero.Date.dateToSQL(dateDeleted, true)
+							},
+							right: jsonData
+						});
+						return;
+					
+					// Auto-restore some locally deleted objects that have changed remotely
+					case 'collection':
+					case 'search':
+						Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
+							+ '-- restoring');
+						await this.removeObjectsFromDeleteLog(
+							objectType,
+							libraryID,
+							[objectKey]
+						);
+						restored = true;
+						break;
+					
+					default:
+						throw new Error("Unknown object type '" + objectType + "'");
+				}
+			}
+			
+			// Create new object
+			obj = new Zotero[ObjectType];
+			obj.libraryID = libraryID;
+			obj.key = objectKey;
+			await obj.loadPrimaryData();
+			
+			// Don't cache new items immediately, which skips reloading after save
+			saveOptions.skipCache = true;
+		}
+		
+		let saveResults = await this._saveObjectFromJSON(obj, jsonObject, saveOptions);
+		if (restored) {
+			saveResults.restored = true;
+		}
+		results.push(saveResults);
+		if (!saveResults.processed) {
+			throw saveResults.error;
+		}
 	},
 	
 	
@@ -1388,6 +1703,7 @@ Zotero.Sync.Data.Local = {
 									await obj.erase({
 										notifierQueue
 									});
+									Zotero.Sync.Data.Local.markRemoteChangesApplied();
 								}
 								catch (e) {
 									results.push({
@@ -1561,6 +1877,7 @@ Zotero.Sync.Data.Local = {
 				obj.synced = true;
 			}
 			await obj.save(saveOptions);
+			this.markRemoteChangesApplied();
 			let cacheJSON = options.cacheObject ? options.cacheObject : json.data;
 			await this.saveCacheObject(obj.objectType, obj.libraryID, cacheJSON);
 			// Delete older versions of the object in the cache
@@ -1596,13 +1913,18 @@ Zotero.Sync.Data.Local = {
 				}
 			}
 			
-			// See explanation in processObjectsFromJSON()
+			// See explanation in _processObjectFromJSON()
 			if (options.newParentItemCollections) {
 				let parentItem = obj.parentItem;
 				for (let c of options.newParentItemCollections) {
 					parentItem.addToCollection(c);
 				}
 				await parentItem.save(saveOptions);
+				// The cached parent item keeps the added collections in memory if the
+				// transaction is rolled back, so reload it
+				Zotero.DB.addCurrentCallback("rollback", function () {
+					return parentItem.reload(['primaryData', 'collections'], true);
+				});
 			}
 		}
 		catch (e) {
@@ -1792,6 +2114,7 @@ Zotero.Sync.Data.Local = {
 		
 		var changes = [];
 		var conflicts = [];
+		var localChanged = false;
 		
 		for (let i = 0; i < changeset.length; i++) {
 			let c2 = changeset[i];
@@ -1811,6 +2134,19 @@ Zotero.Sync.Data.Local = {
 			if ((objectType == 'item' && currentJSON.deleted && newJSON.deleted)
 						|| objectType != 'item') {
 				changes.push(c2);
+				continue;
+			}
+			
+			// Auto-resolve lastRead by keeping the most recent value
+			if (c2.field == 'lastRead') {
+				if ((currentJSON.lastRead || 0) > (c2.value || 0)) {
+					// Local is more recent -- keep it and upload
+					localChanged = true;
+				}
+				else {
+					// Remote is more recent -- apply it
+					changes.push(c2);
+				}
 				continue;
 			}
 			
@@ -1834,7 +2170,6 @@ Zotero.Sync.Data.Local = {
 			conflicts.push([c1, c2]);
 		}
 		
-		var localChanged = false;
 		var normalizeHTML = (str) => {
 			let parser = new DOMParser();
 			str = parser.parseFromString(str, 'text/html');

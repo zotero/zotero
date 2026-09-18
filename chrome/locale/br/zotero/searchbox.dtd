@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Anv:">
 
-<!ENTITY zotero.search.searchInLibrary "Klask el levraoueg:">
-
 <!ENTITY zotero.search.joinMode.prefix "Kenglotus">
 <!ENTITY zotero.search.joinMode.any "unan">
 <!ENTITY zotero.search.joinMode.all "pep-tra">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "devezhioù">
 <!ENTITY zotero.search.date.units.months "mizioù">
 <!ENTITY zotero.search.date.units.years "bloavezhioù">
-
-<!ENTITY zotero.search.search "Klask">
-<!ENTITY zotero.search.clear "Diverkañ">
-<!ENTITY zotero.search.saveSearch "Enrollañ an enklask">

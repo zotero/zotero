@@ -86,6 +86,10 @@ Zotero.defineProperty(Zotero.Search.prototype, 'version', {
 	get: function () { return this._get('version'); },
 	set: function (val) { return this._set('version', val); }
 });
+Zotero.defineProperty(Zotero.Search.prototype, 'clientVersion', {
+	get: function() { return this._get('clientVersion'); },
+	set: function(val) { return this._set('clientVersion', val); }
+});
 Zotero.defineProperty(Zotero.Search.prototype, 'synced', {
 	get: function () { return this._get('synced'); },
 	set: function (val) { return this._set('synced', val); }
@@ -139,6 +143,7 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 		
 		// Integer or 0
 		case 'version':
+		case 'clientVersion':
 			val = val ? parseInt(val) : 0;
 			break;
 		
@@ -206,8 +211,8 @@ Zotero.Search.prototype._saveData = async function (env) {
 		
 		var i = 0;
 		var sql = "INSERT INTO savedSearchConditions "
-			+ "(savedSearchID, searchConditionID, condition, operator, value, required) "
-			+ "VALUES (?,?,?,?,?,?)";
+			+ "(savedSearchID, searchConditionID, condition, operator, value) "
+			+ "VALUES (?,?,?,?,?)";
 		for (let id in this._conditions) {
 			let condition = this._conditions[id];
 			
@@ -221,8 +226,7 @@ Zotero.Search.prototype._saveData = async function (env) {
 				i,
 				conditionString,
 				condition.operator ? condition.operator : null,
-				condition.value ? condition.value : null,
-				condition.required ? 1 : null
+				condition.value ? condition.value : null
 			];
 			await Zotero.DB.queryAsync(sql, sqlParams);
 			i++;
@@ -297,6 +301,10 @@ Zotero.Search.prototype._finalizeErase = async function (env) {
 Zotero.Search.prototype.addCondition = function (condition, operator, value, required) {
 	this._requireData('conditions');
 	
+	if (required) {
+		throw new Error("The 'required' parameter is no longer supported; use a condition group");
+	}
+
 	if (!Zotero.SearchConditions.hasOperator(condition, operator)){
 		let e = new Error("Invalid operator '" + operator + "' for condition " + condition);
 		e.name = "ZoteroInvalidDataError";
@@ -306,14 +314,16 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	// Shortcut to add a condition on every table -- does not return an id
 	if (condition.match(/^quicksearch/)) {
 		var parts = Zotero.SearchConditions.parseSearchString(value);
-		
+
 		for (let part of parts) {
 			if (condition == 'quicksearch-titleCreatorYearNote') {
 				this.addCondition('note', operator, part.text, false);
 				continue;
 			}
-			
-			this.addCondition('blockStart');
+
+			// Each word is an OR-group over the fields below
+			this.addCondition('groupStart', 'true', '');
+			this.addCondition('joinMode', 'any');
 
 			// Allow searching for exact object key
 			if (operator == 'contains' && Zotero.Utilities.isValidObjectKey(part.text)) {
@@ -331,25 +341,29 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			else {
 				this.addCondition('field', operator, part.text, false);
 				this.addCondition('tag', operator, part.text, false);
-				this.addCondition('note', operator, part.text, false);
+				// Match note content as a substring via the note index. Like
+				// full-text content below, skip unquoted terms too short for the
+				// index.
+				if (part.inQuotes || Zotero.FullText.canSearchNotes(part.text)) {
+					this.addCondition('note', operator, part.text, false);
+				}
 				this.addCondition('annotationText', operator, part.text, false);
 				this.addCondition('annotationComment', operator, part.text, false);
 			}
 			this.addCondition('creator', operator, part.text, false);
-			
-			if (condition == 'quicksearch-everything') {
-				if (part.inQuotes) {
-					this.addCondition('fulltextContent', operator, part.text, false);
-				}
-				else {
-					var splits = Zotero.Fulltext.semanticSplitter(part.text);
-					for (let split of splits) {
-						this.addCondition('fulltextWord', operator, split, false);
-					}
-				}
+
+			// Match full-text content by word prefix (case- and diacritic-insensitive)
+			// via the content index. Skip unquoted 1-2-character terms, which would
+			// prefix-match a huge share of the index on every keystroke; they're still
+			// matched against titles, tags, etc. above. Quoted terms are matched
+			// regardless of length: quoting makes the quick search wait for Enter
+			// rather than run on each keystroke.
+			if (condition == 'quicksearch-everything'
+					&& (part.inQuotes || Zotero.FullText.canSearchContent(part.text))) {
+				this.addCondition('fulltextContent', operator, part.text, false);
 			}
-			
-			this.addCondition('blockEnd');
+
+			this.addCondition('groupEnd', 'true', '');
 		}
 		
 		if (condition == 'quicksearch-titleCreatorYear') {
@@ -405,6 +419,11 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 	let mode;
 	[condition, mode] = Zotero.SearchConditions.parseCondition(condition);
 	
+	// isEmpty/isNotEmpty take no value
+	if (operator == 'isEmpty' || operator == 'isNotEmpty') {
+		value = '';
+	}
+	
 	if (typeof value == 'string') value = value.normalize();
 	
 	this._conditions[searchConditionID] = {
@@ -412,8 +431,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		condition: condition,
 		mode: mode,
 		operator: operator,
-		value: value,
-		required: !!required
+		value: value
 	};
 	
 	this._sql = null;
@@ -439,11 +457,14 @@ Zotero.Search.prototype.setScope = function (searchObj, includeChildren) {
  * @param {String} condition
  * @param {String} operator
  * @param {String} value
- * @param {Boolean} [required]
  * @return {Promise}
  */
 Zotero.Search.prototype.updateCondition = function (searchConditionID, condition, operator, value, required) {
 	this._requireData('conditions');
+	
+	if (required) {
+		throw new Error("The 'required' parameter is no longer supported; use a condition group");
+	}
 	
 	if (typeof this._conditions[searchConditionID] == 'undefined'){
 		throw new Error('Invalid searchConditionID ' + searchConditionID);
@@ -464,8 +485,7 @@ Zotero.Search.prototype.updateCondition = function (searchConditionID, condition
 		condition: condition,
 		mode: mode,
 		operator: operator,
-		value: value,
-		required: !!required
+		value: value
 	};
 	
 	this._sql = null;
@@ -482,7 +502,20 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 		throw new Error('Invalid searchConditionID ' + searchConditionID + ' in removeCondition()');
 	}
 	
-	delete this._conditions[searchConditionID];
+	searchConditionID = String(searchConditionID);
+	// Decrement the id of all conditions following
+	// the condition to be deleted. It ensures that
+	// all conditions remain in stict arithmetic sequence and prevents
+	// conditionIDs from colliding
+	let conditionIDs = Object.keys(this._conditions);
+	let conditionIndex = conditionIDs.indexOf(searchConditionID);
+	for (let i = conditionIndex + 1; i < conditionIDs.length; i++) {
+		let conditionID = conditionIDs[i];
+		this._conditions[conditionID - 1] = this._conditions[conditionID];
+		this._conditions[conditionID - 1].id = conditionID - 1;
+	}
+	// After all conditions are shifted, delete the last, empty one
+	delete this._conditions[this._maxSearchConditionID];
 	this._maxSearchConditionID--;
 	this._markFieldChange('conditions', this._conditions);
 	this._changed.conditions = true;
@@ -490,7 +523,7 @@ Zotero.Search.prototype.removeCondition = function (searchConditionID) {
 
 
 /*
- * Returns an array with 'condition', 'operator', 'value', 'required'
+ * Returns an array with 'condition', 'operator', 'value'
  * for the given searchConditionID
  */
 Zotero.Search.prototype.getCondition = function (searchConditionID){
@@ -513,8 +546,7 @@ Zotero.Search.prototype.getConditions = function (){
 			condition: condition.condition,
 			mode: condition.mode,
 			operator: condition.operator,
-			value: condition.value,
-			required: condition.required
+			value: condition.value
 		};
 	}
 	return conditions;
@@ -547,7 +579,9 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		this._requireData('conditions');
 	}
 	try {
-		if (!this._sql){
+		// Rebuild each run when a grouped fulltextContent is materialized into the SQL, so
+		// its matches reflect current full-text content rather than a cached set
+		if (!this._sql || this._hasEagerFullText){
 			await this._buildQuery();
 		}
 		
@@ -557,35 +591,32 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 				case 'fulltextContent':
 					var fulltextContent = true;
 					break;
-				
+
 				case 'includeParentsAndChildren':
 					if (condition.operator == 'true') {
 						var includeParentsAndChildren = true;
 					}
 					break;
-				
+
 				case 'includeParents':
 					if (condition.operator == 'true') {
 						var includeParents = true;
 					}
 					break;
-				
+
 				case 'includeChildren':
 					if (condition.operator == 'true') {
 						var includeChildren = true;
 					}
-					break;
-				
-				case 'blockStart':
-					var hasQuicksearch = true;
 					break;
 			}
 		}
 		
 		// Run a subsearch to define the superset of possible results
 		if (this._scope) {
-			// If subsearch has post-search filter, run and insert ids into temp table
-			if (this._scope.hasPostSearchFilter()) {
+			// If subsearch has post-search filter or a recursive scope,
+			// run and insert ids into temp table
+			if (this._scope.hasPostSearchFilter() || this._scope._scope) {
 				var ids = await this._scope.search();
 				if (!ids) {
 					return [];
@@ -643,22 +674,25 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 		//Zotero.debug(ids);
 		//Zotero.debug('Join mode: ' + this._joinMode);
 		
-		// Filter results with full-text search
+		// Filter top-level fulltextContent conditions with a full-text search (grouped
+		// ones are already in the SQL; see _buildQuery).
 		//
-		// If join mode ALL, return the (intersection of main and full-text word search)
-		// filtered by full-text content.
+		// If join mode ALL, return the intersection of the main search and full-text word
+		// search, filtered by full-text content.
 		//
-		// If join mode ANY or there's a quicksearch (which we assume fulltextContent is part of)
-		// and the main search is filtered by other conditions, return the union of the main search
-		// and (separate full-text word searches filtered by fulltext content).
+		// If join mode ANY and the main search is filtered by other conditions, return the
+		// union of the main search and (separate full-text word searches filtered by
+		// full-text content).
 		//
-		// If join mode ANY or there's a quicksearch and the main search isn't filtered, return just
-		// the union of (separate full-text word searches filtered by full-text content).
+		// If join mode ANY and the main search isn't filtered, return just the union of
+		// (separate full-text word searches filtered by full-text content).
 		var fullTextResults;
-		var joinModeAny = this._joinMode == 'any' || hasQuicksearch;
+		var joinModeAny = this._joinMode == 'any';
 		for (let condition of Object.values(this._conditions)) {
 			if (condition.condition != 'fulltextContent') continue;
-			
+			// Grouped fulltextContent is already in the SQL (materialized in _buildQuery)
+			if (this._eagerFullTextConditionIDs.has(condition.id)) continue;
+
 			if (!fullTextResults) {
 				// For join mode ANY, if we already filtered the main set, add those as results.
 				// Otherwise, start with an empty set.
@@ -667,85 +701,55 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 					: [];
 			}
 			
+			// The set of items this condition decides over: in ALL mode, the remaining main-search
+			// matches; in ANY mode, items in the library not already in the results
 			let scopeIDs;
-			// Regexp mode -- don't use full-text word index
-			let numSplits;
-			if (condition.mode && condition.mode.startsWith('regexp')) {
-				// In ANY mode, include items that haven't already been found, as long as they're in
-				// the right library
-				if (joinModeAny) {
-					let tmpTable = await Zotero.Search.idsToTempTable(fullTextResults);
-					let sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
-						+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
-					if (this.libraryID) {
-						sql += " AND libraryID=?";
-					}
-					let res = await Zotero.DB.valueQueryAsync(sql, this.libraryID, { noCache: true });
-					scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
-					await Zotero.DB.queryAsync("DROP TABLE " + tmpTable, false, { noCache: true });
-				}
-				// In ALL mode, include remaining items from the main search
-				else {
-					scopeIDs = ids;
-				}
-			}
-			// If not regexp mode, run a new search against the full-text word index for words in
-			// this phrase
-			else {
-				//Zotero.debug('Running subsearch against full-text word index');
-				let s = new Zotero.Search();
+			if (joinModeAny) {
+				let tmpTable = await Zotero.Search.idsToTempTable(fullTextResults);
+				let sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE "
+					+ "itemID NOT IN (SELECT itemID FROM " + tmpTable + ")";
 				if (this.libraryID) {
-					s.libraryID = this.libraryID;
+					sql += " AND libraryID=?";
 				}
-				let splits = Zotero.Fulltext.semanticSplitter(condition.value);
-				for (let split of splits){
-					s.addCondition('fulltextWord', condition.operator, split);
-				}
-				// If applicable, only search for words within specified scope (e.g. collection)
-				if (this._scope) {
-					s.setScope(this._scope, true);
-				}
-				numSplits = splits.length;
-				let wordMatches = await s.search();
-				
-				//Zotero.debug("Word index matches");
-				//Zotero.debug(wordMatches);
-				
-				// In ANY mode, include hits from word index that aren't already in the results
-				if (joinModeAny) {
-					let resultsSet = new Set(fullTextResults);
-					scopeIDs = wordMatches.filter(id => !resultsSet.has(id));
-				}
-				// In ALL mode, include the intersection of hits from word index and remaining
-				// main search matches
-				else {
-					let wordIDs = new Set(wordMatches);
-					scopeIDs = ids.filter(id => wordIDs.has(id));
-				}
+				let res = await Zotero.DB.valueQueryAsync(sql, this.libraryID, { noCache: true });
+				scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
+				await Zotero.DB.queryAsync("DROP TABLE " + tmpTable, false, { noCache: true });
 			}
-			
-			// If only one word, just use the results from the word index
-			let filteredIDs = [];
-			if (numSplits === 1) {
-				filteredIDs = scopeIDs;
+			else {
+				scopeIDs = ids;
 			}
-			// Search the full-text content
-			else if (scopeIDs.length) {
-				let found = new Set(
-					(await Zotero.Fulltext.findTextInItems(
+
+			// Find which of those items match the full-text content. Use the content index for
+			// ordinary terms, restricted to the scope up front so a multi-token term's
+			// verification scan (see findItemsWithContent) reads only in-scope candidates; fall
+			// back to scanning the cached text for regexp searches and for terms the index can't
+			// answer (findItemsWithContent returns null).
+			let contentMatches;
+			let indexMatches = (condition.mode && condition.mode.startsWith('regexp'))
+				? null
+				: await Zotero.FullText.findItemsWithContent(
+					condition.value, this.libraryID, scopeIDs
+				);
+			if (indexMatches !== null) {
+				contentMatches = new Set(indexMatches);
+			}
+			else {
+				contentMatches = new Set(
+					(await Zotero.FullText.findTextInItems(
 						scopeIDs,
 						condition.value,
 						condition.mode
 					)).map(x => x.id)
 				);
-				// Either include or exclude the results, depending on the operator
-				filteredIDs = scopeIDs.filter((id) => {
-					return found.has(id)
-						? condition.operator == 'contains'
-						: condition.operator == 'doesNotContain';
-				});
 			}
-			
+
+			// Either include or exclude the matches, depending on the operator
+			let filteredIDs = scopeIDs.filter((id) => {
+				return contentMatches.has(id)
+					? condition.operator == 'contains'
+					: condition.operator == 'doesNotContain';
+			});
+
 			//Zotero.debug("Filtered IDs:")
 			//Zotero.debug(filteredIDs);
 			
@@ -864,16 +868,22 @@ Zotero.Search.prototype.fromJSON = function (json, options = {}) {
 		this.name = json.name;
 	}
 	
-	Object.keys(this.getConditions()).forEach(id => this.removeCondition(id));
+	// Remove all conditions
+	while (Object.keys(this._conditions).length) {
+		this.removeCondition(Object.keys(this._conditions)[0]);
+	}
 	for (let i = 0; i < json.conditions.length; i++) {
 		let condition = json.conditions[i];
-		this.addCondition(
-			condition.condition,
-			condition.operator,
-			condition.value
-		);
+		// The obsolete `childNote` condition is replaced by `note` (see _loadConditions)
+		let name = condition.condition == 'childNote' ? 'note' : condition.condition;
+		this.addCondition(name, condition.operator, condition.value);
 	}
-	
+	// `childNote` returned the parent of a matching child note, so seed an item result level to
+	// roll the migrated `note` up to it (see _loadConditions)
+	if (json.conditions.some(c => c.condition == 'childNote')) {
+		this.addCondition('resultLevel', 'item');
+	}
+
 	if (json.deleted || this.deleted) {
 		this.deleted = !!json.deleted;
 	}
@@ -953,38 +963,115 @@ Zotero.Search.idsToTempTable = async function (ids, { idColumn = 'itemID' } = {}
 };
 
 
+/**
+ * Resolve the itemIDs in this search's library/scope whose full-text content matches `value`
+ * (per `mode`). Used to materialize a fulltextContent condition that sits inside a group, so it
+ * can take part in the SQL AND/OR tree (see _buildQuery). Always returns the *matching* set; the
+ * caller applies IN/NOT IN for the contains/doesNotContain operator.
+ */
+Zotero.Search.prototype._fullTextContentMatches = async function (value, mode) {
+	// The search scope's itemIDs (e.g., a collection), resolved before matching so both the
+	// index path (including a multi-token term's verification scan) and the fallback scan are
+	// restricted to in-scope items
+	let scopeIDs = null;
+	if (this._scope) {
+		let s = new Zotero.Search();
+		if (this.libraryID !== null) {
+			s.libraryID = this.libraryID;
+		}
+		s.setScope(this._scope, true);
+		scopeIDs = await s.search();
+		if (!scopeIDs.length) {
+			return [];
+		}
+	}
+	// For ordinary terms, match via the content index
+	if (!mode || !mode.startsWith('regexp')) {
+		let indexMatches = await Zotero.FullText.findItemsWithContent(
+			value, this.libraryID, scopeIDs
+		);
+		if (indexMatches !== null) {
+			return indexMatches;
+		}
+	}
+	// Regexp, or a term the index can't answer -- scan the cached text of every item in the
+	// library/scope
+	if (!scopeIDs) {
+		let s = new Zotero.Search();
+		if (this.libraryID !== null) {
+			s.libraryID = this.libraryID;
+		}
+		scopeIDs = await s.search();
+		if (!scopeIDs.length) {
+			return [];
+		}
+	}
+	let found = await Zotero.FullText.findTextInItems(scopeIDs, value, mode);
+	return found.map(x => x.id);
+};
+
+
 /*
  * Build the SQL query for the search
  */
 Zotero.Search.prototype._buildQuery = async function () {
 	this._requireData('conditions');
-	
+
+	// fulltextContent conditions nested inside a group are materialized into the SQL tree
+	// below (a plain itemID IN/NOT IN predicate) so they combine like any other condition.
+	// Track them so search()'s post-filter skips them, and so the query is rebuilt each run
+	// (full-text then reflects current content, as the post-filter does for top-level ones).
+	this._eagerFullTextConditionIDs = new Set();
+	this._hasEagerFullText = false;
+
 	var sql = 'SELECT itemID FROM items';
 	
 	var sqlParams = [];
-	// Separate ANY conditions for 'required' condition support
-	var anySQL = '';
-	var anySQLParams = [];
-	
+
 	var conditions = [];
-	
+
 	let lastCondition;
+	// Group nesting depth as the conditions are processed, so a fulltextContent inside a
+	// group can be told apart from a top-level one
+	let loopDepth = 0;
 	let conditionsToProcess = Object.values(this._conditions);
-	
-	// Process joinMode first, since other conditions may depend on it
+
+	// The search's top-level join mode, used by the full-text result merging in
+	// search(). Per-group join modes (including nested groups) are resolved from the
+	// 'joinMode' markers when the condition tree is assembled below, so the joinMode
+	// conditions are left in the stream rather than spliced out here. Only the
+	// top-level joinMode counts here, so skip any nested inside a group.
 	this._joinMode = 'all';
-	var joinModeIndex = conditionsToProcess.findIndex(cond => cond.condition == "joinMode");
-	if (joinModeIndex > -1) {
-		this._joinMode = conditionsToProcess.splice(joinModeIndex, 1)[0].operator;
+	// The result level the whole search returns. A top-level 'resultLevel' condition sets it;
+	// the default 'any' keeps the existing mixed-level behavior (no mapping, no
+	// level constraint on the result set).
+	let resultLevel = 'any';
+	let groupDepth = 0;
+	let foundJoinMode = false;
+	for (let cond of conditionsToProcess) {
+		if (cond.condition == 'groupStart') {
+			groupDepth++;
+		}
+		else if (cond.condition == 'groupEnd') {
+			groupDepth--;
+		}
+		else if (groupDepth == 0 && cond.condition == 'joinMode' && !foundJoinMode) {
+			this._joinMode = cond.operator;
+			foundJoinMode = true;
+		}
+		else if (groupDepth == 0 && cond.condition == 'resultLevel') {
+			resultLevel = cond.operator;
+		}
 	}
 	
-	for (let condition of conditionsToProcess) {
+	// Index-based so anyField can splice its expansion in place (see below)
+	for (let conditionIndex = 0; conditionIndex < conditionsToProcess.length; conditionIndex++) {
+		let condition = conditionsToProcess[conditionIndex];
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
 		
-		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
-		// TEMP: Or 'tag', which needs to match annotation parents
-		if (conditionData.table || name == 'savedSearch' || name == 'tempTable' || name == 'tag') {
+		// Has a table (or 'savedSearch'/'tempTable', which don't have a table but aren't special)
+		if (conditionData.table || name == 'savedSearch' || name == 'tempTable') {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
@@ -1005,11 +1092,13 @@ Zotero.Search.prototype._buildQuery = async function () {
 				alias: conditionData.name != name ? name : false,
 				table: conditionData.table,
 				field: conditionData.field,
+				normalizedField: conditionData.normalizedField,
 				operator: condition.operator,
 				value: condition.value,
 				flags: conditionData.flags,
-				required: condition.required,
-				inlineFilter: conditionData.inlineFilter
+				inlineFilter: conditionData.inlineFilter,
+				// Item level(s) this condition matches at, for cross-level mapping
+				level: Zotero.Search._conditionLevel(name, conditionData)
 			};
 			conditions.push(lastCondition);
 			
@@ -1065,56 +1154,115 @@ Zotero.Search.prototype._buildQuery = async function () {
 					continue;
 				
 				case 'fulltextContent':
-					// Handled in Search.search()
-					continue;
-				
-				// For quicksearch block markers
-				case 'blockStart':
-					conditions.push({name:'blockStart'});
-					continue;
-				case 'blockEnd':
-					conditions.push({name:'blockEnd'});
-					continue;
-				
-				case 'anyField':
-					// We expand this condition to the same underlying set of conditions as 'quicksearch-fields'
-					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
-					// is expanded in addCondition(), but we can't do that with this condition because we don't want
-					// to save the conditions it expands to in the search object
-					if (this._joinMode == 'all') {
-						// If joinMode is 'any', do not wrap conditions in quickSearch block so that
-						// they become just a series of OR statements. Otherwise, "Any Field" will
-						// conflict with all other conditions (if multiple conditions are present).
-						conditionsToProcess.push({ condition: 'blockStart' });
-					}
-					conditionsToProcess.push({
-						condition: 'field',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'tag',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'note',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					conditionsToProcess.push({
-						condition: 'creator',
-						operator: condition.operator,
-						value: condition.value,
-						required: false
-					});
-					if (this._joinMode == 'all') {
-						conditionsToProcess.push({ condition: 'blockEnd' });
+					// A fulltextContent inside a group -- or at the top level when a result
+					// level is set -- becomes an itemID predicate so it joins the SQL AND/OR
+					// tree and can be mapped to that level (full-text is indexed per
+					// attachment). A plain top-level one with no result level is left for the
+					// post-filter in search().
+					if (loopDepth > 0 || resultLevel != 'any') {
+						this._eagerFullTextConditionIDs.add(condition.id);
+						this._hasEagerFullText = true;
+						// Match via the index as a subquery -- no per-match itemID list to
+						// build or parse. Regexp searches, multi-token phrases (whose index
+						// matches are only candidates for a verification scan), and terms the
+						// index can't answer are materialized into an itemID list instead.
+						let subquery = (condition.mode && condition.mode.startsWith('regexp'))
+							? null
+							: Zotero.FullText.getContentSearchSQL(condition.value);
+						let predicate = {
+							name: '_fulltextContentPredicate',
+							operator: condition.operator,
+							// Full-text content is indexed per attachment, so matches are at
+							// the attachment level for cross-level mapping
+							level: 'attachment'
+						};
+						if (subquery) {
+							predicate.subquery = subquery;
+						}
+						else {
+							predicate.matchIDs = await this._fullTextContentMatches(
+								condition.value, condition.mode
+							);
+						}
+						conditions.push(predicate);
+						this._hasPrimaryConditions = true;
 					}
 					continue;
+
+				// Group markers, passed through to the condition tree assembled after the
+				// main loop. Reset lastCondition so inline-filter merging doesn't combine
+				// conditions across a group boundary.
+				case 'joinMode':
+					lastCondition = null;
+					conditions.push({ name: 'joinMode', operator: condition.operator });
+					continue;
+				case 'resultLevel':
+					lastCondition = null;
+					conditions.push({ name: 'resultLevel', operator: condition.operator });
+					continue;
+				case 'groupStart':
+					lastCondition = null;
+					loopDepth++;
+					conditions.push({ name: 'groupStart' });
+					continue;
+				case 'groupEnd':
+					lastCondition = null;
+					loopDepth--;
+					conditions.push({ name: 'groupEnd' });
+					continue;
+				
+				case 'anyField': {
+					// Expand to the same field set as 'quicksearch-fields' (without key
+					// detection or quoted/unquoted splitting). Done here rather than in
+					// addCondition() so the expansion isn't saved in the search object.
+					// Splice it in right after this condition so it's processed at the same
+					// nesting depth -- "Any Field" inside a group stays in that group.
+					// For positive operators this is an OR-group ("matches in any one of
+					// these fields"). For negative operators it must be an AND-group: "the
+					// value appears in none of these fields" holds only when every field
+					// fails to match (De Morgan), and an OR-group would match trivially for
+					// any item missing one of the fields.
+					let op = condition.operator;
+					let val = condition.value;
+					let joinMode = op == 'isNot' || op == 'doesNotContain' ? 'all' : 'any';
+					conditionsToProcess.splice(conditionIndex + 1, 0,
+						{ condition: 'groupStart', operator: 'true', value: '' },
+						{ condition: 'joinMode', operator: joinMode },
+						{ condition: 'field', operator: op, value: val },
+						{ condition: 'tag', operator: op, value: val },
+						{ condition: 'note', operator: op, value: val },
+						{ condition: 'annotationText', operator: op, value: val },
+						{ condition: 'annotationComment', operator: op, value: val },
+						{ condition: 'creator', operator: op, value: val },
+						{ condition: 'groupEnd', operator: 'true', value: '' }
+					);
+					continue;
+				}
+				
+				case 'titleCreatorYear': {
+					// Expand to the same field set as 'quicksearch-titleCreatorYear' (without
+					// key detection or the top-level-only restriction, which the result level
+					// now handles). Spliced in after this condition like 'anyField' above.
+					// An OR-group for positive operators; an AND-group for negative ones, so
+					// "does not contain"/"is not" matches only when the value is absent from
+					// every field (see 'anyField' above).
+					let op = condition.operator;
+					let val = condition.value;
+					let joinMode = op == 'isNot' || op == 'doesNotContain' ? 'all' : 'any';
+					conditionsToProcess.splice(conditionIndex + 1, 0,
+						{ condition: 'groupStart', operator: 'true', value: '' },
+						{ condition: 'joinMode', operator: joinMode },
+						{ condition: 'title', operator: op, value: val },
+						{ condition: 'publicationTitle', operator: op, value: val },
+						{ condition: 'shortTitle', operator: op, value: val },
+						{ condition: 'court', operator: op, value: val },
+						{ condition: 'year', operator: op, value: val },
+						{ condition: 'citationKey', operator: op, value: val },
+						{ condition: 'creator', operator: op, value: val },
+						{ condition: 'groupEnd', operator: 'true', value: '' }
+					);
+					continue;
+				}
 			}
 			
 			throw new Error('Unhandled special condition ' + name);
@@ -1189,11 +1337,72 @@ Zotero.Search.prototype._buildQuery = async function () {
 		sql += " AND (itemID IN (SELECT itemID FROM items WHERE libraryID=?))";
 		sqlParams.push(this.libraryID);
 	}
-	
+
+	// Result level: constrain the result set to one item level. The default
+	// ('any') leaves the mixed-level result unchanged.
+	switch (resultLevel) {
+		case 'item':
+			// Top-level items only (exclude child attachments/notes and annotations)
+			sql += " AND (itemID NOT IN (SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL) "
+				+ "AND itemID NOT IN (SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL) "
+				+ "AND itemID NOT IN (SELECT itemID FROM itemAnnotations))";
+			break;
+		case 'attachment':
+			sql += " AND (itemID IN (SELECT itemID FROM itemAttachments))";
+			break;
+		case 'note':
+			sql += " AND (itemID IN (SELECT itemID FROM itemNotes))";
+			break;
+		case 'annotation':
+			sql += " AND (itemID IN (SELECT itemID FROM itemAnnotations))";
+			break;
+	}
+
 	if (this._hasPrimaryConditions) {
-		sql += " AND ";
-		
+		// Each condition produces a self-contained "itemID [NOT] IN (...)" predicate.
+		// Markers and predicates are collected here in document order, then assembled
+		// into a (possibly nested) tree of AND/OR groups below.
+		let builtConditions = [];
+
 		for (let condition of Object.values(conditions)){
+				// Group markers and per-group join modes are handled when the tree is
+				// assembled, not as SQL predicates
+				if (condition.name == 'groupStart') {
+					builtConditions.push({ marker: 'groupStart' });
+					continue;
+				}
+				if (condition.name == 'groupEnd') {
+					builtConditions.push({ marker: 'groupEnd' });
+					continue;
+				}
+				if (condition.name == 'joinMode') {
+					builtConditions.push({ marker: 'joinMode', operator: condition.operator });
+					continue;
+				}
+				if (condition.name == 'resultLevel') {
+					builtConditions.push({ marker: 'resultLevel', operator: condition.operator });
+					continue;
+				}
+				// A grouped fulltextContent turned into an itemID predicate (above): a direct
+				// index subquery when possible, otherwise a materialized itemID list
+				if (condition.name == '_fulltextContentPredicate') {
+					let op = condition.operator == 'doesNotContain' ? 'NOT IN' : 'IN';
+					let sql, params = [];
+					if (condition.subquery) {
+						sql = 'itemID ' + op + ' (' + condition.subquery.sql + ')';
+						params = condition.subquery.params;
+					}
+					else if (!condition.matchIDs.length) {
+						// No matches: 'contains' matches nothing, 'doesNotContain' matches all
+						sql = condition.operator == 'doesNotContain' ? '1' : '0';
+					}
+					else {
+						sql = 'itemID ' + op + ' (' + condition.matchIDs.join(',') + ')';
+					}
+					builtConditions.push({ sql, params, level: condition.level });
+					continue;
+				}
+
 				var skipOperators = false;
 				var openParens = 0;
 				var condSQL = '';
@@ -1206,7 +1415,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 				// Special table handling
 				//
 				if (condition.table) {
-					let negationOperators = ['isNot', 'doesNotContain'];
+					let negationOperators = ['isNot', 'doesNotContain', 'isEmpty'];
 					let isNegationOperator = negationOperators.includes(condition.operator);
 					
 					condSelectSQL += 'itemID '
@@ -1215,29 +1424,22 @@ Zotero.Search.prototype._buildQuery = async function () {
 					}
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
-					
-					// TEMP: Don't match annotations for negation operators, since it would result in
-					// all parent attachments being returned
-					if (isNegationOperator) {
-						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
+
+					// A negation matches every item that lacks the value, but only one item level
+					// is a plausible match: a non-annotation condition (item metadata, tags) would
+					// otherwise return nearly every annotation, and an annotation condition (text,
+					// color, etc.) would return nearly every non-annotation. Exclude the wrong
+					// level. When a result level is set, the result-level constraint already
+					// restricts to that level (and the cross-level mapping handles negation), so
+					// this only applies to the default path.
+					if (isNegationOperator && resultLevel == 'any') {
+						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID"
+							+ (condition.level == 'annotation' ? "!=" : "=")
 							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
 					}
-					
-					switch (condition.name) {
-						case 'tag':
-							condSQL += "SELECT itemID FROM itemTags "
-								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
-							break;
-						
-						case 'annotationText':
-						case 'annotationComment':
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`
-							break;
-							
-						default:
-							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
-					}
-					
+
+					condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
+
 					openParens = 1;
 				}
 				
@@ -1424,10 +1626,61 @@ Zotero.Search.prototype._buildQuery = async function () {
 						}
 						skipOperators = true;
 						break;
+
+					case 'attachmentStorageType': {
+						let linkModes;
+						switch (condition.value) {
+							case 'storedFile':
+								linkModes = [
+									Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+									Zotero.Attachments.LINK_MODE_IMPORTED_URL
+								];
+								break;
+
+							case 'linkedFile':
+								linkModes = [
+									Zotero.Attachments.LINK_MODE_LINKED_FILE
+								];
+								break;
+
+							case 'webLink':
+								linkModes = [
+									Zotero.Attachments.LINK_MODE_LINKED_URL
+								];
+								break;
+
+							default:
+								throw ("Invalid attachmentStorageType '" + condition.value
+									+ "' specified in search.js");
+						}
+						condSQL += `linkMode IN (${linkModes.map(() => '?').join(', ')})`;
+						condSQLParams.push(...linkModes);
+						skipOperators = true;
+						break;
+					}
 					
 					case 'tag':
 						condSQL += "tagID IN (SELECT tagID FROM tags WHERE ";
 						openParens++;
+						break;
+					
+					// Only regular items can have child notes/attachments, so don't match
+					// other rows, which would all have a count of 0
+					case 'numNotes':
+					case 'numAttachments':
+						condSQL += "itemTypeID NOT IN ("
+							+ ['note', 'attachment', 'annotation']
+								.map(t => Zotero.ItemTypes.getID(t)).join(', ')
+							+ ") AND ";
+						break;
+					
+					// Annotations belong to an attachment (the row itself) or to a regular
+					// item's attachments, so don't match rows that can't have them
+					case 'numAnnotations':
+						condSQL += "itemTypeID NOT IN ("
+							+ ['note', 'annotation']
+								.map(t => Zotero.ItemTypes.getID(t)).join(', ')
+							+ ") AND ";
 						break;
 					
 					case 'creator':
@@ -1445,39 +1698,56 @@ Zotero.Search.prototype._buildQuery = async function () {
 						break;
 					}
 					
-					case 'childNote':
-						condSQL += "itemID IN (SELECT parentItemID FROM "
-							+ "itemNotes WHERE ";
+					// The annotation's creator lives in groupItems, so restrict the annotation
+					// FROM above to items created by the given user
+					case 'annotationAuthor':
+						condSQL += "itemID IN (SELECT itemID FROM groupItems WHERE ";
 						openParens++;
 						break;
-					
-					case 'fulltextWord':
-						condSQL += "wordID IN (SELECT wordID FROM fulltextWords "
-							+ "WHERE ";
-						openParens++;
+
+					// Match note text content via the note FTS index (case- and
+					// diacritic-insensitive) when it can answer the term; otherwise fall
+					// through to the LIKE scan of the note HTML
+					case 'note': {
+						if (typeof condition.value == 'string'
+								&& ['contains', 'doesNotContain'].includes(condition.operator)) {
+							let noteMatch = await Zotero.FullText.getNoteContentSQL(condition.value);
+							if (noteMatch) {
+								condSQL += noteMatch.sql;
+								condSQLParams.push(...noteMatch.params);
+								skipOperators = true;
+							}
+						}
 						break;
-					
+					}
+
 					case 'tempTable':
 						condSQL += "itemID IN (SELECT id FROM " + condition.value + ")";
-						skipOperators = true;
-						break;
-						
-					// For quicksearch blocks
-					case 'blockStart':
-					case 'blockEnd':
 						skipOperators = true;
 						break;
 				}
 				
 				if (!skipOperators) {
+					// isEmpty/isNotEmpty match any row with a value -- the IN/NOT IN structure
+					// above does the real work -- so use an always-true predicate in place of a
+					// value comparison
+					if (condition.operator == 'isEmpty' || condition.operator == 'isNotEmpty') {
+						condSQL += '1';
+					}
+					
 					// Special handling for date fields
 					//
 					// Note: We assume full datetimes are already UTC and don't
 					// need to be handled specially
-					if ((condition.name == 'dateAdded'
+					//
+					// Text operators on a date field compare the stored value
+					// like any other field, so they skip this
+					else if ((condition.name == 'dateAdded'
 							|| condition.name == 'dateModified'
 							|| condition.name == 'lastRead'
 							|| condition.name == 'datefield')
+							&& ['is', 'isNot', 'isBefore', 'isAfter', 'isInTheLast']
+								.includes(condition.operator)
 							&& !Zotero.Date.isSQLDateTime(condition.value)) {
 						
 						// TODO: document these flags
@@ -1579,9 +1849,11 @@ Zotero.Search.prototype._buildQuery = async function () {
 										break;
 									
 									case 'isBefore':
+										// A date without a sortable year is stored
+										// as 0000-..., which isn't before anything
 										condSQL += '<?';
-										condSQL += ' AND ' + condition['field'] +
-											">'0000-00-00'";
+										condSQL += ' AND SUBSTR(' + condition['field']
+											+ ", 1, 10)>'0000-00-00'";
 										break;
 										
 									case 'isAfter':
@@ -1621,6 +1893,17 @@ Zotero.Search.prototype._buildQuery = async function () {
 					
 					// Non-date fields
 					else {
+						// For text conditions, match against the normalized shadow column
+						// with a normalized search term, so that e.g. "seance" matches
+						// "séance" and vice versa
+						var useNormalized = condition.normalizedField
+							&& typeof condition.value == 'string'
+							&& ['contains', 'doesNotContain', 'beginsWith', 'is', 'isNot']
+								.includes(condition.operator);
+						var searchValue = useNormalized
+							? Zotero.Utilities.Internal.normalizeForSearch(condition.value)
+							: condition.value;
+						
 						switch (condition.operator) {
 							// Cast strings as integers for < and > comparisons,
 							// at least until 
@@ -1638,7 +1921,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 								break;
 								
 							default:
-								condSQL += condition['field'];
+								condSQL += useNormalized ? condition.normalizedField : condition['field'];
 						}
 						
 						switch (condition['operator']){
@@ -1650,10 +1933,10 @@ Zotero.Search.prototype._buildQuery = async function () {
 								if (condition['flags'] &&
 										condition['flags']['leftbound'] &&
 										Zotero.Prefs.get('search.useLeftBound')) {
-									condSQLParams.push(condition['value'] + '%');
+									condSQLParams.push(searchValue + '%');
 								}
 								else {
-									condSQLParams.push('%' + condition['value'] + '%');
+									condSQLParams.push('%' + searchValue + '%');
 								}
 								break;
 								
@@ -1693,15 +1976,18 @@ Zotero.Search.prototype._buildQuery = async function () {
 										break;
 									}
 									else {
-										condSQL += '=?';
+										// Searching is case-insensitive
+										// everywhere else, so an exact match is
+										// too
+										condSQL += '=? COLLATE NOCASE';
 									}
-									condSQLParams.push(condition['value']);
+									condSQLParams.push(searchValue);
 								}
 								break;
 							
 							case 'beginsWith':
 								condSQL += ' LIKE ?';
-								condSQLParams.push(condition['value'] + '%');
+								condSQLParams.push(searchValue + '%');
 								break;
 							
 							case 'isLessThan':
@@ -1771,64 +2057,454 @@ Zotero.Search.prototype._buildQuery = async function () {
 					condSQL += ')';
 				}
 				
-				// Little hack to support multiple quicksearch words
-				if (condition['name'] == 'blockStart') {
-					var inQS = true;
-					var qsSQL = '';
-					var qsParams = [];
-					continue;
-				}
-				else if (condition['name'] == 'blockEnd') {
-					inQS = false;
-					// Strip ' OR ' from last condition
-					qsSQL = qsSQL.substring(0, qsSQL.length-4);
-					
-					// Add to existing quicksearch words
-					if (!quicksearchSQLSet) {
-						var quicksearchSQLSet = [];
-						var quicksearchParamsSet = [];
-					}
-					quicksearchSQLSet.push(qsSQL);
-					quicksearchParamsSet.push(qsParams);
-				}
-				else if (inQS) {
-					qsSQL += condSQL + ' OR ';
-					qsParams = qsParams.concat(condSQLParams);
-				}
-				// Keep non-required conditions separate if in ANY mode
-				else if (!condition.required && this._joinMode == 'any') {
-					anySQL += condSQL + ' OR ';
-					anySQLParams = anySQLParams.concat(condSQLParams);
-				}
-				else {
-					condSQL += ' AND ';
-					sql += condSQL;
-					sqlParams = sqlParams.concat(condSQLParams);
-				}
+				builtConditions.push({
+					sql: condSQL,
+					params: condSQLParams,
+					level: condition.level || 'item',
+					negate: condition.operator == 'isNot' || condition.operator == 'doesNotContain'
+						|| condition.operator == 'isEmpty'
+				});
 		}
-		
-		// Add on ANY conditions
-		if (anySQL){
-			sql += '(' + anySQL;
-			sqlParams = sqlParams.concat(anySQLParams);
-			sql = sql.substring(0, sql.length-4); // remove last ' OR '
-			sql += ')';
-		}
-		else {
-			sql = sql.substring(0, sql.length-5); // remove last ' AND '
-		}
-		
-		// Add on quicksearch conditions
-		if (quicksearchSQLSet) {
-			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
-				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
-			
-			for (var k=0; k<quicksearchParamsSet.length; k++) {
-				sqlParams = sqlParams.concat(quicksearchParamsSet[k]);
-			}
+
+		// Combine the collected predicates and group markers into a single predicate
+		// (see Zotero.Search.combineConditions)
+		let combined = Zotero.Search.combineConditions(builtConditions, resultLevel);
+		if (combined.sql) {
+			sql += " AND " + combined.sql;
+			sqlParams = sqlParams.concat(combined.params);
 		}
 	}
 	
 	this._sql = sql;
 	this._sqlParams = sqlParams.length ? sqlParams : false;
+};
+
+
+/**
+ * Combine an ordered list of built condition predicates and group markers into a single SQL
+ * predicate.
+ *
+ * Each item in `builtConditions` is either a predicate { sql, params } or a group
+ * marker { marker: 'groupStart' | 'groupEnd' | 'joinMode', operator }. groupStart/groupEnd
+ * delimit nested groups and a 'joinMode' marker sets its enclosing group's mode.
+ *
+ * For example, conditions built as
+ *
+ *   search.addCondition('joinMode', 'all');
+ *   search.addCondition('title', 'contains', 'foo');
+ *   search.addCondition('groupStart', 'true', '');
+ *   search.addCondition('joinMode', 'any');
+ *   search.addCondition('tag', 'is', 'x');
+ *   search.addCondition('tag', 'is', 'y');
+ *   search.addCondition('groupEnd', 'true', '');
+ *
+ * combine to "title contains 'foo' AND (tag is 'x' OR tag is 'y')". The 'true' operator on the
+ * group markers is an unused placeholder -- they carry no value, but a condition's operator
+ * can't be empty.
+ *
+ * In 'all' mode a group's children are ANDed; in 'any' mode they're ORed.
+ *
+ * A group may also carry a 'resultLevel' marker (a level: 'item'/'attachment'/'note'/'annotation'),
+ * placed inside the group like 'joinMode'. When the result level is a descendant level of the
+ * enclosing row, the group's conditions are matched against descendants and mapped up to
+ * the parent (see Zotero.Search.mapPredicate) -- e.g., "the item has an annotation
+ * matching these conditions".
+ *
+ * @param {Object[]} builtConditions
+ * @param {String} [rootLevel='any'] - The result level the whole search returns ('any' leaves
+ *     the mixed-level default unchanged; otherwise each condition is mapped to this level)
+ * @return {{ sql: String, params: Array }} Combined predicate (sql is '' if nothing to combine)
+ */
+Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') {
+	let root = { children: [] };
+	let groupStack = [root];
+	for (let item of builtConditions) {
+		let group = groupStack[groupStack.length - 1];
+		if (item.marker == 'groupStart') {
+			let child = { children: [] };
+			group.children.push(child);
+			groupStack.push(child);
+		}
+		else if (item.marker == 'groupEnd') {
+			// Ignore an unbalanced end marker rather than popping the root
+			if (groupStack.length > 1) {
+				groupStack.pop();
+			}
+		}
+		else if (item.marker == 'joinMode') {
+			// First one wins, matching _buildQuery()
+			if (!group.joinMode) {
+				group.joinMode = item.operator;
+			}
+		}
+		else if (item.marker == 'resultLevel') {
+			group.level = item.operator;
+		}
+		else {
+			group.children.push(item);
+		}
+	}
+
+	// Reduce a group node to a single { sql, params } predicate. parentLevel is the level the
+	// enclosing row is at; the root is a top-level item.
+	let combineGroup = (node, parentLevel) => {
+		// The level this group's children are matched at -- its own result level if set, otherwise
+		// the enclosing level
+		let level = node.level || parentLevel;
+		let requiredParts = [];
+		let requiredParams = [];
+		let optionalParts = [];
+		let optionalParams = [];
+		for (let child of node.children) {
+			let result = child.children ? combineGroup(child, level) : child;
+			if (!result.sql) {
+				continue;
+			}
+			// A leaf condition's predicate selects itemIDs at its own natural level; if that
+			// differs from this group's level, map it to that level so the group's
+			// children combine at a single level. Nested groups are already mapped to
+			// their own level by the combineGroup() call above.
+			let childSQL = result.sql;
+			if (!child.children) {
+				childSQL = Zotero.Search.mapPredicate(childSQL, result.level || 'item', level, result.negate);
+			}
+			// When mapping reduces a predicate to a constant ('0'/'1' -- e.g., a condition
+			// whose level can't reach the result level), its placeholders are gone, so drop its params
+			let childParams = (childSQL === '0' || childSQL === '1') ? [] : result.params;
+			// Unset joinMode means the default 'all'
+			if (node.joinMode != 'any') {
+				requiredParts.push(childSQL);
+				requiredParams = requiredParams.concat(childParams);
+			}
+			else {
+				optionalParts.push(childSQL);
+				optionalParams = optionalParams.concat(childParams);
+			}
+		}
+		let parts = [];
+		let params = [];
+		if (requiredParts.length) {
+			parts.push(requiredParts.join(' AND '));
+			params = params.concat(requiredParams);
+		}
+		if (optionalParts.length) {
+			parts.push(optionalParts.length > 1
+				? '(' + optionalParts.join(' OR ') + ')'
+				: optionalParts[0]);
+			params = params.concat(optionalParams);
+		}
+		if (!parts.length) {
+			return { sql: '', params: [] };
+		}
+		let sql = parts.length > 1 ? '(' + parts.join(' AND ') + ')' : parts[0];
+		// Map this group to the enclosing row's level. A 'any' enclosing level (the
+		// mixed-level default) has no row level of its own, so a descendant group with a result level
+		// anchors to the top-level item ("the item has a descendant match").
+		let target = parentLevel == 'any' ? 'item' : parentLevel;
+		if (node.level && node.level != 'any' && node.level != target) {
+			sql = Zotero.Search.mapPredicate(sql, node.level, target);
+		}
+		return {
+			sql,
+			// Mapping to a constant drops the placeholders, so drop the params too
+			params: (sql === '0' || sql === '1') ? [] : params
+		};
+	};
+
+	return combineGroup(root, rootLevel);
+};
+
+
+// The item hierarchy used for cross-level mapping: each child level maps to its parent
+// level via (itemID -> parentItemID) in the given table. 'item' is the top level.
+Zotero.Search._levelParent = {
+	annotation: 'attachment',
+	attachment: 'item',
+	note: 'item'
+};
+Zotero.Search._levelChildTable = {
+	annotation: 'itemAnnotations',
+	attachment: 'itemAttachments',
+	note: 'itemNotes'
+};
+// Attachments and notes can be top-level (parentItemID NULL); annotations always have a parent
+Zotero.Search._levelCanBeStandalone = {
+	annotation: false,
+	attachment: true,
+	note: true
+};
+
+/**
+ * Whether `anc` is an ancestor level of `desc` in the item hierarchy (e.g., 'item' is an
+ * ancestor of 'annotation'; 'attachment' is an ancestor of 'annotation'; 'note' and
+ * 'annotation' are unrelated).
+ */
+Zotero.Search._isAncestorLevel = function (anc, desc) {
+	let l = desc;
+	while (l != 'item') {
+		l = Zotero.Search._levelParent[l];
+		if (!l) {
+			return false;
+		}
+		if (l == anc) {
+			return true;
+		}
+	}
+	return false;
+};
+
+/**
+ * The number of parent hops between two levels in either direction, or null if they're on
+ * unrelated branches (e.g., note and annotation).
+ */
+Zotero.Search._levelDistance = function (a, b) {
+	let l = a;
+	let d = 0;
+	while (l && l != b) {
+		l = Zotero.Search._levelParent[l];
+		d++;
+	}
+	if (l == b) {
+		return d;
+	}
+	l = b;
+	d = 0;
+	while (l && l != a) {
+		l = Zotero.Search._levelParent[l];
+		d++;
+	}
+	return l == a ? d : null;
+};
+
+/**
+ * Given the levels a condition matches at, return the one closest (fewest hops) to `toLevel`,
+ * or null if none is related to it. Used to map a multi-level field from a single level.
+ */
+Zotero.Search._closestRelatedLevel = function (levels, toLevel) {
+	let best = null;
+	let bestDist = Infinity;
+	for (let level of levels) {
+		if (level == 'any') {
+			continue;
+		}
+		let d = Zotero.Search._levelDistance(level, toLevel);
+		if (d !== null && d < bestDist) {
+			best = level;
+			bestDist = d;
+		}
+	}
+	return best;
+};
+
+/**
+ * The item level(s) a condition matches at, for cross-level mapping. A condition
+ * definition can set `level` explicitly; otherwise it defaults to the top-level item, except
+ * for the few itemData fields that attachments also have (title, url, accessDate per the
+ * schema), which match at either the item or the attachment level.
+ *
+ * A condition that stands in for a whole set of fields -- the generic 'field' condition that
+ * 'Any Field' expands to -- is matched against every field in the set, so it matches wherever
+ * any one of them lives.
+ */
+Zotero.Search._conditionLevel = function (name, conditionData) {
+	if (conditionData.level) {
+		return conditionData.level;
+	}
+	if (conditionData.table == 'itemData') {
+		let fields = (name == conditionData.name ? conditionData.aliases : null) || [name];
+		let attachmentTypeID = Zotero.ItemTypes.getID('attachment');
+		let onAttachment = fields.some((field) => {
+			let fieldID = Zotero.ItemFields.getID(field);
+			return fieldID && Zotero.ItemFields.isValidForType(fieldID, attachmentTypeID);
+		});
+		if (onAttachment) {
+			return ['item', 'attachment'];
+		}
+	}
+	return 'item';
+};
+
+/**
+ * Rewrite a predicate that selects itemIDs at `fromLevel` so it instead constrains itemIDs at
+ * `toLevel`, mapping through the item hierarchy:
+ *
+ *   - `toLevel` of 'any', or `toLevel` is one of the levels the condition matches at -- the
+ *     condition natively selects rows at the result level, so it's returned unchanged (the
+ *     result-level FROM filters to the right rows). This is how a multi-level field like title
+ *     matches item titles at the item level and attachment titles at the attachment level.
+ *   - `fromLevel` 'any' (level-agnostic, e.g., tag) -- the match rolls UP to the result level:
+ *     a `toLevel` item matches if it or any descendant carries it. Up only -- a parent's tag
+ *     isn't the child's. Skipped for a negated match (rolling up "isn't tagged" is ambiguous).
+ *   - `toLevel` an ancestor of `fromLevel` -- "the row has a descendant matching" (map up)
+ *   - `toLevel` a descendant of `fromLevel` -- "the row's ancestor matches" (map down)
+ *   - unrelated branches (e.g., note vs annotation) -- nothing can satisfy both, so '0'
+ *
+ * @param {String} sql - A predicate in terms of the `fromLevel` itemID
+ * @param {String|String[]} fromLevel - The level(s) the predicate selects ('item'/'attachment'/
+ *     'note'/'annotation'/'any'); an array for a field that exists at more than one level
+ * @param {String} toLevel - The level to constrain instead
+ * @param {Boolean} [negated] - Whether the predicate is a negation (isNot/doesNotContain/isEmpty); a
+ *     negated level-agnostic match is left at its own level rather than rolled up
+ * @return {String} A predicate in terms of the `toLevel` itemID
+ */
+Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false) {
+	if (toLevel == 'any') {
+		return sql;
+	}
+
+	// A condition may match at more than one level (e.g., an itemData field like title, which
+	// exists on both top-level items and attachments), so normalize to an array
+	let fromLevels = Array.isArray(fromLevel) ? fromLevel : [fromLevel];
+
+	if (fromLevels.length == 1 && fromLevels[0] == 'any') {
+		// Level-agnostic (e.g., tag): roll a positive match up to the result level; leave a
+		// negation at its carrying level (see above)
+		return negated ? sql : Zotero.Search._rollUpAnyToLevel(sql, toLevel);
+	}
+
+	// The condition already selects rows at the result level (it natively matches there), so
+	// the result-level FROM filters to the right rows -- no mapping needed
+	if (fromLevels.includes(toLevel)) {
+		return sql;
+	}
+
+	// Otherwise map from the one level in the set closest to the result level -- a
+	// descendant match up or an ancestor match down. Referencing the predicate's SQL exactly
+	// once keeps its bound parameters from being duplicated, so map from a single level.
+	let from = Zotero.Search._closestRelatedLevel(fromLevels, toLevel);
+	if (!from) {
+		// No level in the set is related to the result level (e.g., note vs annotation)
+		return '0';
+	}
+
+	// itemIDs at `from` matching the predicate
+	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+
+	// Walk a child level up to its parent: SELECT the parentItemID of matching child rows.
+	// A standalone-capable level (attachment/note) can be a top-level item itself, so map a
+	// standalone row (no parent) to its own itemID rather than dropping it, matching the
+	// level-agnostic roll-up in _rollUpAnyToLevel.
+	let mapUp = (inner, from, to) => {
+		let l = from;
+		let s = inner;
+		while (l != to) {
+			let table = Zotero.Search._levelChildTable[l];
+			let select = Zotero.Search._levelCanBeStandalone[l]
+				? 'COALESCE(parentItemID, itemID)' : 'parentItemID';
+			s = `SELECT ${select} FROM ${table} WHERE itemID IN (${s})`;
+			l = Zotero.Search._levelParent[l];
+			if (!l) {
+				return null;
+			}
+		}
+		return s;
+	};
+
+	// Walk an ancestor level down to a descendant: SELECT the child rows whose parent matches,
+	// repeated for each step from `from` down to `to`
+	let mapDown = (inner, from, to) => {
+		let path = [];
+		let l = to;
+		while (l != from) {
+			path.push(l);
+			l = Zotero.Search._levelParent[l];
+			if (!l) {
+				return null;
+			}
+		}
+		let s = inner;
+		for (let i = path.length - 1; i >= 0; i--) {
+			let table = Zotero.Search._levelChildTable[path[i]];
+			s = `SELECT itemID FROM ${table} WHERE parentItemID IN (${s})`;
+		}
+		return s;
+	};
+
+	// A multi-level field (e.g. title, which exists on both the top-level item and an attachment)
+	// targeting a descendant should match if *any* of those ancestor levels has the value -- an
+	// annotation matches when its parent attachment OR its top-level item has the title (and a
+	// snapshot's URL stays matchable at the attachment level). Map down from each such ancestor
+	// and union them, testing the predicate once (a single `anc IN (...)`) so its bound parameters
+	// aren't duplicated. A negation keeps the single-level behavior below.
+	let ancestorLevels = fromLevels.filter(
+		l => l != 'any' && Zotero.Search._isAncestorLevel(l, toLevel));
+	if (!negated && ancestorLevels.length > 1) {
+		// (toLevel itemID, ancestor itemID) pairs, walking from toLevel up to `anc`. A standalone
+		// attachment/note has no parent, so it stands in as its own top-level item (COALESCE).
+		let pairsTo = (anc) => {
+			let levels = [];
+			let l = toLevel;
+			while (l != anc) {
+				levels.push(l);
+				l = Zotero.Search._levelParent[l];
+			}
+			let aliases = levels.map((_, i) => 't' + i);
+			let fromSQL = `${Zotero.Search._levelChildTable[levels[0]]} ${aliases[0]}`;
+			for (let i = 1; i < levels.length; i++) {
+				fromSQL += ` JOIN ${Zotero.Search._levelChildTable[levels[i]]} ${aliases[i]}`
+					+ ` ON ${aliases[i]}.itemID = ${aliases[i - 1]}.parentItemID`;
+			}
+			let last = aliases[aliases.length - 1];
+			let lastLevel = levels[levels.length - 1];
+			let ancExpr = Zotero.Search._levelCanBeStandalone[lastLevel]
+				? `COALESCE(${last}.parentItemID, ${last}.itemID)`
+				: `${last}.parentItemID`;
+			return `SELECT ${aliases[0]}.itemID AS itemID, ${ancExpr} AS anc FROM ${fromSQL}`;
+		};
+		let union = ancestorLevels.map(pairsTo).join(' UNION ALL ');
+		return `itemID IN (SELECT itemID FROM (${union}) WHERE anc IN (${matches}))`;
+	}
+
+	let mapped = Zotero.Search._isAncestorLevel(toLevel, from)
+		? mapUp(matches, from, toLevel)
+		: mapDown(matches, from, toLevel);
+	if (mapped === null) {
+		return '0';
+	}
+	return `itemID IN (${mapped})`;
+};
+
+
+/**
+ * Roll a level-agnostic predicate (e.g., tag) up to a result level: select `toLevel` items
+ * that themselves -- or any descendant -- match. Up only (an ancestor's match doesn't count).
+ *
+ * The predicate's own SQL is referenced exactly once (inside a subquery) so its bound
+ * parameters aren't duplicated.
+ *
+ * @param {String} sql - A predicate in terms of an itemID at any level
+ * @param {String} toLevel - 'item' / 'attachment' / 'note' / 'annotation'
+ * @return {String} A predicate in terms of the `toLevel` itemID
+ */
+Zotero.Search._rollUpAnyToLevel = function (sql, toLevel) {
+	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+	switch (toLevel) {
+		// No descendants below these, so only a match at the level itself counts
+		case 'annotation':
+			return `itemID IN (SELECT itemID FROM itemAnnotations WHERE itemID IN (${matches}))`;
+		case 'note':
+			return `itemID IN (SELECT itemID FROM itemNotes WHERE itemID IN (${matches}))`;
+		// An attachment matches if it, or one of its annotations, matches
+		case 'attachment':
+			return "itemID IN ("
+				+ "SELECT COALESCE(att.itemID, annot.parentItemID) "
+				+ `FROM (${matches}) m `
+				+ "LEFT JOIN itemAttachments att ON att.itemID = m.itemID "
+				+ "LEFT JOIN itemAnnotations annot ON annot.itemID = m.itemID "
+				+ "WHERE att.itemID IS NOT NULL OR annot.itemID IS NOT NULL)";
+		// A top-level item matches if it, or any descendant (attachment, note, or an
+		// annotation of an attachment), matches
+		case 'item':
+		default:
+			// For an annotation, prefer its attachment's parent, but fall back to the
+			// attachment itself (annot.parentItemID) when the attachment is standalone
+			return "itemID IN ("
+				+ "SELECT COALESCE(aAtt.parentItemID, annot.parentItemID, att.parentItemID, note.parentItemID, m.itemID) "
+				+ `FROM (${matches}) m `
+				+ "LEFT JOIN itemAttachments att ON att.itemID = m.itemID AND att.parentItemID IS NOT NULL "
+				+ "LEFT JOIN itemNotes note ON note.itemID = m.itemID AND note.parentItemID IS NOT NULL "
+				+ "LEFT JOIN itemAnnotations annot ON annot.itemID = m.itemID "
+				+ "LEFT JOIN itemAttachments aAtt ON aAtt.itemID = annot.parentItemID"
+				+ ")";
+	}
 };

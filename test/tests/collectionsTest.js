@@ -101,4 +101,62 @@ describe("Zotero.Collections", function () {
 			assert.notInstanceOf(collection, Zotero.Feed);
 		});
 	});
+	
+	describe("#getRecent()", function () {
+		it("should list collections most recently added first", async function () {
+			var col1 = await createDataObject('collection');
+			var col2 = await createDataObject('collection');
+			
+			Zotero.Collections.addToRecent(col1);
+			Zotero.Collections.addToRecent(col2);
+			assert.sameOrderedMembers(Zotero.Collections.getRecent().slice(0, 2), [col2, col1]);
+			
+			// Adding a collection again moves it to the front without duplicating it
+			Zotero.Collections.addToRecent(col1);
+			assert.sameOrderedMembers(Zotero.Collections.getRecent().slice(0, 2), [col1, col2]);
+		});
+		
+		it("should drop the oldest collection past the maximum for each library", async function () {
+			var group = await createGroup();
+			var groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			Zotero.Collections.addToRecent(groupCollection);
+			
+			var collections = [];
+			for (let i = 0; i <= Zotero.Collections.MAX_RECENT; i++) {
+				let collection = await createDataObject('collection');
+				collections.push(collection);
+				Zotero.Collections.addToRecent(collection);
+			}
+			
+			var recent = Zotero.Collections.getRecent(Zotero.Libraries.userLibraryID);
+			assert.lengthOf(recent, Zotero.Collections.MAX_RECENT);
+			assert.notInclude(recent, collections[0]);
+			assert.include(recent, collections[1]);
+			// Another library's collections aren't pushed out along with them
+			assert.include(Zotero.Collections.getRecent(group.libraryID), groupCollection);
+		});
+		
+		it("should skip trashed collections and collections in other libraries", async function () {
+			var group = await createGroup();
+			var groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			var trashed = await createDataObject('collection');
+			var collection = await createDataObject('collection');
+			
+			Zotero.Collections.addToRecent(groupCollection);
+			Zotero.Collections.addToRecent(trashed);
+			Zotero.Collections.addToRecent(collection);
+			
+			trashed.deleted = true;
+			await trashed.saveTx();
+			
+			var recent = Zotero.Collections.getRecent();
+			assert.include(recent, collection);
+			assert.include(recent, groupCollection);
+			assert.notInclude(recent, trashed);
+			
+			var userRecent = Zotero.Collections.getRecent(Zotero.Libraries.userLibraryID);
+			assert.include(userRecent, collection);
+			assert.notInclude(userRecent, groupCollection);
+		});
+	});
 })

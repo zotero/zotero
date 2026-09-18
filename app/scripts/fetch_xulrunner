@@ -35,7 +35,7 @@ Required
 Optional / Conditional
  -a ARCH       - Mac:      disallowed (builds are universal)
                - Windows:  x64 | arm64 | win32
-               - Linux:    x64 (or x86_64) | arm64 | i686
+               - Linux:    x64 (or x86_64) | arm64
                If omitted on Windows/Linux, all standard archs are fetched.
 DONE
 	exit 1
@@ -87,7 +87,7 @@ if [[ $BUILD_WIN == 1 || $BUILD_LINUX == 1 ]]; then
 		fi
 		if [[ $BUILD_LINUX == 1 ]]; then
 			[[ $arch == x64 ]] && arch="x86_64"
-			case $arch in x86_64|i686|arm64) ;; *) echo "Invalid Linux arch: $arch" >&2; echo; usage;; esac
+			case $arch in x86_64|arm64) ;; *) echo "Invalid Linux arch: $arch" >&2; echo; usage;; esac
 		fi
 	fi
 fi
@@ -133,6 +133,12 @@ function modify_omni {
 	rm actors/AudioPlayback{Parent,Child}.sys.mjs
 	
 	replace_line 'BROWSER_CHROME_URL:.+' 'BROWSER_CHROME_URL: "chrome:\/\/zotero\/content\/zoteroPane.xhtml",' modules/AppConstants.sys.mjs
+	# Used by OSKeyStore as the master-key label, visible in macOS Keychain Access.
+	# Verify that OSKeyStore still derives the label from MOZ_APP_BASENAME, so a
+	# future Mozilla change to a hardcoded string doesn't silently rebrand the
+	# keychain entry back to "Firefox Encrypted Storage".
+	replace_line 'MOZ_APP_BASENAME: "Firefox"' 'MOZ_APP_BASENAME: "Zotero"' modules/AppConstants.sys.mjs
+	check_line 'STORE_LABEL: AppConstants\.MOZ_APP_BASENAME \+ " Encrypted Storage"' modules/OSKeyStore.sys.mjs
 	
 	# https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/internals/preferences.html
 	#
@@ -195,15 +201,17 @@ function modify_omni {
 	
 	file="modules/ActorManagerParent.sys.mjs"
 	# Remove deleted actors
-	remove_between 'AboutTranslations: \{' '^  },' $file
-	remove_between 'CookieBanner: \{' '^  },' $file
-	remove_between 'PictureInPictureLauncher: \{' '^  },' $file
-	remove_between 'PictureInPictureToggle: \{' '^  },' $file
-	remove_between 'PictureInPicture: \{' '^  },' $file
-	remove_between 'Thumbnails: \{' '^  },' $file
-	remove_between 'Translations: \{' '^  },' $file
-	remove_between 'TranslationsEngine: \{' '^  },' $file
-	remove_between 'AudioPlayback: \{' '^  },' $file
+	# Entries in the JSWINDOWACTORS/JSPROCESSACTORS literals:
+	remove_between '^  AudioPlayback: \{' '^  },' $file
+	remove_between '^  CookieBanner: \{' '^  },' $file
+	remove_between '^  Thumbnails: \{' '^  },' $file
+	remove_between '^  Translations: \{' '^  },' $file
+	remove_between '^  TranslationsEngine: \{' '^  },' $file
+	# Entries added conditionally after the literals:
+	remove_between '^  JSWINDOWACTORS\.AboutTranslations = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPictureLauncher = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPictureToggle = \{' '^  \};' $file
+	remove_between '^  JSWINDOWACTORS\.PictureInPicture = \{' '^  \};' $file
 	# Do not trigger LoginManager event that logs an error on autocomplete submission
 	remove_line 'DOMInputPasswordAdded: \{\},' $file
 	
@@ -387,8 +395,12 @@ function modify_omni {
 	
 	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.css"
 	echo >> $file
-	# Hide search bar, Themes and Plugins tabs, and sidebar footer
-	echo '.main-search, button[name="theme"], button[name="plugin"], sidebar-footer { display: none; }' >> $file
+	# Hide the search bar and the whole sidebar, since we only ever show plugins and the main pane
+	# is already headed "Manage Your Plugins"
+	echo '.main-search, #sidebar { display: none; }' >> $file
+	# Center the content in the window now that it isn't offset by the sidebar
+	echo '#full { grid-template-columns: 1fr; }' >> $file
+	echo '#content { max-width: calc(var(--page-main-content-width) + var(--main-margin-start)); margin-inline: auto; }' >> $file
 	echo '.main-heading { margin-top: 2em; }' >> $file
 	# Hide Details/Permissions tabs in addon details so we only show details
 	echo 'addon-details > button-group { display: none !important; }' >> $file
@@ -404,46 +416,46 @@ function modify_omni {
 	echo '.addon-detail-row-homepage .text-link { cursor: pointer; color: LinkText; }' >> $file
 	echo '.addon-detail-row-homepage .text-link:hover { text-decoration: underline; }' >> $file
 	
-	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
+	file="chrome/toolkit/content/mozapps/extensions/aboutaddons-utils.mjs"
 	# Hide unsigned-addon warning
-	replace_line 'if \(!isCorrectlySigned\(addon\)\) \{' 'if (!isCorrectlySigned(addon)) {return {};' $file
+	replace_line 'export function isUnsignedWarningMessageDisabled\(\) \{' \
+		'export function isUnsignedWarningMessageDisabled() {if (true) return true;' $file
+	# Use our own localized string for blocked plugin notification
+	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
+	# Hide Recommendations tab in sidebar and recommendations in main pane
+	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' $file
+
+	file="chrome/toolkit/content/mozapps/extensions/components/addon-details.mjs"
 	# Hide Private Browsing setting in addon details
 	replace_line 'pbRow\.' '\/\/pbRow.' $file
 	replace_line 'let isAllowed = await isAllowedInPrivateBrowsing' '\/\/let isAllowed = await isAllowedInPrivateBrowsing' $file
-	# Use our own strings for the removal prompt
-	replace_line 'let \{ BrowserAddonUI \} = windowRoot.ownerGlobal;' '' $file
-	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
-	
-	# Customize empty-list message
-	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
-        var p = document.createElement("p");
-        p.id = "empty-list-message";
-        return p;' $file
-	# Swap in include.js, which we need for Zotero.getString(), for abuse-reports.js, which we don't need
-	
 	# Open plugin links in external browser
 	replace_line 'let homepageURL = homepageRow.querySelector\(\"a\"\);' 'let homepageURL = homepageRow.querySelector(\"\.text-link\");' $file
 	replace_line 'homepageURL.href = addon.homepageURL;' 'homepageURL.setAttribute("href", addon.homepageURL);' $file
 	replace_line '<a target="_blank" dir="ltr"><\/a>' \
-		'<label target="_blank" class="text-link" dir="ltr"><\/label>' \
-		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
-	
+		'<label target="_blank" class="text-link" dir="ltr"><\/label>' $file
+
+	file="chrome/toolkit/content/mozapps/extensions/components/addon-card.mjs"
+	# Use our own strings for the removal prompt
+	replace_line 'let \{ BrowserAddonUI \} = windowRoot.window;' '' $file
+	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
+
+	# Customize empty-list message
+	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
+        var p = document.createElement("p");
+        p.id = "empty-list-message";
+        return p;' chrome/toolkit/content/mozapps/extensions/components/addon-list.mjs
+
 	# Add zotero.ftl to the addons page for our own localized strings
 	replace_line 'href="toolkit\/about\/aboutAddons.ftl"' 'href="toolkit\/about\/aboutAddons.ftl" \/>\n    <link rel="localization" href="zotero.ftl"' \
 		chrome/toolkit/content/mozapps/extensions/aboutaddons.html
-	# Use our own localized string for blocked plugin notification
-	file="chrome/toolkit/content/mozapps/extensions/aboutaddons.js"
-	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
 
 	# TODO: Use our own strings, but for now fix the bundled English ones
 	replace_line 'Manage Your Extensions' 'Manage Your Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
-	replace_line '= Extensions' '= Plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Add-on' 'Plugin' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'add-ons' 'plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Select add-on to install' 'Select plugin to install' localization/en-US/toolkit/about/aboutAddons.ftl
 	
-	# Hide Recommendations tab in sidebar and recommendations in main pane
-	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' chrome/toolkit/content/mozapps/extensions/aboutaddonsCommon.js
 	replace_line 'pref\("extensions.htmlaboutaddons.recommendations.enabled".+' 'pref("extensions.htmlaboutaddons.recommendations.enabled", false);' greprefs.js
 	
 	# Hide Report option
@@ -460,7 +472,7 @@ function modify_omni {
 		chrome/toolkit/content/global/commonDialog.xhtml
 	# commonDialog.css link is split across multiple lines, so we have to do a weird substitution,
 	# so check the one-line global.css to make sure the format hasn't changed
-	check_line '<html:link rel="stylesheet" href="chrome:\/\/global\/skin\/global.css" \/>'
+	check_line '<html:link rel="stylesheet" href="chrome:\/\/global\/skin\/global.css" \/>' chrome/toolkit/content/global/commonDialog.xhtml
 	replace_line 'chrome:\/\/global\/skin\/commonDialog.css"' \
 		'chrome:\/\/global\/skin\/commonDialog.css"\/>
 		<html:link rel="stylesheet" href="chrome:\/\/zotero-platform\/content\/zotero.css"' \
@@ -490,8 +502,19 @@ function modify_omni {
        }
        popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.mjs
 	
-	# Remove aria-autocomplete unnecessarily added to search-textbox to not confuse screen readers
-	remove_line 'this.inputField.setAttribute\("aria-autocomplete' chrome/toolkit/content/global/elements/search-textbox.js
+	# Add the dropmarker for toolbarbuttons with wantdropmarker, which Firefox no longer creates
+	replace_line 'this.appendChild\(this.constructor.fragment.cloneNode\(true\)\);' \
+		'this.appendChild(this.constructor.fragment.cloneNode(true));
+
+        if (this.hasAttribute("wantdropmarker")) {
+          let dropmarker = document.createXULElement("dropmarker");
+          dropmarker.setAttribute("type", "menu");
+          dropmarker.className = "toolbarbutton-menu-dropmarker";
+          this.appendChild(dropmarker);
+        }' chrome/toolkit/content/global/elements/toolbarbutton.js
+	# Let clicks on the dropmarker pass through to the toolbarbutton, which only opens its menu
+	# when it's the original event target, as xul.css did when Firefox created the dropmarker
+	echo '.toolbarbutton-menu-dropmarker { pointer-events: none; }' >> chrome/toolkit/content/global/xul.css
 
 	# Remove non-native text input styles
 	remove_between 'html\|input\:where\(' '^}' chrome/toolkit/skin/classic/global/global-shared.css
@@ -505,10 +528,12 @@ function modify_omni {
 		overflow: var(--moz-text-control-overflow);
 	}' >> chrome/toolkit/res/forms.css
 	
-	# By default, an autocomplete popup's width is calculated based on the input that opened it.
-	# Allow an ancestor to designate itself as the width container instead. (For creator inputs.)
-	replace_line 'aElement.getBoundingClientRect\(\).width' \
-		'(aElement.closest(".autocomplete-popup-width-container") || aElement).getBoundingClientRect().width' \
+	# Size an autocomplete popup to the input that opened it, or to an ancestor that designates
+	# itself as the width container. Firefox sizes the popup to its content. (For creator inputs.)
+	replace_line '\/\/ invalidate\(\) depends on the width attribute' \
+		'let widthElement = aElement.closest(".autocomplete-popup-width-container") || aElement;
+        this.style.setProperty("--panel-width", Math.max(widthElement.getBoundingClientRect().width, 100) + "px");
+        \/\/ invalidate() depends on the width attribute' \
 		chrome/toolkit/content/global/elements/autocomplete-popup.js
 	
 	zip -qr9XD omni.ja *
@@ -556,7 +581,7 @@ if [ $BUILD_MAC == 1 ]; then
 		echo "Using Firefox $GECKO_VERSION.app.zip"
 		unzip "Firefox $GECKO_VERSION.app.zip"
 	else
-		curl -o Firefox.dmg "$DOWNLOAD_URL/mac/en-US/Firefox%20$GECKO_VERSION.dmg"
+		curl -fo Firefox.dmg "$DOWNLOAD_URL/mac/en-US/Firefox%20$GECKO_VERSION.dmg"
 		set +e
 		hdiutil detach -quiet /Volumes/Firefox 2>/dev/null
 		set -e
@@ -642,7 +667,7 @@ if [ $BUILD_WIN == 1 ]; then
 			else
 				moz_arch=$arch
 			fi
-			curl -O "$DOWNLOAD_URL/$moz_arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
+			curl -fO "$DOWNLOAD_URL/$moz_arch/en-US/Firefox%20Setup%20$GECKO_VERSION.exe"
 			# Store local copy of unmodified app
 			cp "Firefox%20Setup%20$GECKO_VERSION.exe" "$archived_file"
 		fi
@@ -758,7 +783,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	if [[ -n $arch ]]; then
 		arch_list=("$arch")
 	else
-		arch_list=(x86_64 arm64 i686)
+		arch_list=(x86_64 arm64)
 	fi
 	for arch in "${arch_list[@]}"; do
 		xdir="firefox-linux-$arch"
@@ -774,7 +799,7 @@ if [ $BUILD_LINUX == 1 ]; then
 			else
 				moz_arch=$arch
 			fi
-			curl -O "$DOWNLOAD_URL/linux-$moz_arch/en-US/firefox-$GECKO_VERSION.tar.xz"
+			curl -fO "$DOWNLOAD_URL/linux-$moz_arch/en-US/firefox-$GECKO_VERSION.tar.xz"
 			# Store local copy of unmodified app
 			cp "firefox-$GECKO_VERSION.tar.xz" "$archived_file"
 		fi

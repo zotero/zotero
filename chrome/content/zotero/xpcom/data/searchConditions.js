@@ -52,6 +52,8 @@ Zotero.SearchConditions = new function () {
 		isBefore: true,
 		isAfter: true,
 		isInTheLast: true,
+		isEmpty: true,
+		isNotEmpty: true,
 		
 		// Special
 		any: true,
@@ -229,17 +231,41 @@ Zotero.SearchConditions = new function () {
 				noLoad: true
 			},
 			
-			// Quicksearch block markers
+			// Condition group markers. groupStart/groupEnd delimit a nested group of
+			// conditions; the group's join mode is a separate 'joinMode' condition placed
+			// inside the group, exactly as at the top level. Unlike the quicksearch block
+			// markers above, these are saved with the search, so they're not noLoad. The
+			// operator is an unused placeholder, since the sync server rejects an empty one.
 			{
-				name: 'blockStart',
-				noLoad: true
+				name: 'groupStart',
+				operators: {
+					true: true
+				}
 			},
-			
+
 			{
-				name: 'blockEnd',
-				noLoad: true
+				name: 'groupEnd',
+				operators: {
+					true: true
+				}
 			},
-			
+
+			// Optional level a group's conditions are evaluated at, placed inside the group
+			// like 'joinMode'. When a group's result level is a descendant level of the surrounding
+			// row (e.g., 'annotation' within a top-level item search), the group's conditions
+			// are matched against descendants and the match is mapped up to the parent --
+			// i.e., "the item has a descendant match for these conditions". The level
+			// rides in the operator, as with 'joinMode'. Saved with the search, so not noLoad.
+			{
+				name: 'resultLevel',
+				operators: {
+					item: true,
+					attachment: true,
+					note: true,
+					annotation: true
+				}
+			},
+
 			// Shortcuts for adding collections and searches by id
 			{
 				name: 'collectionID',
@@ -282,7 +308,7 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true
 				},
-				special: true
+				special: false
 			},
 			
 			{
@@ -321,7 +347,8 @@ Zotero.SearchConditions = new function () {
 					isInTheLast: true
 				},
 				table: 'itemAttachments',
-				field: 'lastRead'
+				field: 'lastRead',
+				level: 'attachment'
 			},
 
 			// Deprecated
@@ -353,7 +380,20 @@ Zotero.SearchConditions = new function () {
 					isNot: true
 				},
 				table: 'itemAttachments',
-				field: 'fileTypeID'
+				field: 'fileTypeID',
+				// Matches attachment items; see 'level' handling in search.js
+				level: 'attachment'
+			},
+
+			{
+				name: 'attachmentStorageType',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAttachments',
+				field: 'linkMode',
+				level: 'attachment'
 			},
 			
 			{
@@ -376,7 +416,90 @@ Zotero.SearchConditions = new function () {
 					doesNotContain: true
 				},
 				table: 'itemTags',
-				field: 'name'
+				field: 'name',
+				normalizedField: 'COALESCE(nameNormalized, name)',
+				// Tags apply to items at any level, so a tag match is never mapped
+				level: 'any'
+			},
+			
+			{
+				name: 'numTags',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemTags WHERE itemTags.itemID=items.itemID)',
+				// Every item level has its own tag count, so the condition matches natively
+				// at each level rather than rolling a match up to the result level
+				level: ['item', 'attachment', 'note', 'annotation'],
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			// Non-trashed child notes of a regular item (restricted to regular items in
+			// search.js, since other rows can't have child notes)
+			{
+				name: 'numNotes',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemNotes WHERE parentItemID=items.itemID '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				level: 'item',
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			// Non-trashed child attachments of a regular item (restricted to regular items
+			// in search.js)
+			{
+				name: 'numAttachments',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemAttachments WHERE parentItemID=items.itemID '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				level: 'item',
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
+			},
+			
+			// Non-trashed annotations on the row's own attachment or on a regular item's
+			// non-trashed attachments (restricted to those levels in search.js)
+			{
+				name: 'numAnnotations',
+				operators: {
+					is: true,
+					isNot: true,
+					isLessThan: true,
+					isGreaterThan: true
+				},
+				table: 'items',
+				field: '(SELECT COUNT(*) FROM itemAnnotations WHERE parentItemID IN '
+					+ '(SELECT itemID FROM itemAttachments WHERE '
+						+ '(itemID=items.itemID OR parentItemID=items.itemID) '
+						+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems)) '
+					+ 'AND itemID NOT IN (SELECT itemID FROM deletedItems))',
+				// The count is native to attachments (their own annotations) and regular
+				// items (annotations on their attachments), so no cross-level mapping
+				level: ['item', 'attachment'],
+				inlineFilter: function (val) {
+					return /^[0-9]+$/.test(val) ? val : false;
+				}
 			},
 			
 			{
@@ -388,31 +511,24 @@ Zotero.SearchConditions = new function () {
 				table: 'itemNotes',
 				// Exclude note prefix and suffix
 				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
-					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
+					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`,
+				level: 'note'
 			},
-			
-			{
-				name: 'childNote',
-				operators: {
-					contains: true,
-					doesNotContain: true
-				},
-				table: 'items',
-				// Exclude note prefix and suffix
-				field: `SUBSTR(note, ${1 + Zotero.Notes.notePrefix.length}, `
-					+ `LENGTH(note) - ${Zotero.Notes.notePrefix.length + Zotero.Notes.noteSuffix.length})`
-			},
-			
+
 			{
 				name: 'creator',
 				operators: {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -425,6 +541,7 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemCreators',
 				field: 'lastName',
+				normalizedField: 'COALESCE(lastNameNormalized, lastName)',
 				special: true
 			},
 			
@@ -434,10 +551,14 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -446,10 +567,14 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -458,10 +583,14 @@ Zotero.SearchConditions = new function () {
 					is: true,
 					isNot: true,
 					contains: true,
-					doesNotContain: true
+					doesNotContain: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemCreators',
-				field: "TRIM(firstName || ' ' || lastName)"
+				field: "TRIM(firstName || ' ' || lastName)",
+				normalizedField: "TRIM(COALESCE(firstNameNormalized, firstName) || ' ' "
+					+ "|| COALESCE(lastNameNormalized, lastName))"
 			},
 			
 			{
@@ -471,13 +600,17 @@ Zotero.SearchConditions = new function () {
 					isNot: true,
 					contains: true,
 					doesNotContain: true,
-					beginsWith: true
+					beginsWith: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
-					+ "WHERE fieldName NOT IN ('accessDate', 'date', 'pages', "
-					+ "'section','seriesNumber','issue')"),
+				normalizedField: 'COALESCE(valueNormalized, value)',
+				aliases: (await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined "
+					+ "WHERE fieldName NOT IN ('accessDate', 'pages', "
+					+ "'section','seriesNumber','issue')"))
+					.filter(field => !Zotero.ItemFields.isDate(field)),
 				template: true // mark for special handling
 			},
 
@@ -492,7 +625,19 @@ Zotero.SearchConditions = new function () {
 				},
 				special: false
 			},
-			
+
+			{
+				name: 'titleCreatorYear',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true,
+					beginsWith: true
+				},
+				special: false
+			},
+
 			{
 				name: 'datefield',
 				operators: {
@@ -500,11 +645,18 @@ Zotero.SearchConditions = new function () {
 					isNot: true,
 					isBefore: true,
 					isAfter: true,
-					isInTheLast: true
+					isInTheLast: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',
-				aliases: ['accessDate', 'date', 'dateDue', 'accepted'], // TEMP - NSF
+				aliases: (await Zotero.DB.columnQueryAsync("SELECT fieldName FROM fieldsCombined"))
+					.filter(field => Zotero.ItemFields.isDate(field))
+					// Stored as an SQL datetime rather than a multipart date, so
+					// isDate() doesn't cover it
+					.concat(['accessDate'])
+					.concat(['dateDue', 'accepted']), // TEMP - NSF
 				template: true // mark for special handling
 			},
 			
@@ -529,7 +681,9 @@ Zotero.SearchConditions = new function () {
 					contains: true,
 					doesNotContain: true,
 					isLessThan: true,
-					isGreaterThan: true
+					isGreaterThan: true,
+					isEmpty: true,
+					isNotEmpty: true
 				},
 				table: 'itemData',
 				field: 'value',
@@ -585,7 +739,9 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemAnnotations',
 				field: 'text',
+				normalizedField: 'COALESCE(textNormalized, text)',
 				special: false,
+				level: 'annotation'
 			},
 			
 			{
@@ -596,23 +752,49 @@ Zotero.SearchConditions = new function () {
 				},
 				table: 'itemAnnotations',
 				field: 'comment',
+				normalizedField: 'COALESCE(commentNormalized, comment)',
 				special: false,
+				level: 'annotation'
 			},
-			
+
 			{
-				name: 'fulltextWord',
+				name: 'annotationType',
 				operators: {
-					contains: true,
-					doesNotContain: true
+					is: true,
+					isNot: true
 				},
-				table: 'fulltextItemWords',
-				field: 'word',
-				flags: {
-					leftbound: true
-				},
-				special: true
+				table: 'itemAnnotations',
+				field: 'type',
+				special: false,
+				level: 'annotation'
 			},
-			
+
+			{
+				name: 'annotationColor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'color',
+				special: false,
+				level: 'annotation'
+			},
+
+			// Group-library annotations only; the creator lives in groupItems, so the SQL joins
+			// to it (see search.js)
+			{
+				name: 'annotationAuthor',
+				operators: {
+					is: true,
+					isNot: true
+				},
+				table: 'itemAnnotations',
+				field: 'createdByUserID',
+				special: false,
+				level: 'annotation'
+			},
+
 			{
 				name: 'fulltextContent',
 				operators: {
@@ -732,7 +914,15 @@ Zotero.SearchConditions = new function () {
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){
 			return true;
 		}
-		
+
+		// Date-type item fields also accept the text operators, which compare
+		// the stored value as text, so saved searches that use them keep
+		// loading -- the operators offered in the UI are just 'operators'
+		if (_conditions[condition].name == 'datefield'
+				&& ['contains', 'doesNotContain', 'beginsWith'].includes(operator)) {
+			return true;
+		}
+
 		return !!_conditions[condition]['operators'][operator];
 	}
 	
@@ -762,16 +952,6 @@ Zotero.SearchConditions = new function () {
 			Zotero.debug(`getLocalizedName: no localized string for '${str}'`, 2);
 			return str;
 		}
-	}
-	
-	
-	/**
-	 * Compare two API JSON condition objects
-	 */
-	this.equals = function (data1, data2) {
-		return data1.condition === data2.condition
-			&& data1.operator === data2.operator
-			&& data1.value === data2.value;
 	}
 	
 	

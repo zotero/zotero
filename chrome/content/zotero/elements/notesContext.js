@@ -192,7 +192,7 @@
 				let { id, screenX, screenY } = event.detail;
 				let item = Zotero.Items.get(id);
 				if (item) {
-					this.querySelector('.context-pane-list-move-to-trash').setAttribute('disabled', !this.editable);
+					this.querySelector('.context-pane-list-move-to-trash').toggleAttribute('disabled', !this.editable);
 					let popup = this.querySelector('.context-pane-list-popup');
 					popup.dataset.itemId = id;
 					popup.openPopupAtScreen(screenX, screenY, true);
@@ -203,8 +203,8 @@
 				this._handleAddChildNotePopupClick(event);
 			});
 			this.notesList.addEventListener('add-child', (event) => {
-				this.querySelector('.context-pane-add-child-note').setAttribute('disabled', !this.editable);
-				this.querySelector('.context-pane-add-child-note-from-annotations').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-child-note').toggleAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-child-note-from-annotations').toggleAttribute('disabled', !this.editable);
 				Zotero.MenuManager.updateMenuPopup(addChildNotePopup, "notesPane/addItemNote", {
 					event: undefined,
 					getContext: () => {
@@ -227,8 +227,8 @@
 				this._handleAddStandaloneNotePopupClick(event);
 			});
 			this.notesList.addEventListener('add-standalone', (event) => {
-				this.querySelector('.context-pane-add-standalone-note').setAttribute('disabled', !this.editable);
-				this.querySelector('.context-pane-add-standalone-note-from-annotations').setAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-standalone-note').toggleAttribute('disabled', !this.editable);
+				this.querySelector('.context-pane-add-standalone-note-from-annotations').toggleAttribute('disabled', !this.editable);
 				Zotero.MenuManager.updateMenuPopup(addStandaloneNotePopup, "notesPane/addStandaloneNote", {
 					event: undefined,
 					getContext: () => {

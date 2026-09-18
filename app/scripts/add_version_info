@@ -4,6 +4,7 @@ Update a builds manifest with info on a given build
 """
 import argparse
 import os
+import re
 import sys
 import shutil
 import json
@@ -25,7 +26,7 @@ def main():
     try:
         file = args.file
         version = args.version
-        short_version = version[0:3]
+        short_version = re.match(r'\d+\.\d+', version).group(0)
         
         # Back up JSON file
         shutil.copy2(file, file + '.bak')

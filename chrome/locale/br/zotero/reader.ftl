@@ -8,7 +8,7 @@ reader-add-comment = Ouzhpennañ un evezhiadenn
 reader-annotation-comment = Evezhiadenn an ennotadur
 reader-annotation-text = Testenn an ennotadur
 reader-manage-tags = Merañ an tikedennoù evit an ennotadur-mañ
-reader-open-menu = Digeriñ lañser an ennotaudurioù
+reader-open-menu = Digeriñ lañser an ennotadurioù
 reader-thumbnails = Skeudennigoù
 reader-tag-selector-message = Silañ an ennotadurioù dre an dikedenn-mañ
 reader-add-tags = Ouzhpennañ tikedennoù...
@@ -18,13 +18,13 @@ reader-add-note = Ouzhpennañ un notenn
 reader-add-text = Ouzhpennañ un destenn
 reader-select-area = Diuzañ ur zonenn
 reader-highlight-annotation = Usskediñ an ennotadurioù
-reader-highlight-annotation-short = Highlight
+reader-highlight-annotation-short = Usskediñ
 reader-underline-annotation = Islinennañ an ennotadur
 reader-underline-annotation-short = Islinennet
-reader-note-annotation = Note Annotation
-reader-text-annotation = Text Annotation
-reader-image-annotation = Image Annotation
-reader-ink-annotation = Ink Annotation
+reader-note-annotation = Ennotadur mod notenn
+reader-text-annotation = Ennotadur mod testenn
+reader-image-annotation = Ennotadur mod skeudenn
+reader-ink-annotation = Ennotadur dornskrivet
 reader-search-result-index = Disoc'hoù an enklask
 reader-search-result-total = Hollad disoc'hoù an enklask
 reader-draw = Tresañ
@@ -53,7 +53,7 @@ reader-prompt-delete-pages-text =
         [one] Are you sure you want to delete { $count } page from the PDF file?
        *[other] Are you sure you want to delete { $count } pages from the PDF file?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Dilemel an ennotadurioù
 reader-prompt-delete-annotations-text =
     { $count ->
         [one] Are you sure you want to delete the selected annotation?
@@ -80,8 +80,8 @@ reader-find = Kavout
 reader-close = Serriñ
 reader-show-thumbnails = Diskouez ar skeudennig
 reader-show-outline = Diskouez ezlinenn
-reader-find-previous = Find the previous occurrence of the phrase
-reader-find-next = Find the next occurrence of the phrase
+reader-find-previous = Kavout okurañs kent ar frazenn
+reader-find-next = Kavout okurañs da-heul ar frazenn
 reader-toggle-sidebar = Diskouez/kuzhat ar varrenn-gostez
 reader-find-in-document = Klask er restr
 reader-toggle-context-pane = Diskouez/kuzhat ar banell gendestenn
@@ -109,9 +109,9 @@ reader-theme-sepia = Sepia
 reader-theme-dark = Teñval
 reader-theme-black = Du
 reader-add-theme = Ouzhpennañ un tem
-reader-theme-invert-images = Invert Images
+reader-theme-invert-images = Eilpennañ ar skeudennoù
 reader-scroll-mode = Dibunañ
-reader-spread-mode = Spreads
+reader-spread-mode = Pajennadoù doubl
 reader-flow-mode = Pajenn aozañ
 reader-columns = Bannoù
 reader-split-view = Rannañ ar gweled
@@ -129,7 +129,7 @@ reader-double = Doubl
 reader-theme-name = Anv an tem:
 reader-background = Drekleur:
 reader-foreground = Rakleur:
-reader-reading-mode = Reading Mode
+reader-reading-mode = Mod lenn
 reader-reading-mode-not-supported = Reading Mode is not supported in this document.
 reader-clear-selection = Dilemel an diuzadenn
 reader-epub-encrypted = This ebook is encrypted and cannot be opened.
@@ -142,8 +142,8 @@ reader-a11y-move-annotation = Use the arrow keys to move the annotation.
 reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
 reader-a11y-resize-annotation = To resize the annotation, hold { general-key-shift } and use the arrow keys.
 reader-a11y-annotation-popup-appeared = Use Tab to navigate the annotation popup.
-reader-a11y-annotation-created = { $type } created.
-reader-a11y-annotation-selected = { $type } selected.
+reader-a11y-annotation-created = { $type } krouet.
+reader-a11y-annotation-selected = { $type } diuzet.
 -reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
 -reader-a11y-annotation-instruction = To add this annotation into the document, focus the document and press { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
@@ -170,7 +170,7 @@ reader-find-in-document-input =
     .aria-description = To turn a search result into a highlight annotation, press { general-key-control }-{ option-or-alt }-1. To turn a search result into an underline annotation, press { general-key-control }-{ option-or-alt }-2.
 reader-import-from-epub =
     .label = Import Ebook Annotations…
-reader-import-from-epub-prompt-title = Import Ebook Annotations
+reader-import-from-epub-prompt-title = Emporzhiañ ennotadurioù an Ebook
 reader-import-from-epub-prompt-text =
     { -app-name } found { $count ->
         [one] { $count } { $tool } annotation
@@ -186,36 +186,39 @@ reader-import-from-epub-no-annotations-other-file =
     “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
     
     If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-reader-import-from-epub-select-other = Select Other File…
+reader-import-from-epub-select-other = Diuzañ ur restr all…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] 1 bajenn diuzet
+        [two] { $count } bajenn diuzet
+        [few] { $count } a bajennoù diuzet
+        [many] { $count } a bajennoù diuzet
+       *[other] { $count } a bajennoù diuzet
     }
-reader-page-options = Page Options
-reader-read-aloud = Read Aloud
-reader-read-aloud-from-here = Read Aloud from Here
+reader-page-options = Dibarzhioù ar pajennoù
+reader-read-aloud = Lenn a vouezh uhel
+reader-read-aloud-from-here = Lenn a vouezh uhel adalek amañ
 reader-read-aloud-options = Dibarzhioù
-reader-read-aloud-skip-back = Skip Back
-reader-read-aloud-skip-back-sentence = Skip Back by Sentence
+reader-read-aloud-skip-back = Distreiñ prim
+reader-read-aloud-skip-back-sentence = Distreiñ buan dre frazennoù
 reader-read-aloud-skip-ahead = Skip Ahead
 reader-read-aloud-skip-ahead-sentence = Skip Ahead by Sentence
 reader-read-aloud-add-annotation = Annotate Sentence ({ $key1 }/{ $key2 })
-reader-read-aloud-play = Play
-reader-read-aloud-pause = Pause
-reader-read-aloud-speed = Reading Speed
-reader-read-aloud-voice = Voice
-reader-read-aloud-voice-tier = Voice Mode
-reader-read-aloud-voice-tier-local = Local
+reader-read-aloud-play = Lenn
+reader-read-aloud-pause = Ehan
+reader-read-aloud-speed = Tizh al lenn
+reader-read-aloud-voice = Mouezh
+reader-read-aloud-voice-tier = Mod ar vouezh
+reader-read-aloud-voice-tier-local = Lec'hel
 reader-read-aloud-voice-tier-standard = Standard
 reader-read-aloud-voice-tier-premium = Premium
-reader-read-aloud-more-voices = More Voices…
+reader-read-aloud-more-voices = Muioc'h a vouezhioù…
 reader-read-aloud-language = Yezh
-reader-read-aloud-remaining-time = Remaining reading time
+reader-read-aloud-remaining-time = Amzer lenn a chom
 reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access { -app-name } Voices.
-reader-read-aloud-log-in-button = Log In
+reader-read-aloud-log-in-button = Kevreañ
 reader-read-aloud-done-button = { general-done }
-reader-read-aloud-add-more-time = Add more time
+reader-read-aloud-add-more-time = Ouzhpennañ muioc'h a amzer
 reader-read-aloud-quota-exceeded-message =
     <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
         [standard] Standard Voices
@@ -225,38 +228,38 @@ reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Ur fazi dianav 'zo c'hoarvezet.
 reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
 reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
-reader-read-aloud-retry = Retry
+reader-read-aloud-retry = Adklask
 reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
 reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Voices provided by your operating system
-reader-read-aloud-first-run-voice-tier-local-bullet-offline = Available without an internet connection
-reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Available without a { -app-name } account
-reader-read-aloud-first-run-voice-tier-local-bullet-free = Free to use
-reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Natural-sounding voices
-reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Limited language selection
+reader-read-aloud-first-run-voice-tier-local-bullet-offline = Hegerz hep kevreadenn ouzh internet
+reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Hegerz hep kont { -app-name }
+reader-read-aloud-first-run-voice-tier-local-bullet-free = Implij digoust
+reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Mouezh o vezañ naturel
+reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Hegerz gant ur gevreadenn ouzh internet hepken
+reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Kont { -app-name } rekiz
+reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Diuzañ yezhoù bevennet
 reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = No multilingual support
 reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Source text doesn’t leave { -app-name } servers
 reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Unlimited use with a { -subscription-name } subscription
-reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Highest-quality voices
-reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
+reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Mouezh a galite uhel
+reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Hegerz gant ur gevreadenn ouzh internet hepken
+reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Kont { -app-name } rekiz
+reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Choaz bras a yezhoù
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Multilingual support
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
 reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
-reader-read-aloud-sample-text = I am the local voice { $name }
-reader-read-aloud-voices-none-available = No voices available
+reader-read-aloud-sample-text = Me zo mouezh lec'hel { $name }
+reader-read-aloud-voices-none-available = Mouezh ebet hegerz
 reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
-reader-read-aloud-region = Region
+reader-read-aloud-region = Rannvro
 reader-read-aloud-region-auto = Emgefreek
 reader-read-aloud-annotation-popup-move = Move annotation by sentence
-reader-read-aloud-annotation-popup-extend = Extend annotation by sentence
+reader-read-aloud-annotation-popup-extend = Lazhañ an ennotadurioù dre frazennoù
 reader-read-aloud-annotation-popup-delete = Dilemel
 reader-read-aloud-annotation-popup-done = Graet
-reader-read-aloud-annotation-popup-change-color = Change color
-reader-read-aloud-annotation-popup-highlight = Highlight
+reader-read-aloud-annotation-popup-change-color = Cheñch al liv
+reader-read-aloud-annotation-popup-highlight = Usskediñ
 reader-read-aloud-annotation-popup-underline = Islinennet
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }

@@ -10,13 +10,23 @@ if [ -n "${ZOTERO_PROFILE:-}" ]; then
 	profile_args=(-p "$ZOTERO_PROFILE")
 fi
 
-REBUILD=0
+FORCE_FULL=0
+NO_REBUILD=0
 SKIP_BUNDLED_FILES=0
 DEBUGGER=0
-while getopts "rbd" opt; do
+while getopts "rfnbd" opt; do
 	case $opt in
 		r)
-			REBUILD=1
+			# Deprecated -- rebuilding is now the default
+			echo "-r is deprecated -- rebuilding is now the default (use -n to skip)" >&2
+			;;
+		
+		f)
+			FORCE_FULL=1
+			;;
+		
+		n)
+			NO_REBUILD=1
 			;;
 		
 		b)
@@ -28,7 +38,6 @@ while getopts "rbd" opt; do
 			;;
 		
 		\?)
-			echo "Invalid option: -$OPTARG" >&2
 			exit 1
 			;;
 	esac
@@ -37,12 +46,15 @@ done
 # Remove options from $@
 shift $((OPTIND-1))
 
-if [ $REBUILD -eq 1 ]; then
+if [ $NO_REBUILD -eq 0 ]; then
 	PARAMS=""
 	if [ $DEBUGGER -eq 1 ]; then
 		PARAMS="-t"
 	fi
-	
+	if [ $FORCE_FULL -eq 1 ]; then
+		PARAMS="$PARAMS -f"
+	fi
+
 	# Check if build watch is running
 	# If not, run now
 	if ! ps u | grep js-build/build.js | grep -v grep > /dev/null; then
@@ -50,16 +62,11 @@ if [ $REBUILD -eq 1 ]; then
 		echo
 		cd $ROOT_DIR
 		# TEMP: --openssl-legacy-provider avoids a build error in pdf.js
-		NODE_OPTIONS=--openssl-legacy-provider npm run build
+		NODE_OPTIONS=--openssl-legacy-provider node js-build/build.js
 		echo
 	fi
-	
-	"$SCRIPT_DIR/dir_build" -q $PARAMS
-	
-	if [ "`uname`" = "Darwin" ]; then
-		# Sign the Word dylib so it works on Apple Silicon
-		"$SCRIPT_DIR/codesign_local" "$APP_ROOT_DIR/staging/Zotero.app"
-	fi
+
+	"$SCRIPT_DIR/dir_build" $PARAMS
 fi
 
 PARAMS=""
@@ -87,4 +94,5 @@ else
 	exit 1
 fi
 
-"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText -purgecaches $PARAMS "$@"
+echo
+"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText $PARAMS "$@"

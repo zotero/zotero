@@ -70,6 +70,8 @@ preferences-advanced-server-enable-and-restart =
 preferences-advanced-language-and-region-title = Lingua e impostazioni regionali
 preferences-advanced-enable-bidi-ui =
     .label = Abilita le funzionalità di modifica bidirezionale per il testo
+preferences-advanced-data-dir =
+    .value = Cartella dati:
 preferences-advanced-reset-data-dir =
     .label = Riprista posizione predefinita…
 preferences-advanced-custom-data-dir =
@@ -83,12 +85,12 @@ preferences-sync-data-syncing-groupbox =
     .aria-label = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Accedi con il tuo account { -app-name } per sincronizzare i dati tra più dispositivi, collaborare con altre persone e molto di più.
-preferences-sync-settings-heading = Sync
-preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
-preferences-sync-reset-heading = Sync Reset
+preferences-sync-settings-heading = Sincronizza
+preferences-sync-settings-intro = { -app-name } può sincronizzare i dati e i file della tua biblioteca su più dispositivi. <label data-l10n-name="sync-link">Approfondisci</label>
+preferences-sync-reset-heading = Ripristina la sincronizzazione
 preferences-sync-fileSyncing-groups =
-    .label = Sync attachment files in group libraries using { -app-name } Storage
-preferences-sync-fileSyncing-tos = By using { -app-name } Storage, you agree to become bound by its <label data-l10n-name="terms-link">terms and conditions</label>.
+    .label = Sincronizza gli allegati nelle biblioteche dei gruppi tramite { -app-name } Storage
+preferences-sync-fileSyncing-tos = Usando { -app-name } Storage, acconsenti ai suoi <label data-l10n-name="terms-link">termini e condizioni</label>.
 preferences-account-log-out =
     .label = Scollega l'account
 preferences-sync-reset-restore-to-server-body = { -app-name } sostituirà “{ $libraryName }” su { $domain } con i dati presenti su questo computer.
@@ -126,3 +128,7 @@ preferences-account-switch-accounts =
 preferences-account-switch-text = Cambiare account eliminerà tutti i dati di { -app-name } su questo computer. Prima di continuare, assicurati che tutti i dati e i file che vuoi mantenere siano sincronizzati con l'account “{ $username }” o di avere un backup della cartella dei dati di { -app-name }.
 preferences-account-switch-confirmation-text = elimina i dati locali
 preferences-account-switch-accept = Rimuovi i dati e riavvia
+fulltext-index-status-indexing = Indexing { $indexed } of { $total }…
+fulltext-index-status-complete = Search index is up to date
+fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-not-available = File or full-text content not available:

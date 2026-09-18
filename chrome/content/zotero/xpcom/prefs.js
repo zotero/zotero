@@ -422,9 +422,6 @@ Zotero.Prefs = new function () {
 				if (!win.Zotero) continue;
 				Zotero.updateQuickSearchBox(win.document);
 			}
-		}],
-		[ "cite.useCiteprocRs", function (val) {
-			val && Zotero.CiteprocRs.init();
 		}]
 	];
 	
@@ -513,6 +510,23 @@ Zotero.Prefs = new function () {
 		}
 		handlers.splice(i, 1);
 	}
+	
+	
+	/**
+	 * @return {String[]} - Name of the observed pref for each registered observer that belongs to
+	 *     a closed window, with one entry per observer
+	 */
+	this.getLeakedObserverNames = function () {
+		var names = [];
+		for (let [name, handlers] of Object.entries(_observers)) {
+			for (let handler of handlers) {
+				if (Zotero.Utilities.Internal.isObjectLeakingWindow(handler)) {
+					names.push(name);
+				}
+			}
+		}
+		return names;
+	};
 	
 	
 	this.getVirtualCollectionState = function (type) {

@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "ชื่อ:">
 
-<!ENTITY zotero.search.searchInLibrary "Search in library:">
-
 <!ENTITY zotero.search.joinMode.prefix "ตรงกับ">
 <!ENTITY zotero.search.joinMode.any "คำใดๆ">
 <!ENTITY zotero.search.joinMode.all "ทั้งหมด">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "วัน">
 <!ENTITY zotero.search.date.units.months "เดือน">
 <!ENTITY zotero.search.date.units.years "ปี">
-
-<!ENTITY zotero.search.search "ค้นหา">
-<!ENTITY zotero.search.clear "ล้าง">
-<!ENTITY zotero.search.saveSearch "บันทึกผลการค้นหา">

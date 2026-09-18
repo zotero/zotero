@@ -48,6 +48,7 @@ Zotero.Items = function () {
 				libraryID: "O.libraryID",
 				key: "O.key",
 				version: "O.version",
+				clientVersion: "O.clientVersion",
 				synced: "O.synced",
 				
 				createdByUserID: "createdByUserID",
@@ -142,43 +143,50 @@ Zotero.Items = function () {
 	this._lastReadCutoffs = new Map(); // libraryID -> cutoff timestamp
 	
 	/**
-	 * Get items with recently read attachments in a library.
+	 * Get the Recently Read cutoff timestamp for a library.
 	 *
-	 * "Recently read" means read within two weeks of the most recently read
-	 * attachment in the library (cutoff fixed within each session).
+	 * Recently Read matches items read within two weeks of the most recently
+	 * read attachment in the library. The cutoff is frozen for subsequent
+	 * calls, so reading something new doesn't cause old items to vanish within a
+	 * session.
 	 *
 	 * @param {Integer} libraryID
-	 * @return {Promise<Integer[]>} Item IDs (parent items, or standalone attachments)
+	 * @return {Promise<Integer>} Cutoff timestamp in seconds (0 if nothing read)
 	 */
-	this.getLastRead = async function (libraryID) {
+	this._getLastReadCutoff = async function (libraryID) {
 		let twoWeeksInSeconds = 14 * 24 * 60 * 60;
 
-		// Freeze the cutoff on first load so that reading something new
-		// doesn't cause old items to vanish mid-session
-		let cutoff;
 		if (this._lastReadCutoffs.has(libraryID)) {
-			cutoff = this._lastReadCutoffs.get(libraryID);
-		}
-		else {
-			let maxSQL = "SELECT MAX(IA.lastRead) FROM itemAttachments IA "
-				+ "JOIN items I ON (I.itemID = IA.itemID) "
-				+ "WHERE I.libraryID = ? "
-				+ "AND IA.lastRead IS NOT NULL "
-				+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
-				+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
-			let maxLastRead = await Zotero.DB.valueQueryAsync(maxSQL, [libraryID]);
-			if (maxLastRead) {
-				cutoff = maxLastRead - twoWeeksInSeconds;
-				this._lastReadCutoffs.set(libraryID, cutoff);
-			}
-			else {
-				// No items with lastRead.
-				// Don't persist this - we want to calculate a new cutoff if items come in later.
-				cutoff = 0;
-			}
+			return this._lastReadCutoffs.get(libraryID);
 		}
 
-		let sql = "SELECT DISTINCT COALESCE(IA.parentItemID, IA.itemID) "
+		let maxSQL = "SELECT MAX(IA.lastRead) FROM itemAttachments IA "
+			+ "JOIN items I ON (I.itemID = IA.itemID) "
+			+ "WHERE I.libraryID = ? "
+			+ "AND IA.lastRead IS NOT NULL "
+			+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
+			+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
+		let maxLastRead = await Zotero.DB.valueQueryAsync(maxSQL, [libraryID]);
+		if (maxLastRead) {
+			let cutoff = maxLastRead - twoWeeksInSeconds;
+			this._lastReadCutoffs.set(libraryID, cutoff);
+			return cutoff;
+		}
+		// No items with lastRead.
+		// Don't persist this - we want to calculate a new cutoff if items come in later.
+		return 0;
+	};
+
+	/**
+	 * Run the Recently Read query for a library, selecting the given column.
+	 *
+	 * @param {Integer} libraryID
+	 * @param {String} selectExpr Column expression to select (e.g., "IA.itemID")
+	 * @return {Promise<Integer[]>}
+	 */
+	this._queryLastRead = async function (libraryID, selectExpr) {
+		let cutoff = await this._getLastReadCutoff(libraryID);
+		let sql = "SELECT DISTINCT " + selectExpr + " "
 			+ "FROM itemAttachments IA "
 			+ "JOIN items I ON (I.itemID = COALESCE(IA.parentItemID, IA.itemID)) "
 			+ "WHERE IA.lastRead >= ? "
@@ -186,6 +194,60 @@ Zotero.Items = function () {
 			+ "AND IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
 			+ "AND COALESCE(IA.parentItemID, IA.itemID) NOT IN (SELECT itemID FROM deletedItems)";
 		return Zotero.DB.columnQueryAsync(sql, [cutoff, libraryID]);
+	};
+
+	/**
+	 * Get top-level Recently Read matches in a library.
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise<Integer[]>} Item IDs (parent items and standalone attachments)
+	 */
+	this.getLastRead = async function (libraryID) {
+		return this._queryLastRead(libraryID, "COALESCE(IA.parentItemID, IA.itemID)");
+	};
+
+	/**
+	 * Get the IDs of the attachment items that were recently read in a library.
+	 *
+	 * These are the actual items that were read, as opposed to getLastRead(),
+	 * which returns top-level items (parent items of child attachments).
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise<Integer[]>} Attachment item IDs
+	 */
+	this.getLastReadAttachmentIDs = async function (libraryID) {
+		return this._queryLastRead(libraryID, "IA.itemID");
+	};
+
+
+	/**
+	 * Clear lastRead from all attachments in a library.
+	 *
+	 * @param {Integer} libraryID
+	 */
+	this.clearAllLastRead = async function (libraryID) {
+		let sql = "SELECT itemID FROM itemAttachments WHERE lastRead IS NOT NULL "
+			+ "AND itemID IN (SELECT itemID FROM items WHERE libraryID = ?)";
+		let ids = await Zotero.DB.columnQueryAsync(sql, [libraryID]);
+		if (!ids.length) {
+			return;
+		}
+
+		let items = await this.getAsync(ids);
+		await Zotero.Utilities.Internal.forEachChunkAsync(
+			items,
+			100,
+			async (chunk) => {
+				await Zotero.DB.executeTransaction(async () => {
+					for (let item of chunk) {
+						item.attachmentLastRead = null;
+						await item.save({ skipDateModifiedUpdate: true, skipEditCheck: true });
+					}
+				});
+			}
+		);
+
+		this._lastReadCutoffs.delete(libraryID);
 	};
 
 
@@ -982,10 +1044,11 @@ Zotero.Items = function () {
 
 	this.trash = async function (ids) {
 		Zotero.DB.requireTransaction();
-		
+
 		var libraryIDs = new Set();
 		ids = Zotero.flattenArguments(ids);
 		var items = [];
+		var undoableCount = 0;
 		for (let id of ids) {
 			let item = this.get(id);
 			if (!item) {
@@ -993,17 +1056,34 @@ Zotero.Items = function () {
 				Zotero.Notifier.queue('trash', 'item', id);
 				continue;
 			}
-			
+
 			if (!item.isEditable()) {
 				throw new Error(item._ObjectType + " " + item.libraryKey + " is not editable");
 			}
-			
+
 			if (!Zotero.Libraries.get(item.libraryID).hasTrash) {
 				throw new Error(Zotero.Libraries.getName(item.libraryID) + " does not have a trash");
 			}
-			
+
+			// Record undo data before modifying state
+			if (Zotero.UndoHistory && !item.deleted) {
+				Zotero.UndoHistory.stageChange({
+					objectType: 'item',
+					id: item.id,
+					libraryID: item.libraryID,
+					key: item.key,
+					fields: {
+						deleted: { old: false, new: true }
+					}
+				});
+				undoableCount++;
+			}
+
 			items.push(item);
 			libraryIDs.add(item.libraryID);
+		}
+		if (Zotero.UndoHistory && undoableCount) {
+			Zotero.UndoHistory.stageAction('undo-action-trash', { count: undoableCount });
 		}
 		
 		var parentItemIDs = new Set();

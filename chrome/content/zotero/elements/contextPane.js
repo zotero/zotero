@@ -224,9 +224,9 @@
 				else {
 					this._disableNotesContext();
 				}
-				_contextPaneSplitter.setAttribute('hidden', false);
+				_contextPaneSplitter.removeAttribute('hidden');
 
-				_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
+				_contextPane.toggleAttribute('collapsed', _contextPaneSplitter.getAttribute('state') == 'collapsed');
 				
 				this._sidenav.hidden = false;
 

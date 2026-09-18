@@ -99,7 +99,6 @@ export default [
 			"chrome/content/zotero/xpcom/translation/tlds.js",
 			"resource/bluebird/*",
 			"resource/classnames.js",
-			"resource/citeproc_rs*",
 			"resource/jspath.js",
 			"resource/loader.mjs",
 			"resource/pako.js",

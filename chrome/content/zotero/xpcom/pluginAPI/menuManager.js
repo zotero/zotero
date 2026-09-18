@@ -362,7 +362,7 @@
 				return;
 			}
 			
-			// let win = popupElem.ownerGlobal;
+			// let win = popupElem.documentGlobal;
 			// let doc = popupElem.ownerDocument;
 
 			// TODO: maybe we can let plugins to load their own l10n files in onShowing,
@@ -632,8 +632,16 @@
 					_menuElem.style.setProperty("--custom-menu-icon-dark", `url(${darkIcon || icon})`);
 				},
 			};
+			// ZoteroPane's menu contexts define a collectionTreeRow property that
+			// throws when read, so copy descriptors rather than values, which would
+			// evaluate it every time a menu is built
 			let wrappedGetContext = () => {
-				return Object.assign({}, defaultContext, getContext ? getContext() : {});
+				let context = {};
+				Object.defineProperties(context, Object.getOwnPropertyDescriptors(defaultContext));
+				if (getContext) {
+					Object.defineProperties(context, Object.getOwnPropertyDescriptors(getContext()));
+				}
+				return context;
 			};
 
 			// Add hooks
@@ -761,12 +769,12 @@
 		 */
 		_computeAvailableMenuNum(popupElem) {
 			// Compute the height of current screen
-			let screenHeight = popupElem.ownerGlobal.screen.availHeight;
+			let screenHeight = popupElem.documentGlobal.screen.availHeight;
 			let maxMenuHeight = screenHeight * 0.8;
 
-			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length;
+			let menuCount = popupElem.querySelectorAll(`& > :is(menuitem, menu):not(.${CUSTOM_MENU_CLASS}):not([hidden])`).length;
 			// An additional separator is added before the group
-			let separatorCount = popupElem.querySelectorAll(`& > menuseparator:not(.${CUSTOM_MENU_CLASS}):not([hidden=true])`).length + 1;
+			let separatorCount = popupElem.querySelectorAll(`& > menuseparator:not(.${CUSTOM_MENU_CLASS}):not([hidden])`).length + 1;
 
 			let menuHeight, separatorHeight, popupPadding;
 

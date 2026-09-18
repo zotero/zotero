@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "பெயர்:">
 
-<!ENTITY zotero.search.searchInLibrary "நூலகத்தில் தேடு:">
-
 <!ENTITY zotero.search.joinMode.prefix "பொருத்துக">
 <!ENTITY zotero.search.joinMode.any "ஏதேனும்">
 <!ENTITY zotero.search.joinMode.all "அனைத்தும்">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "நாட்களில்">
 <!ENTITY zotero.search.date.units.months "மாதங்கள்">
 <!ENTITY zotero.search.date.units.years "ஆண்டுகள்">
-
-<!ENTITY zotero.search.search "தேடல்">
-<!ENTITY zotero.search.clear "அழி">
-<!ENTITY zotero.search.saveSearch "தேடலைச் சேமி">

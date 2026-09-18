@@ -223,7 +223,7 @@ reader-read-aloud-quota-exceeded-message =
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Tapahtui tuntematon virhe.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
+reader-read-aloud-error-network = Virhe yhdistettäessä ääneenlukupalveluun. Tarkista internet-yhteytesi.
 reader-read-aloud-error-daily-limit-exceeded = Päivittäinen { -app-name }n lukuäänten aikaraja on saavutettu.
 reader-read-aloud-retry = Yritä uudelleen
 reader-read-aloud-first-run-title = Valitse suosikkilukuäänesi:

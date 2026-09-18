@@ -209,6 +209,9 @@ export class TranslationChild extends JSWindowActorChild {
 			sameZoneAs: this.contentWindow,
 			wantXrays: true,
 			wantGlobalProperties: ["XMLHttpRequest", "fetch", "WebSocket"],
+			// The translation framework adds Bluebird methods to Promise, which system-principal
+			// sandboxes freeze by default
+			freezeBuiltins: false,
 		});
 		
 		let scriptURIs = [

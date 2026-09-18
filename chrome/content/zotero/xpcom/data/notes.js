@@ -117,12 +117,9 @@ Zotero.Notes = new function () {
 		
 			if (itemID) {
 				// Create a name for this window so we can focus it later
-				//
-				// Collection is only used on new notes, so we don't need to
-				// include it in the name
 				name = 'zotero-note-' + itemID;
 			}
-			
+
 			let io = { itemID, parentItemKey, location, _initPromise: Zotero.Promise.defer() };
 			Services.ww.openWindow(
 				win,

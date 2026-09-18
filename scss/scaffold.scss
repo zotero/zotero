@@ -83,6 +83,11 @@ $scaffold-toolbarbutton-icons: (
 		margin: 0 4px;
 		
 		.toolbarbutton-menu-dropmarker {
+			-moz-default-appearance: none;
+			@include svgicon("chevron-6", "universal", "8");
+			color: var(--fill-secondary);
+			width: 8px;
+			height: 8px;
 			margin-inline-start: 4px;
 		}
 	}

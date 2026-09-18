@@ -28,8 +28,11 @@
 		static get observedAttributes() { return ['label']; }
 		
 		attributeChangedCallback(name, oldVal, newVal) {
-			if (name == "label" && newVal != oldVal) {
-				this.querySelector('h2').textContent = newVal;
+			// Can run before the content has been rendered, in which case
+			// connectedCallback() sets the label
+			let label = this.querySelector('h2');
+			if (label && name == "label" && newVal != oldVal) {
+				label.textContent = newVal;
 			}
 		}
 	}

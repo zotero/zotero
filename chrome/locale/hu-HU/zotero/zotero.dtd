@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
 <!ENTITY zotero.toolbar.newGroup "Új csoport...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Új algyűjtemény...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Új mentett keresés...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Kuka ürítése">
 <!ENTITY zotero.toolbar.tagSelector.label "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.toolbar.actions.label "Műveletek">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Beállítások...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Támogatás és dokumentáció">
 <!ENTITY zotero.toolbar.about.label "Névjegy">
-<!ENTITY zotero.toolbar.advancedSearch "Haladó keresés">
 <!ENTITY zotero.toolbar.openURL.label "Keresés">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hol találom a helyi könyvtárban?">
 

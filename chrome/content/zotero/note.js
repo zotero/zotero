@@ -41,7 +41,6 @@ async function onLoad() {
 	}
 	
 	let itemID = parseInt(io.itemID);
-	let collectionID = parseInt(io.collectionID);
 	let parentItemKey = io.parentItemKey;
 	let ref;
 
@@ -64,9 +63,6 @@ async function onLoad() {
 		if (parentItemKey) {
 			ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
 			noteEditor.parentItem = ref;
-		}
-		else if (collectionID && collectionID != 'undefined') {
-			noteEditor.collection = Zotero.Collections.get(collectionID);
 		}
 		noteEditor.refresh();
 	}

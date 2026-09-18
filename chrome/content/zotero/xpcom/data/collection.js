@@ -67,6 +67,10 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'version', {
 	get: function () { return this._get('version'); },
 	set: function (val) { return this._set('version', val); }
 });
+Zotero.defineProperty(Zotero.Collection.prototype, 'clientVersion', {
+	get: function() { return this._get('clientVersion'); },
+	set: function(val) { return this._set('clientVersion', val); }
+});
 Zotero.defineProperty(Zotero.Collection.prototype, 'synced', {
 	get: function () { return this._get('synced'); },
 	set: function (val) { return this._set('synced', val); }
@@ -136,6 +140,7 @@ Zotero.Collection.prototype.loadFromRow = function (row) {
 		
 		// Integer or 0
 		case 'version':
+		case 'clientVersion':
 			val = val ? parseInt(val) : 0;
 			break;
 		
@@ -386,6 +391,7 @@ Zotero.Collection.prototype._finalizeSave = async function (env) {
 };
 
 
+
 /**
  * @param {Number} itemID
  * @return {Promise}
@@ -450,6 +456,8 @@ Zotero.Collection.prototype.removeItem = function (itemID, options = {}) {
  * Does not require a separate save()
  */
 Zotero.Collection.prototype.removeItems = async function (itemIDs, options = {}) {
+	options.skipDateModifiedUpdate = true;
+	
 	if (!itemIDs || !itemIDs.length) {
 		return;
 	}
@@ -467,10 +475,7 @@ Zotero.Collection.prototype.removeItems = async function (itemIDs, options = {})
 		
 		let item = await this.ChildObjects.getAsync(itemID);
 		item.removeFromCollection(this.id);
-		await item.save({
-			skipDateModifiedUpdate: true,
-			skipEditCheck: options.skipEditCheck
-		})
+		await item.save(options);
 	}
 };
 
@@ -615,6 +620,18 @@ Zotero.Collection.prototype.trash = async function (env) {
 				// so we have to do it manually here
 				if (env.options && env.options.skipDeleteLog) {
 					env.notifierData[c.id].skipDeleteLog = true;
+				}
+				// Record undo data for descendent collections
+				if (Zotero.UndoHistory && !c.deleted) {
+					Zotero.UndoHistory.stageChange({
+						objectType: 'collection',
+						id: c.id,
+						libraryID: c.libraryID,
+						key: c.key,
+						fields: {
+							deleted: { old: false, new: true }
+						}
+					});
 				}
 			}
 		}

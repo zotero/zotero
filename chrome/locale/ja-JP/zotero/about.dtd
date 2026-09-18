@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "バージョン">
 <!ENTITY zotero.whatsNew "更新情報">
-<!ENTITY zotero.createdby "作成者:">
-<!ENTITY zotero.director "責任者">
-<!ENTITY zotero.directors "責任者">
-<!ENTITY zotero.developers "開発者:">
-<!ENTITY zotero.alumni "同窓会員:">
-<!ENTITY zotero.about.localizations "各国語版:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
-<!ENTITY zotero.thanks "次のコミュニティメンバーに謝辞を表します:">
+<!ENTITY zotero.createdby "作成者 :">
+<!ENTITY zotero.director "ディレクター :">
+<!ENTITY zotero.directors "ディレクター :">
+<!ENTITY zotero.developers "開発者 :">
+<!ENTITY zotero.alumni "卒業生 :">
+<!ENTITY zotero.about.localizations "各国語版 :">
+<!ENTITY zotero.about.additionalSoftware "サードパーティ製ソフトウェア">
+<!ENTITY zotero.thanks "謝辞 :">
 <!ENTITY zotero.about.close "閉じる">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "その他の貢献者と謝辞">
-<!ENTITY zotero.citationProcessing "出典表記と参考文献目録を処理中">
+<!ENTITY zotero.citationProcessing "引用文献と参考文献の処理">

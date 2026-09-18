@@ -286,16 +286,13 @@ Zotero.QuickCopy = new function () {
 				};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
 				var text = csl.previewCitationCluster(citation, [], [], "text");
-				csl.free();
 			}
 			else {
 				var style = Zotero.Styles.get(format.id);
 				var cslEngine = style.getCiteProc(locale, 'html', { cache: true });
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
- 				cslEngine.free();
 				cslEngine = style.getCiteProc(locale, 'text', { cache: true });
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
-				cslEngine.free();
 			}
 			
 			return {

@@ -200,6 +200,158 @@ describe("Reader", function () {
 			reader.close();
 		});
 
+		async function cleanupReaders(...readers) {
+			for (let reader of readers.filter(Boolean)) {
+				reader.close();
+			}
+			await Zotero.Promise.delay(100);
+			for (let reader of readers.filter(Boolean)) {
+				let index = Zotero.Reader._readers.indexOf(reader);
+				if (index !== -1) {
+					reader.uninit();
+					Zotero.Reader._readers.splice(index, 1);
+				}
+			}
+		}
+
+		it('should reopen a reader whose tab closes during a notifier transaction', async function () {
+			let reader, reopenedReader;
+			let title = Zotero.Promise.defer();
+			let updates = [];
+			let sandbox = sinon.createSandbox();
+			let transactionOpen = false;
+
+			try {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				let oldTabContainer = win.document.getElementById(reader.tabID);
+				sandbox.stub(attachment, 'getTabTitle').returns(title.promise);
+				let updateTitleSpy = sandbox.spy(reader, 'updateTitle');
+				let setTitleSpy = sandbox.spy(reader, '_setTitleValue');
+				let disposeSpy = sandbox.spy(reader._blockingObserver, 'dispose');
+				updates.push(reader.updateTitle());
+
+				Zotero.Notifier.begin();
+				transactionOpen = true;
+				win.Zotero_Tabs.close(reader.tabID);
+				await waitForCallback(() => !oldTabContainer.isConnected, 10, 5);
+				assert.isTrue(reader._isTabClosed);
+				sinon.assert.calledOnce(disposeSpy);
+				assert.isNull(reader._blockingObserver);
+				Zotero.Reader.notify('modify', 'item', [attachment.id], {});
+				updates.push(...updateTitleSpy.getCalls().slice(1).map(call => call.returnValue));
+				assert.equal(updateTitleSpy.callCount, 2);
+
+				reopenedReader = await Zotero.Reader.open(attachment.id);
+				assert.notStrictEqual(reopenedReader, reader);
+
+				title.resolve('Stale title');
+				await Promise.all(updates);
+				sinon.assert.notCalled(setTitleSpy);
+				await reopenedReader._initPromise;
+
+				await Zotero.Notifier.commit();
+				transactionOpen = false;
+				assert.isFalse(Zotero.Reader._readers.includes(reader));
+			}
+			finally {
+				title.resolve('Stale title');
+				try {
+					await Promise.all(updates);
+				}
+				catch {}
+				sandbox.restore();
+				if (transactionOpen) Zotero.Notifier.reset();
+				await cleanupReaders(reader, reopenedReader);
+			}
+		});
+
+		it('should reuse a queued unloaded reader tab and preserve its close callback', async function () {
+			let reader, reloadedReader, openResult, tabID, unloadedTab;
+			let closeCalls = 0, callbackHadExpectedReceiver, callbackSawOpenReader;
+			let transactionOpen = false;
+
+			try {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				tabID = reader.tabID;
+				let oldTabContainer = win.document.getElementById(tabID);
+				win.Zotero_Tabs.select('zotero-pane');
+				Zotero.Notifier.begin();
+				transactionOpen = true;
+				win.Zotero_Tabs.unload(tabID);
+				await waitForCallback(() => !oldTabContainer.isConnected, 10, 5);
+				unloadedTab = win.Zotero_Tabs._getTab(tabID).tab;
+				unloadedTab.onClose = function () {
+					closeCalls++;
+					callbackHadExpectedReceiver = this === unloadedTab;
+					callbackSawOpenReader = reloadedReader && !reloadedReader._isTabClosed;
+				};
+
+				openResult = await Zotero.Reader.open(attachment.id);
+				assert.isTrue(openResult === undefined, 'should select the unloaded tab');
+				reloadedReader = await waitForCallback(
+					() => Zotero.Reader._readers.find(r => r !== reader && r.tabID === tabID),
+					50, 5
+				);
+				await reloadedReader._initPromise;
+
+				await Zotero.Notifier.commit();
+				transactionOpen = false;
+				assert.strictEqual(Zotero.Reader.getByTabID(tabID), reloadedReader);
+
+				win.Zotero_Tabs.close(tabID);
+				await waitForCallback(
+					() => !Zotero.Reader._readers.includes(reloadedReader), 10, 5);
+				assert.equal(closeCalls, 1);
+				assert.isTrue(callbackHadExpectedReceiver);
+				assert.isTrue(callbackSawOpenReader);
+				assert.isTrue(reloadedReader._isTabClosed);
+			}
+			finally {
+				if (transactionOpen) Zotero.Notifier.reset();
+				let tab = tabID && win.Zotero_Tabs._getTab(tabID).tab;
+				if (tab) tab.onClose = null;
+				if (tab) win.Zotero_Tabs.close(tabID);
+				await cleanupReaders(reader, reloadedReader, openResult);
+			}
+		});
+
+		it('should open a reader window while a closed tab reader is pending', async function () {
+			let reader, windowReader, unloadedTabID;
+			let transactionOpen = false;
+
+			try {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				({ id: unloadedTabID } = win.Zotero_Tabs.add({
+					type: 'reader-unloaded',
+					data: { itemID: attachment.id },
+				}));
+				Zotero.Notifier.begin();
+				transactionOpen = true;
+				win.Zotero_Tabs.close(reader.tabID);
+
+				windowReader = await Zotero.Reader.open(
+					attachment.id, null, { openInWindow: true });
+				await windowReader._initPromise;
+				assert.equal(win.Zotero_Tabs._getTab(unloadedTabID).tab.type, 'reader-unloaded');
+
+				await Zotero.Notifier.commit();
+				transactionOpen = false;
+			}
+			finally {
+				if (transactionOpen) Zotero.Notifier.reset();
+				if (win.Zotero_Tabs._getTab(unloadedTabID).tab) {
+					win.Zotero_Tabs.close(unloadedTabID);
+				}
+				await cleanupReaders(reader, windowReader);
+			}
+		});
+
 		describe("#importFromEPUB()", function () {
 			let bookEpubPath; // The EPUB itself
 			let bookSdrPath; // The KOReader "sidecar" folder

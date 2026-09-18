@@ -128,8 +128,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
-		'createdByUserID', 'lastModifiedByUserID']) {
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'clientVersion',
+		'synced', 'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
 		get: function () { return this[prop]; },
@@ -375,6 +375,7 @@ Zotero.Item.prototype._parseRowData = function (row) {
 			
 			// Integer or 0
 			case 'version':
+			case 'clientVersion':
 				val = val ? parseInt(val) : 0;
 				break;
 			
@@ -422,6 +423,16 @@ Zotero.Item.prototype._finalizeLoadFromRow = function (row) {
 	this._clearChanged('primaryData');
 	this._clearChanged('attachmentData');
 	this._identified = true;
+}
+
+
+Zotero.Item.prototype._clearChanged = function (dataType) {
+	Zotero.DataObject.prototype._clearChanged.call(this, dataType);
+	// setType stores the old type under the 'itemType' alias, which the base
+	// primaryData clearing misses (it matches 'itemTypeID'), so clear it here
+	if (!dataType || dataType === 'primaryData') {
+		delete this._previousData.itemType;
+	}
 }
 
 
@@ -879,6 +890,217 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 	}
 	return true;
 }
+
+/**
+ * Override to correctly resolve item data fields via _itemData[fieldID]
+ */
+Zotero.Item.prototype._getUndoData = function () {
+	let skipFields = Zotero.DataObject.UNDO_SKIP_FIELDS;
+	let fields = {};
+
+	// Fields tracked via _previousData
+	for (let field of Object.keys(this._previousData)) {
+		if (skipFields.has(field)) continue;
+		// 'itemType' is a derived name, not directly settable -- handled below as itemTypeID
+		if (field === 'itemType') continue;
+		// Collections are an array but need explicit undo tracking
+		if (field === 'collections') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._collections
+			};
+			continue;
+		}
+		if (field === 'note') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._noteText
+			};
+			continue;
+		}
+		if (field === 'relations') {
+			fields[field] = {
+				old: this._previousData[field],
+				new: this._relations.map(r => [...r])
+			};
+			continue;
+		}
+		if (typeof this._previousData[field] === 'object' && this._previousData[field] !== null) {
+			continue;
+		}
+
+		let fieldID = Zotero.ItemFields.getID(field);
+		if (fieldID) {
+			// Item data field -- new value is in _itemData.
+			// After a type change, lost fields are no longer in _itemData.
+			let newValue = this._itemData[fieldID];
+			fields[field] = {
+				old: this._previousData[field],
+				new: newValue !== undefined ? newValue : false
+			};
+		}
+		else {
+			// Primary data field -- new value is on the instance property
+			fields[field] = {
+				old: this._previousData[field],
+				new: this['_' + field]
+			};
+		}
+	}
+
+	// Detect item type change and store with numeric IDs
+	if (this._changed.primaryData && this._changed.primaryData.itemTypeID
+			&& this._previousData.itemType) {
+		fields.itemTypeID = {
+			old: Zotero.ItemTypes.getID(this._previousData.itemType),
+			new: this._itemTypeID
+		};
+	}
+
+	// Fields tracked via _changedData (e.g. deleted, tags)
+	for (let field of Object.keys(this._changedData)) {
+		if (skipFields.has(field)) continue;
+		if (field === 'deleted') {
+			fields[field] = {
+				old: this._deleted,
+				new: this._changedData[field]
+			};
+		}
+		else if (field === 'tags') {
+			fields[field] = {
+				old: this._tags,
+				new: this._changedData[field]
+			};
+		}
+	}
+
+	// Creators tracked via _changed.creators
+	if (this._changed.creators) {
+		// Old creators were saved in _previousData.creators by _markFieldChange
+		let oldCreators = this._previousData.creators || {};
+		let newCreators = {};
+		for (let i = 0; i < this._creators.length; i++) {
+			newCreators[i] = Object.assign({}, this._creators[i]);
+		}
+		fields.creators = {
+			old: oldCreators,
+			new: newCreators
+		};
+	}
+
+	if (!Object.keys(fields).length) return null;
+
+	return {
+		objectType: this._objectType,
+		id: this._id,
+		libraryID: this._libraryID,
+		key: this._key,
+		fields
+	};
+};
+
+
+/**
+ * @see Zotero.DataObject.prototype._undoFieldMatches
+ *
+ * Mirrors how _getUndoData() (above) captures each item field, and reuses the
+ * canonical change-detection helpers so the staleness check and save-time
+ * change detection stay in agreement.
+ */
+Zotero.Item.prototype._undoFieldMatches = function (field, recorded) {
+	switch (field) {
+		case 'collections':
+			return !Zotero.DataObjectUtilities._collectionsChanged(this._collections, recorded);
+
+		case 'tags':
+			if (!Array.isArray(recorded)) {
+				return this._tags === recorded;
+			}
+			return !Zotero.DataObjectUtilities._tagsChanged(this._tags, recorded);
+
+		case 'relations':
+			return this._undoRelationsMatch(recorded);
+
+		case 'creators':
+			return this._undoCreatorsMatch(recorded);
+
+		case 'note':
+			return this._noteText === recorded;
+
+		case 'itemTypeID':
+			return this._itemTypeID === recorded;
+	}
+
+	let fieldID = Zotero.ItemFields.getID(field);
+	if (fieldID) {
+		return this._undoItemDataMatches(fieldID, recorded);
+	}
+	// Primary scalar field (e.g. dateAdded) -- defer to the base implementation
+	return Zotero.DataObject.prototype._undoFieldMatches.call(this, field, recorded);
+};
+
+
+/**
+ * Compare a recorded item-data value against the live one. An empty field reads
+ * back as false, null, undefined, or '' depending on the path, so treat all of
+ * those as equal -- like setField()'s own change check -- to avoid mistaking an
+ * unchanged value for an external edit.
+ *
+ * @param {Integer} fieldID
+ * @param {*} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoItemDataMatches = function (fieldID, recorded) {
+	let current = this._itemData ? this._itemData[fieldID] : undefined;
+	let emptyCurrent = current === undefined || current === null || current === false || current === '';
+	let emptyRecorded = recorded === undefined || recorded === null || recorded === false || recorded === '';
+	if (emptyCurrent || emptyRecorded) {
+		return emptyCurrent === emptyRecorded;
+	}
+	return current === recorded;
+};
+
+
+/**
+ * Index-keyed creator comparison (reordering counts as a change), against the
+ * { index -> creatorData } shape _getUndoData() records.
+ *
+ * @param {Object} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoCreatorsMatch = function (recorded) {
+	recorded = recorded || {};
+	if (this._creators.length !== Object.keys(recorded).length) {
+		return false;
+	}
+	for (let i = 0; i < this._creators.length; i++) {
+		if (!Zotero.Creators.equals(this._creators[i], recorded[i])) {
+			return false;
+		}
+	}
+	return true;
+};
+
+
+/**
+ * Order-independent comparison of the flat [predicate, object] pair arrays
+ * _getUndoData() records for relations.
+ *
+ * @param {Array} recorded
+ * @return {Boolean}
+ */
+Zotero.Item.prototype._undoRelationsMatch = function (recorded) {
+	if (!Array.isArray(recorded)) {
+		return false;
+	}
+	let current = this._relations.map(r => [...r]);
+	if (current.length !== recorded.length) {
+		return false;
+	}
+	let key = pair => pair[0] + "\t" + pair[1];
+	return Zotero.Utilities.arrayEquals(current.map(key).sort(), recorded.map(key).sort());
+};
+
 
 /*
  * Get the title for an item for display in the interface
@@ -1524,7 +1746,7 @@ Zotero.Item.prototype._saveData = async function (env) {
 		let del = [];
 		
 		let valueSQL = "SELECT valueID FROM itemDataValues WHERE value=?";
-		let insertValueSQL = "INSERT INTO itemDataValues VALUES (?,?)";
+		let insertValueSQL = "INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES (?,?,?)";
 		let replaceSQL = "REPLACE INTO itemData VALUES (?,?,?)";
 		
 		for (let fieldID in this._changed.itemData) {
@@ -1540,12 +1762,21 @@ Zotero.Item.prototype._saveData = async function (env) {
 			if (Zotero.ItemFields.getID('accessDate') == fieldID
 					&& (this.getField(fieldID)) == 'CURRENT_TIMESTAMP') {
 				value = Zotero.DB.transactionDateTime;
+				// The undo snapshot captured the unresolved sentinel as this
+				// field's 'new' value. Replace it with the timestamp we're
+				// actually writing so staleness detection can compare against
+				// the stored value once the item reloads it
+				if (env.undoData && env.undoData.fields.accessDate
+						&& env.undoData.fields.accessDate.new === 'CURRENT_TIMESTAMP') {
+					env.undoData.fields.accessDate.new = value;
+				}
 			}
 			
 			let valueID = await Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })
 			if (!valueID) {
 				valueID = Zotero.ID.get('itemDataValues');
-				await Zotero.DB.queryAsync(insertValueSQL, [valueID, value], { debug: false });
+				let valueNormalized = Zotero.Utilities.Internal.normalizeForSearchStorage(value);
+				await Zotero.DB.queryAsync(insertValueSQL, [valueID, value, valueNormalized], { debug: false });
 			}
 			
 			await Zotero.DB.queryAsync(replaceSQL, [itemID, fieldID, valueID], { debug: false });
@@ -1918,7 +2149,12 @@ Zotero.Item.prototype._saveData = async function (env) {
 			params.unshift(itemID);
 		}
 		await Zotero.DB.queryAsync(sql, params);
-		
+
+		// Flag the note as edited since its last full-text index update rather than re-indexing it
+		// on every auto-save while typing. The background queue re-indexes it, and searches match
+		// the flagged note from its cached text in the meantime.
+		await Zotero.FullText.flagNoteStale(itemID, noteText);
+
 		if (parentItemID) {
 			reloadParentChildItems[parentItemID] = true;
 		}
@@ -2037,8 +2273,8 @@ Zotero.Item.prototype._saveData = async function (env) {
 		let isExternal = this._getLatestField('annotationIsExternal');
 		
 		let sql = "REPLACE INTO itemAnnotations "
-			+ "(itemID, parentItemID, type, authorName, text, comment, color, pageLabel, sortIndex, position, isExternal) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "(itemID, parentItemID, type, authorName, text, textNormalized, comment, commentNormalized, color, pageLabel, sortIndex, position, isExternal) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		await Zotero.DB.queryAsync(
 			sql,
 			[
@@ -2047,7 +2283,9 @@ Zotero.Item.prototype._saveData = async function (env) {
 				typeID,
 				authorName || null,
 				text || null,
+				Zotero.Utilities.Internal.normalizeForSearchStorage(text),
 				comment || null,
+				Zotero.Utilities.Internal.normalizeForSearchStorage(comment),
 				color || Zotero.Annotations.DEFAULT_COLOR,
 				pageLabel || null,
 				sortIndex,
@@ -2638,6 +2876,22 @@ Zotero.Item.prototype.getFile = function () {
 
 
 /**
+ * Check whether a stored file's filename contains a directory path -- a forward slash (never
+ * valid in a filename) or a Windows absolute path (drive-letter or UNC prefix). Bare
+ * backslashes are technically valid on Linux/macOS and present in existing filenames (e.g.,
+ * LaTeX in titles), so they're allowed here.
+ *
+ * @param {String} filename
+ * @return {Boolean}
+ */
+function filenameContainsPath(filename) {
+	return filename.includes('/')
+		|| /^[a-zA-Z]:[\\/]/.test(filename)
+		|| filename.startsWith('\\\\');
+}
+
+
+/**
  * Get the absolute file path for the attachment
  *
  * @return {string|false} - The absolute file path of the attachment, or false for invalid paths
@@ -2675,6 +2929,13 @@ Zotero.Item.prototype.getFilePath = function () {
 		}
 		// Strip "storage:"
 		path = path.substr(8);
+		
+		// A stored file's path is just a filename, so a directory path means it's invalid
+		if (filenameContainsPath(path)) {
+			Zotero.logError("Invalid stored-file attachment filename '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
+		}
 		
 		// Ignore .zotero* files that were relinked before we started blocking them
 		if (path.startsWith(".zotero")) {
@@ -2769,6 +3030,13 @@ Zotero.Item.prototype.getFilePathAsync = async function () {
 		
 		// Strip "storage:"
 		path = path.substr(8);
+		
+		// A stored file's path is just a filename, so a directory path means it's invalid
+		if (filenameContainsPath(path)) {
+			Zotero.logError("Invalid stored-file attachment filename '" + path + "'");
+			this._updateAttachmentStates(false);
+			return false;
+		}
 		
 		// Ignore .zotero* files that were relinked before we started blocking them
 		if (path.startsWith(".zotero")) {
@@ -3346,6 +3614,13 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentFilename', {
 		if (prefixedPath) {
 			return prefixedPath[1].split('/').pop();
 		}
+		// Some ancient libraries have relative paths ('../.../foo.pdf') with no 'storage:' prefix,
+		// which fall through to PathUtils.filename() and throw NS_ERROR_FILE_UNRECOGNIZED_PATH, so
+		// resolve stored-file leaves as strings regardless of prefix. PathUtils.filename() below is
+		// for linked files, whose paths are genuine absolute paths.
+		if (this.isStoredFileAttachment()) {
+			return path.split(/[/\\]/).pop();
+		}
 		return PathUtils.filename(path);
 	},
 	set: function (val) {
@@ -3425,6 +3700,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 					throw new Error("Imported file path must be within storage directory");
 				}
 				val = 'storage:' + PathUtils.filename(val);
+			}
+			// getValidFileName() should be used elsewhere to strip backslashes
+			if (filenameContainsPath(val.substr(8))) {
+				throw new Error(`Stored-file filename cannot contain a directory path -- got '${val}'`);
 			}
 		}
 		
@@ -3903,7 +4182,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			let cacheFile = Zotero.Fulltext.getItemCacheFile(this);
 			if (!cacheFile.exists() || !(await Zotero.FullText.isFullyIndexed(this))) {
 				// Use processor cache file if it exists
-				let processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(this).path;
+				let processorCacheFile = Zotero.FullText.getSyncedContentCacheFile(this).path;
 				if (await OS.File.exists(processorCacheFile)) {
 					let json = await Zotero.File.getContentsAsync(processorCacheFile);
 					let data = JSON.parse(json);
@@ -5349,6 +5628,10 @@ Zotero.Item.prototype._eraseData = async function (env) {
 		await Zotero.Fulltext.clearItemWords(this.id);
 		//Zotero.Fulltext.clearItemContent(this.id);
 	}
+	// Clear the note content index (notes and attachments can both have itemNotes rows)
+	if (this.isNote() || this.isAttachment()) {
+		await Zotero.FullText.clearNoteIndex(this.id);
+	}
 	
 	await Zotero.DB.queryAsync('DELETE FROM items WHERE itemID=?', this.id);
 	
@@ -5869,12 +6152,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 
 
 Zotero.Item.prototype.toResponseJSON = function (options = {}) {
-	// Default to showing synced storage properties, since that's what the API does, and this function
-	// is generally used to emulate the API
-	if (options.syncedStorageProperties === undefined) {
-		options.syncedStorageProperties = true;
-	}
-	
 	var json = this.constructor._super.prototype.toResponseJSON.call(this, options);
 	
 	// creatorSummary
@@ -5903,6 +6180,15 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 			type: this.attachmentContentType,
 			title: this.attachmentFilename
 		};
+	}
+	
+	// When the caller wants the current storage properties from the file on disk
+	// (syncedStorageProperties: false), they're only available asynchronously, so add null
+	// placeholders here to keep their place in the JSON and let toResponseJSONAsync() fill
+	// them in
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties && !options.syncedStorageProperties) {
+		json.data.mtime = null;
+		json.data.md5 = null;
 	}
 	
 	return json;
@@ -5941,6 +6227,12 @@ Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
 	else if (this.isImportedAttachment()) {
 		json.links.enclosure.length = await getFileSize(this);
 	}
+	
+	if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
+		json.data.mtime = await this.attachmentModificationTime ?? null;
+		json.data.md5 = await this.attachmentHash ?? null;
+	}
+	
 	return json;
 };
 
@@ -5975,6 +6267,7 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 	};
 	
 	try {
+		// Keep in sync with the pre-migration check in Zotero.Schema.migrateExtraFields()
 		var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
 			originalExtra,
 			this,

@@ -161,7 +161,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 				// If the anchor element is inside another frame, create a proxy
 				// element in the parent document at the anchor's visual location
 				if (forEl.ownerDocument !== document) {
-					let iframe = forEl.ownerGlobal.frameElement;
+					let iframe = forEl.documentGlobal.frameElement;
 					if (iframe) {
 						let iframeRect = iframe.getBoundingClientRect();
 						let forElRect = forEl.getBoundingClientRect();

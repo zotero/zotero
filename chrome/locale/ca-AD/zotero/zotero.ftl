@@ -24,6 +24,12 @@ delete-or-backspace =
         [macos] Delete
        *[other] Backspace
     }
+-os-name =
+    { PLATFORM() ->
+        [macos] macOS
+        [windows] Windows
+       *[other] Linux
+    }
 general-print = Imprimeix
 general-remove = Elimina
 general-add = Afegeix
@@ -40,11 +46,15 @@ general-view-troubleshooting-instructions = Mostra les instruccions de resoluci�
 general-go-back = Vés enrere
 general-accept = Accepta
 general-cancel = Cancel·la
+cancel-button =
+    .label = { general-cancel }
 general-show-in-library = Mostra a la biblioteca
 general-restartApp = Restart { -app-name }
 general-restartInTroubleshootingMode = Restart in Troubleshooting Mode
 general-save = Desa
 general-clear = Neteja
+clear-button =
+    .label = { general-clear }
 general-update = Actualitza
 general-back = Enrere
 general-edit = Edita
@@ -76,6 +86,8 @@ general-maroon = Vermelló
 general-gray = Gris
 general-black = Negre
 general-loading = S'està carregant…
+db-checking-integrity = Checking database integrity…
+db-repairing = Repairing database…
 citation-style-label = Estil de la cita:
 language-label = Llengua:
 menu-custom-group-submenu =
@@ -162,14 +174,110 @@ collections-menu-show-recently-read =
     .label = Show { recently-read }
 item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
-collections-menu-rename-collection =
-    .label = Reanomena la col·lecció
-collections-menu-edit-saved-search =
-    .label = Edita la cerca desada
+items-section-collections-selected =
+    { $count ->
+        [one] { $count } collection selected
+       *[other] { $count } collections selected
+    }
+items-section-searches-selected =
+    { $count ->
+        [one] { $count } saved search selected
+       *[other] { $count } saved searches selected
+    }
+items-section-sources-selected =
+    { $count ->
+        [one] { $count } source selected
+       *[other] { $count } sources selected
+    }
+items-section-library-collections =
+    { $count ->
+        [one] { $library } ({ $count } collection selected)
+       *[other] { $library } ({ $count } collections selected)
+    }
+items-section-library-searches =
+    { $count ->
+        [one] { $library } ({ $count } saved search selected)
+       *[other] { $library } ({ $count } saved searches selected)
+    }
+items-section-library-sources =
+    { $count ->
+        [one] { $library } ({ $count } source selected)
+       *[other] { $library } ({ $count } sources selected)
+    }
+items-section-library-recently-read = { $library } ({ recently-read })
+items-section-library = { $library }
+collections-menu-rename =
+    .label = Rename
+edit-saved-search = Edita la cerca desada
+collections-menu-edit-search =
+    .label = Edit Search
+collections-menu-duplicate-search =
+    .label = Duplicate Search
 collections-menu-move-collection =
     .label = Mou a
 collections-menu-copy-collection =
     .label = Copia a
+collections-menu-export =
+    .label = Exporta...
+collections-menu-generate-report =
+    .label = Generate Report…
+collections-menu-create-bibliography =
+    .label = Create Bibliography…
+collections-menu-unsubscribe =
+    .label = Unsubscribe…
+collections-menu-delete =
+    .label =
+        { $count ->
+            [one] Delete Collection…
+           *[other] Delete Collections…
+        }
+collections-menu-delete-with-items =
+    .label =
+        { $count ->
+            [one] Delete Collection and Items…
+           *[other] Delete Collections and Items…
+        }
+collections-menu-delete-search =
+    .label =
+        { $count ->
+            [one] Delete Search…
+           *[other] Delete Searches…
+        }
+collections-delete-title =
+    { $count ->
+        [one] Delete Collection
+       *[other] Delete Collections
+    }
+collections-delete-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection?
+       *[other] Are you sure you want to delete { $count } collections?
+    }
+collections-delete-keep-items =
+    { $count ->
+        [one] Items within this collection will not be deleted.
+       *[other] Items within these collections will not be deleted.
+    }
+collections-delete-with-items-title =
+    { $count ->
+        [one] Delete Collection and Items
+       *[other] Delete Collections and Items
+    }
+collections-delete-with-items-message =
+    { $count ->
+        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
+       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+    }
+collections-delete-search-title =
+    { $count ->
+        [one] Delete Search
+       *[other] Delete Searches
+    }
+collections-delete-search-message =
+    { $count ->
+        [one] Are you sure you want to delete this search?
+       *[other] Are you sure you want to delete { $count } searches?
+    }
 item-creator-moveDown =
     .label = Mou avall
 item-creator-moveToTop =
@@ -282,6 +390,7 @@ import-online-relink-only =
     .label = Relink Mendeley Desktop citations
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
+tab-title-multiple-collections = Multiple
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -621,6 +730,18 @@ quicksearch-input =
     .aria-label = Cerca ràpida
     .placeholder = { $placeholder }
     .aria-description = { $placeholder }
+advanced-search = Cerca avançada
+menuitem-advanced-search =
+    .label = { advanced-search }
+quicksearch-advanced-search-button =
+    .tooltiptext = { advanced-search }
+    .aria-label = { advanced-search }
+advanced-search-close =
+    .tooltiptext = Close Advanced Search
+advanced-search-expand =
+    .tooltiptext = Expand Advanced Search
+advanced-search-collapse =
+    .tooltiptext = Collapse Advanced Search
 item-pane-header-view-as =
     .label = Mostra com a
 item-pane-header-none =
@@ -680,9 +801,64 @@ architecture-x64-on-arm64-action = Download { -app-name } for ARM64
 first-run-guidance-authorMenu = { -app-name } lets you specify editors and translators too. You can turn an author into an editor or translator by selecting from this menu.
 first-run-guidance-readAloud = { -app-name } can now read your documents to you using natural-sounding voices.
 advanced-search-remove-btn =
-    .tooltiptext = { general-remove }
+    .tooltiptext = Remove Condition
 advanced-search-add-btn =
-    .tooltiptext = { general-add }
+    .tooltiptext = Add Condition
+advanced-search-group-btn =
+    .tooltiptext = Add Condition Group
+advanced-search-remove-group-btn =
+    .tooltiptext = Remove Group
+advanced-search-ungroup-btn =
+    .tooltiptext = Ungroup Conditions
+advanced-search-result-level-menu =
+    .aria-label = Result type
+advanced-search-result-level-prefix-root =
+    .value = Cerca
+advanced-search-join-prefix-root =
+    .value = matching
+advanced-search-result-level-any =
+    .label = any items
+advanced-search-result-level-item =
+    .label = top-level items
+advanced-search-result-level-attachment =
+    .label = attachments
+advanced-search-result-level-note =
+    .label = notes
+advanced-search-result-level-annotation =
+    .label = anotacions
+advanced-search-binding-menu =
+    .aria-label = Match against the same item
+advanced-search-binding-separate =
+    .label = separately
+advanced-search-binding-same-attachment =
+    .label = in the same attachment
+advanced-search-binding-same-note =
+    .label = in the same note
+advanced-search-binding-same-annotation =
+    .label = in the same annotation
+advanced-search-of-the-following =
+    .value = of the following
+advanced-search-binding-hint-attachment =
+    .value = These conditions can match separate attachments.
+advanced-search-binding-hint-note =
+    .value = These conditions can match separate notes.
+advanced-search-binding-hint-annotation =
+    .value = These conditions can match separate annotations.
+advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+advanced-search-group-warning-unreachable =
+    A condition here cannot be in the same { $entity ->
+        [attachment] attachment
+        [note] note
+       *[annotation] annotation
+    }. Match these separately or remove the incompatible condition.
+advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+advanced-search-bind-same-attachment =
+    .label = Match the same attachment
+advanced-search-bind-same-note =
+    .label = Match the same note
+advanced-search-bind-same-annotation =
+    .label = Match the same annotation
 advanced-search-conditions-menu =
     .aria-label = Condició de cerca
     .label = { $label }
@@ -692,11 +868,17 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
+search-operator-isEmpty = is empty
+search-operator-isNotEmpty = is not empty
 search-conditions-tooltip-fields = Camps:
 search-conditions-collection = Col·lecció
 search-conditions-savedSearch = Cerca desada
 search-conditions-itemTypeID = Tipus d'element
 search-conditions-tag = Etiqueta
+search-conditions-numTags = # of Tags
+search-conditions-numNotes = # of Notes
+search-conditions-numAttachments = # of Attachments
+search-conditions-numAnnotations = # of Annotations
 search-conditions-note = Nota
 search-conditions-childNote = Nota filla
 search-conditions-creator = Creador
@@ -715,10 +897,26 @@ search-conditions-dateModified = Data de modificació
 search-conditions-fulltextContent = Contingut de l'adjunció
 search-conditions-programmingLanguage = Llengua de programació
 search-conditions-fileTypeID = Tipus de fitxer de l'adjunció
+search-conditions-attachmentStorageType = Attachment Storage Type
 search-conditions-lastRead = Attachment Last Read
 search-conditions-annotationText = Text d'anotació
 search-conditions-annotationComment = Comentari d'anotació
+search-conditions-annotationType = Annotation Type
+search-conditions-annotationColor = Annotation Color
+search-conditions-annotationAuthor = Annotation Author
 search-conditions-anyField = Qualsevol camp
+search-conditions-titleCreatorYear = Títol, autor, any
+search-conditions-submenu-attachment = Adjunció
+search-conditions-submenu-annotation = Anotació
+search-conditions-short-fulltextContent = Content
+search-conditions-short-fileTypeID = Tipus de fitxer
+search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-lastRead = Last Read
+search-conditions-short-annotationText = Text
+search-conditions-short-annotationComment = Comment
+search-conditions-short-annotationType = Tipus
+search-conditions-short-annotationColor = Color
+search-conditions-short-annotationAuthor = Autor
 find-pdf-files-added =
     { $count ->
         [one] { $count } file added
@@ -750,6 +948,9 @@ file-type-video = Vídeo
 file-type-presentation = Presentació
 file-type-document = Document
 file-type-ebook = Llibre electrònic
+attachment-storage-type-storedFile = Stored File
+attachment-storage-type-linkedFile = Linked File
+attachment-storage-type-webLink = Web Link
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -758,18 +959,23 @@ post-upgrade-done =
 text-action-paste-and-search =
     .label = Enganxa i cerca
 mac-word-plugin-install-message = El Zotero necessita accés a les dades del Word per a instal·lar el connector de Word.
+mac-word-plugin-install-folder-message = { -app-name } needs access to Word’s startup folder to install the Word plugin.
 mac-word-plugin-install-action-button =
     .label = Instal·la el connector del Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
+mac-word-plugin-install-folder-dialog-button = Instal·la
+mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
+search-normalization-progress-message = Indexing items for search
 long-tag-fixer-window-title =
     .title = Split Tags
 long-tag-fixer-button-dont-split =
@@ -788,3 +994,140 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+os-keystore-save-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+    }
+os-keystore-migrate-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
+        [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+    }
+search-button =
+    .label = Cerca
+save-search-new-button =
+    .label = Save Search…
+save-search-edit-button =
+    .label = Desa
+save-search-name-title = Desa la cerca
+save-search-name-message = Enter a name for the saved search:
+saved-search-close-confirmation-title = Editing Saved Search
+saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
+item-pane-batch-editing-prompt =
+    .aria-label = Batch editing
+item-pane-batch-editing-enable =
+    .label = Edit Multiple Items…
+item-pane-batch-editing-multiple-values-placeholder = Multiple
+item-pane-batch-editing-clear-values = Clear all values
+item-pane-batch-editing-header =
+    { $count ->
+        [one] Editing { $count } item
+       *[other] Editing { $count } items
+    }
+item-pane-batch-editing-done =
+    .label = { general-done }
+undo-action-edit-metadata =
+    { $count ->
+        [one] Edit Metadata
+       *[other] Edit Metadata for { $count } Items
+    }
+undo-action-edit-field =
+    { $count ->
+        [one] Edit of “{ $field }”
+       *[other] Edit of “{ $field }” for { $count } Items
+    }
+undo-action-normalize-attachment-titles = Normalize Attachment Title
+undo-action-trash =
+    { $count ->
+        [one] Trash Item
+       *[other] Trash { $count } Items
+    }
+undo-action-restore-items =
+    { $count ->
+        [one] Restore Item
+       *[other] Restore { $count } Items
+    }
+undo-action-trash-collection =
+    { $count ->
+        [one] Trash Collection
+       *[other] Trash { $count } Collections
+    }
+undo-action-trash-search =
+    { $count ->
+        [one] Trash Saved Search
+       *[other] Trash { $count } Saved Searches
+    }
+undo-action-restore-collection =
+    { $count ->
+        [one] Restore Collection
+       *[other] Restore { $count } Collections
+    }
+undo-action-restore-objects =
+    { $count ->
+        [one] Restore Object
+       *[other] Restore { $count } Objects
+    }
+undo-action-add-to-collection =
+    { $count ->
+        [one] Add to Collection
+       *[other] Add { $count } Items to Collection
+    }
+undo-action-remove-from-collection =
+    { $count ->
+        [one] Remove from Collection
+       *[other] Remove { $count } Items from Collection
+    }
+undo-action-move-to-collection =
+    { $count ->
+        [one] Move to Collection
+       *[other] Move { $count } Items to Collection
+    }
+undo-action-rename-collection = Reanomena la col·lecció
+undo-action-move-collection = Move Collection
+undo-action-add-tag =
+    { $count ->
+        [one] Add Tag
+       *[other] Add Tag to { $count } Items
+    }
+undo-action-change-tag = Change Tag
+undo-action-split-tag = Split Tag
+undo-action-remove-tag =
+    { $count ->
+        [one] Remove Tag
+       *[other] Remove Tag from { $count } Items
+    }
+undo-action-remove-tags-from-item =
+    { $count ->
+        [one] Remove Tag
+       *[other] Remove { $count } Tags
+    }
+undo-action-remove-all-tags = Remove All Tags
+undo-action-edit-note = Edita la nota
+undo-action-add-creator = Add Creator
+undo-action-remove-creator = Remove Creator
+undo-action-edit-creator = Edit Creator
+undo-action-reorder-creator = Reorder Creator
+undo-action-change-type = Canvia el tipus d'element
+undo-action-change-parent-item =
+    { $count ->
+        [one] Change Parent Item
+       *[other] Change Parent for { $count } Items
+    }
+undo-action-convert-to-standalone =
+    { $count ->
+        [one] Convert to Standalone
+       *[other] Convert { $count } Items to Standalone
+    }
+undo-action-add-related = Add Related
+undo-action-remove-related = Remove Related
+undo-action-merge-items =
+    { $count ->
+        [one] Merge Item
+       *[other] Merge { $count } Items
+    }
+menu-edit-undo-action = Undo { $action }
+menu-edit-redo-action = Redo { $action }

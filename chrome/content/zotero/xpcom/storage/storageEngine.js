@@ -146,38 +146,15 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 		Zotero.debug("No file editing access -- skipping file modification check for "
 			+ this.library.name);
 	}
-	// Use file change watcher to check only files that actually changed on disk
-	//
-	// Note: File-sync downloads also generate filesystem events, so recently downloaded files will
-	// appear here on the next sync cycle, but checkForUpdatedFiles() will see that the mtime/hash
-	// match the synced values and skip them.
+	// If the file change watcher is active, files that actually changed on disk were already
+	// checked and marked in the database when the sync runner took the watcher snapshot at the
+	// start of file syncing, so the scan can be skipped entirely unless this library needs a
+	// full scan (not yet scanned, watcher fallback, daily refresh, or manual sync)
 	else if (Zotero.Sync.Storage.FileChangeWatcher.available) {
-		let changedKeys = Zotero.Sync.Storage.FileChangeWatcher.getChangedItemKeys();
-		if (changedKeys) {
-			if (changedKeys.size > 0) {
-				let keysArray = Array.from(changedKeys);
-				let itemIDs = [];
-				// Batch to avoid hitting SQLite parameter limit
-				await Zotero.Utilities.Internal.forEachChunkAsync(
-					keysArray, 500, async function (chunk) {
-						let ids = await Zotero.DB.columnQueryAsync(
-							"SELECT itemID FROM items WHERE libraryID=? AND key IN ("
-								+ chunk.map(() => '?').join(',') + ")",
-							[libraryID, ...chunk]
-						);
-						itemIDs.push(...ids);
-					}
-				);
-				if (itemIDs.length) {
-					await this.local.checkForUpdatedFiles(libraryID, itemIDs);
-				}
-			}
-			// else: no changes detected, skip scan entirely
-		}
-		else {
-			// Watcher returned null (first run or error) -- full scan
+		if (Zotero.Sync.Storage.FileChangeWatcher.needsFullScan(libraryID, this.background)) {
 			this.local.lastFullFileCheck[libraryID] = new Date().getTime();
 			await this.local.checkForUpdatedFiles(libraryID);
+			Zotero.Sync.Storage.FileChangeWatcher.recordFullScan(libraryID);
 		}
 	}
 	// If this is a background sync, it's not the first sync of the session, the library has had
@@ -205,9 +182,11 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 	var downloadForced = await this.local.checkForForcedDownloads(libraryID);
 	
 	// If we don't have any forced downloads, we can skip downloads if no storage metadata has
-	// changed (meaning nothing else has uploaded files since the last successful file sync)
+	// changed (meaning nothing else has uploaded files since the last successful file sync) and
+	// nothing is already marked for download.
 	if (downloadAll && !downloadForced) {
-		if (this.library.storageVersion == this.library.libraryVersion) {
+		if (this.library.storageVersion == this.library.libraryVersion
+				&& !(await this.local.checkForPendingDownloads(libraryID))) {
 			Zotero.debug("No remote storage changes for " + this.library.name
 				+ " -- skipping file downloads");
 			downloadAll = false;
@@ -374,11 +353,15 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = async function (item) {
 				+ item.libraryKey);
 	}
 	
-	if (type == 'upload') {
-		if (!((await item.fileExists()))) {
-			Zotero.debug("File " + item.libraryKey + " not available to upload -- skipping");
+	if (type == 'upload' && !(await item.fileExists())) {
+		Zotero.debug("File " + item.libraryKey + " not available to upload -- "
+			+ "marking for download");
+		await this.local.updateSyncStates([item], 'to_download');
+		if (!this.local.downloadOnSync(this.libraryID)) {
 			return;
 		}
+		type = 'download';
+		fn = 'downloadFile';
 	}
 	this.queues[type].add(() => {
 		var request = new Zotero.Sync.Storage.Request({

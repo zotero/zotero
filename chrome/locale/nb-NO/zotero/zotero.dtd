@@ -70,7 +70,7 @@
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
 <!ENTITY zotero.items.menu.mergeItems "Slå sammen elementer…">
-<!ENTITY zotero.items.menu.unrecognize "Gjør om hent metadat">
+<!ENTITY zotero.items.menu.unrecognize "Angre hent metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Velg versjon av element til bruk som hovedelement:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Velg felt å bevare fra andre versjoner av elementet:">
@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element...">
 <!ENTITY zotero.toolbar.newGroup "Ny gruppe...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny under-samling...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm søppelkorg">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul emneordvelger">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Innstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avansert søk">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom ditt lokale bibliotek">
 

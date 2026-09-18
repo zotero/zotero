@@ -289,7 +289,7 @@ Zotero.Integration = new function () {
 		}
 		catch (e) {
 			if (!(e instanceof Zotero.Exception.UserCancelled)) {
-				await Zotero.Integration._handleCommandError(document, session, e);
+				await Zotero.Integration._handleCommandError(document, e);
 			}
 			else {
 				if (session) {
@@ -383,7 +383,7 @@ Zotero.Integration = new function () {
 		return false;
 	};
 	
-	this._handleCommandError = async function (document, session, e) {
+	this._handleCommandError = async function (document, e) {
 		try {
 			let supportURL = "https://www.zotero.org/support/kb/debugging_broken_documents";
 			var displayError;
@@ -445,15 +445,6 @@ Zotero.Integration = new function () {
 					Zotero.launchURL(supportURL);
 				}
 			}
-			
-			// CiteprocRsDriverError available only if citeproc-rs is enabled
-			try {
-				// If the driver panicked we cannot reuse it
-				if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
-					session.style.free(true);
-					delete Zotero.Integration.sessions[session.id];
-				}
-			} catch (e) {}
 		}
 		finally {
 			Zotero.logError(e);
@@ -1170,9 +1161,7 @@ Zotero.Integration.Session.prototype.updateFromDocument = async function (forceU
 	if (forceUpdateAllCitations) {
 		this.forceUpdateAllCitations = true;
 		// See Session.restoreProcessorState() for a comment
-		if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
-			this.rebuildCiteprocState = true;
-		}
+		this.rebuildCiteprocState = true;
 	}
 	await this._processFields();
 	try {
@@ -1333,13 +1322,19 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	var indicesToUpdate = Object.keys(this.processIndices);
 	
 	// Add bibliography indices to the above indices
-	if (this.bibliography	 				// if bibliography exists
-			&& Object.keys(this.citationsByIndex).length // and doc has citations
-			&& (this.bibliographyHasChanged	// and bibliography changed
-			|| forceBibliography)) {					// or if we should generate regardless of
-														// changes
-		for (let field of this._bibliographyFields) {
-			indicesToUpdate.push(field.index);
+	if (this.bibliography) {								// if bibliography exists
+		if (!Object.keys(this.citationsByIndex).length) {	// and there are no citations
+			for (let field of this._bibliographyFields) {
+				// Remove all bibliography fields
+				this._deleteFields[field.index] = true;
+			}
+		}
+		else if (this.bibliographyHasChanged				// if bibliography changed
+			|| forceBibliography) {							// or force flag is active
+			for (let field of this._bibliographyFields) {
+				// Update all bibliography fields
+				indicesToUpdate.push(field.index);
+			}
 		}
 	}
 	
@@ -1496,7 +1491,7 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	
 	var deleteFields = Object.keys(this._deleteFields).sort((a, b) => b - a);
 	for (let fieldIndex of deleteFields) {
-		this._fields[fieldIndex].delete();
+		await this._fields[fieldIndex].delete();
 	}
 	this.processIndices = {}
 }
@@ -1564,7 +1559,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 			this.updateFromDocument(FORCE_CITATIONS_FALSE).then(() => this.citationsByItemID);
 	}
 
-	var previewFn = async function (citation) {
+	var previewFn = async function (citation, format) {
 		let idx = await fieldIndexPromise;
 		await citationsByItemIDPromise;
 
@@ -1580,7 +1575,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 		let citationsPost = citations.slice(sliceIdx);
 		let citationID = citation.citationID;
 		try {
-			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, format || "rtf");
 		} catch(e) {
 			throw e;
 		} finally {
@@ -1811,10 +1806,11 @@ Zotero.Integration.CitationEditInterface = function (items, sortable, fieldIndex
 Zotero.Integration.CitationEditInterface.prototype = {
 	/**
 	 * Execute a callback with a preview of the given citation
+	 * @param {String} [format] Override the default output format (e.g. "html" for use in citation dialog)
 	 * @return {Promise} A promise resolved with the previewed citation string
 	 */
-	preview: function () {
-		return this.previewFn(this.citation);
+	preview: function (format) {
+		return this.previewFn(this.citation, format);
 	},
 	
 	/**
@@ -1992,9 +1988,6 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			await Zotero.Styles.init();
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
-			if (this.style && this.style.free) {
-				this.style.free();
-			}
 			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, {
 				automaticJournalAbbreviations: data.prefs.automaticJournalAbbreviations,
 			});
@@ -2263,9 +2256,6 @@ Zotero.Integration.Session.prototype.getCiteprocLists = function () {
  * Updates the list of citations to be serialized to the document
  */
 Zotero.Integration.Session.prototype._updateCitations = async function () {
-	if (Zotero.Prefs.get('cite.useCiteprocRs')) {
-		return this._updateCitationsCiteprocRs();
-	}
 	Zotero.debug("Integration: Indices of new citations");
 	Zotero.debug(Object.keys(this.newIndices));
 	Zotero.debug("Integration: Indices of updated citations");
@@ -2310,51 +2300,6 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
 
 
 /**
- * Updates the list of citations to be serialized to the document with citeproc-rs
- */
-Zotero.Integration.Session.prototype._updateCitationsCiteprocRs = async function () {
-	Zotero.debug("Integration: Indices of new citations");
-	Zotero.debug(Object.keys(this.newIndices));
-	Zotero.debug("Integration: Indices of updated citations");
-	Zotero.debug(Object.keys(this.updateIndices));
-
-	for (let indexList of [this.newIndices, this.updateIndices]) {
-		for (let index in indexList) {
-			if (indexList == this.newIndices) {
-				delete this.newIndices[index];
-				delete this.updateIndices[index];
-			}
-
-			var citation = this.citationsByIndex[index];
-			citation = citation.toJSON();
-
-			Zotero.debug(`Integration: citeprocRs.insertCluster(${citation.toSource()})`);
-			this.style.insertCluster(citation);
-		}
-	}
-	
-	let citationIDToIndex = {};
-	for (const key in this.citationsByIndex) {
-		citationIDToIndex[this.citationsByIndex[key].citationID] = key;
-	}
-
-	const citations = this.getCiteprocLists()[0];
-	Zotero.debug("Integration: citeprocRs.setClusterOrder()");
-	this.style.setClusterOrder(citations);
-	Zotero.debug("Integration: citeprocRs.getBatchedUpdates()");
-	const updateSummary = this.style.getBatchedUpdates();
-	Zotero.debug("Integration: got UpdateSummary from citeprocRs");
-	for (const [citationID, text] of updateSummary.clusters) {
-		const index = citationIDToIndex[citationID];
-		this.citationsByIndex[index].text = text;
-		this.processIndices[index] = true;
-	}
-
-	this.bibliographyHasChanged |= updateSummary.bibliography
-		&& Object.keys(updateSummary.bibliography.updatedEntries).length;
-}
-
-/**
  * Restores processor state from document, without requesting citation updates
  */
 Zotero.Integration.Session.prototype.restoreProcessorState = function () {
@@ -2372,13 +2317,11 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function () {
 			citations.push(this.citationsByIndex[i]);
 		}
 	}
-	if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
-		// rebuildProcessorState() doesn't reset the disambiguation cache when
-		// passed a non-empty citation list. This causes items to be disambiguated
-		// even after being modified so they're no longer ambiguous. Work around
-		// this by manually clearing the item list first.
-		this.style.updateItems([]);
-	}
+	// rebuildProcessorState() doesn't reset the disambiguation cache when
+	// passed a non-empty citation list. This causes items to be disambiguated
+	// even after being modified so they're no longer ambiguous. Work around
+	// this by manually clearing the item list first.
+	this.style.updateItems([]);
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
 

@@ -49,7 +49,6 @@ const symlinkFiles = [
 	// Feed *.idl files are for documentation only
 	'!resource/feeds/*.idl',
 	'!chrome/skin/default/zotero/**/*.scss',
-	'!resource/citeproc_rs_wasm.js',
 	'resource/vs/**/*',
 	// Patched in babel-worker.js
 	'!resource/vs/language/typescript/tsWorker.js',
@@ -104,7 +103,6 @@ const jsFiles = [
 	// Special handling for react-virtualized and others -- see note above
 	'resource/react-virtualized.js',
 	'resource/SingleFile/lib/single-file.js',
-	'resource/citeproc_rs_wasm.js',
 	'resource/vs/language/typescript/tsWorker.js',
 	'resource/monacopilot.mjs',
 	'resource/monacopilot-core.mjs',

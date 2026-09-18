@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "உருப்படியை அகற்று…">
 <!ENTITY zotero.toolbar.newGroup "புதிய குழு…">
 <!ENTITY zotero.toolbar.newSubcollection.label "புதிய துணைக்குழு…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "புதிய சேமித்த தேடல்…">
 <!ENTITY zotero.toolbar.emptyTrash.label "வெற்று குப்பை">
 <!ENTITY zotero.toolbar.tagSelector.label "குறிச்சொல் தேர்வாளரைக் காட்டு/மறைக்கவும்">
 <!ENTITY zotero.toolbar.actions.label "செயல்கள்">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "விருப்பத்தேர்வுகள்…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "உதவி மற்றும் ஆவணங்கள்">
 <!ENTITY zotero.toolbar.about.label "சோட்டெரோ பற்றி">
-<!ENTITY zotero.toolbar.advancedSearch "மேம்பட்ட தேடல்">
 <!ENTITY zotero.toolbar.openURL.label "கண்டுபிடி">
 <!ENTITY zotero.toolbar.openURL.tooltip "உங்கள் உள்ளக நூலகம் மூலம் கண்டுபிடிக்கவும்">
 

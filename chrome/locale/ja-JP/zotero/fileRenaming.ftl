@@ -1,6 +1,6 @@
 file-renaming-settings-window =
     .title = Configure File Renaming
-file-renaming-settings-library-label = Library:
+file-renaming-settings-library-label = ライブラリ :
 file-renaming-auto-rename-files =
     .label = Automatically rename files
 file-renaming-file-types = Rename files of these types:
@@ -17,13 +17,13 @@ file-renaming-file-type-video =
 file-renaming-rename-now =
     .label = Rename Files…
 file-renaming-rename-linked =
-    .label = Rename linked files
+    .label = リンクされたファイル名の変更
 file-renaming-format-title = Filename Format
 file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
 file-renaming-format-instructions-example = For example, "{ $example }" in this template will be replaced with the title of the parent item, truncated at 50 characters.
 file-renaming-format-instructions-more = 詳細については、 <label data-l10n-name="file-renaming-format-help-link">ドキュメント</label> を参照してください。
 file-renaming-format-template = Filename Template:
-file-renaming-format-preview = Preview:
+file-renaming-format-preview = プレビュー :
 file-renaming-preview-changes = Preview Changes…
 file-renaming-rename-files =
     .label = Rename Files

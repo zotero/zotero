@@ -49,6 +49,22 @@ describe("Add Item by Identifier", function () {
 		});
 	});
 	
+	it("should focus the items list after adding items", async function () {
+		// Make sure the items list is non-empty (and therefore focusable)
+		await createDataObject('item');
+		await waitForItemsLoad(win);
+		// Stub the lookup itself so the test doesn't hit external services
+		var stub = sinon.stub(win.Zotero_Lookup, "addItemsFromIdentifier").resolves([{}]);
+		try {
+			var textbox = win.document.getElementById("zotero-lookup-textbox");
+			await win.Zotero_Lookup.accept(textbox);
+			assert.equal(win.document.activeElement.id, win.ZoteroPane.itemsView.id);
+		}
+		finally {
+			stub.restore();
+		}
+	});
+
 	it.skip("should add a DOI with an open-access PDF");
 	
 	// e.g., arXiv

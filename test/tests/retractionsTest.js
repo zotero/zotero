@@ -88,7 +88,7 @@ describe("Retractions", function () {
 	
 	function bannerShown() {
 		var container = win.document.getElementById('retracted-items-container');
-		if (container.getAttribute('collapsed') == 'true') {
+		if (container.hasAttribute('collapsed')) {
 			return false;
 		}
 		if (!container.hasAttribute('collapsed')) {
@@ -198,6 +198,118 @@ describe("Retractions", function () {
 			await promise;
 			
 			assert.isFalse(Zotero.Retractions.isRetracted(item));
+		});
+		
+		it("should refresh stored data for a version bump when the list is unchanged", async function () {
+			var doi = '10.1234/cdefg';
+			var hash = Zotero.Utilities.Internal.sha1(doi);
+			var line = Zotero.Retractions.TYPE_DOI + hash.substr(0, 5) + ' 12345\n';
+			var version = Zotero.Retractions._version;
+			var reason = "Error in Data";
+			
+			server.respond(function (req) {
+				if (req.method == 'GET' && req.url == baseURL + 'list') {
+					// The list itself never changes, so a conditional request gets a 304
+					if (req.requestHeaders['If-None-Match'] == 'unchanged') {
+						req.respond(304, {}, '');
+						return;
+					}
+					req.respond(200, { 'Content-Type': 'text/plain', 'ETag': 'unchanged' }, line);
+				}
+				else if (req.method == 'POST' && req.url == baseURL + 'search') {
+					req.respond(
+						200,
+						{ 'Content-Type': 'application/json' },
+						JSON.stringify([
+							{
+								doi: hash,
+								retractionDOI: '10.1234/defgh',
+								date: '2019-01-02',
+								reasons: [reason],
+								urls: []
+							}
+						])
+					);
+				}
+			});
+			
+			try {
+				await Zotero.Retractions.updateFromServer();
+				
+				let promise = waitForItemEvent('refresh');
+				let item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+				item.setField('DOI', doi);
+				await item.saveTx();
+				await promise;
+				assert.sameMembers((await Zotero.Retractions.getData(item)).reasons, [reason]);
+				
+				// An update with the same version gets a 304 and leaves the stored data alone
+				reason = "Error in Text";
+				await Zotero.Retractions.updateFromServer();
+				assert.sameMembers((await Zotero.Retractions.getData(item)).reasons, ["Error in Data"]);
+				
+				// A version bump skips the conditional request and rewrites it
+				Zotero.Retractions._version = version + 1;
+				await Zotero.Retractions.updateFromServer();
+				assert.sameMembers((await Zotero.Retractions.getData(item)).reasons, [reason]);
+			}
+			finally {
+				Zotero.Retractions._version = version;
+			}
+		});
+		
+		it("should keep a hidden retraction hidden across an update", async function () {
+			var doi = '10.1234/defgh';
+			var hash = Zotero.Utilities.Internal.sha1(doi);
+			var line = Zotero.Retractions.TYPE_DOI + hash.substr(0, 5) + ' 12345\n';
+			var etags = ['first', 'second'];
+			
+			server.respond(function (req) {
+				if (req.method == 'GET' && req.url == baseURL + 'list') {
+					req.respond(
+						200,
+						{ 'Content-Type': 'text/plain', 'ETag': etags.shift() || 'second' },
+						line
+					);
+				}
+				else if (req.method == 'POST' && req.url == baseURL + 'search') {
+					req.respond(
+						200,
+						{ 'Content-Type': 'application/json' },
+						JSON.stringify([
+							{
+								doi: hash,
+								retractionDOI: '10.1234/efghi',
+								date: '2019-01-02',
+								reasons: ["Error in Data"],
+								urls: []
+							}
+						])
+					);
+				}
+			});
+			
+			await Zotero.Retractions.updateFromServer();
+			
+			let promise = waitForItemEvent('refresh');
+			let item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('DOI', doi);
+			await item.saveTx();
+			await promise;
+			assert.isTrue(Zotero.Retractions.isRetracted(item));
+			
+			await Zotero.Retractions.hideRetraction(item);
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+			
+			// The stored flag is what survives a restart, so it has to outlast an update
+			await Zotero.Retractions.updateFromServer();
+			assert.isFalse(Zotero.Retractions.isRetracted(item));
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT flag FROM retractedItems WHERE itemID=?", item.id
+				),
+				Zotero.Retractions.FLAG_HIDDEN
+			);
 		});
 	});
 	

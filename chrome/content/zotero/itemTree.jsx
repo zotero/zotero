@@ -219,8 +219,6 @@ class ItemTreeRowProvider {
 			return true;
 		}
 		return row.isContainerEmpty({
-			searchMode: this._searchMode,
-			searchItemIDs: this._searchItemIDs,
 			includeTrashed: this._includeTrashed,
 		});
 	}
@@ -258,6 +256,7 @@ class ItemTreeRowProvider {
 			let level = this.getLevel(index);
 			// Remove child rows
 			while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
+				this.itemTree.selection.adjustForRowRemoval(index + 1, true);
 				this._removeRow(index + 1, true);
 				count++;
 			}
@@ -283,6 +282,7 @@ class ItemTreeRowProvider {
 				count++;
 				this._addRow(childRows[i], index + i + 1, true);
 			}
+			this.itemTree.selection.adjustForRowInsertion(index, count);
 
 			this._rows[index].isOpen = true;
 		}
@@ -292,14 +292,26 @@ class ItemTreeRowProvider {
 	}
 
 	toggleOpenState(index, skipRowMapRefresh = false) {
+		let selection = this.itemTree.selection;
+		let preserveDetachedFocus = !selection.isSelected(selection.focused);
 		this.itemTree._cacheState();
+		let selectedBefore = this.itemTree._cachedSelection;
 		this._toggleOpenState(index, skipRowMapRefresh);
 		// Preserve viewport when toggling a container instead of jumping to the current selection.
 		this.runListeners('update', true, {
-			restoreSelection: true,
+			restoreSelection: !preserveDetachedFocus,
 			expandCollapsedParents: false,
 			restoreScroll: true,
 		});
+		if (preserveDetachedFocus) {
+			// Collapsing a container with selected descendants moves their selection to the
+			// container row, and listeners have to be notified of the new selection
+			let selectedAfter = this.itemTree.getSelectedObjects();
+			if (selectedAfter.length != selectedBefore.length
+					|| selectedAfter.some(ref => !selectedBefore.includes(ref))) {
+				selection._updateTree();
+			}
+		}
 	}
 
 	/**
@@ -1046,9 +1058,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 	get visibilityGroup() {
 		return 'default';
 	}
-	
+
 	get viewType() {
 		return 'library';
+	}
+
+	/**
+	 * Trees not backed by a collection tree selection (e.g. the citation
+	 * explorer's) have no rows and no special view behavior
+	 */
+	get collectionTreeRows() {
+		return [];
+	}
+
+	get viewMode() {
+		return 'default';
 	}
 
 	get isSortable() {
@@ -1121,6 +1145,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let id of this._prefsObserverIDs) {
 			Zotero.Prefs.unregisterObserver(id);
 		}
+		this.clearEventListeners();
 		this._writeColumnPrefsToFile(true);
 	}
 
@@ -1333,6 +1358,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	handleActivate(event, indices) {
+		// Skip non-selectable rows (e.g. library headers and spacers), which aren't real items
+		// and can be double-clicked via the opaque sticky header
+		indices = indices.filter(index => this.isSelectable(index));
+		if (!indices.length) {
+			return;
+		}
 		let items = indices.map(index => this.getRow(index).ref);
 		this.props.onActivate(event, items);
 	}
@@ -1346,9 +1377,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return false;
 		}
 		
-		// Handle arrow keys specially on multiple selection, since
-		// otherwise the tree just applies it to the last-selected row
-		if (this.selection.count > 1 && ["ArrowLeft", "ArrowRight"].includes(event.key)) {
+		// If selection count is greater than 1 and the focused row wasn't
+		// moved out of the selection - toggle open/closed all rows in that selection
+		// Otherwise if the focused row has moved out of the selection, toggle state
+		// of the focused row (handled in virtualized-table and this conditional should match that)
+		if (this.selection.count > 1
+				&& this.selection.isSelected(this.selection.focused)
+				&& [Zotero.arrowPreviousKey, Zotero.arrowNextKey].includes(event.key)) {
 			if (event.key == Zotero.arrowNextKey) {
 				this.expandSelectedRows();
 			}
@@ -1424,6 +1459,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				multiSelect: this.props.multiSelect,
 
+				stickySectionHeaders: true,
+				isSectionHeader: index => this.getRow(index)?.type == 'library-header',
+
 				onSelectionChange: this._handleSelectionChange.bind(this),
 				isSelectable: this.isSelectable.bind(this),
 				getParentIndex: this.getParentIndex.bind(this),
@@ -1492,23 +1530,31 @@ var ItemTree = class ItemTree extends LibraryTree {
 				await this.expandToItem(id);
 				if (!this._rowMap[id]) {
 					// The row is still not found
-					// Clear the quick search and tag selection and try again (once)
+					// Clear the quick search, tag selection, and advanced search
+					// and try again (once)
 					if (!noRecurse && window.ZoteroPane) {
-						let hasQuickSearch = !!this.collectionTreeRow.searchText;
-						let hasTagFilters = this.collectionTreeRow.tags?.size > 0;
-						if (hasQuickSearch || hasTagFilters) {
-							// Clear all searches set on the collection tree row directly on
-							// collectionTreeRow (vs using ZoteroPane functions) to avoid
+						let hasQuickSearch = !!this.collectionTreeRows[0].searchText;
+						let hasTagFilters = this.collectionTreeRows[0].tags?.size > 0;
+						let hasAdvancedSearch = !!this.collectionTreeRows[0].advancedSearch;
+						if (hasQuickSearch || hasTagFilters || hasAdvancedSearch) {
+							// Clear all searches set on the collection tree rows directly on
+							// the rows (vs using ZoteroPane functions) to avoid
 							// refreshing the itemTree multiple times at the same time, which can lead
 							// to tag selector not showing all tags after quickSearch is cleared
-							this.collectionTreeRow.setTags(new Set());
-							this.collectionTreeRow.setSearch('');
-							// Clear quickSearch text field and tag selection without
-							// rerunning search
+							for (let collectionTreeRow of this.collectionTreeRows) {
+								collectionTreeRow.setTags(new Set());
+								collectionTreeRow.setSearch('');
+								collectionTreeRow.setAdvancedSearch(null);
+							}
+							// Clear tag selection, quicksearch text field, and advanced search
+							// without rerunning search
 							if (window.ZoteroPane.tagSelector) {
 								window.ZoteroPane.tagSelector.clearTagSelection();
 							}
 							window.ZoteroPane.clearQuicksearch(true);
+							if (hasAdvancedSearch) {
+								await window.ZoteroPane.setAdvancedSearchState('closed', { skipRefresh: true });
+							}
 							// Rerun search and refresh the itemTree
 							await this.refreshAndMaintainSelection();
 							// Try to select the item(s) again
@@ -1782,7 +1828,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @return {Zotero.Item[]|Integer[]} - An array of Zotero.Item objects or itemIDs
 	 */
 	getSortedItems(asIDs) {
-		return this._rows.map(row => asIDs ? row.ref.id : row.ref);
+		return this._rows
+			.filter(row => row.isObjectRow)
+			.map(row => asIDs ? row.ref.id : row.ref);
+	}
+
+	/**
+	 * Number of visible rows representing objects, excluding library headers
+	 * and spacers
+	 *
+	 * @return {Integer}
+	 */
+	get objectRowCount() {
+		return this._rows.reduce((count, row) => count + (row.isObjectRow ? 1 : 0), 0);
 	}
 
 	/**
@@ -2131,7 +2189,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			.forEach((column, i) => {
 				let menuItem = document.createXULElement('menuitem');
 				menuItem.setAttribute('type', 'checkbox');
-				menuItem.setAttribute('checked', this.getSortField() == column.dataKey);
+				menuItem.toggleAttribute('checked', this.getSortField() == column.dataKey);
 				menuItem.setAttribute('label', formatColumnName(column));
 				menuItem.addEventListener('command', () => {
 					this.toggleSort(i, true);
@@ -2186,9 +2244,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
+		div.classList.toggle('library-header-row', row.type === 'library-header');
+		div.classList.toggle('spacer-row', row.type === 'spacer');
 		if (row.type !== 'annotation') {
 			div.classList.remove('tight');
 		}
+		
+		let { firstColumn } = columns.reduce((acc, column) => {
+			return !column.hidden && column.ordinal < acc.lowestOrdinal
+				? { lowestOrdinal: column.ordinal, firstColumn: column }
+				: acc;
+		}, { lowestOrdinal: Infinity, firstColumn: null });
+
+		this._renderCtx.firstColumn = firstColumn;
+		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
+
+		row.renderRow(div, index, columns, rowData, this._renderCtx);
 		
 		if (this._dropRow == index) {
 			let span;
@@ -2201,17 +2272,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				div.classList.add('drop');
 			}
 		}
-
-		let { firstColumn } = columns.reduce((acc, column) => {
-			return !column.hidden && column.ordinal < acc.lowestOrdinal
-				? { lowestOrdinal: column.ordinal, firstColumn: column }
-				: acc;
-		}, { lowestOrdinal: Infinity, firstColumn: null });
-
-		this._renderCtx.firstColumn = firstColumn;
-		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
-
-		row.renderRow(div, index, columns, rowData, this._renderCtx);
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {
@@ -2344,8 +2404,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.lastRead = row.isItem ? treeRow.ref.getItemLastRead() : "";
-		row.addedBy = row.isItem && treeRow.getAddedBy();
-		row.lastModifiedBy = row.isItem && treeRow.getLastModifiedBy();
+		row.addedBy = row.isItem ? treeRow.getAddedBy() : "";
+		row.lastModifiedBy = row.isItem ? treeRow.getLastModifiedBy() : "";
 		row.title = treeRow.getDisplayTitle();
 		
 		const columns = this.getColumns();
@@ -2559,7 +2619,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// Initial hidden value
 			else if (!("hidden" in column)) {
-				if (hasDefaultIn && this.collectionTreeRow) {
+				if (hasDefaultIn && this.collectionTreeRows.length) {
 					column.hidden = !(column.defaultIn && this._matchesViewType(column.defaultIn));
 				}
 				else {
@@ -2585,7 +2645,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// Force sort indicator for views with a fixed sort order
-		if (this.collectionTreeRow?.isRecentlyRead()) {
+		if (this.viewMode == 'recentlyRead') {
 			let col = this._columns.find(c => c.dataKey === 'lastRead');
 			if (col) {
 				col.sortDirection = -1;
@@ -2593,7 +2653,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
+		let sortedColumns = this._columns.sort((a, b) => a.ordinal - b.ordinal);
+
+		// If no column has an explicit sort direction (e.g., a fresh profile that
+		// has never had a column header clicked), mark the default sort column --
+		// the first visible column, matching getSortField() -- as the sorted
+		// column. The view is already sorted ascending by this column (see
+		// getSortDirection()'s fallback), but without an explicit sortDirection
+		// the first click on the header would just set the direction to its
+		// default instead of reversing the sort.
+		if (!this._sortedColumn) {
+			let defaultColumn = sortedColumns.find(column => !column.hidden);
+			if (defaultColumn) {
+				defaultColumn.sortDirection = 1;
+				this._sortedColumn = defaultColumn;
+			}
+		}
+
+		return sortedColumns;
 	}
 	
 	_getColumn(index) {
@@ -2762,7 +2839,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else {
 			if (this._sortedColumn) {
 				delete this._sortedColumn.sortDirection;
-				if (columnSettings[column.dataKey]) {
+				if (columnSettings[this._sortedColumn.dataKey]) {
 					delete columnSettings[this._sortedColumn.dataKey].sortDirection;
 				}
 			}

@@ -44,7 +44,7 @@ var Zotero_Preferences = {
 
 		this.navigation.addEventListener('mouseover', event => this._handleNavigationMouseOver(event));
 		this.navigation.addEventListener('select', () => this._handleNavigationSelect());
-		this.searchField.addEventListener('command', () => this._search(this.searchField.value));
+		this.searchField.addEventListener('command', () => this._search(this.searchField.value.trim()));
 		
 		document.getElementById('prefs-subpane-back-button').addEventListener('command', () => {
 			let parent = this.panes.get(this.navigation.value).parent;
@@ -608,12 +608,6 @@ ${str}
 			attributeFilter: ['preference']
 		});
 
-		// parseXULToFragment() doesn't convert oncommand attributes into actual
-		// listeners, so we'll do it here
-		for (let elem of container.querySelectorAll('[oncommand]')) {
-			elem.oncommand = elem.getAttribute('oncommand');
-		}
-
 		for (let child of container.children) {
 			let event = new Event('load');
 			event.waitUntil = (promise) => {
@@ -699,6 +693,7 @@ ${str}
 		let termForDisplay = Zotero.Utilities.trimInternal(term).toLowerCase();
 		term = this._normalizeSearch(term);
 
+		let scrolled = false;
 		for (let paneContainer of this.content.querySelectorAll(':scope > .pane-container')) {
 			let roots = paneContainer.children;
 			while (roots.length === 1 && roots[0].childElementCount) {
@@ -719,6 +714,11 @@ ${str}
 							range.setStart(node, index);
 							range.setEnd(node, index + term.length);
 							this._getSearchSelection().addRange(range);
+							
+							if (!scrolled) {
+								node.parentElement?.scrollIntoView({ block: 'center' });
+								scrolled = true;
+							}
 						}
 						else if (node.nodeType == Node.ELEMENT_NODE) {
 							// For element nodes, wrap the element and add a tooltip
@@ -743,6 +743,11 @@ ${str}
 							// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#689-691
 							let tooltipRect = tooltip.getBoundingClientRect();
 							tooltip.style.left = `calc(50% - ${tooltipRect.width / 2}px)`;
+							
+							if (!scrolled) {
+								node.scrollIntoView({ block: 'center' });
+								scrolled = true;
+							}
 						}
 
 						let tabPanel = this._closest(node, 'tabpanels > tabpanel');
@@ -776,7 +781,7 @@ ${str}
 	 * @return {Promise<Node[]>}
 	 */
 	async _findNodesMatching(root, term) {
-		const EXCLUDE_SELECTOR = 'input, [hidden]:not([hidden="false"]), [no-highlight]';
+		const EXCLUDE_SELECTOR = 'input, [hidden], [no-highlight]';
 
 		let matched = new Set();
 		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -826,16 +831,25 @@ ${str}
 					localizedStrings = localizedStrings.flatMap((message, i) => {
 						// If we got something from Fluent, use the value and relevant attributes
 						if (message) {
-							return [message.value, message.attributes?.title, message.attributes?.label];
+							let attributeValues = (message.attributes ?? [])
+								.filter(attr => attr.name === 'title' || attr.name === 'label')
+								.map(attr => attr.value);
+							return [message.value, ...attributeValues];
 						}
 
 						// If we didn't, try strings from DTDs and properties
 						let key = stringKeys[i];
-						return [
-							Zotero.Intl.strings.hasOwnProperty(key)
-								? Zotero.Intl.strings[key]
-								: Zotero.getString(key)
-						];
+						if (Zotero.Intl.strings.hasOwnProperty(key)) {
+							return [Zotero.Intl.strings[key]];
+						}
+						try {
+							return [Zotero.getString(key)];
+						}
+						catch (e) {
+							// Don't let one missing string abort the entire search
+							Zotero.logError(e);
+							return [];
+						}
 					}).filter(Boolean)
 						.map(this._normalizeSearch)
 						.filter(Boolean);

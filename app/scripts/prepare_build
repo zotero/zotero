@@ -71,34 +71,42 @@ def main():
         
         tmp_src_dir = os.path.join(tmp_dir, 'zotero')
         
-        # Export a clean copy of the source tree
-        subprocess.check_call([
-            'rsync',
-            '-aL',
-            # Exclude hidden files
-            '--exclude', '.*',
-            '--exclude', '#*',
-            '--exclude', 'package.json',
-            '--exclude', 'package-lock.json',
-            '.' + os.sep,
-            tmp_src_dir + os.sep
-        ])
+        # Export a clean copy of the source tree -- with Python on Windows, where rsync,
+        # if present at all, doesn't handle Windows-style paths
+        if os.name == 'nt' or not shutil.which('rsync'):
+            shutil.copytree(
+                '.',
+                tmp_src_dir,
+                ignore=shutil.ignore_patterns('.*', '#*', 'package.json', 'package-lock.json')
+            )
+        else:
+            subprocess.check_call([
+                'rsync',
+                '-aL',
+                # Exclude hidden files
+                '--exclude', '.*',
+                '--exclude', '#*',
+                '--exclude', 'package.json',
+                '--exclude', 'package-lock.json',
+                '.' + os.sep,
+                tmp_src_dir + os.sep
+            ])
         
-        # Make sure rsync worked
+        # Make sure the copy worked
         d = os.path.join(tmp_src_dir, 'chrome')
         if not os.path.isdir(d):
             raise FileNotFoundError(d + " not found")
         
         # Delete CSL locale support files
-        subprocess.check_call([
-            'find',
-            os.path.normpath(tmp_src_dir + '/chrome/content/zotero/locale/csl/'),
-            '-mindepth', '1',
-            '!', '-name', '*.xml',
-            '!', '-name', 'locales.json',
-            #'-print',
-            '-delete'
-        ])
+        csl_dir = os.path.normpath(tmp_src_dir + '/chrome/content/zotero/locale/csl/')
+        for root, dirs, files in os.walk(csl_dir, topdown=False):
+            for name in files:
+                if not name.endswith('.xml') and name != 'locales.json':
+                    os.remove(os.path.join(root, name))
+            for name in dirs:
+                d = os.path.join(root, name)
+                if not os.listdir(d):
+                    os.rmdir(d)
         
         # Delete styles build script
         os.remove(os.path.join(tmp_src_dir, 'styles', 'update'))

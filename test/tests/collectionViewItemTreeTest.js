@@ -165,6 +165,26 @@ describe("CollectionViewItemTree", function () {
 			});
 		});
 		
+		it("should re-run the search when the quick-search mode changes", async function () {
+			// Term appears only in a field excluded by "Title, Creator, Year" mode
+			let item = createUnsavedDataObject('item', { itemType: 'journalArticle', title: 'Untitled' });
+			item.setField('abstractNote', 'zqsmodeterm');
+			await item.saveTx();
+
+			Zotero.Prefs.set('search.quicksearch-mode', 'titleCreatorYear');
+			quicksearch.value = 'zqsmodeterm';
+			await zp.search();
+			assert.isFalse(itemsView.getRowIndexByID(item.id));
+
+			// Changing only the mode, with the same search text, should re-run the search
+			Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+			await zp.search();
+			assert.isNumber(itemsView.getRowIndexByID(item.id));
+
+			Zotero.Prefs.clear('search.quicksearch-mode');
+			await item.eraseTx();
+		});
+
 		it("should not clear quick search after deleting item from collection", async function () {
 			let col = await createDataObject('collection');
 			let item = await createDataObject('item', { title: "test", collections: [col.id] });
@@ -240,6 +260,37 @@ describe("CollectionViewItemTree", function () {
 			assert.isFalse(itemsView.getRowIndexByID(highlightOne.id));
 			assert.isFalse(itemsView.getRowIndexByID(highlightTwo.id));
 		});
+
+		it("should keep attachments expandable and show all annotations for non-annotation searches when hideContextAnnotationRows=true", async function () {
+			Zotero.Prefs.set("hideContextAnnotationRows", true);
+
+			let item = await createDataObject('item', { title: "uniqueParentTitle" });
+			let attachment = await importFileAttachment('test.pdf', { title: 'PDF', parentItemID: item.id });
+			let highlight = await createAnnotation('highlight', attachment, { comment: "comment one" });
+			let underline = await createAnnotation('underline', attachment, { comment: "comment two" });
+
+			// Search matches the parent item's title, not any annotation
+			await zp.itemsView.setFilter('search', "uniqueParentTitle");
+
+			// Expand the matched parent to reveal its attachment
+			let itemRow = itemsView.getRowIndexByID(item.id);
+			assert.isNumber(itemRow);
+			if (!itemsView.isContainerOpen(itemRow)) {
+				await itemsView.toggleOpenState(itemRow);
+			}
+
+			// The attachment should still be expandable even though no annotation matched
+			let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+			assert.isNumber(attachmentRow);
+			assert.isFalse(itemsView.isContainerEmpty(attachmentRow));
+
+			// Expanding it should reveal all of its annotations rather than hiding them
+			if (!itemsView.isContainerOpen(attachmentRow)) {
+				await itemsView.toggleOpenState(attachmentRow);
+			}
+			assert.isNumber(itemsView.getRowIndexByID(highlight.id));
+			assert.isNumber(itemsView.getRowIndexByID(underline.id));
+		});
 	});
 	
 	describe("#selectItem()", function () {
@@ -276,7 +327,7 @@ describe("CollectionViewItemTree", function () {
 			await zp.itemsView.selectItem(itemTwo.id);
 
 			// tag selector should be cleared and itemTwo - selected
-			assert.equal(zp.getCollectionTreeRow().tags.size, 0);
+			assert.equal(zp.getCollectionTreeRows()[0].tags.size, 0);
 			assert.equal(zp.tagSelector.selectedTags.size, 0);
 			assert.equal(zp.itemsView.getSelectedItems()[0].id, itemTwo.id);
 		});
@@ -513,6 +564,138 @@ describe("CollectionViewItemTree", function () {
 	});
 	
 	describe("#toggleOpenState()", function () {
+		it("should preserve selection and detached focus when toggling another container", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			var item2 = await createDataObject('item', { collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(itemsView.getRowIndexByID(item2.id));
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+
+			itemsView.tree._onKeyDown({
+				key: Zotero.arrowNextKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await itemsView.waitForLoad();
+			assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, item2.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+
+			itemsView.tree._onKeyDown({
+				key: Zotero.arrowPreviousKey,
+				preventDefault: () => {},
+				stopPropagation: () => {}
+			});
+			await itemsView.waitForLoad();
+			assert.isFalse(itemsView.isContainerOpen(itemsView.getRowIndexByID(parentItem.id)));
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, item2.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+		})
+
+		it("should select the parent when collapsing a selected child", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(attachment.id);
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+			// The selection changes to the parent, so a select event has to fire
+			var selectPromise = itemsView.waitForSelect();
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			await selectPromise;
+			assert.sameMembers(itemsView.getSelectedItems(true), [parentItem.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+		})
+
+		it("should keep detached focus when collapsing a selected child alongside another selected item", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+
+			var parentItem = await createDataObject('item', { collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(itemsView.getRowIndexByID(attachment.id));
+			parentRow = itemsView.getRowIndexByID(parentItem.id);
+			itemsView.selection.focused = parentRow;
+			itemsView.selection.pivot = parentRow;
+
+			var selectPromise = itemsView.waitForSelect();
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			await selectPromise;
+			assert.sameMembers(itemsView.getSelectedItems(true), [item1.id, parentItem.id]);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(parentItem.id));
+		})
+
+		it("should adjust focus with an empty selection when toggling a container above it", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+
+			var ran = Zotero.Utilities.randomString();
+			var parentItem = await createDataObject('item', { title: ran + " AAA", collections: [collection.id] });
+			var attachment = await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			var item1 = await createDataObject('item', { title: ran + " ZZZ", collections: [collection.id] });
+			await waitForItemsLoad(win);
+
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			if (!itemsView.isContainerOpen(parentRow)) {
+				await itemsView.toggleOpenState(parentRow);
+				await itemsView.waitForLoad();
+			}
+			var item1Row = itemsView.getRowIndexByID(item1.id);
+			assert.isAbove(item1Row, itemsView.getRowIndexByID(attachment.id));
+			// Empty the selection, leaving focus on the item
+			await itemsView.selectItem(item1.id);
+			itemsView.selection.toggleSelect(item1Row);
+			assert.equal(itemsView.selection.count, 0);
+
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(parentItem.id));
+			await itemsView.waitForLoad();
+			assert.equal(itemsView.selection.count, 0);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(item1.id));
+
+			await itemsView.toggleOpenState(itemsView.getRowIndexByID(parentItem.id));
+			await itemsView.waitForLoad();
+			assert.equal(itemsView.selection.count, 0);
+			assert.equal(itemsView.selection.focused, itemsView.getRowIndexByID(item1.id));
+		})
+
 		it("shouldn't scroll back to selected row when opening another container", async function () {
 			var collection = await createDataObject('collection');
 			await select(win, collection);
@@ -1140,7 +1323,7 @@ describe("CollectionViewItemTree", function () {
 			var item = await createDataObject('item', { title: "Unfiled Item" });
 			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
 			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
-			assert.equal(zp.getCollectionTreeRow().id, 'U' + userLibraryID);
+			assert.equal(zp.getCollectionTreeRows()[0].id, 'U' + userLibraryID);
 			await waitForItemsLoad(win);
 			let rowIndex = zp.itemsView.getRowIndexByID(item.id);
 			assert.isNumber(rowIndex);
@@ -1180,6 +1363,33 @@ describe("CollectionViewItemTree", function () {
 			// Ensure that the note is still selected and quick search is still active
 			assert.equal(zp.itemsView.getSelectedItems(true)[0], note.id);
 			assert.equal(quickSearch.value, "item");
+		});
+
+		it("should add an item to a collection when a saved search is also selected", async function () {
+			Zotero.Prefs.set('recursiveCollections', true);
+			let logError = sinon.spy(Zotero, 'logError');
+			try {
+				let collection = await createDataObject('collection');
+				let subcollection = await createDataObject('collection', { parentID: collection.id });
+				let search = await createDataObject('search');
+
+				await cv.selectByID("C" + collection.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+
+				// With recursiveCollections, an item added to a subcollection shows in
+				// the parent collection's view
+				let item = await createDataObject('item', { collections: [subcollection.id] });
+				assert.isNumber(zp.itemsView.getRowIndexByID(item.id));
+				assert.deepEqual(logError.getCalls().map(call => String(call.args[0])), []);
+			}
+			finally {
+				logError.restore();
+				Zotero.Prefs.clear('recursiveCollections');
+				await selectLibrary(win);
+			}
 		});
 
 		describe("Change parent item", function () {
@@ -1335,7 +1545,7 @@ describe("CollectionViewItemTree", function () {
 				await attachment2.saveTx();
 
 				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
-				assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
+				assert.equal(zp.getCollectionTreeRows()[0].id, 'Y' + userLibraryID);
 				await waitForItemsLoad(win);
 				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
@@ -1365,7 +1575,7 @@ describe("CollectionViewItemTree", function () {
 				await attachment2.saveTx();
 
 				await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
-				assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
+				assert.equal(zp.getCollectionTreeRows()[0].id, 'Y' + groupLibraryID);
 				await waitForItemsLoad(win);
 				assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
@@ -1374,6 +1584,74 @@ describe("CollectionViewItemTree", function () {
 				await attachment2.saveTx();
 
 				assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
+
+				await item1.eraseTx();
+				await item2.eraseTx();
+			});
+
+			it("should show read child attachments as matched, not context, rows", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let item = await createDataObject('item', { libraryID: userLibraryID });
+				let readAttachment = await importPDFAttachment(item);
+				let unreadAttachment = await importPDFAttachment(item);
+				readAttachment.attachmentLastRead = Math.round(Date.now() / 1000);
+				await readAttachment.saveTx();
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+
+				let itemsView = zp.itemsView;
+				let parentRow = itemsView.getRowIndexByID(item.id);
+				assert.isNumber(parentRow);
+
+				// Expand the parent to reveal its children
+				await itemsView.toggleOpenState(parentRow);
+
+				let readRow = itemsView.getRowIndexByID(readAttachment.id);
+				let unreadRow = itemsView.getRowIndexByID(unreadAttachment.id);
+				assert.isNumber(readRow);
+				assert.isNumber(unreadRow);
+
+				// The read attachment is matched, shown in black
+				assert.isNotOk(itemsView._getRowData(readRow).contextRow);
+				// The parent is also matched
+				assert.isNotOk(itemsView._getRowData(parentRow).contextRow);
+				// The unread sibling is still a grayed-out context row
+				assert.isTrue(itemsView._getRowData(unreadRow).contextRow);
+
+				await item.eraseTx();
+			});
+
+			it("should not auto-expand parents of read attachments", async function () {
+				let userLibraryID = Zotero.Libraries.userLibraryID;
+				let now = Math.round(Date.now() / 1000);
+
+				let item1 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment1 = await importPDFAttachment(item1);
+				attachment1.attachmentLastRead = now;
+				await attachment1.saveTx();
+
+				let item2 = await createDataObject('item', { libraryID: userLibraryID });
+				let attachment2 = await importPDFAttachment(item2);
+				attachment2.attachmentLastRead = now - 5;
+				await attachment2.saveTx();
+
+				await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+				await waitForItemsLoad(win);
+
+				let itemsView = zp.itemsView;
+				let item1Row = itemsView.getRowIndexByID(item1.id);
+				let item2Row = itemsView.getRowIndexByID(item2.id);
+				assert.isNumber(item1Row);
+				assert.isNumber(item2Row);
+
+				// Parents should remain collapsed - marking read children as matched
+				// must not trigger auto-expansion
+				assert.isFalse(itemsView.isContainerOpen(item1Row));
+				assert.isFalse(itemsView.isContainerOpen(item2Row));
+				// Child attachments are therefore not shown until the parent is expanded
+				assert.isFalse(itemsView.getRowIndexByID(attachment1.id));
+				assert.isFalse(itemsView.getRowIndexByID(attachment2.id));
 
 				await item1.eraseTx();
 				await item2.eraseTx();
@@ -1523,6 +1801,50 @@ describe("CollectionViewItemTree", function () {
 					assert.isNumber(zp.itemsView.getRowIndexByID(matchItem.id));
 					assert.isFalse(zp.itemsView.getRowIndexByID(otherItem.id));
 				});
+
+				it("should show read attachments as matches in every selected library", async function () {
+					let group = await createGroup();
+					let title = 'Cross Library Read QQQ';
+					let userItem = await createDataObject('item', { title });
+					let userAttachment = await importPDFAttachment(userItem);
+					let groupItem = await createDataObject(
+						'item', { libraryID: group.libraryID, title }
+					);
+					let groupAttachment = await importPDFAttachment(groupItem);
+					for (let attachment of [userAttachment, groupAttachment]) {
+						attachment.attachmentLastRead = Math.round(Date.now() / 1000);
+						await attachment.saveTx();
+					}
+
+					await zp.setVirtual(Zotero.Libraries.userLibraryID, 'recentlyRead', true, true);
+					await zp.setVirtual(group.libraryID, 'recentlyRead', true, true);
+					await cv.expandLibrary(group.libraryID);
+					await cv.selectByID("Y" + Zotero.Libraries.userLibraryID);
+					await waitForItemsLoad(win);
+					cv.selection.toggleSelect(cv.getRowIndexByID("Y" + group.libraryID));
+					await zp.onCollectionSelected();
+					await zp.itemsView.waitForLoad();
+
+					quicksearch.value = title;
+					quicksearch.doCommand();
+					await zp.itemsView._refreshPromise;
+
+					// The attachments are what was actually read, so they display as
+					// results rather than grayed-out context rows
+					let view = zp.itemsView;
+					for (let attachment of [userAttachment, groupAttachment]) {
+						await view.expandToItem(attachment.id);
+						let row = view.getRowIndexByID(attachment.id);
+						assert.isNumber(row, `Attachment ${attachment.id} should be shown`);
+						assert.isFalse(
+							view.tree._jsWindow.getElementByIndex(row).classList.contains('context-row'),
+							`Attachment in library ${attachment.libraryID} should be a match`
+						);
+					}
+
+					await selectLibrary(win);
+					await group.eraseTx();
+				});
 			});
 
 			describe("After Remove from Recently Read", function () {
@@ -1665,6 +1987,58 @@ describe("CollectionViewItemTree", function () {
 				assert.isNumber(searchRowIndex);
 				assert.equal(itemsView.getRow(collectionRowIndex).type, 'collection');
 				assert.equal(itemsView.getRow(searchRowIndex).type, 'search');
+			});
+
+			it("shouldn't show a value in Added By/Modified By for trashed collections and searches", async function () {
+				let collection = await createDataObject('collection', { deleted: true });
+				let search = await createDataObject('search', { deleted: true });
+
+				await selectTrash(win);
+
+				for (let obj of [collection, search]) {
+					let row = itemsView.getRowIndexByID(obj.treeViewID);
+					assert.isNumber(row);
+					assert.strictEqual(itemsView.getCellText(row, 'addedBy'), "");
+					assert.strictEqual(itemsView.getCellText(row, 'lastModifiedBy'), "");
+				}
+			});
+
+			it("shouldn't show trashed collections or searches when an advanced search is active", async function () {
+				let item = await createDataObject('item', { title: "advancedTrashMatch", deleted: true });
+				let collection = await createDataObject('collection', { name: "advancedTrashMatch", deleted: true });
+				let search = await createDataObject('search', { name: "advancedTrashMatch", deleted: true });
+
+				await selectTrash(win);
+
+				let s = new Zotero.Search();
+				s.libraryID = item.libraryID;
+				s.addCondition('title', 'is', "advancedTrashMatch");
+				await itemsView.setFilter('advanced-search', s);
+
+				// The matching item is shown, but the collection and search, which can't
+				// match item-level conditions, are excluded
+				assert.isNumber(itemsView.getRowIndexByID(item.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(collection.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(search.treeViewID));
+
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should filter trashed collections and searches by name during a quick search", async function () {
+				let match = await createDataObject('collection', { name: "quickTrashFindme", deleted: true });
+				let other = await createDataObject('collection', { name: "quickTrashOther", deleted: true });
+				let matchSearch = await createDataObject('search', { name: "quickTrashFindme", deleted: true });
+				let otherSearch = await createDataObject('search', { name: "quickTrashOther", deleted: true });
+
+				await selectTrash(win);
+				await itemsView.setFilter('search', "quickTrashFindme");
+
+				assert.isNumber(itemsView.getRowIndexByID(match.treeViewID));
+				assert.isNumber(itemsView.getRowIndexByID(matchSearch.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(other.treeViewID));
+				assert.isFalse(itemsView.getRowIndexByID(otherSearch.treeViewID));
+
+				await itemsView.setFilter('search', "");
 			});
 
 			it("should sort by hasAttachment in trash without crashing", async function () {
@@ -1901,6 +2275,51 @@ describe("CollectionViewItemTree", function () {
 			assert.isFalse(itemsView.isContainerEmpty(itemsView.getRowIndexByID(item2.id)));
 		});
 		
+		it("should move a child item when the drag only allows copying", async function () {
+			var collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+			var item1 = await createDataObject('item', { title: "A", collections: [collection.id] });
+			var item2 = await createDataObject('item', { title: "B", collections: [collection.id] });
+			var attachment = await importFileAttachment('test.pdf', { parentItemID: item1.id });
+			
+			await itemsView.selectItem(attachment.id);
+			
+			var dataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['zotero/item'],
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return attachment.id + "";
+					}
+					return "";
+				},
+				mozItemCount: 1
+			};
+			var index = itemsView.getRowIndexByID(item2.id);
+			var rowEl = {
+				classList: { contains: () => false },
+				getBoundingClientRect: () => ({ y: 0, height: 100 })
+			};
+			Zotero.DragDrop.currentDragSource = itemsView.collectionTreeRows[0];
+			itemsView.onDragOver({
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: rowEl,
+				target: rowEl,
+				clientY: 50,
+				dataTransfer
+			}, index);
+			// The requested move has to be sent as an allowed effect for the drop to happen
+			assert.equal(dataTransfer.dropEffect, 'copy');
+			
+			var promise = itemsView.waitForSelect();
+			await drop(index, 0, dataTransfer);
+			await promise;
+			
+			assert.equal(attachment.parentItemID, item2.id);
+		});
+		
 		it("should move a child item from last item in list to another", async function () {
 			var collection = await createDataObject('collection');
 			await waitForItemsLoad(win);
@@ -1962,6 +2381,120 @@ describe("CollectionViewItemTree", function () {
 			);
 		});
 		
+		it("should add a dragged file to all selected collections", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			
+			// Select both collections
+			await cv.selectByID("C" + collection1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			
+			var idsPromise = waitForItemEvent('add');
+			
+			drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			})
+			
+			var ids = await idsPromise;
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(item.inCollection(collection1.id));
+			assert.isTrue(item.inCollection(collection2.id));
+		});
+		
+		it("should allow a file drop onto a specific item but not blank space for a cross-library selection", async function () {
+			var group = await createGroup();
+			var c1 = await createDataObject('collection');
+			var c2 = await createDataObject('collection', { libraryID: group.libraryID });
+			var userItem = await createDataObject('item', { collections: [c1.id] });
+			var groupItem = await createDataObject('item', { libraryID: group.libraryID, collections: [c2.id] });
+
+			await cv.expandLibrary(group.libraryID);
+			await cv.selectByID("C" + c1.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + c2.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+
+			// Directly onto a specific item (which identifies the target library): allowed
+			assert.isTrue(itemsView.canDropCheck(itemsView.getRowIndexByID(userItem.id), 0, fileDataTransfer));
+			// Into blank space (ambiguous across libraries): rejected
+			assert.isFalse(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+
+			// Dropping onto the group item attaches the file in the group library
+			var idsPromise = waitForItemEvent('add');
+			await drop(itemsView.getRowIndexByID(groupItem.id), 0, fileDataTransfer);
+			var ids = await idsPromise;
+			var attachment = Zotero.Items.get(ids[0]);
+			assert.equal(attachment.libraryID, group.libraryID);
+			assert.equal(attachment.parentItemID, groupItem.id);
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should allow a blank-space file drop for a mixed collection and saved-search selection regardless of order", async function () {
+			var collection = await createDataObject('collection');
+			var search = await createDataObject('search');
+
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['application/x-moz-file'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+
+			// Select the saved search first (so it's focused), then add the collection
+			await cv.selectByID("S" + search.id);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			itemsView = zp.itemsView;
+
+			// Allowed even though the focused row is a search, since a selected
+			// collection can receive the file
+			assert.isTrue(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+
+			await selectLibrary(win);
+		});
+
 		it("should create a stored top-level attachment when a file URI is dragged", async function () {
 			var promise = itemsView.waitForSelect();
 			var pdfFile = getTestDataDirectory();
@@ -2449,33 +2982,340 @@ describe("CollectionViewItemTree", function () {
 		});
 	});
 	
-	describe("#setCollectionTreeRow()", function () {
-		it("should no-op when setting the same row", async function () {
+	describe("#setCollectionTreeRows()", function () {
+		it("should no-op when setting the same rows", async function () {
 			let rowProvider = itemsView.rowProvider;
-			let currentRow = rowProvider.collectionTreeRow;
+			let currentRow = rowProvider.collectionTreeRows[0];
 			assert.ok(currentRow);
-			
+
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			
+
 			try {
-				await rowProvider.setCollectionTreeRow(currentRow);
+				await rowProvider.setCollectionTreeRows([currentRow]);
 				assert.equal(refreshSpy.callCount, 0);
 			}
 			finally {
 				refreshSpy.restore();
 			}
 		});
+
+		it("should treat collections, saved searches, and library roots as one kind of view", async function () {
+			let collection = await createDataObject('collection');
+			let search = await createDataObject('search');
+
+			await selectLibrary(win);
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			// A collection and a saved search together are still an ordinary view
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+			assert.equal(zp.itemsView.viewMode, 'default');
+
+			await cv.selectByID("T" + Zotero.Libraries.userLibraryID);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.viewMode, 'trash');
+
+			await selectLibrary(win);
+		});
+
+		it("should reject rows that don't form a single view", async function () {
+			let collection = await createDataObject('collection');
+			await cv.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+
+			let collectionRow = cv.getRow(cv.getRowIndexByID("C" + collection.id));
+			let trashRow = cv.getRow(cv.getRowIndexByID("T" + Zotero.Libraries.userLibraryID));
+
+			let error = await getPromiseError(
+				zp.itemsView.rowProvider.setCollectionTreeRows([collectionRow, trashRow])
+			);
+			assert.match(error.message, /don't form a single view/);
+
+			await selectLibrary(win);
+		});
 	});
-	
+
+	describe("Library grouping", function () {
+		// Fluent wraps interpolated values in bidi isolation marks; strip them for
+		// plain-text comparisons
+		function stripBidi(str) {
+			return str.replace(/[⁦-⁩]/g, '');
+		}
+
+		async function selectMultipleCollections(collections) {
+			await cv.selectByID("C" + collections[0].id);
+			await waitForItemsLoad(win);
+			for (let i = 1; i < collections.length; i++) {
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + collections[i].id));
+			}
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+		}
+
+		it("should group items by library with headers in collections-list order", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			// Reverse-alphabetical across the library boundary, so title sorting
+			// alone would put the group item first
+			let item1 = await createDataObject('item', { title: "ZZZ", collections: [collection1.id] });
+			let item2 = await createDataObject(
+				'item',
+				{ libraryID: group.libraryID, title: "AAA", collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			let item1Row = view.getRowIndexByID(item1.id);
+			let item2Row = view.getRowIndexByID(item2.id);
+
+			assert.isNumber(userHeaderRow, "User library header should be shown");
+			assert.isNumber(groupHeaderRow, "Group library header should be shown");
+			assert.isBelow(userHeaderRow, groupHeaderRow,
+				"User library group should come first");
+			assert.isAbove(item1Row, userHeaderRow);
+			assert.isBelow(item1Row, groupHeaderRow,
+				"User library item should be in the user library group despite sorting after the group item");
+			assert.isAbove(item2Row, groupHeaderRow);
+
+			// Header rows aren't selectable
+			assert.isFalse(view.isSelectable(userHeaderRow));
+
+			// Each cross-library header is the library name plus what's selected in it
+			assert.equal(stripBidi(view.getRow(groupHeaderRow).getDisplayTitle()),
+				Zotero.Libraries.getName(group.libraryID) + " (1 collection selected)");
+
+			// A blank spacer row sits above every header except the first, for whitespace
+			// separating the sections
+			assert.notEqual(view.getRow(userHeaderRow - 1)?.type, 'spacer',
+				"No spacer above the first header");
+			assert.equal(view.getRow(groupHeaderRow - 1).type, 'spacer',
+				"Spacer row above a later header");
+			assert.isFalse(view.isSelectable(groupHeaderRow - 1),
+				"Spacer rows aren't selectable");
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should pin the section header of the library scrolled to the top", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { collections: [collection1.id] });
+			// Enough group items below the group header that it can be scrolled to the top
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 0; i < 60; i++) {
+					let item = createUnsavedDataObject(
+						'item', { libraryID: group.libraryID, collections: [collection2.id] }
+					);
+					await item.save();
+				}
+			});
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let tree = view.tree;
+			let body = tree._jsWindow.targetElement;
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+
+			// At the very top, the real header is in place, so nothing is pinned -- a pinned
+			// copy would just double the header
+			body.scrollTop = 0;
+			tree._updateStickySectionHeader();
+			assert.equal(tree._stickyHeader.style.display, 'none');
+
+			// Scrolling the first (user library) header up under the top pins it
+			body.scrollTop = tree._jsWindow._getItemPosition(userHeaderRow) + 5;
+			tree._updateStickySectionHeader();
+			assert.include(tree._stickyHeader.textContent,
+				Zotero.Libraries.getName(Zotero.Libraries.userLibraryID));
+
+			// The pinned header lines up horizontally with the real header row
+			let realIcon = tree._jsWindow.getElementByIndex(userHeaderRow).querySelector('.icon-item-type');
+			let stickyIcon = tree._stickyHeaderContent.querySelector('.icon-item-type');
+			assert.equal(
+				stickyIcon.getBoundingClientRect().left,
+				realIcon.getBoundingClientRect().left,
+				"Pinned header icon should align with the real header icon"
+			);
+
+			// A focused header row renders with the focus class, but the pinned copy must
+			// not carry that focus ring
+			tree.selection.focused = userHeaderRow;
+			assert.isTrue(tree._renderItem(userHeaderRow).classList.contains('focused'),
+				"Setup: a focused header row renders with the focus class");
+			tree._stickyHeaderIndex = null;
+			tree._updateStickySectionHeader();
+			assert.isFalse(tree._stickyHeaderContent.querySelector('.row').classList.contains('focused'),
+				"Pinned header should not show a focus ring");
+
+			// Scrolling the group header up under the top pins the group library header instead
+			body.scrollTop = tree._jsWindow._getItemPosition(groupHeaderRow) + 5;
+			tree._updateStickySectionHeader();
+			assert.include(tree._stickyHeader.textContent, Zotero.Libraries.getName(group.libraryID));
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should restart row striping at each section header", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			// One user-library item so the group's first item falls on an even absolute index
+			await createDataObject('item', { collections: [collection1.id] });
+			await createDataObject('item', { libraryID: group.libraryID, collections: [collection2.id] });
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			let tree = view.tree;
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			let firstGroupItemRow = groupHeaderRow + 1;
+			// The header is the section's unstriped row, so the item right below it is
+			// striped (odd) -- even though its absolute index is even
+			assert.equal(firstGroupItemRow % 2, 0, "Setup: first group item at an even index");
+			let elem = tree._jsWindow.getElementByIndex(firstGroupItemRow);
+			assert.isTrue(elem.classList.contains('odd'), "First item below a header is striped");
+			assert.isFalse(elem.classList.contains('even'));
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should show one summary header but not group for a single-library multi-selection", async function () {
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection');
+			let item1 = await createDataObject('item', { collections: [collection1.id] });
+			let item2 = await createDataObject('item', { collections: [collection2.id] });
+
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			// One library -> a single summary header, but not grouped into sections
+			assert.isFalse(view.rowProvider._groupedByLibrary);
+			let headerRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			assert.isNumber(headerRow, "A summary header should be shown");
+			assert.equal(stripBidi(view.getRow(headerRow).getDisplayTitle()), "2 collections selected");
+			assert.isNumber(view.getRowIndexByID(item1.id));
+			assert.isNumber(view.getRowIndexByID(item2.id));
+
+			await selectLibrary(win);
+		});
+
+		it("shouldn't include header and spacer rows in the view's items", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			let item1 = await createDataObject('item', { collections: [collection1.id] });
+			let item2 = await createDataObject(
+				'item', { libraryID: group.libraryID, collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			// Two headers and a spacer sit among the rows
+			assert.equal(view.rowCount, 5);
+
+			let items = view.getSortedItems();
+			assert.sameMembers(items.map(o => o.id), [item1.id, item2.id]);
+			assert.isTrue(items.every(o => o instanceof Zotero.Item));
+			assert.sameMembers(view.getSortedItems(true), [item1.id, item2.id]);
+			assert.equal(view.objectRowCount, 2);
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("should keep headers above their items after a column sort", async function () {
+			let group = await createGroup();
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('item', { title: "AAA", collections: [collection1.id] });
+			await createDataObject('item', { title: "ZZZ", collections: [collection1.id] });
+			await createDataObject(
+				'item', { libraryID: group.libraryID, title: "MMM", collections: [collection2.id] }
+			);
+
+			await cv.expandLibrary(group.libraryID);
+			await selectMultipleCollections([collection1, collection2]);
+
+			let view = zp.itemsView;
+			await view.sort();
+
+			let userHeaderRow = view.getRowIndexByID("L" + Zotero.Libraries.userLibraryID);
+			let groupHeaderRow = view.getRowIndexByID("L" + group.libraryID);
+			assert.equal(userHeaderRow, 0, "First header stays at the top");
+			assert.equal(view.getRow(groupHeaderRow - 1).type, 'spacer',
+				"Spacer stays directly above the later header");
+			// Every item still sits within its own library's section
+			for (let i = 0; i < view.rowCount; i++) {
+				let row = view.getRow(i);
+				if (!row.isObjectRow) continue;
+				if (row.ref.libraryID == group.libraryID) {
+					assert.isAbove(i, groupHeaderRow, `Group item at row ${i}`);
+				}
+				else {
+					assert.isBelow(i, groupHeaderRow - 1, `User library item at row ${i}`);
+				}
+			}
+
+			await selectLibrary(win);
+			await group.eraseTx();
+		});
+
+		it("shouldn't group feeds by library, even across feed libraries", async function () {
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
+			let feedItem1 = await createDataObject('feedItem', { libraryID: feed1.libraryID });
+			let feedItem2 = await createDataObject('feedItem', { libraryID: feed2.libraryID });
+
+			// Select both feeds (each is its own feed library)
+			await cv.selectByID(feed1.treeViewID);
+			await waitForItemsLoad(win);
+			cv.selection.toggleSelect(cv.getRowIndexByID(feed2.treeViewID));
+			await zp.onCollectionSelected();
+			await zp.itemsView.waitForLoad();
+
+			let view = zp.itemsView;
+			// The selection spans two feed libraries, but feeds are never grouped
+			assert.isFalse(view.rowProvider._groupedByLibrary);
+			assert.isFalse(view.getRowIndexByID("L" + feed1.libraryID),
+				"No library header should be shown for a feeds selection");
+			assert.isNumber(view.getRowIndexByID(feedItem1.id));
+			assert.isNumber(view.getRowIndexByID(feedItem2.id));
+
+			await selectLibrary(win);
+			await clearFeeds();
+		});
+	});
+
 	describe("#setFilter()", function () {
 		it("should refresh when search filter value changes", async function () {
 			let rowProvider = itemsView.rowProvider;
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(true);
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRows[0], 'setSearch').returns(true);
 			
 			try {
 				await rowProvider.setFilter('search', 'changed-search');
-				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search'));
+				assert.isTrue(setSearchStub.calledOnceWithExactly('changed-search',
+					Zotero.Prefs.get('search.quicksearch-mode')));
 				assert.isTrue(refreshSpy.calledOnceWithExactly({ restoreSelection: true }));
 			}
 			finally {
@@ -2487,7 +3327,7 @@ describe("CollectionViewItemTree", function () {
 		it("should not refresh when filter value is unchanged", async function () {
 			let rowProvider = itemsView.rowProvider;
 			let refreshSpy = sinon.spy(rowProvider, 'refresh');
-			let setSearchStub = sinon.stub(rowProvider.collectionTreeRow, 'setSearch').returns(false);
+			let setSearchStub = sinon.stub(rowProvider.collectionTreeRows[0], 'setSearch').returns(false);
 			
 			try {
 				await rowProvider.setFilter('search', 'unchanged-search');
@@ -2783,47 +3623,6 @@ describe("CollectionViewItemTree", function () {
 			assert.include(text, toplevelItemTwo.getDisplayTitle());
 		});
 	});
-	
-	describe('Advanced Search', function () {
-		describe('#notify', function () {
-			it('should resolve the returned promise when an item is selected', async function() {
-				var item = await createDataObject('item', { setTitle: true });
-				var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
-				zp.openAdvancedSearchWindow();
-				var searchWin = await promise;
-				await searchWin.ZoteroAdvancedSearch._loadedDeferred.promise;
-				// Add condition
-				var searchBox = searchWin.document.getElementById('zotero-search-box');
-				
-				var s = new Zotero.Search();
-				s.addCondition('title', 'is', item.getField('title'))
-				searchBox.search = s;
-				
-				// Run search and wait for results
-				var o = searchWin.ZoteroAdvancedSearch;
-				var iv = o.itemsView;
-				await iv.waitForLoad();
-				await o.search();
-				await iv.waitForLoad();
-				
-				// Check results
-				assert.equal(iv.rowCount, 1);
-				
-				// Make sure an item is selected (otherwise notify resolves fine)
-				await iv.selectItem(item.id);
-				assert.equal(iv.selection.count, 1);
-
-				let notifySpy = sinon.spy(iv, 'notify');
-				await createDataObject('item');
-				assert.isTrue(notifySpy.calledOnce);
-				await notifySpy.returnValues[0];
-				notifySpy.restore();
-
-				searchWin.close();
-				await item.eraseTx();
-			});
-		});
-	});
 
 	describe("Search error handling", function () {
 		var rowProvider;
@@ -2844,7 +3643,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should show load error message on search failure", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			var setMessageSpy = sinon.spy(itemsView, 'setItemsPaneMessage');
 			try {
 				await rowProvider.refresh();
@@ -2859,7 +3658,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should recover after switching to a working collection", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			await rowProvider.refresh();
 			stub.restore();
 
@@ -2870,7 +3669,7 @@ describe("CollectionViewItemTree", function () {
 		});
 
 		it("should not re-throw SearchError from refresh()", async function () {
-			var stub = stubBrokenSearch(rowProvider.collectionTreeRow);
+			var stub = stubBrokenSearch(rowProvider.collectionTreeRows[0]);
 			try {
 				// refresh() should resolve, not reject
 				await rowProvider.refresh();

@@ -2,6 +2,12 @@
   "general_more": {
     "message": "Meir …"
   },
+  "general_moreInfo": {
+    "message": "Meir informasjon..."
+  },
+  "general_needHelp": {
+    "message": "Treng du hjelp?"
+  },
   "general_done": {
     "message": "Ferdig"
   },
@@ -29,17 +35,62 @@
   "general_deselectAll": {
     "message": "Fjern merking"
   },
+  "general_pleaseWait": {
+    "message": "Ver vennleg å vente..."
+  },
   "general_copyToClipboard": {
     "message": "Kopier til utklippstavle"
   },
+  "itemType_pdf": {
+    "message": "PDF-vedlegg"
+  },
+  "itemType_epub": {
+    "message": "EPUB-vedlegg"
+  },
+  "itemType_snapshot": {
+    "message": "Snøggbilete"
+  },
   "itemType_note": {
     "message": "Notat"
+  },
+  "itemType_link": {
+    "message": "Nettlenke"
   },
   "itemType_attachment": {
     "message": "Vedlegg"
   },
   "progressWindow_savingTo": {
     "message": "Lagrar til"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Vis detaljar"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Gøym detaljar"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Val av mål-samling"
+  },
+  "progressWindow_savingItems": {
+    "message": "Lagrar $1 element. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Lagrar element $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Element $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Lagra $1"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Kunne ikkje laste ned $1"
+  },
+  "progressWindow_allDone": {
+    "message": "Lagring ferdig - stenger dialogen."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Element frå denne nettsida er allerede lagra."
   },
   "progressWindow_tagPlaceholder": {
     "message": "merke (skilde med komma)"

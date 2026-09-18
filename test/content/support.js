@@ -177,7 +177,7 @@ function waitForWindow(uri, callback) {
 		}
 		
 		Services.ww.unregisterNotification(winobserver);
-		var win = ev.target.ownerGlobal;
+		var win = ev.target.documentGlobal;
 		// Give window code time to run on load
 		win.setTimeout(function () {
 			if (callback) {
@@ -429,7 +429,7 @@ function waitForCallback(cb, interval, timeout) {
 			deferred.resolve(success);
 		} else if(Date.now() - start > timeout*1000) {
 			clearInterval(id);
-			deferred.reject(new Error("Promise timed out"));
+			deferred.reject(new Error("Promise timed out: " + cb.toString()));
 		}
 	}, interval);
 	return deferred.promise;
@@ -650,7 +650,7 @@ var modifyDataObject = function (obj, params = {}, saveOptions) {
 	default:
 		obj.name = params.name !== undefined ? params.name : Zotero.Utilities.randomString();
 	}
-	return obj.saveTx(saveOptions);
+	return obj.save({ tx: true, ...saveOptions });
 };
 
 /**
@@ -664,6 +664,33 @@ async function getPromiseError(promise) {
 		return e;
 	}
 	return false;
+}
+
+/**
+ * Run the given function within a DB transaction that is rolled back at the end,
+ * for testing rollback handling
+ *
+ * The function runs within the transaction, so it must use save() rather than saveTx().
+ *
+ * @param {Function} fn
+ * @param {Object} [options] - Options to pass to Zotero.DB.executeTransaction()
+ * @return {Promise} - Return value of the passed function
+ */
+async function executeTransactionWithForcedRollback(fn, options) {
+	var result;
+	var forcedError = new Error("Forced rollback");
+	try {
+		await Zotero.DB.executeTransaction(async function () {
+			result = await fn();
+			throw forcedError;
+		}, options);
+	}
+	catch (e) {
+		if (e !== forcedError) {
+			throw e;
+		}
+	}
+	return result;
 }
 
 /**
@@ -721,9 +748,17 @@ var removeDir = async function (dir) {
  *
  * @param {Object} [options] - Initialization options, as passed to Zotero.init(), overriding
  *                             any that were set at startup
+ * @param {Object} [options.prefs] - Prefs to set for the reinitialization, overriding the
+ *     test-runner defaults. Cleared by the global afterEach().
  */
 async function resetDB(options = {}) {
 	resetPrefs();
+	
+	if (options.prefs) {
+		for (let key in options.prefs) {
+			Zotero.Prefs.set(key, options.prefs[key]);
+		}
+	}
 	
 	if (options.thisArg) {
 		options.thisArg.timeout(60000);

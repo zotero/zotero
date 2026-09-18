@@ -19,7 +19,8 @@ binary=$1
 from_channel=$2
 to_channel=$3
 # `strings` has a 4-character minimum by default, but we need 3 for 'dev'
-strings_cmd="strings -n 3"
+# `-arch all` scans all slices of the universal binary rather than just the host architecture
+strings_cmd="strings -n 3 -arch all"
 
 if [ ${#to_channel} -gt 7 ]; then
 	echo "Channel length cannot exceed 7 characters -- aborting" >&2

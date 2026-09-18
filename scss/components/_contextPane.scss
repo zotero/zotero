@@ -54,7 +54,7 @@
 	background: var(--material-sidepane);
 	flex-direction: column;
 	
-	&[collapsed=true] {
+	&[collapsed] {
 		height: 0 !important;
 	}
 }
@@ -113,9 +113,9 @@
 	height: 28px;
 }
 
-#zotero-context-pane[collapsed=true] .notes-list-container,
-#zotero-context-pane-inner[collapsed=true] .notes-list-container,
-#zotero-context-pane[collapsed=true] .zotero-view-item > tabpanel > *,
-#zotero-context-pane-inner[collapsed=true] .zotero-view-item > tabpanel > * {
+#zotero-context-pane[collapsed] .notes-list-container,
+#zotero-context-pane-inner[collapsed] .notes-list-container,
+#zotero-context-pane[collapsed] .zotero-view-item > tabpanel > *,
+#zotero-context-pane-inner[collapsed] .zotero-view-item > tabpanel > * {
 	overflow: unset !important;
 }

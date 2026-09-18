@@ -766,4 +766,37 @@ describe("Zotero.Items", function () {
 			assert.include(ids, item2.id);
 		});
 	});
+
+	describe("#getLastReadAttachmentIDs()", function () {
+		it("should return the read attachments themselves, not their parents", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let now = Math.round(Date.now() / 1000);
+
+			let item = await createDataObject('item', { libraryID });
+			let readAttachment = await importPDFAttachment(item);
+			readAttachment.attachmentLastRead = now;
+			await readAttachment.saveTx();
+			let unreadAttachment = await importPDFAttachment(item);
+
+			let ids = await Zotero.Items.getLastReadAttachmentIDs(libraryID);
+			// The read attachment is included, but not its parent or its unread sibling
+			assert.include(ids, readAttachment.id);
+			assert.notInclude(ids, item.id);
+			assert.notInclude(ids, unreadAttachment.id);
+		});
+
+		it("should return standalone attachments", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let now = Math.round(Date.now() / 1000);
+
+			let att = await importPDFAttachment(null, { libraryID });
+			att.attachmentLastRead = now;
+			await att.saveTx();
+
+			let ids = await Zotero.Items.getLastReadAttachmentIDs(libraryID);
+			assert.include(ids, att.id);
+		});
+	});
 });

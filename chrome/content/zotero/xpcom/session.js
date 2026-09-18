@@ -30,6 +30,7 @@ Zotero.Session = new function () {
 	let _state = {
 		windows: []
 	};
+	let _initialized = false;
 
 	Zotero.defineProperty(this, 'state', {
 		get: () => {
@@ -48,6 +49,7 @@ Zotero.Session = new function () {
 				Zotero.logError(e);
 			}
 		}
+		_initialized = true;
 	};
 	
 	this.setLastClosedZoteroPaneState = function (state) {
@@ -59,6 +61,11 @@ Zotero.Session = new function () {
 	}, DEBOUNCED_SAVING_DELAY);
 
 	this.save = async function () {
+		// Don't overwrite the saved session if startup failed before the session was loaded
+		if (!_initialized) {
+			return;
+		}
+		
 		try {
 			// Saving is triggered in `zotero.js` when a quit event is received,
 			// though if it was triggered by closing a window, ZoteroPane might

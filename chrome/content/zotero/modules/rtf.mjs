@@ -642,6 +642,5 @@ export async function replaceCitations(content, citations, citationItemIDs, styl
 		}
 	}
 
-	cslEngine.free();
 	return content;
 }

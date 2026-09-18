@@ -3,9 +3,9 @@
 <!ENTITY servicesMenuMac.label "サービス">
 <!ENTITY hideThisAppCmdMac.label "&brandShortName; を隠す">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "ほかを隠す">
+<!ENTITY hideOtherAppsCmdMac.label "その他を隠す">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "すべてを表示">
+<!ENTITY showAllAppsCmdMac.label "すべて表示">
 <!ENTITY quitApplicationCmdMac.label "Zotero を終了">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
@@ -22,7 +22,7 @@
 <!ENTITY closeCmd.label "閉じる">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "添付ファイルの管理">
 <!ENTITY convertToStored.label "リンクファイルを保存ファイルに変換...">
 <!ENTITY importCmd.label "インポート...">
 <!ENTITY importCmd.key "I">
@@ -32,13 +32,13 @@
 <!ENTITY quitApplicationCmd.label "終了">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-<!ENTITY copyCitationCmd.label "出典表記をコピー">
-<!ENTITY copyBibliographyCmd.label "参考文献目録をコピー">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyCitationCmd.label "引用文献のコピー">
+<!ENTITY copyBibliographyCmd.label "参考文献のコピー">
+<!ENTITY copyNoteCmd.label "メモのコピー">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "ページの方向を切り替える">
+<!ENTITY bidiSwitchPageDirectionItem.label "ページ方向の切り替え">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "文字列の方向を切り替える">
+<!ENTITY bidiSwitchTextDirectionItem.label "文字列方向の切り替え">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
@@ -49,19 +49,19 @@
 <!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "レイアウト">
 <!ENTITY standardView.label "標準ビュー">
-<!ENTITY stackedView.label "Stacked View">
+<!ENTITY stackedView.label "スタックビュー">
 <!ENTITY collectionsPane.label "コレクションパネル">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "サブコレクションからアイテムを表示">
+<!ENTITY itemPane.label "項目パネル">
+<!ENTITY tagSelector.label "タグセレクター">
+<!ENTITY recursiveCollections.label "サブコレクションから項目を表示">
 <!ENTITY fontSize.label "フォントサイズ">
 <!ENTITY noteFontSize.label "メモのフォントサイズ">
-<!ENTITY columns.label "Columns">
-<!ENTITY sortBy.label "Sort By">
+<!ENTITY columns.label "列">
+<!ENTITY sortBy.label "並べ替え">
 
 <!ENTITY toolsMenu.label "ツール">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector…">
+<!ENTITY installConnector.label "ブラウザコネクタをインストール…">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "アドオン">
 <!ENTITY developer.label "開発者">
@@ -77,20 +77,20 @@
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "サポートとヘルプ">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "トラブルシューティング情報...">
+<!ENTITY helpTroubleshootingInfo.label "トラブルシューティング...">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "ディスカッション・フォーラム">
+<!ENTITY helpFeedbackPage.label "フォーラム">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "エラーを報告する...">
+<!ENTITY helpReportErrors.label "エラー報告...">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "デバッグ出力のログ">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "出力を提出する">
+<!ENTITY debugOutputLogging.submit "出力を提出">
 <!ENTITY debugOutputLogging.view "出力を表示">
-<!ENTITY debugOutputLogging.clear "出力を消去する">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "ログを有効化して再起動する...">
+<!ENTITY debugOutputLogging.clear "出力を消去">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "ログを有効化して再起動...">
 
-<!ENTITY helpCheckForUpdates.label "更新を確認...">
+<!ENTITY helpCheckForUpdates.label "更新の確認...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

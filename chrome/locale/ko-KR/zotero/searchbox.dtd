@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "이름:">
 
-<!ENTITY zotero.search.searchInLibrary "라이브러리 검색:">
-
 <!ENTITY zotero.search.joinMode.prefix "다음 조건 중">
 <!ENTITY zotero.search.joinMode.any "아무거나">
 <!ENTITY zotero.search.joinMode.all "모두">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "일">
 <!ENTITY zotero.search.date.units.months "월">
 <!ENTITY zotero.search.date.units.years "년">
-
-<!ENTITY zotero.search.search "검색">
-<!ENTITY zotero.search.clear "결과 삭제">
-<!ENTITY zotero.search.saveSearch "검색결과 저장">

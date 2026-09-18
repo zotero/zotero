@@ -214,7 +214,8 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	},
 
 	_loginManagerHost: 'chrome://zotero',
-	_loginManagerRealm: 'Zotero Storage Server',
+	_loginManagerRealm: 'Zotero Storage Server (encrypted)',
+	_loginManagerRealmLegacy: 'Zotero Storage Server',
 	
 	
 	get defaultError() {
@@ -238,14 +239,64 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		Zotero.debug('Getting WebDAV password');
+		
+		// Prefer the legacy realm during the transition window: an older version
+		// may have written a fresh value there after we migrated. Mirror it to
+		// the encrypted realm but keep the legacy entry so a downgrade can still
+		// read it. The legacy realm will be cleared in a future version once
+		// downgrades are unlikely.
+		var legacyLogins = await Services.logins.searchLoginsAsync({
+			origin: this._loginManagerHost,
+			httpRealm: this._loginManagerRealmLegacy,
+		});
+		for (let i = 0; i < legacyLogins.length; i++) {
+			if (legacyLogins[i].username == username) {
+				let password = legacyLogins[i].password;
+				if (!this._mirroredPassword) {
+					try {
+						Zotero.debug("Mirroring plaintext WebDAV password to encrypted storage");
+						await this._writeEncryptedPassword(username, password);
+						this._mirroredPassword = true;
+					}
+					catch (e) {
+						Zotero.logError(e);
+						if (!Zotero.Sync.Runner.backgroundSync) {
+							if (Zotero.OSKeyStore.isKeyStoreError(e)) {
+								Zotero.OSKeyStore.alertMigrateFailed();
+							}
+							else {
+								await Zotero.Sync.Data.Local.alertLoginManagerCorrupted();
+							}
+						}
+					}
+				}
+				return password;
+			}
+		}
+		
 		var logins = await Services.logins.searchLoginsAsync({
 			origin: this._loginManagerHost,
 			httpRealm: this._loginManagerRealm,
 		});
-		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username) {
-				return logins[i].password;
+				let password = logins[i].password;
+				if (Zotero.OSKeyStore.isEncrypted(password)) {
+					return Zotero.OSKeyStore.decrypt(password);
+				}
+				// Password stored without encryption after a failed write -- encrypt it now,
+				// in case the keystore has since become usable
+				if (!this._reencryptedPassword) {
+					this._reencryptedPassword = true;
+					try {
+						Zotero.debug("Encrypting unencrypted WebDAV password");
+						await this._writeEncryptedPassword(username, password);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+				return password;
 			}
 		}
 		
@@ -270,22 +321,37 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			return;
 		}
 		
-		if (password == (await this.getPassword())) {
-			Zotero.debug("WebDAV password hasn't changed");
-			return;
+		// Skip the write if the password hasn't changed. This is an optimization,
+		// not a correctness requirement -- if we can't read the existing value
+		// (e.g. keychain locked), proceed with the write anyway.
+		try {
+			if (password == (await this.getPassword())) {
+				Zotero.debug("WebDAV password hasn't changed");
+				return;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
 		}
 		
 		this._basicAuthHeader = false;
 		this._digestParams = null;
 
+		await this._savePassword(username, password);
+		
+		// Drop any leftover plaintext entry from the legacy realm
 		var logins = await Services.logins.searchLoginsAsync({
 			origin: this._loginManagerHost,
-			httpRealm: this._loginManagerRealm
+			httpRealm: this._loginManagerRealmLegacy
 		});
-		for (var i = 0; i < logins.length; i++) {
-			Zotero.debug('Clearing WebDAV passwords');
-			if (logins[i].httpRealm == this._loginManagerRealm) {
-				Services.logins.removeLogin(logins[i]);
+		for (let i = 0; i < logins.length; i++) {
+			if (logins[i].httpRealm == this._loginManagerRealmLegacy) {
+				try {
+					await Services.logins.removeLoginAsync(logins[i]);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			break;
 		}
@@ -298,7 +364,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			Zotero.debug('Clearing old WebDAV passwords');
 			if (logins[i].formSubmitURL == "Zotero Storage Server") {
 				try {
-					Services.logins.removeLogin(logins[i]);
+					await Services.logins.removeLoginAsync(logins[i]);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -306,13 +372,72 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			}
 			break;
 		}
+	},
+	
+	/**
+	 * Store the password, retrying after a login manager repair and, if the keystore still
+	 * can't be used, offering to store the password without it
+	 */
+	async _savePassword(username, password) {
+		var error;
+		try {
+			await this._writeEncryptedPassword(username, password);
+			return;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			error = e;
+		}
+		// If the write failed because the key database was unusable, reset the login manager
+		// and retry
+		if (await Zotero.Sync.Data.Local.repairLoginManager()) {
+			try {
+				await this._writeEncryptedPassword(username, password);
+				return;
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		// The login manager can fail to store a value even when the keystore works -- e.g., if
+		// the key database is read-only -- and storing the password unencrypted wouldn't help
+		if (!Zotero.OSKeyStore.isKeyStoreError(error)) {
+			await Zotero.Sync.Data.Local.alertLoginManagerCorrupted();
+			throw error;
+		}
+		// A password that would read back as ciphertext can't be stored unencrypted
+		if (Zotero.OSKeyStore.isEncrypted(password)) {
+			throw error;
+		}
+		if (!Zotero.OSKeyStore.confirmUnencryptedFallback()) {
+			throw error;
+		}
+		await this._writePassword(username, password);
+		// The keystore is unusable, so don't try to encrypt again on the next read
+		this._reencryptedPassword = true;
+	},
+	
+	async _writeEncryptedPassword(username, password) {
+		await this._writePassword(username, password && await Zotero.OSKeyStore.encrypt(password));
+	},
+	
+	async _writePassword(username, storedValue) {
+		// Remove any existing entries in the encrypted realm for this user
+		var logins = await Services.logins.searchLoginsAsync({
+			origin: this._loginManagerHost,
+			httpRealm: this._loginManagerRealm
+		});
+		for (let i = 0; i < logins.length; i++) {
+			if (logins[i].username == username) {
+				await Services.logins.removeLoginAsync(logins[i]);
+			}
+		}
 		
-		if (password) {
-			Zotero.debug('Setting WebDAV password');
-			var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+		if (storedValue) {
+			let nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
 				Components.interfaces.nsILoginInfo, "init");
-			var loginInfo = new nsLoginInfo(this._loginManagerHost, null,
-				this._loginManagerRealm, username, password, "", "");
+			let loginInfo = new nsLoginInfo(this._loginManagerHost, null,
+				this._loginManagerRealm, username, storedValue, "", "");
 			await Services.logins.addLoginAsync(loginInfo);
 		}
 	},

@@ -131,6 +131,8 @@ async function onLoad() {
 	await IOManager.toggleDialogMode(initialMode);
 	// most of IO handling relies on currentLayout being defined so it must follow setInitialDialogMode
 	IOManager.init();
+	// set the text of the citation preview
+	CitationPreview.update();
 	// explicitly focus bubble input so one can begin typing right away
 	_id("bubble-input").refocusInput();
 	// wait to call functions that rely on io.getItems() or io.sort() till all cited data is loaded
@@ -258,8 +260,9 @@ async function setDialogType(type) {
 	_id("keepSorted").disabled = !io.sortable || !DIALOG_STATE.isCitingItems();
 	_id("keepSorted").checked = !_id("keepSorted").disabled && !io.citation.properties.unsorted;
 	if (DIALOG_STATE.isCitingItems()) {
-		_id("settings-button").hidden = !io.sortable;
 		_id("keepSorted").disabled = !io.sortable;
+		_id("keepSorted").parentElement.hidden = !io.sortable;
+		CitationPreview.update();
 		if (!DIALOG_STATE.loaded) {
 			_id("keepSorted").checked = io.sortable && !io.citation.properties.unsorted;
 		}
@@ -451,7 +454,7 @@ class Layout {
 		else {
 			// Make sure the collectionTreeRow is defined to
 			// avoid errors thrown when filter is set on first load
-			while (!this.itemsView.collectionTreeRow) {
+			while (!this.itemsView.collectionTreeRows) {
 				await Zotero.Promise.delay(10);
 			}
 			await this.refreshItemsList();
@@ -596,14 +599,16 @@ class LibraryLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
+	// Resolves once the resize animation has fully completed
 	async resizeWindow() {
 		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
 		let suggestedItemsHeight = _id("library-other-items").getBoundingClientRect().height;
 		let minTableHeight = 400;
+		let citationPreview = _id("citation-preview").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
-		let minHeight = bubbleInputHeight + suggestedItemsHeight + bottomHeight + minTableHeight;
+		let minHeight = bubbleInputHeight + suggestedItemsHeight + citationPreview + bottomHeight + minTableHeight;
 
 		let targetWidth = Math.max(window.innerWidth, this.MIN_WIDTH);
 		let targetHeight = Math.max(minHeight, lastSetWindowHeight);
@@ -612,13 +617,16 @@ class LibraryLayout extends Layout {
 		if (needsResize) {
 			doc.documentElement.style.removeProperty('min-height');
 			ignoreWindowResizing = true;
-			Helpers.smoothResize(targetWidth, targetHeight, {
-				onComplete: () => {
-					_id("bubble-input").refocusInput();
-					doc.documentElement.style.minHeight = `${minHeight}px`;
-					document.documentElement.setAttribute("dialog-layout", this.type);
-					ignoreWindowResizing = false;
-				},
+			await new Promise((resolve) => {
+				Helpers.smoothResize(targetWidth, targetHeight, {
+					onComplete: () => {
+						_id("bubble-input").refocusInput();
+						doc.documentElement.style.minHeight = `${minHeight}px`;
+						document.documentElement.setAttribute("dialog-layout", this.type);
+						ignoreWindowResizing = false;
+						resolve();
+					},
+				});
 			});
 		}
 		// ensure dialog-layout and min-height is set even if window does not need resizing
@@ -673,13 +681,19 @@ class LibraryLayout extends Layout {
 				let icon = getCSSIcon('plus-circle');
 				iconWrapper.append(icon);
 				// add aria-label for screen readers to announce if this item is added
+				let count = this._getItemsViewIconClickItems(index).length;
 				if (inCitation) {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table-added", { count });
 				}
 				else {
-					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table");
+					doc.l10n.setAttributes(cell, "integration-citationDialog-items-table", { count });
 				}
 				iconWrapper.append(icon);
+				// refresh the tooltip's item count, since the selection can change
+				// without this row re-rendering
+				cell.addEventListener("mouseenter", () => {
+					doc.l10n.setArgs(cell, { count: this._getItemsViewIconClickItems(index).length });
+				});
 				iconWrapper.addEventListener("click", () => {
 					this._handleItemsViewIconClick(index);
 				});
@@ -776,7 +790,8 @@ class LibraryLayout extends Layout {
 			hideSources: ['duplicates', 'trash', 'feeds'],
 			initialFolder: Zotero.Prefs.get("integration.citationDialogCollectionLastSelected"),
 			onActivate: () => {},
-			filterLibraryIDs: io.filterLibraryIDs
+			filterLibraryIDs: io.filterLibraryIDs,
+			multiSelect: true
 		});
 		// Add aria-description with instructions on what this collection tree is for
 		// Voiceover announces the description placed on the actual tree when focus enters it
@@ -869,10 +884,18 @@ class LibraryLayout extends Layout {
 	}
 	
 	async _onCollectionSelection() {
-		var collectionTreeRow = this.collectionsView.getRow(this.collectionsView.selection.focused);
 		if (!this.collectionsView.selection.count) return;
-		// Collection not changed
-		if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
+		// Show the union of all selected collections (cross-library selections are
+		// grouped by library in the items view, as in List mode)
+		let selectedRows = [...this.collectionsView.selection.selected]
+			.sort((a, b) => a - b)
+			.map(index => this.collectionsView.getRow(index));
+		// Collection selection not changed
+		if (this.itemsView
+				&& Zotero.Utilities.arrayEquals(
+					selectedRows.map(row => row.id).sort(),
+					this.itemsView.collectionTreeRows.map(row => row.id).sort()
+				)) {
 			return;
 		}
 		// _onCollectionSelection will be called during initiation. It can take a while
@@ -880,41 +903,45 @@ class LibraryLayout extends Layout {
 		if (currentLayout?.type !== "library") return;
 
 		this.itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-		
-		// Load library data if necessary
-		var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-		if (!library.getDataLoaded('item')) {
-			Zotero.debug("Waiting for items to load for library " + library.libraryID);
-			await library.waitForDataLoad('item');
+
+		// Load item data for each selected library if necessary
+		for (let libraryID of new Set(selectedRows.map(row => row.ref.libraryID))) {
+			let library = Zotero.Libraries.get(libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				await library.waitForDataLoad('item');
+			}
 		}
-		
-		await this.itemsView.changeCollectionTreeRow({
+
+		// Restrict each collection's items to those relevant to the current citation mode
+		let filterItemsForMode = async (items) => {
+			// In add-note mode, note parent checks call item.getNotes(), which requires childItems
+			if (DIALOG_STATE.isAddingNote()) {
+				let regularItems = items.filter(item => SearchHandler.isItemWithNotes(item));
+				if (regularItems.length) {
+					await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
+				}
+				// when citing notes, only keep notes or note parents
+				items = items.filter(item => item.isNote() || item.getNotes().length);
+			}
+			// when adding annotations, only keep annotations, their attachments, and their top-level items
+			if (DIALOG_STATE.isAddingAnnotations()) {
+				return SearchHandler.keepItemsWithAnnotations(items);
+			}
+			return items;
+		};
+
+		await this.itemsView.changeCollectionTreeRows(selectedRows.map(collectionTreeRow => ({
 			id: collectionTreeRow.id,
-			getItems: async () => {
-				let items = await collectionTreeRow.getItems();
-				// In add-note mode, note parent checks call item.getNotes(), which requires childItems
-				if (DIALOG_STATE.isAddingNote()) {
-					let regularItems = items.filter(item => SearchHandler.isItemWithNotes(item));
-					if (regularItems.length) {
-						await Zotero.Items.loadDataTypes(regularItems, ['childItems']);
-					}
-					// when citing notes, only keep notes or note parents
-					items = items.filter(item => item.isNote() || item.getNotes().length);
-				}
-				// when adding annotations, only keep annotations, their attachments, and their top-level items
-				if (DIALOG_STATE.isAddingAnnotations()) {
-					return SearchHandler.keepItemsWithAnnotations(items);
-				}
-				return items;
-			},
+			getItems: async () => filterItemsForMode(await collectionTreeRow.getItems()),
 			isSearch: () => true,
 			isSearchMode: () => true,
 			setSearch: (searchText, mode) => collectionTreeRow.setSearch(searchText, mode),
 			clearCache: () => collectionTreeRow.clearCache(),
 			ref: collectionTreeRow.ref
-		});
+		})));
 		await this.itemsView.setFilter('citation-search', SearchHandler.searchValue);
-		
+
 		this.itemsView.clearItemsPaneMessage();
 	}
 
@@ -931,16 +958,33 @@ class LibraryLayout extends Layout {
 		}
 	}
 
-	// click on + icon will add the item to the citation
+	// click on + icon will add the item(s) to the citation
 	_handleItemsViewIconClick(index) {
 		let rowNode = doc.getElementById(`${this.itemsView.id}-row-${index}`);
 		let rowTopBeforeRefresh = rowNode.getBoundingClientRect().top;
+		let items = this._getItemsViewIconClickItems(index);
 		this.itemsView.selection.clearSelection();
-		let row = this.itemsView.getRow(index);
-		// after adding the item, try to keep the mouse over it even if the bubble-input gets taller
-		IOManager.addItemsToCitation([row.ref]).then(() => {
+		// after adding the items, try to keep the mouse over the clicked row
+		// even if the bubble-input gets taller
+		IOManager.addItemsToCitation(items).then(() => {
 			this._scrollItemTreeToRow(rowNode.id, rowTopBeforeRefresh);
 		});
+	}
+
+	// items that a click on the + icon of the given row will add: all selected
+	// items if the row is part of the current selection, otherwise just this row's item
+	_getItemsViewIconClickItems(index) {
+		let items;
+		if (this.itemsView.selection.isSelected(index)) {
+			items = this.itemsView.getSelectedItems();
+		}
+		else {
+			items = [this.itemsView.getRow(index).ref];
+		}
+		if (DIALOG_STATE.isAddingAnnotations()) {
+			items = items.filter(item => item.isAnnotation());
+		}
+		return items;
 	}
 
 	_handleSelectionChangeWithAnnotation() {
@@ -997,7 +1041,9 @@ class LibraryLayout extends Layout {
 		// If the itemTree is still loading, wait for it to finish
 		await this.itemsView.waitForLoad();
 		// Scroll to the first cited item
-		let firstCitedRow = this.itemsView._rows.findIndex(row => CitationDataManager.itemAddedCache.has(row.ref.id));
+		let firstCitedRow = this.itemsView._rows.findIndex(
+			row => row.isObjectRow && CitationDataManager.itemAddedCache.has(row.ref.id)
+		);
 		if (firstCitedRow == -1) return;
 		this.itemsView.ensureRowsAreVisible([firstCitedRow]);
 	}
@@ -1006,10 +1052,11 @@ class LibraryLayout extends Layout {
 	// scroll it back up so that the mouse remains over the same row as before click
 	// do not do it on click of the first row, since then the mouse will be on a header
 	_scrollItemTreeToRow(rowID, rowTopBeforeRefresh) {
-		let rowIndex = rowID.split("-")[4];
+		let rowIndex = parseInt(rowID.split("-").at(-1));
 		if (rowIndex === 0) return;
 		this.itemsView.ensureRowIsVisible(rowIndex);
 		let rowAfterRefresh = doc.querySelector(`#zotero-items-tree #${rowID}`);
+		if (!rowAfterRefresh) return;
 		let rowTopAfterRefresh = rowAfterRefresh.getBoundingClientRect().top;
 		let delta = rowTopAfterRefresh - rowTopBeforeRefresh;
 		if (delta > 0.1) {
@@ -1092,6 +1139,7 @@ class ListLayout extends Layout {
 		IOManager.updateBubbleInput();
 	}
 
+	// Resolves only once the resize animation has fully completed
 	async resizeWindow() {
 		await Helpers.smoothResizingPromise;
 		let bubbleInputHeight = Helpers.getSearchRowHeight();
@@ -1112,11 +1160,12 @@ class ListLayout extends Layout {
 			marginOfError = Zotero.isWin ? 6 : 2;
 		}
 
-		// height of the bottom section
+		// height of citation preview (0 when hidden) and the bottom section
+		let citationPreview = _id("citation-preview").getBoundingClientRect().height;
 		let bottomHeight = _id("bottom-area-wrapper").getBoundingClientRect().height;
 
 		// set min height and resize the window
-		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + bottomHeight + marginOfError;
+		let autoHeight = bubbleInputHeight + sectionsHeight + sectionsWrapperPadding + citationPreview + bottomHeight + marginOfError;
 		// window.resizeTo(X,Y) resizes the window so that it's outerHeight == Y. On mac and windows,
 		// innerHeight and outerHeight are the same. On linux, the outerHeight > innerHeight, perhaps
 		// outerHeight there includes chrome, borders, etc. This difference is accounted for below, so that the dialog
@@ -1124,24 +1173,39 @@ class ListLayout extends Layout {
 		if (Zotero.isLinux) {
 			autoHeight += (window.outerHeight - window.innerHeight);
 		}
-		let minHeight = bubbleInputHeight + bottomHeight;
-		doc.documentElement.style.minHeight = `${minHeight}px`;
+		let minHeight = bubbleInputHeight + citationPreview + bottomHeight;
 
 		// cap window height at the height last set by the user
 		autoHeight = Math.min(autoHeight, lastSetWindowHeight);
 		let targetWidth = Math.min(window.innerWidth, this.MIN_WIDTH);
+
+		// Skip the resize animation if the window is already at the target size.
+		let needsResize = Math.round(window.innerWidth) !== Math.round(targetWidth) || Math.round(window.innerHeight) !== Math.round(autoHeight);
+		if (!needsResize) {
+			doc.documentElement.style.minHeight = `${minHeight}px`;
+			document.documentElement.setAttribute("dialog-layout", this.type);
+			return;
+		}
+
+		// Clear the min-height floor so the window can animate freely (including shrinking);
+		// it's restored to the new value in onComplete below.
+		doc.documentElement.style.removeProperty("min-height");
 		ignoreWindowResizing = true;
 		
-		// Timeout is required likely to allow minHeight update to settle
-		setTimeout(() => {
-			Helpers.smoothResize(targetWidth, autoHeight, {
-				onComplete: () => {
-					_id("bubble-input").refocusInput();
-					document.documentElement.setAttribute("dialog-layout", this.type);
-					ignoreWindowResizing = false;
-				},
-			});
-		}, 10);
+		// Timeout is required likely to allow the min-height removal to settle
+		await new Promise((resolve) => {
+			setTimeout(() => {
+				Helpers.smoothResize(targetWidth, autoHeight, {
+					onComplete: () => {
+						_id("bubble-input").refocusInput();
+						doc.documentElement.style.minHeight = `${minHeight}px`;
+						document.documentElement.setAttribute("dialog-layout", this.type);
+						ignoreWindowResizing = false;
+						resolve();
+					},
+				});
+			}, 10);
+		});
 	}
 
 	_markRoundedCorners() {
@@ -1181,6 +1245,7 @@ class ListLayout extends Layout {
 const IOManager = {
 	sectionExpandedStatus: {},
 	_skipInputAcceptOnEnterUntil: 0,
+	_timesItemsAdded: 0,
 
 	// most essential IO functionality that is added immediately on load
 	preInit() {
@@ -1224,6 +1289,7 @@ const IOManager = {
 		});
 
 		_id("includeComments").addEventListener("click", () => this._toggleIncludeComments());
+		_id("display-preview-button").addEventListener("click", () => this._toggleDisplayPreview());
 
 		// open settings popup on btn click
 		_id("settings-button").addEventListener("click", event => _id("settings-popup").openPopup(event.target, "before_end"));
@@ -1267,10 +1333,12 @@ const IOManager = {
 		let isInitialModeSetting = currentLayout === undefined;
 		currentLayout = newMode === "library" ? libraryLayout : listLayout;
 
+		// Reflect visibility of the citation preview after the layout switch.
+		CitationPreview.update();
+
 		// Wait for window resize before running search to avoid stutter with large libraries
 		if (!isInitialModeSetting) {
 			await currentLayout.resizeWindow();
-			await Helpers.smoothResizingPromise;
 		}
 
 		// do not show View menubar with itemTree-specific options in list mode
@@ -1317,6 +1385,7 @@ const IOManager = {
 			};
 		}), DIALOG_STATE.type);
 		_id("accept-button").disabled = !CitationDataManager.items.length;
+		CitationPreview.update();
 	},
 
 	async addItemsToCitation(items, { noInputRefocus, index } = { index: null }) {
@@ -1373,11 +1442,21 @@ const IOManager = {
 			// Do not record just-added bubbles if locator is already provided
 			this._clearJustAddedBubbles();
 		}
-		else {
-			// If no locator is provided, record which bubbles were just added.
-			// If a locator is typed next, these bubbles will receive it.
+		else if (bubbleItems.length == 1) {
+			// If no locator is provided, record the just-added bubble.
+			// If a locator is typed next, that bubble will receive it.
 			this._justAddedBubbles = bubbleItems;
+			// Only show the placeholder guidance on the first add -- after
+			// that, the user presumably knows about the shortcut
+			_id("bubble-input").showJustAddedPlaceholder = DIALOG_STATE.isCitingItems()
+				&& this._timesItemsAdded < 1;
 		}
+		else {
+			// A multi-item add doesn't enter locator-typing mode, so typed text
+			// starts a new search instead of setting a page number on every added item
+			this._clearJustAddedBubbles();
+		}
+		this._timesItemsAdded++;
 		await CitationDataManager.addItems({ bubbleItems, index });
 		// Refresh the itemTree if in library mode
 		if (currentLayout.type == "library") {
@@ -1394,6 +1473,9 @@ const IOManager = {
 			doc.querySelector("guidance-panel").setAttribute("x", Math.round(width / 2));
 			IOManager.showFirstRunDialog();
 		}
+		// Render the preview before refreshing the list so resizeWindow measures its real height;
+		// otherwise the debounced render lands after the resize and overflows the window.
+		await CitationPreview.render();
 		// Always refresh items list to make sure the opened and selected items are up to date
 		await currentLayout.refreshItemsList();
 		if (!noInputRefocus) {
@@ -1663,6 +1745,9 @@ const IOManager = {
 				input.value = "";
 				input.dispatchEvent(new Event('input', { bubbles: true }));
 				this.updateBubbleInput();
+				// The typed-locator shortcut has been used, so stop showing the tip
+				// about it in the item details popup
+				Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 				return;
 			}
 		}
@@ -1703,9 +1788,14 @@ const IOManager = {
 
 	_deleteItem(dialogReferenceID) {
 		CitationDataManager.deleteItem({ dialogReferenceID });
+		// If the citation is emptied, show the placeholder guidance again on the next add
+		if (!CitationDataManager.items.length) {
+			this._timesItemsAdded = 0;
+		}
 		if (currentLayout.type == "library") {
 			libraryLayout.refreshItemsView();
 		}
+		this._clearJustAddedBubbles();
 		this.updateBubbleInput();
 		// Always refresh items list to make sure the opened and selected items are up to date
 		currentLayout.refreshItemsList();
@@ -1803,9 +1893,14 @@ const IOManager = {
 			bubbleItem.label = "page";
 		}
 		IOManager._hideLoadingSpinner();
-		// Clear the input and update bubbles
+		// Clear the input and update bubbles. The placeholder stays, since both of its
+		// suggestions still apply -- typed digits keep appending to the locator, and
+		// any other input starts a search
 		input.value = "";
 		IOManager.updateBubbleInput();
+		// The typed-locator shortcut has been used, so stop showing the tip
+		// about it in the item details popup
+		Zotero.Prefs.set("integration.citationDialogShowLocatorTip", false);
 		// Disable Enter on input from accepting the dialog for the next 500ms;
 		// If one intends to confirmed the numeric locator by pressing Enter (via _handleInputEnter),
 		// we ensure that the Enter keypress won't happen right after when the locator is added to
@@ -1819,11 +1914,18 @@ const IOManager = {
 	// and Enter is presses, just-added bubbles get that locator.
 	_clearJustAddedBubbles(event) {
 		if (!this._justAddedBubbles) return;
-		// on keydown, only proceed if it's an arrow key
-		let navigationKeys = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
-		if (event && event.type == "keydown" && !navigationKeys.includes(event.key)) return;
+		// On keydown, only proceed for left/right arrows, which move to another
+		// reference (e.g. to explicitly search for a year). Up/down arrows just move
+		// the list selection while focus remains in the input, so locator entry
+		// stays active.
+		if (event && event.type == "keydown" && !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+		// On focusout, only proceed if focus moved elsewhere within the dialog. When
+		// the window itself loses focus (e.g., on Cmd-Tab to another app to check a
+		// page number), the input remains focused and locator entry stays active.
+		if (event && event.type == "focusout" && !doc.hasFocus()) return;
 		// clear just added bubbles and update bubble input to reflect that
 		this._justAddedBubbles = null;
+		_id("bubble-input").showJustAddedPlaceholder = false;
 		this.updateBubbleInput();
 	},
 
@@ -1860,6 +1962,31 @@ const IOManager = {
 	_toggleIncludeComments() {
 		let includeComments = _id("includeComments").checked;
 		Zotero.Prefs.set("integration.annotationDialogIncludeComments", includeComments);
+	},
+
+	async _toggleDisplayPreview() {
+		let newShown = !Zotero.Prefs.get("integration.citationPreviewShown");
+		Zotero.Prefs.set("integration.citationPreviewShown", newShown);
+		// Reflect the pressed state right away, since revealing the preview is deferred until resize
+		_id("display-preview-button").setAttribute("aria-pressed", newShown ? "true" : "false");
+		let preview = _id("citation-preview");
+		if (newShown) {
+			// Lay the preview out off-flow via .measuring (real height, but invisible and not
+			// pushing the list around) so resizeWindow grows the window to fit it; then drop it
+			// into view once there's room, avoiding a momentary squeeze of the list.
+			await CitationPreview.render();
+			preview.classList.add("measuring");
+			preview.hidden = false;
+			await currentLayout.resizeWindow();
+			preview.classList.remove("measuring");
+			CitationPreview.update();
+		}
+		else {
+			// Hide first, then shrink -- freeing the space before the window contracts looks clean.
+			preview.classList.remove("measuring");
+			CitationPreview.update();
+			currentLayout.resizeWindow();
+		}
 	},
 
 	// Return focus to where it was before click moved focus.
@@ -1937,6 +2064,64 @@ const IOManager = {
 			IOManager._focusBeforePanelShow = null;
 		});
 	}
+};
+
+// Manages the citation preview shown in the bottom area of both layouts.
+const CitationPreview = {
+	// Lazily create _renderDebounced on first use
+	get _renderDebounced() {
+		delete CitationPreview._renderDebounced;
+		CitationPreview._renderDebounced = Zotero.Utilities.debounce(() => CitationPreview.render(), 250);
+		return CitationPreview._renderDebounced;
+	},
+
+	// The rendered text is kept in sync with the cited items even while the preview is hidden,
+	// so it can be measured and revealed instantly when toggled on.
+	update() {
+		let prefShown = Zotero.Prefs.get("integration.citationPreviewShown");
+		let isCitingItems = DIALOG_STATE.isCitingItems();
+		let hasPreview = !!io.preview;
+		let isEmpty = !CitationDataManager.items.length;
+		// The preview pane appears when citing at least one item and the caller has
+		// provided a preview function
+		let isRelevant = isCitingItems && hasPreview && !isEmpty;
+		_id("citation-preview").hidden = !(isRelevant && prefShown);
+		if (isEmpty) {
+			_id("citation-preview-content").innerHTML = "";
+			_id("citation-preview-error").hidden = true;
+		}
+		// The toggle button is hidden when there's no preview and is restored to its last
+		// state when the preview pane appears
+		let toggleBtn = _id("display-preview-button");
+		toggleBtn.hidden = !isRelevant;
+		toggleBtn.setAttribute("aria-pressed", prefShown ? "true" : "false");
+		if (!isEmpty) {
+			CitationPreview._renderDebounced();
+		}
+	},
+
+	async render() {
+		if (!DIALOG_STATE.isCitingItems()) return;
+		if (!CitationDataManager.items.length) return;
+		if (!io.preview) return;
+
+		CitationDataManager.updateCitationObject();
+		let html;
+		try {
+			html = await io.preview("html");
+		}
+		catch (e) {
+			// A preview failure usually means the citation itself won't process, but that
+			// error belongs to the insertion step -- just flag the preview as unavailable
+			Zotero.logError(e);
+		}
+		// Re-check after the await in case the user cleared items
+		if (!CitationDataManager.items.length) return;
+		let errored = html === undefined;
+		_id("citation-preview-content").hidden = errored;
+		_id("citation-preview-error").hidden = !errored;
+		_id("citation-preview-content").innerHTML = errored ? "" : html;
+	},
 };
 
 // Representation of a single entry in the citation.
@@ -2125,7 +2310,16 @@ const CitationDataManager = {
 		if (!ioIsReady) return;
 		Zotero.debug("Citation Dialog: sorting items");
 		this.updateCitationObject();
-		await io.sort();
+		try {
+			await io.sort();
+		}
+		catch (e) {
+			// Sorting runs the citation through the processor, so it can fail like the
+			// preview does. Keep the current order -- if the citation can't be processed,
+			// the error will surface when it's inserted into the document.
+			Zotero.logError(e);
+			return;
+		}
 		// sync the order of this.items with io.citation.sortedItems
 		let sortedIOItems = io.citation.sortedItems.map(entry => entry[1]);
 		let sortedItems = sortedIOItems.map((sortedItem) => {

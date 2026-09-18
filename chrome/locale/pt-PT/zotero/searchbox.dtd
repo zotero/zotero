@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Procurar na biblioteca:">
-
 <!ENTITY zotero.search.joinMode.prefix "Fazer corresponder">
 <!ENTITY zotero.search.joinMode.any "qualquer dos">
 <!ENTITY zotero.search.joinMode.all "todos os">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "dias">
 <!ENTITY zotero.search.date.units.months "meses">
 <!ENTITY zotero.search.date.units.years "anos">
-
-<!ENTITY zotero.search.search "Procurar">
-<!ENTITY zotero.search.clear "Limpar">
-<!ENTITY zotero.search.saveSearch "Guardar a Procura">

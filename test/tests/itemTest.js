@@ -1067,6 +1067,30 @@ describe("Zotero.Item", function () {
 				attachment.getFilePath()
 			);
 		});
+		
+		it("should return false for a stored file with a directory path instead of a filename", async function () {
+			var item = await importTextAttachment();
+			// Corrupt paths from a third-party tool that bypassed the setter
+			for (let path of ["storage:/", "storage:D:\\foo\\bar\\", "storage:foo/bar.pdf"]) {
+				item._attachmentPath = path;
+				assert.isFalse(item.getFilePath(), path);
+				assert.isFalse(await item.getFilePathAsync(), path);
+			}
+		});
+		
+		it("should return a path for a stored file with a backslash in the filename", async function () {
+			// Backslashes are only valid in filenames on Linux/macOS
+			if (Zotero.isWin) this.skip();
+			
+			var item = await importTextAttachment();
+			var storageDir = Zotero.getStorageDirectory().path;
+			item._attachmentPath = "storage:foo\\bar.txt";
+			
+			assert.equal(
+				item.getFilePath(),
+				OS.Path.join(storageDir, item.key, "foo\\bar.txt")
+			);
+		});
 	});
 	
 	
@@ -1158,7 +1182,37 @@ describe("Zotero.Item", function () {
 			
 			assert.equal(attachment.attachmentFilename, filename);
 		});
-		
+
+		it("should reject a filename containing a directory path", async function () {
+			var item = await createDataObject('item');
+
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.parentID = item.id;
+			assert.throws(() => attachment.attachmentFilename = "D:/Foo/Bar/test.pdf", /directory path/);
+			assert.throws(() => attachment.attachmentFilename = "D:\\Foo\\Bar\\test.pdf", /directory path/);
+			assert.throws(() => attachment.attachmentFilename = "\\\\server\\share\\test.pdf", /directory path/);
+		});
+
+		it("should allow a filename containing a bare backslash", async function () {
+			var item = await createDataObject('item');
+
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			attachment.parentID = item.id;
+			attachment.attachmentFilename = "foo\\bar.pdf";
+			assert.equal(attachment.attachmentFilename, "foo\\bar.pdf");
+		});
+
+		it("should return the basename for a stored file with a corrupt non-'storage:' path", function () {
+			var attachment = new Zotero.Item("attachment");
+			attachment.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+			// Legacy corrupt data that bypassed the setter (an old relative descriptor with no
+			// 'storage:' prefix); the getter must not throw via PathUtils
+			attachment._attachmentPath = "../../Foo Bar/Documents/~STUFF/paper .pdf";
+			assert.equal(attachment.attachmentFilename, "paper .pdf");
+		});
+
 		it("should get a filename for a base-dir-relative file", function () {
 			var dir = getTestDataDirectory().path;
 			Zotero.Prefs.set('saveRelativeAttachmentPath', true)
@@ -2155,7 +2209,25 @@ describe("Zotero.Item", function () {
 			// "second" -> "third", old value is "second", and we don't notify about "extra" because it's not changed this time
 			assert.deepPropertyVal(extraData[ids[0]], 'changed', { title: 'second' });
 		});
-		
+
+		it("should report the previous itemType in notifier extraData on consecutive type changes", async function () {
+			var item = await createDataObject('item', { itemType: 'book' });
+
+			var promise = waitForNotifierEvent('modify', 'item');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			await item.saveTx();
+			var { ids, extraData } = await promise;
+			assert.propertyVal(extraData[ids[0]].changed, 'itemType', 'book');
+
+			promise = waitForNotifierEvent('modify', 'item');
+			item.setType(Zotero.ItemTypes.getID('case'));
+			await item.saveTx();
+			({ ids, extraData } = await promise);
+			// Without clearing the 'itemType' alias from _previousData after the prior save,
+			// this would report the stale 'book' instead of 'journalArticle' (#5964)
+			assert.propertyVal(extraData[ids[0]].changed, 'itemType', 'journalArticle');
+		});
+
 		// 'deleted' and 'tags' use a different, newer mechanism for marking changes
 		it("should include changed 'deleted' value in notifier extraData", async function () {
 			var item = await createDataObject('item');

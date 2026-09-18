@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffix
 integration-citationDialog-details-prefix = Präfix
 integration-citationDialog-details-suppressAuthor = Autor auslassen
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Kommentare miteinbeziehen
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -40,8 +41,8 @@ integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Zitationseinstellungen
 integration-citationDialog-lib-message-citation =
     { $search ->
-        [true] No selected, open, or cited items match the current search
-       *[other] No selected or open items
+        [true] Kein ausgewählter, geöffneter oder zitierter Eintrag entspricht der aktuellen Suche
+       *[other] Keine Einträge ausgewählt oder geöffnet
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
@@ -50,10 +51,14 @@ integration-citationDialog-lib-message-add-note =
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
-        [true] No items with annotations match the current search
-       *[other] No selected or open items with annotations
+        [true] Kein Eintrag mit Anmerkungen entspricht der aktuellen Suche
+       *[other] Kein Eintrag mit Anmerkungen ausgewählt oder geöffnet
     }
 integration-citationDialog-settings-keepSorted = Quellen sortiert lassen
+integration-citationDialog-preview-empty = Vorschau
+integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-btn-displayPreview =
+    .title = Display citation preview
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliothek
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Drücken Sie die Tabulatortaste, um Elemente auszuwählen, die Sie zu diesem Zitat hinzufügen möchten. Drücken Sie die Escape-Taste, um die Änderungen zu verwerfen und das Dialogfeld zu schließen.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -101,7 +111,7 @@ integration-citationDialog-bubble-empty = (Kein Titel)
 integration-citationDialog-add-to-citation = Zur Zitation hinzufügen
 integration-citationDialog-annotations-filter =
     .placeholder = Anmerkungen filtern
-integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
+integration-citationDialog-annotations-empty = Wählen Sie ein Element, einen Anhang oder eine Anmerkung aus, um die Details der Anmerkung anzuzeigen
 integration-prefs-displayAs-label = Literaturangaben anzeigen als:
 integration-prefs-footnotes =
     .label = Fußnoten
@@ -131,7 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = An den Dokumenten
 integration-warning-discard-changes = Änderungen verwerfen
 integration-warning-command-is-running = Ein Befehl der Integration des Textverarbeitungsprogramms wird bereits ausgeführt.
 first-run-guidance-citationDialog =
-    Geben Sie einen Titel, einen Autor und/oder ein Jahr ein, um nach einer Referenz zu suchen.
-    Nachdem Sie Ihre Auswahl getroffen haben, klicken Sie auf die Blase oder wählen Sie sie über die Tastatur aus und drücken Sie ↓/Leertaste, um Zitieroptionen wie Seitenzahl, Präfix und Suffix anzuzeigen.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
-    Sie können auch eine Seitenzahl oder einen anderen Ortungsbegriff hinzufügen, indem Sie diesen in Ihre Suchbegriffe einfügen (z. B. „Geschichte { $locator }“) oder indem Sie ihn nach der Sprechblase eingeben und die Taste { return-or-enter } drücken.
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

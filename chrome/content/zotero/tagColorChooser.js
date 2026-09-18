@@ -76,7 +76,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 				colorPicker.color = color;
 				dialog.buttons = "cancel,accept";
 			}
-			colorPicker.setAttribute('disabled', 'false');
+			colorPicker.removeAttribute('disabled');
 			
 			var numColors = tagColors.size;
 			var max = colorData ? numColors : numColors + 1;
@@ -86,7 +86,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 				tagPosition.appendItem(i, i-1);
 			}
 			if (numColors) {
-				tagPosition.setAttribute('disabled', 'false');
+				tagPosition.removeAttribute('disabled');
 				if (colorData) {
 					tagPosition.selectedIndex = colorData.position;
 				}

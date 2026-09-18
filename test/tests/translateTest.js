@@ -1311,12 +1311,6 @@ describe("Zotero.Translate", function () {
 					collections: [importCollection.id]
 				});
 				
-				// When exporting a library, the top-most collection should be included. When
-				// exporting a collection, the selected collection isn't included, so remove it.
-				if (mode == 'collection') {
-					collectionNames.shift();
-				}
-				
 				var collections = importCollection.getChildCollections();
 				assert.lengthOf(collections, 1, mode);
 				assert.equal(collections[0].name, collectionNames.shift(), mode)
@@ -1589,6 +1583,26 @@ describe("Zotero.Translate", function () {
 				assert.ok(collection.hasItem(translation.newItems[0].id));
 			});
 
+		});
+		describe("#_getURLObjectsFromResolvers()", function () {
+			it("should run function resolvers and pass through plain objects", async function () {
+				var itemSaver = new Zotero.Translate.ItemSaver({
+					libraryID: Zotero.Libraries.userLibraryID,
+					attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE
+				});
+				var fromFunction = { url: 'https://example.com/a.pdf', accessMethod: 'oa' };
+				var fromObject = {
+					pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC1234/',
+					accessMethod: 'oa'
+				};
+
+				var urlObjects = await itemSaver._getURLObjectsFromResolvers([
+					async () => [fromFunction],
+					fromObject
+				]);
+
+				assert.deepEqual(urlObjects, [fromFunction, fromObject]);
+			});
 		});
 		describe('#saveItems', function () {
 			it("should deproxify item and attachment urls when proxy provided", async function () {
@@ -2408,6 +2422,28 @@ describe("Zotero.Translate.ItemGetter", function () {
 			getter.setCollection(col);
 			
 			assert.equal(getter.numItems, 2);
+		});
+	});
+	
+	describe("#setCollections()", function () {
+		it("should not export a collection separately from a given ancestor", async function () {
+			var collection = await createDataObject('collection');
+			var subcollection = await createDataObject('collection', { parentID: collection.id });
+			await createDataObject('item', { collections: [collection.id] });
+			await createDataObject('item', { collections: [subcollection.id] });
+			
+			let getter = new Zotero.Translate.ItemGetter();
+			getter.setCollections([collection, subcollection], true);
+			
+			assert.equal(getter.numItems, 2);
+			
+			var collections = [];
+			var returnedCollection;
+			while (returnedCollection = getter.nextCollection()) {
+				collections.push(returnedCollection);
+			}
+			assert.lengthOf(collections, 1);
+			assert.equal(collections[0].id, collection.id);
 		});
 	});
 	

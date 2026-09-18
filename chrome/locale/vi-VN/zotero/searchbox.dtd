@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Tên:">
 
-<!ENTITY zotero.search.searchInLibrary "Tìm trong thư viện:">
-
 <!ENTITY zotero.search.joinMode.prefix "Tìm các biểu ghi thỏa mãn">
 <!ENTITY zotero.search.joinMode.any "một trong">
 <!ENTITY zotero.search.joinMode.all "tất cả">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "ngày">
 <!ENTITY zotero.search.date.units.months "tháng">
 <!ENTITY zotero.search.date.units.years "năm">
-
-<!ENTITY zotero.search.search "Thực hiện Tìm kiếm">
-<!ENTITY zotero.search.clear "Xóa">
-<!ENTITY zotero.search.saveSearch "Ghi nhớ Tìm kiếm Định sẵn">

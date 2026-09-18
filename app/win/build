@@ -30,8 +30,8 @@ else
 	echo "Unknown architecture $arch" >&2
 	exit 1
 fi
-rustup target add $rust_target-pc-windows-msvc
 rustup default $RUST_VERSION
+rustup target add $rust_target-pc-windows-msvc
 
 cp "$SCRIPT_DIR/mozconfig" "$gecko_path"
 

@@ -4079,8 +4079,11 @@ CSL.Engine.prototype.setStyleAttributes = function () {
     attributes = this.cslXml.attributes(this.cslXml.dataObj);
     for (attrname in attributes) {
         if (attributes.hasOwnProperty(attrname)) {
-            // attr = attributes[key];
-            CSL.Attributes[attrname].call(dummy, this, attributes[attrname]);
+            if (CSL.Attributes[attrname]) {
+                CSL.Attributes[attrname].call(dummy, this, attributes[attrname]);
+            } else {
+                CSL.debug("warning: undefined attribute \"" + attrname + "\" in style");
+            }
         }
     }
 };
@@ -6981,9 +6984,13 @@ CSL.Engine.prototype.previewCitationCluster = function (citation, citationsPre, 
 	if (citation.citationID) {
 		delete citation.citationID;
 	}
-    var ret = this.processCitationCluster(citation, citationsPre, citationsPost, CSL.PREVIEW);
-
-    this.setOutputFormat(oldMode);
+    // Restore the output format even if the preview fails
+    var ret;
+    try {
+        ret = this.processCitationCluster(citation, citationsPre, citationsPost, CSL.PREVIEW);
+    } finally {
+        this.setOutputFormat(oldMode);
+    }
     return ret[1];
 };
 
@@ -7699,53 +7706,55 @@ CSL.Engine.prototype.processCitationCluster = function (citation, citationsPre, 
             ret = this.process_CitationCluster.call(this, citation.sortedItems, citation);
         } catch (e) {
             CSL.error("Error running CSL processor for preview: "+e);
-        }
-            
-        //SNIP-START
-        if (this.debug) {
-            CSL.debug("****** end run processor *********");
-            CSL.debug("****** start state restore *********");
-        }
-        //SNIP-END
-        // Wind out anything related to new items added for the preview.
-        // This means (1) names, (2) disambig state for affected items,
-        // (3) keys registered in the ambigs pool arrays, and (4) registry
-        // items.
-        //
+        } finally {
+            // Restore state even if an error occurred above
 
-        // restore sliced citations
-        this.registry.citationreg.citationByIndex = oldCitationList;
-        this.registry.citationreg.citationById = {};
-        for (var i = 0, ilen = oldCitationList.length; i < ilen; i += 1) {
-            this.registry.citationreg.citationById[oldCitationList[i].citationID] = oldCitationList[i];
-        }
-
-        //SNIP-START
-        if (this.debug) {
-            CSL.debug("****** start final update *********");
-        }
-        //SNIP-END
-        var oldItemIds = [];
-        for (var i = 0, ilen = oldItemList.length; i < ilen; i += 1) {
-            oldItemIds.push("" + oldItemList[i].id);
-        }
-        this.updateItems(oldItemIds, null, null, true);
-        //SNIP-START
-        if (this.debug) {
-            CSL.debug("****** end final update *********");
-        }
-        //SNIP-END
-        // Roll back disambig states
-        for (var key in oldAmbigs) {
-            if (oldAmbigs.hasOwnProperty(key)) {
-                this.registry.registry[key].disambig = oldAmbigs[key];
+            //SNIP-START
+            if (this.debug) {
+                CSL.debug("****** end run processor *********");
+                CSL.debug("****** start state restore *********");
             }
+            //SNIP-END
+            // Wind out anything related to new items added for the preview.
+            // This means (1) names, (2) disambig state for affected items,
+            // (3) keys registered in the ambigs pool arrays, and (4) registry
+            // items.
+            //
+
+            // restore sliced citations
+            this.registry.citationreg.citationByIndex = oldCitationList;
+            this.registry.citationreg.citationById = {};
+            for (var i = 0, ilen = oldCitationList.length; i < ilen; i += 1) {
+                this.registry.citationreg.citationById[oldCitationList[i].citationID] = oldCitationList[i];
+            }
+
+            //SNIP-START
+            if (this.debug) {
+                CSL.debug("****** start final update *********");
+            }
+            //SNIP-END
+            var oldItemIds = [];
+            for (var i = 0, ilen = oldItemList.length; i < ilen; i += 1) {
+                oldItemIds.push("" + oldItemList[i].id);
+            }
+            this.updateItems(oldItemIds, null, null, true);
+            //SNIP-START
+            if (this.debug) {
+                CSL.debug("****** end final update *********");
+            }
+            //SNIP-END
+            // Roll back disambig states
+            for (var key in oldAmbigs) {
+                if (oldAmbigs.hasOwnProperty(key)) {
+                    this.registry.registry[key].disambig = oldAmbigs[key];
+                }
+            }
+            //SNIP-START
+            if (this.debug) {
+                CSL.debug("****** end state restore *********");
+            }
+            //SNIP-END
         }
-        //SNIP-START
-        if (this.debug) {
-            CSL.debug("****** end state restore *********");
-        }
-        //SNIP-END
     } else {
         // Rerun cites that have moved across citations or had a change
         // in their number of subsequent references, so that disambiguate

@@ -131,6 +131,7 @@ function ZoteroLoader({
 		clearInterval: win.clearInterval,
 		requestAnimationFrame: win.requestAnimationFrame,
 		cancelAnimationFrame: win.requestAnimationFrame,
+		ResizeObserver: win.ResizeObserver,
 	};
 	for (const name in injectedGlobals) {
 		this.loader.globals[name] = injectedGlobals[name];

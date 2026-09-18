@@ -66,7 +66,7 @@ import { getCSSIcon } from 'components/icons';
 		}
 
 		get _renderDependencies() {
-			return [...super._renderDependencies, this.collectionTreeRow?.id];
+			return [...super._renderDependencies, this.collectionTreeRows?.map(o => o.id).join(',')];
 		}
 
 		init() {
@@ -148,14 +148,17 @@ import { getCSSIcon } from 'components/icons';
 						Zotero.getString('pane.items.removeFromOther', [obj.name])
 					)) {
 						contextItem.removeFromCollection(obj.id);
-						contextItem.saveTx();
+						contextItem.saveTx({
+							undoAction: 'undo-action-remove-from-collection',
+							undoActionArgs: { count: 1 }
+						});
 					}
 				});
 				row.append(remove);
 			}
 			
 			let isCurrent = this.tabType === 'library'
-				&& this.collectionTreeRow?.id == obj.treeViewID;
+				&& this.collectionTreeRows.map(o => o.id).includes(obj.treeViewID);
 			box.classList.toggle('current', isCurrent);
 
 			// Disable clicky if this is a context row or we're already in the library/collection it points to

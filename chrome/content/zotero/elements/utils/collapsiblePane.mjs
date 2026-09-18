@@ -30,11 +30,11 @@
  * @returns {boolean}
  */
 export function isPaneCollapsed(pane) {
-	let collapsibleParent = pane.closest('splitter:not([hidden="true"]) + *');
+	let collapsibleParent = pane.closest('splitter:not([hidden]) + *');
 	if (!collapsibleParent) {
 		return false;
 	}
-	return collapsibleParent.getAttribute('collapsed') === 'true';
+	return collapsibleParent.hasAttribute('collapsed');
 }
 
 /**
@@ -44,7 +44,7 @@ export function isPaneCollapsed(pane) {
  * @param {boolean} collapsed
  */
 export function setPaneCollapsed(pane, collapsed) {
-	let collapsibleParent = pane.closest('splitter:not([hidden="true"]) + *');
+	let collapsibleParent = pane.closest('splitter:not([hidden]) + *');
 	if (!collapsibleParent) {
 		return;
 	}

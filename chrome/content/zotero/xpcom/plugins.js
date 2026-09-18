@@ -34,7 +34,7 @@ Zotero.Plugins = new function () {
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
 		aomStartup: [
 			"@mozilla.org/addons/addon-manager-startup;1",
-			"amIAddonManagerStartup",
+			Ci.amIAddonManagerStartup,
 		],
 	});
 	var scopes = new Map();
@@ -332,6 +332,151 @@ Zotero.Plugins = new function () {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.name;
 	};
+
+
+	/**
+	 * Identify the plugin, if any, whose code appears in an error's stack
+	 *
+	 * The topmost plugin frame wins, so an error thrown by Zotero code that a plugin called
+	 * is attributed to the plugin that called it.
+	 *
+	 * @param {Error|String} error - An error or a stack string
+	 * @return {Promise<Object|false>} - { id, name }, or false if no plugin frame was found
+	 */
+	this.getPluginFromError = async function (error) {
+		try {
+			var stack = typeof error == 'string' ? error : error?.stack;
+			if (!stack) {
+				return false;
+			}
+			var { addons } = await AddonManager.getActiveAddons(["extension"]);
+			if (!addons?.length) {
+				return false;
+			}
+			var roots = addons.map(addon => [addon, _archiveOrDirURI(addon.getResourceURI().spec)]);
+			for (let line of stack.split('\n')) {
+				let uri = _stackFrameURI(line);
+				if (!uri) {
+					continue;
+				}
+				uri = _resolveChromeOrResourceURI(uri);
+				if (!uri) {
+					continue;
+				}
+				uri = _archiveOrDirURI(uri);
+				for (let [addon, root] of roots) {
+					if (root && uri.startsWith(root)) {
+						return { id: addon.id, name: addon.name };
+					}
+				}
+			}
+			return false;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return false;
+		}
+	};
+
+
+	var warnedRemovedAPICalls = new Set();
+
+	/**
+	 * Warn about a call to an API that was removed, naming the plugin that called it
+	 *
+	 * Resolving the plugin is async, so the warning is logged after this returns.
+	 *
+	 * @param {String} name - The removed API, e.g. "CollectionTree#getSelectedSearch()"
+	 * @param {String} replacement - What to use instead, e.g. "getSelectedSearches()"
+	 */
+	this.warnRemovedAPICall = function (name, replacement) {
+		let stack = new Error().stack;
+		// Warn once per call site, since a plugin may call these repeatedly (e.g., on every
+		// item list load). The frames above the caller are this method and the removed
+		// method itself, which are the same for every caller.
+		let callerFrame = stack.split("\n").find(line => !_isZoteroStackFrame(line));
+		let key = name + "\n" + (callerFrame || "");
+		if (warnedRemovedAPICalls.has(key)) {
+			return;
+		}
+		warnedRemovedAPICalls.add(key);
+		this.getPluginFromError(stack)
+			.then((plugin) => {
+				let caller = plugin ? `${plugin.name} (${plugin.id})` : "Something";
+				Zotero.warn(`${caller} called ${name}, which was removed -- use ${replacement}`);
+			})
+			.catch(e => Zotero.logError(e));
+	};
+
+
+	/**
+	 * Resolve a chrome:// or resource:// URI to the file or JAR URI it points at, since
+	 * plugins can register packages and substitutions under both
+	 *
+	 * @param {String} uri
+	 * @return {String} - The resolved URI, or an empty string if it can't be resolved
+	 */
+	function _resolveChromeOrResourceURI(uri) {
+		try {
+			if (uri.startsWith('chrome://')) {
+				return Cc["@mozilla.org/chrome/chrome-registry;1"]
+					.getService(Ci.nsIChromeRegistry)
+					.convertChromeURL(Services.io.newURI(uri))
+					.spec;
+			}
+			if (uri.startsWith('resource://')) {
+				return Services.io.getProtocolHandler("resource")
+					.QueryInterface(Ci.nsIResProtocolHandler)
+					.resolveURI(Services.io.newURI(uri));
+			}
+		}
+		catch {
+			return '';
+		}
+		return uri;
+	}
+
+
+	/**
+	 * Reduce a URI to something comparable between plugin root URIs and stack frames:
+	 * the containing archive for a jar: URI (which points inside an XPI), or the URI itself
+	 * for a plugin installed unpacked
+	 *
+	 * @param {String} uri
+	 * @return {String}
+	 */
+	function _archiveOrDirURI(uri) {
+		if (uri.startsWith('jar:')) {
+			let pos = uri.indexOf('!/');
+			return pos == -1 ? uri.substring(4) : uri.substring(4, pos);
+		}
+		return uri;
+	}
+
+
+	/**
+	 * @param {String} line - A line from an error stack
+	 * @return {Boolean} - True if the frame is Zotero's own code
+	 */
+	function _isZoteroStackFrame(line) {
+		let uri = _stackFrameURI(line);
+		// Trailing slashes matter: a plugin package can start with our own name, as
+		// chrome://zoterostyle/ does
+		return !uri
+			|| uri.startsWith("chrome://zotero/")
+			|| uri.startsWith("resource://zotero/")
+			|| uri.startsWith("resource://gre/");
+	}
+
+
+	/**
+	 * @param {String} line - A line from an error stack, "name@uri:line:column"
+	 * @return {String} - The URI, without the line and column
+	 */
+	function _stackFrameURI(line) {
+		// A function name can't contain "@", while a URI can (plugin IDs are email-like)
+		return line.slice(line.indexOf('@') + 1).replace(/:\d+(?::\d+)?$/, '');
+	}
 
 
 	this.getAllPluginIDs = async function () {

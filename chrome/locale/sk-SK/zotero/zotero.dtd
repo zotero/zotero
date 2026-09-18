@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Odstrániť záznam...">
 <!ENTITY zotero.toolbar.newGroup "Nová skupina...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nová sub-kolekcia...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nové uložené hľadanie...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Vysypať kôš">
 <!ENTITY zotero.toolbar.tagSelector.label "Ukázať/skryť výber značiek">
 <!ENTITY zotero.toolbar.actions.label "Akcie">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Možnosti...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Podpora a dokumentácia">
 <!ENTITY zotero.toolbar.about.label "O Zotere">
-<!ENTITY zotero.toolbar.advancedSearch "Pokročilé vyhľadávanie">
 <!ENTITY zotero.toolbar.openURL.label "Nájsť">
 <!ENTITY zotero.toolbar.openURL.tooltip "Nájdi v lokálnej knižnici">
 

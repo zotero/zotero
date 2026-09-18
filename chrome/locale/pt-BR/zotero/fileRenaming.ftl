@@ -40,6 +40,6 @@ file-renaming-preview-window =
     .title = Renomear arquivos
 file-renaming-preview-window-loading = Carregando...
 file-renaming-preview-window-intro = { -app-name } irá renomear oa seguintes arquivos na sua biblioteca para corresponder aos seus itens pai:
-file-renaming-preview-window-intro-library = { -app-name } will rename the following files in "{ $library }" to match their parent items:
+file-renaming-preview-window-intro-library = { -app-name } irá renomear os seguintes arquivos em "{ $library }" para corresponder com seus itens pais:
 file-renaming-preview-window-renaming = Renomeando...
 file-renaming-preview-window-no-files = Todos os nomes de arquivo já correspondem aos itens pai. Nenhuma mudança é necessária.

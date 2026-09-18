@@ -23,8 +23,14 @@
     ***** END LICENSE BLOCK *****
 */
 
+(function () {
 var { InlineSpellChecker } = ChromeUtils.importESModule("resource://gre/modules/InlineSpellChecker.sys.mjs");
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+
+let lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	generateHTMLFromTemplate: "chrome://zotero/content/modules/templates.mjs",
+});
 
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
@@ -44,9 +50,14 @@ const DOWNLOADED_IMAGE_TYPE = [
 	'image/png'
 ];
 
+// Tries at saving a note when the database is busy, each waiting out the transaction timeout
+const MAX_SAVE_ATTEMPTS = 3;
+
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
+		this._undoRedoController = null;
+		this._lastSaveID = 0;
 	}
 
 	get itemID() {
@@ -236,6 +247,7 @@ class EditorInstance {
 	}
 
 	async uninit() {
+		this._unregisterUndoRedoController();
 		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		if (this._citationDialogWindow) {
 			this._citationDialogWindow.close();
@@ -246,6 +258,69 @@ class EditorInstance {
 		await Zotero.Notes.unregisterEditorInstance(this);
 		if (!this._item.isAttachment() && !this._filesReadOnly) {
 			await Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
+		}
+	}
+
+	_registerUndoRedoController() {
+		if (this._undoRedoController) {
+			return;
+		}
+
+		try {
+			let editorWindow = this._iframeWindow.wrappedJSObject;
+			let commands = new Map([
+				['cmd_undo', { can: 'canUndo', run: 'doUndo' }],
+				['cmd_redo', { can: 'canRedo', run: 'doRedo' }],
+			]);
+			let invoke = (command, operation) => {
+				let method = commands.get(command)?.[operation];
+				if (!method) {
+					return false;
+				}
+				try {
+					return typeof editorWindow[method] == 'function'
+						? editorWindow[method]()
+						: false;
+				}
+				catch (e) {
+					if (!Components.utils.isDeadWrapper(editorWindow)) {
+						Zotero.logError(e);
+					}
+					return false;
+				}
+			};
+			let controller = {
+				supportsCommand: command => commands.has(command),
+				isCommandEnabled: command => !!invoke(command, 'can'),
+				doCommand: command => invoke(command, 'run'),
+				onEvent() {},
+			};
+
+			this._iframeWindow.controllers.insertControllerAt(0, controller);
+			this._undoRedoController = controller;
+		}
+		catch (e) {
+			if (!Components.utils.isDeadWrapper(this._iframeWindow)) {
+				Zotero.logError(e);
+			}
+		}
+	}
+
+	_unregisterUndoRedoController() {
+		if (!this._undoRedoController) {
+			return;
+		}
+
+		try {
+			this._iframeWindow.controllers.removeController(this._undoRedoController);
+		}
+		catch (e) {
+			if (!Components.utils.isDeadWrapper(this._iframeWindow)) {
+				Zotero.logError(e);
+			}
+		}
+		finally {
+			this._undoRedoController = null;
 		}
 	}
 
@@ -561,6 +636,7 @@ class EditorInstance {
 		try {
 			switch (message.action) {
 				case 'initialized': {
+					this._registerUndoRedoController();
 					this._resolveInitPromise();
 					return;
 				}
@@ -779,7 +855,7 @@ class EditorInstance {
 						// Forget the previously focused element within the iframe to avoid
 						// it receiving focus for a moment if you later tab back into the editor
 						iframe.ownerDocument.activeElement.blur();
-						Services.focus.moveFocus(iframe.ownerGlobal, iframe, Services.focus.MOVEFOCUS_BACKWARD, Services.focus.FLAG_SHOWRING);
+						Services.focus.moveFocus(iframe.documentGlobal, iframe, Services.focus.MOVEFOCUS_BACKWARD, Services.focus.FLAG_SHOWRING);
 					};
 					return;
 				}
@@ -905,11 +981,11 @@ class EditorInstance {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('value', item.name);
 						menuitem.setAttribute('label', item.label);
-						menuitem.setAttribute('disabled', !item.enabled);
+						menuitem.toggleAttribute('disabled', !item.enabled);
 						if (item.checked) {
 							menuitem.setAttribute('type', 'checkbox');
 						}
-						menuitem.setAttribute('checked', item.checked);
+						menuitem.toggleAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
 							if (item.name === 'insertImage') {
 								return this._iframeWindow.eval('openImageFilePicker()');
@@ -965,7 +1041,7 @@ class EditorInstance {
 		// Check Spelling
 		var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
-		menuitem.setAttribute('checked', spellChecker.enabled);
+		menuitem.toggleAttribute('checked', spellChecker.enabled);
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.addEventListener('command', () => {
 			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
@@ -1068,7 +1144,9 @@ class EditorInstance {
 		}
 	}
 
-	async _save(noteData, skipDateModifiedUpdate) {
+	// saveID identifies this save among the editor's others, so that a retry can tell whether it
+	// still holds the newest content. Assigned below, once there's something to write.
+	async _save(noteData, skipDateModifiedUpdate, saveID, attempt = 1) {
 		if (!noteData) return;
 		let { state, html } = noteData;
 		if (html === undefined) return;
@@ -1085,6 +1163,13 @@ class EditorInstance {
 			if (html === null) {
 				Zotero.debug('Note value not available -- not saving', 2);
 				return;
+			}
+			// Claim an ID now that there's something to write. saveSync() calls through with no
+			// data whenever the editor has no unsaved changes -- including once an update has been
+			// dispatched but not yet saved -- and such a save must not make a retry waiting below
+			// look superseded.
+			if (saveID === undefined) {
+				saveID = ++this._lastSaveID;
 			}
 			// Update note
 			if (this._item) {
@@ -1127,6 +1212,20 @@ class EditorInstance {
 			}
 		}
 		catch (e) {
+			// A long-running operation elsewhere (e.g., full-text index maintenance) can hold the
+			// database past the transaction wait timeout. Nothing was written, so try again rather
+			// than telling the user to restart.
+			if (e instanceof Zotero.DBConnection.TimeoutError && attempt < MAX_SAVE_ATTEMPTS) {
+				// Unless the editor has handed us newer content in the meantime, in which case
+				// this save is superseded and retrying it would undo the newer one
+				if (saveID != this._lastSaveID) {
+					Zotero.debug("Timed out saving note, but a newer save is pending -- skipping", 2);
+					return;
+				}
+				Zotero.debug("Timed out waiting for the database to save note -- retrying", 2);
+				await this._save(noteData, skipDateModifiedUpdate, saveID, attempt + 1);
+				return;
+			}
 			Zotero.logError(e);
 			Zotero.crash(true);
 			throw e;
@@ -1226,14 +1325,6 @@ class EditorInstance {
 				// Otherwise returns `undefined` which makes this function to be
 			},
 			
-			/**
-			 * Execute a callback with a preview of the given citation
-			 * @return {Promise} A promise resolved with the previewed citation string
-			 */
-			preview: async function () {
-				// Zotero.debug('CI: preview');
-			},
-
 			/**
 			 * Sort the citationItems within citation (depends on this.citation.properties.unsorted)
 			 * @return {Promise} A promise resolved with the previewed citation string
@@ -1503,7 +1594,7 @@ class EditorInstance {
 				title: Zotero.getString('reader-annotations'),
 				date: new Date().toLocaleString()
 			};
-			html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+			html = lazy.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
 			// New line is needed for note title parser
 			html += '\n';
 		}
@@ -1738,7 +1829,7 @@ class EditorInstanceUtilities {
 				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
 
-			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			let templateHTML = lazy.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
 			// Remove multiple spaces
@@ -1898,3 +1989,4 @@ class EditorInstanceUtilities {
 
 Zotero.EditorInstance = EditorInstance;
 Zotero.EditorInstanceUtilities = new EditorInstanceUtilities();
+})();

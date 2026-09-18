@@ -4,13 +4,13 @@
 		margin-left: 17px;
 	}
 	
-	checkbox[disabled=true] label {
+	checkbox[disabled] label {
 		opacity: .5;
 	}
 
 	/* Override rules from Mozilla checkbox.css that make text almost unreadable when disabled
 	   when combined with our opacity: .5 */
-	checkbox[native][disabled="true"] {
+	checkbox[native][disabled] {
 		color: unset;
 	}
 }

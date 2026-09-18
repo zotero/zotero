@@ -32,6 +32,7 @@ integration-citationDialog-section-cited =
 integration-citationDialog-details-suffix = Suffixe
 integration-citationDialog-details-prefix = Préfixe
 integration-citationDialog-details-suppressAuthor = Ignorer l'auteur
+integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
 integration-citationDialog-details-includeComments = Inclure les commentaires
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
@@ -54,6 +55,10 @@ integration-citationDialog-lib-message-annotations =
        *[other] Aucun document avec annotations n'est ouvert ou sélectionné
     }
 integration-citationDialog-settings-keepSorted = Trier les sources automatiquement
+integration-citationDialog-preview-empty = Aperçu
+integration-citationDialog-preview-error = Aperçu indisponible
+integration-citationDialog-btn-displayPreview =
+    .title = Afficher l'aperçu de la citation
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliothèque
@@ -76,6 +81,11 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Appuyer sur Tab pour sélectionner les documents à ajouter à cette citation. Appuyer sur Échap pour ignorer les changements et fermer la fenêtre.
+integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-citation =
+    .placeholder = { $placeholder }
+    .title = { $title }
+    .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
@@ -131,8 +141,6 @@ integration-warning-documentPreferences-changes-will-be-lost = Certaines des mod
 integration-warning-discard-changes = Ignorer les modifications
 integration-warning-command-is-running = Une commande de l'intégration de traitement de texte est déjà en cours d'exécution.
 first-run-guidance-citationDialog =
-    Tapez un titre, un auteur et/ou une année pour rechercher une référence.
+    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
-    Une fois votre sélection effectuée, cliquez sur la bulle ou sélectionnez-la à l'aide du clavier, puis appuyez sur ↓/Espace pour afficher les options de citation telles que le numéro de page, le préfixe et le suffixe.
-    
-    Vous pouvez aussi ajouter un numéro de page ou un autre localisateur en l'incluant dans vos termes de recherche (par exemple, "histoire { $locator }") ou en le saisissant après la bulle et en appuyant sur { return-or-enter }.
+    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.

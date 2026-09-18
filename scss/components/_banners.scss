@@ -68,7 +68,7 @@
 // Add drop shadow after banner that's followed by another
 //
 // We set a z-index in ZoteroPane.setBannerZIndexes() to make this work
-.banner-container:has(~ .banner-container:not([collapsed="true"])) {
+.banner-container:has(~ .banner-container:not([collapsed])) {
 	box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.25);
 }
 

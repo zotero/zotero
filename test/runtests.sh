@@ -46,6 +46,7 @@ Options
  -f                  stop after first test failure
  -g                  only run tests matching the given pattern (grep)
  -h                  display this help
+ -p SHARD/TOTAL      run only the given shard of the default test set (e.g., 2/4)
  -r RETRIES          retry failed tests the given number of times (default: 0)
  -s TEST             start at the given test
  -t                  generate test data and quit
@@ -58,7 +59,7 @@ DONE
 DEBUG=false
 DEBUG_LEVEL=5
 RETRIES=0
-while getopts "bcd:e:fg:hr:s:tx:" opt; do
+while getopts "bcd:e:fg:hp:r:s:tx:" opt; do
 	case $opt in
         b)
         	Z_ARGS="$Z_ARGS -ZoteroSkipBundledFiles"
@@ -84,6 +85,12 @@ while getopts "bcd:e:fg:hr:s:tx:" opt; do
 			;;
 		h)
 			usage
+			;;
+		p)
+			if [[ ! "$OPTARG" =~ ^[1-9][0-9]*/[1-9][0-9]*$ ]]; then
+				usage
+			fi
+			Z_ARGS="$Z_ARGS -shard $OPTARG"
 			;;
 		r)
 			RETRIES="$OPTARG"
@@ -164,6 +171,13 @@ else
 	Z_ARGS="$Z_ARGS -jsconsole"
 fi
 
+# On Windows, zotero.exe is the Mozilla launcher process, which spawns the browser process
+# and exits, so tell it to wait -- the success check and profile cleanup below otherwise
+# run while the app is still starting
+if [ ! -z $IS_CYGWIN ]; then
+	Z_ARGS="$Z_ARGS --wait-for-browser"
+fi
+
 # Clean up on exit
 trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
@@ -173,11 +187,11 @@ if [[ -z "$CI" ]] && ! ps | grep js-build/build.js | grep -v grep > /dev/null; t
 	echo
 	echo "Running JS build process"
 	cd "$ROOT_DIR"
-	NODE_OPTIONS=--openssl-legacy-provider npm run build || exit $?
+	NODE_OPTIONS=--openssl-legacy-provider node js-build/build.js || exit $?
 	echo
 fi
 
-ZOTERO_TEST=1 "$ROOT_DIR/app/scripts/dir_build" -q
+ZOTERO_TEST=1 "$ROOT_DIR/app/scripts/dir_build"
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" \

@@ -33,7 +33,7 @@
 	list-style-image: url('chrome://zotero/skin/citation-up.png');
 }
 
-#up[disabled="true"] {
+#up[disabled] {
 	list-style-image: url('chrome://zotero/skin/citation-up-gray.png');
 }
 
@@ -41,7 +41,7 @@
 	list-style-image: url('chrome://zotero/skin/citation-down.png');
 }
 
-#down[disabled="true"] {
+#down[disabled] {
 	list-style-image: url('chrome://zotero/skin/citation-down-gray.png');
 }
 
@@ -50,7 +50,7 @@
 	list-style-image: url('chrome://zotero/skin/citation-add.png');
 }
 
-#add[disabled="true"] {
+#add[disabled] {
 	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
 
@@ -58,7 +58,7 @@
 	list-style-image: url('chrome://zotero/skin/citation-delete.png');
 }
 
-#remove[disabled="true"] {
+#remove[disabled] {
 	list-style-image: url('chrome://zotero/skin/citation-delete-gray.png');
 }
 
@@ -161,7 +161,7 @@ span.zotero-bubble-input {
 	border-color: #6d95e0;
 }
 
-.citation-dialog.bubble[selected="true"] {
+.citation-dialog.bubble[selected] {
 	border-radius: 8px !important;
 	background-color: #598bec;
 	color: #fff;
@@ -265,7 +265,7 @@ span.zotero-bubble-input {
 	color: var(--fill-secondary);
 }
 
-richlistitem[selected="true"] {
+richlistitem[selected] {
 	background: Highlight !important;
 	color: HighlightText !important;
 }

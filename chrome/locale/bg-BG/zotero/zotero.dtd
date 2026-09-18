@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Премахване на запис...">
 <!ENTITY zotero.toolbar.newGroup "Нова група...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Нова подколекция...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Ново запазено търсене...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Изпразване на кошчето за боклук">
 <!ENTITY zotero.toolbar.tagSelector.label "Показване/скриване на изборателя на маркери">
 <!ENTITY zotero.toolbar.actions.label "Действия">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Предпочитания...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">
 <!ENTITY zotero.toolbar.about.label "За Зотеро">
-<!ENTITY zotero.toolbar.advancedSearch "Сложно търсене">
 <!ENTITY zotero.toolbar.openURL.label "Откриване">
 <!ENTITY zotero.toolbar.openURL.tooltip "Откриване чрез Вашата локална библиотека">
 

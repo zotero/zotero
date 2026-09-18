@@ -4,6 +4,7 @@
 // http://www.zotero.org/documentation/hidden_prefs
 
 pref("extensions.zotero.firstRun2", true);
+pref("extensions.zotero.undoHistory.steps", 100);
 
 pref("extensions.zotero.saveRelativeAttachmentPath", false);
 pref("extensions.zotero.baseAttachmentPath", "");
@@ -134,7 +135,6 @@ pref("extensions.zotero.export.bibliographySettings", "save-as-rtf");
 pref("extensions.zotero.export.displayCharsetOption", true);
 pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 pref("extensions.zotero.cite.automaticJournalAbbreviations", true);
-pref("extensions.zotero.cite.useCiteprocRs", false);
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
@@ -152,7 +152,9 @@ pref("extensions.zotero.integration.keepAddCitationDialogRaised", false);
 pref("extensions.zotero.integration.upgradeTemplateDelayedOn", 0);
 pref("extensions.zotero.integration.dontPromptMendeleyImport", false);
 pref("extensions.zotero.integration.citationDialogMode", "last-used");
+pref("extensions.zotero.integration.citationDialogShowLocatorTip", true);
 pref("extensions.zotero.integration.annotationDialogIncludeComments", true);
+pref("extensions.zotero.integration.citationPreviewShown", true);
 
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", true);
@@ -246,9 +248,22 @@ pref("extensions.zotero.reader.autoDisableTool.note", true);
 pref("extensions.zotero.reader.autoDisableTool.text", true);
 pref("extensions.zotero.reader.autoDisableTool.image", true);
 pref("extensions.zotero.reader.lastSidebarTab", "annotations");
+pref("extensions.zotero.reader.popupPositions", "{}");
+pref("extensions.zotero.reader.readAloud.highlightGranularity", "sentence");
 
 // Set color scheme to auto by default
 pref("browser.theme.toolbar-theme", 2);
 
 // Need to enable -moz-context-properties for SVG context properties to work
 pref("svg.context-properties.content.enabled", true);
+
+// Firefox applies a baseline "script-src chrome: resource: moz-src:" CSP to every chrome:
+// document, which blocks inline <script>s and inline event handlers
+pref("security.chrome_baseline_csp.enabled", false);
+
+// Allow chrome: DTDs to be loaded, which we still use for localized strings in XUL markup
+pref("dom.fetch.allow_force_allowed_dtd", true);
+
+// Translators are evaluated in the parent process with the system principal
+pref("security.allow_eval_with_system_principal", true);
+pref("security.allow_eval_in_parent_process", true);

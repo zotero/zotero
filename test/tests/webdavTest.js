@@ -250,6 +250,97 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	//
 	// Tests
 	//
+	describe("#getPassword()", function () {
+		it("should return a stored password with non-ASCII characters", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			var password = "p\u00e4ssw\u20acrd";
+			await controller.setPassword(password);
+			assert.equal(await controller.getPassword(), password);
+		})
+		
+		
+		it("should report a keystore read failure with a usable message", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			await controller.setPassword("password");
+			var decryptStub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
+				.rejects(keyStoreError());
+			var encryptStub = sinon.stub(Zotero.OSKeyStore._module, "encrypt")
+				.rejects(keyStoreError());
+			try {
+				let e = await getPromiseError(controller.getPassword());
+				assert.equal(e.message, Zotero.getString('os-keystore-read-failed'));
+			}
+			finally {
+				decryptStub.restore();
+				encryptStub.restore();
+			}
+		})
+		
+		
+		it("should tell the user to reenter a password the keystore can't decrypt", async function () {
+			if (!Zotero.OSKeyStore.available) {
+				this.skip();
+			}
+			await controller.setPassword("password");
+			var stub = sinon.stub(Zotero.OSKeyStore._module, "decrypt")
+				.rejects(keyStoreError());
+			try {
+				let e = await getPromiseError(controller.getPassword());
+				assert.equal(e.message, Zotero.getString('os-keystore-read-unrecoverable'));
+			}
+			finally {
+				stub.restore();
+			}
+		})
+		
+		
+		function keyStoreError() {
+			return new Zotero.Error(
+				"Key store unavailable",
+				0,
+				{ keyStoreError: new Error("User canceled OS unlock entry") }
+			);
+		}
+		
+		
+		it("shouldn't store a password that would read back as encrypted", async function () {
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(keyStoreError());
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				var e = await getPromiseError(controller.setPassword("oskv1:example"));
+				assert.ok(e);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+			}
+		})
+		
+		
+		it("should return a password stored without encryption after a keystore failure", async function () {
+			var password = "p\u00e4ssw\u20acrd";
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(keyStoreError());
+			var confirmStub = sinon.stub(Zotero.OSKeyStore, "confirmUnencryptedFallback")
+				.returns(true);
+			try {
+				await controller.setPassword(password);
+				assert.ok(confirmStub.called);
+				assert.equal(await controller.getPassword(), password);
+			}
+			finally {
+				encryptStub.restore();
+				confirmStub.restore();
+			}
+		})
+	})
+	
 	describe("Syncing", function () {
 		it("should skip downloads if not marked as needed", async function () {
 			var engine = await setup();

@@ -25,6 +25,58 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("#getAbbreviation()", function () {
+		it("should drop accented stop-words when auto-abbreviating", function () {
+			var obj = { default: { 'container-title': {} } };
+			Zotero.Cite.getAbbreviation(
+				"default", obj, "default", "container-title", "Jahrbuch für Heimatkunde"
+			);
+			assert.equal(
+				obj.default['container-title']['Jahrbuch für Heimatkunde'],
+				"Jahrb. Heimatkunde"
+			);
+		});
+	});
+	
+	describe("Dates", function () {
+		async function makeBibliography(fields) {
+			let item = new Zotero.Item;
+			item.fromJSON(Object.assign({
+				itemType: "book",
+				title: "Test Book"
+			}, fields));
+			await item.saveTx();
+
+			let style = Zotero.Styles.get('http://www.zotero.org/styles/chicago-notes-bibliography');
+			let cslEngine = style.getCiteProc('en-US');
+			return Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+		}
+
+		it("should render a date range", async function () {
+			assert.include(await makeBibliography({ date: '2021/2026' }), '2021–2026');
+		});
+
+		it("should render a BCE date", async function () {
+			assert.match(await makeBibliography({ date: '-429' }), /429\s?BC/);
+		});
+
+		it("should render a spelled-out BCE date", async function () {
+			let output = await makeBibliography({ date: 'January 10, 200 BCE' });
+			assert.match(output, /200\s?BC/);
+			assert.notMatch(output, /\bAD\b/);
+		});
+
+		it("should render an EDTF range in Extra, overriding the Date field", async function () {
+			let output = await makeBibliography({ date: '1999', extra: 'issued: 2021/2026' });
+			assert.include(output, '2021–2026');
+			assert.notInclude(output, '1999');
+		});
+
+		it("should render a quoted date as a literal string", async function () {
+			assert.include(await makeBibliography({ date: '"1637 and 1662"' }), '1637 and 1662');
+		});
+	});
+
 	describe("#retrieveLocale()", function () {
 		it("should handle locale with script code", async function () {
 			var item = new Zotero.Item;
@@ -40,6 +92,22 @@ describe("Zotero.Cite", function () {
 			
 			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
 			assert.include(output, 'izd');
+		});
+
+		it("should use closest available locale for locale without a CSL locale", async function () {
+			var item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "Test Book",
+				edition: "2"
+			});
+			await item.saveTx();
+
+			var style = Zotero.Styles.get('http://www.zotero.org/styles/chicago-notes-bibliography');
+			var cslEngine = style.getCiteProc('sr-RS');
+
+			var output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			assert.include(output, 'изд');
 		});
 	});
 	
@@ -89,6 +157,75 @@ describe("Zotero.Cite", function () {
 		it("should handle a single-character field name", function () {
 			var str = 'a: ';
 			assert.equal(Zotero.Cite.extraToCSL(str), str);
+		});
+	});
+	
+	describe("previewCitationCluster()", function () {
+		before(async function () {
+			await Zotero.Styles.init();
+			await Zotero.Styles.install(
+				{ file: OS.Path.join(getTestDataDirectory().path, 'apa.csl') },
+				'http://www.zotero.org/styles/apa',
+				true
+			);
+		});
+		
+		async function makeEngineWithCitation() {
+			let item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "Preview Test",
+				creators: [{ creatorType: "author", firstName: "Jane", lastName: "Smith" }],
+				date: "2019"
+			});
+			await item.saveTx();
+			let style = Zotero.Styles.get('http://www.zotero.org/styles/apa');
+			let cslEngine = style.getCiteProc('en-US', 'rtf');
+			cslEngine.processCitationCluster(
+				{
+					citationID: "CITATION-1",
+					citationItems: [{ id: item.id }],
+					properties: { noteIndex: 1 }
+				},
+				[], []
+			);
+			return { cslEngine, item };
+		}
+		
+		function assertStateRestored(cslEngine, item) {
+			assert.equal(cslEngine.opt.mode, 'rtf');
+			assert.lengthOf(cslEngine.registry.citationreg.citationByIndex, 1);
+			// Processor should still render in its native format
+			let text = cslEngine.previewCitationCluster(
+				{ citationItems: [{ id: item.id }], properties: { noteIndex: 2 } },
+				[["CITATION-1", 1]], [], "rtf"
+			);
+			assert.equal(text, "(Smith, 2019)");
+		}
+		
+		it("shouldn't modify processor state if an item can't be retrieved", async function () {
+			let { cslEngine, item } = await makeEngineWithCitation();
+			assert.throws(() => {
+				cslEngine.previewCitationCluster(
+					{ citationItems: [{ id: 999999999 }], properties: { noteIndex: 2 } },
+					[["CITATION-1", 1]], [], "html"
+				);
+			});
+			assertStateRestored(cslEngine, item);
+		});
+		
+		it("shouldn't modify processor state if rendering fails", async function () {
+			let { cslEngine, item } = await makeEngineWithCitation();
+			let stub = sinon.stub(cslEngine, 'process_CitationCluster')
+				.throws(new Error("simulated rendering error"));
+			assert.throws(() => {
+				cslEngine.previewCitationCluster(
+					{ citationItems: [{ id: item.id }], properties: { noteIndex: 2 } },
+					[["CITATION-1", 1]], [], "html"
+				);
+			});
+			stub.restore();
+			assertStateRestored(cslEngine, item);
 		});
 	});
 	

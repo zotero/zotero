@@ -17,7 +17,7 @@ XPCOMUtils.defineLazyServiceGetter(
     lazy,
     "resProto",
     "@mozilla.org/network/protocol;1?name=resource",
-    "nsIResProtocolHandler"
+    Ci.nsIResProtocolHandler
 );
 
 ChromeUtils.defineESModuleGetters(

@@ -156,6 +156,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	var _locked = false;
 	var _shutdownListeners = [];
 	var _progressMessage;
+	var _progressDeterminate;
+	var _progressGeneration = 0;
+	var _progressOwner;
 	var _progressMeters;
 	var _progressPopup;
 	var _lastPercentage;
@@ -540,6 +543,12 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		Zotero.DB.addCallback('begin', id => Zotero.Notifier.begin(id));
 		Zotero.DB.addCallback('commit', id => Zotero.Notifier.commit(null, id));
 		Zotero.DB.addCallback('rollback', id => Zotero.Notifier.reset(id));
+
+		// Initialize undo history and add its callbacks to the DB layer
+		Zotero.UndoHistory.init();
+		Zotero.DB.addCallback('begin', id => Zotero.UndoHistory._onTransactionBegin(id));
+		Zotero.DB.addCallback('commit', id => Zotero.UndoHistory._onTransactionCommit(id));
+		Zotero.DB.addCallback('rollback', id => Zotero.UndoHistory._onTransactionRollback(id));
 		
 		try {
 			// Require >=2.1b3 database to ensure proper locking
@@ -591,18 +600,22 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				throw true;
 			}
 			
+			let upgradeMessageTimeoutID;
 			try {
-				var updated = await Zotero.Schema.updateSchema({
-					onBeforeUpdate: (options = {}) => {
-						if (options.minor) return;
-						try {
-							Zotero.showZoteroPaneProgressMeter(
-								Zotero.getString('upgrade.status')
-							)
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
+				await Zotero.Schema.updateSchema({
+					// Show "Upgrading database…" if the upgrade is still running after a short
+					// delay, so that the message doesn't flash during quick upgrades
+					onBeforeUpdate: () => {
+						upgradeMessageTimeoutID = setTimeout(() => {
+							try {
+								Zotero.showZoteroPaneProgressMeter(
+									Zotero.getString('upgrade.status')
+								)
+							}
+							catch (e) {
+								Zotero.logError(e);
+							}
+						}, 500);
 					}
 				});
 			}
@@ -656,11 +669,17 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					throw e;
 				}
 				
-				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
-				Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
-					+ "\n\n"
-					+ (stack || e);
+				// Report the error unless corruption recovery has already started a quit
+				// or restart
+				if (!Zotero.skipLoading) {
+					Zotero.startupError = Zotero.getString('startupError.databaseUpgradeError')
+						+ "\n\n"
+						+ _formatStartupError(e);
+				}
 				throw e;
+			}
+			finally {
+				clearTimeout(upgradeMessageTimeoutID);
 			}
 			
 			const { ZoteroProtocolHandler } = ChromeUtils.importESModule(
@@ -671,7 +690,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			const { ZoteroAutoComplete } = ChromeUtils.importESModule(
 				`chrome://zotero/content/zotero-autocomplete.mjs`
 			);
+			
 			ZoteroAutoComplete.init();
+
+			const { OptionsAutoComplete } = ChromeUtils.importESModule(
+				`chrome://zotero/content/modules/optionsAutoComplete.mjs`
+			);
+			
+			OptionsAutoComplete.init();
 
 			await Zotero.Users.init();
 			await Zotero.Libraries.init();
@@ -689,8 +715,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			Zotero.locked = false;
 			
 			// Initialize various services
-			if(Zotero.Prefs.get("httpServer.enabled")) {
-				Zotero.Server.init();
+			if (Zotero.Prefs.get("httpServer.enabled")) {
+				await Zotero.Server.init();
 			}
 			
 			await Zotero.Fulltext.init();
@@ -762,15 +788,22 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				// Feed updates (e.g., deleting old items) can interfere with this, so pause them
 				// until we're done
 				let feedPauser = await Zotero.Feeds.pause();
+				let started = new Date();
 				try {
 					await Zotero.Schema.migrateExtraFields({
 						onProgress: ({ progress, progressMax }) => {
+							// Only show the progress window if the migration is still running
+							// after a short delay, so that it doesn't flash for a few items
 							if (!progressWin) {
+								if (new Date() - started < 500) {
+									return;
+								}
 								progressWin = new Zotero.ProgressWindow({
 									closeOnClick: false
 								});
-								let title = Zotero.getString('upgrade.status');
-								progressWin.changeHeadline(title);
+								progressWin.changeHeadline(
+									Zotero.getString('migrate-extra-fields-progress-headline')
+								);
 								itemProgress = new progressWin.ItemProgress(
 									'journalArticle',
 									Zotero.getString('migrate-extra-fields-progress-message')
@@ -784,7 +817,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				}
 				catch (e) {
 					Zotero.logError(e);
-					itemProgress.setError();
+					if (itemProgress) {
+						itemProgress.setError();
+					}
 				}
 				finally {
 					feedPauser.resume();
@@ -793,15 +828,34 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					progressWin.startCloseTimer(3000);
 				}
 			});
-			
+
+			// Populate normalized search columns after an upgrade. This is local-only derived
+			// data, so we don't need to wait for sync for correctness, but we run after the
+			// initial auto-sync (like the Extra migration) so the backfill doesn't compete with a
+			// large initial download. It's sub-second for typical libraries and chunked so the UI
+			// stays responsive on large ones, and search degrades gracefully until it finishes --
+			// so it runs silently, without a progress window of its own (the full-text content
+			// index shows one for the slower, more visible pass).
+			Zotero.startupSyncPromise.then(async () => {
+				if (Zotero.test) return;
+				try {
+					await Zotero.Schema.populateNormalizedSearchColumns();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			});
+
 			return true;
 		}
 		catch (e) {
 			Zotero.logError(e);
-			if (!Zotero.startupError) {
+			// Report a generic error unless a more specific one was set above or corruption
+			// recovery has already started a quit or restart
+			if (!Zotero.startupError && !Zotero.skipLoading) {
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
-					+ e.message ? (e.message + "\n\n" + e.stack) : e;
+					+ _formatStartupError(e);
 			}
 			return false;
 		}
@@ -828,6 +882,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			else if (!Zotero.File.pathToFile(dbfile).isWritable()) {
 				var msg = 'Cannot write to ' + dbfile;
 			}
+			// Shouldn't be reached, since the checks above should catch anything SQLite refuses
+			// to write to, but don't continue with a connection that couldn't be configured
+			else if (Zotero.DB.readOnly) {
+				var msg = dbfile + ' was opened read-only';
+			}
 			else {
 				var msg = false;
 			}
@@ -842,6 +901,11 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 		}
 		catch (e) {
+			// If a database corruption handler already resolved the error and initiated a
+			// quit or restart, don't show a startup error
+			if (Zotero.skipLoading) {
+				return false;
+			}
 			if (_checkDataDirAccessError(e)) {}
 			else if (_checkDataDirStorageIOError(e)) {}
 			// Storage busy
@@ -849,10 +913,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				Zotero.startupError = Zotero.getString('startupError.databaseInUse');
 			}
 			else {
-				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
-					+ (stack || e);
+					+ _formatStartupError(e);
 			}
 			
 			Zotero.debug(e.toString(), 1);
@@ -863,6 +926,20 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		
 		return true;
 	};
+	
+	
+	/**
+	 * Format an error for a startup error message
+	 *
+	 * SpiderMonkey stacks contain only frames, so the message has to be included with them.
+	 *
+	 * @param {Error|*} e
+	 * @return {String|*}
+	 */
+	function _formatStartupError(e) {
+		var stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
+		return [e.message, stack].filter(x => x).join("\n\n") || e;
+	}
 	
 	
 	function _checkDataDirAccessError(e) {
@@ -1180,7 +1257,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 					Zotero.Utilities.Internal.Environment.clearMozillaVariables();
 				}
 				
-				svc.loadURI(Services.io.newURI(url, null, null));
+				svc.loadURI(
+					Services.io.newURI(url, null, null),
+					Services.scriptSecurityManager.getSystemPrincipal(),
+				);
 				return;
 			}
 		}
@@ -1706,12 +1786,30 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {String} msg
 	 * @param {Boolean} [determinate=false]
 	 * @param {Boolean} [modalOnly=false] - Don't use popup if Zotero pane isn't showing
-	 * @return	void
+	 * @return {Object} - Token that can optionally be passed to
+	 *     restoreZoteroPaneProgressMeter() to restore the previous display state, for callers
+	 *     that might be interrupting another operation's progress display. Callers that own
+	 *     the display can ignore it and clear with hideZoteroPaneOverlays() as usual.
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
+		// Capture the previous display state and owner so that the caller can restore them
+		// with restoreZoteroPaneProgressMeter()
+		var token = {
+			owner: ++_progressGeneration,
+			previousOwner: _progressOwner,
+			locked: this.locked,
+			message: _progressMessage,
+			determinate: _progressDeterminate,
+			percentage: _lastPercentage
+		};
+		_progressOwner = token.owner;
 		// If msg is undefined, keep any existing message. If false/null/"", clear.
 		// The message is also cleared when the meters are hidden.
 		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
+		_progressDeterminate = determinate;
+		// The new meter starts at 0 if determinate and empty otherwise, so a first update
+		// that matches the previous meter's state shouldn't be suppressed
+		_lastPercentage = determinate ? 0 : null;
 		var currentWindow = Services.wm.getMostRecentWindow("navigator:browser");
 		var enumerator = Services.wm.getEnumerator("navigator:browser");
 		var progressMeters = [];
@@ -1762,7 +1860,36 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		this.locked = true;
 		_progressMeters = progressMeters;
+		return token;
 	}
+
+
+	/**
+	 * Restore the progress display to its state before a showZoteroPaneProgressMeter() call,
+	 * using the object returned by that call. Does nothing if the display has been changed
+	 * again since then, in which case the newer operation owns it. Restores ownership to the
+	 * previous owner, so nested tokens can be restored in reverse order.
+	 */
+	this.restoreZoteroPaneProgressMeter = function (token) {
+		if (!token || token.owner != _progressOwner) {
+			return;
+		}
+		if (!token.locked) {
+			this.hideZoteroPaneOverlays();
+			return;
+		}
+		this.showZoteroPaneProgressMeter(token.message || null, token.determinate);
+		// Hand the display back to the previous owner rather than keeping the owner id
+		// minted by the call above
+		_progressOwner = token.previousOwner;
+		// Restore the meter position, which showZoteroPaneProgressMeter() reset
+		_lastPercentage = token.percentage;
+		if (token.determinate && token.percentage !== null && token.percentage !== undefined) {
+			for (let pm of _progressMeters) {
+				pm.setAttribute('value', token.percentage);
+			}
+		}
+	};
 	
 	
 	/**
@@ -1791,6 +1918,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 		}
 		_lastPercentage = percentage;
+		// Updating with or without a percentage switches the meter between determinate and
+		// indeterminate, so keep the recorded mode accurate for restoration
+		_progressDeterminate = percentage !== null;
 	}
 	
 	
@@ -1811,11 +1941,14 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		if (_progressPopup) {
 			_progressPopup.close();
 		}
-		
+
+		_progressGeneration++;
+		_progressOwner = null;
 		_progressMessage = null;
+		_progressDeterminate = null;
+		_lastPercentage = null;
 		_progressMeters = [];
 		_progressPopup = null;
-		_lastPercentage = null;
 	}
 	
 	
@@ -1864,7 +1997,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		await Zotero.DB.executeTransaction(async function () {
 			return Zotero.Tags.purge();
 		});
-		await Zotero.Fulltext.purgeUnusedWords();
+		// Items.purge() below resets the pref
+		if (Zotero.Prefs.get('purge.items')) {
+			await Zotero.FullText.purgeOrphanedContent();
+		}
 		await Zotero.Items.purge();
 		// DEBUG: this might not need to be permanent
 		//yield Zotero.DB.executeTransaction(async function () {
@@ -2202,6 +2338,9 @@ Zotero.VersionHeader = {
 Zotero.DragDrop = {
 	currentEvent: null,
 	currentOrientation: 0,
+	// The effect set by the tree's last onDragOver() via LibraryTreeView::setDropEffect(), which
+	// can differ from the drop event's dropEffect
+	currentDropEffect: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;

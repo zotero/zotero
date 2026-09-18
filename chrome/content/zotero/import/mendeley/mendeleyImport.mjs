@@ -32,6 +32,9 @@ export var Zotero_Import_Mendeley = function () {
 	this.relinkOnly = false;
 	this.numRelinked = 0;
 	this.skipNotebooks = false;
+	// Directory the database was selected from, if it isn't the one the database is read
+	// from -- i.e. when an encrypted database is read from a decrypted copy
+	this.sourceDirectory = null;
 	
 	this._tokens = null;
 	this._credentials = null;
@@ -1698,7 +1701,7 @@ Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
  * Get the path to use for a file that exists, or false if none
  *
  * This can be either the original path or, for a file in the Downloaded directory, in a directory
- * relative to the database.
+ * relative to where the database was selected from.
  *
  * @return {String|false}
  */
@@ -1712,7 +1715,7 @@ Zotero_Import_Mendeley.prototype._getRealFilePath = async function (path) {
 	}
 	// For file paths in Downloaded folder, try relative to database if not found at the
 	// absolute location, in case this is a DB backup
-	var dataDir = PathUtils.parent(this._file);
+	var dataDir = this.sourceDirectory || PathUtils.parent(this._file);
 	var altPath = OS.Path.join(dataDir, 'Downloaded', PathUtils.filename(path));
 	if (altPath != path && await OS.File.exists(altPath)) {
 		return altPath;

@@ -2,4 +2,9 @@
 	appearance: auto;
 	-moz-default-appearance: -moz-mac-help-button;
 	min-width: 0;
+
+	// The question mark comes from the native appearance, so a visible label would overlap it
+	.button-text {
+		visibility: hidden;
+	}
 }

@@ -33,6 +33,16 @@ class ItemTreeRow {
 		return 'item';
 	}
 
+	/**
+	 * Whether the row represents an object in the view, as opposed to a
+	 * library header or spacer. Callers that operate on the view's contents
+	 * (counting rows, collecting items, walking top-level rows) should skip
+	 * rows where this is false.
+	 */
+	get isObjectRow() {
+		return true;
+	}
+
 	get isDraggable() {
 		return false;
 	}
@@ -451,17 +461,21 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 		return true;
 	}
 
-	isContainerEmpty({ searchMode, searchItemIDs } = {}) {
-		if (Zotero.Prefs.get("hideContextAnnotationRows") && searchMode) {
-			return !this.ref.getAnnotations().some(annotation => searchItemIDs.has(annotation.id));
-		}
+	isContainerEmpty() {
 		return this.ref.numAnnotations() == 0;
 	}
 
 	getChildItems({ searchMode, searchItemIDs } = {}) {
 		let annotations = this.ref.getAnnotations();
-		if (Zotero.Prefs.get("hideContextAnnotationRows") && searchMode) {
-			annotations = annotations.filter(annotation => searchItemIDs.has(annotation.id));
+		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
+		// annotations match a search, show only those and hide the rest. If none match,
+		// show them all, since otherwise the attachment couldn't be expanded to browse its
+		// annotations at all.
+		if (searchMode && Zotero.Prefs.get("hideContextAnnotationRows")) {
+			let matches = annotations.filter(annotation => searchItemIDs.has(annotation.id));
+			if (matches.length) {
+				annotations = matches;
+			}
 		}
 		return annotations;
 	}
@@ -631,6 +645,100 @@ class SearchItemTreeRow extends ItemTreeRow {
  * Dispatch order: Collection, Search, annotation item, file attachment item,
  * generic Zotero.Item, and finally the base ItemTreeRow fallback.
  */
+/**
+ * Non-selectable section header row shown above each library's items when the
+ * items list displays a multi-library selection. Wraps a Zotero.Library.
+ */
+class LibraryHeaderItemTreeRow extends ItemTreeRow {
+	constructor(library, label, iconName) {
+		super(library, 0, false);
+		// Label and icon are computed from the selection (see
+		// CollectionViewItemTreeRow._computeSectionHeaders); fall back to the library's
+		// own name/icon when not provided
+		this._label = label;
+		this._iconName = iconName;
+	}
+
+	get type() {
+		return 'library-header';
+	}
+
+	get isObjectRow() {
+		return false;
+	}
+
+	getDisplayTitle() {
+		return this._label ?? Zotero.Libraries.getName(this.ref.libraryID);
+	}
+
+	getField(field) {
+		if (field == 'title') {
+			return this.getDisplayTitle();
+		}
+		return '';
+	}
+
+	getIcon() {
+		// An explicit null icon name means render no icon (e.g. the single-library
+		// summary header), distinct from undefined (use the library's own icon)
+		if (this._iconName === null) {
+			return null;
+		}
+		let iconName = this._iconName
+			?? (this.ref.libraryType == 'group' ? 'library-group' : 'library');
+		let icon = getCSSIcon(iconName);
+		icon.classList.add('icon-item-type');
+		return icon;
+	}
+
+	renderRow(div, _index, _columns, _rowData, _renderCtx) {
+		// Single cell with an optional icon and the label, spanning the row
+		let span = document.createElement('span');
+		span.className = 'cell primary library-header';
+		let textSpan = document.createElement('span');
+		textSpan.className = 'cell-text';
+		textSpan.textContent = this.getDisplayTitle();
+		let icon = this.getIcon();
+		if (icon) {
+			span.append(icon, textSpan);
+		}
+		else {
+			// No icon, but reserve its space so the label still lines up with item titles
+			let spacer = document.createElement('span');
+			spacer.className = 'library-header-icon-spacer';
+			span.append(spacer, textSpan);
+		}
+		div.appendChild(span);
+	}
+}
+
+/**
+ * A blank, non-selectable row providing one row of whitespace above a library header
+ * (see CollectionViewItemTreeRow._insertLibraryHeaders). Kept separate from the header
+ * row so the header stays a uniform height and pins flush to the top when sticky.
+ */
+class SpacerItemTreeRow extends ItemTreeRow {
+	constructor(library) {
+		super(library, 0, false, 'spacer-' + library.libraryID);
+	}
+
+	get type() {
+		return 'spacer';
+	}
+
+	get isObjectRow() {
+		return false;
+	}
+
+	getField() {
+		return '';
+	}
+
+	renderRow(_div, _index, _columns, _rowData, _renderCtx) {
+		// Intentionally empty -- the row's height alone provides the whitespace
+	}
+}
+
 ItemTreeRow.create = function (ref, level, isOpen) {
 	if (ref instanceof Zotero.Collection) return new CollectionItemTreeRow(ref, level, isOpen);
 	if (ref instanceof Zotero.Search) return new SearchItemTreeRow(ref, level, isOpen);
@@ -646,3 +754,5 @@ module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;
+module.exports.SpacerItemTreeRow = SpacerItemTreeRow;
+module.exports.LibraryHeaderItemTreeRow = LibraryHeaderItemTreeRow;

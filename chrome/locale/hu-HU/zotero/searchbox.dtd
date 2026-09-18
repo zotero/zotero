@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Név:">
 
-<!ENTITY zotero.search.searchInLibrary "Keresés könyvtárban:">
-
 <!ENTITY zotero.search.joinMode.prefix "Találat">
 <!ENTITY zotero.search.joinMode.any "bármelyik">
 <!ENTITY zotero.search.joinMode.all "összes">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "nap">
 <!ENTITY zotero.search.date.units.months "hónap">
 <!ENTITY zotero.search.date.units.years "év">
-
-<!ENTITY zotero.search.search "Keresés">
-<!ENTITY zotero.search.clear "Törlés">
-<!ENTITY zotero.search.saveSearch "Keresés mentése">

@@ -35,8 +35,23 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_UNDERLINE', { value: 5 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_TEXT', { value: 6 });
 
-	Zotero.defineProperty(this, 'DEFAULT_COLOR', { value: '#ffd400' });
-	
+	// The annotation color palette, as [l10n key, hex] pairs.
+	// Keep in sync with the reader's ANNOTATION_COLORS (reader/src/common/defines.js)
+	Zotero.defineProperty(this, 'COLORS', {
+		value: [
+			['general-yellow', '#ffd400'],
+			['general-red', '#ff6666'],
+			['general-green', '#5fb236'],
+			['general-blue', '#2ea8e5'],
+			['general-purple', '#a28ae5'],
+			['general-magenta', '#e56eee'],
+			['general-orange', '#f19837'],
+			['general-gray', '#aaaaaa']
+		]
+	});
+
+	Zotero.defineProperty(this, 'DEFAULT_COLOR', { value: this.COLORS[0][1] });
+
 	Zotero.defineProperty(this, 'PROPS', {
 		value: ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
 		writable: false
@@ -326,6 +341,23 @@ Zotero.Annotations = new function () {
 			}
 		}
 		return splitAnnotations;
+	};
+
+	/**
+	 * Return the distinct authors of annotations in a library, for the Annotation Author
+	 * search condition's value menu
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Promise<Object[]>} - Array of { userID, name }
+	 */
+	this.getAllAuthors = async function (libraryID) {
+		let sql = "SELECT DISTINCT u.userID AS userID, u.name AS name FROM users u "
+			+ "JOIN groupItems gi ON (gi.createdByUserID = u.userID) "
+			+ "JOIN itemAnnotations ia ON (ia.itemID = gi.itemID) "
+			+ "JOIN items i ON (i.itemID = ia.itemID) "
+			+ "WHERE i.libraryID=?";
+		let rows = await Zotero.DB.queryAsync(sql, libraryID);
+		return rows.map(row => ({ userID: row.userID, name: row.name }));
 	};
 
 	/**

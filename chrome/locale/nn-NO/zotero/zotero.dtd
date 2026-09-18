@@ -81,7 +81,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Fjern element …">
 <!ENTITY zotero.toolbar.newGroup "New Group …">
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling …">
-<!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagra søk …">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm søppelbøtta">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul taggsamling">
 <!ENTITY zotero.toolbar.actions.label "Handlingar">
@@ -92,7 +91,6 @@
 <!ENTITY zotero.toolbar.preferences.label "Innstillingar …">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">
 <!ENTITY zotero.toolbar.about.label "Om Zotero">
-<!ENTITY zotero.toolbar.advancedSearch "Avansert søk">
 <!ENTITY zotero.toolbar.openURL.label "Lokaliser">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finn gjennom det lokale biblioteket ditt">
 
@@ -120,7 +118,7 @@
 <!ENTITY zotero.toolbar.attachment.linked "Lenkje til fil …">
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil …">
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenkje til gjeldande side">
-<!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldande side">
+<!ENTITY zotero.toolbar.attachment.snapshot "Lag snøggbilete av gjeldande side">
 <!ENTITY zotero.toolbar.context.item "Item">
 <!ENTITY zotero.toolbar.context.notes "Notat">
 

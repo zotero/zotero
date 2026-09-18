@@ -1,7 +1,5 @@
 <!ENTITY zotero.search.name "Nom :">
 
-<!ENTITY zotero.search.searchInLibrary "Rechercher dans la bibliothèque :">
-
 <!ENTITY zotero.search.joinMode.prefix "Correspond">
 <!ENTITY zotero.search.joinMode.any "au moins à une">
 <!ENTITY zotero.search.joinMode.all "à toutes les">
@@ -19,7 +17,3 @@
 <!ENTITY zotero.search.date.units.days "jours">
 <!ENTITY zotero.search.date.units.months "mois">
 <!ENTITY zotero.search.date.units.years "années">
-
-<!ENTITY zotero.search.search "Rechercher">
-<!ENTITY zotero.search.clear "Effacer">
-<!ENTITY zotero.search.saveSearch "Enregistrer la recherche">

@@ -294,7 +294,15 @@ Zotero.HTTP = new function () {
 		if (!options.foreground) {
 			xmlhttp.mozBackgroundRequest = true;
 		}
-		xmlhttp.open(method, url, true, options.username, options.password);
+		// Necko percent-decodes credentials passed to open(), so encode them to preserve
+		// literal %HH sequences in the password
+		xmlhttp.open(
+			method,
+			url,
+			true,
+			options.username && encodeURIComponent(options.username),
+			options.password && encodeURIComponent(options.password)
+		);
 		
 		// Isolate cookies into a separate jar via userContextId
 		if (options.userContextId && xmlhttp.setOriginAttributes) {
@@ -694,7 +702,9 @@ Zotero.HTTP = new function () {
 		// Build headers
 		let headers = new Zotero.HTTP.CasePreservingHeaders(options.headers || {});
 		if (ctx.username) {
-			let encoded = btoa(ctx.username + ':' + (ctx.password || ''));
+			// Encode as UTF-8 before base64, since btoa() only accepts code points below 256
+			let bytes = new TextEncoder().encode(ctx.username + ':' + (ctx.password || ''));
+			let encoded = btoa(String.fromCharCode(...bytes));
 			headers.set('Authorization', `Basic ${encoded}`);
 		}
 		fetchOptions.headers = headers;
