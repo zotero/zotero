@@ -58,6 +58,20 @@
 
 		connectedCallback() {
 			this.append(this.contentFragment);
+			
+			// Prevent DOM-attached mouse handlers from running in the dropmarker area
+			for (const eventType of ['mousedown', 'mouseup', 'click']) {
+				const handler = this.getAttribute('on' + eventType);
+				if (!handler) {
+					continue;
+				}
+				this['on' + eventType] = null;
+				this.addEventListener(eventType, (event) => {
+					if (!this._isEventInDropmarkerBox(event)) {
+						eval(handler).bind(this);
+					}
+				});
+			}
 		}
 
 		disconnectedCallback() {

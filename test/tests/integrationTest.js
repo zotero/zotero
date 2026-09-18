@@ -407,7 +407,102 @@ describe("Zotero.Integration", function () {
 		displayDialogStub.restore();
 		addEditCitationSpy.restore();
 	});
-	
+
+	describe('Session', function () {
+		describe('#_relinkItems()', function () {
+			var session;
+			var firstCitation;
+			var secondCitation;
+			var firstReplacement;
+			var secondReplacement;
+
+			beforeEach(function () {
+				firstCitation = {
+					citationItems: [
+						{ id: 'stale-id', cslItemID: 'embedded/first', uris: ['old:first'] },
+						{
+							id: 'stale-unreplaced',
+							cslItemID: 'embedded/unreplaced',
+							uris: ['old:unreplaced'],
+						},
+						{ id: 2, uris: ['old:second'] },
+					],
+				};
+				secondCitation = {
+					citationItems: [
+						{ id: 'embedded/first', uris: ['old:first'] },
+					],
+				};
+				firstReplacement = { id: 100 };
+				secondReplacement = { id: 101 };
+				session = {
+					citationsByIndex: {
+						2: firstCitation,
+						9: secondCitation,
+					},
+					citationsByItemID: {},
+					updateIndices: {},
+					uriMap: {
+						getURIsForItemID: id => [`new:${id}`],
+					},
+					bibliography: {
+						uncitedItemIDs: new Set(['embedded/second']),
+						omittedItemIDs: new Set(['embedded/first']),
+						customEntryText: {
+							'embedded/first': 'First custom entry',
+							'embedded/second': 'Second custom entry',
+						},
+					},
+					bibliographyHasChanged: false,
+					bibliographyDataHasChanged: false,
+				};
+			});
+
+			it('should relink every citation occurrence and bibliography entry', function () {
+				Zotero.Integration.Session.prototype._relinkItems.call(session, [
+					{ oldItemID: 'embedded/first', item: firstReplacement },
+					{ oldItemID: 'embedded/second', item: secondReplacement },
+				]);
+
+				assert.equal(firstCitation.citationItems[0].id, firstReplacement.id);
+				assert.notProperty(firstCitation.citationItems[0], 'cslItemID');
+				assert.deepEqual(firstCitation.citationItems[0].uris, ['new:100']);
+				assert.equal(secondCitation.citationItems[0].id, firstReplacement.id);
+				assert.deepEqual(secondCitation.citationItems[0].uris, ['new:100']);
+				assert.deepEqual(Object.keys(session.updateIndices), ['2', '9']);
+				assert.deepEqual(session.citationsByItemID[firstReplacement.id], [
+					firstCitation,
+					secondCitation,
+				]);
+				assert.deepEqual(
+					session.citationsByItemID['embedded/unreplaced'],
+					[firstCitation]
+				);
+				assert.notProperty(session.citationsByItemID, 'stale-unreplaced');
+				assert.deepEqual(session.citationsByItemID[2], [firstCitation]);
+
+				assert.deepEqual(
+					[...session.bibliography.uncitedItemIDs],
+					[String(secondReplacement.id)]
+				);
+				assert.deepEqual(
+					[...session.bibliography.omittedItemIDs],
+					[String(firstReplacement.id)]
+				);
+				assert.equal(
+					session.bibliography.customEntryText[firstReplacement.id],
+					'First custom entry'
+				);
+				assert.equal(
+					session.bibliography.customEntryText[secondReplacement.id],
+					'Second custom entry'
+				);
+				assert.isTrue(session.bibliographyHasChanged);
+				assert.isTrue(session.bibliographyDataHasChanged);
+			});
+		});
+	});
+
 	describe('Interface', function () {
 		describe('#execCommand', function () {
 			var setDocumentDataSpy;
