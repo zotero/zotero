@@ -40,6 +40,11 @@
  * stageAction is opt-in via save({ undoAction, undoActionArgs }) or by an
  * outer caller invoking Zotero.UndoHistory.stageAction() directly inside
  * the transaction.
+ *
+ * Components that maintain their own history of undoable changes participate
+ * via registerProvider() and setProviderSteps(). Their steps are interleaved
+ * with the entries captured here. Providers are responsible for
+ * undoing/reapplying their changes themselves.
  */
 Zotero.UndoHistory = {
 	_undoStack: [],
@@ -47,6 +52,7 @@ Zotero.UndoHistory = {
 	_pendingEntry: null,
 	_maxSteps: 100,
 	_opQueue: Promise.resolve(),
+	_providers: new Map(),
 
 	init() {
 		// default (100) when unset or non-numeric. 0 (or less) disables undo/redo entirely.
@@ -73,9 +79,159 @@ Zotero.UndoHistory = {
 	 * @param {Integer} libraryID
 	 */
 	clearForLibrary(libraryID) {
-		let affectsLibrary = entry => entry.changes.some(change => change.libraryID === libraryID);
+		let affectsLibrary = entry => (entry.providerID
+			? entry.libraryID === libraryID
+			: entry.changes.some(change => change.libraryID === libraryID));
 		if (this._undoStack.some(affectsLibrary) || this._redoStack.some(affectsLibrary)) {
 			this.clear();
+		}
+	},
+
+	/**
+	 * Register a component that keeps its own history of undoable changes and
+	 * wants those changes to take part in the app-wide undo/redo commands.
+	 *
+	 * The provider reports its history with setProviderSteps() and does the
+	 * actual work in undo() and redo(), each of which steps the provider's
+	 * own history by one and returns whether it did so.
+	 *
+	 * @param {String} providerID
+	 * @param {Object} options
+	 * @param {Integer} options.libraryID Library the provider's changes belong to
+	 * @param {Function} options.undo () => boolean | Promise<boolean>
+	 * @param {Function} options.redo () => boolean | Promise<boolean>
+	 * @param {Function} [options.reveal] Bring the provider into view after a step
+	 * @param {Window} [options.window] Frame the provider's changes are made in,
+	 *     which therefore shouldn't be left to handle undo/redo itself
+	 */
+	registerProvider(providerID, { libraryID, undo, redo, reveal, window }) {
+		this._providers.set(providerID,
+			{ libraryID, undo, redo, reveal, window, seenSteps: new Map() });
+	},
+
+	/**
+	 * Unregister a provider and discard its entries, since nothing can apply
+	 * them anymore
+	 *
+	 * @param {String} providerID
+	 */
+	unregisterProvider(providerID) {
+		if (this._providers.delete(providerID)) {
+			this._filterEntries(entry => entry.providerID !== providerID);
+		}
+	},
+
+	/**
+	 * Bring a provider's entries in line with the provider's own history.
+	 *
+	 * Steps are ordered oldest first and identified by an ID that increases
+	 * monotonically, plus a revision that changes when a step absorbs a later
+	 * change (e.g., continued typing in an annotation comment). Steps the
+	 * provider no longer has are dropped. A step we haven't seen, or one whose
+	 * revision changed since we last saw it, covers a new change, so it goes
+	 * to the top of the undo stack. A step reported with a revision we've
+	 * already seen is left alone, so entries discarded in the meantime (e.g.
+	 * by a clear()) aren't brought back.
+	 *
+	 * @param {String} providerID
+	 * @param {Object} history
+	 * @param {{ id, revision, action, actionArgs }[]} history.undoSteps
+	 * @param {{ id, revision, action, actionArgs }[]} history.redoSteps
+	 */
+	setProviderSteps(providerID, { undoSteps = [], redoSteps = [] }) {
+		let provider = this._providers.get(providerID);
+		if (!provider || !this.isEnabled()) {
+			return;
+		}
+		let steps = [...undoSteps, ...redoSteps];
+		let stepIDs = new Set(steps.map(step => step.id));
+		this._filterEntries(
+			entry => entry.providerID !== providerID || stepIDs.has(entry.stepID)
+		);
+		let changed = false;
+		for (let step of undoSteps) {
+			if (provider.seenSteps.get(step.id) === step.revision) {
+				continue;
+			}
+			let index = this._undoStack.findIndex(
+				entry => entry.providerID === providerID && entry.stepID === step.id);
+			if (index === -1) {
+				this._undoStack.push({
+					providerID,
+					stepID: step.id,
+					libraryID: provider.libraryID,
+					action: step.action,
+					actionArgs: step.actionArgs || null
+				});
+			}
+			else {
+				this._undoStack.push(...this._undoStack.splice(index, 1));
+			}
+			changed = true;
+		}
+		provider.seenSteps = new Map(steps.map(step => [step.id, step.revision]));
+		if (changed) {
+			// Any new change invalidates redo, including one absorbed into a
+			// step we already had an entry for
+			this._redoStack = [];
+			this._trimUndoStack();
+		}
+	},
+
+	_filterEntries(keep) {
+		this._undoStack = this._undoStack.filter(keep);
+		this._redoStack = this._redoStack.filter(keep);
+	},
+
+	/**
+	 * Bring the context a change was made in back into view, so the user can see
+	 * what an undo or redo did. Providers know how to reveal themselves; for
+	 * entries we manage, focus the tab where the change was made.
+	 *
+	 * @param {Object} entry
+	 */
+	_revealEntry(entry) {
+		try {
+			if (entry.providerID) {
+				let provider = this._providers.get(entry.providerID);
+				if (provider && provider.reveal) {
+					provider.reveal();
+				}
+				return;
+			}
+			this._revealTab(entry.tabID);
+		}
+		catch (e) {
+			// A change that can't be revealed has still been applied
+			Zotero.logError(e);
+		}
+	},
+
+	/**
+	 * Select a tab in the main window, bringing the window itself forward if
+	 * it's not the one in front (e.g. when undoing from a reader window)
+	 *
+	 * @param {String} tabID
+	 */
+	_revealTab(tabID) {
+		let win = Zotero.getMainWindow();
+		// The tab may have been closed since the change was made
+		if (!tabID || !win?.Zotero_Tabs?._getTab(tabID).tab) {
+			return;
+		}
+		win.Zotero_Tabs.select(tabID);
+		if (Services.focus.activeWindow !== win) {
+			win.focus();
+		}
+	},
+
+	_getSelectedTabID() {
+		return Zotero.getMainWindow()?.Zotero_Tabs?.selectedID || null;
+	},
+
+	_trimUndoStack() {
+		if (this._undoStack.length > this._maxSteps) {
+			this._undoStack.splice(0, this._undoStack.length - this._maxSteps);
 		}
 	},
 
@@ -146,17 +302,31 @@ Zotero.UndoHistory = {
 	},
 
 	_hasNativeCommand(doc, cmd) {
-		// If focus is in a child window (e.g. note-editor or reader iframe),
-		// it handles its own undo/redo internally
+		// If focus is in a child frame, it handles its own undo/redo internally
+		// (e.g. the note editor)... unless it has a provider here, in which case
+		// its changes are ours to undo and only text editing within it wins
 		let focusedWindow = doc.commandDispatcher.focusedWindow;
 		if (focusedWindow && focusedWindow !== doc.defaultView) {
-			return true;
+			if (!this._getProviderForWindow(focusedWindow)) {
+				return true;
+			}
+			return this._isTextBoxFocused(focusedWindow, cmd);
 		}
 		let el = doc.commandDispatcher.focusedElement;
 		if (!el) return false;
-		// Iframes (note-editor, reader) handle their own undo/redo
-		// internally but don't expose XUL controllers for it
-		if (el.tagName === 'iframe' || el.tagName === 'IFRAME') return true;
+		if (['iframe', 'browser'].includes(el.localName)
+				&& !this._getProviderForWindow(el.contentWindow)) {
+			return true;
+		}
+		return this._elementSupportsCommand(el, cmd);
+	},
+
+	/**
+	 * @param {Element} el
+	 * @param {String} cmd
+	 * @return {Boolean}
+	 */
+	_elementSupportsCommand(el, cmd) {
 		let controllers;
 		try {
 			controllers = el.controllers;
@@ -172,6 +342,45 @@ Zotero.UndoHistory = {
 			}
 		}
 		return false;
+	},
+
+	/**
+	 * The provider that records the changes made in a given frame, if any
+	 *
+	 * @param {Window} win
+	 * @return {Object|undefined}
+	 */
+	_getProviderForWindow(win) {
+		// Collect the frame and its ancestors, since focus may be in a frame
+		// nested inside the provider's own (e.g., a reader's view iframe)
+		let frames = [];
+		for (; win && !frames.includes(win); win = win.parent) {
+			frames.push(win);
+		}
+		for (let provider of this._providers.values()) {
+			if (provider.window && frames.includes(provider.window)) {
+				return provider;
+			}
+		}
+		return undefined;
+	},
+
+	/**
+	 * Whether the focused element in a frame is a text box, meaning native text
+	 * editing owns undo/redo for it
+	 *
+	 * @param {Window} win
+	 * @param {String} cmd
+	 * @return {Boolean}
+	 */
+	_isTextBoxFocused(win, cmd) {
+		let el = win.document.activeElement;
+		if (!el) {
+			return false;
+		}
+		// A contenteditable's undo/redo is handled by an editing controller on
+		// the window rather than one of its own
+		return el.isContentEditable || this._elementSupportsCommand(el, cmd);
 	},
 
 	/**
@@ -239,6 +448,9 @@ Zotero.UndoHistory = {
 	async _apply({ fromStack, toStack, staleSide, applySide, label }) {
 		let entry = this[fromStack].pop();
 		if (!entry) return false;
+		if (entry.providerID) {
+			return this._applyProviderEntry(entry, { toStack, label });
+		}
 		let stale = false;
 		try {
 			await Zotero.DB.executeTransaction(async () => {
@@ -267,6 +479,7 @@ Zotero.UndoHistory = {
 				return false;
 			}
 			this[toStack].push(entry);
+			this._revealEntry(entry);
 			return true;
 		}
 		catch (e) {
@@ -281,6 +494,43 @@ Zotero.UndoHistory = {
 		}
 	},
 
+	/**
+	 * Hand an entry back to the provider that recorded it. The provider holds
+	 * the snapshots and does its own staleness checking, so all that's left
+	 * here is to step it and move the entry to the opposite stack.
+	 *
+	 * A provider that declines (or is gone) is out of step with us, so we drop
+	 * the rest of its entries rather than risk applying them out of order.
+	 * Entries captured here are self-contained, so the stacks are otherwise
+	 * left alone.
+	 *
+	 * @param {Object} entry
+	 * @param {Object} opts
+	 * @param {String} opts.toStack -- name of the stack to push the entry to on success
+	 * @param {String} opts.label -- 'undo' or 'redo'
+	 * @return {Promise<Boolean>} -- true if the entry was applied
+	 */
+	async _applyProviderEntry(entry, { toStack, label }) {
+		let provider = this._providers.get(entry.providerID);
+		let applied = false;
+		try {
+			if (provider) {
+				applied = !!(await (label === 'undo' ? provider.undo() : provider.redo()));
+			}
+		}
+		catch (e) {
+			Zotero.debug(`UndoHistory: ${label} failed for provider ${entry.providerID}: ` + e);
+		}
+		if (!applied) {
+			Zotero.debug(`UndoHistory: declining ${label} entry for provider ${entry.providerID}`);
+			this._filterEntries(other => other.providerID !== entry.providerID);
+			return false;
+		}
+		this[toStack].push(entry);
+		this._revealEntry(entry);
+		return true;
+	},
+
 	// -- Transaction lifecycle callbacks --
 
 	_onTransactionBegin(_id) {
@@ -293,15 +543,32 @@ Zotero.UndoHistory = {
 		if (this._pendingEntry && this._pendingEntry.changes.length && this._pendingEntry.action) {
 			this._undoStack.push(this._pendingEntry);
 			this._redoStack = [];
-			if (this._undoStack.length > this._maxSteps) {
-				this._undoStack.splice(0, this._undoStack.length - this._maxSteps);
-			}
+			this._trimUndoStack();
 		}
 		this._pendingEntry = null;
 	},
 
 	_onTransactionRollback(_id) {
 		this._pendingEntry = null;
+	},
+
+	/**
+	 * The entry being staged by the current transaction, created on first use.
+	 * It records the tab the change is being made in, so that undoing it later
+	 * from somewhere else can bring the user back.
+	 *
+	 * @return {Object}
+	 */
+	_ensurePendingEntry() {
+		if (!this._pendingEntry) {
+			this._pendingEntry = {
+				changes: [],
+				action: null,
+				actionArgs: null,
+				tabID: this._getSelectedTabID()
+			};
+		}
+		return this._pendingEntry;
 	},
 
 	/**
@@ -321,11 +588,9 @@ Zotero.UndoHistory = {
 			return;
 		}
 		Zotero.DB.requireTransaction();
-		if (!this._pendingEntry) {
-			this._pendingEntry = { changes: [], action: null, actionArgs: null };
-		}
-		this._pendingEntry.action = action;
-		this._pendingEntry.actionArgs = actionArgs || null;
+		let entry = this._ensurePendingEntry();
+		entry.action = action;
+		entry.actionArgs = actionArgs || null;
 	},
 
 	/**
@@ -351,6 +616,40 @@ Zotero.UndoHistory = {
 	},
 
 	/**
+	 * Update the Undo/Redo items in a window's Edit menu to name the action
+	 * they would apply (e.g. "Undo Add Tag")
+	 *
+	 * @param {Document} doc
+	 */
+	updateMenuItems(doc) {
+		// When a native text-editing controller handles undo/redo (e.g. focused
+		// input), show generic labels and let it take over
+		this._updateMenuItem(doc, 'menu_undo', 'text-action-undo', 'menu-edit-undo-action',
+			!this.hasNativeUndo(doc) && this.getUndoAction());
+		this._updateMenuItem(doc, 'menu_redo', 'text-action-redo', 'menu-edit-redo-action',
+			!this.hasNativeRedo(doc) && this.getRedoAction());
+	},
+
+	_updateMenuItem(doc, id, genericMessageID, actionMessageID, action) {
+		let menuitem = doc.getElementById(id);
+		if (!menuitem) {
+			return;
+		}
+		if (action) {
+			let actionLabel = Zotero.ftl.formatValueSync(
+				action.action, action.actionArgs || undefined
+			);
+			menuitem.removeAttribute('data-l10n-id');
+			menuitem.setAttribute('label', Zotero.ftl.formatValueSync(
+				actionMessageID, { action: actionLabel }
+			));
+		}
+		else {
+			doc.l10n.setAttributes(menuitem, genericMessageID);
+		}
+	},
+
+	/**
 	 * Stage a change record. Must be called inside a transaction; without
 	 * a matching stageAction() in the same transaction, the record is
 	 * discarded at commit.
@@ -367,9 +666,7 @@ Zotero.UndoHistory = {
 			return;
 		}
 		Zotero.DB.requireTransaction();
-		if (!this._pendingEntry) {
-			this._pendingEntry = { changes: [], action: null, actionArgs: null };
-		}
+		this._ensurePendingEntry();
 		let existing = this._pendingEntry.changes.find(
 			c => c.objectType === changeRecord.objectType && c.id === changeRecord.id);
 		if (existing) {
