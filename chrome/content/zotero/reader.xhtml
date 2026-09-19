@@ -54,7 +54,7 @@
 		<!--EDIT-->
 		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
-			oncommand="document.getElementById('zotero-tb-search').select()"/>
+			oncommand="reader.toggleFindPopup({ open: true });"/>
 
 		<!--WINDOW-->
 		<command id="minimizeWindow"
@@ -156,6 +156,13 @@
 						class="menu-type-reader pdf"
 						label="&zotero.pdfReader.rotatePageRight;"
 						oncommand="reader.rotatePageRight()"
+				/>
+				<menuseparator/>
+				<menuitem
+						id="menu_delete"
+						key="key_find"
+						label="&findCmd.label;"
+						command="cmd_find"
 				/>
 			</menupopup>
 		</menu>
