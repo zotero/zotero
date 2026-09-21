@@ -239,6 +239,18 @@ function modify_omni {
 	rm -rf default-theme
 	popd
 	
+	# Subprocess declares variadic fcntl() with a fixed third argument, so on arm64 macOS the flag
+	# is never passed and garbage can set macOS 26's FD_CLOFORK, breaking spawns with piped stdio
+	if [[ $platform != win* ]]; then
+		replace_line 'ctypes\.int \/\* \.\.\. \*\/,' '"...",' modules/subprocess/subprocess_shared_unix.js
+		replace_line 'libc\.fcntl\(fds\[0\], LIBC\.F_SETFD, LIBC\.FD_CLOEXEC\);' 'libc.fcntl(fds[0], LIBC.F_SETFD, ctypes.int(LIBC.FD_CLOEXEC));' modules/subprocess/subprocess_unix.worker.js
+		replace_line 'libc\.fcntl\(fds\[1\], LIBC\.F_SETFD, LIBC\.FD_CLOEXEC\);' 'libc.fcntl(fds[1], LIBC.F_SETFD, ctypes.int(LIBC.FD_CLOEXEC));' modules/subprocess/subprocess_unix.worker.js
+		replace_line 'libc\.fcntl\(fds\[1\], LIBC\.F_SETFL, LIBC\.O_NONBLOCK\);' 'libc.fcntl(fds[1], LIBC.F_SETFL, ctypes.int(LIBC.O_NONBLOCK));' modules/subprocess/subprocess_unix.worker.js
+		replace_line 'libc\.fcntl\(fds\[0\], LIBC\.F_SETFL, LIBC\.O_NONBLOCK\);' 'libc.fcntl(fds[0], LIBC.F_SETFL, ctypes.int(LIBC.O_NONBLOCK));' modules/subprocess/subprocess_unix.sys.mjs
+		replace_line 'libc\.fcntl\(fds\[0\], LIBC\.F_SETFD, LIBC\.FD_CLOEXEC\);' 'libc.fcntl(fds[0], LIBC.F_SETFD, ctypes.int(LIBC.FD_CLOEXEC));' modules/subprocess/subprocess_unix.sys.mjs
+		replace_line 'libc\.fcntl\(fds\[1\], LIBC\.F_SETFD, LIBC\.FD_CLOEXEC\);' 'libc.fcntl(fds[1], LIBC.F_SETFD, ctypes.int(LIBC.FD_CLOEXEC));' modules/subprocess/subprocess_unix.sys.mjs
+	fi
+	
 	# This file loads remote-settings.sys.mjs, but if it's empty Zotero crashes
 	replace_line 'async #init\(\) \{' 'async #init() { if (true) { return; }' modules/URLQueryStrippingListService.sys.mjs
 	
