@@ -34,6 +34,10 @@ const PropTypes = require("prop-types");
 
 const CHILD_INDENT = 16;
 
+// Rows that aren't backed by a collection or a saved search, in the order in which they're
+// displayed under a library
+const VIRTUAL_ROW_TYPES = ['recentlyRead', 'publications', 'duplicates', 'unfiled', 'retracted', 'trash'];
+
 var CollectionTree = class CollectionTree extends LibraryTree {
 	static async init(domEl, opts) {
 		Zotero.debug("Initializing React CollectionTree");
@@ -237,7 +241,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				|| this._hiddenFocusedRow.isGroup()
 				|| this._hiddenFocusedRow.isSearch()
 				|| this._hiddenFocusedRow.isFeed()) {
-				if (!this._includedInTree(this._hiddenFocusedRow.ref) && treeRow.id !== this._hiddenFocusedRow.id) {
+				if (!this._includedInTree(this._hiddenFocusedRow) && treeRow.id !== this._hiddenFocusedRow.id) {
 					let indexToDelete = this.getRowIndexByID(this._hiddenFocusedRow.id);
 					if (indexToDelete) {
 						this._removeRow(indexToDelete);
@@ -332,7 +336,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		div.classList.toggle('drop', this._dropRow == index);
 		div.classList.toggle('flashing', this._flashingRow == index);
 		div.classList.toggle('unread', treeRow.ref && treeRow.ref.unreadCount > 0);
-		let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(treeRow.ref);
+		let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(treeRow);
 		div.classList.toggle('context-row', !matchesFilter && hasChildMatchingFilter);
 		// Hide currently focused but filtered out row to avoid confusing itemTree
 		if (this._hiddenFocusedRow && this._hiddenFocusedRow.id == treeRow.id) {
@@ -1072,7 +1076,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					let parentIndex = rowIndex ? this.getParentIndex(rowIndex) : -1;
 					while (parentIndex > 0) {
 						let parent = this.getRow(parentIndex);
-						this._matchesFilter(parent.ref, true);
+						this._matchesFilter(parent, true);
 						parentIndex = this.getParentIndex(parentIndex);
 					}
 				}
@@ -1401,7 +1405,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// During filtering, context rows return an empty string to not be selectable
 		// with key-based navigation
 		if (!this._isFilterEmpty()) {
-			if (!this._matchesFilter(this.getRow(index).ref).matchesFilter) {
+			if (!this._matchesFilter(this.getRow(index)).matchesFilter) {
 				return "";
 			}
 		}
@@ -2847,7 +2851,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let parentRowIndex = this.getParentIndex(rowIndex);
 		while (parentRowIndex > 0) {
 			let parentRow = this.getRow(parentRowIndex);
-			if (parentRow.depth < 1 || this._matchesFilter(parentRow.ref).matchesFilter) {
+			if (parentRow.depth < 1 || this._matchesFilter(parentRow).matchesFilter) {
 				break;
 			}
 			parentRowIndex = this.getParentIndex(parentRowIndex);
@@ -2880,7 +2884,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let willBeEmpty = filterText.length == 0;
 		this._filter = Zotero.Utilities.Internal.normalizeForSearch(filterText);
 		let currentRow = this.getRow(this.selection.focused) || this._hiddenFocusedRow;
-		let currentRowDisplayed = currentRow && this._includedInTree(currentRow.ref);
+		let currentRowDisplayed = currentRow && this._includedInTree(currentRow);
 		let shouldRestoreScrollPosition = willBeEmpty && !isEmpty && !this._treeWasFocused;
 		// Save the initial scroll position, selected row and which rows were collapsed before the filtering starts
 		if (!willBeEmpty && isEmpty) {
@@ -2917,7 +2921,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (!this._isFilterEmpty()) {
 			for (let i = 0; i < this._rows.length; i++) {
 				let row = this._rows[i];
-				if (this.isContainer(i) && this._matchesFilter(row.ref).hasChildMatchingFilter && !row.isOpen) {
+				if (this.isContainer(i) && this._matchesFilter(row).hasChildMatchingFilter && !row.isOpen) {
 					await this.toggleOpenState(i);
 				}
 			}
@@ -2979,10 +2983,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	focusedRowMatchesFilter() {
 		let row = this.getRow(this.selection.focused);
-		if (row.isDuplicates() || row.isUnfiled() || row.isRetracted() || row.isTrash() || row.isPublications()) {
-			return false;
-		}
-		return this._matchesFilter(row.ref).matchesFilter;
+		return this._matchesFilter(row).matchesFilter;
 	}
 
 	filterEquals(filterValue) {
@@ -3014,7 +3015,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let row = this.getRow(index);
 		while (index < this._rows.length) {
 			row = this.getRow(index);
-			if (this._matchesFilter(row.ref).matchesFilter) {
+			if (this._matchesFilter(row).matchesFilter) {
 				// The matching row may not be selectable (e.g. Group Libraries header).
 				// In that case, just keep looking for the next row
 				let wasSelected = await this.selectByID(row.id);
@@ -3045,7 +3046,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			offset = 2;
 		}
 		let lastRow = this.getRow(this._rows.length - offset);
-		while (lastRow && !lastRow.isOpen && this._matchesFilter(lastRow.ref).hasChildMatchingFilter) {
+		while (lastRow && !lastRow.isOpen && this._matchesFilter(lastRow).hasChildMatchingFilter) {
 			await this.toggleOpenState(this._rows.length - 1);
 			lastRow = this.getRow(this._rows.length - offset);
 			// Sanity check to make sure we are not stuck in an infinite loop if something goes wrong
@@ -3088,7 +3089,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				return false;
 			}
 			// Select the row if it's matching the filter unless it's a header or separator
-			if (this._matchesFilter(nextRow.ref).matchesFilter
+			if (this._matchesFilter(nextRow).matchesFilter
 				&& !["separator", "header"].includes(nextRow.type)) {
 				this.tree.focus();
 				return this.selectByID(nextRow.id);
@@ -3099,9 +3100,92 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
+	 * Get which virtual rows are shown for a given library
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Object} - Object with a boolean property for each type in VIRTUAL_ROW_TYPES
+	 */
+	_getVirtualRowVisibility(libraryID) {
+		// Virtual collections default to showing if not explicitly hidden
+		return {
+			recentlyRead: this._virtualCollectionLibraries.recentlyRead?.[libraryID] !== false,
+			publications: this.props.hideSources.indexOf('publications') == -1
+				&& this._virtualCollectionLibraries.publications?.[libraryID] !== false
+				&& libraryID == Zotero.Libraries.userLibraryID,
+			duplicates: this.props.hideSources.indexOf('duplicates') == -1
+				&& this._virtualCollectionLibraries.duplicates?.[libraryID] !== false,
+			unfiled: this.props.hideSources.indexOf('unfiled') == -1
+				&& this._virtualCollectionLibraries.unfiled?.[libraryID] !== false,
+			retracted: this.props.hideSources.indexOf('retracted') == -1
+				&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
+				&& Zotero.Retractions.libraryHasRetractedItems(libraryID),
+			trash: this.props.hideSources.indexOf('trash') == -1
+		};
+	}
+
+	/**
+	 * Get the display name of a virtual row
+	 *
+	 * @param {String} type - One of VIRTUAL_ROW_TYPES
+	 * @return {String}
+	 */
+	_getVirtualRowName(type) {
+		switch (type) {
+			case 'recentlyRead':
+				return Zotero.getString('recently-read');
+			
+			case 'publications':
+				return Zotero.getString('pane.collections.publications');
+			
+			case 'duplicates':
+				return Zotero.getString('pane.collections.duplicate');
+			
+			case 'unfiled':
+				return Zotero.getString('pane.collections.unfiled');
+			
+			case 'retracted':
+				return Zotero.getString('pane.collections.retracted');
+			
+			case 'trash':
+				return Zotero.getString('pane.collections.trash');
+		}
+		throw new Error(`Unknown virtual row type '${type}'`);
+	}
+
+	/**
+	 * Get the names of the virtual rows displayed under a given library, to check whether the
+	 * library has children matching the filter
+	 *
+	 * @param {Integer} libraryID
+	 * @return {String[]}
+	 */
+	_getVisibleVirtualRowNames(libraryID) {
+		let visibility = this._getVirtualRowVisibility(libraryID);
+		// The trash is hidden when empty, which is only known once the library has been expanded
+		if (this._trashNotEmpty[libraryID] === false && !Zotero.Prefs.get('showTrashWhenEmpty')) {
+			visibility.trash = false;
+		}
+		return VIRTUAL_ROW_TYPES.filter(type => visibility[type]).map(type => this._getVirtualRowName(type));
+	}
+
+	/**
+	 * Check if a virtual row matches the filter
+	 *
+	 * @param {String} type - One of VIRTUAL_ROW_TYPES
+	 * @return {Boolean}
+	 */
+	_virtualRowMatchesFilter(type) {
+		if (this._isFilterEmpty()) {
+			return true;
+		}
+		let name = Zotero.Utilities.Internal.normalizeForSearch(this._getVirtualRowName(type));
+		return name.includes(this._filter);
+	}
+
+	/**
 	 * Check if a given object matches filter or has children that match the filter.
 	 *
-	 * @param {Collection|Search|Library|Group} object - Object to check
+	 * @param {CollectionTreeRow|Collection|Search|Library|Group} object - Object or row to check
 	 * @param {Bool} resetCache - Ignore and reset existing cache value for that object
 	 * @return {Object} { matchesFilter: Bool, hasChildMatchingFilter: Bool }
 	 * 		matchesFilter = object itself matches the filter
@@ -3111,6 +3195,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// When the filter is empty, everything matches
 		if (this._isFilterEmpty()) {
 			return { matchesFilter: true, hasChildMatchingFilter: true };
+		}
+		// The refs of virtual rows don't identify them (e.g., the Trash's ref is just a
+		// libraryID), so they're matched by row
+		if (object instanceof Zotero.CollectionTreeRow) {
+			if (VIRTUAL_ROW_TYPES.includes(object.type)) {
+				return {
+					matchesFilter: this._virtualRowMatchesFilter(object.type),
+					hasChildMatchingFilter: false
+				};
+			}
+			object = object.ref;
 		}
 		// Handle separator or group headers
 		if ((object.libraryID === undefined || object.libraryID === -1) && !object.updateFeed) {
@@ -3142,6 +3237,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let filterValue = this._filter;
 
 		let childrenToSearch = [];
+		let virtualRowNames = [];
 		if (object._ObjectType == 'Collection') {
 			let collection = Zotero.Collections.get(object.id);
 			childrenToSearch = collection.getChildCollections();
@@ -3149,16 +3245,20 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (object.libraryID && !["Search", "Feeds"].includes(object._ObjectType)) {
 			childrenToSearch = Zotero.Collections.getByLibrary(object.libraryID);
 			childrenToSearch = childrenToSearch.concat(Zotero.Searches.getByLibrary(object.libraryID));
+			if (object._ObjectType != 'Feed') {
+				virtualRowNames = this._getVisibleVirtualRowNames(object.libraryID);
+			}
 		}
 		else if (objectID == 'feeds') {
 			childrenToSearch = Zotero.Feeds.getAll();
 		}
 		let matchesFilter = objectName.includes(filterValue);
 		// For libraries, groups and collections, recursively check if they have any children that match the filter
-		let hasChildMatchingFilter = childrenToSearch.some((child) => {
-			let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(child);
-			return matchesFilter || hasChildMatchingFilter;
-		});
+		let hasChildMatchingFilter = virtualRowNames.some(name => normalize(name).includes(filterValue))
+			|| childrenToSearch.some((child) => {
+				let { matchesFilter, hasChildMatchingFilter } = this._matchesFilter(child);
+				return matchesFilter || hasChildMatchingFilter;
+			});
 		// Save filter status to cache
 		this._filterResultsCache[objectID] = {
 			matchesFilter: matchesFilter,
@@ -3172,15 +3272,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * 	1. It matches the searchbox filter OR
 	 * 	2. Its children match the searchbox filter AND
 	 * 	3. It is allowed by filter prop
-	 * @param {Collection|Search|Library|Group} object - Object to check
+	 * @param {CollectionTreeRow|Collection|Search|Library|Group} object - Object or row to check
 	 * @param {Bool} resetCache - Ignore and reset existing cache value for that object
 	 * @returns {boolean} Whether the object should be included in the tree
 	 */
 	_includedInTree(object, resetCache) {
-		const notACollection = (object.libraryID === undefined || object.libraryID === -1) && !object.updateFeed;
+		const ref = object instanceof Zotero.CollectionTreeRow ? object.ref : object;
+		const notACollection = (ref.libraryID === undefined || ref.libraryID === -1) && !ref.updateFeed;
 		const treeHasFilterProp = Array.isArray(this.props.filterLibraryIDs) && this.props.filterLibraryIDs;
 		const isAllowedByPropFilter = notACollection || !treeHasFilterProp
-			|| this.props.filterLibraryIDs.includes(object.libraryID)
+			|| this.props.filterLibraryIDs.includes(ref.libraryID)
 		;
 		
 		if (!isAllowedByPropFilter) return false;
@@ -3205,29 +3306,19 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		if (isLibrary) {
 			var savedSearches = (await Zotero.Searches.getAll(libraryID)).filter(s => !s.deleted);
-			// Virtual collections default to showing if not explicitly hidden
-			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
-				&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
-			var showUnfiled = this.props.hideSources.indexOf('unfiled') == -1
-				&& this._virtualCollectionLibraries.unfiled?.[libraryID] !== false;
-			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead?.[libraryID] !== false;
-			var showRetracted = this.props.hideSources.indexOf('retracted') == -1
-				&& this._virtualCollectionLibraries.retracted?.[libraryID] !== false
-				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
-			var showPublications = this.props.hideSources.indexOf('publications') == -1
-				&& this._virtualCollectionLibraries.publications?.[libraryID] !== false
-				&& libraryID == Zotero.Libraries.userLibraryID;
-			var showTrash = this.props.hideSources.indexOf('trash') == -1;
+			var virtualRows = this._getVirtualRowVisibility(libraryID);
 		}
 		else {
 			var savedSearches = [];
-			var showDuplicates = false;
-			var showUnfiled = false;
-			var showRecentlyRead = false;
-			var showRetracted = false;
-			var showPublications = false;
-			var showTrash = false;
+			var virtualRows = {};
 		}
+		// Virtual rows are shown while filtering if their names match the filter
+		var showDuplicates = virtualRows.duplicates && this._virtualRowMatchesFilter('duplicates');
+		var showUnfiled = virtualRows.unfiled && this._virtualRowMatchesFilter('unfiled');
+		var showRecentlyRead = virtualRows.recentlyRead && this._virtualRowMatchesFilter('recentlyRead');
+		var showRetracted = virtualRows.retracted && this._virtualRowMatchesFilter('retracted');
+		var showPublications = virtualRows.publications && this._virtualRowMatchesFilter('publications');
+		var showTrash = virtualRows.trash && this._virtualRowMatchesFilter('trash');
 		
 		// If not a manual open and either the library is set to be collapsed or this is a collection that isn't explicitly opened,
 		// set the initial state to closed
@@ -3238,7 +3329,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return 0;
 		}
 
-		var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showRecentlyRead || showRetracted || showTrash);
+		var startOpen = !!(collections.length || savedSearches.length || virtualRows.duplicates
+			|| virtualRows.unfiled || virtualRows.recentlyRead || virtualRows.retracted || virtualRows.trash);
 		
 		// If this isn't a manual open, set the initial state depending on whether
 		// there are child nodes
@@ -3253,7 +3345,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var newRows = 0;
 		
 		// Recently Read
-		if (showRecentlyRead && this._isFilterEmpty()) {
+		if (showRecentlyRead) {
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this,
 					'recentlyRead',
@@ -3296,7 +3388,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			newRows++;
 		}
 		
-		if (showPublications && this._isFilterEmpty()) {
+		if (showPublications) {
 			// Add "My Publications"
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this,
@@ -3312,7 +3404,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		// Duplicate items
-		if (showDuplicates && this._isFilterEmpty()) {
+		if (showDuplicates) {
 			let d = new Zotero.Duplicates(libraryID);
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'duplicates', d, level + 1));
@@ -3320,7 +3412,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		// Unfiled items
-		if (showUnfiled && this._isFilterEmpty()) {
+		if (showUnfiled) {
 			let s = new Zotero.Search;
 			s.libraryID = libraryID;
 			s.name = Zotero.getString('pane.collections.unfiled');
@@ -3332,7 +3424,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 
 		// Retracted items
-		if (showRetracted && this._isFilterEmpty()) {
+		if (showRetracted) {
 			let s = new Zotero.Search;
 			s.libraryID = libraryID;
 			s.name = Zotero.getString('pane.collections.retracted');
@@ -3343,11 +3435,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			newRows++;
 		}
 		
-		if (showTrash && this._isFilterEmpty()) {
+		if (showTrash) {
 			let deletedItems = await Zotero.Items.getDeleted(libraryID, true);
 			let deletedCollections = await Zotero.Collections.getDeleted(libraryID, true);
 			let deletedSearches = await Zotero.Searches.getDeleted(libraryID, true);
-			let trashNotEmpty = deletedItems.length || deletedCollections.length || deletedSearches.length;
+			let trashNotEmpty = !!(deletedItems.length || deletedCollections.length || deletedSearches.length);
 			if (trashNotEmpty || Zotero.Prefs.get("showTrashWhenEmpty")) {
 				var ref = {
 					libraryID: libraryID

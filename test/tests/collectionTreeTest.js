@@ -2061,6 +2061,36 @@ describe("Zotero.CollectionTree", function () {
 			});
 		}
 
+		it('should show and allow selecting a virtual row matching the filter', async function () {
+			await cv.setFilter(Zotero.getString('pane.collections.trash'));
+			
+			let index = cv.getRowIndexByID("T" + userLibraryID);
+			assert.notStrictEqual(index, false);
+			await cv.focusFirstMatchingRow();
+			assert.isTrue(cv.getRow(cv.selection.focused).isTrash());
+		});
+
+		it('should not show a library whose trash is empty and hidden', async function () {
+			Zotero.Prefs.set('showTrashWhenEmpty', false);
+			var group = await createGroup();
+			try {
+				await cv.setFilter(Zotero.getString('pane.collections.trash'));
+				
+				assert.isFalse(cv.getRowIndexByID("L" + group.libraryID));
+			}
+			finally {
+				Zotero.Prefs.clear('showTrashWhenEmpty');
+				await group.eraseTx();
+			}
+		});
+
+		it('should hide a virtual row not matching the filter', async function () {
+			await cv.setFilter("collection");
+			
+			assert.isFalse(cv.getRowIndexByID("T" + userLibraryID));
+			assert.isFalse(cv.getRowIndexByID("U" + userLibraryID));
+		});
+
 		it('should match an accented collection name from an unaccented filter', async function () {
 			var collection = await createDataObject('collection', { name: "zdiacrésumé", libraryID: userLibraryID });
 			await cv.setFilter("zdiacresume");
