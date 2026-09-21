@@ -239,8 +239,16 @@ function modify_omni {
 	rm -rf default-theme
 	popd
 	
-	# Subprocess declares variadic fcntl() with a fixed third argument, so on arm64 macOS the flag
-	# is never passed and garbage can set macOS 26's FD_CLOFORK, breaking spawns with piped stdio
+	# fcntl() is variadic, but js-ctypes declares it with a fixed third argument, which violates
+	# the ABI on every platform. It's harmless on Linux, where variadic and fixed integer
+	# arguments are passed in the same registers, but Apple's arm64 ABI passes variadic
+	# arguments on the stack, so the flag goes into a register the callee never reads and
+	# fcntl() takes it from an uninitialized stack slot instead. F_SETFD can therefore set
+	# FD_CLOFORK (bit 1, added in macOS 26) rather than FD_CLOEXEC, closing the pipe in the
+	# forked child and breaking Subprocess spawns, and F_SETFL can silently fail to set
+	# O_NONBLOCK. Since the value comes from leftover stack contents, this varies by build and
+	# call path instead of failing consistently -- don't assume it's fixed just because a given
+	# build works. This change should stay until this is fixed upstream.
 	if [[ $platform != win* ]]; then
 		replace_line 'ctypes\.int \/\* \.\.\. \*\/,' '"...",' modules/subprocess/subprocess_shared_unix.js
 		replace_line 'libc\.fcntl\(fds\[0\], LIBC\.F_SETFD, LIBC\.FD_CLOEXEC\);' 'libc.fcntl(fds[0], LIBC.F_SETFD, ctypes.int(LIBC.FD_CLOEXEC));' modules/subprocess/subprocess_unix.worker.js
