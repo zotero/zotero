@@ -837,17 +837,26 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 * Get a storage controller for a given mode ('zfs', 'webdav'),
 	 * caching it if necessary
 	 */
-	this.getStorageController = function (mode, options) {
-		if (_storageControllers[mode]) {
-			return _storageControllers[mode];
+	this.getStorageController = function (mode, options = {}) {
+		let controllerKey = Zotero.Sync.Storage.Profiles.getControllerKey(mode, options);
+		if (_storageControllers[controllerKey]) {
+			return _storageControllers[controllerKey];
 		}
 		var modeClass = Zotero.Sync.Storage.Utilities.getClassForMode(mode);
-		return _storageControllers[mode] = new modeClass(options);
+		return _storageControllers[controllerKey] = new modeClass(options);
 	},
 	
 	
-	this.resetStorageController = function (mode) {
-		delete _storageControllers[mode];
+	this.resetStorageController = function (mode, options) {
+		if (options) {
+			delete _storageControllers[Zotero.Sync.Storage.Profiles.getControllerKey(mode, options)];
+			return;
+		}
+		for (let key of Object.keys(_storageControllers)) {
+			if (key == mode || key.startsWith(mode + ':')) {
+				delete _storageControllers[key];
+			}
+		}
 	},
 	
 	
@@ -872,7 +881,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		var itemID = item.id;
 		var modeClass = Zotero.Sync.Storage.Local.getClassForLibrary(item.libraryID);
 		var controller = new modeClass({
-			apiClient: this.getAPIClient({apiKey })
+			apiClient: this.getAPIClient({apiKey }),
+			libraryID: item.libraryID
 		});
 		
 		// TODO: verify WebDAV on-demand?
@@ -1699,6 +1709,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 	this.deleteAPIKey = async function () {
 		this.resetStorageController('zfs');
+		this.resetStorageController('webdav');
 		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		var client = this.getAPIClient({apiKey});
 		// Remove streaming subscription before clearing the key

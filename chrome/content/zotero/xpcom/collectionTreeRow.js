@@ -247,14 +247,12 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 	}
 	var libraryID = this.ref.libraryID;
 	if (this.isGroup()) {
-		return this.ref.editable && this.ref.filesEditable;
+		return Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID);
 	}
 	if (this.isCollection() || this.isSearch() || this.isDuplicates() || this.isUnfiled() || this.isRecentlyRead() || this.isRetracted()) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return group.editable && group.filesEditable;
+			return Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID);
 		}
 		throw ("Unknown library type '" + type + "' in Zotero.CollectionTreeRow.filesEditable");
 	}

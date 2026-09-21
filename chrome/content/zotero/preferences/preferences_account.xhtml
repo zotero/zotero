@@ -195,6 +195,92 @@
 
 				</stack>
 
+				<separator class="thin"/>
+
+				<vbox id="storage-profile-settings" class="storage-profile-settings">
+					<label><html:h3 data-l10n-id="preferences-sync-fileSyncing-webDAVProfiles-title"/></label>
+					<description class="storage-profile-description"
+						data-l10n-id="preferences-sync-fileSyncing-webDAVProfiles-description"/>
+
+					<html:div class="form-grid storage-profile-editor">
+						<label control="storage-profile-selector"
+							data-l10n-id="preferences-sync-fileSyncing-profile"/>
+						<hbox align="center">
+							<menulist id="storage-profile-selector"
+								oncommand="Zotero_Preferences.Sync.onStorageProfileSelect()"
+								native="true">
+								<menupopup/>
+							</menulist>
+							<button id="storage-profile-new"
+								data-l10n-id="preferences-sync-fileSyncing-profile-new"
+								oncommand="Zotero_Preferences.Sync.newStorageProfile()"/>
+							<button id="storage-profile-delete"
+								data-l10n-id="preferences-sync-fileSyncing-profile-delete"
+								oncommand="Zotero_Preferences.Sync.deleteStorageProfile()"/>
+						</hbox>
+
+						<label control="storage-profile-id"
+							data-l10n-id="preferences-sync-fileSyncing-profile-id"/>
+						<hbox>
+							<html:input id="storage-profile-id"/>
+						</hbox>
+
+						<label control="storage-profile-url-prefix" value="&zotero.preferences.sync.fileSyncing.url;"/>
+						<hbox>
+							<menulist id="storage-profile-url-prefix"
+								style="padding: 0; width: 7em"
+								native="true">
+								<menupopup>
+									<menuitem label="https" value="https"/>
+									<menuitem label="http" value="http"/>
+								</menupopup>
+							</menulist>
+							<label value="://"/>
+							<html:input id="storage-profile-url" style="flex: 1;"
+								aria-label="&zotero.preferences.sync.fileSyncing.url;"/>
+							<label value="/zotero/"/>
+						</hbox>
+
+						<label control="storage-profile-username" value="&zotero.preferences.sync.username;"/>
+						<hbox>
+							<html:input id="storage-profile-username"/>
+						</hbox>
+
+						<label control="storage-profile-password" value="&zotero.preferences.sync.password;"/>
+						<hbox>
+							<html:input id="storage-profile-password" type="password"
+								data-l10n-id="preferences-sync-fileSyncing-profile-password-placeholder"/>
+						</hbox>
+
+						<box/>
+						<hbox align="center">
+							<button id="storage-profile-copy-current"
+								data-l10n-id="preferences-sync-fileSyncing-profile-copy-current"
+								oncommand="Zotero_Preferences.Sync.copyCurrentWebDAVToStorageProfile()"/>
+							<button id="storage-profile-save"
+								data-l10n-id="preferences-sync-fileSyncing-profile-save"
+								oncommand="Zotero_Preferences.Sync.saveStorageProfile()"/>
+							<button id="storage-profile-verify"
+								data-l10n-id="preferences-sync-fileSyncing-profile-verify"
+								oncommand="Zotero_Preferences.Sync.verifyStorageProfile()"/>
+							<progressmeter id="storage-profile-progress" hidden="true"
+								mode="undetermined"/>
+						</hbox>
+					</html:div>
+					<label id="storage-profile-status" class="storage-profile-status"/>
+				</vbox>
+
+				<separator class="thin"/>
+
+				<vbox id="storage-library-profile-settings" class="storage-library-profile-settings">
+					<label><html:h3 data-l10n-id="preferences-sync-fileSyncing-library-storage-title"/></label>
+					<description class="storage-profile-description"
+						data-l10n-id="preferences-sync-fileSyncing-library-storage-description"/>
+					<vbox id="storage-library-profile-list"/>
+				</vbox>
+
+				<separator class="thin"/>
+
 				<hbox class="storage-settings-download-options" align="center">
 					<label control="storage-user-download-mode" value="&zotero.preferences.sync.fileSyncing.download;"/>
 					<menulist id="storage-user-download-mode"

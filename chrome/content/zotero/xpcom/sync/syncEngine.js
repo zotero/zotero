@@ -2262,23 +2262,31 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = async function (obje
 					// If we do still have file-editing access, something else went wrong,
 					// and we should just fail without resetting
 					if (!filesEditable) {
+						if (Zotero.Sync.Storage.Profiles.getWebDAVProfileForLibrary(this.libraryID)) {
+							e.message = "zotero.org rejected attachment metadata because the group "
+								+ "does not allow Zotero Storage file editing. The assigned WebDAV "
+								+ "profile prevents local file resets, but attachment metadata sync "
+								+ "requires Zotero group file editing access or WebDAV-backed metadata sync.";
+							return false;
+						}
+
 						let index = Zotero.Sync.Storage.Utilities.showFileWriteAccessLostPrompt(
 							null, this.library
 						);
 						
-						let e = new Error(message);
+						let error = new Error(message);
 						if (index === 0) {
 							let group = Zotero.Groups.get(groupID);
 							group.filesEditable = false;
 							await group.saveTx();
 							
 							await Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(this.libraryID);
-							e.name = "ZoteroUploadRestartError";
+							error.name = "ZoteroUploadRestartError";
 						}
 						else {
-							e.name = "ZoteroUploadCancelError";
+							error.name = "ZoteroUploadCancelError";
 						}
-						throw e;
+						throw error;
 					}
 				}
 				else {

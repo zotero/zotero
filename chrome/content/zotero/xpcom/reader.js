@@ -2275,8 +2275,7 @@ class ReaderWindow extends ReaderInstance {
 		let importFromEPUBMenuitem = this._window.document.getElementById('menu_importFromEPUB');
 		
 		if (item
-			&& library.filesEditable
-			&& library.editable
+			&& Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID)
 			&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 			let annotations = item.getAnnotations();
 			let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);

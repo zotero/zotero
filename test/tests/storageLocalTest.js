@@ -1,6 +1,420 @@
 "use strict";
 
 describe("Zotero.Sync.Storage.Local", function () {
+	describe("#getModeForLibrary()", function () {
+		it("should use a configured WebDAV profile for a group library", async function () {
+			let group = await createGroup({ editable: true, filesEditable: true });
+			let originalGroupsEnabled = Zotero.Prefs.get('sync.storage.groups.enabled');
+			Zotero.Prefs.set('sync.storage.groups.enabled', false);
+
+			try {
+				assert.equal(Zotero.Sync.Storage.Local.getModeForLibrary(group.libraryID), 'zfs');
+				assert.isFalse(Zotero.Sync.Storage.Local.getEnabledForLibrary(group.libraryID));
+
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile('project-a', {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					'project-a',
+					{ resetSyncState: false }
+				);
+
+				assert.equal(
+					Zotero.Sync.Storage.Local.getModeForLibrary(group.libraryID),
+					'webdav'
+				);
+				assert.isTrue(Zotero.Sync.Storage.Local.getEnabledForLibrary(group.libraryID));
+				assert.propertyVal(
+					Zotero.Sync.Storage.Profiles.getWebDAVProfileForLibrary(group.libraryID),
+					'url',
+					'dav.example.com/project-a'
+				);
+
+				await Zotero.Sync.Storage.Profiles.clearLibraryProfile(
+					group.libraryID,
+					{ resetSyncState: false }
+				);
+				assert.equal(Zotero.Sync.Storage.Local.getModeForLibrary(group.libraryID), 'zfs');
+				assert.isFalse(Zotero.Sync.Storage.Local.getEnabledForLibrary(group.libraryID));
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile('project-a');
+				Zotero.Prefs.set('sync.storage.groups.enabled', originalGroupsEnabled);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should allow local file saves for an editable group with a configured WebDAV profile", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+
+			try {
+				assert.isFalse(Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(group.libraryID));
+
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile('project-a', {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					'project-a',
+					{ resetSyncState: false }
+				);
+
+				assert.isTrue(Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(group.libraryID));
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile('project-a');
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should not allow local file saves for a non-editable group with a configured WebDAV profile", async function () {
+			let group = await createGroup({ editable: false, filesEditable: false });
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				assert.isFalse(Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(group.libraryID));
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(profileID);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should import stored file attachments into an editable WebDAV-profile group", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			let attachment;
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile('project-a', {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					'project-a',
+					{ resetSyncState: false }
+				);
+
+				attachment = await importFileAttachment('test.pdf', { libraryID: group.libraryID });
+
+				assert.equal(attachment.libraryID, group.libraryID);
+				assert.isTrue(attachment.isFileAttachment());
+				assert.isTrue(await IOUtils.exists(attachment.getFilePath()));
+			}
+			finally {
+				if (attachment) {
+					await attachment.eraseTx();
+				}
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile('project-a');
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should clear profile credentials when deleting a WebDAV profile", async function () {
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user',
+					password: 'old-password'
+				});
+
+				let controller = new Zotero.Sync.Storage.Mode.WebDAV({ profileID });
+				assert.equal(await controller.getPassword(), 'old-password');
+
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(profileID);
+
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				controller = new Zotero.Sync.Storage.Mode.WebDAV({ profileID });
+				assert.equal(await controller.getPassword(), '');
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(profileID);
+			}
+		});
+
+		it("should reject reserved WebDAV profile IDs", async function () {
+			let e = await getPromiseError(Zotero.Sync.Storage.Profiles.setWebDAVProfile('__proto__', {
+				scheme: 'https',
+				url: 'dav.example.com/project-a',
+				username: 'user'
+			}));
+			assert.include(e.message, "reserved");
+		});
+
+		it("should reset assigned library sync states when a WebDAV profile connection changes", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+			let attachment;
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				attachment = await importFileAttachment('test.pdf', { libraryID: group.libraryID });
+				attachment.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
+				await attachment.saveTx({ skipAll: true });
+				group.libraryVersion = group.storageVersion = 10;
+				await group.saveTx();
+
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-b',
+					username: 'user'
+				});
+
+				assert.equal(
+					Zotero.Items.get(attachment.id).attachmentSyncState,
+					Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
+				);
+				assert.equal(Zotero.Libraries.get(group.libraryID).storageVersion, -1);
+			}
+			finally {
+				if (attachment) {
+					await attachment.eraseTx({ skipEditCheck: true });
+				}
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID,
+					{ resetSyncState: false }
+				);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should reset assigned library sync states when deleting a WebDAV profile", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+			let attachment;
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				attachment = await importFileAttachment('test.pdf', { libraryID: group.libraryID });
+				attachment.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
+				await attachment.saveTx({ skipAll: true });
+				group.libraryVersion = group.storageVersion = 10;
+				await group.saveTx();
+
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(profileID);
+
+				assert.equal(
+					Zotero.Items.get(attachment.id).attachmentSyncState,
+					Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD
+				);
+				assert.equal(Zotero.Libraries.get(group.libraryID).storageVersion, -1);
+			}
+			finally {
+				if (attachment) {
+					await attachment.eraseTx({ skipEditCheck: true });
+				}
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID,
+					{ resetSyncState: false }
+				);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should reject assigning one WebDAV profile to multiple libraries", async function () {
+			let group1 = await createGroup({ editable: true, filesEditable: false });
+			let group2 = await createGroup({ editable: true, filesEditable: false });
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group1.libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				let e = await getPromiseError(
+					Zotero.Sync.Storage.Profiles.setLibraryProfile(
+						group2.libraryID,
+						profileID,
+						{ resetSyncState: false }
+					)
+				);
+				assert.include(e.message, "already assigned to another library");
+
+				await Zotero.Sync.Storage.Profiles.clearLibraryProfile(
+					group1.libraryID,
+					{ resetSyncState: false }
+				);
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group2.libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+				assert.equal(
+					Zotero.Sync.Storage.Profiles.getLibraryProfileID(group2.libraryID),
+					profileID
+				);
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(profileID);
+				await group1.eraseTx({ skipDeleteLog: true });
+				await group2.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should reject assigning duplicate WebDAV roots to multiple libraries", async function () {
+			let group1 = await createGroup({ editable: true, filesEditable: false });
+			let group2 = await createGroup({ editable: true, filesEditable: false });
+			let profileID1 = 'project-' + Zotero.Utilities.randomString(8);
+			let profileID2 = 'project-' + Zotero.Utilities.randomString(8);
+
+			try {
+				for (let profileID of [profileID1, profileID2]) {
+					await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+						scheme: 'https',
+						url: 'dav.example.com/shared',
+						username: 'user'
+					});
+				}
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group1.libraryID,
+					profileID1,
+					{ resetSyncState: false }
+				);
+
+				let e = await getPromiseError(
+					Zotero.Sync.Storage.Profiles.setLibraryProfile(
+						group2.libraryID,
+						profileID2,
+						{ resetSyncState: false }
+					)
+				);
+				assert.include(e.message, "same WebDAV URL");
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID1,
+					{ resetSyncState: false }
+				);
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID2,
+					{ resetSyncState: false }
+				);
+				await group1.eraseTx({ skipDeleteLog: true });
+				await group2.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should reject assigning a group profile with the active global WebDAV root", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			let profileID = 'project-' + Zotero.Utilities.randomString(8);
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let originalUserProfileID = Zotero.Sync.Storage.Profiles.getLibraryProfileID(userLibraryID);
+			let originalPrefs = {
+				enabled: Zotero.Prefs.get('sync.storage.enabled'),
+				protocol: Zotero.Prefs.get('sync.storage.protocol'),
+				scheme: Zotero.Prefs.get('sync.storage.scheme'),
+				url: Zotero.Prefs.get('sync.storage.url')
+			};
+
+			try {
+				if (originalUserProfileID) {
+					await Zotero.Sync.Storage.Profiles.clearLibraryProfile(
+						userLibraryID,
+						{ resetSyncState: false }
+					);
+				}
+				Zotero.Prefs.set('sync.storage.enabled', true);
+				Zotero.Prefs.set('sync.storage.protocol', 'webdav');
+				Zotero.Prefs.set('sync.storage.scheme', 'https');
+				Zotero.Prefs.set('sync.storage.url', 'dav.example.com/shared');
+
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/shared',
+					username: 'user'
+				});
+
+				let e = await getPromiseError(
+					Zotero.Sync.Storage.Profiles.setLibraryProfile(
+						group.libraryID,
+						profileID,
+						{ resetSyncState: false }
+					)
+				);
+				assert.include(e.message, "global WebDAV");
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID,
+					{ resetSyncState: false }
+				);
+				for (let [pref, value] of Object.entries(originalPrefs)) {
+					Zotero.Prefs.set(`sync.storage.${pref}`, value);
+				}
+				if (originalUserProfileID) {
+					await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+						userLibraryID,
+						originalUserProfileID,
+						{ resetSyncState: false }
+					);
+				}
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should use distinct controller keys for global WebDAV and a profile named default", async function () {
+			assert.equal(
+				Zotero.Sync.Storage.Profiles.getControllerKey('webdav'),
+				'webdav:global'
+			);
+			assert.equal(
+				Zotero.Sync.Storage.Profiles.getControllerKey('webdav', { profileID: 'default' }),
+				'webdav:profile:default'
+			);
+		});
+	});
+
 	describe("#checkForUpdatedFiles()", function () {
 		it("should flag modified file for upload and return it", async function () {
 			// Create attachment

@@ -132,7 +132,7 @@ Zotero.Sync.Storage.Engine.prototype.start = async function () {
 	//
 	// TODO: If files are persistently missing, don't try to download them each time
 	
-	var filesEditable = Zotero.Libraries.get(libraryID).filesEditable;
+	var filesEditable = Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID);
 	this.requestsRemaining = 0;
 	
 	// Clear over-quota flag on manual sync

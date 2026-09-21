@@ -34,15 +34,24 @@ Zotero.Server.Connector = {
 		var editable = null;
 		
 		if (zp && zp.collectionsView) {
-			if (allowReadOnly || zp.collectionsView.editable && allowFilesReadOnly || zp.collectionsView.filesEditable) {
-				// The Connector saves to a single target, so derive both the library and the
-				// collection from the focused row. A multiple-collection selection in the pane
-				// isn't expressible here yet, and the other selected rows could otherwise
-				// contribute a collection from a different library than the focused row.
-				let treeRow = zp.collectionsView.selectedTreeRow;
-				library = treeRow?.ref?.libraryID !== undefined
-					? Zotero.Libraries.get(treeRow.ref.libraryID)
-					: null;
+			// The Connector saves to a single target, so derive both the library and the
+			// collection from the focused row. A multiple-collection selection in the pane
+			// isn't expressible here yet, and the other selected rows could otherwise
+			// contribute a collection from a different library than the focused row.
+			let treeRow = zp.collectionsView.selectedTreeRow;
+			let selectedLibrary = treeRow?.ref?.libraryID !== undefined
+				? Zotero.Libraries.get(treeRow.ref.libraryID)
+				: null;
+			let selectedFilesEditable = selectedLibrary
+				? Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(selectedLibrary.libraryID)
+				: zp.collectionsView.filesEditable;
+
+			if (
+				allowReadOnly
+				|| zp.collectionsView.editable && allowFilesReadOnly
+				|| selectedFilesEditable
+			) {
+				library = selectedLibrary;
 				collection = treeRow && treeRow.isCollection() ? treeRow.ref : null;
 				editable = zp.collectionsView.editable;
 			}
@@ -502,7 +511,7 @@ Zotero.Server.Connector.SaveAttachment.prototype = {
 		}
 		
 		let { library } = Zotero.Server.Connector.getSaveTarget();
-		if (!library.filesEditable) {
+		if (!Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID)) {
 			return [200, 'text/plain', 'Library files are not editable.'];
 		}
 
@@ -563,7 +572,7 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 		}
 
 		let { library } = Zotero.Server.Connector.getSaveTarget();
-		if (!library.filesEditable) {
+		if (!Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID)) {
 			return [200, 'text/plain', 'Library files are not editable.'];
 		}
 
@@ -941,7 +950,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			libraryID: library.libraryID,
 			libraryName: library.name,
 			libraryEditable: library.editable,
-			filesEditable: library.filesEditable,
+			filesEditable: Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID),
 			editable
 		};
 		
@@ -967,13 +976,13 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 				{
 					id: library.treeViewID,
 					name: library.name,
-					filesEditable: library.filesEditable,
+					filesEditable: Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID),
 					level: 0
 				},
 				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
 					id: c.treeViewID,
 					name: c.name,
-					filesEditable: library.filesEditable,
+					filesEditable: Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID),
 					level: c.level + 1 || 1 // Added by Zotero.Collections._getByContainer()
 				}))
 			);

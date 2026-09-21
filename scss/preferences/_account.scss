@@ -96,6 +96,53 @@
 	padding-bottom: 0.5em;
 }
 
+.storage-profile-settings h3,
+.storage-library-profile-settings h3 {
+	margin-block: 0.25em 0.4em;
+	font-size: 1em;
+}
+
+.storage-profile-description {
+	margin-block-end: 0.6em;
+}
+
+.storage-profile-editor {
+	margin-inline-start: 20px;
+}
+
+.storage-profile-editor > hbox,
+.storage-library-profile-row {
+	gap: 6px;
+}
+
+#storage-profile-selector,
+#storage-library-apply-profile,
+.storage-library-profile-row menulist {
+	min-width: 16em;
+}
+
+.storage-profile-status {
+	min-height: 1.5em;
+	margin-inline-start: 20px;
+}
+
+.storage-library-profile-row {
+	align-items: center;
+	display: flex;
+	margin-block: 0.2em;
+	margin-inline-start: 20px;
+}
+
+.storage-library-profile-row label {
+	min-width: 18em;
+}
+
+.storage-library-profile-actions {
+	gap: 6px;
+	margin-block-start: 0.6em;
+	margin-inline-start: 20px;
+}
+
 #storage-verify, #storage-abort, #storage-clean
 {
 	margin-inline-start: 0;

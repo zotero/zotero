@@ -57,7 +57,6 @@
 <!ENTITY zotero.preferences.sync.fileSyncing						"File Syncing">
 <!ENTITY zotero.preferences.sync.fileSyncing.url					"URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary				"Sync attachment files in My Library using">
-
 <!ENTITY zotero.preferences.sync.fileSyncing.download				"Download files">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime	"at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand		"as needed">

@@ -2103,7 +2103,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		await newItem.addLinkedItem(item);
 		
 		if (item.isNote()) {
-			if (Zotero.Libraries.get(newItem.libraryID).filesEditable) {
+			if (Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(newItem.libraryID)) {
 				await Zotero.Notes.copyEmbeddedImages(item, newItem);
 			}
 			return newItemID;
@@ -2122,7 +2122,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					skipSelect: true
 				})
 
-				if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
+				if (Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(newNote.libraryID)) {
 					await Zotero.Notes.copyEmbeddedImages(note, newNote);
 				}
 				await newNote.addLinkedItem(note);

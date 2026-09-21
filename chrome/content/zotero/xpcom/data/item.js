@@ -1578,7 +1578,7 @@ Zotero.Item.prototype.isEditable = function (op = 'edit') {
 	if (this.isAttachment()
 			&& (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL
 				|| this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-			&& !Zotero.Libraries.get(this.libraryID).filesEditable) {
+			&& !Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(this.libraryID)) {
 		return false;
 	}
 	
@@ -5438,7 +5438,7 @@ Zotero.Item.prototype.moveToLibrary = async function (libraryID, onSkippedAttach
 	if (!library.editable) {
 		throw new Error("Can't move item to read-only library");
 	}
-	var filesEditable = library.filesEditable;
+	var filesEditable = Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID);
 	var allowsLinkedFiles = library.allowsLinkedFiles;
 	
 	var newItem = await Zotero.DB.executeTransaction(async function () {

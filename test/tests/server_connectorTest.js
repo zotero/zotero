@@ -93,6 +93,46 @@ describe("Connector Server", function () {
 		});
 	});
 
+	describe("/connector/getSelectedCollection", function () {
+		it("should report an editable WebDAV-profile group as files editable", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile('project-a', {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					group.libraryID,
+					'project-a',
+					{ resetSyncState: false }
+				);
+				await select(win, group);
+
+				let req = await httpRequest(
+					'POST',
+					connectorServerPath + "/connector/getSelectedCollection",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({})
+					}
+				);
+
+				assert.equal(req.status, 200);
+				let response = JSON.parse(req.responseText);
+				assert.equal(response.libraryID, group.libraryID);
+				assert.isTrue(response.filesEditable);
+				assert.isTrue(response.targets.find(t => t.id == group.treeViewID).filesEditable);
+			}
+			finally {
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile('project-a');
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+	});
+
 	describe('/connector/getTranslatorCode', function () {
 		it('should respond with translator code', async function () {
 			var code = 'function detectWeb() {}\nfunction doImport() {}';

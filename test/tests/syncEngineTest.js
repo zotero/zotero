@@ -3685,6 +3685,177 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 
 
+		it("should not show file-write-access-lost dialog on 403 for attachment upload in a WebDAV-profile group", async function () {
+			var group = await createGroup({
+				editable: true,
+				filesEditable: false
+			});
+			var profileID = 'project-' + Zotero.Utilities.randomString(8);
+			var libraryID = group.libraryID;
+			var attachment;
+			var promptStub;
+			var getGroupStub;
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				({ engine, client, caller } = await setup({
+					libraryID,
+					stopOnError: false
+				}));
+
+				attachment = await importFileAttachment('test.png', { libraryID });
+				promptStub = sinon.stub(
+					Zotero.Sync.Storage.Utilities,
+					'showFileWriteAccessLostPrompt'
+				).throws(new Error("File write access prompt should not be shown"));
+				getGroupStub = sinon.stub(client, 'getGroup').resolves({
+					data: {
+						id: group.id,
+						version: group.libraryVersion,
+						name: group.name,
+						owner: userID + 1,
+						type: "Private",
+						description: "",
+						url: "",
+						libraryEditing: "members",
+						libraryReading: "all",
+						fileEditing: "admins",
+						admins: [],
+						members: [userID]
+					}
+				});
+
+				let error = {
+					code: 403,
+					message: "File editing access denied"
+				};
+				let keepGoing = await engine._checkObjectUploadError(
+					'item',
+					attachment.key,
+					error,
+					[],
+					[]
+				);
+
+				assert.isFalse(keepGoing);
+				assert.include(error.message, "assigned WebDAV profile prevents local file resets");
+				assert.isFalse(promptStub.called);
+				assert.isTrue(getGroupStub.calledOnce);
+			}
+			finally {
+				if (promptStub) {
+					promptStub.restore();
+				}
+				if (getGroupStub) {
+					getGroupStub.restore();
+				}
+				if (attachment) {
+					await attachment.eraseTx();
+				}
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID,
+					{ resetSyncState: false }
+				);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+		it("should preserve non-permission 403 errors for WebDAV-profile group attachments", async function () {
+			var group = await createGroup({
+				editable: true,
+				filesEditable: false
+			});
+			var profileID = 'project-' + Zotero.Utilities.randomString(8);
+			var libraryID = group.libraryID;
+			var attachment;
+			var promptStub;
+			var getGroupStub;
+
+			try {
+				await Zotero.Sync.Storage.Profiles.setWebDAVProfile(profileID, {
+					scheme: 'https',
+					url: 'dav.example.com/project-a',
+					username: 'user'
+				});
+				await Zotero.Sync.Storage.Profiles.setLibraryProfile(
+					libraryID,
+					profileID,
+					{ resetSyncState: false }
+				);
+
+				({ engine, client, caller } = await setup({
+					libraryID,
+					stopOnError: false
+				}));
+
+				attachment = await importFileAttachment('test.png', { libraryID });
+				promptStub = sinon.stub(
+					Zotero.Sync.Storage.Utilities,
+					'showFileWriteAccessLostPrompt'
+				).throws(new Error("File write access prompt should not be shown"));
+				getGroupStub = sinon.stub(client, 'getGroup').resolves({
+					data: {
+						id: group.id,
+						version: group.libraryVersion,
+						name: group.name,
+						owner: userID + 1,
+						type: "Private",
+						description: "",
+						url: "",
+						libraryEditing: "members",
+						libraryReading: "all",
+						fileEditing: "members",
+						admins: [],
+						members: [userID]
+					}
+				});
+
+				let error = {
+					code: 403,
+					message: "Original attachment upload error"
+				};
+				let keepGoing = await engine._checkObjectUploadError(
+					'item',
+					attachment.key,
+					error,
+					[],
+					[]
+				);
+
+				assert.isFalse(keepGoing);
+				assert.equal(error.message, "Original attachment upload error");
+				assert.isFalse(promptStub.called);
+				assert.isTrue(getGroupStub.calledOnce);
+			}
+			finally {
+				if (promptStub) {
+					promptStub.restore();
+				}
+				if (getGroupStub) {
+					getGroupStub.restore();
+				}
+				if (attachment) {
+					await attachment.eraseTx();
+				}
+				await Zotero.Sync.Storage.Profiles.removeWebDAVProfile(
+					profileID,
+					{ resetSyncState: false }
+				);
+				await group.eraseTx({ skipDeleteLog: true });
+			}
+		});
+
+
 		it("should reset rejected settings to remote version on 403", async function () {
 			var group = await createGroup({
 				libraryVersion: 5

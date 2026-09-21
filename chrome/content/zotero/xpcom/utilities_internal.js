@@ -1739,7 +1739,10 @@ Zotero.Utilities.Internal = {
 			menuitem.value = library.libraryID;
 			menuitem.setAttribute('label', library.name);
 			menuitem.setAttribute('data-editable', library.editable ? 'true' : 'false');
-			menuitem.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');
+			menuitem.setAttribute(
+				'data-filesEditable',
+				Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID) ? 'true' : 'false'
+			);
 			menupopup.appendChild(menuitem);
 			if (library.libraryID == selectedLibraryID) {
 				selectedIndex = i;
@@ -1760,7 +1763,10 @@ Zotero.Utilities.Internal = {
 			let option = select.ownerDocument.createElement('option');
 			option.setAttribute('value', library.libraryID);
 			option.setAttribute('data-editable', library.editable ? 'true' : 'false');
-			option.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');
+			option.setAttribute(
+				'data-filesEditable',
+				Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID) ? 'true' : 'false'
+			);
 			option.textContent = library.name;
 			select.appendChild(option);
 			if (library.libraryID == selectedLibraryID) {

@@ -2364,7 +2364,7 @@ async function handleFileWrite(endpoint, requestData) {
 			&& linkMode !== Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
 		return [400, 'text/plain', 'Cannot upload files for non-imported attachments'];
 	}
-	if (!Zotero.Libraries.get(libraryID).filesEditable) {
+	if (!Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID)) {
 		return [403, 'text/plain', 'File editing denied'];
 	}
 

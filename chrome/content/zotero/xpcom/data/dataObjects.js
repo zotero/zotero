@@ -1065,7 +1065,7 @@ Zotero.DataObjects.prototype.isEditable = function (obj) {
 	if (obj.objectType == 'item' && obj.isAttachment()
 		&& (obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
 			obj.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-		&& !Zotero.Libraries.get(libraryID).filesEditable
+		&& !Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(libraryID)
 	) {
 		return false;
 	}

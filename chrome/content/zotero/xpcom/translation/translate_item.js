@@ -54,9 +54,10 @@ Zotero.Translate.ItemSaver = function (options) {
 	this._collections = options.collections || false;
 	this._autoCreatedCollectionID = options.autoCreatedCollectionID || false;
 	
-	// If group filesEditable==false, don't save attachments
-	this.attachmentMode = Zotero.Libraries.get(this._libraryID).filesEditable ? options.attachmentMode :
-	                      Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
+	// If files can't be saved for the target library, don't save attachments
+	this.attachmentMode = Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(this._libraryID)
+		? options.attachmentMode
+		: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_IGNORE;
 	this._linkFiles = options.linkFiles;
 	this._forceTagType = options.forceTagType;
 	this._referrer = options.referrer;

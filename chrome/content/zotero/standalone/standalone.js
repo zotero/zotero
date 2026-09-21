@@ -176,8 +176,7 @@ const ZoteroStandalone = new function () {
 			let item = Zotero.Items.get(reader.itemID);
 			let library = Zotero.Libraries.get(item.libraryID);
 			if (item
-					&& library.filesEditable
-					&& library.editable
+					&& Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(library.libraryID)
 					&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
 				let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);

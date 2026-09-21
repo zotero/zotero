@@ -31,6 +31,7 @@ Zotero.Sync.Storage.Local = {
 				if (this.storageRemainingForLibrary.has(libraryID)) {
 					this.storageRemainingForLibrary.delete(libraryID);
 				}
+				Zotero.Sync.Storage.Profiles.clearLibraryProfileByKey(`G${libraryID}`);
 			}
 		}
 	},
@@ -41,6 +42,9 @@ Zotero.Sync.Storage.Local = {
 		// user double-clicks on a missing file in download-as-needed mode.
 		if (!Zotero.Users.getCurrentUserID()) {
 			return false;
+		}
+		if (Zotero.Sync.Storage.Profiles.getModeForLibrary(libraryID)) {
+			return true;
 		}
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
@@ -68,6 +72,11 @@ Zotero.Sync.Storage.Local = {
 	},
 	
 	getModeForLibrary: function (libraryID) {
+		let profileMode = Zotero.Sync.Storage.Profiles.getModeForLibrary(libraryID);
+		if (profileMode) {
+			return profileMode;
+		}
+
 		var libraryType = Zotero.Libraries.get(libraryID).libraryType;
 		switch (libraryType) {
 		case 'user':

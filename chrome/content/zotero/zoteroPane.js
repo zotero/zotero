@@ -2454,7 +2454,8 @@ var ZoteroPane = new function () {
 				}
 			}
 			await newItem.save();
-			if (item.isNote() && Zotero.Libraries.get(newItem.libraryID).filesEditable) {
+			if (item.isNote()
+					&& Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(newItem.libraryID)) {
 				await Zotero.Notes.copyEmbeddedImages(item, newItem);
 			}
 			for (let relItemKey of item.relatedItems) {
@@ -5494,7 +5495,7 @@ var ZoteroPane = new function () {
 		}
 		itemType = Zotero.ItemTypes.getID(itemType);
 		var item = await this.newItem(itemType, data, row);
-		var filesEditable = Zotero.Libraries.get(item.libraryID).filesEditable;
+		var filesEditable = Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(item.libraryID);
 		
 		if (saveSnapshot) {
 			var link = false;
@@ -5551,7 +5552,7 @@ var ZoteroPane = new function () {
 			}
 			
 			var item = await ZoteroPane_Local.newItem(itemType, {}, row)
-			var filesEditable = Zotero.Libraries.get(item.libraryID).filesEditable;
+			var filesEditable = Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(item.libraryID);
 			
 			// Save snapshot if explicitly enabled or automatically pref is set and not explicitly disabled
 			if (saveSnapshot || (saveSnapshot !== false && Zotero.Prefs.get('automaticSnapshots'))) {
@@ -6181,7 +6182,9 @@ var ZoteroPane = new function () {
 				if (!itemID) {
 					throw new Error('Reader tab has no itemID');
 				}
-				return Zotero.Items.get(itemID).library.filesEditable;
+				return Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(
+					Zotero.Items.get(itemID).libraryID
+				);
 			}
 			default:
 				return false;

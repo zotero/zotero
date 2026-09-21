@@ -315,7 +315,10 @@
 		_handleAddPopupShowing = () => {
 			let canAddAny = this.item?.isRegularItem() && this.item.library.editable;
 			let [addFile, addLink, addWebLink] = this._addPopup.children;
-			addFile.disabled = addLink.disabled = !(canAddAny && this.item.library.filesEditable);
+			addFile.disabled = addLink.disabled = !(
+				canAddAny
+				&& Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(this.item.libraryID)
+			);
 			addWebLink.disabled = !canAddAny;
 		};
 

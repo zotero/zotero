@@ -85,7 +85,7 @@ class EditorInstance {
 		this._viewMode = options.viewMode;
 		this._tabID = options.tabID;
 		this._readOnly = options.readOnly || this._isReadOnly();
-		this._filesReadOnly = !Zotero.Libraries.get(this._item.libraryID).filesEditable;
+		this._filesReadOnly = !Zotero.Sync.Storage.Profiles.canSaveFilesForLibrary(this._item.libraryID);
 		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
 		this._iframeWindow = options.iframeWindow;
