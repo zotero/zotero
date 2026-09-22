@@ -1964,6 +1964,11 @@ describe("ZoteroPane", function () {
 				buttons[0].style.display = 'none';
 				paneToggle.dispatchEvent(tab);
 				assert.equal(doc.activeElement, buttons[1]);
+				buttons[0].style.display = '';
+				buttons[0].disabled = true;
+				doc.getElementById('zotero-tb-add').focus();
+				buttons[0].dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
 			}
 			finally {
 				buttons.forEach(button => button.remove());

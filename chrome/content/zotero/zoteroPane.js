@@ -178,8 +178,7 @@ var ZoteroPane = new function () {
 		// toolbarbutton. Read the current buttons for each key event.
 		let pluginButtons = () => [...document.querySelectorAll(
 			'#zotero-items-toolbar > toolbarbutton[tabindex="0"]'
-		)].filter(button => !button.disabled && !button.hidden
-			&& getComputedStyle(button).display !== 'none');
+		)];
 		let titleBar = document.getElementById("zotero-title-bar");
 		let itemTree = document.getElementById("zotero-items-tree");
 		let collectionsTree = document.getElementById("zotero-collections-tree");
