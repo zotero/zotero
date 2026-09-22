@@ -174,8 +174,8 @@ var ZoteroPane = new function () {
 	function setUpKeyboardNavigation() {
 		let collectionTreeToolbar = document.getElementById("zotero-toolbar-collection-tree");
 		let itemTreeToolbar = document.getElementById("zotero-toolbar-item-tree");
-		// Plugins append their toolbar buttons after Zotero's built-in controls.
-		// Read the current buttons for each key event so installation needs no registration.
+		// Plugins can opt into keyboard focus with tabindex=0 on an appended
+		// toolbarbutton. Read the current buttons for each key event.
 		let pluginButtons = () => [...document.querySelectorAll(
 			'#zotero-items-toolbar > toolbarbutton[tabindex="0"]'
 		)].filter(button => !button.disabled && !button.hidden
@@ -408,7 +408,7 @@ var ZoteroPane = new function () {
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
-					ArrowNext: () => pluginButtons()[0] || null,
+					ArrowNext: () => null,
 					ArrowPrevious: () => document.getElementById("zotero-tb-attachment-add"),
 					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
@@ -438,8 +438,7 @@ var ZoteroPane = new function () {
 			if (pluginButtons().includes(event.target)) {
 				actionsMap[event.target.id] = {
 					ArrowNext: () => adjacentPluginButton(event.target, 1) || null,
-					ArrowPrevious: () => adjacentPluginButton(event.target, -1)
-						|| document.getElementById('zotero-tb-note-add'),
+					ArrowPrevious: () => adjacentPluginButton(event.target, -1) || null,
 					Tab: () => adjacentPluginButton(event.target, 1)
 						|| itemTree.querySelector(".virtualized-table"),
 					ShiftTab: () => adjacentPluginButton(event.target, -1)
