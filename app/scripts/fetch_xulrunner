@@ -468,10 +468,22 @@ function modify_omni {
 	replace_line '    for \(const addon of this.pendingUninstallAddons\) \{' \
 		'    const pendingUninstalls = [...this.pendingUninstallAddons];
     this.pendingUninstallAddons.clear();
-    for (const addon of pendingUninstalls) {' $file
+    for (let i = 0; i < pendingUninstalls.length; i++) {
+      const addon = pendingUninstalls[i];' $file
 	replace_line '      if \(isPending\(addon, "uninstall"\)\) \{' \
-		'      const current = await AddonManager.getAddonByID(addon.id);
+		'      let current;
+      try {
+        current = await AddonManager.getAddonByID(addon.id);
+      } catch (error) {
+        console.error(error);
+        this.pendingUninstallAddons.add(addon);
+      }
       if (this.isConnected) {
+        for (const pending of pendingUninstalls.slice(i)) {
+          if (isPending(pending, "uninstall")) {
+            this.pendingUninstallAddons.add(pending);
+          }
+        }
         return;
       }
       if (current === addon && isPending(current, "uninstall")) {' $file

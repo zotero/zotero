@@ -15,7 +15,9 @@ const source = readFileSync(sourcePath, 'utf8')
 	.replace('customElements.define("addon-list", AddonList);', 'globalThis.AddonList = AddonList;');
 
 function createList(currentById) {
+	const errors = [];
 	const context = {
+		console: { error: error => errors.push(error) },
 		HTMLElement: class {},
 		ChromeUtils: {
 			importESModule: () => ({ AddonManager: {
@@ -31,6 +33,7 @@ function createList(currentById) {
 	list.removeListener = () => {};
 	list.updateAddon = () => {};
 	list.removePendingUninstallBar = () => {};
+	list.errors = errors;
 	return list;
 }
 
@@ -80,4 +83,35 @@ test('a reconnect during lookup leaves newly queued removals intact', async () =
 	await teardown;
 	assert.equal(uninstalls, 0);
 	assert.equal(list.pendingUninstallAddons.has(fresh), true);
+});
+
+test('a reconnect mid-loop preserves the unprocessed pending removal', async () => {
+	let resolveSecond;
+	let firstUninstalls = 0;
+	let secondUninstalls = 0;
+	const first = { id: 'first@test', pendingUninstall: true,
+		uninstall: () => firstUninstalls++ };
+	const second = { id: 'second@test', pendingUninstall: true,
+		uninstall: () => secondUninstalls++ };
+	const list = createList(id => id === first.id ? Promise.resolve(first)
+		: new Promise(resolve => { resolveSecond = resolve; }));
+	list.pendingUninstallAddons.add(first);
+	list.pendingUninstallAddons.add(second);
+	const teardown = list.disconnectedCallback();
+	await new Promise(resolve => setImmediate(resolve));
+	assert.equal(firstUninstalls, 1);
+	list.isConnected = true;
+	resolveSecond(second);
+	await teardown;
+	assert.equal(secondUninstalls, 0);
+	assert.equal(list.pendingUninstallAddons.has(second), true);
+});
+
+test('a failed current-add-on lookup retains the pending removal', async () => {
+	const old = { id: 'plugin@test', pendingUninstall: true };
+	const list = createList(() => Promise.reject(new Error('lookup failed')));
+	list.pendingUninstallAddons.add(old);
+	await list.disconnectedCallback();
+	assert.equal(list.pendingUninstallAddons.has(old), true);
+	assert.equal(list.errors.length, 1);
 });
