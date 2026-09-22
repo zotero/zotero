@@ -1275,24 +1275,7 @@ Zotero.Search.prototype._buildQuery = async function () {
 	}
 	else {
 		let not = deleted ? "" : "NOT ";
-		sql += ` WHERE (itemID ${not} IN (`
-				// Deleted items
-				+ "SELECT itemID FROM deletedItems "
-				// Child notes of deleted items
-				+ "UNION SELECT itemID FROM itemNotes "
-					+ "WHERE parentItemID IS NOT NULL AND "
-					+ "parentItemID IN (SELECT itemID FROM deletedItems) "
-				// Child attachments of deleted items
-				+ "UNION SELECT itemID FROM itemAttachments "
-					+ "WHERE parentItemID IS NOT NULL AND "
-					+ "parentItemID IN (SELECT itemID FROM deletedItems)"
-				// Annotations of deleted attachments
-				+ "UNION SELECT itemID FROM itemAnnotations "
-					+ "WHERE parentItemID IN (SELECT itemID FROM deletedItems)"
-				// Annotations of attachments of deleted items
-				+ "UNION SELECT itemID FROM itemAnnotations "
-					+ "WHERE parentItemID IN (SELECT itemID FROM itemAttachments WHERE parentItemID IN (SELECT itemID FROM deletedItems))"
-			+ "))";
+		sql += ` WHERE (itemID ${not} IN (${Zotero.Search._deletedItemsSQL}))`;
 	}
 	
 	if (noChildren){
@@ -2023,11 +2006,16 @@ Zotero.Search.prototype._buildQuery = async function () {
 				
 				if (!forceNoResults) {
 					if (includeParentsAndChildren || includeParents) {
+						// A trashed child doesn't bring in its parent, which isn't itself
+						// in the trash
+						let childNotDeleted = includeDeleted || deleted
+							? ""
+							: ` AND itemID NOT IN (${Zotero.Search._deletedItemsSQL})`;
 						var parentSQL = "SELECT itemID FROM items WHERE "
 							+ "itemID IN (SELECT parentItemID FROM itemAttachments "
-								+ "WHERE itemID IN (" + condSQL + ")) "
+								+ "WHERE itemID IN (" + condSQL + ")" + childNotDeleted + ") "
 							+ "OR itemID IN (SELECT parentItemID FROM itemNotes "
-								+ "WHERE itemID IN (" + condSQL + ")) ";
+								+ "WHERE itemID IN (" + condSQL + ")" + childNotDeleted + ") ";
 						var parentSQLParams = condSQLParams.concat(condSQLParams);
 					}
 					
@@ -2068,7 +2056,9 @@ Zotero.Search.prototype._buildQuery = async function () {
 
 		// Combine the collected predicates and group markers into a single predicate
 		// (see Zotero.Search.combineConditions)
-		let combined = Zotero.Search.combineConditions(builtConditions, resultLevel);
+		let combined = Zotero.Search.combineConditions(builtConditions, resultLevel, {
+			excludeDeleted: !includeDeleted && !deleted
+		});
 		if (combined.sql) {
 			sql += " AND " + combined.sql;
 			sqlParams = sqlParams.concat(combined.params);
@@ -2113,9 +2103,12 @@ Zotero.Search.prototype._buildQuery = async function () {
  * @param {Object[]} builtConditions
  * @param {String} [rootLevel='any'] - The result level the whole search returns ('any' leaves
  *     the mixed-level default unchanged; otherwise each condition is mapped to this level)
+ * @param {Object} [options]
+ * @param {Boolean} [options.excludeDeleted] - Don't count a match on a trashed item when
+ *     mapping between levels
  * @return {{ sql: String, params: Array }} Combined predicate (sql is '' if nothing to combine)
  */
-Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') {
+Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any', options = {}) {
 	let root = { children: [] };
 	let groupStack = [root];
 	for (let item of builtConditions) {
@@ -2166,7 +2159,9 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 			// their own level by the combineGroup() call above.
 			let childSQL = result.sql;
 			if (!child.children) {
-				childSQL = Zotero.Search.mapPredicate(childSQL, result.level || 'item', level, result.negate);
+				childSQL = Zotero.Search.mapPredicate(
+					childSQL, result.level || 'item', level, result.negate, options
+				);
 			}
 			// When mapping reduces a predicate to a constant ('0'/'1' -- e.g., a condition
 			// whose level can't reach the result level), its placeholders are gone, so drop its params
@@ -2202,7 +2197,7 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 		// anchors to the top-level item ("the item has a descendant match").
 		let target = parentLevel == 'any' ? 'item' : parentLevel;
 		if (node.level && node.level != 'any' && node.level != target) {
-			sql = Zotero.Search.mapPredicate(sql, node.level, target);
+			sql = Zotero.Search.mapPredicate(sql, node.level, target, false, options);
 		}
 		return {
 			sql,
@@ -2213,6 +2208,25 @@ Zotero.Search.combineConditions = function (builtConditions, rootLevel = 'any') 
 
 	return combineGroup(root, rootLevel);
 };
+
+
+// Trashed items, along with the child items and annotations that are in the trash with them.
+// These are excluded from search results, and are the only results when searching the trash.
+Zotero.Search._deletedItemsSQL = "SELECT itemID FROM deletedItems "
+	// Child notes of deleted items
+	+ "UNION SELECT itemID FROM itemNotes "
+		+ "WHERE parentItemID IS NOT NULL AND "
+		+ "parentItemID IN (SELECT itemID FROM deletedItems) "
+	// Child attachments of deleted items
+	+ "UNION SELECT itemID FROM itemAttachments "
+		+ "WHERE parentItemID IS NOT NULL AND "
+		+ "parentItemID IN (SELECT itemID FROM deletedItems)"
+	// Annotations of deleted attachments
+	+ "UNION SELECT itemID FROM itemAnnotations "
+		+ "WHERE parentItemID IN (SELECT itemID FROM deletedItems)"
+	// Annotations of attachments of deleted items
+	+ "UNION SELECT itemID FROM itemAnnotations "
+		+ "WHERE parentItemID IN (SELECT itemID FROM itemAttachments WHERE parentItemID IN (SELECT itemID FROM deletedItems))";
 
 
 // The item hierarchy used for cross-level mapping: each child level maps to its parent
@@ -2345,9 +2359,11 @@ Zotero.Search._conditionLevel = function (name, conditionData) {
  * @param {String} toLevel - The level to constrain instead
  * @param {Boolean} [negated] - Whether the predicate is a negation (isNot/doesNotContain/isEmpty); a
  *     negated level-agnostic match is left at its own level rather than rolled up
+ * @param {Object} [options]
+ * @param {Boolean} [options.excludeDeleted] - Don't count a match on a trashed item
  * @return {String} A predicate in terms of the `toLevel` itemID
  */
-Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false) {
+Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false, options = {}) {
 	if (toLevel == 'any') {
 		return sql;
 	}
@@ -2359,7 +2375,7 @@ Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false)
 	if (fromLevels.length == 1 && fromLevels[0] == 'any') {
 		// Level-agnostic (e.g., tag): roll a positive match up to the result level; leave a
 		// negation at its carrying level (see above)
-		return negated ? sql : Zotero.Search._rollUpAnyToLevel(sql, toLevel);
+		return negated ? sql : Zotero.Search._rollUpAnyToLevel(sql, toLevel, options);
 	}
 
 	// The condition already selects rows at the result level (it natively matches there), so
@@ -2378,7 +2394,7 @@ Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false)
 	}
 
 	// itemIDs at `from` matching the predicate
-	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+	let matches = Zotero.Search._matchingItemsSQL(sql, options);
 
 	// Walk a child level up to its parent: SELECT the parentItemID of matching child rows.
 	// A standalone-capable level (attachment/note) can be a top-level item itself, so map a
@@ -2466,6 +2482,22 @@ Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false)
 
 
 /**
+ * The itemIDs matching a predicate, as a subquery. With `excludeDeleted`, trashed items are
+ * left out, so a match on a trashed item doesn't carry to a level that isn't itself trashed.
+ *
+ * @param {String} sql - A predicate in terms of an itemID
+ * @param {Object} [options] - See Zotero.Search.mapPredicate()
+ * @return {String} A SELECT returning itemIDs
+ */
+Zotero.Search._matchingItemsSQL = function (sql, options = {}) {
+	return "SELECT itemID FROM items WHERE " + sql
+		+ (options.excludeDeleted
+			? ` AND itemID NOT IN (${Zotero.Search._deletedItemsSQL})`
+			: '');
+};
+
+
+/**
  * Roll a level-agnostic predicate (e.g., tag) up to a result level: select `toLevel` items
  * that themselves -- or any descendant -- match. Up only (an ancestor's match doesn't count).
  *
@@ -2474,10 +2506,11 @@ Zotero.Search.mapPredicate = function (sql, fromLevel, toLevel, negated = false)
  *
  * @param {String} sql - A predicate in terms of an itemID at any level
  * @param {String} toLevel - 'item' / 'attachment' / 'note' / 'annotation'
+ * @param {Object} [options] - See Zotero.Search.mapPredicate()
  * @return {String} A predicate in terms of the `toLevel` itemID
  */
-Zotero.Search._rollUpAnyToLevel = function (sql, toLevel) {
-	let matches = `SELECT itemID FROM items WHERE ${sql}`;
+Zotero.Search._rollUpAnyToLevel = function (sql, toLevel, options = {}) {
+	let matches = Zotero.Search._matchingItemsSQL(sql, options);
 	switch (toLevel) {
 		// No descendants below these, so only a match at the level itself counts
 		case 'annotation':

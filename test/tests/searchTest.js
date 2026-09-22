@@ -755,6 +755,62 @@ describe("Zotero.Search", function () {
 				});
 				
 
+				it("shouldn't match an item by a tag on a child attachment in the trash", async function () {
+					var tag = 'ztrash' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					attachment.addTag(tag);
+					await attachment.saveTx();
+					attachment.deleted = true;
+					await attachment.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('tag', 'is', tag);
+					assert.lengthOf(await s.search(), 0);
+
+					await item.eraseTx();
+				});
+
+				it("shouldn't match an item by an annotation on a child attachment in the trash", async function () {
+					// Same as above for a fixed-level condition, which maps up to the result
+					// level separately from a level-agnostic one like tag
+					var word = 'ztrashann' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					await createAnnotation('highlight', attachment, { comment: 'x ' + word + ' y' });
+					attachment.deleted = true;
+					await attachment.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('annotationComment', 'contains', word);
+					assert.lengthOf(await s.search(), 0);
+
+					await item.eraseTx();
+				});
+
+				it("should match a trashed item by a tag on its child attachment when searching the trash", async function () {
+					var tag = 'ztrash' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					attachment.addTag(tag);
+					await attachment.saveTx();
+					item.deleted = true;
+					await item.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('deleted', 'true');
+					s.addCondition('resultLevel', 'item');
+					s.addCondition('tag', 'is', tag);
+					assert.sameMembers(await s.search(), [item.id]);
+
+					await item.eraseTx();
+				});
+
 				it("should bind a same-entity group below a non-item result level", async function () {
 					// Result level attachment + a group scoped to annotation: find attachments
 					// that have a single annotation matching all of the group's conditions.
@@ -1506,6 +1562,23 @@ describe("Zotero.Search", function () {
 					// Matching the parent pulls in its child, and matching the child its parent
 					assert.sameMembers(await run(itemTitle), [item.id, attachment.id]);
 					assert.sameMembers(await run(attTitle), [item.id, attachment.id]);
+
+					await item.eraseTx();
+				});
+
+				it("shouldn't include the parent of a match in the trash", async function () {
+					var attTitle = 'zincd' + Zotero.Utilities.randomString();
+					var item = await createDataObject('item');
+					var attachment = await importPDFAttachment(item);
+					attachment.setField('title', attTitle);
+					attachment.deleted = true;
+					await attachment.saveTx();
+
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('title', 'is', attTitle);
+					s.addCondition('includeParentsAndChildren', 'true');
+					assert.lengthOf(await s.search(), 0);
 
 					await item.eraseTx();
 				});
