@@ -76,13 +76,29 @@ test('a reconnect during lookup leaves newly queued removals intact', async () =
 	const list = createList(() => new Promise(resolve => { resolveLookup = resolve; }));
 	list.pendingUninstallAddons.add(old);
 	const teardown = list.disconnectedCallback();
-	assert.equal(list.pendingUninstallAddons.size, 0);
+	assert.equal(list.pendingUninstallAddons.has(old), true);
 	list.isConnected = true;
 	list.pendingUninstallAddons.add(fresh);
 	resolveLookup(old);
 	await teardown;
 	assert.equal(uninstalls, 0);
 	assert.equal(list.pendingUninstallAddons.has(fresh), true);
+});
+
+test('install notification during lookup removes the stale entry before reconnect', async () => {
+	let resolveLookup;
+	let uninstalls = 0;
+	const old = { id: 'plugin@test', pendingUninstall: true, uninstall: () => uninstalls++ };
+	const replacement = { id: old.id, pendingUninstall: false };
+	const list = createList(() => new Promise(resolve => { resolveLookup = resolve; }));
+	list.pendingUninstallAddons.add(old);
+	const teardown = list.disconnectedCallback();
+	list.onInstalled(replacement);
+	list.isConnected = true;
+	resolveLookup(replacement);
+	await teardown;
+	assert.equal(uninstalls, 0);
+	assert.equal(list.pendingUninstallAddons.has(old), false);
 });
 
 test('a reconnect mid-loop preserves the unprocessed pending removal', async () => {
