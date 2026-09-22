@@ -432,7 +432,7 @@ Zotero.Sync.Storage.Profiles = {
 			return null;
 		}
 		profileID = this._normalizeProfileID(profileID);
-		return `Zotero Storage Server (${profileID})`;
+		return `Zotero Storage Server (profile: ${profileID})`;
 	},
 
 	/**
