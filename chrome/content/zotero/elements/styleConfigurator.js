@@ -135,13 +135,15 @@
 		}
 
 		set value(val) {
-			try {
-				// eslint-disable-next-line no-new
-				new Intl.Locale(val);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				val = '';
+			if (val) {
+				try {
+					// eslint-disable-next-line no-new
+					new Intl.Locale(val);
+				}
+				catch (e) {
+					Zotero.logError(e);
+					val = '';
+				}
 			}
 			
 			val = Zotero.Styles.resolveLocale(val);
