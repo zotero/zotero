@@ -460,6 +460,31 @@ function modify_omni {
 	replace_line 'let \{ BrowserAddonUI \} = windowRoot.window;' '' $file
 	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
 
+	file="chrome/toolkit/content/mozapps/extensions/components/addon-list.mjs"
+	# The Add-ons window can retain the old add-on wrapper after a replacement.
+	# Finalizing that wrapper's pending uninstall would remove the new copy by ID.
+	replace_line '  disconnectedCallback\(\) \{' '  async disconnectedCallback() {' $file
+	remove_line '    this.pendingUninstallAddons.clear\(\);' $file
+	replace_line '    for \(const addon of this.pendingUninstallAddons\) \{' \
+		'    const pendingUninstalls = [...this.pendingUninstallAddons];
+    this.pendingUninstallAddons.clear();
+    for (const addon of pendingUninstalls) {' $file
+	replace_line '      if \(isPending\(addon, "uninstall"\)\) \{' \
+		'      const current = await AddonManager.getAddonByID(addon.id);
+      if (this.isConnected) {
+        return;
+      }
+      if (current === addon && isPending(current, "uninstall")) {' $file
+	replace_line '  onInstalled\(addon\) \{' '  onInstalled(addon) {
+    if (!isPending(addon, "uninstall")) {
+      for (const pending of this.pendingUninstallAddons) {
+        if (pending.id === addon.id) {
+          this.pendingUninstallAddons.delete(pending);
+          this.removePendingUninstallBar(pending);
+        }
+      }
+    }' $file
+
 	# Customize empty-list message
 	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
         var p = document.createElement("p");
