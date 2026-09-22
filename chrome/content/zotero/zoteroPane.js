@@ -174,6 +174,12 @@ var ZoteroPane = new function () {
 	function setUpKeyboardNavigation() {
 		let collectionTreeToolbar = document.getElementById("zotero-toolbar-collection-tree");
 		let itemTreeToolbar = document.getElementById("zotero-toolbar-item-tree");
+		// Plugins append their toolbar buttons after Zotero's built-in controls.
+		// Read the current buttons for each key event so installation needs no registration.
+		let pluginButtons = () => [...document.querySelectorAll(
+			'#zotero-items-toolbar > toolbarbutton[tabindex="0"]'
+		)].filter(button => !button.disabled && !button.hidden
+			&& getComputedStyle(button).display !== 'none');
 		let titleBar = document.getElementById("zotero-title-bar");
 		let itemTree = document.getElementById("zotero-items-tree");
 		let collectionsTree = document.getElementById("zotero-collections-tree");
@@ -367,6 +373,11 @@ var ZoteroPane = new function () {
 		});
 
 		itemTreeToolbar.addEventListener("keydown", (event) => {
+			let adjacentPluginButton = (button, direction) => {
+				let buttons = pluginButtons();
+				let index = buttons.indexOf(button);
+				return index === -1 ? null : buttons[index + direction];
+			};
 			let actionsMap = {
 				'zotero-tb-add': {
 					ArrowNext: () => document.getElementById("zotero-tb-lookup"),
@@ -397,7 +408,7 @@ var ZoteroPane = new function () {
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
-					ArrowNext: () => null,
+					ArrowNext: () => pluginButtons()[0] || null,
 					ArrowPrevious: () => document.getElementById("zotero-tb-attachment-add"),
 					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
@@ -420,10 +431,21 @@ var ZoteroPane = new function () {
 					ShiftTab: () => document.getElementById("zotero-tb-search-textbox")
 				},
 				'zotero-tb-toggle-item-pane-stacked': {
-					Tab: () => itemTree.querySelector(".virtualized-table"),
+					Tab: () => pluginButtons()[0] || itemTree.querySelector(".virtualized-table"),
 					ShiftTab: () => document.getElementById("zotero-tb-search-advanced-button")
 				},
 			};
+			if (pluginButtons().includes(event.target)) {
+				actionsMap[event.target.id] = {
+					ArrowNext: () => adjacentPluginButton(event.target, 1) || null,
+					ArrowPrevious: () => adjacentPluginButton(event.target, -1)
+						|| document.getElementById('zotero-tb-note-add'),
+					Tab: () => adjacentPluginButton(event.target, 1)
+						|| itemTree.querySelector(".virtualized-table"),
+					ShiftTab: () => adjacentPluginButton(event.target, -1)
+						|| document.getElementById('zotero-tb-toggle-item-pane-stacked')
+				};
+			}
 			moveFocus(actionsMap, event, true);
 		});
 
@@ -468,7 +490,8 @@ var ZoteroPane = new function () {
 						if (advancedSearchDeck?.state === 'collapsed') {
 							return document.querySelector('#zotero-tb-search .advanced-close-button');
 						}
-						return document.getElementById('zotero-tb-toggle-item-pane-stacked');
+						return pluginButtons().at(-1)
+							|| document.getElementById('zotero-tb-toggle-item-pane-stacked');
 					}
 				}
 			};
