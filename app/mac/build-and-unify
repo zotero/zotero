@@ -56,8 +56,15 @@ cp x64/$fx_app_name/Contents/MacOS/firefox zotero
 xz zotero
 mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
 
-# Save a copy of XUL
-#cp x64/$fx_app_name/Contents/MacOS/XUL "$APP_ROOT_DIR/mac/XUL"
+# Package custom components for fetch_xulrunner.
+# Upload MacOS-<hash>.tar.xz to ${custom_components_url}mac/<hash>.tar.xz and set
+# custom_components_hash_mac in config.sh.
+mkdir MacOS
+cp x64/$fx_app_name/Contents/MacOS/{XUL,libmozglue.dylib} MacOS/
+tar cfJ MacOS.tar.xz MacOS
+components_hash=$(shasum -a 256 MacOS.tar.xz | cut -d ' ' -f 1)
+mv MacOS.tar.xz "$APP_ROOT_DIR/mac/MacOS-$components_hash.tar.xz"
+echo "Custom components hash: $components_hash"
 
 # Save a copy of ChannelPrefs.framework
 #
