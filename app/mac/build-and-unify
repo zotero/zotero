@@ -56,15 +56,15 @@ cp x64/$fx_app_name/Contents/MacOS/firefox zotero
 xz zotero
 mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
 
-# Package custom components for fetch_xulrunner.
-# Upload MacOS-<hash>.tar.xz to ${custom_components_url}mac/<hash>.tar.xz and set
-# custom_components_hash_mac in config.sh.
-mkdir MacOS
-cp x64/$fx_app_name/Contents/MacOS/{XUL,libmozglue.dylib} MacOS/
-tar cfJ MacOS.tar.xz MacOS
-components_hash=$(shasum -a 256 MacOS.tar.xz | cut -d ' ' -f 1)
-mv MacOS.tar.xz "$APP_ROOT_DIR/mac/MacOS-$components_hash.tar.xz"
-echo "Custom components hash: $components_hash"
+# Package custom libmozglue.dylib for fetch_xulrunner.
+# Upload the file to ${custom_components_url}mac/ and set custom_components_hash_mac in
+# config.sh.
+xz --stdout x64/$fx_app_name/Contents/MacOS/libmozglue.dylib > libmozglue.dylib.xz
+components_hash=$(shasum -a 256 libmozglue.dylib.xz | cut -d ' ' -f 1)
+mozglue_file="${GECKO_VERSION_MAC//esr}-libmozglue-$components_hash.dylib.xz"
+mv libmozglue.dylib.xz "$APP_ROOT_DIR/mac/$mozglue_file"
+echo "Custom libmozglue.dylib: $APP_ROOT_DIR/mac/$mozglue_file"
+echo "custom_components_hash_mac=\"$components_hash\""
 
 # Save a copy of ChannelPrefs.framework
 #
