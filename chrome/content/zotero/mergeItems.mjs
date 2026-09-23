@@ -240,12 +240,14 @@ async function mergeWebAttachments(item, otherItems) {
 			}
 
 			// If we can find an attachment with the same title *and* URL, use it.
+			// For snapshots, fall back to matching on title alone.
 			let masterAttachment = (
 				masterAttachments.find(attachment => attachment.getField('title') == otherAttachment.getField('title')
 					&& attachment.getField('url') == otherAttachment.getField('url')
 					&& attachment.attachmentLinkMode === otherAttachment.attachmentLinkMode)
-				|| masterAttachments.find(attachment => attachment.getField('title') == otherAttachment.getField('title')
-					&& attachment.attachmentLinkMode === otherAttachment.attachmentLinkMode)
+				|| otherAttachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL
+					&& masterAttachments.find(attachment => attachment.getField('title') == otherAttachment.getField('title')
+						&& attachment.attachmentLinkMode === otherAttachment.attachmentLinkMode)
 			);
 
 			if (!masterAttachment) {

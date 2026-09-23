@@ -573,6 +573,33 @@ describe("Item merging", function () {
 		assert.isFalse(attachment3.deleted);
 	});
 
+	it("should keep linked URL with same title but different URL", async function () {
+		let item1 = await createDataObject('item', { setTitle: true });
+		let attachment1 = await Zotero.Attachments.linkFromURL({
+			url: 'https://example.com/',
+			title: 'Catalog Entry',
+			parentItemID: item1.id
+		});
+
+		let item2 = item1.clone();
+		await item2.saveTx();
+		let attachment2 = await Zotero.Attachments.linkFromURL({
+			url: 'https://otherdomain.example.com/',
+			title: 'Catalog Entry',
+			parentItemID: item2.id
+		});
+
+		await mergeItems(item1, [item2]);
+
+		assert.isFalse(item1.deleted);
+		assert.isFalse(attachment1.deleted);
+		assert.equal(item1.numAttachments(true), 2);
+		assert.isTrue(item2.deleted);
+		assert.equal(attachment2.parentItemID, item1.id);
+		assert.isFalse(attachment2.deleted);
+		assert.equal(attachment2.getField('url'), 'https://otherdomain.example.com/');
+	});
+
 	it("should keep web attachment with same URL but different title", async function () {
 		let item1 = await createDataObject('item', { setTitle: true });
 		let attachment1 = await Zotero.Attachments.linkFromURL({
