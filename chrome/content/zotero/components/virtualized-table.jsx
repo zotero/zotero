@@ -1670,7 +1670,9 @@ class VirtualizedTable extends React.Component {
 		const jsWindow = document.querySelector(`#${this._jsWindowID} .windowed-list`);
 		if (!jsWindow) return;
 		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
-		const scrollbarWidth = jsWindow.parentElement.getBoundingClientRect().width - jsWindow.parentElement.clientWidth;
+		// Use matching integer measurements so fractional flex widths cannot make
+		// the header padding oscillate around a scrollbar-width boundary.
+		const scrollbarWidth = Math.max(0, jsWindow.parentElement.offsetWidth - jsWindow.parentElement.clientWidth);
 
 		header.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
 	}
