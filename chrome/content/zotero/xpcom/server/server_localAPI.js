@@ -1966,6 +1966,14 @@ function makeNewObject(libraryID, kind, itemType) {
 	return obj;
 }
 
+async function makeNewObjectWithKey(libraryID, kind, itemType, key) {
+	let obj = makeNewObject(libraryID, kind, itemType);
+	obj.key = key;
+	// Setting the key identifies the object. Initialize its data before fromJSON().
+	await obj.loadPrimaryData();
+	return obj;
+}
+
 /**
  * Apply JSON to an existing or new data object. Throws HTTPError on validation
  * failure. Caller is responsible for calling saveTx().
@@ -2077,8 +2085,7 @@ async function writeMultipleObjects(endpoint, requestData, kind) {
 						throw new HTTPError(404, `${kind} doesn't exist `
 							+ `(expected version ${parseInt(entry.version)}; use 0 instead)`);
 					}
-					obj = makeNewObject(libraryID, kind, entry.itemType);
-					obj.key = providedKey;
+					obj = await makeNewObjectWithKey(libraryID, kind, entry.itemType, providedKey);
 				}
 			}
 			else {
@@ -2202,8 +2209,7 @@ async function writeSingleObject(endpoint, requestData, kind, isPatch) {
 			return [400, 'text/plain', 'itemType property not provided'];
 		}
 		try {
-			obj = makeNewObject(libraryID, kind, body.itemType);
-			obj.key = key;
+			obj = await makeNewObjectWithKey(libraryID, kind, body.itemType, key);
 		}
 		catch (e) {
 			if (e instanceof HTTPError) {

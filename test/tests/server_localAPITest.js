@@ -911,6 +911,49 @@ describe("Local API Server", function () {
 				if (item) await item.eraseTx();
 			});
 
+			it("should create a single item with a supplied key", async function () {
+				let key = Zotero.Utilities.generateObjectKey();
+				let { response } = await apiPost('/users/0/items', {
+					body: [{
+						key,
+						version: 0,
+						itemType: 'webpage',
+						title: 'Example Domain',
+						url: 'https://example.com/',
+						accessDate: '2026-09-20T01:30:00Z'
+					}]
+				});
+				assert.isEmpty(response.failed);
+				assert.equal(response.success['0'], key);
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, key);
+				assert.isOk(item);
+				assert.equal(item.getField('title'), 'Example Domain');
+				assert.equal(item.getField('url'), 'https://example.com/');
+				await item.eraseTx();
+			});
+
+			it("should create a child item with a supplied parent key", async function () {
+				let key = Zotero.Utilities.generateObjectKey();
+				let { response } = await apiPost('/users/0/items', {
+					body: [
+						{ key, version: 0, itemType: 'book', title: 'Parent' },
+						{ itemType: 'note', parentItem: key, note: '<p>Child note</p>' }
+					]
+				});
+				assert.isEmpty(response.failed);
+				assert.equal(response.success['0'], key);
+				let parent = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, key);
+				let child = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, response.success['1']);
+				assert.isOk(parent);
+				assert.isOk(child);
+				assert.equal(child.parentItemKey, key);
+				await child.eraseTx();
+				await parent.eraseTx();
+			});
+
 			it("should create multiple items in one request", async function () {
 				let { response } = await apiPost('/users/0/items', {
 					body: [
@@ -1145,6 +1188,19 @@ describe("Local API Server", function () {
 				await item.eraseTx();
 			});
 
+			it("should create an item with a supplied key", async function () {
+				let key = Zotero.Utilities.generateObjectKey();
+				let { status } = await apiPut(`/users/0/items/${key}`, {
+					body: { itemType: 'webpage', title: 'PUT Created Item' }
+				});
+				assert.equal(status, 204);
+				let item = await Zotero.Items.getByLibraryAndKeyAsync(
+					Zotero.Libraries.userLibraryID, key);
+				assert.isOk(item);
+				assert.equal(item.getField('title'), 'PUT Created Item');
+				await item.eraseTx();
+			});
+
 			it("should reject without version or If-Unmodified-Since-Version", async function () {
 				let item = await createDataObject('item');
 				let { status } = await apiPut(`/users/0/items/${item.key}`, {
@@ -1368,6 +1424,20 @@ describe("Local API Server", function () {
 				await col.eraseTx();
 			});
 
+			it("should create a collection with a supplied key", async function () {
+				let key = Zotero.Utilities.generateObjectKey();
+				let { response } = await apiPost('/users/0/collections', {
+					body: [{ key, version: 0, name: 'Keyed Collection' }]
+				});
+				assert.isEmpty(response.failed);
+				assert.equal(response.success['0'], key);
+				let collection = Zotero.Collections.getByLibraryAndKey(
+					Zotero.Libraries.userLibraryID, key);
+				assert.isOk(collection);
+				assert.equal(collection.name, 'Keyed Collection');
+				await collection.eraseTx();
+			});
+
 			it("should set parentCollection when provided", async function () {
 				let parent = await createDataObject('collection');
 				let { response } = await apiPost('/users/0/collections', {
@@ -1444,6 +1514,20 @@ describe("Local API Server", function () {
 				let search = Zotero.Searches.getByLibraryAndKey(
 					Zotero.Libraries.userLibraryID, key);
 				assert.equal(search.name, 'My Saved Search');
+				await search.eraseTx();
+			});
+
+			it("should create a saved search with a supplied key", async function () {
+				let key = Zotero.Utilities.generateObjectKey();
+				let { response } = await apiPost('/users/0/searches', {
+					body: [{ key, version: 0, name: 'Keyed Search', conditions: [] }]
+				});
+				assert.isEmpty(response.failed);
+				assert.equal(response.success['0'], key);
+				let search = Zotero.Searches.getByLibraryAndKey(
+					Zotero.Libraries.userLibraryID, key);
+				assert.isOk(search);
+				assert.equal(search.name, 'Keyed Search');
 				await search.eraseTx();
 			});
 
