@@ -612,50 +612,46 @@ if [ $BUILD_MAC == 1 ]; then
 		hdiutil detach -quiet /Volumes/Firefox
 	fi
 	
-	# Download and extract custom libmozglue.dylib
+	# Download custom components (e.g., XUL), as an xz-compressed tarball of the MacOS folder with
+	# custom files in it
 	echo
-	hash="$custom_components_hash_mac"
-	if [ -n "$hash" ]; then
-		xzfile="Firefox $GECKO_VERSION libmozglue.dylib.xz"
-		# Filename doesn't include "esr"
-		url="${custom_components_url}mac/${GECKO_VERSION//esr}-libmozglue-$hash.dylib.xz"
-
+	rm -rf MacOS
+	if [ -n "$custom_components_hash_mac" ]; then
+		tarfile="Firefox $GECKO_VERSION MacOS.tar.xz"
 		if [[ "$(uname)" = "Darwin" ]]; then
 			shasum="shasum -a 256"
 		else
 			shasum=sha256sum
 		fi
 
-		download_xz() {
-			echo "Downloading custom libmozglue.dylib"
+		download_components() {
+			echo "Downloading custom Firefox components"
 			echo
-			echo $url
-			curl -fo "$xzfile" "$url"
+			curl -fo "$tarfile" "${custom_components_url}mac/$custom_components_hash_mac.tar.xz"
 		}
 
-		verify_hash() {
-			echo "$hash  $xzfile" | $shasum -c -
+		verify_components_hash() {
+			echo "$custom_components_hash_mac  $tarfile" | $shasum -c -
 		}
 
-		# Download if file doesn't exist
-		if [ ! -e "$xzfile" ]; then
-			download_xz
+		if [ ! -e "$tarfile" ]; then
+			download_components
 		fi
 
+		# Verify hash
 		echo
-		if ! verify_hash; then
-			echo "SHA hash mismatch. Redownloading libmozglue.dylib…"
-			rm -f "$xzfile"
-			download_xz
+		if ! verify_components_hash; then
+			echo "SHA hash mismatch. Redownloading custom Firefox components…"
+			rm -f "$tarfile"
+			download_components
 			echo
-			if ! verify_hash; then
+			if ! verify_components_hash; then
 				echo "Hash still doesn't match. Aborting."
 				exit 1
 			fi
 		fi
 		echo
-
-		xz -d --stdout "$xzfile" > Firefox.app/Contents/MacOS/libmozglue.dylib
+		tar xvf "$tarfile"
 		echo
 	fi
 	

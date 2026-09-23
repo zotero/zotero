@@ -709,6 +709,11 @@ if [ $BUILD_MAC == 1 ]; then
 	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
 	chmod 755 "$CONTENTSDIR/MacOS/zotero"
 
+	# Overlay custom Firefox components (e.g., XUL or libmozglue.dylib)
+	if [ -n "$custom_components_hash_mac" ]; then
+		cp -R "$MAC_RUNTIME_PATH/../MacOS/." "$CONTENTSDIR/MacOS/"
+	fi
+
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"
 	check_lfs_file "$CALLDIR/mac/updater.tar.xz"
