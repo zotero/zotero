@@ -154,9 +154,9 @@ Zotero.ItemFields = new function () {
 		}
 		var byField = _loadInfo[itemTypeID];
 		if (!byField) {
-			byField = _loadInfo[itemTypeID] = new Map();
+			byField = _loadInfo[itemTypeID] = [];
 		}
-		var info = byField.get(fieldID);
+		var info = byField[fieldID];
 		if (info === undefined) {
 			if (!this.getID(fieldID)) {
 				info = false;
@@ -171,7 +171,7 @@ Zotero.ItemFields = new function () {
 					isISBN: resolvedID == this.getID('ISBN')
 				};
 			}
-			byField.set(fieldID, info);
+			byField[fieldID] = info;
 		}
 		return info;
 	};
