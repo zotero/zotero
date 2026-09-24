@@ -298,6 +298,7 @@ Zotero.Items = function () {
 		var sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
 		var allItemIDs = [];
+		var fieldIDsByType = new Map();
 		await Zotero.DB.queryAsync(
 			sql,
 			params,
@@ -306,9 +307,13 @@ Zotero.Items = function () {
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
-					
+
 					// Set nonexistent fields in the cache list to false (instead of null)
-					let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+					let fieldIDs = fieldIDsByType.get(item.itemTypeID);
+					if (!fieldIDs) {
+						fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+						fieldIDsByType.set(item.itemTypeID, fieldIDs);
+					}
 					for (let j=0; j<fieldIDs.length; j++) {
 						let fieldID = fieldIDs[j];
 						if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {

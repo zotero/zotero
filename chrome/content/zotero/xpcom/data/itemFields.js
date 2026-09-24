@@ -39,7 +39,9 @@ Zotero.ItemFields = new function () {
 	var _typeFieldNamesByBase = {};
 	var _baseFieldIDsByTypeAndField = {};
 	var _autocompleteFields = null;
-	
+	var _loadInfo = [];
+	var _loadInfoMethods = {};
+
 	// Privileged methods
 	this.getName = getName;
 	this.getID = getID;
@@ -59,6 +61,7 @@ Zotero.ItemFields = new function () {
 	this.init = async function () {
 		_fields = {};
 		_fieldsFormats = [];
+		_loadInfo = [];
 		
 		var result = await Zotero.DB.queryAsync('SELECT * FROM fieldFormats');
 		
@@ -123,6 +126,57 @@ Zotero.ItemFields = new function () {
 	}
 	
 	
+	/**
+	 * The lookups Zotero.Item#setField() does for every value loaded from the
+	 * database, cached per item type and field
+	 *
+	 * The cache is dropped if any method it depends on is replaced, so an
+	 * overridden method is still consulted.
+	 *
+	 * @param {Integer} itemTypeID
+	 * @param {Integer} fieldID
+	 * @return {Object|false} - false for an unknown field
+	 */
+	this._getLoadInfo = function (itemTypeID, fieldID) {
+		if (_loadInfoMethods.getID !== this.getID
+				|| _loadInfoMethods.getFieldIDFromTypeAndBase !== this.getFieldIDFromTypeAndBase
+				|| _loadInfoMethods.isValidForType !== this.isValidForType
+				|| _loadInfoMethods.isMultiline !== this.isMultiline
+				|| _loadInfoMethods.getItemTypeID !== Zotero.ItemTypes.getID) {
+			_loadInfo = [];
+			_loadInfoMethods = {
+				getID: this.getID,
+				getFieldIDFromTypeAndBase: this.getFieldIDFromTypeAndBase,
+				isValidForType: this.isValidForType,
+				isMultiline: this.isMultiline,
+				getItemTypeID: Zotero.ItemTypes.getID
+			};
+		}
+		var byField = _loadInfo[itemTypeID];
+		if (!byField) {
+			byField = _loadInfo[itemTypeID] = new Map();
+		}
+		var info = byField.get(fieldID);
+		if (info === undefined) {
+			if (!this.getID(fieldID)) {
+				info = false;
+			}
+			else {
+				let resolvedID = this.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID;
+				info = {
+					fieldID: resolvedID,
+					titleID: this.getID('title'),
+					valid: this.isValidForType(resolvedID, itemTypeID),
+					multiline: this.isMultiline(resolvedID),
+					isISBN: resolvedID == this.getID('ISBN')
+				};
+			}
+			byField.set(fieldID, info);
+		}
+		return info;
+	};
+
+
 	/*
 	 * Return the fieldName for a passed fieldID or fieldName
 	 */
