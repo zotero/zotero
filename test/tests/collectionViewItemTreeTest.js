@@ -757,6 +757,48 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(treebox.getFirstVisibleRow(), firstVisibleBefore);
 			assert.isFalse(itemsView.tree.rowIsVisible(itemsView.getRowIndexByID(selectedItemID)));
 		});
+		
+		it("shouldn't scroll when opening a container above the selected row", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+			
+			var treebox = itemsView._treebox;
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
+			
+			// Sort the container to the top, with more rows below than fit in the view
+			var num = numVisibleRows + 10;
+			var parentItem = await createDataObject('item', {
+				title: String(0).padStart(num, '0'),
+				collections: [collection.id]
+			});
+			await importFileAttachment('test.png', { parentItemID: parentItem.id });
+			await Zotero.DB.executeTransaction(async function () {
+				for (let i = 1; i < num; i++) {
+					let item = createUnsavedDataObject('item', {
+						title: String(i).padStart(num, '0'),
+						collections: [collection.id]
+					});
+					await item.save();
+				}
+			});
+			await waitForItemsLoad(win);
+			
+			var parentRow = itemsView.getRowIndexByID(parentItem.id);
+			treebox.scrollTo(treebox.getRowPosition(parentRow));
+			var scrollOffsetBefore = treebox.scrollOffset;
+			
+			// Select a visible row below the container
+			await itemsView.selectItem(itemsView.getRow(parentRow + 2).ref.id);
+			assert.isFalse(itemsView.isContainerOpen(parentRow));
+			
+			await itemsView.toggleOpenState(parentRow);
+			await itemsView.waitForLoad();
+			
+			assert.isTrue(itemsView.isContainerOpen(parentRow));
+			assert.equal(treebox.scrollOffset, scrollOffsetBefore);
+			assert.isTrue(itemsView.tree.rowIsVisible(parentRow));
+		});
 	});
 	
 	describe("#sort()", function () {
@@ -1079,163 +1121,125 @@ describe("CollectionViewItemTree", function () {
 			assert.sameMembers(zp.itemsView.getSelectedItems(true), [item.id]);
 		});
 		
-		it("should keep first visible item in view when other items are added with skipSelect and nothing in view is selected", async function () {
-			var collection = await createDataObject('collection');
-			await waitForItemsLoad(win);
-			itemsView = zp.itemsView;
-			
-			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
-			
-			// Get a numeric string left-padded with zeroes
-			function getTitle(i, max) {
-				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
-			}
-			
-			var num = numVisibleRows + 10;
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < num; i++) {
-					let title = getTitle(i, num);
-					let item = createUnsavedDataObject('item', { title });
-					item.addToCollection(collection.id);
-					await item.save();
-				}
-			}.bind(this));
-			
-			// Scroll halfway
-			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
-			
-			var firstVisibleItemID = itemsView.getRow(treebox.getFirstVisibleRow()).ref.id;
-			
-			// Add one item at the beginning
-			var item = createUnsavedDataObject(
-				'item', { title: getTitle(0, num), collections: [collection.id] }
-			);
-			await item.saveTx({
-				skipSelect: true
+		describe("scroll position", function () {
+			var collection, items, treebox;
+
+			beforeEach(async function () {
+				collection = await createDataObject('collection');
+				await select(win, collection);
+				itemsView = zp.itemsView;
+				treebox = itemsView._treebox;
+				items = [];
+				let count = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow() + 30;
+				await Zotero.DB.executeTransaction(async function () {
+					for (let i = 0; i < count; i++) {
+						let item = createUnsavedDataObject('item', {
+							title: String(i).padStart(4, '0'),
+							collections: [collection.id],
+						});
+						await item.save({ skipSelect: true });
+						items.push(item);
+					}
+				});
+				await itemsView.selectItem(items[8].id);
+				treebox.scrollTo(treebox.getRowPosition(4) + 7);
 			});
-			// Then add a few more in a transaction
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < 3; i++) {
-					var item = createUnsavedDataObject(
-						'item', { title: getTitle(0, num), collections: [collection.id] }
-					);
-					await item.save({
-						skipSelect: true
+
+			it("should preserve the selected item's position in viewport when an edit changes its sort position", async function () {
+				let offset = treebox.getRowPosition(itemsView.getRowIndexByID(items[8].id)) - treebox.scrollOffset;
+				items[8].setField('title', '0012a');
+				await items[8].saveTx();
+				assert.equal(
+					treebox.getRowPosition(itemsView.getRowIndexByID(items[8].id)) - treebox.scrollOffset,
+					offset
+				);
+			});
+
+			it("should preserve scroll position for multi-item edits", async function () {
+				let offset = treebox.scrollOffset;
+				await Zotero.DB.executeTransaction(async function () {
+					for (let i of [8, 9]) {
+						items[i].setField('title', '0012' + i);
+						await items[i].save();
+					}
+				});
+				assert.equal(treebox.scrollOffset, offset);
+			});
+
+			it("should preserve scroll position when items are added above the visible rows with no selection", async function () {
+				itemsView.selection.clearSelection();
+				let firstItem = itemsView.getRow(treebox.getFirstVisibleRow()).ref;
+				let offset = treebox.getRowPosition(itemsView.getRowIndexByID(firstItem.id)) - treebox.scrollOffset;
+				await Zotero.DB.executeTransaction(async function () {
+					for (let i = 0; i < 3; i++) {
+						let item = createUnsavedDataObject('item', {
+							title: '0000a', collections: [collection.id]
+						});
+						await item.save({ skipSelect: true });
+					}
+				});
+				assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstItem.id);
+				assert.equal(treebox.getRowPosition(itemsView.getRowIndexByID(firstItem.id)) - treebox.scrollOffset, offset);
+			});
+
+			it("shouldn't scroll when items are added within the visible rows with skipSelect", async function () {
+				let offset = treebox.scrollOffset;
+				await Zotero.DB.executeTransaction(async function () {
+					for (let i = 0; i < 3; i++) {
+						let item = createUnsavedDataObject('item', {
+							title: '0005a', collections: [collection.id]
+						});
+						await item.save({ skipSelect: true });
+					}
+				});
+				assert.sameMembers(itemsView.getSelectedItems(true), [items[8].id]);
+				assert.equal(treebox.scrollOffset, offset);
+			});
+
+			it("shouldn't scroll when at the top and items are added with skipSelect", async function () {
+				await itemsView.selectItem(items[2].id);
+				treebox.scrollTo(0);
+				await Zotero.DB.executeTransaction(async function () {
+					for (let i = 0; i < 3; i++) {
+						let item = createUnsavedDataObject('item', {
+							title: '000', collections: [collection.id]
+						});
+						await item.save({ skipSelect: true });
+					}
+				});
+				assert.equal(treebox.scrollOffset, 0);
+			});
+
+			for (let count of [1, 2]) {
+				it(`should preserve selection scroll position when moving ${count} child item(s) to another parent`, async function () {
+					let attachments = [];
+					for (let i = 0; i < count; i++) {
+						attachments.push(await importFileAttachment('test.png', { parentItemID: items[0].id }));
+					}
+					itemsView.expandAllRows(true);
+					await itemsView.selectItems(attachments.map(item => item.id));
+					treebox.scrollTo(7);
+					let firstSelected = itemsView.getRow(itemsView.getRowIndexByID(items[0].id) + 1).ref;
+					let offset = treebox.getRowPosition(itemsView.getRowIndexByID(firstSelected.id)) - treebox.scrollOffset;
+
+					await Zotero.DB.executeTransaction(async function () {
+						for (let attachment of attachments) {
+							attachment.parentItemID = items[3].id;
+							await attachment.save();
+						}
 					});
-				}
-			}.bind(this));
-			
-			// Make sure the same item is still in the first visible row
-			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
-		});
-		
-		it("should keep first visible selected item in position when other items are added with skipSelect", async function () {
-			var collection = await createDataObject('collection');
-			await select(win, collection);
-			itemsView = zp.itemsView;
-			
-			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
-			
-			// Get a numeric string left-padded with zeroes
-			function getTitle(i, max) {
-				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
-			}
-			
-			var num = numVisibleRows + 10;
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < num; i++) {
-					let title = getTitle(i, num);
-					let item = createUnsavedDataObject('item', { title });
-					item.addToCollection(collection.id);
-					await item.save();
-				}
-			});
-			
-			// Scroll halfway
-			treebox.scrollToRow(Math.round(num / 2) - Math.round(numVisibleRows / 2));
-			
-			// Select an item
-			itemsView.selection.select(Math.round(num / 2));
-			var selectedItem = itemsView.getSelectedItems()[0];
-			var offset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
-			
-			// Add one item at the beginning
-			var item = createUnsavedDataObject(
-				'item', { title: getTitle(0, num), collections: [collection.id] }
-			);
-			await item.saveTx({
-				skipSelect: true
-			});
-			// Then add a few more in a transaction
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < 3; i++) {
-					var item = createUnsavedDataObject(
-						'item', { title: getTitle(0, num), collections: [collection.id] }
+					await itemsView.waitForLoad();
+
+					assert.sameMembers(itemsView.getSelectedItems(true), attachments.map(item => item.id));
+					assert.equal(
+						treebox.getRowPosition(itemsView.getRowIndexByID(firstSelected.id)) - treebox.scrollOffset,
+						offset
 					);
-					await item.save({
-						skipSelect: true
-					});
-				}
-			});
-			
-			// Make sure the selected item is still at the same position
-			assert.equal(itemsView.getSelectedItems()[0], selectedItem);
-			var newOffset = itemsView.getRowIndexByID(selectedItem.treeViewID) - treebox.getFirstVisibleRow();
-			assert.equal(newOffset, offset);
-		});
-		
-		it("shouldn't scroll items list if at top when other items are added with skipSelect", async function () {
-			var collection = await createDataObject('collection');
-			await select(win, collection);
-			itemsView = zp.itemsView;
-			
-			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
-			
-			// Get a numeric string left-padded with zeroes
-			function getTitle(i, max) {
-				return new String(new Array(max + 1).join(0) + i).slice(-1 * max);
+					assert.isAbove(treebox.scrollOffset, 7);
+				});
 			}
-			
-			var num = numVisibleRows + 10;
-			await Zotero.DB.executeTransaction(async function () {
-				// Start at "*1" so we can add items before
-				for (let i = 1; i < num; i++) {
-					let title = getTitle(i, num);
-					let item = createUnsavedDataObject('item', { title });
-					item.addToCollection(collection.id);
-					await item.save();
-				}
-			}.bind(this));
-			
-			// Scroll to top
-			treebox.scrollToRow(0);
-			
-			// Add one item at the beginning
-			var item = createUnsavedDataObject(
-				'item', { title: getTitle(0, num), collections: [collection.id] }
-			);
-			await item.saveTx({
-				skipSelect: true
-			});
-			// Then add a few more in a transaction
-			await Zotero.DB.executeTransaction(async function () {
-				for (let i = 0; i < 3; i++) {
-					var item = createUnsavedDataObject(
-						'item', { title: getTitle(0, num), collections: [collection.id] }
-					);
-					await item.save({
-						skipSelect: true
-					});
-				}
-			}.bind(this));
-			
-			// Make sure the first row is still at the top
-			assert.equal(treebox.getFirstVisibleRow(), 0);
 		});
-		
+
 		it("should update search results when items are added", async function () {
 			var search = await createDataObject('search');
 			await select(win, search);

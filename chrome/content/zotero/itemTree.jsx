@@ -1230,9 +1230,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return this.rowProvider.refresh(options);
 	})
 
-	_cacheState() {
+	/**
+	 * Capture selection and scroll position before changing rows. Preserve the first
+	 * visible row by default; single-item edits and reparenting preserve selection scroll.
+	 * The update's restoreSelection and restoreScroll flags independently apply this state.
+	 *
+	 * @param {Object} [options]
+	 * @param {boolean} [options.preserveSelectionScroll=false]
+	 */
+	_cacheState({ preserveSelectionScroll = false } = {}) {
 		this._cachedSelection = this.getSelectedObjects();
-		this._cachedScrollPosition = this._saveScrollPosition();
+		this._cachedScrollPosition = this._saveScrollPosition({ preserveSelectionScroll });
 	}
 
 	/**
@@ -1352,7 +1360,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 		
-		this._cacheState();
+		// Preserve selection scroll for single-item edits and reparenting, including
+		// moves of multiple items. Other bulk changes preserve the first visible row.
+		let preserveSelectionScroll = action == 'modify' && type == 'item'
+			&& (ids.length == 1 || ids.some(id => {
+				let row = this._rowMap[id];
+				if (row === undefined) return false;
+				let parentIndex = this.getParentIndex(row);
+				let oldParentID = parentIndex == -1 ? null : this.getRow(parentIndex).ref.id;
+				return oldParentID != (this.getRow(row).ref.parentItemID || null);
+			}));
+		this._cacheState({ preserveSelectionScroll });
 
 		await this.rowProvider.notify(action, type, ids, extraData);
 	}
@@ -2690,55 +2708,58 @@ var ItemTree = class ItemTree extends LibraryTree {
 			scrollPosition = this._cachedScrollPosition;
 			this._cachedScrollPosition = null;
 		}
-		if (!scrollPosition || !scrollPosition.id || !this._treebox) {
+		if (!scrollPosition || !this._treebox) {
 			return;
 		}
-		var row = this._rowMap[scrollPosition.id];
+		if (scrollPosition.id === undefined) {
+			this._treebox.scrollTo(scrollPosition.offset);
+			return;
+		}
+		let row = this._rowMap[scrollPosition.id];
 		if (row === undefined) {
 			return;
 		}
-		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0), true);
+		this._treebox.scrollTo(this._treebox.getRowPosition(row) - scrollPosition.offset);
 	}
 
 	/**
 	 * Return an object describing the current scroll position to restore after changes
 	 *
-	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 * Anchors to top visible item (viewport) scroll by default, can override to anchor to
+	 * selected item instead. This ensures that collapse/expand doesn't move the row from under
+	 * cursor.
+	 *
+	 * @param {Object} [options]
+	 * @param {boolean} [options.preserveSelectionScroll=false] - Prefer a visible selected row over the viewport
+	 * @return {Object|false} - A row ID and relative pixel offset
 	 */
-	_saveScrollPosition() {
+	_saveScrollPosition({ preserveSelectionScroll = false } = {}) {
 		if (!this._treebox) return false;
 		var treebox = this._treebox;
 		var first = treebox.getFirstVisibleRow();
 		if (first === undefined || first === null) {
 			return false;
 		}
-		var last = treebox.getLastVisibleRow();
-		for (let i = first; i <= last; i++) {
-			// If an object is selected, keep the first selected one in position
-			if (this.selection.isSelected(i)) {
-				let row = this.getRow(i);
-				if (!row) return false;
-				return {
-					id: row.ref.treeViewID,
-					offset: i - first
-				};
+		let scrollOffset = treebox.scrollOffset;
+		if (scrollOffset == 0) {
+			return { offset: 0 };
+		}
+
+		let anchorIndex = first;
+		if (preserveSelectionScroll) {
+			for (let i = first; i <= treebox.getLastVisibleRow(); i++) {
+				if (this.selection.isSelected(i)) {
+					anchorIndex = i;
+					break;
+				}
 			}
 		}
 
-		// With no selection to anchor to, don't save a scroll position when the
-		// view is already at the top of the list. Otherwise restoring after an
-		// insertion would pin the previously-top row in place (pushing the view
-		// down) instead of leaving the list scrolled to its new top.
-		if (!first) {
-			return false;
-		}
-
-		// Otherwise keep the first visible row in position
-		let row = this.getRow(first);
+		let row = this.getRow(anchorIndex);
 		if (!row) return false;
 		return {
 			id: row.ref.treeViewID,
-			offset: 0
+			offset: treebox.getRowPosition(anchorIndex) - scrollOffset
 		};
 	}
 
