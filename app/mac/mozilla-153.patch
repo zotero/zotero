@@ -1,0 +1,116 @@
+diff --git a/mozglue/build/AudioQueueSanitizer.cpp b/mozglue/build/AudioQueueSanitizer.cpp
+new file mode 100644
+index 000000000000..9efa3255c472
+--- /dev/null
++++ b/mozglue/build/AudioQueueSanitizer.cpp
+@@ -0,0 +1,91 @@
++/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* vim: set ts=8 sts=2 et sw=2 tw=80: */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++// Work around a use-after-free in the macOS 27 system speech synthesizer.
++//
++// When an utterance finishes, the AudioQueue player in the private
++// TextToSpeech framework (used by both NSSpeechSynthesizer and
++// AVSpeechSynthesizer) enqueues a short de-click ramp that starts from a
++// sample read out of a buffer it has already freed. With the system
++// allocator, which zeroes freed memory, that sample is 0 and the ramp is
++// silent. mozjemalloc poisons freed memory with 0xE5 instead, which reads
++// as -1.36e23 in float32, so every utterance ends with a ~10 ms full-scale
++// burst.
++//
++// We can't fix the framework, so we interpose AudioQueueEnqueueBuffer and
++// zero any float samples that are non-finite or far outside the nominal
++// [-1, 1] range before they reach CoreAudio. Real audio never gets close
++// to kMaxSampleMagnitude, so this only ever affects garbage.
++//
++// dyld only honors __interpose tuples in images loaded at launch, which is
++// why this needs to be in mozglue rather than in XUL (loaded with dlopen)
++// alongside OSXSpeechSynthesizerService.
++
++#include <AudioToolbox/AudioToolbox.h>
++#include <math.h>
++
++namespace {
++
++constexpr float kMaxSampleMagnitude = 16.0f;
++
++void SanitizeBuffer(AudioQueueRef aQueue, AudioQueueBufferRef aBuffer) {
++  AudioStreamBasicDescription format;
++  UInt32 size = sizeof(format);
++  if (AudioQueueGetProperty(aQueue, kAudioQueueProperty_StreamDescription,
++                            &format, &size) != noErr) {
++    return;
++  }
++  if (format.mFormatID != kAudioFormatLinearPCM ||
++      !(format.mFormatFlags & kAudioFormatFlagIsFloat) ||
++      format.mBitsPerChannel != 32) {
++    return;
++  }
++
++  float* samples = static_cast<float*>(aBuffer->mAudioData);
++  UInt32 count = aBuffer->mAudioDataByteSize / sizeof(float);
++  for (UInt32 i = 0; i < count; i++) {
++    // Written so that NaN also fails the comparison.
++    if (!(fabsf(samples[i]) <= kMaxSampleMagnitude)) {
++      samples[i] = 0.0f;
++    }
++  }
++}
++
++OSStatus SanitizingEnqueueBuffer(
++    AudioQueueRef aQueue, AudioQueueBufferRef aBuffer, UInt32 aNumPackets,
++    const AudioStreamPacketDescription* aPacketDescs) {
++  SanitizeBuffer(aQueue, aBuffer);
++  return AudioQueueEnqueueBuffer(aQueue, aBuffer, aNumPackets, aPacketDescs);
++}
++
++OSStatus SanitizingEnqueueBufferWithParameters(
++    AudioQueueRef aQueue, AudioQueueBufferRef aBuffer, UInt32 aNumPackets,
++    const AudioStreamPacketDescription* aPacketDescs, UInt32 aTrimFrames,
++    UInt32 aTrimFramesAtEnd, UInt32 aNumParamValues,
++    const AudioQueueParameterEvent* aParamValues,
++    const AudioTimeStamp* aStartTime, AudioTimeStamp* aActualStartTime) {
++  SanitizeBuffer(aQueue, aBuffer);
++  return AudioQueueEnqueueBufferWithParameters(
++      aQueue, aBuffer, aNumPackets, aPacketDescs, aTrimFrames,
++      aTrimFramesAtEnd, aNumParamValues, aParamValues, aStartTime,
++      aActualStartTime);
++}
++
++struct Interpose {
++  const void* mReplacement;
++  const void* mReplacee;
++};
++
++__attribute__((used, section("__DATA,__interpose"))) const Interpose
++    kInterposes[] = {
++        {reinterpret_cast<const void*>(&SanitizingEnqueueBuffer),
++         reinterpret_cast<const void*>(&AudioQueueEnqueueBuffer)},
++        {reinterpret_cast<const void*>(&SanitizingEnqueueBufferWithParameters),
++         reinterpret_cast<const void*>(
++             &AudioQueueEnqueueBufferWithParameters)},
++};
++
++}  // namespace
+diff --git a/mozglue/build/moz.build b/mozglue/build/moz.build
+index f8f01e999e54..111fe5af1b0d 100644
+--- a/mozglue/build/moz.build
++++ b/mozglue/build/moz.build
+@@ -41,6 +41,14 @@ if CONFIG["OS_TARGET"] == "WINNT":
+         "winmm.dll",
+     ]
+ 
++if CONFIG["OS_TARGET"] == "Darwin" and FORCE_SHARED_LIB:
++    SOURCES += [
++        "AudioQueueSanitizer.cpp",
++    ]
++    OS_LIBS += [
++        "-framework AudioToolbox",
++    ]
++
+ if CONFIG["MOZ_WIDGET_TOOLKIT"]:
+     if CONFIG["MOZ_MEMORY"] and FORCE_SHARED_LIB:
+         pass
