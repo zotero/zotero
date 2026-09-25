@@ -28,6 +28,9 @@ NOTARIZATION_BUNDLE_ID=""
 NOTARIZATION_USER=""
 NOTARIZATION_TEAM_ID=""
 NOTARIZATION_PASSWORD=""
+# Name of a notarytool keychain profile (see `xcrun notarytool store-credentials`), e.g., for an
+# App Store Connect API key -- used instead of the Apple ID settings above if set
+NOTARIZATION_PROFILE=""
 
 # Paths for Windows installer build
 NSIS_DIR='C:\Program Files (x86)\NSIS\'

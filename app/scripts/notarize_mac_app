@@ -4,6 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$ROOT_DIR/config.sh"
+. "$SCRIPT_DIR/utils.sh"
 
 function usage {
 	echo "Usage: $0 file"
@@ -15,5 +16,7 @@ if [[ -z "$file" ]]; then
 	usage
 fi
 
+prepare_notary_auth
+
 echo "Uploading ${file##*/} to Apple for notarization" >&2
-xcrun notarytool submit $file --apple-id "$NOTARIZATION_USER" --team-id "$NOTARIZATION_TEAM_ID" --password="$NOTARIZATION_PASSWORD" --wait
+xcrun notarytool submit $file "${notary_auth[@]}" --wait
