@@ -317,7 +317,11 @@ var Zotero_Preferences = {
 					sameZoneAs: window,
 				});
 				for (let script of pane.scripts) {
-					Services.scriptloader.loadSubScript(script, pane.scope);
+					// Plugin panes load scripts from jar:file: URIs
+					Services.scriptloader.loadSubScriptWithOptions(script, {
+						target: pane.scope,
+						allowUnsafeURL: true
+					});
 				}
 			}
 			if (pane.stylesheets) {

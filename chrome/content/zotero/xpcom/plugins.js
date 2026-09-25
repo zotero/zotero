@@ -197,7 +197,54 @@ Zotero.Plugins = new function () {
 				return Reflect.get(target, property, receiver);
 			}
 		});
-		
+
+		// fx153.3: The script loader now refuses jar:file: URIs unless allowUnsafeURL is
+		// passed (Mozilla bug 1974213), and plugins load their own scripts from their
+		// XPI that way. Allow it for URIs within the plugin, and keep loading into the
+		// plugin scope when no target is given, as a direct call would.
+		let rootURI = addon.getResourceURI().spec;
+		let withinPlugin = url => typeof url == 'string' && url.startsWith(rootURI);
+		// The loader's methods are non-configurable, so proxy an empty object instead
+		let scriptloader = new Proxy({}, {
+			has(_, property) {
+				return property in Services.scriptloader;
+			},
+			get(_, property) {
+				let target = Services.scriptloader;
+				if (property === 'loadSubScript') {
+					return function (url, targetObj, charset) {
+						if (!withinPlugin(url)) {
+							return target.loadSubScript(url, targetObj || scope, charset);
+						}
+						let options = { target: targetObj || scope, allowUnsafeURL: true };
+						if (charset) {
+							options.charset = charset;
+						}
+						return target.loadSubScriptWithOptions(url, options);
+					};
+				}
+				if (property === 'loadSubScriptWithOptions') {
+					return function (url, options = {}) {
+						options = { ...options, target: options.target || scope };
+						if (withinPlugin(url) && !('allowUnsafeURL' in options)) {
+							options.allowUnsafeURL = true;
+						}
+						return target.loadSubScriptWithOptions(url, options);
+					};
+				}
+				let value = Reflect.get(target, property, target);
+				return typeof value == 'function' ? value.bind(target) : value;
+			}
+		});
+		scope.Services = new Proxy(Services, {
+			get(target, property) {
+				if (property === 'scriptloader') {
+					return scriptloader;
+				}
+				return Reflect.get(target, property, target);
+			}
+		});
+
 		scopes.set(addon.id, scope);
 		
 		try {
@@ -206,7 +253,10 @@ Zotero.Plugins = new function () {
 				uri,
 				{
 					target: scope,
-					ignoreCache: true
+					ignoreCache: true,
+					// Plugins are loaded from jar:file: URIs, which the script loader
+					// otherwise refuses (Mozilla bug 1974213)
+					allowUnsafeURL: true
 				}
 			);
 		}
@@ -528,7 +578,8 @@ Zotero.Plugins = new function () {
 				addon.getResourceURI("prefs.js").spec,
 				{
 					target: obj,
-					ignoreCache: true
+					ignoreCache: true,
+					allowUnsafeURL: true
 				}
 			);
 		}
@@ -554,7 +605,8 @@ Zotero.Plugins = new function () {
 				addon.getResourceURI("prefs.js").spec,
 				{
 					target: obj,
-					ignoreCache: true
+					ignoreCache: true,
+					allowUnsafeURL: true
 				}
 			);
 		}
