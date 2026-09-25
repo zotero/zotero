@@ -167,3 +167,21 @@ function remove_between {
 		exit 1
 	fi
 }
+
+# Set $notary_auth to notarytool authentication arguments: the keychain profile in
+# NOTARIZATION_PROFILE if set, or else the Apple ID and app-specific password
+function prepare_notary_auth {
+	if [[ -n "${NOTARIZATION_PROFILE:-}" ]]; then
+		notary_auth=(--keychain-profile "$NOTARIZATION_PROFILE")
+		if [[ -n "$KEYCHAIN" ]]; then
+			keychain_path="$HOME/Library/Keychains/$KEYCHAIN.keychain-db"
+			# The keychain may have auto-locked since signing
+			if [[ -n "$KEYCHAIN_PASSWORD" ]]; then
+				security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+			fi
+			notary_auth+=(--keychain "$keychain_path")
+		fi
+	else
+		notary_auth=(--apple-id "$NOTARIZATION_USER" --team-id "$NOTARIZATION_TEAM_ID" --password "$NOTARIZATION_PASSWORD")
+	fi
+}
