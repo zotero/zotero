@@ -1,23 +1,26 @@
 .AnnotationBox {
+	// Sizes relative to the 13px base, so they follow Zotero's font size setting
 	.title {
 		font-weight: 600;
-		font-size: 12px;
+		font-size: calc(12em / 13);
 		margin: 5px;
 	}
-	
+
+	// Theme colors rather than a fixed white box, which left dark-theme text unreadable
 	.container {
 		display: flex;
 		flex-direction: column;
 		margin: 5px;
-		border: 1px solid #d7dad7;
+		border: var(--material-border-quarternary);
 		border-radius: 5px;
-		background: white;
-		
+		background: var(--material-background);
+		color: var(--fill-primary);
+
 		.header {
 			font-weight: 600;
-			font-size: 11px;
+			font-size: calc(11em / 13);
 			margin-top: 4px;
-			border-bottom: 1px solid #d7dad7;
+			border-bottom: var(--material-border-quarternary);
 			padding: 0 8px 3px;
 		}
 		
