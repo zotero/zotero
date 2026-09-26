@@ -40,7 +40,7 @@
 #zotero-pane-progress-box {
 	background: var(--color-sidepane);
 	border-radius: 8px;
-	border: var(--color-panedivider);
+	border: var(--material-panedivider);
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 	min-height: 30px;
 	width: 320px;
@@ -54,6 +54,7 @@
 #zotero-pane-progress-label {
 	margin: 0;
 	font-weight: 590;
+	overflow-wrap: anywhere;
 }
 
 #zotero-pane-progressmeter {
