@@ -830,6 +830,38 @@ describe("Zotero.DB", function () {
 			assert.isFalse(db.readOnly);
 			await db.closeDatabase();
 		});
+
+		it("should set a 64MB page cache", async function () {
+			var pageSize = await Zotero.DB.valueQueryAsync("PRAGMA page_size");
+			assert.equal(await Zotero.DB.valueQueryAsync("PRAGMA cache_size"), 65536000 / pageSize);
+		});
+
+		it("should gather query planner statistics", async function () {
+			let dir = await getTempDirectory();
+			let dbPath = PathUtils.join(dir, 'test.sqlite');
+			let db = new Zotero.DBConnection(dbPath);
+			await db.queryAsync("CREATE TABLE foo (a INT, b INT)");
+			await db.queryAsync("CREATE INDEX foo_a ON foo(a)");
+			await db.executeTransaction(async function () {
+				for (let i = 0; i < 1000; i++) {
+					await db.queryAsync("INSERT INTO foo VALUES (?, ?)", [i % 10, i]);
+				}
+			});
+			await db.closeDatabase();
+			// Open through internal initialization
+			db._externalDB = false;
+
+			try {
+				await db.queryAsync("SELECT COUNT(*) FROM foo");
+				assert.isAbove(
+					await db.valueQueryAsync("SELECT COUNT(*) FROM sqlite_stat1 WHERE tbl='foo'"),
+					0
+				);
+			}
+			finally {
+				await db.closeDatabase();
+			}
+		});
 	});
 	
 

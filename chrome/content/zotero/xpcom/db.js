@@ -1213,6 +1213,15 @@ Zotero.DBConnection.prototype.closeDatabase = async function (permanent) {
 		// potentially bad WAL data into the database file, which might be a valid file that a
 		// stale WAL file is being incorrectly replayed into.
 		if (!this._dbIsCorrupt) {
+			// Refresh statistics for tables whose size changed a lot this session
+			if (!this.readOnly) {
+				try {
+					await this._connection.execute("PRAGMA optimize");
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
 			try {
 				Zotero.debug("PRAGMA wal_checkpoint(TRUNCATE)");
 				await this._connection.execute("PRAGMA wal_checkpoint(TRUNCATE)");
@@ -1664,9 +1673,11 @@ Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 			}
 		}
 
-		// Set page cache size to 8MB
+		// Set page cache size to 64MB. Pages are allocated only as they're read,
+		// so small databases don't use it all, but loading a library larger than
+		// the cache re-reads most pages from disk for every data type.
 		let pageSize = await this.valueQueryAsync("PRAGMA page_size");
-		let cacheSize = 8192000 / pageSize;
+		let cacheSize = 65536000 / pageSize;
 		await this.queryAsync("PRAGMA cache_size=" + cacheSize);
 		
 		// Enable foreign key checks
@@ -1702,7 +1713,22 @@ Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 				throw error;
 			}
 		}
-		
+
+		// Gather query planner statistics for any table that needs them. Without them,
+		// SQLite reads every item through the items(libraryID, key) index instead of
+		// scanning the table, which is several times slower for a large library. After
+		// the first run, this is a no-op unless a table has grown or shrunk a lot.
+		// Use _connection.execute() directly, since an error here shouldn't start
+		// corruption handling -- the next real query will report a corrupt database.
+		if (!this.readOnly) {
+			try {
+				await this._connection.execute("PRAGMA optimize=0x10002");
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+
 		// Register idle observer for DB backup
 		if (!this._idleObserverScheduled) {
 			this._idleObserverScheduled = true;
