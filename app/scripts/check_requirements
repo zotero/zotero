@@ -56,9 +56,6 @@ which python3 || { $FAIL_CMD; FAILED=1; }
 echo -n "Checking for curl: "
 which curl || { $FAIL_CMD; FAILED=1; }
 
-echo -n "Checking for wget: "
-which wget || { $FAIL_CMD; FAILED=1; }
-
 echo -n "Checking for zip: "
 which zip || { $FAIL_CMD; FAILED=1; }
 

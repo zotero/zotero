@@ -14,7 +14,7 @@ hash="$1"
 tmpdir=`mktemp -d`
 
 cd $tmpdir
-wget -O build.zip "https://$S3_BUCKET.s3.amazonaws.com/$S3_CI_ZIP_PATH/$hash.zip" >&2 \
+curl -sS -f -L -o build.zip "https://$S3_BUCKET.s3.amazonaws.com/$S3_CI_ZIP_PATH/$hash.zip" >&2 \
 	|| (echo "ZIP file not found for commit '$hash'" && exit 1)
 unzip build.zip >&2
 rm build.zip

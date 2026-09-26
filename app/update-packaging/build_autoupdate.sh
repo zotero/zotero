@@ -215,10 +215,12 @@ for version in "$FROM" "$TO"; do
 		set +e
 		# Cached version is available
 		if [ -n "$ETAG" ]; then
-			NEW_ETAG=$(wget -nv -S --header "If-None-Match: $ETAG" $URL 2>&1 | awk '/ *ETag: */ {print $2}')
+			HTTP_CODE=$(curl -sS -L -D headers.txt -o $archive -w '%{http_code}' -H "If-None-Match: $ETAG" "$URL")
+			NEW_ETAG=$(awk 'tolower($1) == "etag:" {print $2}' headers.txt | tr -d '\r' | tail -n 1)
+			rm -f headers.txt
 			
 			# If ETag didn't match, cache newly downloaded version
-			if [ -f $archive ]; then
+			if [ "$HTTP_CODE" = 200 ]; then
 				echo "ETag for $archive didn't match! -- using new version"
 				rm -f "$CACHE_DIR/$archive.etag"
 				cp $archive "$CACHE_DIR/"
@@ -229,7 +231,9 @@ for version in "$FROM" "$TO"; do
 				cp "$CACHE_DIR/$archive" .
 			fi
 		else
-			NEW_ETAG=$(wget -nv -S $URL 2>&1 | awk '/ *ETag: */ {print $2}')
+			curl -sS -f -L -D headers.txt -o $archive "$URL"
+			NEW_ETAG=$(awk 'tolower($1) == "etag:" {print $2}' headers.txt | tr -d '\r' | tail -n 1)
+			rm -f headers.txt
 			
 			# Save archive to cache
 			rm -f "$CACHE_DIR/$archive.etag"

@@ -20,7 +20,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 #mkdir -p nsis
 #cd nsis
 #for plugin in $plugins; do
-#	 wget $plugin
+#	 curl -fsSLO $plugin
 #done
 #
 #unzip_cmd="unzip -d Plugins -j"
