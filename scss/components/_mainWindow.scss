@@ -66,10 +66,11 @@
 	border-radius: 999px;
 	background-color: var(--fill-quinary);
 	overflow: hidden;
+	--progress-fill: var(--color-accent);
 
 	// Determinate fill
 	&::-moz-progress-bar {
-		background-color: var(--color-accent);
+		background-color: var(--progress-fill);
 		border-radius: 999px;
 		transition: width 120ms ease;
 	}
@@ -81,7 +82,7 @@
 		background-image: linear-gradient(
 			90deg,
 			transparent 0%,
-			var(--color-accent) 50%,
+			var(--progress-fill) 50%,
 			transparent 100%
 		);
 		background-size: 40% 100%;
@@ -101,9 +102,18 @@
 		// A still accent segment in the middle of the track instead of the moving sweep
 		&:indeterminate {
 			animation: none;
-			background-image: linear-gradient(var(--color-accent), var(--color-accent));
+			background-image: linear-gradient(var(--progress-fill), var(--progress-fill));
 			background-position: 50% 0;
 		}
+	}
+
+	// High contrast: forced colors would drop the sweep (a background image) and blend the
+	// track into the box, so draw the meter with system colors instead
+	@media (forced-colors: active) {
+		forced-color-adjust: none;
+		--progress-fill: Highlight;
+		background-color: Canvas;
+		border: 1px solid CanvasText;
 	}
 }
 
