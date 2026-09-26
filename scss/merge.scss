@@ -12,6 +12,8 @@ merge-group {
 	display: flex;
 	overflow: hidden auto;
 	gap: 8px;
+	// Room for the focus ring and the selected ring, which the scrollport would clip
+	padding: 4px;
 
 	merge-pane {
 		flex: 1;
@@ -40,8 +42,8 @@ merge-group {
 			box-shadow: 0 0 0 1px var(--color-accent);
 		}
 
-		&[selected] h2,
-		&[selected] attachment-box #title {
+		// Only the heading: an accent-colored attachment title would read as a link
+		&[selected] h2 {
 			color: var(--color-accent);
 		}
 
