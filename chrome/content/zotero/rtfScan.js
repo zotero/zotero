@@ -13,7 +13,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfi
 const columns = [
 	{ dataKey: 'rtf', label: "zotero.rtfScan.citation.label", primary: true, flex: 4 },
 	{ dataKey: 'item', label: "zotero.rtfScan.itemName.label", flex: 5 },
-	{ dataKey: 'action', label: "", fixedWidth: true, width: "32px" },
+	{ dataKey: 'action', label: "", fixedWidth: true, width: 32 },
 ];
 
 const initialRows = [
@@ -339,7 +339,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 					row = { ...row, parent: ambiguousRow };
 					this.insertRows(row, this.rowMap.mapped);
 					this.insertRows(
-						items.map(item => ({ rtf: '', item: item.getField('title'), parent: row })),
+						items.map(item => ({ rtf: '', item: item.getField('title'), action: true, parent: row })),
 						this.rowMap[row.id] + 1
 					);
 					this.citationItemIDs[row.rtf] = items.map(item => item.id);
