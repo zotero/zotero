@@ -109,12 +109,10 @@ describe("Document Recognition", function () {
 			win.ZoteroPane.recognizeSelected();
 			
 			var addedIDs = await waitForItemEvent("add");
-			var modifiedIDs = await waitForItemEvent("modify");
 			// Item and note
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
 			assert.equal(item.getField("title"), "Scaling study of an improved fermion action on quenched lattices");
-			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 
@@ -141,11 +139,9 @@ describe("Document Recognition", function () {
 			win.ZoteroPane.recognizeSelected();
 			
 			var addedIDs = await waitForItemEvent("add");
-			var modifiedIDs = await waitForItemEvent("modify");
 			// Item and note
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
-			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 			
@@ -169,11 +165,9 @@ describe("Document Recognition", function () {
 			win.ZoteroPane.recognizeSelected();
 			
 			var addedIDs = await waitForItemEvent("add");
-			var modifiedIDs = await waitForItemEvent("modify");
 			// Item and note
 			assert.lengthOf(addedIDs, 2);
 			var item = Zotero.Items.get(addedIDs[0]);
-			assert.lengthOf(modifiedIDs, 2);
 			
 			await waitForProgressWindow();
 			
@@ -205,6 +199,47 @@ describe("Document Recognition", function () {
 			await waitForProgressWindow();
 			
 			assert.isTrue(collection.hasItem(item.id));
+		});
+		
+		it("should recognize a standalone PDF by ISBN and make it a child of the new item", async function () {
+			let isbn = '9783034602891';
+			let baseURL = 'http://recognizer.test/';
+			Zotero.Prefs.set('recognize.url', baseURL);
+			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+			let server = sinon.fakeServer.create();
+			server.autoRespond = true;
+			server.respondWith(
+				'POST',
+				baseURL + 'recognize',
+				[200, { 'Content-Type': 'application/json' }, JSON.stringify({ isbn })]
+			);
+			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
+				.resolves([{
+					itemType: 'book',
+					title: 'Classification of Higher Dimensional Algebraic Varieties',
+					ISBN: isbn,
+					tags: []
+				}]);
+			
+			try {
+				let testdir = getTestDataDirectory();
+				testdir.append("recognizePDF_test_DOI.pdf");
+				let attachment = await Zotero.Attachments.importFromFile({ file: testdir });
+				
+				win.ZoteroPane.recognizeSelected();
+				
+				let addedIDs = await waitForItemEvent("add");
+				await waitForProgressWindow();
+				
+				assert.lengthOf(addedIDs, 1);
+				assert.equal(attachment.parentItemID, addedIDs[0]);
+			}
+			finally {
+				Zotero.Prefs.clear('recognize.url');
+				Zotero.HTTP.mock = null;
+				server.restore();
+				translateStub.restore();
+			}
 		});
 		
 		it("should recognize PDF by title and put new item in same collection in group library", async function () {

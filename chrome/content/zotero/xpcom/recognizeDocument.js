@@ -444,7 +444,7 @@ Zotero.RecognizeDocument = new function () {
 				if (!newItem.language && res.language) {
 					newItem.setField('language', res.language);
 				}
-				newItem.saveTx();
+				await newItem.saveTx();
 				return newItem;
 			}
 			catch (e) {
@@ -469,7 +469,7 @@ Zotero.RecognizeDocument = new function () {
 					if (!newItem.language && res.language) {
 						newItem.setField('language', res.language);
 					}
-					newItem.saveTx();
+					await newItem.saveTx();
 					return newItem;
 				}
 				catch (e) {
@@ -520,7 +520,7 @@ Zotero.RecognizeDocument = new function () {
 					if (!newItem.language && res.language) {
 						newItem.setField('language', res.language);
 					}
-					newItem.saveTx();
+					await newItem.saveTx();
 					return newItem;
 				}
 			}
