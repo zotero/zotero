@@ -1,13 +1,13 @@
 diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 --- a/browser/app/nsBrowserApp.cpp
 +++ b/browser/app/nsBrowserApp.cpp
-@@ -154,19 +154,31 @@ static bool IsArg(const char* arg, const
- #endif
- 
+@@ -193,19 +193,31 @@ static bool HasFlag(int argc, char* argv[], const char* s) {
+   }
    return false;
  }
+ #endif
  
- Bootstrap::UniquePtr gBootstrap;
+ constinit Bootstrap::UniquePtr gBootstrap;
  
  static int do_main(int argc, char* argv[], char* envp[]) {
 +  // Allow profile downgrade for Zotero
@@ -26,7 +26,7 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 +  char *appDataFile = iniPath.get();
 +
 +
-   if ((!appDataFile || !*appDataFile) && (argc > 1 && IsArg(argv[1], "app"))) {
+   if ((!appDataFile || !*appDataFile) && (argc > 1 && IsFlag(argv[1], "app"))) {
      if (argc == 2) {
        Output("Incorrect number of arguments passed to -app");
        return 255;
@@ -37,7 +37,7 @@ diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
 --- a/xpcom/build/BinaryPath.h
 +++ b/xpcom/build/BinaryPath.h
-@@ -128,16 +128,56 @@ class BinaryPath {
+@@ -126,16 +126,56 @@ class BinaryPath {
      } else {
        rv = NS_ERROR_FAILURE;
      }
@@ -94,7 +94,7 @@ diff --git a/xpcom/build/BinaryPath.h b/xpcom/build/BinaryPath.h
      if (!libDir) {
        return NS_ERROR_FAILURE;
      }
-@@ -283,16 +323,29 @@ class BinaryPath {
+@@ -281,16 +321,29 @@ class BinaryPath {
      if (NS_FAILED(Get(path))) {
        return nullptr;
      }
