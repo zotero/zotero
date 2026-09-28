@@ -4,7 +4,7 @@ elif [ "$Z_ARCH" == "aarch64" ]; then
         ac_add_options --target=aarch64-apple-darwin
 fi
 ac_add_options --enable-bootstrap
-ac_add_options --with-macos-sdk=$HOME/tmp/MacOSX15.5.sdk
+ac_add_options --with-macos-sdk=$HOME/src/MacOSX26.5.sdk
 
 mk_add_options AUTOCLOBBER=1
 
@@ -23,6 +23,11 @@ ac_add_options --disable-eme
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
 MOZ_REQUIRE_SIGNING=
+
+# Official builds require source info, which Mozilla only detects automatically from
+# Mercurial checkouts
+export MOZ_SOURCE_REPO=https://github.com/mozilla-firefox/firefox
+export MOZ_SOURCE_CHANGESET=$(git -C "$topsrcdir" rev-parse HEAD)
 
 ac_add_options --enable-official-branding
 
