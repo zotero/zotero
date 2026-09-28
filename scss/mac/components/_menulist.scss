@@ -1,3 +1,17 @@
 menulist {
 	line-height: normal;
 }
+
+// Match the insets of native pop-up buttons on macOS 26+, which leave more room for the chevron
+// than Firefox's dropdown border
+@media (-moz-mac-tahoe-theme) {
+	menulist[native] {
+		padding-inline: 4px 11px;
+		
+		// Keep the height at 24px. Firefox scales up the control image when the box is taller
+		// than its natural height (22px) plus a 2px tolerance, making the chevron and bezel too big.
+		&::part(label) {
+			margin-block: 2px;
+		}
+	}
+}
