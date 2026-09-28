@@ -1232,7 +1232,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	/**
 	 * Capture selection and scroll position before changing rows. Preserve the first
-	 * visible row by default; single-item edits and reparenting preserve selection scroll.
+	 * visible row by default; single-item edits preserve selection scroll.
 	 * The update's restoreSelection and restoreScroll flags independently apply this state.
 	 *
 	 * @param {Object} [options]
@@ -1360,16 +1360,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 		
-		// Preserve selection scroll for single-item edits and reparenting, including
-		// moves of multiple items. Other bulk changes preserve the first visible row.
-		let preserveSelectionScroll = action == 'modify' && type == 'item'
-			&& (ids.length == 1 || ids.some(id => {
-				let row = this._rowMap[id];
-				if (row === undefined) return false;
+		// Preserve selection scroll for single-item edits (e.g. if a change makes the
+		// item resort and move somewhere else in the tree)
+		// Other changes preserve the first visible row.
+		let preserveSelectionScroll = false;
+		if (action == 'modify' && type == 'item' && ids.length == 1) {
+			let row = this._rowMap[ids[0]];
+			if (row !== undefined) {
 				let parentIndex = this.getParentIndex(row);
 				let oldParentID = parentIndex == -1 ? null : this.getRow(parentIndex).ref.id;
-				return oldParentID != (this.getRow(row).ref.parentItemID || null);
-			}));
+				preserveSelectionScroll = oldParentID == (this.getRow(row).ref.parentItemID || null);
+			}
+		}
 		this._cacheState({ preserveSelectionScroll });
 
 		await this.rowProvider.notify(action, type, ids, extraData);

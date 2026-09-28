@@ -1210,34 +1210,24 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(treebox.scrollOffset, 0);
 			});
 
-			for (let count of [1, 2]) {
-				it(`should preserve selection scroll position when moving ${count} child item(s) to another parent`, async function () {
-					let attachments = [];
-					for (let i = 0; i < count; i++) {
-						attachments.push(await importFileAttachment('test.png', { parentItemID: items[0].id }));
-					}
-					itemsView.expandAllRows(true);
-					await itemsView.selectItems(attachments.map(item => item.id));
-					treebox.scrollTo(7);
-					let firstSelected = itemsView.getRow(itemsView.getRowIndexByID(items[0].id) + 1).ref;
-					let offset = treebox.getRowPosition(itemsView.getRowIndexByID(firstSelected.id)) - treebox.scrollOffset;
+			it("shouldn't scroll when a selected child item is moved to a parent further down", async function () {
+				let attachment = await importFileAttachment('test.png', { parentItemID: items[0].id });
+				itemsView.expandAllRows(true);
+				await itemsView.selectItem(attachment.id);
+				// Scroll partway into a row, which should be preserved as is
+				treebox.scrollTo(7);
 
-					await Zotero.DB.executeTransaction(async function () {
-						for (let attachment of attachments) {
-							attachment.parentItemID = items[3].id;
-							await attachment.save();
-						}
-					});
-					await itemsView.waitForLoad();
+				attachment.parentItemID = items[3].id;
+				await attachment.saveTx();
+				await itemsView.waitForLoad();
 
-					assert.sameMembers(itemsView.getSelectedItems(true), attachments.map(item => item.id));
-					assert.equal(
-						treebox.getRowPosition(itemsView.getRowIndexByID(firstSelected.id)) - treebox.scrollOffset,
-						offset
-					);
-					assert.isAbove(treebox.scrollOffset, 7);
-				});
-			}
+				assert.sameMembers(itemsView.getSelectedItems(true), [attachment.id]);
+				assert.equal(
+					itemsView.getRowIndexByID(attachment.id),
+					itemsView.getRowIndexByID(items[3].id) + 1
+				);
+				assert.equal(treebox.scrollOffset, 7);
+			});
 		});
 
 		it("should update search results when items are added", async function () {
