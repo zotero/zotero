@@ -1,0 +1,13 @@
+// Firefox 153 draws native controls on macOS 26+ to fill their entire frame
+// (see InflateControlRect() in nsNativeThemeCocoa.mm) but still uses the old
+// widget border sizes, leaving labels nearly touching the edges of the new
+// capsule-shaped buttons and menulists
+@media (-moz-mac-tahoe-theme) {
+	:where(button:not(.plain)) {
+		padding-inline: 6px;
+	}
+	
+	:where(menulist) {
+		padding-inline: 6px;
+	}
+}
