@@ -866,7 +866,12 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 */
 	var _initDB = async function (haveReleasedLock) {
 		// Initialize main database connection
-		Zotero.DB = new Zotero.DBConnection('zotero');
+		// Paperly: the ID, not the literal name. This is the one place the main
+		// database was asked for by a hardcoded string, so it went on opening
+		// zotero.sqlite after DataDirectory had renamed the library to
+		// paperly.sqlite -- the app built a fresh empty database beside the
+		// real one and started using that instead.
+		Zotero.DB = new Zotero.DBConnection(ZOTERO_CONFIG.ID);
 		
 		try {
 			// Test read access

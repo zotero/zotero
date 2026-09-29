@@ -297,7 +297,69 @@ Zotero.DataDirectory = {
 				return;
 			}
 		}
+		await this._migrateLegacyDatabaseName(dataDir);
 		this._cache(dataDir);
+	},
+	
+	
+	/**
+	 * Paperly: brings a library that was created as zotero.sqlite over to the
+	 * name this build uses.
+	 *
+	 * Runs from init(), which is the last moment the data directory is known and
+	 * the database is still closed. It is a no-op on a fresh profile, on one
+	 * already migrated, and on a build whose ID is still 'zotero'.
+	 *
+	 * Two things decide whether this is safe:
+	 *
+	 * The backup. A full copy is taken under the old name before anything moves,
+	 * so a failure anywhere below leaves a complete database behind.
+	 *
+	 * The order. `-wal` is moved *first*, and that is not arbitrary. SQLite
+	 * finds the write-ahead log by filename, so a database separated from its
+	 * log silently loses whatever had not been checkpointed. Interrupted after
+	 * the log moves, the next start finds no new database, migrates again, and
+	 * the already-moved log is waiting at the right name -- recoverable.
+	 * Interrupted after the *database* moves instead, the next start would see
+	 * the new database, return early, and open it without its log. So the log
+	 * goes first. `-shm` is only a shared-memory index and is rebuilt on open,
+	 * so it is dropped rather than carried.
+	 */
+	_migrateLegacyDatabaseName: async function (dataDir) {
+		const LEGACY_ID = 'zotero';
+		if (ZOTERO_CONFIG.ID == LEGACY_ID) {
+			return;
+		}
+		let newPath = OS.Path.join(dataDir, this.getDatabaseFilename());
+		let oldPath = OS.Path.join(dataDir, LEGACY_ID + '.sqlite');
+		if (await OS.File.exists(newPath)) {
+			return;
+		}
+		if (!(await OS.File.exists(oldPath))) {
+			return;
+		}
+		
+		try {
+			let backupPath = oldPath + '.pre-' + ZOTERO_CONFIG.ID + '.bak';
+			if (!(await OS.File.exists(backupPath))) {
+				Zotero.debug(`Backing up ${oldPath} before renaming it`);
+				await OS.File.copy(oldPath, backupPath);
+			}
+			
+			if (await OS.File.exists(oldPath + '-wal')) {
+				await OS.File.move(oldPath + '-wal', newPath + '-wal');
+			}
+			await OS.File.move(oldPath, newPath);
+			await OS.File.remove(oldPath + '-shm', { ignoreAbsent: true });
+			Zotero.debug(`Renamed ${oldPath} to ${newPath}`);
+		}
+		catch (e) {
+			// Leave the old database where it is and let the rest of startup
+			// fail loudly on a missing database, rather than half-moving a
+			// library and reporting success.
+			Zotero.logError(e);
+			throw e;
+		}
 	},
 	
 	

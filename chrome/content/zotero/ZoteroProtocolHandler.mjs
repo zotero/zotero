@@ -33,6 +33,7 @@ const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOT
 const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 import { NetUtil } from "resource://gre/modules/NetUtil.sys.mjs";
+import { ZOTERO_CONFIG } from "resource://zotero/config.mjs";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1011,12 +1012,27 @@ ZoteroProtocolHandler.prototype = {
  * Unregistered in Zotero.reinit() for tests
  */
 ZoteroProtocolHandler.init = function () {
-	Services.io.registerProtocolHandler(
-		'zotero',
-		new ZoteroProtocolHandler(),
-		ZoteroProtocolHandler.prototype.protocolFlags,
-		ZoteroProtocolHandler.prototype.defaultPort
-	);
+	// Paperly registers two schemes, and needs both.
+	//
+	// `zotero` because every link already written into a note, and every link
+	// any translator produces, is a zotero:// one. Dropping it would break
+	// them all.
+	//
+	// `paperly` because the Note Markdown translator rewrites zotero:// to
+	// <ZOTERO_CONFIG.ID>:// on export whenever the ID is not 'zotero'
+	// (translate.js). Without this second registration that export would write
+	// links to a scheme nothing answers.
+	//
+	// The same handler serves both: it dispatches on the path, not the scheme.
+	let schemes = new Set([ZOTERO_SCHEME, ZOTERO_CONFIG.ID]);
+	for (let scheme of schemes) {
+		Services.io.registerProtocolHandler(
+			scheme,
+			new ZoteroProtocolHandler(),
+			ZoteroProtocolHandler.prototype.protocolFlags,
+			ZoteroProtocolHandler.prototype.defaultPort
+		);
+	}
 };
 
 

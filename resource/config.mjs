@@ -1,6 +1,10 @@
 export var ZOTERO_CONFIG = {
 	GUID: 'zotero@zotero.org',
-	ID: 'zotero', // used for db filename, etc.
+	// Paperly: this names the database file (paperly.sqlite) and is what the
+	// Note Markdown translator rewrites zotero:// links to on export. Changing
+	// it is why DataDirectory._migrateLegacyDatabaseName and the second
+	// protocol registration in ZoteroProtocolHandler both exist.
+	ID: 'paperly', // used for db filename, etc.
 	CLIENT_NAME: 'Paperly',
 	DOMAIN_NAME: 'zotero.org',
 	PRODUCER: 'Digital Scholar',
