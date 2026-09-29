@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "Nuosavos publikacijos">
 
-<!ENTITY zotero.publications.intro "„Nuosavose publikacijose“ patalpinti įrašai rodysimi Zotero.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.">
+<!ENTITY zotero.publications.intro "„Nuosavose publikacijose“ patalpinti įrašai rodysimi Paperly.org svetainėje jūsų profilyje. Jei pasirenkate įtraukti prisegtas rinkmenas, jos bus viešai prieinamos pagal jūsų pasirinktą licenciją. „Nuosavoms publikacijoms“ priskirkite tik tuos darbus, kuriuos patys kūrėte, o rinkmenas viešinkite tik jei turite teisę tą daryti.">
 <!ENTITY zotero.publications.include.checkbox.files "Įtraukti rinkmenas">
 <!ENTITY zotero.publications.include.checkbox.notes "Įtraukti pastabas">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Tai, ką rodyti, galėsite bet kada vėliau pasirinkti „Nuosavų publikacijų“ rinkinyje.">

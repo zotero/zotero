@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero beállítások">
+<!ENTITY zotero.preferences.title "Paperly beállítások">
 
 <!ENTITY zotero.preferences.helpButton.label "Súgó">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
 <!ENTITY zotero.preferences.updateNow "Frissítés indítása">
 <!ENTITY zotero.preferences.reportTranslationFailure "Hibás adatkonverterek jelentése">
-<!ENTITY zotero.preferences.parseRISRefer "A Zotero használata BibTeX/RIS/Refer fájlok letöltésére">
+<!ENTITY zotero.preferences.parseRISRefer "A Paperly használata BibTeX/RIS/Refer fájlok letöltésére">
 <!ENTITY zotero.preferences.automaticTags "Kulcsszavak és tárgyszavak automatikus hozzárendelése címkeként">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Elveszett jelszó?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatikus szinkronizálás">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Teljes szöveg szinkronizálása">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "A Zotero szinkronizálhatja a Zotero könyvtáraiban található fájlok teljes szövegét a zotero.org-gal és egyéb csatolt eszközökkel, lehetővé téve, hogy bárhol könnyedén keressen a fájljaira. A fájlok teljes szövege nem válik nyilvánossá.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "A Paperly szinkronizálhatja a Paperly könyvtáraiban található fájlok teljes szövegét a zotero.org-gal és egyéb csatolt eszközökkel, lehetővé téve, hogy bárhol könnyedén keressen a fájljaira. A fájlok teljes szövege nem válik nyilvánossá.">
 <!ENTITY zotero.preferences.sync.about "Bővebben a szinkronizálásról">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fájlok szinkronizálása">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -74,7 +74,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Helyreállítás az online könyvtáramból">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "A helyi adatok felülírása az online könyvtárban található adatokkal.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Az Online Könyvtár cseréje">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Az online könyvtár felülírása a helyi Paperly adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Az összes csatolt fájl összehasonlítása a tárhely szerveren">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Hivatkozási beállítások">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "URL megjelenítése a nyomtatásban megjelent cikkeknél">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ha ez a lehetőség nincs bekapcsolva, a Zotero csak akkor jeleníti meg az URL-t folyóirat-, újság- vagy magazincikkeknél, ha nincs megadva oldalszám.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ha ez a lehetőség nincs bekapcsolva, a Paperly csak akkor jeleníti meg az URL-t folyóirat-, újság- vagy magazincikkeknél, ha nincs megadva oldalszám.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolás">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Elemformátum:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Frissítve">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Mentés Paperly-ba (adress bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Gyorskeresés">
 <!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyk">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy-beállítások">
-<!ENTITY zotero.preferences.proxies.desc_before_link "A Zotero a kéréseket az elmentett proxykon keresztül szolgálja ki. Olvassa el a">
+<!ENTITY zotero.preferences.proxies.desc_before_link "A Paperly a kéréseket az elmentett proxykon keresztül szolgálja ki. Olvassa el a">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy leírást">
 <!ENTITY zotero.preferences.proxies.desc_after_link "további információkért.">
 <!ENTITY zotero.preferences.proxies.transparent "Emlékezzen a proxyn keresztül megtekintett erőforrásokra">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Leírás">
 <!ENTITY zotero.preferences.locate.name "Név">
-<!ENTITY zotero.preferences.locate.addDescription "A listán nem szereplő keresőmotor hozzáadásához látogasson el a kívánt keresőmotorra a böngészőben, és válassza a &quot;Hozzáadás&quot; lehetőséget a Zotero Keresés menüjében.">
+<!ENTITY zotero.preferences.locate.addDescription "A listán nem szereplő keresőmotor hozzáadásához látogasson el a kívánt keresőmotorra a böngészőben, és válassza a &quot;Hozzáadás&quot; lehetőséget a Paperly Keresés menüjében.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Visszaállítás alapértelmezettre">
 
 <!ENTITY zotero.preferences.charset "Karakterkódolás">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Áttérés az új alapértelmezett helyre…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "A Zotero relatív útvonalakat használ a csatolt fájlokhoz az alap könyvtáron belül , ezzel elérhetővé teszi a fájlokat különböző számítógépeken, amennyiben a fájlszerkezet az alap könyvtárban változatlan.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "A Paperly relatív útvonalakat használ a csatolt fájlokhoz az alap könyvtáron belül , ezzel elérhetővé teszi a fájlokat különböző számítógépeken, amennyiben a fájlszerkezet az alap könyvtárban változatlan.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Alap könyvtár:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Tallózás…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Visszavonás…">

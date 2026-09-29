@@ -1,8 +1,8 @@
--brand-shorter-name = Zotero
--brand-short-name = Zotero
--brand-full-name = Zotero
--brand-product-name = Zotero
--vendor-short-name = Zotero
--app-name = Zotero
+-brand-shorter-name = Paperly
+-brand-short-name = Paperly
+-brand-full-name = Paperly
+-brand-product-name = Paperly
+-vendor-short-name = Paperly
+-app-name = Paperly
 -subscription-name = Zotero Storage
 trademarkInfo = Zotero is a trademark of the Corporation for Digital Scholarship.

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Nastavení aplikace Zotero">
+<!ENTITY zotero.preferences.title "Nastavení aplikace Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Pomoc">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatický vyhledávat updaty překladačů a stylů">
 <!ENTITY zotero.preferences.updateNow "Aktualizovat nyní">
 <!ENTITY zotero.preferences.reportTranslationFailure "Oznamovat poškozené překladače">
-<!ENTITY zotero.preferences.parseRISRefer "Použít Zotero pro stažené soubory BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Použít Paperly pro stažené soubory BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Automaticky oštítkovat položky na základě klíčových slov a předmětových hesel">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstranit položky v koši smazané déle než">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dní">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Ztracené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovat automaticky">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizovat plnotextový obsah">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero může synchronizovat plnotextový obsah souborů ve vašich knihovnách Zotera se serverem zotero.org a dalšími propojenými zařízeními. To vám umožní snadno hledat vaše soubory kdekoli se nacházíte. Plnotextový obsah vašich souborů nebude sdílen veřejně.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly může synchronizovat plnotextový obsah souborů ve vašich knihovnách Zotera se serverem zotero.org a dalšími propojenými zařízeními. To vám umožní snadno hledat vaše soubory kdekoli se nacházíte. Plnotextový obsah vašich souborů nebude sdílen veřejně.">
 <!ENTITY zotero.preferences.sync.about "O synchronizaci">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizace souborů">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetovat historii synchronizace dat">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sloučit místní data s vzdálenými daty; historie synchronizace se bude ignorovat">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Obnovit z Online knihovny">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Přepsat lokální data Zotero daty z online knihovny.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Přepsat lokální data Paperly daty z online knihovny.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Nahradit online knihovnu">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Přepsat online knihovnu daty z lokálního Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Možnosti citování">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Zahrnout URL článků v referencích">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pokud je tato volba neaktivní, Zotero zahrne URL v případě citování článku (z časopisu, magazínu nebo novin) pouze když článek nemá specifikovaný rozsah stran.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pokud je tato volba neaktivní, Paperly zahrne URL v případě citování článku (z časopisu, magazínu nebo novin) pouze když článek nemá specifikovaný rozsah stran.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rychlé kopírování">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Formát položky">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy servery">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Možnosti Proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero bude transparentně přesměrovávat požadavky skrz uložené proxy servery. Více informací najdete v">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly bude transparentně přesměrovávat požadavky skrz uložené proxy servery. Více informací najdete v">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentaci k proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pro další informace.">
 <!ENTITY zotero.preferences.proxies.transparent "Automaticky přesměrovávat požadavky skrz dříve použité proxy servery.">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Jméno">
-<!ENTITY zotero.preferences.locate.addDescription "Pro přidání vyhledávače, který není v seznamu, přejděte na požadovaný vyhledávač v prohlížeči a vyberte položku „Přidat“ v Zotero menu Najít.">
+<!ENTITY zotero.preferences.locate.addDescription "Pro přidání vyhledávače, který není v seznamu, přejděte na požadovaný vyhledávač v prohlížeči a vyberte položku „Přidat“ v Paperly menu Najít.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovit původní nastavení">
 
 <!ENTITY zotero.preferences.charset "Kódování znaků">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrovat do nového výchozího umístění...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Připojený základní adresář pro přílohy">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero použije relativní cesty pro propojené souborové přílohy v základním adresáři, což umožňuje přístup k souborům na různých počítačích, pokud bude zachována stejná struktura souborů v základním adresáři.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly použije relativní cesty pro propojené souborové přílohy v základním adresáři, což umožňuje přístup k souborům na různých počítačích, pokud bude zachována stejná struktura souborů v základním adresáři.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Základní adresář">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vybrat...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Změnit na absolutní cesty...">

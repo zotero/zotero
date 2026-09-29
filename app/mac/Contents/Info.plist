@@ -160,7 +160,7 @@
 	<key>CFBundleExecutable</key>
 	<string>zotero</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Zotero {{VERSION}}, © 2006-2018 Contributors</string>
+	<string>Paperly {{VERSION}}, © 2006-2018 Contributors</string>
 	<key>CFBundleIconFile</key>
 	<string>paperly</string>
 	<key>CFBundleIdentifier</key>
@@ -168,7 +168,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Zotero</string>
+	<string>Paperly</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

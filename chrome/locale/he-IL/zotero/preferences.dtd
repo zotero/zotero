@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "העדפות Zotero">
+<!ENTITY zotero.preferences.title "העדפות Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "עזרה">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "לבדוק אוטומטית אם יש מתרגמים וסגנונות עדכניים">
 <!ENTITY zotero.preferences.updateNow "לעדכן עכשיו">
 <!ENTITY zotero.preferences.reportTranslationFailure "דיווח על מתרגמי אתרים פגומים">
-<!ENTITY zotero.preferences.parseRISRefer "להשתמש ב־Zotero לטובת קובצי BibTeX/RIS/Refer שהתקבלו">
+<!ENTITY zotero.preferences.parseRISRefer "להשתמש ב־Paperly לטובת קובצי BibTeX/RIS/Refer שהתקבלו">
 <!ENTITY zotero.preferences.automaticTags "לתייג פריטים עם מילות מפתח וכותרות נושא אוטומטית">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "להסיר אוטומטית פריטים מהאשפה שנמחקו לפני למעלה מ־">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ימים">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "איבדת סיסמה?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "סנכרון אוטומטית">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "סנכרון תוכן טקסט מלא">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero יכול לסנכרן את התוכן בטקסט מלא של הקבצים בספריות ה־Zotero שלך מול zotero.org ומכשירים מקושרים נוספים, מה שמאפשר לך לחפש את הקבצים שלך בקלות מכל מקום שהוא. תוכן הטקסט המלא של הקבצים שלך לא ישותף לציבור.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly יכול לסנכרן את התוכן בטקסט מלא של הקבצים בספריות ה־Paperly שלך מול zotero.org ומכשירים מקושרים נוספים, מה שמאפשר לך לחפש את הקבצים שלך בקלות מכל מקום שהוא. תוכן הטקסט המלא של הקבצים שלך לא ישותף לציבור.">
 <!ENTITY zotero.preferences.sync.about "על הסנכרון">
 <!ENTITY zotero.preferences.sync.fileSyncing "סנכרון קבצים">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "כתובת:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "היסטוריית איפוס סנכרון נתונים">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "מיזוג הנתונים המקומיים עם הנתונים המרוחקים תוך התעלמות מהיסטוריית הסנכרון">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "שחזור מתיקייה מקוונת">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "לשכתב על הנתונים המקומיים של Zotero עם נתונים מהספרייה המקוונת.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "לשכתב על הנתונים המקומיים של Paperly עם נתונים מהספרייה המקוונת.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "החלפת הספרייה המרוחקת">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "שכתוב הספרייה המרוחקת עם הנתונים המקומיים של Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "שכתוב הספרייה המרוחקת עם הנתונים המקומיים של Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "איפוס היסטוריית סנכרון קבצים">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "השוואת כל קובצי הצרופות עם שירות האחסון">
 <!ENTITY zotero.preferences.sync.reset "איפוס">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "לכלול כתובות של מאמרי נייר בהפניות">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "כאשר אפשרות זו מושבתת, Zotero כולל כתובות בעת ציטוט מכתבי עת, מגזינים וכתבות בעתון רק אם לא צוין טווח עמודים למאמר.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "כאשר אפשרות זו מושבתת, Paperly כולל כתובות בעת ציטוט מכתבי עת, מגזינים וכתבות בעתון רק אם לא צוין טווח עמודים למאמר.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "העתקה מהירה">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "עיצוב הפריט:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "עודכן">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL (שפת סגנון ציטוטים)">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "שמירה ל־Zotero (סמל שורת כתובת)">
+<!ENTITY zotero.preferences.keys.saveToZotero "שמירה ל־Paperly (סמל שורת כתובת)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "התמקדות על חלונית הספריות">
 <!ENTITY zotero.preferences.keys.quicksearch "חיפוש מהיר">
 <!ENTITY zotero.preferences.keys.newItem "יצירת פריט חדש">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "מתווכים">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "אפשרויות מתווך">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero יפנה בקשות באופן שקוף דרך המתווכים שנשמרו. כדאי לעיין">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly יפנה בקשות באופן שקוף דרך המתווכים שנשמרו. כדאי לעיין">
 <!ENTITY zotero.preferences.proxies.desc_link "בתיעוד על המתווכים">
 <!ENTITY zotero.preferences.proxies.desc_after_link "למידע נוסף.">
 <!ENTITY zotero.preferences.proxies.transparent "הפעלת הפניית מתווך">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "מנהל מנוע חיפוש כתבות">
 <!ENTITY zotero.preferences.locate.description "תיאור">
 <!ENTITY zotero.preferences.locate.name "שם">
-<!ENTITY zotero.preferences.locate.addDescription "כדי להוסיף מנוע חיפוש שאינו ברשימה, יש לבקר במנוע החיפוש הרצוי דרך הדפדפן שלך ולבחור ב„הוספה” מתפריט האיתור של Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "כדי להוסיף מנוע חיפוש שאינו ברשימה, יש לבקר במנוע החיפוש הרצוי דרך הדפדפן שלך ולבחור ב„הוספה” מתפריט האיתור של Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "שחזור ברירות מחדל">
 
 <!ENTITY zotero.preferences.charset "קידוד תווים">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "הסבה למיקום ברירת מחדל חדש…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "תיקיית בסיס לצרופה מקושרת">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero ישתמש בנתיבים יחסיים לקובצי צרופות מקושרים בתוך תיקיית הבסיס, מה שמאפשר לך לגשת לקבצים במחשבים אחרים כל עוד מבנה הקבצים בתיקיית הבסיס נשאר זהה.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly ישתמש בנתיבים יחסיים לקובצי צרופות מקושרים בתוך תיקיית הבסיס, מה שמאפשר לך לגשת לקבצים במחשבים אחרים כל עוד מבנה הקבצים בתיקיית הבסיס נשאר זהה.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "תיקיית בסיס:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "בחירה…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "העברה לנתיבים מוחלטים…">

@@ -41,7 +41,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrukce pro aktualizaci">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
 <!ENTITY zotero.upgrade.upgradeInProgress "Prosím počkejte, dokud neskončí proces aktualizace. Může zabrat až několik minut.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Vaše Zotero databáze byla úspěšně aktualizována.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Vaše Paperly databáze byla úspěšně aktualizována.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Prosím podívejte se na">
 <!ENTITY zotero.upgrade.changeLogLink "seznam změn">
 <!ENTITY zotero.upgrade.changeLogAfterLink ", kde jsou popsány novinky.">
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Stahování:">
 <!ENTITY zotero.sync.storage.uploads "Nahrávání:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Následující štítky ve vaší Zotero Knihovně jsou pro synchronizaci na server příliš dlouhé.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Následující štítky ve vaší Paperly Knihovně jsou pro synchronizaci na server příliš dlouhé.">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizované štítky musí být kratší než 256 znaků.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Můžete štítek rozdělit do více štítků, pomocí editace ho zkrátit, nebo ho smazat.">
 <!ENTITY zotero.sync.longTagFixer.split "Rozdělit">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Nejednoznačné citace">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Přiřazené citace">
 <!ENTITY zotero.rtfScan.introPage.label "Představení">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero může automaticky extrahovat, přeformátovat a vložit bibliografii do RTF souborů. Začněte vybráním RTF souboru níže.">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly může automaticky extrahovat, přeformátovat a vložit bibliografii do RTF souborů. Začněte vybráním RTF souboru níže.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Začnete vybráním RTF vstupního souboru a výstupního souboru níže:">
 <!ENTITY zotero.rtfScan.scanPage.label "Vyhledávají se citace">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero vyhledává v dokumentu citace. Prosím o chvilku strpení.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly vyhledává v dokumentu citace. Prosím o chvilku strpení.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Ověřit citované položky">
-<!ENTITY zotero.rtfScan.citationsPage.description "Prosím, ověřte seznam rozpoznaných citací níže, pro ujištění, že Zotero vybralo odpovídající položky správně. Všechny nepřiřazené nebo nejednoznačné citace musí být vyřešeny před pokračováním k dalšímu kroku.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Prosím, ověřte seznam rozpoznaných citací níže, pro ujištění, že Paperly vybralo odpovídající položky správně. Všechny nepřiřazené nebo nejednoznačné citace musí být vyřešeny před pokračováním k dalšímu kroku.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formátování dokumentu">
 <!ENTITY zotero.rtfScan.formatPage.label "Formátování citací">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero zpracovává a formátuje váš RTF soubor. Prosím o chvilku strpení.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly zpracovává a formátuje váš RTF soubor. Prosím o chvilku strpení.">
 <!ENTITY zotero.rtfScan.completePage.label "Prohledávání RTF ukončeno">
 <!ENTITY zotero.rtfScan.completePage.description "Váš dokument byl prohledán a zpracován. Prosím, ujistěte se, že je korektně naformátován.">
 <!ENTITY zotero.rtfScan.inputFile.label "Vstupní soubor">

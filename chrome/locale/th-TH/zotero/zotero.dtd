@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "ตั้งค่าใหม่">
 
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Paperly Error Report">
 <!ENTITY zotero.errorReport.submissionInProgress "โปรดรอในระหว่างที่รายงานข้อผิดพลาดกำลังส่งอยู่">
 <!ENTITY zotero.errorReport.submitted "รายงานข้อผิดพลาดถูกส่งเรียบร้อยแล้ว">
 <!ENTITY zotero.errorReport.reportID "รหัสรายงาน:">
 <!ENTITY zotero.errorReport.postToForums "กรุณาส่งข้อความในฟอรั่มของ Zotero (forums.zotero.org) และแจ้งรหัสรายงานนี้ รายละเอียดของปัญหาและขั้นตอนที่ทำให้เกิดปัญหานั้นอีก">
 <!ENTITY zotero.errorReport.notReviewed "รายงานข้อผิดพลาดจะไม่ได้รับการตรวจสอบหากไม่มีการอ้างถึงในฟอรั่ม">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Zotero รุ่นใหม่แล้ว">
-<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Zotero ของท่าน ต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
+<!ENTITY zotero.upgrade.title "Paperly Upgrade Wizard">
+<!ENTITY zotero.upgrade.newVersionInstalled "ท่านได้ติดตั้ง Paperly รุ่นใหม่แล้ว">
+<!ENTITY zotero.upgrade.upgradeRequired "ฐานข้อมูล Paperly ของท่าน ต้องปรับเป็นรุ่นปัจจุบันก่อนเพื่อให้ทำงานได้กับรุ่นใหม่">
 <!ENTITY zotero.upgrade.autoBackup "ฐานข้อมูลปัจจุบันของท่านจะถูกสำรองไว้โดยอัตโนมัติ ก่อนที่จะมีการเปลี่ยนแปลงใด ๆ เกิดขึ้น">
 <!ENTITY zotero.upgrade.majorUpgrade "นี่คือการปรับให้ทันสมัยครั้งสำคัญ">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "ต้องมั่นใจว่าคุณได้ทบทวน">
 <!ENTITY zotero.upgrade.majorUpgradeLink "คำแนะนำการอัพเกรด">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "ก่อนที่จะทำต่อ">
 <!ENTITY zotero.upgrade.upgradeInProgress "โปรดรอจนกว่าจะบวนการอัพเกรดจะเสร็จสิ้น ซึ่งอาจใช้เวลาหลายนาที">
-<!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูล Zotero ของท่านได้รับการปรับให้เป็นรุ่นปัจจุบันแล้ว">
+<!ENTITY zotero.upgrade.upgradeSucceeded "ฐานข้อมูล Paperly ของท่านได้รับการปรับให้เป็นรุ่นปัจจุบันแล้ว">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "โปรดดู">
 <!ENTITY zotero.upgrade.changeLogLink "ข้อมูลการเปลี่ยนแปลง">
 <!ENTITY zotero.upgrade.changeLogAfterLink "ดูว่ามีอะไรใหม่">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "กราดตรวจ RTF">
 <!ENTITY zotero.toolbar.preferences.label "ค่าตั้งพึงใจ...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "การสนับสนุนและเอกสาร">
-<!ENTITY zotero.toolbar.about.label "เกี่ยวกับ Zotero">
+<!ENTITY zotero.toolbar.about.label "เกี่ยวกับ Paperly">
 <!ENTITY zotero.toolbar.openURL.label "หาที่ตั้ง">
 <!ENTITY zotero.toolbar.openURL.tooltip "ค้นหาผ่านไลบรารี่ในเครื่องของคุณ">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "ดาวน์โหลด:">
 <!ENTITY zotero.sync.storage.uploads "อัพโหลด:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "แท็กต่อไปนี้ในไลบรารี่ของคุณยาวเกินไปที่จะประสานกับเครื่องบริการ Zotero">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "แท็กต่อไปนี้ในไลบรารี่ของคุณยาวเกินไปที่จะประสานกับเครื่องบริการ Paperly">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "ประสานแท็กต้องมีความยาวน้อยกว่า 256 ตัวอักษร">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "คุณสามารถแยกแท็กไปยังหลายแท็ก แก้ไขแท็กให้สั้นด้วยตัวเองหรือลบแท็ก">
 <!ENTITY zotero.sync.longTagFixer.split "แยก">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "การอ้างอิงที่คลุมเครือ">
 <!ENTITY zotero.rtfScan.mappedCitations.label "ทำผังการอ้างอิง">
 <!ENTITY zotero.rtfScan.introPage.label "คำแนะนำ">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero สามารถคัดลอกและปรับรูปแบบการอ้างอิง และแทรกบรรณานุกรมในแฟ้ม RTF ได้ คุณสมบัติกราดตรวจ RTF รองรับการอ้างอิงอย่างหลากหลายตามรูปแบบดังต่อไปนี้">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly สามารถคัดลอกและปรับรูปแบบการอ้างอิง และแทรกบรรณานุกรมในแฟ้ม RTF ได้ คุณสมบัติกราดตรวจ RTF รองรับการอ้างอิงอย่างหลากหลายตามรูปแบบดังต่อไปนี้">
 <!ENTITY zotero.rtfScan.introPage.description2 "เริ่มโดยเลือกแฟ้มข้อมูล RTF เพื่อนำเข้าและแฟ้มข้อมูลสำหรับส่งออก:">
 <!ENTITY zotero.rtfScan.scanPage.label "กราดตรวจเพื่อการอ้างอิง">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero กำลังกราดตรวจแฟ้มเอกสารของคุณเพื่อการอ้างอิง กรุณารอสักครู่">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly กำลังกราดตรวจแฟ้มเอกสารของคุณเพื่อการอ้างอิง กรุณารอสักครู่">
 <!ENTITY zotero.rtfScan.citationsPage.label "ตรวจสอบรายการที่อ้างถึง">
-<!ENTITY zotero.rtfScan.citationsPage.description "โปรดตรวจทานรายการการอ้างอิงข้างล่างนี้ เพื่อให้แน่ใจว่า Zotero เลือกรายการได้อย่างถูกต้อง การอ้างอิงที่ไม่ถูกต้องหรือคลุมเครือต้องแก้ไขก่อนที่จะดำเนินการขั้นต่อไป">
+<!ENTITY zotero.rtfScan.citationsPage.description "โปรดตรวจทานรายการการอ้างอิงข้างล่างนี้ เพื่อให้แน่ใจว่า Paperly เลือกรายการได้อย่างถูกต้อง การอ้างอิงที่ไม่ถูกต้องหรือคลุมเครือต้องแก้ไขก่อนที่จะดำเนินการขั้นต่อไป">
 <!ENTITY zotero.rtfScan.stylePage.label "จัดรูปแบบแฟ้มเอกสาร">
 <!ENTITY zotero.rtfScan.formatPage.label "จัดรูปแบบการอ้างอิง">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero กำลังดำเนินการและจัดรูปแบบแฟ้ม RTF ของคุณ กรุณารอสักครู่">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly กำลังดำเนินการและจัดรูปแบบแฟ้ม RTF ของคุณ กรุณารอสักครู่">
 <!ENTITY zotero.rtfScan.completePage.label "กราดตรวจ RTF เรียบร้อยแล้ว">
 <!ENTITY zotero.rtfScan.completePage.description "แฟ้มเอกสารของคุณได้กราดตรวจและดำเนินการแล้ว กรุณาตรวจสอบให้แน่ใจว่ารูปแบบที่ได้นั้นถูกต้อง">
 <!ENTITY zotero.rtfScan.inputFile.label "แฟ้มนำเข้า">

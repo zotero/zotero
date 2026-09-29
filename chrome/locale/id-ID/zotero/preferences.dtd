@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Preferensi Zotero">
+<!ENTITY zotero.preferences.title "Preferensi Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Bantuan">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Secara otomatis memeriksa penerjemah dan gaya yang diperbarui">
 <!ENTITY zotero.preferences.updateNow "Mutakhirkan sekarang">
 <!ENTITY zotero.preferences.reportTranslationFailure "Laporkan kerusakan translator situs">
-<!ENTITY zotero.preferences.parseRISRefer "Gunakan Zotero untuk mengunduh file BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Gunakan Paperly untuk mengunduh file BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronisasi konten teks lengkap">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero dapat menyinkronkan konten teks lengkap file di perpustakaan Zotero Anda dengan zotero.org dan perangkat lain yang ditautkan, memungkinkan Anda untuk dengan mudah mencari file Anda di mana pun Anda berada. Konten teks lengkap file Anda tidak akan dibagikan secara publik.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly dapat menyinkronkan konten teks lengkap file di perpustakaan Paperly Anda dengan zotero.org dan perangkat lain yang ditautkan, memungkinkan Anda untuk dengan mudah mencari file Anda di mana pun Anda berada. Konten teks lengkap file Anda tidak akan dibagikan secara publik.">
 <!ENTITY zotero.preferences.sync.about "Tentang Sinkronisasi">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Atur Ulang Riwayat Sinkronisasi Data">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Gabungkan data lokal dengan data jarak jauh, mengabaikan riwayat sinkronisasi">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Kembalikan dari Perpustakaan Online">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Timpa data Zotero lokal dengan data dari perpustakaan online.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Timpa data Paperly lokal dengan data dari perpustakaan online.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ganti Perpustakaan Online">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Timpa perpustakaan online dengan data Zotero lokal">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Timpa perpustakaan online dengan data Paperly lokal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset Riwayat Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Bandingkan semua file lampiran dengan layanan penyimpanan">
 <!ENTITY zotero.preferences.sync.reset "Reset">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Pilihan Sitasi">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Masukkan URL artikel tulisan di dalam referensi">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ketika opsi ini dimatikan, Zotero hanya akan memasukkan URL pada saat mengutip artikel  jurnal, majalah, dan koran yang tidak memiliki rentang halaman spesifik.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ketika opsi ini dimatikan, Paperly hanya akan memasukkan URL pada saat mengutip artikel  jurnal, majalah, dan koran yang tidak memiliki rentang halaman spesifik.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Salin Cepat">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format item:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Diperbarui">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Simpan ke Zotero (ikon bilah alamat)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Simpan ke Paperly (ikon bilah alamat)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus Jendela Pustaka">
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
 <!ENTITY zotero.preferences.keys.newItem "Buat Item baru">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proksi">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Pilihan Proksi">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero akan secara jelas mengalihkan permintaan melalui proksi yang tersimpan. Lihat">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly akan secara jelas mengalihkan permintaan melalui proksi yang tersimpan. Lihat">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentasi proksi">
 <!ENTITY zotero.preferences.proxies.desc_after_link "untuk informasi lebih lanjut.">
 <!ENTITY zotero.preferences.proxies.transparent "Aktifkan pengalihan proksi">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Pengelola Mesin Pencarian Artikel">
 <!ENTITY zotero.preferences.locate.description "Deskripsi">
 <!ENTITY zotero.preferences.locate.name "Nama">
-<!ENTITY zotero.preferences.locate.addDescription "Untuk menambahkan Mesin Pencari yang tidak ada dalam daftar, kunjungi mesin pencari yang diinginkan di browser Anda dan pilih &quot;Tambah&quot; dari menu Locate Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Untuk menambahkan Mesin Pencari yang tidak ada dalam daftar, kunjungi mesin pencari yang diinginkan di browser Anda dan pilih &quot;Tambah&quot; dari menu Locate Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Kembalikan Default">
 
 <!ENTITY zotero.preferences.charset "Pengkodean karakter">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrasi Ke Lokasi Default Baru...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Direktori Dasar Lampiran Tertaut">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero akan menggunakan jalur relatif untuk lampiran file yang ditautkan di dalam direktori dasar, memungkinkan Anda untuk mengakses file di komputer yang berbeda selama struktur file di dalam direktori dasar tetap sama.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly akan menggunakan jalur relatif untuk lampiran file yang ditautkan di dalam direktori dasar, memungkinkan Anda untuk mengakses file di komputer yang berbeda selama struktur file di dalam direktori dasar tetap sama.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Direktori dasar:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Pilih...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Kembali ke Jalur Absolut...">

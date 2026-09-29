@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Các tùy chọn của Zotero">
+<!ENTITY zotero.preferences.title "Các tùy chọn của Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Giúp đỡ">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra các bộ chuyển đổi và kiểu trích dẫn có được cập nhật">
 <!ENTITY zotero.preferences.updateNow "Cập nhật ngay bây giờ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Báo cáo các bộ chuyển đổi bị hỏng">
-<!ENTITY zotero.preferences.parseRISRefer "Dùng Zotero để tải các tập tin Bib TeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Dùng Paperly để tải các tập tin Bib TeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Tự động tạo tag cho các tài liệu bằng các từ khóa và các đề mục">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các tài liệu trong Thùng rác đã xóa hơn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ngày trước đây">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Quên mật khẩu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Tự động đồng bộ">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Đồng bộ nội dung toàn văn">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero có thể đồng bộ nội dung full-text của các tập tin trong các thư viện Zotero của bạn với zotero.org và các thiết bị có liên kết khác, cho phép bạn dễ dàng tìm kiếm các tập tin của bạn khi bạn cần. Chỉ riêng bạn thấy được nội dung full-text của các tập tin của bạn.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly có thể đồng bộ nội dung full-text của các tập tin trong các thư viện Paperly của bạn với zotero.org và các thiết bị có liên kết khác, cho phép bạn dễ dàng tìm kiếm các tập tin của bạn khi bạn cần. Chỉ riêng bạn thấy được nội dung full-text của các tập tin của bạn.">
 <!ENTITY zotero.preferences.sync.about "Về đồng bộ">
 <!ENTITY zotero.preferences.sync.fileSyncing "Đồng bộ tập tin">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Xóa lịch sử đồng bộ dữ liệu">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Trộn dữ liệu cục bộ với dữ liệu trên máy chủ, bỏ qua lịch sử đồng bộ">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Lấy lại từ thư viện trực tuyến">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Ghi đè dữ liệu Zotero cục bộ bằng dữ liệu từ thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Ghi đè dữ liệu Paperly cục bộ bằng dữ liệu từ thư viện trực tuyến">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Thay thế thư viện trực tuyến">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Ghi đè tư viện trực tuyến bằng dữ liệu từ tập tin cục bộ">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Thiết lập lại lịch sử đồng bộ tập tin">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Các tùy chọn trích dẫn">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Gộp các URL của bài báo trong các tham chiếu">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Khi không cho phép tùy chọn này, Zotero sẽ chỉ gộp các URL khi trích dẫn các bài journal, magazine và newspaper không có vùng trang xác định">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Khi không cho phép tùy chọn này, Paperly sẽ chỉ gộp các URL khi trích dẫn các bài journal, magazine và newspaper không có vùng trang xác định">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Sao chép nhanh">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Đã cập nhật">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Lưu vào Zotero (biểu tượng thanh địa chỉ)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Lưu vào Paperly (biểu tượng thanh địa chỉ)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Khung thư viện quan tâm">
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
 <!ENTITY zotero.preferences.keys.newItem "Tạo tài liệu mới">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Các Proxy">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Tùy chọn cho Proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero sẽ tự chuyển các yêu cầu qua các proxy đã lưu. Xem">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly sẽ tự chuyển các yêu cầu qua các proxy đã lưu. Xem">
 <!ENTITY zotero.preferences.proxies.desc_link "tài liệu proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "để có thêm thông tin.">
 <!ENTITY zotero.preferences.proxies.transparent "Cho phép chuyển hướng qua proxy">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Bộ quản lý cơ chế tìm bài viết">
 <!ENTITY zotero.preferences.locate.description "Mô tả">
 <!ENTITY zotero.preferences.locate.name "Tên">
-<!ENTITY zotero.preferences.locate.addDescription "Để thêm cơ chế tìm kiếm không có trong danh sách, mở trang tìm kiếm trong trình duyệt và chọn &quot;Thêm&quot; từ menu Locate của Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Để thêm cơ chế tìm kiếm không có trong danh sách, mở trang tìm kiếm trong trình duyệt và chọn &quot;Thêm&quot; từ menu Locate của Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Phục hồi mặc định">
 
 <!ENTITY zotero.preferences.charset "Mã hóa ký tự">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Chuyển sang vị trí mặc định mới...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Thư mục cơ sở cho các tập tin đính kèm theo dạng liên kết">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero sẽ dùng các đường dẫn tương đối từ thư mục cơ sở cho các tập tin đính kèm theo dạng liên kết cho phép bạn truy cập các tập tin trên các máy tính khác miễn là cấu trúc bên trong thư mục cơ sở không đổi.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly sẽ dùng các đường dẫn tương đối từ thư mục cơ sở cho các tập tin đính kèm theo dạng liên kết cho phép bạn truy cập các tập tin trên các máy tính khác miễn là cấu trúc bên trong thư mục cơ sở không đổi.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Thư mục cơ sở:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Chọn...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Chuyển thành đường dẫn tuyệt đối...">

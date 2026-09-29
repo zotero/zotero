@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Préférences de Zotero">
+<!ENTITY zotero.preferences.title "Préférences de Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "?">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Vérifier automatiquement les mises à jour des convertisseurs et des styles">
 <!ENTITY zotero.preferences.updateNow "Mettre à jour maintenant">
 <!ENTITY zotero.preferences.reportTranslationFailure "Signaler les convertisseurs défectueux">
-<!ENTITY zotero.preferences.parseRISRefer "Utiliser Zotero pour les fichiers BibTex, RIS, Refer téléchargés">
+<!ENTITY zotero.preferences.parseRISRefer "Utiliser Paperly pour les fichiers BibTex, RIS, Refer téléchargés">
 <!ENTITY zotero.preferences.automaticTags "Ajouter automatiquement aux documents des marqueurs à partir des mots-clés fournis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les documents mis à la corbeille depuis plus de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Mot de passe oublié ?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchroniser automatiquement">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchroniser le texte intégral des pièces jointes indexées">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero peut synchroniser l'intégralité du texte des pièces jointes indexées (PDF et HTML) de vos bibliothèques Zotero avec zotero.org et, ainsi, avec vos autres appareils connectés. Cela vous permet de rechercher facilement dans le contenu de vos fichiers où que vous soyez. Le texte intégral de vos fichiers ne sera pas partagé publiquement.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly peut synchroniser l'intégralité du texte des pièces jointes indexées (PDF et HTML) de vos bibliothèques Paperly avec zotero.org et, ainsi, avec vos autres appareils connectés. Cela vous permet de rechercher facilement dans le contenu de vos fichiers où que vous soyez. Le texte intégral de vos fichiers ne sera pas partagé publiquement.">
 <!ENTITY zotero.preferences.sync.about "À propos de la synchronisation">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Adresse (URL) :">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Réinitialiser l'historique de synchronisation des données">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusionner les données locales avec les données distantes, en ignorant l'historique de synchronisation">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurer depuis la bibliothèque en ligne">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Écraser les données Zotero locales avec les données provenant de la bibliothèque en ligne">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Écraser les données Paperly locales avec les données provenant de la bibliothèque en ligne">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Remplacer la bibliothèque en ligne">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Écraser les données de la bibliothèque en ligne avec les données Zotero locales">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Écraser les données de la bibliothèque en ligne avec les données Paperly locales">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Réinitialiser l'historique de synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparer tous les fichiers joints avec le serveur de stockage">
 <!ENTITY zotero.preferences.sync.reset "Réinitialisation">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Options de citation">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inclure les adresses URL des articles de journaux dans les références">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quand cette option est désactivée, Zotero inclut les adresses URL dans la citation des articles de revue, magazine et journal seulement si l'article ne précise pas les numéros de pages.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quand cette option est désactivée, Paperly inclut les adresses URL dans la citation des articles de revue, magazine et journal seulement si l'article ne précise pas les numéros de pages.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copie rapide">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format pour les documents :">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Mis à jour">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Enregistrer dans Zotero (icône de la barre d'adresse)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Enregistrer dans Paperly (icône de la barre d'adresse)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Placer le curseur dans le volet de gauche (bibliothèques)">
 <!ENTITY zotero.preferences.keys.quicksearch "Recherche rapide">
 <!ENTITY zotero.preferences.keys.newItem "Créer un nouveau document">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Serveurs mandataires">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Options des serveurs mandataires">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero redirigera automatiquement les requêtes via les serveurs mandataires (proxy) enregistrés. Consultez la">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly redirigera automatiquement les requêtes via les serveurs mandataires (proxy) enregistrés. Consultez la">
 <!ENTITY zotero.preferences.proxies.desc_link "documentation relative aux serveurs mandataires">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pour plus d'information.">
 <!ENTITY zotero.preferences.proxies.transparent "Activer la redirection par un serveur mandataire (proxy)">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.name "Nom">
-<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, rendez-vous à l'adresse de ce moteur de recherche avec votre navigateur, puis sélectionnez “Ajoutez” à partir du menu Localiser de Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, rendez-vous à l'adresse de ce moteur de recherche avec votre navigateur, puis sélectionnez “Ajoutez” à partir du menu Localiser de Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 
 <!ENTITY zotero.preferences.charset "Codage de caractères">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrer vers le nouvel emplacement par défaut…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Répertoire de base pour les pièces jointes liées">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero utilisera un chemin relatif pour l'emplacement des pièces jointes liées - uniquement celles-ci - à l'intérieur du répertoire de base. Cela vous permet d'accéder à ces fichiers depuis différents ordinateurs dès lors que la structure des dossiers et fichiers dans ce répertoire de base reste la même.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly utilisera un chemin relatif pour l'emplacement des pièces jointes liées - uniquement celles-ci - à l'intérieur du répertoire de base. Cela vous permet d'accéder à ces fichiers depuis différents ordinateurs dès lors que la structure des dossiers et fichiers dans ce répertoire de base reste la même.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Répertoire de base :">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choisir…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revenir à des chemins absolus…">

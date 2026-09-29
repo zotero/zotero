@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Thiết lập lại">
 
 
-<!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">
+<!ENTITY zotero.errorReport.title "Báo cáo lỗi Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Xin vui lòng chờ trong khi báo cáo lỗi được gửi đi.">
 <!ENTITY zotero.errorReport.submitted "Báo cáo lỗi đã được gửi đi">
 <!ENTITY zotero.errorReport.reportID "ID của Báo cáo:">
 <!ENTITY zotero.errorReport.postToForums "Xin gửi một thông báo tới diễn đàn Zotero (forums.zotero.org) với mã báo cáo này cùng mô tả vấn đề và tình huống sinh ra lỗi.">
 <!ENTITY zotero.errorReport.notReviewed "Các báo cáo lỗi không được xem xét trừ khi được tham chiếu tới trên diễn đàn.">
 
-<!ENTITY zotero.upgrade.title "Bộ hướng dẫn nâng cấp Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Zotero của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
+<!ENTITY zotero.upgrade.title "Bộ hướng dẫn nâng cấp Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Bạn đã cài đặt một phiên bản mới của Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Cơ sở dữ liệu Paperly của bạn phải được nâng cấp để có thể làm việc với phiên bản mới.">
 <!ENTITY zotero.upgrade.autoBackup "Cơ sở dữ liệu hiện tại của bạn sẽ được sao lưu dự phòng một cách tự động trước khi có bất kỳ một thay dổi nào.">
 <!ENTITY zotero.upgrade.majorUpgrade "Đây là một bản nâng cấp lớn">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Hãy chắc chắn bạn đã xem kỹ">
 <!ENTITY zotero.upgrade.majorUpgradeLink "các hướng dẫn nâng cấp">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "trước khi tiếp tục.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Xin vui lòng chờ đến khi tiến trình cập nhật kết thúc. Tiến trình có thể sẽ kéo dài trong vài phút.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Cơ sở dữ liệu Zotero của bạn đã được cập nhật thành công.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Cơ sở dữ liệu Paperly của bạn đã được cập nhật thành công.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Xin vui lòng xem">
 <!ENTITY zotero.upgrade.changeLogLink "sổ nhật ký các thay đổi (changelog)">
 <!ENTITY zotero.upgrade.changeLogAfterLink "để biết có gì mới.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.preferences.label "Tùy chọn...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hộ trợ và Tài liệu">
-<!ENTITY zotero.toolbar.about.label "Giới thiệu về Zotero">
+<!ENTITY zotero.toolbar.about.label "Giới thiệu về Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Định vị">
 <!ENTITY zotero.toolbar.openURL.tooltip "Tìm trong thư viện cục bộ của bạn">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Paperly library is too long to sync to the server:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
 <!ENTITY zotero.sync.longTagFixer.split "Split">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
 <!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
 <!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanning for Citations">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly is scanning your document for citations. Please be patient.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Paperly has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
 <!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly is processing and formatting your RTF file. Please be patient.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
 <!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
 <!ENTITY zotero.rtfScan.inputFile.label "Input File">

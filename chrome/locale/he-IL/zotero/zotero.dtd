@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "איפוס">
 
 
-<!ENTITY zotero.errorReport.title "דוח שגיאה של Zotero">
+<!ENTITY zotero.errorReport.title "דוח שגיאה של Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "נא להמתין להגשת דוח השגיאה.">
 <!ENTITY zotero.errorReport.submitted "דוח השגיאה שלך הוגש.">
 <!ENTITY zotero.errorReport.reportID "מס׳ הדוח:">
 <!ENTITY zotero.errorReport.postToForums "נא לפרסם הודעה בפורומים של Zotero‏ (forums.zotero.org) עם מספר השגיאה הזה, תיאור של התקלה והצעדים הנחוצים לשחזורה.">
 <!ENTITY zotero.errorReport.notReviewed "דוחות שגיאה בדרך כלל לא זוכים לטיפול אלא אם כן דנים עליהם בפורום.">
 
-<!ENTITY zotero.upgrade.title "אשף השדרוג של Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "התקנת גירסה חדשה של Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "יש לשדרג את מסד הנתונים של ה־Zotero שלך כדי שיעבוד עם הגירסה החדשה.">
+<!ENTITY zotero.upgrade.title "אשף השדרוג של Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "התקנת גירסה חדשה של Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "יש לשדרג את מסד הנתונים של ה־Paperly שלך כדי שיעבוד עם הגירסה החדשה.">
 <!ENTITY zotero.upgrade.autoBackup "מסד הנתונים הנוכחי שלך יגובה אוטומטית בטרם ביצוע שינויים כלשהם.">
 <!ENTITY zotero.upgrade.majorUpgrade "זה עדכון משמעותי.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "נא לוודא שעברת על">
 <!ENTITY zotero.upgrade.majorUpgradeLink "הנחיות ההתקנה">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "בטרם המשך התהליך.">
 <!ENTITY zotero.upgrade.upgradeInProgress "נא להמתין לסיום תהליך השדרוג. עשוי לארוך מספר דקות.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "מסד הנתונים של ה־Zotero שלך שודרג בהצלחה.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "מסד הנתונים של ה־Paperly שלך שודרג בהצלחה.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "נא לעיין">
 <!ENTITY zotero.upgrade.changeLogLink "ביומן השינויים">
 <!ENTITY zotero.upgrade.changeLogAfterLink "כדי ללמוד מה חדש">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "סריקת RTF">
 <!ENTITY zotero.toolbar.preferences.label "העדפות…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "תמיכה ותיעוד">
-<!ENTITY zotero.toolbar.about.label "על Zotero">
+<!ENTITY zotero.toolbar.about.label "על Paperly">
 <!ENTITY zotero.toolbar.openURL.label "חיפוש">
 <!ENTITY zotero.toolbar.openURL.tooltip "חיפוש בספרייה המקומית שלך">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "הורדות:">
 <!ENTITY zotero.sync.storage.uploads "העלאות:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "התגית הבאה בספריית ה־Zotero שלך ארוכה מכדי להסתנכרן מול השרת:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "התגית הבאה בספריית ה־Paperly שלך ארוכה מכדי להסתנכרן מול השרת:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "על התגיות המסונכרנות לא לעלות על 256 תווים.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "אפשר לפצל את התגית למספר תגיות, לערוך את התגית ידנית ולקצר אותה או למחוק אותה.">
 <!ENTITY zotero.sync.longTagFixer.split "פיצול">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "ציטוטים מעורפלים">
 <!ENTITY zotero.rtfScan.mappedCitations.label "ציטוטים ממופים">
 <!ENTITY zotero.rtfScan.introPage.label "היכרות">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero יכול לחלץ ולעצב ציטוטים מחדש ולהוסיף ביבליוגרפיה לקובצי RTF. יכולת סריקת ה־RTF תומכת בציטוטים כרגע עם הגוונים לפי התצורות הבאות:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly יכול לחלץ ולעצב ציטוטים מחדש ולהוסיף ביבליוגרפיה לקובצי RTF. יכולת סריקת ה־RTF תומכת בציטוטים כרגע עם הגוונים לפי התצורות הבאות:">
 <!ENTITY zotero.rtfScan.introPage.description2 "כדי להתחיל, יש לבחור קובץ קלט RTF וקובץ פלט להלן:">
 <!ENTITY zotero.rtfScan.scanPage.label "סורק אחר ציטוטים">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero מחפש ציטוטים במסמך שלך. נא להתאזר בסבלנות.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly מחפש ציטוטים במסמך שלך. נא להתאזר בסבלנות.">
 <!ENTITY zotero.rtfScan.citationsPage.label "אימות פריטים מצוטטים">
-<!ENTITY zotero.rtfScan.citationsPage.description "נא לסקור את רשימת הציטוטים המזוהים להלן כדי לוודא ש־Zotero בחר את הפריטים המתאימים כראוי. ציטוטים בלתי ממופים או מעורפלים יש לפתור בטרם מעבר לשלב הבא.">
+<!ENTITY zotero.rtfScan.citationsPage.description "נא לסקור את רשימת הציטוטים המזוהים להלן כדי לוודא ש־Paperly בחר את הפריטים המתאימים כראוי. ציטוטים בלתי ממופים או מעורפלים יש לפתור בטרם מעבר לשלב הבא.">
 <!ENTITY zotero.rtfScan.stylePage.label "עיצוב מסמך">
 <!ENTITY zotero.rtfScan.formatPage.label "עיצוב ציטוטים">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero מעבד ומעצב את קובץ ה־RTF שלך. נא להתאזר בסבלנות.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly מעבד ומעצב את קובץ ה־RTF שלך. נא להתאזר בסבלנות.">
 <!ENTITY zotero.rtfScan.completePage.label "סקירת ה־RTF הושלמה">
 <!ENTITY zotero.rtfScan.completePage.description "המסמך שלך נסרק ועבר עיבוד כעת. נא לוודא שהוא מעוצב כראוי.">
 <!ENTITY zotero.rtfScan.inputFile.label "קובץ קלט">

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero-voorkeuren">
+<!ENTITY zotero.preferences.title "Paperly-voorkeuren">
 
 <!ENTITY zotero.preferences.helpButton.label "Help">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatisch controleren op updates voor vertalers en verwijsstijlen">
 <!ENTITY zotero.preferences.updateNow "Nu bijwerken">
 <!ENTITY zotero.preferences.reportTranslationFailure "Defecte webpagina-vertalers rapporteren">
-<!ENTITY zotero.preferences.parseRISRefer "Zotero gebruiken voor gedownloade BibTeX/RIS/Refer-bestanden">
+<!ENTITY zotero.preferences.parseRISRefer "Paperly gebruiken voor gedownloade BibTeX/RIS/Refer-bestanden">
 <!ENTITY zotero.preferences.automaticTags "Items automatisch labelen met trefwoorden en onderwerpen">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Items in de prullenbak automatisch wissen na">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagen geleden">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Wachtwoord vergeten?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Automatisch synchroniseren">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchroniseer alle Volledige Tekst inhoud">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan de Volledige Tekst inhoud van bestanden in uw Zotero bibliotheek synchroniseren met zotero.org en andere gekoppelde apparaten, zodat u eenvoudig door al uw bestanden kunt zoeken waar u ook bent. De Volledige Tekst-inhoud van uw bestanden zal niet publiekelijk gedeeld worden.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly kan de Volledige Tekst inhoud van bestanden in uw Paperly bibliotheek synchroniseren met zotero.org en andere gekoppelde apparaten, zodat u eenvoudig door al uw bestanden kunt zoeken waar u ook bent. De Volledige Tekst-inhoud van uw bestanden zal niet publiekelijk gedeeld worden.">
 <!ENTITY zotero.preferences.sync.about "Over synchroniseren">
 <!ENTITY zotero.preferences.sync.fileSyncing "Bestandssynchronisatie">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Herstel synchronisatiegeschiedenis">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero Server (houdt geen rekening met synchronisatiegeschiedenis).">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Herstellen vanuit online-bibliotheek">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Lokale Zoterogegevens overschrijven met data uit de online-bibliotheek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Lokale Paperlygegevens overschrijven met data uit de online-bibliotheek">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Online Bibliotheek Vervangen">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Alle gegevens op de server wissen en vervangen door de lokale Paperly-gegevens.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wis bestandssynchronisatiegeschiedenis">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Controleren of alle lokale bestanden op de server aanwezig zijn.">
 <!ENTITY zotero.preferences.sync.reset "Reset">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opties voor verwijzingen">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "URL's van artikelen aan verwijzingen toevoegen">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie is uitgezet voegt Zotero alleen URLs toe aan verwijzingen van tijdschrift-, magazine en krantenartikelen als paginanummers ontbreken.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Als deze optie is uitgezet voegt Paperly alleen URLs toe aan verwijzingen van tijdschrift-, magazine en krantenartikelen als paginanummers ontbreken.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snelle kopie">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Bijgewerkt">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Paperly (adresbalk icoon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Breng venster Bibliotheken naar voren">
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
 <!ENTITY zotero.preferences.keys.newItem "Maak een Nieuw item">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy's">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy instellingen">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero zal requests transparant omleiden via de opgeslagen proxies. Zie de">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly zal requests transparant omleiden via de opgeslagen proxies. Zie de">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy-documentatie">
 <!ENTITY zotero.preferences.proxies.desc_after_link "voor meer informatie.">
 <!ENTITY zotero.preferences.proxies.transparent "Proxy-omleiding inschakelen">
@@ -166,7 +166,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager voor artikel-zoekmachines">
 <!ENTITY zotero.preferences.locate.description "Beschrijving">
 <!ENTITY zotero.preferences.locate.name "Naam">
-<!ENTITY zotero.preferences.locate.addDescription "Om een zoekmachine toe te voegen die niet in deze lijst aanwezig is, bezoek de zoekmachine via uw webbrowser en selecteer “Toevoegen” in het Opzoeken-menu van Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Om een zoekmachine toe te voegen die niet in deze lijst aanwezig is, bezoek de zoekmachine via uw webbrowser en selecteer “Toevoegen” in het Opzoeken-menu van Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standaardinstellingen herstellen">
 
 <!ENTITY zotero.preferences.charset "Tekensetcodering">
@@ -182,7 +182,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Naar nieuwe standaardlocatie verplaatsen…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Gekoppelde Bijlage-Bestandsmap">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly gebruik relatieve paden voor gekoppelde bijlagebestanden binnen de standaard bestandsmap, waardoor u toegang heeft tot al uw bestanden op verschillende computers zolang de bestandsstructuur in de standaard bestandsmap hetzelfde blijft.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Standaard bestandsmap">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Kiezen...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Terug naar Absolute paden...">

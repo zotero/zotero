@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero nuostatos">
+<!ENTITY zotero.preferences.title "Paperly nuostatos">
 
 <!ENTITY zotero.preferences.helpButton.label "Žinynas">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatiškai tikrinti, ar yra transliatorių ir stilių atnaujinimų">
 <!ENTITY zotero.preferences.updateNow "Atnaujinti dabar">
 <!ENTITY zotero.preferences.reportTranslationFailure "Pranešti apie netinkamus svetainės transliatorius">
-<!ENTITY zotero.preferences.parseRISRefer "Zotero naudoti BibTeX/RIS/Refer rinkmenų parsiuntimui">
+<!ENTITY zotero.preferences.parseRISRefer "Paperly naudoti BibTeX/RIS/Refer rinkmenų parsiuntimui">
 <!ENTITY zotero.preferences.automaticTags "Įrašams automatiškai priskirti gaires su raktažodžiais ir temomis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "d.">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Pamiršote slaptažodį?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinchronizuoti automatiškai">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Visatekstinio turinio sinchronizavimas">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero gali sinchronizuoti visą jūsiškės bibliotekos rinkmenų visatekstinį turinį su zotero.org ir kitais susietais įrenginiais. Tai Jums leistų greitai pasiekti savas rinkmenas kad ir kur bebūtumėte. Jūsų visatekstinis turinys nebus viešinamas.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly gali sinchronizuoti visą jūsiškės bibliotekos rinkmenų visatekstinį turinį su zotero.org ir kitais susietais įrenginiais. Tai Jums leistų greitai pasiekti savas rinkmenas kad ir kur bebūtumėte. Jūsų visatekstinis turinys nebus viešinamas.">
 <!ENTITY zotero.preferences.sync.about "Apie sinchronizavimą">
 <!ENTITY zotero.preferences.sync.fileSyncing "Rinkmenų sinchronizavimas">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,7 +72,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Perrašyti duomenų sinchronizavimo žurnalą">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Apjungti vietinius duomenis su duomenimis nuotoliniame serveryje, ignoruojant duombazės informaciją apie pakeitimus">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Atkurti iš nuotolinės saugyklos">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Vietinius Zotero duomenis pakeisti nuotolinės saugyklos duomenimis.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Vietinius Paperly duomenis pakeisti nuotolinės saugyklos duomenimis.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Pakeisti nuotolinėje saugykloje">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Nuotolinės saugyklos duomenis pakeisti vietinės saugyklos duomenimis.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti rinkmenų sinchronizavimo žurnalą">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Citavimo parinktys">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Į nuorodas įtraukti popierinių straipsnių URL adresus">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Jei parinktis nepasirinkta, Zotero URL adresus įtrauks tik jei cituojamas žurnalo, laikraščio ar periodinio leidinio straipsnyje nenurodyti puslapiai.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Jei parinktis nepasirinkta, Paperly URL adresus įtrauks tik jei cituojamas žurnalo, laikraščio ar periodinio leidinio straipsnyje nenurodyti puslapiai.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Greitas kopijavimas">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Įrašų formatas:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Atnaujinta">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Įrašyti į Zotero (ženkliukas adreso juostoje)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Įrašyti į Paperly (ženkliukas adreso juostoje)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Aktyvuoti bibliotekos skydelį">
 <!ENTITY zotero.preferences.keys.quicksearch "Greita paieška">
 <!ENTITY zotero.preferences.keys.newItem "Sukurti naują įrašą">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Įgaliotieji serveriai">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Įgaliotojo serverio parinktys">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero skaidriai nukreips užklausas per įrašytus įgaliotuosius serverius. Daugiau informacijos rasite">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly skaidriai nukreips užklausas per įrašytus įgaliotuosius serverius. Daugiau informacijos rasite">
 <!ENTITY zotero.preferences.proxies.desc_link "įgaliotojo serverio dokumentacijoje">
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Įgalinti įgaliotojo serverio nukreipimą">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
 <!ENTITY zotero.preferences.locate.description "Aprašas">
 <!ENTITY zotero.preferences.locate.name "Pavadinimas">
-<!ENTITY zotero.preferences.locate.addDescription "Norėdami įtraukti paieškos variklį, kurio nėra sąraše, interneto naršyklėje atverkite tos paieškos sistemos svetainę ir nuspauskite Zotero meniu mygtuką „Pridėti“.">
+<!ENTITY zotero.preferences.locate.addDescription "Norėdami įtraukti paieškos variklį, kurio nėra sąraše, interneto naršyklėje atverkite tos paieškos sistemos svetainę ir nuspauskite Paperly meniu mygtuką „Pridėti“.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Naudoti numatytuosius">
 
 <!ENTITY zotero.preferences.charset "Rašmenų koduotė">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Perkelti į naują numatytąją vietą...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Susietų priedų pagrindinis katalogas">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Rinkmenoms, kurios prisegtos prie įrašų, Zotero naudos santykinius kelius pagrindinio katalogo atžvilgiu, tad rinkmenas galėsite pasiekti bet kuriame savo kompiuteryje, žinoma, jei rinkmenų struktūra pagrindiniuose kataloguose bus tokia pati.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Rinkmenoms, kurios prisegtos prie įrašų, Paperly naudos santykinius kelius pagrindinio katalogo atžvilgiu, tad rinkmenas galėsite pasiekti bet kuriame savo kompiuteryje, žinoma, jei rinkmenų struktūra pagrindiniuose kataloguose bus tokia pati.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Pagrindinis katalogas:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Pasirinkti...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Pakeisti absoliučiais keliais...">

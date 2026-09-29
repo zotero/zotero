@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Resetare">
 
 
-<!ENTITY zotero.errorReport.title "Raportul de erori Zotero">
+<!ENTITY zotero.errorReport.title "Raportul de erori Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Așteaptă, te rog, ca raportul de eroare să fie trimis.">
 <!ENTITY zotero.errorReport.submitted "Raportul de eroare a fost trimis.">
 <!ENTITY zotero.errorReport.reportID "ID raport:">
 <!ENTITY zotero.errorReport.postToForums "Te rog trimite un mesaj către forumul Zotero (forums.zotero.org) cu acest Raport ID, o descriere a problemei şi orice alt pas necesar pentru a o reproduce.">
 <!ENTITY zotero.errorReport.notReviewed "Raporturile de erori nu sunt luate în considerare atâta timp cât nu se află pe forum.">
 
-<!ENTITY zotero.upgrade.title "Expertul de upgrade Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Baza de date Zotero trebui actualizată în aşa fel încât să meargă cu noua versiune.">
+<!ENTITY zotero.upgrade.title "Expertul de upgrade Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Ai instalat o nouă versiune de Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Baza de date Paperly trebui actualizată în aşa fel încât să meargă cu noua versiune.">
 <!ENTITY zotero.upgrade.autoBackup "Baza de date existentă va fi salvată automat, înainte să se facă vreo schimbare.">
 <!ENTITY zotero.upgrade.majorUpgrade "Aceasta este o actualizare majoră.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Asigură-te că ai revăzut">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrucțiunile de actualizare">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "înainte de a continua.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Așteaptă, te rog, ca procesul de actualizare să se încheie. Poate dura câteva minute.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Baza de date Zotero a fost actualizată cu succes.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Baza de date Paperly a fost actualizată cu succes.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Vezi, te rog,">
 <!ENTITY zotero.upgrade.changeLogLink "raportul schimbărilor">
 <!ENTITY zotero.upgrade.changeLogAfterLink "pentru a vedea ce este nou.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Scanare RTF">
 <!ENTITY zotero.toolbar.preferences.label "Preferințe...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Suport și documentație">
-<!ENTITY zotero.toolbar.about.label "Despre Zotero">
+<!ENTITY zotero.toolbar.about.label "Despre Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Localizare">
 <!ENTITY zotero.toolbar.openURL.tooltip "Găsește în biblioteca ta locală">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Descărcări:">
 <!ENTITY zotero.sync.storage.uploads "Încărcări:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Următoarele etichete în biblioteca ta Zotero sunt prea lungi pentru a le sincroniza cu serverul:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Următoarele etichete în biblioteca ta Paperly sunt prea lungi pentru a le sincroniza cu serverul:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Pentru sincronizare, etichetele trebuie să aibă mai puțin de 256 caractere.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Poți fie să-ți împarți eticheta în mai multe etichete, fie să o editezi manual, fie să o ștergi.">
 <!ENTITY zotero.sync.longTagFixer.split "Împarte">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citări ambigue">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citări rezolvate">
 <!ENTITY zotero.rtfScan.introPage.label "Introducere">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero poate extrage și reformata automat citările și poate introduce o bibliografie în fișierele RTF. Facilitatea scanării RTF suportă în mod curent variații ale următoarelor formate:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly poate extrage și reformata automat citările și poate introduce o bibliografie în fișierele RTF. Facilitatea scanării RTF suportă în mod curent variații ale următoarelor formate:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Pentru a porni, selectează mai jos un fișier RTF de intrare și un fișier de ieșire:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanează după citări">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero scanează documentul pentru a găsi citări. Te rog să aștepți.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly scanează documentul pentru a găsi citări. Te rog să aștepți.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verifică înregistrările citate">
-<!ENTITY zotero.rtfScan.citationsPage.description "Te rog să controlezi lista de mai jos a citărilor recunoscute pentru a te asigura că Zotero a selectat înregistrările corespunzătoare în mod corect. Eventualele citări nepotrivite sau ambigue trebuie rezolvate înainte de a proceda la următorul pas.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Te rog să controlezi lista de mai jos a citărilor recunoscute pentru a te asigura că Paperly a selectat înregistrările corespunzătoare în mod corect. Eventualele citări nepotrivite sau ambigue trebuie rezolvate înainte de a proceda la următorul pas.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formatare document">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatare citări">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero procesează și formatează fișierul tău RTF. Te rog să aștepți.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly procesează și formatează fișierul tău RTF. Te rog să aștepți.">
 <!ENTITY zotero.rtfScan.completePage.label "Scanare RTF completă">
 <!ENTITY zotero.rtfScan.completePage.description "Documentul tău a fost acum scanat și procesat. Te rog să te asiguri că e formatat corect.">
 <!ENTITY zotero.rtfScan.inputFile.label "Fișier de intrare">

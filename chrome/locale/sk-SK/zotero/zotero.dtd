@@ -34,14 +34,14 @@
 
 <!ENTITY zotero.upgrade.title "Sprievodca aktualizáciou Zotera">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nainštalovali ste novú verziu Zotera.">
-<!ENTITY zotero.upgrade.upgradeRequired "Na to, aby ste mohli pracovať s novou verziou je potrebné aktualizovať vašu Zotero databázu.">
+<!ENTITY zotero.upgrade.upgradeRequired "Na to, aby ste mohli pracovať s novou verziou je potrebné aktualizovať vašu Paperly databázu.">
 <!ENTITY zotero.upgrade.autoBackup "Pred tým, než budú vykonané zmeny, sa vaša súčasná databáza automaticky zálohuje.">
 <!ENTITY zotero.upgrade.majorUpgrade "Toto je hlavná aktualizácia.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Pred tým, než budete pokračovať si prečítajte">
 <!ENTITY zotero.upgrade.majorUpgradeLink "pokyny k aktualizácii">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink ".">
 <!ENTITY zotero.upgrade.upgradeInProgress "Počkajte, prosím, kým sa dokončí aktualizácia. Môže to trvať niekoľko minút.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Vaša Zotero databáza bola úspešne aktualizovaná.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Vaša Paperly databáza bola úspešne aktualizovaná.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Prosím prezrite si">
 <!ENTITY zotero.upgrade.changeLogLink "protokol o zmenách">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aby ste sa dozvedeli o novinkách a zmenách v tejto verzii.">
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Sťahovanie:">
 <!ENTITY zotero.sync.storage.uploads "Nahrávanie:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Táto značka vo vašej Zotero knižnici je príliš dlhá na to, aby sa mohla synchronizovať na serveri:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Táto značka vo vašej Paperly knižnici je príliš dlhá na to, aby sa mohla synchronizovať na serveri:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizované značky musia mať menej ako 256 znakov.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Môžete rozdeliť značku na viacero kratších, skrátiť ju manuálne alebo ju zmazať.">
 <!ENTITY zotero.sync.longTagFixer.split "Rozdeliť">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Nezaraditeľné citácie">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Priradené citácie">
 <!ENTITY zotero.rtfScan.introPage.label "Úvod">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero dokáže automaticky vyhľadať citácie, upraviť ich štýl a vložiť bibliografiu do RTF súborov. Funkcia spracovať RTF v súčasnosti podporuje citácie v rôznych z nasledujúcich štýlov:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly dokáže automaticky vyhľadať citácie, upraviť ich štýl a vložiť bibliografiu do RTF súborov. Funkcia spracovať RTF v súčasnosti podporuje citácie v rôznych z nasledujúcich štýlov:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Na začiatok si vyberte vstupný RTF súbor a výstupný súbor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Vyhľadávanie citácií">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero vyhľadáva citácie vo vybranom dokumente. Čakajte prosím.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly vyhľadáva citácie vo vybranom dokumente. Čakajte prosím.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Skontrolovať citované záznamy">
-<!ENTITY zotero.rtfScan.citationsPage.description "Prezrite si zoznam rozpoznaných citácií a uistite sa, že Zotero správne označilo korešpondujúce záznamy. Pred ďalším krokom je potrebné priradiť všetky nepriradené alebo nejednoznačné citácie.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Prezrite si zoznam rozpoznaných citácií a uistite sa, že Paperly správne označilo korešpondujúce záznamy. Pred ďalším krokom je potrebné priradiť všetky nepriradené alebo nejednoznačné citácie.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formátovanie dokumentu">
 <!ENTITY zotero.rtfScan.formatPage.label "Formátovanie citácií">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero spracovávaa a formátuje dokument. Čakajte prosím.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly spracovávaa a formátuje dokument. Čakajte prosím.">
 <!ENTITY zotero.rtfScan.completePage.label "Spracovanie RTF je dokončené.">
 <!ENTITY zotero.rtfScan.completePage.description "RTF dokument bol spracovaný. Prosím uistite sa, že je formátovaný správne.">
 <!ENTITY zotero.rtfScan.inputFile.label "Vstupný súbor">

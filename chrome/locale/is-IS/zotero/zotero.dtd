@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Endurræsa">
 
 
-<!ENTITY zotero.errorReport.title "Zotero villutilkynning">
+<!ENTITY zotero.errorReport.title "Paperly villutilkynning">
 <!ENTITY zotero.errorReport.submissionInProgress "Bíddu aðeins á meðan villuskýrsla er send.">
 <!ENTITY zotero.errorReport.submitted "Villuskýrsla þín hefur verið send.">
 <!ENTITY zotero.errorReport.reportID "Auðkennisnúmer (ID) skýrslu:">
 <!ENTITY zotero.errorReport.postToForums "Sendu skilaboð á Zotero samskiptasvæðið (forums.zotero.org) með þessu auðkenni (Report ID), með lýsingu á vandamálinu og hvað þarf að gera til að kalla aftur fram villuna. ">
 <!ENTITY zotero.errorReport.notReviewed "Villuskýrslur eru ekki yfirfarnar nema vísað sé í þær á samskiptasvæðum.">
 
-<!ENTITY zotero.upgrade.title "Zotero uppfærslutól">
-<!ENTITY zotero.upgrade.newVersionInstalled "Þú hefur sett inn nýja útgáfu af Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Það þarf að uppfæra Zotero gagnagrunninn þinn svo hann virki með nýju útgáfunni.">
+<!ENTITY zotero.upgrade.title "Paperly uppfærslutól">
+<!ENTITY zotero.upgrade.newVersionInstalled "Þú hefur sett inn nýja útgáfu af Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Það þarf að uppfæra Paperly gagnagrunninn þinn svo hann virki með nýju útgáfunni.">
 <!ENTITY zotero.upgrade.autoBackup "Afrit verður gert af gagnagrunninum þínum áður en breytingar á honum verða framkvæmdar.">
 <!ENTITY zotero.upgrade.majorUpgrade "Þetta er alhliða uppfærsla.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Vertu viss um að hafa farið yfir">
 <!ENTITY zotero.upgrade.majorUpgradeLink "leiðbeiningar um uppfærslu">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "áður en haldið er áfram.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Hinkraðu þar til uppfærsluferlinu lýkur. Það gæti tekið nokkrar mínútur.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Vel tókst að uppfæra Zotero gagnagrunninn þinn.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Vel tókst að uppfæra Paperly gagnagrunninn þinn.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Hægt er að skoða">
 <!ENTITY zotero.upgrade.changeLogLink "breytingafærsluskrána">
 <!ENTITY zotero.upgrade.changeLogAfterLink "til að sjá hvað er nýtt.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF skönnun">
 <!ENTITY zotero.toolbar.preferences.label "Kjörstillingar…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Stuðningur og leiðbeiningar">
-<!ENTITY zotero.toolbar.about.label "Um Zotero">
+<!ENTITY zotero.toolbar.about.label "Um Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Staðsetja">
 <!ENTITY zotero.toolbar.openURL.tooltip "Finna í næsta færslusafni">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Sóttar skrár:">
 <!ENTITY zotero.sync.storage.uploads "Uppflutningur:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Efitrfarandi merki í Zotero færslusafninu þínu er of langt til þess að það verði samhæft þjóni:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Efitrfarandi merki í Paperly færslusafninu þínu er of langt til þess að það verði samhæft þjóni:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Samhæft merki verður að vera styttra en 256 bókstafir.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Þú getur ýmist skipt upp merkinu í fleiri merki, stytt merkið handvirkt eða eytt því.">
 <!ENTITY zotero.sync.longTagFixer.split "Skipta">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Óræðar tilvitnanir">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Kortlagðar tilvitnanir">
 <!ENTITY zotero.rtfScan.introPage.label "Inngangur">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Til að byrja, veldu RTF skrá til lestrar og útskrá hér fyrir neðan:">
 <!ENTITY zotero.rtfScan.scanPage.label "Leita að tilvitnunum">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero er að leita að tilvitnunum í skjalinu þínu. Þetta gæti tekið dálitla stund.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly er að leita að tilvitnunum í skjalinu þínu. Þetta gæti tekið dálitla stund.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Yfirfara tilvitnaðar færslur">
-<!ENTITY zotero.rtfScan.citationsPage.description "Yfirfarðu listann yfir þær tilvitnanir sem kannast var við til að tryggja að Zotero hafi valið tilsvarandi færslur með réttum hætti. Allar ókortlagðar eða vafasamar tilvitnanir verður að auðkenna áður en haldið er áfram.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Yfirfarðu listann yfir þær tilvitnanir sem kannast var við til að tryggja að Paperly hafi valið tilsvarandi færslur með réttum hætti. Allar ókortlagðar eða vafasamar tilvitnanir verður að auðkenna áður en haldið er áfram.">
 <!ENTITY zotero.rtfScan.stylePage.label "Snið skjals">
 <!ENTITY zotero.rtfScan.formatPage.label "Snið tilvitnana">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero er að vinna úr og sníða RTF skrána þína. Þetta gæti tekið dálitla stund.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly er að vinna úr og sníða RTF skrána þína. Þetta gæti tekið dálitla stund.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF skönnun lokið">
 <!ENTITY zotero.rtfScan.completePage.description "Skjalið þitt hefur nú verið skannað og unnið. Gakktu úr skugga um að það sé með rétt snið.">
 <!ENTITY zotero.rtfScan.inputFile.label "Innlestrarskrá">

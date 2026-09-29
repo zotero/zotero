@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Προτιμήσεις Zotero">
+<!ENTITY zotero.preferences.title "Προτιμήσεις Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Βοήθεια">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους μεταφραστές και στυλ">
 <!ENTITY zotero.preferences.updateNow "Ενημέρωση τώρα">
 <!ENTITY zotero.preferences.reportTranslationFailure "Αναφέρετε προβληματικούς μεταφραστές ιστοτόπου">
-<!ENTITY zotero.preferences.parseRISRefer "Χρήση του Zotero για λήψη αρχείων BibTex/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Χρήση του Paperly για λήψη αρχείων BibTex/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Αυτόματη επισήμανση των στοιχείων με λέξεις κλειδιά και κεφαλίδες θέματος">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Αυτόματη διαγραφή από τον κάδο ανακύκλωσης στοιχείων που έχουν διαγραφεί για περισσότερο από">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ημέρες πριν">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Χάσατε τον κωδικό;">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Αυτόματος συγχρονισμός">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Συγχρονισμός περιεχομένου πλήρους κειμένου">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Το Zotero μπορεί να συγχρονίσει με το zotero.org και με άλλες συνδεδεμένες συσκευές το πλήρους κειμένου περιεχόμενο των αρχείων σας μέσα στην βιβλιοθήκη σας Zotero, επιτρέποντας την εύκολη αναζήτηση των αρχείων σας οπουδήποτε κι αν είστε. Το περιεχόμενο πλήρους κειμένου των αρχείων σας δεν διαμοιρασθεί δημοσίως.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Το Paperly μπορεί να συγχρονίσει με το zotero.org και με άλλες συνδεδεμένες συσκευές το πλήρους κειμένου περιεχόμενο των αρχείων σας μέσα στην βιβλιοθήκη σας Paperly, επιτρέποντας την εύκολη αναζήτηση των αρχείων σας οπουδήποτε κι αν είστε. Το περιεχόμενο πλήρους κειμένου των αρχείων σας δεν διαμοιρασθεί δημοσίως.">
 <!ENTITY zotero.preferences.sync.about "Σχετικά με τον συγχρονισμό">
 <!ENTITY zotero.preferences.sync.fileSyncing "Συγχρονισμός αρχείου">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Επαναφορά Ιστορικού Συγχρονισμού Δεδομένων">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Συγχώνευση τοπικών δεδομένων με απομακρυσμένα δεδομένα, αγνοώντας το ιστορικό συγχρονισμού">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Επαναφορά από την Online Βιβλιοθήκη">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Αντικατάσταση των τοπικών δεδομένων Zotero με δεδομένα από την Online Ββλιοθήκη.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Αντικατάσταση των τοπικών δεδομένων Paperly με δεδομένα από την Online Ββλιοθήκη.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Αντικατάσταση Online Βιβλιοθήκης">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Αντικαταστήστε την online βιβλιοθήκη με τα τοπικά δεδομένα Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Αντικαταστήστε την online βιβλιοθήκη με τα τοπικά δεδομένα Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Σύγκριση όλων των συνημμένων αρχείων με την υπηρεσία αποθήκευσης">
 <!ENTITY zotero.preferences.sync.reset "Επαναφορά">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Επιλογές παραπομπών">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Στις αναφορές να συμπεριλαμβάνονται τα URL έντυπων άρθρων">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Όταν απενεργοποιείται αυτή η λειτουργία το Zotero συμπεριλαμβάνει τις διευθύνσεις URL κατά την παράθεση άρθρων περιοδικών και εφημερίδων, μόνο αν στα άρθρα δεν ορίζεται το εύρος των σελίδων.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Όταν απενεργοποιείται αυτή η λειτουργία το Paperly συμπεριλαμβάνει τις διευθύνσεις URL κατά την παράθεση άρθρων περιοδικών και εφημερίδων, μόνο αν στα άρθρα δεν ορίζεται το εύρος των σελίδων.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Γρήγορη αντιγραφή">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Μορφή Στοιχείου:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Ενημερώθηκε">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Αποθήκευση στο Zotero (εικονίδιο γραμμής διεύθυνσης)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Αποθήκευση στο Paperly (εικονίδιο γραμμής διεύθυνσης)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Εστίαση στο πλαίσιο Βιβλιοθηκών">
 <!ENTITY zotero.preferences.keys.quicksearch "Γρήγορη αναζήτηση">
 <!ENTITY zotero.preferences.keys.newItem "Δημιουργία Νέου στοιχείου">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Διαμεσολαβητές">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Επιλογές διαμεσολαβητή">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Το Zotero θα ανακατευθύνει τα αιτήματα μέσω των αποθηκευμένων διαμεσολαβητών. Δείτε την">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Το Paperly θα ανακατευθύνει τα αιτήματα μέσω των αποθηκευμένων διαμεσολαβητών. Δείτε την">
 <!ENTITY zotero.preferences.proxies.desc_link "τεκμηρίωση διαμεσολαβητών">
 <!ENTITY zotero.preferences.proxies.desc_after_link "για περισσότερες πληροφορίες.">
 <!ENTITY zotero.preferences.proxies.transparent "Ενεργοποίηση της ανακατεύθυνσης διαμεσολαβητή">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Διαχειριστής Μηχανής Αναζήτησης Άρθρων">
 <!ENTITY zotero.preferences.locate.description "Περιγραφή">
 <!ENTITY zotero.preferences.locate.name "Όνομα">
-<!ENTITY zotero.preferences.locate.addDescription "Για να προσθέσετε μια Μηχανή Αναζήτησης που δεν περιλαμβάνεται στη λίστα, επισκεφθείτε την μηχανή αναζήτησης που επιθυμείτε και επιλέξτε &quot;Προσθήκη&quot; από το μενού εντοπισμού του Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Για να προσθέσετε μια Μηχανή Αναζήτησης που δεν περιλαμβάνεται στη λίστα, επισκεφθείτε την μηχανή αναζήτησης που επιθυμείτε και επιλέξτε &quot;Προσθήκη&quot; από το μενού εντοπισμού του Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Επαναφορά αρχικών ρυθμίσεων">
 
 <!ENTITY zotero.preferences.charset "Κωδικοποίηση χαρακτήρων">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Μετεγκατάσταση Σε Νέα Προεπιλεγμένη Θέση ...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Σύνδεσμος Βασικού Καταλόγου Συνημμένων">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Το Zotero θα χρησιμοποιήσει σχετικές διαδρομές για τα συνδεδεμένα προσαρτήματα αρχείων εντός του καταλόγου βάσης του, επιτρέποντας την πρόσβαση προς αρχείων σε διαφορετικούς υπολογιστές, εφόσον η δομή των αρχείων μέσα στον κατάλογο βάσης παραμένει η ίδια.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Το Paperly θα χρησιμοποιήσει σχετικές διαδρομές για τα συνδεδεμένα προσαρτήματα αρχείων εντός του καταλόγου βάσης του, επιτρέποντας την πρόσβαση προς αρχείων σε διαφορετικούς υπολογιστές, εφόσον η δομή των αρχείων μέσα στον κατάλογο βάσης παραμένει η ίδια.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Κατάλογος βάσης:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Επιλέξτε...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Επαναφορά σε απόλυτες διαδρομές...">

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero 偏好設定">
+<!ENTITY zotero.preferences.title "Paperly 偏好設定">
 
 <!ENTITY zotero.preferences.helpButton.label "說明">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新轉譯器與樣式">
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "回報有問題的網站轉譯器">
-<!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理下載的 BibTeX/RIS/Refer 檔">
+<!ENTITY zotero.preferences.parseRISRefer "用 Paperly 處理下載的 BibTeX/RIS/Refer 檔">
 <!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主題標目作為項目的標籤">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天以前">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "忘記密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "同步全文內容">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero 能以 zotero.org 和其他連結的裝置同步文獻庫中的檔案之全文內容，讓您無論身處何處，都能容易搜尋檔案。檔案之全文內容不會公開分享給他人。">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly 能以 zotero.org 和其他連結的裝置同步文獻庫中的檔案之全文內容，讓您無論身處何處，都能容易搜尋檔案。檔案之全文內容不會公開分享給他人。">
 <!ENTITY zotero.preferences.sync.about "關於同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "檔案同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重設資料同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "將本機的資料與遠端的資料合併，忽略同步歷史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "從線上文獻庫還原">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "以線上文獻庫的資料覆蓋本機 Zotero 資料。">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "以線上文獻庫的資料覆蓋本機 Paperly 資料。">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "取代線上文獻庫">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "以本機 Zotero 資料覆蓋線上文獻庫的資料。">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "以本機 Paperly 資料覆蓋線上文獻庫的資料。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "將所有附件檔案與儲存空間中的進行比較">
 <!ENTITY zotero.preferences.sync.reset "重設">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "引用文獻選項">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "包括參考文獻中論文文章的 URL">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "若停用此選項，在引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Zotero 才包含 URL。">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "若停用此選項，在引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Paperly 才包含 URL。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "項目格式">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "引用文獻樣式語言 CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
+<!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Paperly (網址列圖示)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦到文獻庫窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "新增項目">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "代理伺服器選項">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 會透明地透過已儲存的代理伺服器重新導向請求。請參見">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly 會透明地透過已儲存的代理伺服器重新導向請求。請參見">
 <!ENTITY zotero.preferences.proxies.desc_link "代理伺服器文件">
 <!ENTITY zotero.preferences.proxies.desc_after_link "以獲得更多資訊。">
 <!ENTITY zotero.preferences.proxies.transparent "啟用代理伺服器重新導向">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名稱">
-<!ENTITY zotero.preferences.locate.addDescription "如果要新增一個列表中沒有的搜尋引擎，請先在瀏覽器中前往該搜尋引擎，然後在Zotero的選單中點選「新增」。">
+<!ENTITY zotero.preferences.locate.addDescription "如果要新增一個列表中沒有的搜尋引擎，請先在瀏覽器中前往該搜尋引擎，然後在Paperly的選單中點選「新增」。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "回復預設值">
 
 <!ENTITY zotero.preferences.charset "字元編碼">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置……">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "連結的附加檔來源目錄">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 會使用連到的附加檔來源目錄內的相對路徑，讓您可在不同電腦存取檔案，只要來源目錄內的檔案結構保持不變即可。">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly 會使用連到的附加檔來源目錄內的相對路徑，讓您可在不同電腦存取檔案，只要來源目錄內的檔案結構保持不變即可。">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "來源目錄：">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "選擇……">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "還原成絕對路徑……">

@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "Meine Veröffentlichungen">
 
-<!ENTITY zotero.publications.intro "Einträge, die Sie zu Meine Veröffentlichungen hinzufügen, werden auf Ihrer Profilseite auf Zotero.org angezeigt. Wenn Sie die Option &quot;Dateien verfügbar machen&quot; auswählen, werden die Dateianhänge unter der von Ihnen gewählten Lizenz öffentlich verfügbar gemacht. Fügen Sie nur Werke hinzu, die Sie selbst erstellt haben, und laden wählen Sie diese Option nur dann, wenn Sie zur Verbreitung der Dateien berechtigt sind und sie öffentlich verfügbar machen wollen.">
+<!ENTITY zotero.publications.intro "Einträge, die Sie zu Meine Veröffentlichungen hinzufügen, werden auf Ihrer Profilseite auf Paperly.org angezeigt. Wenn Sie die Option &quot;Dateien verfügbar machen&quot; auswählen, werden die Dateianhänge unter der von Ihnen gewählten Lizenz öffentlich verfügbar gemacht. Fügen Sie nur Werke hinzu, die Sie selbst erstellt haben, und laden wählen Sie diese Option nur dann, wenn Sie zur Verbreitung der Dateien berechtigt sind und sie öffentlich verfügbar machen wollen.">
 <!ENTITY zotero.publications.include.checkbox.files "Anhänge verfügbar machen">
 <!ENTITY zotero.publications.include.checkbox.notes "Notizen verfügbar machen">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Sie können das, was angezeigt wird, jederzeit über die Sammlung Meine Veröffentlichungen ändern.">

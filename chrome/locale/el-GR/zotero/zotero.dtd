@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Επαναφορά">
 
 
-<!ENTITY zotero.errorReport.title "Αναφορά σφάλματος Zotero">
+<!ENTITY zotero.errorReport.title "Αναφορά σφάλματος Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Περιμένετε μέχρι να υποβληθεί η αναφορά σφάλματος.">
 <!ENTITY zotero.errorReport.submitted "Η αναφορά σας σφάλματος υποβλήθηκε.">
 <!ENTITY zotero.errorReport.reportID "Ταυτότητα αναφοράς:">
 <!ENTITY zotero.errorReport.postToForums "Παρακαλώ, στείλτε ένα μήνυμα στο φόρουμ του Zotero (forums.zotero.org) με αυτή την Ταυτότητα Σφάλματος, μια περιγραφή του προβλήματος και τα απαραίτητα βήματα για την αναπαραγωγή του.">
 <!ENTITY zotero.errorReport.notReviewed "Οι αναφορές σφαλμάτων δεν εξετάζονται αν πρώτα δεν αναφερθούν στα φόρα.">
 
-<!ENTITY zotero.upgrade.title "Μάγος Αναβάθμισης Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Εγκαταστήσατε μια νέα έκδοση του Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Η βάση δεδομένων του Zotero πρέπει να αναβαθμιστεί ώστε να λειτουργεί με την νέα έκδοση.">
+<!ENTITY zotero.upgrade.title "Μάγος Αναβάθμισης Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Εγκαταστήσατε μια νέα έκδοση του Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Η βάση δεδομένων του Paperly πρέπει να αναβαθμιστεί ώστε να λειτουργεί με την νέα έκδοση.">
 <!ENTITY zotero.upgrade.autoBackup "Θα δημιουργηθεί αυτόματα αντίγραφο ασφαλείας της υπάρχουσας βάσης δεδομένων σας, πριν γίνουν οι οποιεσδήποτε αλλαγές.">
 <!ENTITY zotero.upgrade.majorUpgrade "Αυτή είναι μια κύρια αναβάθμιση.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Βεβαιωθείτε ότι έχετε επανεξετάσει τις">
 <!ENTITY zotero.upgrade.majorUpgradeLink "οδηγίες αναβάθμισης">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "πριν συνεχίσετε.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Παρακαλώ περιμένετε ώστε να ολοκληρωθεί η διαδικασία αναβάθμισης. Αυτό μπορεί να διαρκέσει μερικά λεπτά.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Η βάση δεδομένων σας Zotero αναβαθμίστηκε επιτυχώς.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Η βάση δεδομένων σας Paperly αναβαθμίστηκε επιτυχώς.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Παρακαλώ διαβάστε">
 <!ENTITY zotero.upgrade.changeLogLink "τον κατάλογο των αλλαγών (changelog)">
 <!ENTITY zotero.upgrade.changeLogAfterLink "για να δείτε τι νεότερο υπάρχει.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Σάρωση RTF">
 <!ENTITY zotero.toolbar.preferences.label "Προτιμήσεις...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Υποστήριξη και Τεκμηρίωση">
-<!ENTITY zotero.toolbar.about.label "Σχετικά με το Zotero">
+<!ENTITY zotero.toolbar.about.label "Σχετικά με το Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Εντοπισμός">
 <!ENTITY zotero.toolbar.openURL.tooltip "Αναζήτηση μέσα από την τοπική βιβλιοθήκη σας">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Λήψεις:">
 <!ENTITY zotero.sync.storage.uploads "Μεταφορτώσεις:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Η ακόλουθη ετικέτα στην βιβλιοθήκη σας Zotero είναι πολύ μεγάλη για να συγχρονιστεί με τον διακομιστή:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Η ακόλουθη ετικέτα στην βιβλιοθήκη σας Paperly είναι πολύ μεγάλη για να συγχρονιστεί με τον διακομιστή:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Οι συγχρονιζόμενες ετικέτες πρέπει να είναι μικρότερες των 256 χαρακτήρων.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Μπορείτε είτε να διαιρέσετε την ετικέτα σε πολλαπλές ετικέτες, να επεξεργαστείτε χειροκίνητα την ετικέτα ώστε να την μικρύνετε ή να την διαγράψετε.">
 <!ENTITY zotero.sync.longTagFixer.split "Διαίρεση">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Ασαφής παραπομπή">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Χαρτογραφημένες παραπομπές">
 <!ENTITY zotero.rtfScan.introPage.label "Εισαγωγή">
-<!ENTITY zotero.rtfScan.introPage.description "Το Zotero μπορεί αυτόματα να εξάγει και να αναδιαμορφώσει τις παραπομπές και να εισάγει βιβλιογραφία μέσα σε αρχεία τύπου RTF. Η λειτουργία Σάρωσης RTF υποστηρίζει τις παρακάτω μορφές παραπομπών/παραθέσεων: ">
+<!ENTITY zotero.rtfScan.introPage.description "Το Paperly μπορεί αυτόματα να εξάγει και να αναδιαμορφώσει τις παραπομπές και να εισάγει βιβλιογραφία μέσα σε αρχεία τύπου RTF. Η λειτουργία Σάρωσης RTF υποστηρίζει τις παρακάτω μορφές παραπομπών/παραθέσεων: ">
 <!ENTITY zotero.rtfScan.introPage.description2 "Για να ξεκινήσετε επιλέξτε παρακάτω ένα αρχείο εισόδου RTF και ένα αρχείο εξόδου:">
 <!ENTITY zotero.rtfScan.scanPage.label "Σάρωση για παραπομπές">
-<!ENTITY zotero.rtfScan.scanPage.description "Το Zotero σαρώνει τα έγγραφά σας για παραπομπές. Παρακαλώ περιμένετε.">
+<!ENTITY zotero.rtfScan.scanPage.description "Το Paperly σαρώνει τα έγγραφά σας για παραπομπές. Παρακαλώ περιμένετε.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Εξακρίβωση παρατιθέμενων στοιχείων">
-<!ENTITY zotero.rtfScan.citationsPage.description "Παρακαλώ εξετάστε τον κατάλογο των αναγνωρισμένων παραπομπών που ακολουθεί για να βεβαιωθείτε ότι το Zotero έχει επιλέξει τα αντίστοιχα στοιχεία σωστά. Κάθε αχαρτογράφητη ή ασαφής παραπομπή πρέπει να αποσαφηνιστεί πριν προχωρήσετε στο επόμενο βήμα.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Παρακαλώ εξετάστε τον κατάλογο των αναγνωρισμένων παραπομπών που ακολουθεί για να βεβαιωθείτε ότι το Paperly έχει επιλέξει τα αντίστοιχα στοιχεία σωστά. Κάθε αχαρτογράφητη ή ασαφής παραπομπή πρέπει να αποσαφηνιστεί πριν προχωρήσετε στο επόμενο βήμα.">
 <!ENTITY zotero.rtfScan.stylePage.label "Μορφοποίηση εγγράφου">
 <!ENTITY zotero.rtfScan.formatPage.label "Μορφοποίηση παπομπών/παραθέσεων">
-<!ENTITY zotero.rtfScan.formatPage.description "Το Zotero επεξεργάζεται και μορφοποιεί τα αρχεία σας RTF. Παρακαλώ δείξτε υπομονή.">
+<!ENTITY zotero.rtfScan.formatPage.description "Το Paperly επεξεργάζεται και μορφοποιεί τα αρχεία σας RTF. Παρακαλώ δείξτε υπομονή.">
 <!ENTITY zotero.rtfScan.completePage.label "Η Σάρωση RTF ολοκληρώθηκε">
 <!ENTITY zotero.rtfScan.completePage.description "Το έγγραφό σας σαρώθηκε και επεξεργάστηκε. Παρααλώ βεβαιωθείτε ότι μοφροποιήθηκε σωστά.">
 <!ENTITY zotero.rtfScan.inputFile.label "Αρχείο εισαγωγής">

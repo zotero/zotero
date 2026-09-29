@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zoteron asetukset">
+<!ENTITY zotero.preferences.title "Paperlyn asetukset">
 
 <!ENTITY zotero.preferences.helpButton.label "Ohje">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Tarkista sivutulkkien ja tyylien päivitykset automaattisesti">
 <!ENTITY zotero.preferences.updateNow "Päivitä nyt">
 <!ENTITY zotero.preferences.reportTranslationFailure "Ilmoita toimimattomista sivutulkeista">
-<!ENTITY zotero.preferences.parseRISRefer "Käytä Zoteroa ladattujen BibTeX/Refer-tiedostojen avaamiseen">
+<!ENTITY zotero.preferences.parseRISRefer "Käytä Paperlya ladattujen BibTeX/Refer-tiedostojen avaamiseen">
 <!ENTITY zotero.preferences.automaticTags "Merkitse automaattisesti nimikkeisiin avainsanat ja otsikot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Poista roskakorista automaattisesti nimikkeet, jotka poistettiin yli">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päivää sitten">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Unohditko salasanan?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronoi automaattisesti">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synkronisoi kokotekstit">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero voi synkronisoida kirjastossasi olevien tiedostojen kokotekstisisällön zotero.orgiin ja linkattuihin laitteisiin, joten voi helposti hakea tietoja missä vain. Tiedostojen kokotekstisisältöä ei jaeta julkisesti.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly voi synkronisoida kirjastossasi olevien tiedostojen kokotekstisisällön zotero.orgiin ja linkattuihin laitteisiin, joten voi helposti hakea tietoja missä vain. Tiedostojen kokotekstisisältöä ei jaeta julkisesti.">
 <!ENTITY zotero.preferences.sync.about "Tietoa synkronoinnista">
 <!ENTITY zotero.preferences.sync.fileSyncing "Tiedostojen synkronointi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "Osoite:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tyhjennä synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Yhdistä paikalliset tiedot palvelimella olevien kanssa, välittämättä synkronointihistoriasta">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Palauta tiedot verkkokirjastosta">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Korvaa Zoteron paikalliset tiedot verkkokirjastossa olevilla tiedoilla.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Korvaa Paperlyn paikalliset tiedot verkkokirjastossa olevilla tiedoilla.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Korvaa verkkokirjasto">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Korvaa verkkokirjastossa olevat tiedot Zoteron paikallisilla tiedoilla.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Korvaa verkkokirjastossa olevat tiedot Paperlyn paikallisilla tiedoilla.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vertaa kaikkia liitetiedostoja tallennuspalvelun kanssa">
 <!ENTITY zotero.preferences.sync.reset "Palauta alkutilaan">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Viittausasetukset">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Liitä painettujen artikkeleiden internet-osoitteet viitteisiin">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kun tämä valinta on pois päältä, Zotero lisää internet-osoitteet tieteellisten lehtien, aikakauslehtien ja sanomalehtien artikkeleihin vain silloin kun niiden sivunumeroja ei ole määritelty.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kun tämä valinta on pois päältä, Paperly lisää internet-osoitteet tieteellisten lehtien, aikakauslehtien ja sanomalehtien artikkeleihin vain silloin kun niiden sivunumeroja ei ole määritelty.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Pikakopiointi">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Nimikkeen muoto:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Päivitetty">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Zoteroon (osoitepalkin kuvake)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Paperlyon (osoitepalkin kuvake)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kohdista kirjastonäkymään">
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
 <!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Välityspalvelimet">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Välityspalvelinten asetukset">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero välittää huomaamattomasti pyyntöjä tallennettujen välityspalvelinten kautta. Katso">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly välittää huomaamattomasti pyyntöjä tallennettujen välityspalvelinten kautta. Katso">
 <!ENTITY zotero.preferences.proxies.desc_link "välityspalvelinten ohjeesta">
 <!ENTITY zotero.preferences.proxies.desc_after_link "lisätietoja.">
 <!ENTITY zotero.preferences.proxies.transparent "Käytä välityspalvelinta uudelleenohjaukseen">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
 <!ENTITY zotero.preferences.locate.description "Kuvaus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
-<!ENTITY zotero.preferences.locate.addDescription "Lisätäksesi hakukoneen listan ulkopuolelta, käy kyseisen hakukoneen verkkosivulla ja valitse &quot;Lisää&quot; Zoteron &quot;Etsi&quot;-valikosta.">
+<!ENTITY zotero.preferences.locate.addDescription "Lisätäksesi hakukoneen listan ulkopuolelta, käy kyseisen hakukoneen verkkosivulla ja valitse &quot;Lisää&quot; Paperlyn &quot;Etsi&quot;-valikosta.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Palauta oletusarvot">
 
 <!ENTITY zotero.preferences.charset "Merkistökoodaus">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Siirrä uuteen vakiosijaintiin...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linkattujen liitteiden juurikansio">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero käyttää suhteellisia polkuja viitatakseen tiedostoliitteisiin juurikansiossa, joten voit käyttää tiedostoja eri tietokoneilla, kunhan tiedostorakenne juurikansion sisällä pysyy samana.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly käyttää suhteellisia polkuja viitatakseen tiedostoliitteisiin juurikansiossa, joten voit käyttää tiedostoja eri tietokoneilla, kunhan tiedostorakenne juurikansion sisällä pysyy samana.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Juurikansio:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Valitse...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Palauta absoluuttiset polut...">

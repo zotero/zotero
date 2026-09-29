@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Nulstil">
 
 
-<!ENTITY zotero.errorReport.title "Zotero fejlrapport">
+<!ENTITY zotero.errorReport.title "Paperly fejlrapport">
 <!ENTITY zotero.errorReport.submissionInProgress "Vent venligst mens fejlrapporten registreres.">
 <!ENTITY zotero.errorReport.submitted "Din fejlrapport er registreret.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
 <!ENTITY zotero.errorReport.postToForums "Læg venligst en besked på Zoteros fora (forums.zotero.org) med dette Rapport-ID, en beskrivelse af problemet og det der får problemet til at opstå.">
 <!ENTITY zotero.errorReport.notReviewed "Fejlrapporter bliver ikke læst medmindre der henvises til dem i Zoteros fora.">
 
-<!ENTITY zotero.upgrade.title "Zotero opgraderingsguide">
-<!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Din Zotero-database skal opgraderes for at virke med den seneste version.">
+<!ENTITY zotero.upgrade.title "Paperly opgraderingsguide">
+<!ENTITY zotero.upgrade.newVersionInstalled "Du har installeret en ny version af Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Din Paperly-database skal opgraderes for at virke med den seneste version.">
 <!ENTITY zotero.upgrade.autoBackup "Din nuværende database vil blive sikkerhedskopieret, inden der foretages ændringer.">
 <!ENTITY zotero.upgrade.majorUpgrade "Dette er en større opgradering.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Sørg for at gennemse">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruktioner for opgradering">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "inden du fortsætter">
 <!ENTITY zotero.upgrade.upgradeInProgress "Vent venligst til opgraderingsprocessen er slut. Det kan tage nogle minutter.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Din Zotero-database er blevet opgraderet korrekt.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Din Paperly-database er blevet opgraderet korrekt.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Se venligst">
 <!ENTITY zotero.upgrade.changeLogLink "listen med ændringer">
 <!ENTITY zotero.upgrade.changeLogAfterLink "for at se nyhederne.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.preferences.label "Indstillinger...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Support og dokumentation">
-<!ENTITY zotero.toolbar.about.label "Om Zotero">
+<!ENTITY zotero.toolbar.about.label "Om Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Find">
 <!ENTITY zotero.toolbar.openURL.tooltip "Find gennem dit lokale bibliotek">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "De følgende mærkater i dit Zoterobibliotek er for lange til at synkronisere med serveren:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "De følgende mærkater i dit Paperlybibliotek er for lange til at synkronisere med serveren:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserede mærkater kan højst være 256 tegn.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan enten opdele mærkatet i flere mærkater, redigere mærkatet manuelt for at forkorte det eller slette det.">
 <!ENTITY zotero.sync.longTagFixer.split "Opdel">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Flertydige teksthenvisnnger">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Teksthenvisninger med poster i dit bibliotek">
 <!ENTITY zotero.rtfScan.introPage.label "Introduktion">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisk uddrage og reformatere teksthenvisninger og indsætte en referenceliste i en RTF-fil. RTF-scanningsfunktionen understøtter referencer i følgende formater:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly kan automatisk uddrage og reformatere teksthenvisninger og indsætte en referenceliste i en RTF-fil. RTF-scanningsfunktionen understøtter referencer i følgende formater:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Vælg en RTF-fil som input og en output-fil nedenfor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Scanner efter teksthenvisninger i dokumentet">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero scanner dit dokument for teksthenvisninger. Vent venligst.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly scanner dit dokument for teksthenvisninger. Vent venligst.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Kontroller referencerne">
-<!ENTITY zotero.rtfScan.citationsPage.description "Kontroller listen med de fundne referencer for at sikre at Zotero har identificeret værkerne korrekt. Alle referencer uden korrespondence og alle flertydige referencer skal afklares før du går videre til næste fase.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Kontroller listen med de fundne referencer for at sikre at Paperly har identificeret værkerne korrekt. Alle referencer uden korrespondence og alle flertydige referencer skal afklares før du går videre til næste fase.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formatering af dokument">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatering af referencer">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero behandler og formaterer din RTF-fil. Vent tålmodigt.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly behandler og formaterer din RTF-fil. Vent tålmodigt.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF-scanning fuldført">
 <!ENTITY zotero.rtfScan.completePage.description "Dit dokument er blevet scannet og behandlet. Kontrollerer at det er blevet formateret korrekt.">
 <!ENTITY zotero.rtfScan.inputFile.label "Input-fil">

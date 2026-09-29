@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "ตั้งค่าพึงใจสำหรับ Zotero">
+<!ENTITY zotero.preferences.title "ตั้งค่าพึงใจสำหรับ Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "วิธีใช้">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
 <!ENTITY zotero.preferences.updateNow "อัพเดตเดี๋ยวนี้">
 <!ENTITY zotero.preferences.reportTranslationFailure "รายงานตัวช่วยแปลเว็บไซต์ใช้งานไม่ได้">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Use Paperly for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticTags "สร้างแท็กด้วยคำสำคัญและหัวเรื่องโดยอัตโนมัติ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ล้างรายการในถังขยะที่เคยลบนานกว่า ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "วันที่แล้ว">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "รหัสผ่านหาย?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "ประสานข้อมูลโดยอัตโนมัติ">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly can sync the full-text content of files in your Paperly libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "เกี่ยวกับการประสานข้อมูล">
 <!ENTITY zotero.preferences.sync.fileSyncing "ประสานข้อมูลในแฟ้ม">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Paperly data with data from the online library.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Paperly data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ตั้งค่าประวัติการประสานข้อมูลแฟ้มใหม่">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "ตั้งค่าใหม่">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "ตัวเลือกการอ้างอิง">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "รวม URLs ของบทความในเอกสารอ้างอิง">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "เมื่อไม่ใช้งานตัวเลือกนี้ Zotero จะรวม URLs เมื่ออ้างถึงวารสาร นิตยสารและหนังสือพิมพ์เฉพาะกรณีที่บทความนั้นไม่มีเลขหน้าเท่านั้น">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "เมื่อไม่ใช้งานตัวเลือกนี้ Paperly จะรวม URLs เมื่ออ้างถึงวารสาร นิตยสารและหนังสือพิมพ์เฉพาะกรณีที่บทความนั้นไม่มีเลขหน้าเท่านั้น">
 
 <!ENTITY zotero.preferences.quickCopy.caption "ทำสำเนาอย่างเร็ว">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "ปรับเป็นรุ่นปัจจุบันแล้ว">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Paperly (address bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "โฟกัสที่ช่องไลบรารี">
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาแบบเร็ว">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "พร็อกซี่">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "ตัวเลือกของพร็อกซี่">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero จะเปลี่ยนทิศทางคำขอผ่านการบันทึกพร็อกซี่แบบเงียบๆ ดูที่">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly จะเปลี่ยนทิศทางคำขอผ่านการบันทึกพร็อกซี่แบบเงียบๆ ดูที่">
 <!ENTITY zotero.preferences.proxies.desc_link "เอกสารพร็อกซี่">
 <!ENTITY zotero.preferences.proxies.desc_after_link "สำหรับข้อมูลเพิ่มเติม">
 <!ENTITY zotero.preferences.proxies.transparent "เปิดการเปลี่ยนทิศทางพร็อกซี่">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "ตัวจัดการเครื่องมือค้นหาบทความ">
 <!ENTITY zotero.preferences.locate.description "รายละเอียด">
 <!ENTITY zotero.preferences.locate.name "ชื่อ">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Paperly’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "ใช้ค่าโดยปริยาย">
 
 <!ENTITY zotero.preferences.charset "รหัสอักขระ">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "เชื่อมโยงสารบบแฟ้มแนบแล้ว">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero จะใช้เส้นทางซึ่งสัมพันธ์กันสำหรับเชื่อมโยงแฟ้มแนบในสารบบฐาน ช่วยให้คุณเข้าถึงแฟ้มจากคอมพิวเตอร์เครื่องอื่นได้ตราบที่โครงสร้างแฟ้มในสารบบฐานยังคงเหมือนเดิม">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly จะใช้เส้นทางซึ่งสัมพันธ์กันสำหรับเชื่อมโยงแฟ้มแนบในสารบบฐาน ช่วยให้คุณเข้าถึงแฟ้มจากคอมพิวเตอร์เครื่องอื่นได้ตราบที่โครงสร้างแฟ้มในสารบบฐานยังคงเหมือนเดิม">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "สารบบฐาน:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "เลือก...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "ย้อนกลับสู่เส้นทางแท้จริง…">

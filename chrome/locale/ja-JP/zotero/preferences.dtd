@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero 環境設定">
+<!ENTITY zotero.preferences.title "Paperly 環境設定">
 
 <!ENTITY zotero.preferences.helpButton.label "ヘルプ">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "トランスレータとスタイルの更新を自動的に確認する">
 <!ENTITY zotero.preferences.updateNow "今すぐ更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "サイトの問題を報告">
-<!ENTITY zotero.preferences.parseRISRefer "ダウンロード済みの BibTeX/RIS/Refer ファイルに対して Zotero を使用する">
+<!ENTITY zotero.preferences.parseRISRefer "ダウンロード済みの BibTeX/RIS/Refer ファイルに対して Paperly を使用する">
 <!ENTITY zotero.preferences.automaticTags "キーワードと件名で項目に自動的にタグを付ける">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ごみ箱内の項目を">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "日を経過したら自動的に削除する">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "パスワードを忘れましたか？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動的に同期">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "全文を同期する">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero はあなたの Zotero ライブラリに含まれるファイルの全文をを zotero.org や他のリンクした機器と同期させることができます。これにより、どこでも簡単にあなたのファイルを探すことができるようになります。あなたのファイルの全文が公開されることはありません。">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly はあなたの Paperly ライブラリに含まれるファイルの全文をを zotero.org や他のリンクした機器と同期させることができます。これにより、どこでも簡単にあなたのファイルを探すことができるようになります。あなたのファイルの全文が公開されることはありません。">
 <!ENTITY zotero.preferences.sync.about "同期について">
 <!ENTITY zotero.preferences.sync.fileSyncing "ファイルの同期">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL :">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "データ同期の履歴をリセット">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ローカルのデータをリモートのデータと統合し、同期の履歴は無視する">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "オンラインライブラリから復元">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "オンラインライブラリを使ってローカルのZoteroデータを上書き">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "オンラインライブラリを使ってローカルのPaperlyデータを上書き">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "オンラインライブラリの置き換え">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "オンラインライブラリをローカルの Zotero データで上書き">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "オンラインライブラリをローカルの Paperly データで上書き">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴をリセット">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべての添付ファイルをストレージサービスと比較">
 <!ENTITY zotero.preferences.sync.reset "リセット">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "引用文献オプション">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "論文の URL アドレスを参考文献に含める">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "この機能が無効化されていると、Zotero はページ範囲が指定されていない文献に限り、学術雑誌、雑誌論文、新聞記事を引用する際に、URL アドレスを含みます。">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "この機能が無効化されていると、Paperly はページ範囲が指定されていない文献に限り、学術雑誌、雑誌論文、新聞記事を引用する際に、URL アドレスを含みます。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "項目のフォーマット">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "更新日">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Zotero に保存 (アドレスバーのアイコン)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Paperly に保存 (アドレスバーのアイコン)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "ライブラリパネルへ">
 <!ENTITY zotero.preferences.keys.quicksearch "クイック検索">
 <!ENTITY zotero.preferences.keys.newItem "新しい項目の作成">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "プロキシ">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "プロキシ設定">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero は保存されたプロキシを通じて透過的に要求を転送します。さらに詳しくは">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly は保存されたプロキシを通じて透過的に要求を転送します。さらに詳しくは">
 <!ENTITY zotero.preferences.proxies.desc_link "プロキシヘルプ">
 <!ENTITY zotero.preferences.proxies.desc_after_link "詳細情報。">
 <!ENTITY zotero.preferences.proxies.transparent "プロキシ転送を有効化する">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "文献検索エンジンの管理">
 <!ENTITY zotero.preferences.locate.description "説明">
 <!ENTITY zotero.preferences.locate.name "名前">
-<!ENTITY zotero.preferences.locate.addDescription "リストにない検索エンジンを追加するには、ブラウザで目的の検索エンジンにアクセスし、Zotero の 検索メニューから &quot;追加&quot; を選択します。">
+<!ENTITY zotero.preferences.locate.addDescription "リストにない検索エンジンを追加するには、ブラウザで目的の検索エンジンにアクセスし、Paperly の 検索メニューから &quot;追加&quot; を選択します。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "初期設定に戻す">
 
 <!ENTITY zotero.preferences.charset "文字エンコーディング">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "新しい既定の場所へ移動...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "リンク付き添付ファイルの基本ディレクトリ">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero は、基本ディレクトリの中のリンク付き添付ファイルについて相対パスを使用します。これにより、基本ディレクトリのファイル構造が同じである限り、異なるコンピューター上のファイルへのアクセスが可能になります。">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly は、基本ディレクトリの中のリンク付き添付ファイルについて相対パスを使用します。これにより、基本ディレクトリのファイル構造が同じである限り、異なるコンピューター上のファイルへのアクセスが可能になります。">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "ベースディレクトリ">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "選択...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "絶対パスに戻す...">

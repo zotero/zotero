@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Adderaouekaat">
 
 
-<!ENTITY zotero.errorReport.title "Fazi danevell Zotero">
+<!ENTITY zotero.errorReport.title "Fazi danevell Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Gortozit e-pad ma vez kaset an danevell fazi mar plij.">
 <!ENTITY zotero.errorReport.submitted "An danevell fazi a zo bet kaset.">
 <!ENTITY zotero.errorReport.reportID "ID danevell:">
 <!ENTITY zotero.errorReport.postToForums "Skrivit ur gemennadenn e-barzh foromoù Zotero (forums.zotero.org) gant an ID danevell-mañ, gant un deskrivadur eus ar gudenn hag ar pazennoù ret heuliañ evit adkaout ar gudenn-se.">
 <!ENTITY zotero.errorReport.notReviewed "An danevelloù fazioù na vezont ket lennet keit ha ma ne vezont ket daveennet e-barzh ar foromoù.">
 
-<!ENTITY zotero.upgrade.title "Skoazeller hizivadur Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Staliet ho peus ur stumm nevez eus Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Ho tiaz-roadennoù Zotero a rank bezañ hizivaet evit mont en-dro gant ar stumm nevez.">
+<!ENTITY zotero.upgrade.title "Skoazeller hizivadur Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Staliet ho peus ur stumm nevez eus Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Ho tiaz-roadennoù Paperly a rank bezañ hizivaet evit mont en-dro gant ar stumm nevez.">
 <!ENTITY zotero.upgrade.autoBackup "Ho tiaz-roadennoù a-vremañ a vo em-enrollet a-raok kement cheñchamant.">
 <!ENTITY zotero.upgrade.majorUpgrade "Un hizivadur a-bouez eo.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Bezit sur da vezañ taolet ur sell ouzh">
 <!ENTITY zotero.upgrade.majorUpgradeLink "kelennadurioù diwar-benn an hizivadurioù">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "a-raok kenderc'hel.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Gortozit betek fin an argerzh hizivadur mar plij. An dra-se a c'hall kemer meur a vunutenn.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Ho tiaz-roadennoù Zotero a zo bet hizivaet gant berzh.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Ho tiaz-roadennoù Paperly a zo bet hizivaet gant berzh.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Sellit mar plij">
 <!ENTITY zotero.upgrade.changeLogLink "renabl ar cheñchamantoù">
 <!ENTITY zotero.upgrade.changeLogAfterLink "evit dizoloiñ ar pezh a zo nevez.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Skan RTF">
 <!ENTITY zotero.toolbar.preferences.label "Arventennoù...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Skoazellerezh ha titouroù">
-<!ENTITY zotero.toolbar.about.label "Diwar-benn Zotero">
+<!ENTITY zotero.toolbar.about.label "Diwar-benn Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Lec'helaat">
 <!ENTITY zotero.toolbar.openURL.tooltip "Klask e-barzh ho levraoueg lec'hel">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Gwech pellgarget:">
 <!ENTITY zotero.sync.storage.uploads "Lakaet enlinenn:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Ar baliz da-heul en ho levraoueg Zotero a zo re hir anezhañ da sinkro d'ar servijer:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Ar baliz da-heul en ho levraoueg Paperly a zo re hir anezhañ da sinkro d'ar servijer:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Ar balizoù sinkroaet a rank bezañ berroc'h evit 256 arouezenn.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Gellout a rit skarat ar baliz e meur a valiz, pe aozañ ar baliz gant an dorn evit berraat anezhañ, pe dilemel anezhañ.">
 <!ENTITY zotero.sync.longTagFixer.split "Skarat">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Arroudennoù amduek">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Arroudennoù treuzskrivet">
 <!ENTITY zotero.rtfScan.introPage.label "Digoradur">
-<!ENTITY zotero.rtfScan.introPage.description "Gellout a ra Zotero em-dennañ hag em-adstummañ arroudennoù hag enlakaat ul levrlennadur er restroù RTF. An arc'hweladur skan RTF a c'hall kemer e-kont an arroudennoù e-barzh kemmoù ar stummoù da-heul:">
+<!ENTITY zotero.rtfScan.introPage.description "Gellout a ra Paperly em-dennañ hag em-adstummañ arroudennoù hag enlakaat ul levrlennadur er restroù RTF. An arc'hweladur skan RTF a c'hall kemer e-kont an arroudennoù e-barzh kemmoù ar stummoù da-heul:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Evit stagañ ganti, diuzit ur restr RTF enmont hag ur restr ezvont dindan:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skanañ evit kavout arroudennoù">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero a zo o skaniñ ho teuliad evit klask war-lerc'h arroudennoù. Bezit pasiant mar plij.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly a zo o skaniñ ho teuliad evit klask war-lerc'h arroudennoù. Bezit pasiant mar plij.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Gwiriañ an elfennoù arroudennet">
-<!ENTITY zotero.rtfScan.citationsPage.description "Grit un tamm sell ouzh al listenn a arroudennoù anavezet amañ dindan evit bezañ sur ez eus bet diuzet gant Zotero en un doare reizh an elfennoù a genglot. Kemenet arroudenn chomet amdreuzskrivet pe amduek a rank bezañ dirouestlet a-raok tremen d'ar bazenn da-heul.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Grit un tamm sell ouzh al listenn a arroudennoù anavezet amañ dindan evit bezañ sur ez eus bet diuzet gant Paperly en un doare reizh an elfennoù a genglot. Kemenet arroudenn chomet amdreuzskrivet pe amduek a rank bezañ dirouestlet a-raok tremen d'ar bazenn da-heul.">
 <!ENTITY zotero.rtfScan.stylePage.label "Teuliad-aozañ">
 <!ENTITY zotero.rtfScan.formatPage.label "Arroudenn-aozañ">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero a dret hag a bajennaoz ho restr RTF. Bezit pasiant mar plij.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly a dret hag a bajennaoz ho restr RTF. Bezit pasiant mar plij.">
 <!ENTITY zotero.rtfScan.completePage.label "Skan RTF klokaet">
 <!ENTITY zotero.rtfScan.completePage.description "Ho teuliad a zo bet skanet ha tretet bremañ. Grit e-seurt da vezañ asur eo bet stummet ez-reizh.">
 <!ENTITY zotero.rtfScan.inputFile.label "Restr enmont">

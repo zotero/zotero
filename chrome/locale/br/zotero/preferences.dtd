@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Arventennoù Zotero">
+<!ENTITY zotero.preferences.title "Arventennoù Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Sikour">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Em-wiriañ hizivadurioù an troerioù hag ar stiloù">
 <!ENTITY zotero.preferences.updateNow "Hizivaat bremañ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Kemenniñ lec'hiennoù troerioù torret">
-<!ENTITY zotero.preferences.parseRISRefer "Implijout Zotero evit ar restroù BibTex/RIS/Refer pellgarget">
+<!ENTITY zotero.preferences.parseRISRefer "Implijout Paperly evit ar restroù BibTex/RIS/Refer pellgarget">
 <!ENTITY zotero.preferences.automaticTags "Em-valizañ an elfennoù gant gerioù-alc'hwez ha sujedoù danvez">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Em-zilemel an elfennoù er pod-lastez abaoe muioc'h evit">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "devezh 'zo">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Ger-tremen ankouaeet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Em-sinkroaat">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkro testenn a-bezh ar stagadennoù">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero a c'hall sinkroaat testenn a-bezh ar pezhioù-stag indekset e-barzh ho levraouegoù Zotero gant zotero.org hag, e-giz-se, gant ho trevnadoù kevreet. An dra-se a ro an aotre da glask en un doare aeset e-barzh endalc'had ho restroù ne vern e pelec'h e vefec'h. Ne vo ket rannet en un doare foran testenn a-bezh ho restroù.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly a c'hall sinkroaat testenn a-bezh ar pezhioù-stag indekset e-barzh ho levraouegoù Paperly gant zotero.org hag, e-giz-se, gant ho trevnadoù kevreet. An dra-se a ro an aotre da glask en un doare aeset e-barzh endalc'had ho restroù ne vern e pelec'h e vefec'h. Ne vo ket rannet en un doare foran testenn a-bezh ho restroù.">
 <!ENTITY zotero.preferences.sync.about "Diwar-benn ar sinkro">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Adloc'hañ roll-istor ar sinkro roadennoù">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Kendeuziñ ar roadennoù lec'hel gant ar roadennoù a-bell, ober fae ouzh ar roll-istor sinkro">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Adsevel adalek al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Flastrañ ar roadennoù Zotero lec'hel gant roadennoù o tont eus al levraoueg enlinenn">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Flastrañ ar roadennoù Paperly lec'hel gant roadennoù o tont eus al levraoueg enlinenn">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Erlec'hiañ al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Flastrañ roadennoù al levraoueg enlinenn gant roadennoù lec'hel Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Flastrañ roadennoù al levraoueg enlinenn gant roadennoù lec'hel Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
 <!ENTITY zotero.preferences.sync.reset "Adderaouekaat">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Dibarzhioù arroudenn">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Enklozañ URLioù ar pennadoù paperioù en daveennoù">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pa vez enaouet an dibarzh-mañ, Zotero a enkloz an URLioù pa vez arroudennet pennadoù kelaouennoù, magazinoù, ha kazetennoù ma ne spisa ket ar pennad niverenn ar bajenn.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pa vez enaouet an dibarzh-mañ, Paperly a enkloz an URLioù pa vez arroudennet pennadoù kelaouennoù, magazinoù, ha kazetennoù ma ne spisa ket ar pennad niverenn ar bajenn.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Eilañ prim">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Stumm an elfenn:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Hizivaet">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Zotero (ikon ar varrenn chomlec'hioù)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Paperly (ikon ar varrenn chomlec'hioù)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus war banell al levraouegoù">
 <!ENTITY zotero.preferences.keys.quicksearch "Enklask prim">
 <!ENTITY zotero.preferences.keys.newItem "Krouiñ un elfenn nevez">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proksioù">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Dibarzhioù proksi">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero ac'h adheñcho ar rekedoù dre broksioù enrollet en un doare treuzwelus. Gwelet">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly ac'h adheñcho ar rekedoù dre broksioù enrollet en un doare treuzwelus. Gwelet">
 <!ENTITY zotero.preferences.proxies.desc_link "titouroù diwar-benn ar proksioù">
 <!ENTITY zotero.preferences.proxies.desc_after_link "evit muioc'h a ditouroù.">
 <!ENTITY zotero.preferences.proxies.transparent "Enaouiñ an adheñchañ dre broksi">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Fiñval betek al lec'hiadur dre-ziouer nevez...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Kavlec'h diazez evit ar pezhioù-stag liammet">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero a implijo hentoù relativel evit ar pezhioù-stag liammet e-barzh ar c'havlec'h diazez, reiñ a raio deoc'h an aotre da dizhout restroù war urzhiataerioù disheñvel e-keit ha ma chom framm ar restr er c'havlec'h diazez ar memes hini.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly a implijo hentoù relativel evit ar pezhioù-stag liammet e-barzh ar c'havlec'h diazez, reiñ a raio deoc'h an aotre da dizhout restroù war urzhiataerioù disheñvel e-keit ha ma chom framm ar restr er c'havlec'h diazez ar memes hini.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Kavlec'h diazez:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Dibab...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Distreiñ da hentoù absolut...">

@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Ponovno postavi">
 
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Paperly Error Report">
 <!ENTITY zotero.errorReport.submissionInProgress "Pričekajte da se pošalje izvješće o grešci.">
 <!ENTITY zotero.errorReport.submitted "Vaše izvješće o grešci je poslano.">
 <!ENTITY zotero.errorReport.reportID "ID izvješća:">
 <!ENTITY zotero.errorReport.postToForums "Objavite poruku na Zoterovom forumu (forums.zotero.org) s ovim ID-om izvješća, opisom problema i koracima koji vode do njega.">
 <!ENTITY zotero.errorReport.notReviewed "Prijave grešaka se ne pregledavaju, ako nisu objavljene na forumu.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
+<!ENTITY zotero.upgrade.title "Paperly Upgrade Wizard">
 <!ENTITY zotero.upgrade.newVersionInstalled "Instalirali ste novu verziju Zotera.">
-<!ENTITY zotero.upgrade.upgradeRequired "Zoterova baza podataka mora se nadograditi da bi radila s novom verzijom.">
+<!ENTITY zotero.upgrade.upgradeRequired "Paperlyva baza podataka mora se nadograditi da bi radila s novom verzijom.">
 <!ENTITY zotero.upgrade.autoBackup "Postojeća baza podataka bit će automatski sigurnosno kopirana prije primjene bilo kakvih izmjena.">
 <!ENTITY zotero.upgrade.majorUpgrade "Ovo je velika nadogradnja.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Provjerite">
 <!ENTITY zotero.upgrade.majorUpgradeLink "upute za nadogradnju">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "prije nastavljanja.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Pričekajte da završi proces nadogradnje. Ovo može potrajati nekoliko minuta.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zoterova baza podataka je uspješno nadograđena.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Paperlyva baza podataka je uspješno nadograđena.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Pogledajte">
 <!ENTITY zotero.upgrade.changeLogLink "zapisnik o promjenama">
 <!ENTITY zotero.upgrade.changeLogAfterLink "kako biste saznali što je novo.">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Dvosmisleni citati">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapirani citati">
 <!ENTITY zotero.rtfScan.introPage.label "Uvod">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero može automatski izdvojiti i formatirati citate i umetnuti bibliografiju u RTF datoteke. Značajka „RTF skeniranje” trenutno podržava citate u varijantama sljedećih formata:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly može automatski izdvojiti i formatirati citate i umetnuti bibliografiju u RTF datoteke. Značajka „RTF skeniranje” trenutno podržava citate u varijantama sljedećih formata:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Za početak, u nastavku odaberite ulaznu RTF datoteku i izlaznu datoteku:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skeniranje citata">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero trenutno skenira citate u Vašem dokumentu. Budite strpljivi.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly trenutno skenira citate u Vašem dokumentu. Budite strpljivi.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Potvrdi citirane stavke">
-<!ENTITY zotero.rtfScan.citationsPage.description "U nastavku pregledajte popis prepoznatih citata kako biste se uvjerili da je Zotero ispravno odabrao odgovarajuće stavke. Nemapirane i dvosmislene citate morate riješiti prije nastavka na sljedeći korak.">
+<!ENTITY zotero.rtfScan.citationsPage.description "U nastavku pregledajte popis prepoznatih citata kako biste se uvjerili da je Paperly ispravno odabrao odgovarajuće stavke. Nemapirane i dvosmislene citate morate riješiti prije nastavka na sljedeći korak.">
 <!ENTITY zotero.rtfScan.stylePage.label "Oblikovanje dokumenta">
 <!ENTITY zotero.rtfScan.formatPage.label "Oblikovanje citata">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero obrađuje i formatira Vašu RTF datoteku. Budite strpljivi.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly obrađuje i formatira Vašu RTF datoteku. Budite strpljivi.">
 <!ENTITY zotero.rtfScan.completePage.label "Završeno je RTF skeniranje">
 <!ENTITY zotero.rtfScan.completePage.description "Vaš dokument je skeniran i obrađen. Provjerite je li ispravno oblikovan.">
 <!ENTITY zotero.rtfScan.inputFile.label "Ulazna datoteka">

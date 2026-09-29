@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automaticky hľadať aktualizácie konvertorov a štýlov ">
 <!ENTITY zotero.preferences.updateNow "Aktualizovať teraz">
 <!ENTITY zotero.preferences.reportTranslationFailure "Nahlásiť chybné konvertory">
-<!ENTITY zotero.preferences.parseRISRefer "Použiť Zotero ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
+<!ENTITY zotero.preferences.parseRISRefer "Použiť Paperly ako predvolený program pre prevzaté BibTeX/RIS/Refer súbory">
 <!ENTITY zotero.preferences.automaticTags "automaticky aplikovať kľúčové slová a predmetové heslá ako značky">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť záznamy vymazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Stratené heslo?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizovať automaticky">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizovať plno-textový obsah">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero teraz môže synchronizovať plno-textový obsah súborov vo vašich knižniciach Zotera so serverom zotero.org a inými pripojenými zariadeniami, čím sa vám umožňuje ľahké vyhľadávanie vo vašich súboroch, nech ste kdekoľvek. Plno-textový obsah vašich súborov sa verejne nezdieľa.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly teraz môže synchronizovať plno-textový obsah súborov vo vašich knižniciach Zotera so serverom zotero.org a inými pripojenými zariadeniami, čím sa vám umožňuje ľahké vyhľadávanie vo vašich súboroch, nech ste kdekoľvek. Plno-textový obsah vašich súborov sa verejne nezdieľa.">
 <!ENTITY zotero.preferences.sync.about "O synchronizácii">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizácia súborov">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Možnosti pri citovaní">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Zahrnúť do referencií URL adresy článkov">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Keď táto voľba nie je vybraná, Zotero vloží URL adresy pri citovaní článkov (z odborných a populárnych časopisov alebo novín) iba v prípade, ak článok nemá špecifikovaný rozsah strán.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Keď táto voľba nie je vybraná, Paperly vloží URL adresy pri citovaní článkov (z odborných a populárnych časopisov alebo novín) iba v prípade, ak článok nemá špecifikovaný rozsah strán.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rýchle kopírovanie">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Formát záznamu:">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxy">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Nastavenia proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero dokáže transparentne presmerovať požiadavky na vybrané sídla cez uložené proxy servery. Viac informácií nájdete v">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly dokáže transparentne presmerovať požiadavky na vybrané sídla cez uložené proxy servery. Viac informácií nájdete v">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentácii k proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Transparentne presmerovať požiadavky cez v minulosti použité proxy">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Presunúť na nové predvolené umiestnenie...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Základný adresár prepojených príloh">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero použije relatívne cesty pre prepojené súbory príloh vo vnútri základného adresára, čím vám sprístupní súbory na rôznych počítačoch pokiaľ štruktúra súborov vo vnútri základného adresára zostáva rovnaká.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly použije relatívne cesty pre prepojené súbory príloh vo vnútri základného adresára, čím vám sprístupní súbory na rôznych počítačoch pokiaľ štruktúra súborov vo vnútri základného adresára zostáva rovnaká.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Základný adresár:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Zvoliť...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Prepnúť na absolútne cesty...">

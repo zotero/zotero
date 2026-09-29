@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Przywróć">
 
 
-<!ENTITY zotero.errorReport.title "Raport błędów Zotero">
+<!ENTITY zotero.errorReport.title "Raport błędów Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Proszę czekać, informacje o błędzie są wysyłane.">
 <!ENTITY zotero.errorReport.submitted "Informacje o błędzie zostały wysłane.">
 <!ENTITY zotero.errorReport.reportID "ID raportu:">
 <!ENTITY zotero.errorReport.postToForums "Proszę wysłać informację na forum Zotero (forums.zotero.org) z podaniem tego ID raportu, opisem problemu oraz wszystkmi krokami niezbędnymi do powtórzenia błędu.">
 <!ENTITY zotero.errorReport.notReviewed "Raporty błędów zwykle nie są przeglądane, jeśli nie zostaną zamieszczone na forum.">
 
-<!ENTITY zotero.upgrade.title "Kreator aktualizacji Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Zotero została zainstalowana.">
-<!ENTITY zotero.upgrade.upgradeRequired "Baza danych Zotero musi zostać zaktualizowana, aby mogła współpracować z nową wersją programu.">
+<!ENTITY zotero.upgrade.title "Kreator aktualizacji Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Nowa wersja Paperly została zainstalowana.">
+<!ENTITY zotero.upgrade.upgradeRequired "Baza danych Paperly musi zostać zaktualizowana, aby mogła współpracować z nową wersją programu.">
 <!ENTITY zotero.upgrade.autoBackup "Przed wprowadzeniem zmian automatycznie zostanie utworzona kopia zapasowa istniejącej bazy danych.">
 <!ENTITY zotero.upgrade.majorUpgrade "To jest duża aktualizacja.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Upewnij się, że zapoznałeś się z">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instrukcją aktualizacji">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "przed kontynuacją.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Proszę poczekać na zakończenie procesu aktualizacji. Może to potrwać kilka minut.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Baza danych Zotero została pomyślnie zaktualizowana.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Baza danych Paperly została pomyślnie zaktualizowana.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Przejrzyj">
 <!ENTITY zotero.upgrade.changeLogLink "opis zmian,">
 <!ENTITY zotero.upgrade.changeLogAfterLink "aby zobaczyć nowości w tej wersji.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Skanowanie pliku RTF">
 <!ENTITY zotero.toolbar.preferences.label "Ustawienia...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Wsparcie i dokumentacja">
-<!ENTITY zotero.toolbar.about.label "Zotero - informacje">
+<!ENTITY zotero.toolbar.about.label "Paperly - informacje">
 <!ENTITY zotero.toolbar.openURL.label "Wyszukaj lokalnie">
 <!ENTITY zotero.toolbar.openURL.tooltip "Wyszukuje w katalogu lokalnej biblioteki">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Pobrano:">
 <!ENTITY zotero.sync.storage.uploads "Wysłano:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Poniższa etykieta w twojej bibliotece Zotero jest zbyt długa, aby ją zsynchornizować z serwerem:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Poniższa etykieta w twojej bibliotece Paperly jest zbyt długa, aby ją zsynchornizować z serwerem:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synchronizowane etykiety muszą być krótsze niż 256 znaków.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Możesz podzielić etykietę na kilka osobnych, edytować ręcznie, aby ją skrócić lub też po prostu ją usunąć.">
 <!ENTITY zotero.sync.longTagFixer.split "Podziel">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Niepewne cytowania">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Zmapowane cytowania">
 <!ENTITY zotero.rtfScan.introPage.label "Wstęp">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero potrafi automatycznie wydobyć i przeformatować cytowania oraz wstawić bibliografię do plików w formacie RTF. Usługa skanowania plików RTF wspiera obecnie cytowania w następujących sposobach formatowania:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly potrafi automatycznie wydobyć i przeformatować cytowania oraz wstawić bibliografię do plików w formacie RTF. Usługa skanowania plików RTF wspiera obecnie cytowania w następujących sposobach formatowania:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Aby rozpocząć, wybierz poniżej plik wejściowy w formacie RTF oraz plik wyjściowy:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skanowanie cytowań">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero skanuje twój dokument w poszukiwaniu cytowań, prosimy o cierpliwość.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly skanuje twój dokument w poszukiwaniu cytowań, prosimy o cierpliwość.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Sprawdzenie cytowanych elementów">
-<!ENTITY zotero.rtfScan.citationsPage.description "Proszę przejrzeć poniższą listę rozpoznanych cytowań, aby upewnić się że Zotero wybrał poprawnie odpowiednie elementy. Wszystkie niezmapowane lub niepewne cytowania muszą być rozwiązane przed przejściem do następnego etapu.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Proszę przejrzeć poniższą listę rozpoznanych cytowań, aby upewnić się że Paperly wybrał poprawnie odpowiednie elementy. Wszystkie niezmapowane lub niepewne cytowania muszą być rozwiązane przed przejściem do następnego etapu.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formatowanie dokumentu">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatowanie cytowań">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero przetwarza i formatuje twój plik RTF, prosimy o cierpliwość.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly przetwarza i formatuje twój plik RTF, prosimy o cierpliwość.">
 <!ENTITY zotero.rtfScan.completePage.label "Zakończono skanowanie RTF">
 <!ENTITY zotero.rtfScan.completePage.description "Twój dokument został przeskanowany i przetworzony. Proszę upewnić się, że jest on poprawnie sformatowany.">
 <!ENTITY zotero.rtfScan.inputFile.label "Plik wejściowy">

@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Preferințe Zotero">
+<!ENTITY zotero.preferences.title "Preferințe Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Ajutor">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Verifică în mod automat dacă există translatori și stiluri actualizate">
 <!ENTITY zotero.preferences.updateNow "Actualizează acum">
 <!ENTITY zotero.preferences.reportTranslationFailure "Raportează site-uri cu legături rupte (la translatare)">
-<!ENTITY zotero.preferences.parseRISRefer "Folosește Zotero pentru fișierele descărcate de tip BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Folosește Paperly pentru fișierele descărcate de tip BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Creează automat etichetele pentru înregistrări, împreună cu cuvintele cheie și cu titlurile">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Ai uitat parola?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizare automată">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizează conținutul textului complet">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero poate sincroniza, cu zotero.org și alte dispozitive legate, conținutul textului complet al fișierelor din bibliotecile tale Zotero, permițându-ți să cauți cu ușurință în fișierele tale oriunde ai fi. Conținutul textului complet al fișierelor tale nu va fi partajat public.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly poate sincroniza, cu zotero.org și alte dispozitive legate, conținutul textului complet al fișierelor din bibliotecile tale Paperly, permițându-ți să cauți cu ușurință în fișierele tale oriunde ai fi. Conținutul textului complet al fișierelor tale nu va fi partajat public.">
 <!ENTITY zotero.preferences.sync.about "Despre sincronizare">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronizare fișier">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetează istoria sincronizării datelor">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Unește datele locale cu datele la distanță, ignorând istoria sincronizărilor">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurează din biblioteca online">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Suprascrie datele locale din Zotero cu datele din biblioteca online.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Suprascrie datele locale din Paperly cu datele din biblioteca online.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Înlocuiește biblioteca online">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Suprascrie datele din biblioteca online cu datele locale din Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Suprascrie datele din biblioteca online cu datele locale din Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compară toate fișierele anexate cu serviciul de stocare">
 <!ENTITY zotero.preferences.sync.reset "Resetare">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opțiuni citare">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URL-urile articolelor în referințe">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opțiune nu este funcțională, Zotero include URL-urile în timp ce citează articole de jurnale, reviste și ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opțiune nu este funcțională, Paperly include URL-urile în timp ce citează articole de jurnale, reviste și ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copiere rapidă">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format item:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualizat">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Paperly (iconița din bara de adrese)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o nouă înregistrare">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Servere proxy">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Opțiuni pentru serverele proxy">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero va redirecționa cererile prin serverele proxy salvate. Vezi">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly va redirecționa cererile prin serverele proxy salvate. Vezi">
 <!ENTITY zotero.preferences.proxies.desc_link "documentația pentru serverele proxy">
 <!ENTITY zotero.preferences.proxies.desc_after_link "pentru mai multe informații.">
 <!ENTITY zotero.preferences.proxies.transparent "Reamintește automat resursele proxy">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
 <!ENTITY zotero.preferences.locate.description "Descriere">
 <!ENTITY zotero.preferences.locate.name "Nume">
-<!ENTITY zotero.preferences.locate.addDescription "Pentru a adăuga un motor de căutare care nu este în listă, vizitați în browser motorul de căutare dorit și selectați „Adaugă” din meniul Localizare din Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Pentru a adăuga un motor de căutare care nu este în listă, vizitați în browser motorul de căutare dorit și selectați „Adaugă” din meniul Localizare din Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurează valorile implicite">
 
 <!ENTITY zotero.preferences.charset "Codificarea caracterelor">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrează la o nouă locație implicită...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Dosarul de bază pentru anexe atașate">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero va folosi căi relative pentru fișierele anexate în directorul de bază, permițând accesarea fișierelor pe diferite calculatoare atâta timp cât structura fișierelor în dosarul de bază rămâne aceeași.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly va folosi căi relative pentru fișierele anexate în directorul de bază, permițând accesarea fișierelor pe diferite calculatoare atâta timp cât structura fișierelor în dosarul de bază rămâne aceeași.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Dosar de bază:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Alege…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revino la căi absolute...">

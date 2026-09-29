@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Innstillingar for Zotero">
+<!ENTITY zotero.preferences.title "Innstillingar for Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Hjelp">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Sjekk automatisk etter oppdaterte omsetjarar og stilar">
 <!ENTITY zotero.preferences.updateNow "Oppdater no">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter øydelagte nettstadomsetjarar">
-<!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlasta BibTeX/RIS/Refer-filer">
+<!ENTITY zotero.preferences.parseRISRefer "Bruk Paperly for nedlasta BibTeX/RIS/Refer-filer">
 <!ENTITY zotero.preferences.automaticTags "Legg til tagg automatisk frå nøkkel- og emneord i hovudteksta">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjernar automatisk element i søppelkorga sletta meir enn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sidan">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Gløymt passordet?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synkroniser fulltekst-innhald">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisera all teksten i filene i Zotero-biblioteka dine med zotero.org og andre tilknytta einingar, slik at du lett kan søka etter filene kor du enn er. Tekst og anna innhald i filene dine vert ikkje delt offentleg.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly kan synkronisera all teksten i filene i Paperly-biblioteka dine med zotero.org og andre tilknytta einingar, slik at du lett kan søka etter filene kor du enn er. Tekst og anna innhald i filene dine vert ikkje delt offentleg.">
 <!ENTITY zotero.preferences.sync.about "Om synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing "Filsynkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Paperly data with data from the online library.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Paperly data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nullstill filsynkroniseringshistorikken">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Nullstill">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Siteringsval">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inkluderer URL til trykte artiklar i referansane">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når dette alternativet ikkje er valt, vil Zotero berre oppgje URL til tidsskriftet, magasinet eller avisa, dersom artikkelen er registrert utan sidetal.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når dette alternativet ikkje er valt, vil Paperly berre oppgje URL til tidsskriftet, magasinet eller avisa, dersom artikkelen er registrert utan sidetal.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snøgg-kopi">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Oppdatert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Save to Paperly (address bar icon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Mellomtenarar">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Val for mellomtenarar">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero vil senda førespurnader gjennom lagra mellomtenarar utan at du merkar noko. Sjå">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly vil senda førespurnader gjennom lagra mellomtenarar utan at du merkar noko. Sjå">
 <!ENTITY zotero.preferences.proxies.desc_link "Dokumentasjon av mellomtenarar">
 <!ENTITY zotero.preferences.proxies.desc_after_link "for meir informasjon.">
 <!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
 <!ENTITY zotero.preferences.locate.description "Skildring">
 <!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Paperly’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
 <!ENTITY zotero.preferences.charset "Teiknsett">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">

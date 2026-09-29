@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "Teised peita">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Näidata kõiki">
-<!ENTITY quitApplicationCmdMac.label "Väljuda Zoterost">
+<!ENTITY quitApplicationCmdMac.label "Väljuda Paperlyst">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "Fail">

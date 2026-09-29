@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero Tercihleri">
+<!ENTITY zotero.preferences.title "Paperly Tercihleri">
 
 <!ENTITY zotero.preferences.helpButton.label "Yardım">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
 <!ENTITY zotero.preferences.updateNow "Şimdi Güncelle">
 <!ENTITY zotero.preferences.reportTranslationFailure "Bozuk site çevirmenlerini bildir">
-<!ENTITY zotero.preferences.parseRISRefer "İndirilmiş BibTeX/RIS/Refer dosyaları için, Zotero'yu kullan">
+<!ENTITY zotero.preferences.parseRISRefer "İndirilmiş BibTeX/RIS/Refer dosyaları için, Paperly'yu kullan">
 <!ENTITY zotero.preferences.automaticTags "Anahtar kelimeler ve konu başlıkları ile eserleri otomatik olarak etiketle">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Unutulan Şifre?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Kendiliğinden eşitle">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Tüm-metin içeriği eşitle">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero, Zotero kitaplıklarınızdaki dosyaların tüm-metin içeriklerini zotero.org ve diğer bağlantılı cihazlarla eşitliyebilir. Bu sayede her yerden kolayca dosyalarınızı arayabilirsiniz. Dosyalarınızın tüm-metin içerikleri herkese açık olarak paylaşılmayacaktır.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly, Paperly kitaplıklarınızdaki dosyaların tüm-metin içeriklerini zotero.org ve diğer bağlantılı cihazlarla eşitliyebilir. Bu sayede her yerden kolayca dosyalarınızı arayabilirsiniz. Dosyalarınızın tüm-metin içerikleri herkese açık olarak paylaşılmayacaktır.">
 <!ENTITY zotero.preferences.sync.about "Eşitleme Hakkında">
 <!ENTITY zotero.preferences.sync.fileSyncing "Dosya Eşitlemesi">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Çevrimiçi Kitaplıktan Geri Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Yerel Zotero verilerinin üzerine çevrimiçi kitaplıktaki verileri yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Yerel Paperly verilerinin üzerine çevrimiçi kitaplıktaki verileri yaz.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Çevrimiçi Kitaplığı Değiştir">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Çevrimiçi kitaplıktaki verilerin üzerine yerel Zotero verilerini yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Çevrimiçi kitaplıktaki verilerin üzerine yerel Paperly verilerini yaz.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekilerle karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Alıntı Seçenekleri">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Kaynakçalara makale URL'leri dahil edilsin">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek devre dışı bırakıldığında, Zotero, bilimsel dergi, magazin ve gazete makalelerine olan alıntılara URL'leri, yalnızca bir sayfa aralığı belirtilmediği halde ekleyecektir.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek devre dışı bırakıldığında, Paperly, bilimsel dergi, magazin ve gazete makalelerine olan alıntılara URL'leri, yalnızca bir sayfa aralığı belirtilmediği halde ekleyecektir.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Eser Biçimi:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Güncellenme">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Paperly'ya Kaydet (adres çubuğu ikonu)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Dermeler Bölmesine Odaklan">
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
 <!ENTITY zotero.preferences.keys.newItem "Yeni Eser Oluştur">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Vekil Sunucular">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Vekil Sunucu Seçenekleri">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero, istekleri kayıtlı vekil sunucular aracılığı ile açık bir şekilde yönlendirecektir. Daha fazla bilgi için">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly, istekleri kayıtlı vekil sunucular aracılığı ile açık bir şekilde yönlendirecektir. Daha fazla bilgi için">
 <!ENTITY zotero.preferences.proxies.desc_link "vekil sunucu belgelerine">
 <!ENTITY zotero.preferences.proxies.desc_after_link "bakınız.">
 <!ENTITY zotero.preferences.proxies.transparent "Vekil sunucu yönlendirmelerini etkinleştir">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
 <!ENTITY zotero.preferences.locate.description "Tanım">
 <!ENTITY zotero.preferences.locate.name "Ad">
-<!ENTITY zotero.preferences.locate.addDescription "Listede olmayan bir Bakma Motoru eklemek için, tarayıcınızda istediğiniz arama moturunu ziyaret edip Zotero'nun Yerini Bul menüsünden &quot;Ekle&quot;yi seçiniz.">
+<!ENTITY zotero.preferences.locate.addDescription "Listede olmayan bir Bakma Motoru eklemek için, tarayıcınızda istediğiniz arama moturunu ziyaret edip Paperly'nun Yerini Bul menüsünden &quot;Ekle&quot;yi seçiniz.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 
 <!ENTITY zotero.preferences.charset "Karakter Kodlaması">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Yeni Varsayılan Konuma Geç...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Bağlantılı Ek Taban Dizini">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero, bağlantılı dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly, bağlantılı dosya ekleri için göreceli yollar kullanacaktır. Bu, temel dizininizdeki dosya yapınız aynı kaldığı sürece, dosyalarınıza değişik bilgisayarlarda ulaşımınızı sağlamaktadır.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Temel dizin:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Seç...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Mutlak Yollara Geri Döndür...">

@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Visszaállítás">
 
 
-<!ENTITY zotero.errorReport.title "Zotero hibajelentés">
+<!ENTITY zotero.errorReport.title "Paperly hibajelentés">
 <!ENTITY zotero.errorReport.submissionInProgress "Várjon a hibajelentés elküldéséig.">
 <!ENTITY zotero.errorReport.submitted "A hibajelentés elküldve.">
 <!ENTITY zotero.errorReport.reportID "Jelentés azonosítója:">
 <!ENTITY zotero.errorReport.postToForums "Küldje el a Zotero fórumba (forums.zotero.org) a probléma leírását, hogy hogyan jutott idáig, ill. a hibaüzenet ID-jét .">
 <!ENTITY zotero.errorReport.notReviewed "A fórumba be nem küldött hibaüzenetek nem kerülnek kivizsgálásra.">
 
-<!ENTITY zotero.upgrade.title "Zotero frissítés varázsló">
-<!ENTITY zotero.upgrade.newVersionInstalled "A Zotero új verziójának telepítése sikerült.">
-<!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Zotero adatbázist, hogy működjön az új verzióval.">
+<!ENTITY zotero.upgrade.title "Paperly frissítés varázsló">
+<!ENTITY zotero.upgrade.newVersionInstalled "A Paperly új verziójának telepítése sikerült.">
+<!ENTITY zotero.upgrade.upgradeRequired "Frissíteni kell a Paperly adatbázist, hogy működjön az új verzióval.">
 <!ENTITY zotero.upgrade.autoBackup "Az adatbázisról a módosítás előtt biztonsági másolat készül.">
 <!ENTITY zotero.upgrade.majorUpgrade "Ez egy komoly frissítés.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Mindenképpen olvassa el a">
 <!ENTITY zotero.upgrade.majorUpgradeLink "frissítési útmutatót">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "mielőtt folytatná.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Várjon a frissítés befejezéséig. Ez akár percekig is eltarthat.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "A Zotero adatbázis frissítése sikerült.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "A Paperly adatbázis frissítése sikerült.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Részletesen utánanézhet">
 <!ENTITY zotero.upgrade.changeLogLink "a változások listájában">
 <!ENTITY zotero.upgrade.changeLogAfterLink "az újdonságoknak.">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Bizonytalan hivatkozások">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Felismert">
 <!ENTITY zotero.rtfScan.introPage.label "Bevezetés">
-<!ENTITY zotero.rtfScan.introPage.description "A Zotero automatikusan képes kinyerni és újraformázni a hivatkozásokat és bibliográfiát beilleszteni RTF fájlokba. Az RTF Scan jelenleg az alábbi formátumokban támogatja a hivatkozásokat:">
+<!ENTITY zotero.rtfScan.introPage.description "A Paperly automatikusan képes kinyerni és újraformázni a hivatkozásokat és bibliográfiát beilleszteni RTF fájlokba. Az RTF Scan jelenleg az alábbi formátumokban támogatja a hivatkozásokat:">
 <!ENTITY zotero.rtfScan.introPage.description2 "A kezdéshez, válasszon egy RTF bemeneti fájlt és egy kimenti fájlt alább:">
 <!ENTITY zotero.rtfScan.scanPage.label "Hivatkozások keresése">
-<!ENTITY zotero.rtfScan.scanPage.description "A Zotero hivatkozásokat keres a dokumentumban. Kérem várjon.">
+<!ENTITY zotero.rtfScan.scanPage.description "A Paperly hivatkozásokat keres a dokumentumban. Kérem várjon.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Hivatkozott elemek ellenőrzése">
-<!ENTITY zotero.rtfScan.citationsPage.description "Kérem, tekintse át az alábbi felismert hivatkozásokat, hogy meggyőződjön arról, hogy a Zotero a helyesen választotta ki a megfelelő elemeket. A nem egyértelmű vagy mappa nélküli hivatkozásokat javítani kell, mielőtt rátér a következő lépésre.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Kérem, tekintse át az alábbi felismert hivatkozásokat, hogy meggyőződjön arról, hogy a Paperly a helyesen választotta ki a megfelelő elemeket. A nem egyértelmű vagy mappa nélküli hivatkozásokat javítani kell, mielőtt rátér a következő lépésre.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumentum formázása">
 <!ENTITY zotero.rtfScan.formatPage.label "Hivatkozás formázása">
-<!ENTITY zotero.rtfScan.formatPage.description "A Zotero feldolgozza és formázza az RTF fájlt. Kérem várjon.">
+<!ENTITY zotero.rtfScan.formatPage.description "A Paperly feldolgozza és formázza az RTF fájlt. Kérem várjon.">
 <!ENTITY zotero.rtfScan.completePage.label "Az RTF átvizsgálása befejeződött">
 <!ENTITY zotero.rtfScan.completePage.description "A dokumentum átvizsgálása és feldolgozása megtörtént. Győződjön meg róla, hogy megfelelően van formázva.">
 <!ENTITY zotero.rtfScan.inputFile.label "Bemeneti fájl">

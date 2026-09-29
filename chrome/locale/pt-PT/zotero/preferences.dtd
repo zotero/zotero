@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Preferências do Zotero">
+<!ENTITY zotero.preferences.title "Preferências do Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Ajuda">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Verificar automaticamente actualizações de tradutores e estilos">
 <!ENTITY zotero.preferences.updateNow "Actualizar agora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Reportar tradutores de sítios com problemas">
-<!ENTITY zotero.preferences.parseRISRefer "Usar o Zotero para arquivos BibTeX/RIS/Refer descarregados">
+<!ENTITY zotero.preferences.parseRISRefer "Usar o Paperly para arquivos BibTeX/RIS/Refer descarregados">
 <!ENTITY zotero.preferences.automaticTags "Etiquetar automaticamente os itens com as palavras-chave e cabeçalhos de assunto">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente itens no lixo há mais de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Esqueceu-se da Palavra-Passe?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronizar automaticamente">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronizar todo o conteúdo">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Zotero pode sincronizar todo o conteúdo dos arquivos nas suas bibliotecas com o zotero.org e com outros dispositivos ligados, permitindo-lhe pesquisar facilmente os seus arquivos onde quer que esteja. O conteúdo completo dos seus arquivos não será partilhado publicamente.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "O Paperly pode sincronizar todo o conteúdo dos arquivos nas suas bibliotecas com o zotero.org e com outros dispositivos ligados, permitindo-lhe pesquisar facilmente os seus arquivos onde quer que esteja. O conteúdo completo dos seus arquivos não será partilhado publicamente.">
 <!ENTITY zotero.preferences.sync.about "Acerca da Sincronização">
 <!ENTITY zotero.preferences.sync.fileSyncing "Arquivo Sincronizando">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Repor Histórico da Sincronização de Dados">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fundir dados locais com dados remotos, ignorando o histórico de sincronização">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurar a partir da Biblioteca em Linha">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobrepor os dados locais do Zotero com os dados da biblioteca em linha.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobrepor os dados locais do Paperly com os dados da biblioteca em linha.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Substituir Biblioteca em Linha">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobrepor a biblioteca em linha com os dados locais do Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobrepor a biblioteca em linha com os dados locais do Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o Histórico de Sincronização de Arquivos">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos com o serviço de armazenamento">
 <!ENTITY zotero.preferences.sync.reset "Restabelecer">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opções de Citação">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Incluir os URL de artigos nas referências">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quando esta opção está inactiva, o Zotero inclui URL ao citar artigos de revistas científicas, de revistas e de jornais apenas se o artigo não especificar uma sequência de páginas.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quando esta opção está inactiva, o Paperly inclui URL ao citar artigos de revistas científicas, de revistas e de jornais apenas se o artigo não especificar uma sequência de páginas.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Cópia Rápida">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Formato do Item:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualizado">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Guardar no Zotero (ícone da barra de endereço)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Guardar no Paperly (ícone da barra de endereço)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Foco no Painel de Bibliotecas">
 <!ENTITY zotero.preferences.keys.quicksearch "Procura Rápida">
 <!ENTITY zotero.preferences.keys.newItem "Criar um Novo Item">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Opções de Proxies">
-<!ENTITY zotero.preferences.proxies.desc_before_link "O Zotero redireccionará de forma transparente os pedidos através dos proxies guardadas. Ver a">
+<!ENTITY zotero.preferences.proxies.desc_before_link "O Paperly redireccionará de forma transparente os pedidos através dos proxies guardadas. Ver a">
 <!ENTITY zotero.preferences.proxies.desc_link "documentação sobre proxies">
 <!ENTITY zotero.preferences.proxies.desc_after_link "para mais informação.">
 <!ENTITY zotero.preferences.proxies.transparent "Activar redireccionamento proxy">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor do Motor de Localização de Artigos">
 <!ENTITY zotero.preferences.locate.description "Descrição">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Motor de Localização que não esteja na lista, visite o motor de pesquisa desejado no seu navegador e seleccione «Adicionar» no menu Localizar do Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Motor de Localização que não esteja na lista, visite o motor de pesquisa desejado no seu navegador e seleccione «Adicionar» no menu Localizar do Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Reestabelecer Valores por Omissão">
 
 <!ENTITY zotero.preferences.charset "Codificação de Caracteres">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrar Para Nova Localização Por Omissão…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Pasta Base dos Anexos Ligados">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "O Zotero usará caminhos relativos para arquivos anexos ligados que se encontrem na pasta base, permitindo-lhe aceder a esses arquivos em diferentes computadores, desde que a estrutura de arquivos dentro da pasta base se mantenha.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "O Paperly usará caminhos relativos para arquivos anexos ligados que se encontrem na pasta base, permitindo-lhe aceder a esses arquivos em diferentes computadores, desde que a estrutura de arquivos dentro da pasta base se mantenha.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Pasta base:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Escolher...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Voltar a Caminhos Absolutos...">

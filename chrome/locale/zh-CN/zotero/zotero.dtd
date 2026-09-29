@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "重置">
 
 
-<!ENTITY zotero.errorReport.title "Zotero 错误报告">
+<!ENTITY zotero.errorReport.title "Paperly 错误报告">
 <!ENTITY zotero.errorReport.submissionInProgress "正在提交错误报告, 请稍候.">
 <!ENTITY zotero.errorReport.submitted "错误报告已经提交.">
 <!ENTITY zotero.errorReport.reportID "报告ID:">
 <!ENTITY zotero.errorReport.postToForums "请到Zotero论坛(forums.zotero.org)发布新帖, 内容包括: 报告ID, 问题描述以任何必要的步骤以重现该问题.">
 <!ENTITY zotero.errorReport.notReviewed "除非在此论坛中提交，错误报告一般不会被看到.">
 
-<!ENTITY zotero.upgrade.title "Zotero 升级向导">
-<!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一套新版的Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的 Zotero 数据库.">
+<!ENTITY zotero.upgrade.title "Paperly 升级向导">
+<!ENTITY zotero.upgrade.newVersionInstalled "您已经安装了一套新版的Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "为了使用这个新版本您必须升级您的 Paperly 数据库.">
 <!ENTITY zotero.upgrade.autoBackup "在发生任何更改之前, 将自动备份您现有的数据库.">
 <!ENTITY zotero.upgrade.majorUpgrade "这是主版本更新.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "请确保您已经查阅了">
 <!ENTITY zotero.upgrade.majorUpgradeLink "升级说明">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "在继续之前.">
 <!ENTITY zotero.upgrade.upgradeInProgress "请耐心等待升级过程结束. 这可能要花上几分钟.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "您的 Zotero 数据库已成功升级.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "您的 Paperly 数据库已成功升级.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "请查阅">
 <!ENTITY zotero.upgrade.changeLogLink "变更日志">
 <!ENTITY zotero.upgrade.changeLogAfterLink "以了解有哪些新的改动.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 扫描">
 <!ENTITY zotero.toolbar.preferences.label "首选项…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支持与文档">
-<!ENTITY zotero.toolbar.about.label "关于 Zotero">
+<!ENTITY zotero.toolbar.about.label "关于 Paperly">
 <!ENTITY zotero.toolbar.openURL.label "检索">
 <!ENTITY zotero.toolbar.openURL.tooltip "在本地文献库里查找">
 
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引注">
 <!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引注">
 <!ENTITY zotero.rtfScan.introPage.label "介绍">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取、格式化引注并将参考文献表插入 RTF 文件。RTF 扫描功能目前支持下列格式的引注：">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly 可以自动提取、格式化引注并将参考文献表插入 RTF 文件。RTF 扫描功能目前支持下列格式的引注：">
 <!ENTITY zotero.rtfScan.introPage.description2 "如要开始，请选择 RTF 输入文件和输出文件：">
 <!ENTITY zotero.rtfScan.scanPage.label "扫描引注">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引注, 请耐心等待.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly 正在扫描引注, 请耐心等待.">
 <!ENTITY zotero.rtfScan.citationsPage.label "校验已引用的条目">
-<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引注以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引注.">
+<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引注以确保 Paperly 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引注.">
 <!ENTITY zotero.rtfScan.stylePage.label "文档格式化中">
 <!ENTITY zotero.rtfScan.formatPage.label "正在格式化引注">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在处理和格式化您的 RTF 文件，请耐心等待。">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly 正在处理和格式化您的 RTF 文件，请耐心等待。">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 扫描完成">
 <!ENTITY zotero.rtfScan.completePage.description "文档处理完成, 请确保格式正确.">
 <!ENTITY zotero.rtfScan.inputFile.label "输入文件">

@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Palauta">
 
 
-<!ENTITY zotero.errorReport.title "Zoteron virheraportti">
+<!ENTITY zotero.errorReport.title "Paperlyn virheraportti">
 <!ENTITY zotero.errorReport.submissionInProgress "Odota, kunnes virheraportti on toimitettu.">
 <!ENTITY zotero.errorReport.submitted "Virheraporttisi on toimitettu.">
 <!ENTITY zotero.errorReport.reportID "Raportin tunnus:">
 <!ENTITY zotero.errorReport.postToForums "Lähetä Zoteron keskustelualueelle (forums.zotero.org) viesti, joka sisältää raportin tunnuksen, ongelman kuvauksen sekä toimenpiteet, joilla virhe saadaan toistettua.">
 <!ENTITY zotero.errorReport.notReviewed "Virheraportteja ei yleensä käsitellä, jos niihin ei ole viitattu keskustelualueella.">
 
-<!ENTITY zotero.upgrade.title "Zoteron ohjattu päivitystoiminto">
-<!ENTITY zotero.upgrade.newVersionInstalled "Olet asentanut Zoteron uuden version.">
-<!ENTITY zotero.upgrade.upgradeRequired "Zotero-tietokantasi täytyy päivittää, jotta se toimisi uuden version kanssa.">
+<!ENTITY zotero.upgrade.title "Paperlyn ohjattu päivitystoiminto">
+<!ENTITY zotero.upgrade.newVersionInstalled "Olet asentanut Paperlyn uuden version.">
+<!ENTITY zotero.upgrade.upgradeRequired "Paperly-tietokantasi täytyy päivittää, jotta se toimisi uuden version kanssa.">
 <!ENTITY zotero.upgrade.autoBackup "Tietokantasi varmuuskopioidaan automaattisesti ennen muutosten tekemistä.">
 <!ENTITY zotero.upgrade.majorUpgrade "Tämä on merkittävä päivitys.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Olethan tutustunut">
 <!ENTITY zotero.upgrade.majorUpgradeLink "päivitysohjeisiin">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "ennen kuin jatkat.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Odota päivitysprosessin päättymistä. Tämä saattaa kestää muutamia minuutteja.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero-tietokantasi on onnistuneesti päivitetty.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Paperly-tietokantasi on onnistuneesti päivitetty.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Katso">
 <!ENTITY zotero.upgrade.changeLogLink "muutosloki">
 <!ENTITY zotero.upgrade.changeLogAfterLink "tutustuaksesi uusiin ominaisuuksiin ja päivityksiin.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF:n läpikäynti">
 <!ENTITY zotero.toolbar.preferences.label "Asetukset...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Ohjeet ja tuki">
-<!ENTITY zotero.toolbar.about.label "Tietoja Zoterosta">
+<!ENTITY zotero.toolbar.about.label "Tietoja Paperlysta">
 <!ENTITY zotero.toolbar.openURL.label "Paikanna">
 <!ENTITY zotero.toolbar.openURL.tooltip "Etsi paikallisen kirjaston kautta">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Lataukset:">
 <!ENTITY zotero.sync.storage.uploads "Siirrot:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Seuraava merkki Zotero-kirjastossasi on liian pitkä synkronoitavaksi palvelimelle:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Seuraava merkki Paperly-kirjastossasi on liian pitkä synkronoitavaksi palvelimelle:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkronoitavien merkkien tulee olla alle 256 merkkiä pitkiä.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Voit joko jakaa merkin useisiin osiin, muokata sitä käsin lyhyemmäksi tai poistaa sen.">
 <!ENTITY zotero.sync.longTagFixer.split "Jaa">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Monimerkityksiset sitaatit">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Paikannetut sitaatit">
 <!ENTITY zotero.rtfScan.introPage.label "Johdanto">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero voi automaattisesti poimia ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly voi automaattisesti poimia ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Valitse aluksi luettava RTF-tiedosto sekä kirjoitettava tiedosto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Etsitään viitteitä">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero etsii asiakirjasta lähdeviitteitä. Malta vielä hetki.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly etsii asiakirjasta lähdeviitteitä. Malta vielä hetki.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Varmenna siteeratut nimikkeet">
-<!ENTITY zotero.rtfScan.citationsPage.description "Käy läpi allaoleva tunnistettujen sitaattien lista varmistaaksesi, että Zotero on valinnut sitaatteja vastaavat nimikkeet oikein. Kaikki paikantamattomat tai monimerkityksiset sitaatit täytyy selvittää ennen seuraavaa vaihetta.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Käy läpi allaoleva tunnistettujen sitaattien lista varmistaaksesi, että Paperly on valinnut sitaatteja vastaavat nimikkeet oikein. Kaikki paikantamattomat tai monimerkityksiset sitaatit täytyy selvittää ennen seuraavaa vaihetta.">
 <!ENTITY zotero.rtfScan.stylePage.label "Asiakirjan muotoilu">
 <!ENTITY zotero.rtfScan.formatPage.label "Sitaattien muotoilu">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero käsittelee ja muotoilee RTF-tiedostoa. Malta vielä hetki.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly käsittelee ja muotoilee RTF-tiedostoa. Malta vielä hetki.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF-läpikäynti valmis">
 <!ENTITY zotero.rtfScan.completePage.description "Asiakirja on läpikäyty ja prosessoitu. Varmista vielä, että muotoilut ovat oikein.">
 <!ENTITY zotero.rtfScan.inputFile.label "Luettava tiedosto">

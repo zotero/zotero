@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero hobespenak">
+<!ENTITY zotero.preferences.title "Paperly hobespenak">
 
 <!ENTITY zotero.preferences.helpButton.label "Laguntza">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatikoki egiaztatu itzultzaile eta estiloen eguneraketan">
 <!ENTITY zotero.preferences.updateNow "Eguneratu orain">
 <!ENTITY zotero.preferences.reportTranslationFailure "Hautsitako gune itzultzaileen berri eman">
-<!ENTITY zotero.preferences.parseRISRefer "Erabili Zotero deskargatutako RIS/Refer fitxategietarako">
+<!ENTITY zotero.preferences.parseRISRefer "Erabili Paperly deskargatutako RIS/Refer fitxategietarako">
 <!ENTITY zotero.preferences.automaticTags "Automatikoki etiketatu elementuak hitz gako eta gaien goiburuekin">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikoki ezabatu zaborran daudek elementuak ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "egun atzera">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Pasahitza ahaztu zaizu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinkronizatu automatikoki">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronizatu testu osoa">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zoterok zure Zotero liburutegietako fitxategien testu osoko edukia sinkronizatu dezake zotero.org eta estekatutako beste gailuekin, edonon zaudela ere zure fitxategietan bilaketak egitea ahalbidetuz. Zure fitxategien testu osoko edukia ez da publikoki partekatuko.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperlyk zure Paperly liburutegietako fitxategien testu osoko edukia sinkronizatu dezake zotero.org eta estekatutako beste gailuekin, edonon zaudela ere zure fitxategietan bilaketak egitea ahalbidetuz. Zure fitxategien testu osoko edukia ez da publikoki partekatuko.">
 <!ENTITY zotero.preferences.sync.about "Sinkronizazioari buruz">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fitxategiak sinkronizatzea">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URLa:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Berrezarri datuen sinkronizazioaren historia">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Bateratu datu lokalak urrunekoekin, sinkronizazioaren historia baztertuz">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Lineako liburutegitik berreskuratu">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Gainidatzi Zoteroko datu lokalak lineako liburutegikoekin.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Gainidatzi Paperlyko datu lokalak lineako liburutegikoekin.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ordezkatu lineako liburutegia">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Gainidatzi lineako liburutegia Zoteroko datu lokalekin.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Gainidatzi lineako liburutegia Paperlyko datu lokalekin.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Aipuaren aukerak">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Paperezko artikuluen URLak gehitu erreferentziatan">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Aukera hau ezgaituta dagoenean, Zoterok URLak gehitzen ditu aldizkari eta egunkarietako artikuluak aipatzean, artikuluak orrialde-barruti bat zehazten ez badu bakarrik.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Aukera hau ezgaituta dagoenean, Paperlyk URLak gehitzen ditu aldizkari eta egunkarietako artikuluak aipatzean, artikuluak orrialde-barruti bat zehazten ez badu bakarrik.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Kopia azkarra">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Elementuaren formatua:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Eguneratua">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Gorde Zoteron (helbide barrako ikonoa)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gorde Paperlyn (helbide barrako ikonoa)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfokatu liburutegien panela">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
 <!ENTITY zotero.preferences.keys.newItem "Elementu berria sortu">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyak">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy aukerak">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zoterok transparenteki berbideratuko ditu gordetako proxien bitartez egindako eskaerak. Ikus ">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperlyk transparenteki berbideratuko ditu gordetako proxien bitartez egindako eskaerak. Ikus ">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy dokumentazioa">
 <!ENTITY zotero.preferences.proxies.desc_after_link "informazio gehiagorako.">
 <!ENTITY zotero.preferences.proxies.transparent "Gaitu proxy bidezko birbideratzea">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikuluen bilaketarako motoreen kudeatzailea">
 <!ENTITY zotero.preferences.locate.description "Deskribapena">
 <!ENTITY zotero.preferences.locate.name "Izena">
-<!ENTITY zotero.preferences.locate.addDescription "Zerrendan ez dagoen Bilaketa motore bat gehitzeko, bisitatu nahi duzun bilatzailea zure nabigatzailearen bitartez eta sakatu &quot;Gehitu&quot; Zoteroren &quot;Aurkitu&quot; menuan.">
+<!ENTITY zotero.preferences.locate.addDescription "Zerrendan ez dagoen Bilaketa motore bat gehitzeko, bisitatu nahi duzun bilatzailea zure nabigatzailearen bitartez eta sakatu &quot;Gehitu&quot; Paperlyren &quot;Aurkitu&quot; menuan.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Lehenetsitakoak berrezarri">
 
 <!ENTITY zotero.preferences.charset "Karaktere-kodeketa">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Lehenetsitako kokaleku berrira migratu...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Estekatutako eranskinen erro-direktorioa">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zoterok bide erlatiboak erabiliko ditu oinarrizko direktorioko estekatutako fitxategi eranskinentzat. Modu horretan, oinarrizko direktorioaren direktorio egitura berbera den bitartean, ordenagailu ezberdinetan fitxategiak eskuragarri izatea ahalbidetzen da.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperlyk bide erlatiboak erabiliko ditu oinarrizko direktorioko estekatutako fitxategi eranskinentzat. Modu horretan, oinarrizko direktorioaren direktorio egitura berbera den bitartean, ordenagailu ezberdinetan fitxategiak eskuragarri izatea ahalbidetzen da.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Oinarrizko direktorioa:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Aukeratu...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Bide absolutuetara itzuli...">

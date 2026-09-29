@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Ripristina">
 
 
-<!ENTITY zotero.errorReport.title "Segnalazione di errore di Zotero">
+<!ENTITY zotero.errorReport.title "Segnalazione di errore di Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Attendere l'invio della segnalazione.">
 <!ENTITY zotero.errorReport.submitted "La tua segnalazione di errore è stata inviata.">
 <!ENTITY zotero.errorReport.reportID "ID della segnalazione:">
 <!ENTITY zotero.errorReport.postToForums "Ti preghiamo di pubblicare un messaggio sul forum di Zotero (forums.zotero.org) contenente l'ID della segnalazione, una descrizione del problema e tutti i passaggi necessari a ricrearlo.">
 <!ENTITY zotero.errorReport.notReviewed "Le segnalazioni di errore non saranno revisionate a meno che non vengano espressamente segnalate nel forum.">
 
-<!ENTITY zotero.upgrade.title "Assistente per l'aggiornamento di Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Nuova versione di Zotero installata correttamente.">
-<!ENTITY zotero.upgrade.upgradeRequired "Il database deve essere aggiornato per funzionare con la nuova versione di Zotero.">
+<!ENTITY zotero.upgrade.title "Assistente per l'aggiornamento di Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Nuova versione di Paperly installata correttamente.">
+<!ENTITY zotero.upgrade.upgradeRequired "Il database deve essere aggiornato per funzionare con la nuova versione di Paperly.">
 <!ENTITY zotero.upgrade.autoBackup "Verrà effettuata una copia di backup del database di Zotero prima di apportarvi modifiche.">
 <!ENTITY zotero.upgrade.majorUpgrade "Questo è un aggiornamento importante.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Accertati di avere consultato le">
 <!ENTITY zotero.upgrade.majorUpgradeLink "istruzioni di aggiornamento">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "prima di continuare.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Attendere il completamento del processo di aggiornamento. L'operazione potrebbe richiedere alcuni minuti.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Il database di Zotero è stato aggiornato correttamente.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Il database di Paperly è stato aggiornato correttamente.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Prendere visione dello">
 <!ENTITY zotero.upgrade.changeLogLink "registro delle modifiche">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per conoscere le novità.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Scansione RTF">
 <!ENTITY zotero.toolbar.preferences.label "Preferenze…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Supporto e documentazione">
-<!ENTITY zotero.toolbar.about.label "Informazioni su Zotero…">
+<!ENTITY zotero.toolbar.about.label "Informazioni su Paperly…">
 <!ENTITY zotero.toolbar.openURL.label "Trova">
 <!ENTITY zotero.toolbar.openURL.tooltip "Cerca nella biblioteca personale">
 
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citazioni ambigue">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citazioni corripondenti">
 <!ENTITY zotero.rtfScan.introPage.label "Introduzione">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero può estrarre e riformattare automaticamente le citazioni e inserire una bibliografia all'interno di un file RTF. La funzionalità di scansione RTF attualmente supporta citazioni con variazioni nei seguenti formati:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly può estrarre e riformattare automaticamente le citazioni e inserire una bibliografia all'interno di un file RTF. La funzionalità di scansione RTF attualmente supporta citazioni con variazioni nei seguenti formati:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Sto cercando citazioni">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero sta esaminando il documento per individuare citazioni. Ti preghiamo di attendere.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly sta esaminando il documento per individuare citazioni. Ti preghiamo di attendere.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verifica gli elementi citati.">
-<!ENTITY zotero.rtfScan.citationsPage.description "Ti preghiamo di controllare la lista qui sotto delle citazioni individuate e di assicurarti che Zotero abbia selezionato correttamente gli elementi corrispondenti. Le citazioni senza corrispondenza o ambigue devono essere corrette prima di procedere al passaggio successivo.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Ti preghiamo di controllare la lista qui sotto delle citazioni individuate e di assicurarti che Paperly abbia selezionato correttamente gli elementi corrispondenti. Le citazioni senza corrispondenza o ambigue devono essere corrette prima di procedere al passaggio successivo.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formattazione del documento">
 <!ENTITY zotero.rtfScan.formatPage.label "Formattazione delle citazioni">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero sta elaborando e formattando il tuo documento. Ti preghiamo di attendere.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly sta elaborando e formattando il tuo documento. Ti preghiamo di attendere.">
 <!ENTITY zotero.rtfScan.completePage.label "Elaborazione RTF completata.">
 <!ENTITY zotero.rtfScan.completePage.description "Il tuo documento è stato elaborato. Per favore assicurati che sia stato formattato correttamente.">
 <!ENTITY zotero.rtfScan.inputFile.label "File da elaborare">

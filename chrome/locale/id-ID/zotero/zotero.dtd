@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Reset">
 
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
+<!ENTITY zotero.errorReport.title "Paperly Error Report">
 <!ENTITY zotero.errorReport.submissionInProgress "Mohon tunggu sampai laporan kesalahan dikirimkan.">
 <!ENTITY zotero.errorReport.submitted "Laporan kesalahan Anda telah dikirimkan.">
 <!ENTITY zotero.errorReport.reportID "ID Laporan:">
 <!ENTITY zotero.errorReport.postToForums "Mohon poskan pesan ke forum Zotero (forums.zotero.org) dengan ID Laporan ini, deskripsi masalah, dan langkah-langkah yang diperlukan untuk mereproduksinya.">
 <!ENTITY zotero.errorReport.notReviewed "Laporan kesalahan tidak akan ditinjau ulang kecuali dirujuk di dalam forum.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "Anda telah menginstal versi terbaru Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Database Zotero Anda harus di-upgrade agar dapat bekerja dengan versi terbaru Zotero.">
+<!ENTITY zotero.upgrade.title "Paperly Upgrade Wizard">
+<!ENTITY zotero.upgrade.newVersionInstalled "Anda telah menginstal versi terbaru Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Database Paperly Anda harus di-upgrade agar dapat bekerja dengan versi terbaru Paperly.">
 <!ENTITY zotero.upgrade.autoBackup "Database Anda saat ini akan di-back up secara automatis sebelum perubahan dilakukan.">
 <!ENTITY zotero.upgrade.majorUpgrade "Ini adalah upgrade utama.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Yakinkan bahwa Anda telah meninjau ulang">
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruksi upgrade">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "sebelum melanjutkan.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Mohon tunggu sampai proses upgrade selesai dilaksanakan. Hal ini mungkin akan berjalan beberapa menit.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Database Zotero Anda telah berhasil di-upgrade.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Database Paperly Anda telah berhasil di-upgrade.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Mohon lihat">
 <!ENTITY zotero.upgrade.changeLogLink "log perubahan">
 <!ENTITY zotero.upgrade.changeLogAfterLink "untuk mengetahui hal-hal apa saja yang baru.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.preferences.label "Preferensi...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Dukungan dan Dokuementasi">
-<!ENTITY zotero.toolbar.about.label "Tentang Zotero">
+<!ENTITY zotero.toolbar.about.label "Tentang Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Temukan">
 <!ENTITY zotero.toolbar.openURL.tooltip "Temukan melalui perpustakaan lokal Anda">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Unduh:">
 <!ENTITY zotero.sync.storage.uploads "Unggah:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Tag berikut ini pada perpustakaan Zotero Anda terlalu panjang untuk disinkronisasikan ke server:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Tag berikut ini pada perpustakaan Paperly Anda terlalu panjang untuk disinkronisasikan ke server:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Tag yang disinkronisasikan harus kurang dari 256 karakter.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Anda dapat membagi tag menjadi beberapa bagian, mengedit tag secara manual agar lebih ringkas, atau menghapusnya.">
 <!ENTITY zotero.sync.longTagFixer.split "Bagi">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Sitasi Ambigu">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Sitasi yang Terpetakan">
 <!ENTITY zotero.rtfScan.introPage.label "Pendahuluan">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero dapat secara automatis mengekstrak dan memformat ulang sitasi serta memasukkan bibiliografi ke dalam berkas RTF. Saat ini, fitur Pemindaian RTF ini mendukung sitasi dalam beragam format berikut:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly dapat secara automatis mengekstrak dan memformat ulang sitasi serta memasukkan bibiliografi ke dalam berkas RTF. Saat ini, fitur Pemindaian RTF ini mendukung sitasi dalam beragam format berikut:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Untuk memulai, pilih berkas input dan output RTF di bawah ini:">
 <!ENTITY zotero.rtfScan.scanPage.label "Memindai Sitasi.">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero sedang memindai dokumen Anda untuk menemukan sitasi. Mohon bersabar.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly sedang memindai dokumen Anda untuk menemukan sitasi. Mohon bersabar.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Memverifikasi Item-item yang Dikutip">
-<!ENTITY zotero.rtfScan.citationsPage.description "Mohon tinjau ulang daftar sitasi-sitasi yang dikenali di bawah ini untuk memastikan bahwa Zotero telah memilih item-item dengan tepat. Semua sitasi yang tidak terpetakan atau ambigu harus diperbaiki terlebih dahulu sebelum Anda melakukan langkah berikutnya.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Mohon tinjau ulang daftar sitasi-sitasi yang dikenali di bawah ini untuk memastikan bahwa Paperly telah memilih item-item dengan tepat. Semua sitasi yang tidak terpetakan atau ambigu harus diperbaiki terlebih dahulu sebelum Anda melakukan langkah berikutnya.">
 <!ENTITY zotero.rtfScan.stylePage.label "Pemformatan Dokumen">
 <!ENTITY zotero.rtfScan.formatPage.label "Memformat Sitasi">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero sedang memproses dan memformat berkas RTF Anda. Mohon bersabar.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly sedang memproses dan memformat berkas RTF Anda. Mohon bersabar.">
 <!ENTITY zotero.rtfScan.completePage.label "Pemindaian RTF selesai">
 <!ENTITY zotero.rtfScan.completePage.description "Dokumen Anda telah selesai dipindai dan diproses. Mohon pastikan bahwa dokumen tersebut telah terformat secara tepat.">
 <!ENTITY zotero.rtfScan.inputFile.label "Berkas Input">

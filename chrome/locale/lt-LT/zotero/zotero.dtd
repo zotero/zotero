@@ -25,16 +25,16 @@
 <!ENTITY zotero.general.reset "Iš naujo">
 
 
-<!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Zotero programoje">
+<!ENTITY zotero.errorReport.title "Pranešimas apie klaidą Paperly programoje">
 <!ENTITY zotero.errorReport.submissionInProgress "Prašome palaukti kol siunčiamas klaidų sąrašas.">
 <!ENTITY zotero.errorReport.submitted "Jūsų klaidų sąrašas buvo nusiųstas.">
 <!ENTITY zotero.errorReport.reportID "Pranešimo ID:">
 <!ENTITY zotero.errorReport.postToForums "Parašykite žinutę Zotero forume (forums.zotero.org), nurodydami ataskaitos identifikatorių, aprašydami nesklandumus ir žingsnius, kurie ją sukelia.">
 <!ENTITY zotero.errorReport.notReviewed "Pranešimai apie klaidas peržiūrimi tik tuomet, kai jie yra forume.">
 
-<!ENTITY zotero.upgrade.title "Zotero atnaujinimo vediklis">
-<!ENTITY zotero.upgrade.newVersionInstalled "Jūs įdiegėte naują Zotero versiją.">
-<!ENTITY zotero.upgrade.upgradeRequired "Prieš dirbant su naujają Zotero versija, reikia atnaujinti Zotero duomenų bazę.">
+<!ENTITY zotero.upgrade.title "Paperly atnaujinimo vediklis">
+<!ENTITY zotero.upgrade.newVersionInstalled "Jūs įdiegėte naują Paperly versiją.">
+<!ENTITY zotero.upgrade.upgradeRequired "Prieš dirbant su naujają Paperly versija, reikia atnaujinti Paperly duomenų bazę.">
 <!ENTITY zotero.upgrade.autoBackup "Prieš atliekant kokius nors pakeitimus, automatiškai sukursime dabartinės duomenų bazės atsarginę kopiją.">
 <!ENTITY zotero.upgrade.majorUpgrade "Tai reikšmingas atnaujinimas.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Prieš tęsdami būtinai perskaitykite">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF peržvelgimas">
 <!ENTITY zotero.toolbar.preferences.label "Nuostatos...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Palaikymas ir dokumentacija">
-<!ENTITY zotero.toolbar.about.label "Apie Zotero">
+<!ENTITY zotero.toolbar.about.label "Apie Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Rasti vietą">
 <!ENTITY zotero.toolbar.openURL.tooltip "Ieškoti vietinėje bibliotekoje">
 
@@ -277,12 +277,12 @@
 <!ENTITY zotero.rtfScan.introPage.description "Zotaro gali automatiškai aptikti citavimus, pakeisti jų formatą ir įterpti bibliografiją į raiškiojo teksto formato dokumentus. Dabartinė RTF peržvelgimo funkcija palaiko įvairiausius citavimo formatus:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Norėdami pradėti,  įvedimui pasirinkite RTF dokumentą ir dokumentą išvedimui:">
 <!ENTITY zotero.rtfScan.scanPage.label "Peržvlgiame citavimus">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero dabar ieško dokumente esančių citavimų. Palaukite.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly dabar ieško dokumente esančių citavimų. Palaukite.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Tikrinti cituotus įrašus">
-<!ENTITY zotero.rtfScan.citationsPage.description "Peržiūrėkite aptiktų citavimų sąrašą, kad būtumėte tikri, jog Zotero tinkamai parinko atitinkamus elementus. Prieš tęsdami turite savarankiškai susieti nesusietus ir neaiškius citavimus.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Peržiūrėkite aptiktų citavimų sąrašą, kad būtumėte tikri, jog Paperly tinkamai parinko atitinkamus elementus. Prieš tęsdami turite savarankiškai susieti nesusietus ir neaiškius citavimus.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumento formatavimas">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatuojame citavimus">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero apdoroja ir formatuoja RTF dokumentą. Palaukite.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly apdoroja ir formatuoja RTF dokumentą. Palaukite.">
 <!ENTITY zotero.rtfScan.completePage.label "Raiškiojo teksto formato dokumentų peržvelgimas baigtas">
 <!ENTITY zotero.rtfScan.completePage.description "Jūsiškis dokumentas peržvelgtas ir apdorotas. Pažiūrėkite, ar jis tinkamai suformatuotas.">
 <!ENTITY zotero.rtfScan.inputFile.label "Įvedimo rinkmena">

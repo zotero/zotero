@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Настройки Zotero">
+<!ENTITY zotero.preferences.title "Настройки Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Справка">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновлённых трансляторов и стилей">
 <!ENTITY zotero.preferences.updateNow "Обновить сейчас">
 <!ENTITY zotero.preferences.reportTranslationFailure "Сообщить о неработающих трансляторах сайта">
-<!ENTITY zotero.preferences.parseRISRefer "Использовать Zotero для скачанных файлов BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Использовать Paperly для скачанных файлов BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Автоматически присваивать записям теги из ключевых слов и  заголовков тем">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически удалять записи из корзины, удалённые более">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дней назад">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Забыли пароль?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Синхронизировать автоматически">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Синхронизировать полные тексты">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero может синхронизировать полный текст содержания файлов в ваших библиотеках Zotero с сайтом zotero.org и с другими связанными устройствами, позволяя вам с лёгкостью производить поиск файлов где бы вы ни находились. Полнотекстовое содержание ваших файлов не будет публиковаться в общем доступе.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly может синхронизировать полный текст содержания файлов в ваших библиотеках Paperly с сайтом zotero.org и с другими связанными устройствами, позволяя вам с лёгкостью производить поиск файлов где бы вы ни находились. Полнотекстовое содержание ваших файлов не будет публиковаться в общем доступе.">
 <!ENTITY zotero.preferences.sync.about "О синхронизации">
 <!ENTITY zotero.preferences.sync.fileSyncing "Синхронизация файлов">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Сбросить историю синхронизации данных">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Объединить локальные данные с облачными, игнорируя историю синхронизации">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Восстановить из онлайн-библиотеки">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Перезаписать локальные данные Zotero данными из онлайн-библиотеки.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Перезаписать локальные данные Paperly данными из онлайн-библиотеки.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Заменить онлайн-библиотеку">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Перезаписать онлайн-библиотеку локальными данными Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Перезаписать онлайн-библиотеку локальными данными Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравнить все файлы вложений с данными в хранилище">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Опции цитирования">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Включать URL журнальных статей в цитирования">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когда эта опция отключена, Zotero добавляет URL-адреса в цитирования журнальных и газетных статей только при отсутствии у статьи указанного диапазона страниц.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когда эта опция отключена, Paperly добавляет URL-адреса в цитирования журнальных и газетных статей только при отсутствии у статьи указанного диапазона страниц.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Быстрое копирование">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Формат записи:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Обновлён">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Zotero (иконка в адресной строке)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Сохранить в Paperly (иконка в адресной строке)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Сфокусироваться на панели библиотек">
 <!ENTITY zotero.preferences.keys.quicksearch "Быстрый поиск">
 <!ENTITY zotero.preferences.keys.newItem "Создать новую запись">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Прокси">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Настройки прокси">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero будет автоматически перенаправлять запросы через сохранённые прокси. Смотрите">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly будет автоматически перенаправлять запросы через сохранённые прокси. Смотрите">
 <!ENTITY zotero.preferences.proxies.desc_link "документацию по прокси">
 <!ENTITY zotero.preferences.proxies.desc_after_link "для дополнительной информации.">
 <!ENTITY zotero.preferences.proxies.transparent "Включить перенаправление через прокси">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер движков поиска статей">
 <!ENTITY zotero.preferences.locate.description "Описание">
 <!ENTITY zotero.preferences.locate.name "Название">
-<!ENTITY zotero.preferences.locate.addDescription "Для добавления поискового движка, отсутствующего в списке, посетите страницу движка в вашем браузере и выберите «Добавить» в меню Обнаружение в Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Для добавления поискового движка, отсутствующего в списке, посетите страницу движка в вашем браузере и выберите «Добавить» в меню Обнаружение в Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Восстановить значения по умолчанию">
 
 <!ENTITY zotero.preferences.charset "Кодировка символов">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Переместить в новое расположение по умолчанию…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Папка базы привязанных вложений">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero будет использовать относительные пути для привязанных файлов вложений в папке базы, позволяя вам получать доступ к файлам на разных компьютерах, пока структура файлов в папке базы остается неизменной.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly будет использовать относительные пути для привязанных файлов вложений в папке базы, позволяя вам получать доступ к файлам на разных компьютерах, пока структура файлов в папке базы остается неизменной.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Папка базы вложений:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Выбрать...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Вернуть абсолютные пути...">

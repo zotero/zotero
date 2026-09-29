@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero eelistused">
+<!ENTITY zotero.preferences.title "Paperly eelistused">
 
 <!ENTITY zotero.preferences.helpButton.label "Abi">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Otsida automaatsed stiile ja tõlkijaid">
 <!ENTITY zotero.preferences.updateNow "Uuendada nüüd">
 <!ENTITY zotero.preferences.reportTranslationFailure "Anda teada vigastest tõlkijatest">
-<!ENTITY zotero.preferences.parseRISRefer "Kasutada Zoterot BibTeX/RIS/Refer failide avamisel">
+<!ENTITY zotero.preferences.parseRISRefer "Kasutada Paperlyt BibTeX/RIS/Refer failide avamisel">
 <!ENTITY zotero.preferences.automaticTags "Lisada automaatselt märksõnad ja teemapealkirjad lipikutesse">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaatselt eemaldada kirjed prügikastist, mis on kustutatud rohkem kui">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päeva tagasi">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Salasõna kadunud?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sünkroonida automaatselt">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sünkroniseerida täistekst sisu">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero on võimeline sünkroniseerima teie failide täistekst sisu zotero.org kaudu teiste ühendatud seadmetega, võimaldades lihtsat ligipääsu failidele. Teie failide täistekst sisu ei jagata avalikult. ">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly on võimeline sünkroniseerima teie failide täistekst sisu zotero.org kaudu teiste ühendatud seadmetega, võimaldades lihtsat ligipääsu failidele. Teie failide täistekst sisu ei jagata avalikult. ">
 <!ENTITY zotero.preferences.sync.about "Sünkroonimise kohta">
 <!ENTITY zotero.preferences.sync.fileSyncing "Failide sünkroonimine">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Paperly data with data from the online library.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Paperly data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Algseadistada failide sünkroonimise ajalugu">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
 <!ENTITY zotero.preferences.sync.reset "Algseadistada">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Tsiteeringu seaded">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Lisada viidetes paberartiklitele URL">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kui see ei ole valitud, siis Zotero lisab URL vaid siis kui tsiteeritaval artiklil ei ole määratud lehekülgede vahemikku.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kui see ei ole valitud, siis Paperly lisab URL vaid siis kui tsiteeritaval artiklil ei ole määratud lehekülgede vahemikku.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Kiirkopeerimine">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Uuendatud">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Zoterosse (aadressiriba ikoon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Paperlysse (aadressiriba ikoon)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kataloogide paan fookusesse">
 <!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
 <!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proksid">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proksi seaded">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero suunab transparentselt päringuid läbi salvestatud prokside. Palun vaadata">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly suunab transparentselt päringuid läbi salvestatud prokside. Palun vaadata">
 <!ENTITY zotero.preferences.proxies.desc_link "prokside dokumentatsiooni">
 <!ENTITY zotero.preferences.proxies.desc_after_link ".">
 <!ENTITY zotero.preferences.proxies.transparent "Pidada meeles prokside kaudu kasutatavad allikad">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikli otsingumootori haldaja">
 <!ENTITY zotero.preferences.locate.description "Kirjeldus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Paperly’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Algseaded taastada">
 
 <!ENTITY zotero.preferences.charset "Tähtede kodeering">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Lingitud manuse baaskataloog">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero kasutab lingitud manuste puhul suhtelisi radasid baaskataloogis. Selliseilt on võimalik failidele ligipääs erinevates arvutites, tingimusel, et failistruktuur baaskataloogis on sama.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly kasutab lingitud manuste puhul suhtelisi radasid baaskataloogis. Selliseilt on võimalik failidele ligipääs erinevates arvutites, tingimusel, et failistruktuur baaskataloogis on sama.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Baaskataloog:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Valida...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Absoluutsetele radadele üleminek...">

@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatski provjeri ima li ažuriranih prevoditelja i stilova">
 <!ENTITY zotero.preferences.updateNow "Ažuriraj sada">
 <!ENTITY zotero.preferences.reportTranslationFailure "Prijavi neispravnog prevoditelja stranica">
-<!ENTITY zotero.preferences.parseRISRefer "Koristi Zotero za preuzete BibTex/RIS/Refer datoteke">
+<!ENTITY zotero.preferences.parseRISRefer "Koristi Paperly za preuzete BibTex/RIS/Refer datoteke">
 <!ENTITY zotero.preferences.automaticTags "Automatski označi stavke ključnim riječima i naslovima predmeta">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatski ukloni stavke iz otpada izbrisane prije više od">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dana prije">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Zaboravljena lozinka?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinkroniziraj automatski">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronizacija potpunog sadržaja">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero može sinkronizirati puni tekstualni sadržaj datoteka u vašim Zotero bibliotekama sa zotero.org i drugim povezanim uređajima, omogućavajući jednostavno pretraživanje datoteka gdje god se nalazili. Cijeli tekstualni sadržaj Vaših datoteka neće se javno dijeliti.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly može sinkronizirati puni tekstualni sadržaj datoteka u vašim Paperly bibliotekama sa zotero.org i drugim povezanim uređajima, omogućavajući jednostavno pretraživanje datoteka gdje god se nalazili. Cijeli tekstualni sadržaj Vaših datoteka neće se javno dijeliti.">
 <!ENTITY zotero.preferences.sync.about "O sinkronizaciji">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkronizacija datoteka">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Ponovno postavi povijest sinkr. datoteka">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Spoji lokalne s udaljenim podacima, zanemarujući povijest sinkronizacije">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Vrati iz mrežne biblioteke">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Prebrišite lokalne Zotero podatke podacima iz mrežne biblioteke.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Prebrišite lokalne Paperly podatke podacima iz mrežne biblioteke.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Zamijeni mrežnu biblioteku">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Prebrišite mrežnu biblioteku lokalnim Zotero podacima">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Prebrišite mrežnu biblioteku lokalnim Paperly podacima">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Ponovno postavi povijest sinkronizacije datoteke">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Usporedi sve privitke s uslugom skladištenja">
 <!ENTITY zotero.preferences.sync.reset "Ponovno postavi">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opcije citiranja">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Uključi URL-ove članaka u referencama">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kada je ova opcija onemogućena, Zotero uključuje URL-ove kada citira članke iz časopisa, magazina i novina samo ako članak nema naveden raspon stranica.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Kada je ova opcija onemogućena, Paperly uključuje URL-ove kada citira članke iz časopisa, magazina i novina samo ako članak nema naveden raspon stranica.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Brzo kopiranje">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format stavke:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Ažurirano">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Spremi u Zotero (ikona adresne trake)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Spremi u Paperly (ikona adresne trake)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus na okno biblioteke">
 <!ENTITY zotero.preferences.keys.quicksearch "Brza pretraga">
 <!ENTITY zotero.preferences.keys.newItem "Stvori novu stavku">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyji">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Mogućnosti proxyja">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero će transparentno preusmjeriti zahtjeve preko spremljenih proxyja. Vidite">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly će transparentno preusmjeriti zahtjeve preko spremljenih proxyja. Vidite">
 <!ENTITY zotero.preferences.proxies.desc_link " dokumentaciju proxyja">
 <!ENTITY zotero.preferences.proxies.desc_after_link "za više informacija.">
 <!ENTITY zotero.preferences.proxies.transparent "Omogući preusmjeravanje kroz proxy">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Upravitelj tražilice članaka">
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Naziv">
-<!ENTITY zotero.preferences.locate.addDescription "Za dodavanje tražilice koja nije na popisu, posjetite željenu tražilicu u svom pregledniku i odaberite &quot;Dodaj&quot; iz Zoterovog izbornika „Lociraj”.">
+<!ENTITY zotero.preferences.locate.addDescription "Za dodavanje tražilice koja nije na popisu, posjetite željenu tražilicu u svom pregledniku i odaberite &quot;Dodaj&quot; iz Paperlyvog izbornika „Lociraj”.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Vrati zadane postavke">
 
 <!ENTITY zotero.preferences.charset "Kodiranje znakova">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Premjesti na novu zadanu lokaciju…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Povezani osnovni direktorij privitaka">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero će koristiti relativne putanje za povezane privitke datoteka unutar osnovnog direktorija, omogućujući Vam pristup datotekama na različitim računalima sve dok datotečna struktura unutar osnovnog direktorija ostaje ista.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly će koristiti relativne putanje za povezane privitke datoteka unutar osnovnog direktorija, omogućujući Vam pristup datotekama na različitim računalima sve dok datotečna struktura unutar osnovnog direktorija ostaje ista.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Osnovni direktorij:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Odaberi…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Vrati na apsolutne putanje…">

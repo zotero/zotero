@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Indstillinger for Zotero">
+<!ENTITY zotero.preferences.title "Indstillinger for Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Hjælp">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for opdaterede oversættere og bibliografiske formater">
 <!ENTITY zotero.preferences.updateNow "Opdater nu">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter om &quot;oversættere&quot; uden forbindelse">
-<!ENTITY zotero.preferences.parseRISRefer "Brug Zotero til at hente BibTeX/RIS/Refer -filer">
+<!ENTITY zotero.preferences.parseRISRefer "Brug Paperly til at hente BibTeX/RIS/Refer -filer">
 <!ENTITY zotero.preferences.automaticTags "Mærk automatisk Elementer med stikord og emne-grupper">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Mistet adgangskode?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkroniser automatisk">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synkronisér fuldtekst-indhold">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero kan synkronisere full-text indholdet af filer i dit Zoterobibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly kan synkronisere full-text indholdet af filer i dit Paperlybibliotek med zotero.org og andre tilknyttede enheder, hvilket tillader dig enkel søgning i dine foler uanset hvor du er. Full-text indholdet af dine filer vil ikke blive delt offentligt.">
 <!ENTITY zotero.preferences.sync.about "Om synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fil-synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Nulstil historikken for datasynkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Flet lokale data med fjerndata og ignorér synkroniseringshistorikken">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Gendan fra onlinebibliotek">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overskriv lokale Zotero-data med data fra onlinebiblioteket.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overskriv lokale Paperly-data med data fra onlinebiblioteket.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overskriv onlinebiblioteket med lokale Zotero-data.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overskriv onlinebiblioteket med lokale Paperly-data.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedhæftede filer med lagringstjenesten">
 <!ENTITY zotero.preferences.sync.reset "Nulstil">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Valgmuligheder for henvisninger">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Medtag URL'er for trykte artikler i referencer">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Paperly kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Opdateret">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Zotero (ikon i adresselinjen)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gem til Paperly (ikon i adresselinjen)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panel med fokusbiblioteker">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøgning">
 <!ENTITY zotero.preferences.keys.newItem "Opret nyt element">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxyer">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy-indstillinger">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero vil automatisk ekspedere forespørgsler via de gemte proxyer. Se">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly vil automatisk ekspedere forespørgsler via de gemte proxyer. Se">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentation om proxyer">
 <!ENTITY zotero.preferences.proxies.desc_after_link "for nærmere oplysninger.">
 <!ENTITY zotero.preferences.proxies.transparent "Send forespørgsler gennem tidligere anvendte proxyer">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
 <!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.addDescription "For at tilføje en søgemaskine, som ikke er på listen, skal du i din browser besøge den pågældende søgemaskine og vælge &quot;Tilføj&quot; i Zoteros Lokalisér-menu">
+<!ENTITY zotero.preferences.locate.addDescription "For at tilføje en søgemaskine, som ikke er på listen, skal du i din browser besøge den pågældende søgemaskine og vælge &quot;Tilføj&quot; i Paperlys Lokalisér-menu">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
 
 <!ENTITY zotero.preferences.charset "Tegnsæt">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migrér til ny standardplacering">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Tilknyttet databasemappe for vedhæftninger">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero vil benytte relative stier for tilknyttede vedhæftede filer i databasemappe, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasemappen forbliver den samme">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly vil benytte relative stier for tilknyttede vedhæftede filer i databasemappe, hvilket giver dig mulighed for at tilgå filerne med forskellige computere så længe filstrukturen i databasemappen forbliver den samme">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Databasemappe:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Vælg...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Gendan til absolutte stier...">

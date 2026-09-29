@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Preferències del Zotero">
+<!ENTITY zotero.preferences.title "Preferències del Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Ajuda">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Comprova automàticament si hi ha traductors o estils actualitzats">
 <!ENTITY zotero.preferences.updateNow "Actualitza ara">
 <!ENTITY zotero.preferences.reportTranslationFailure "Envia un informe dels transcriptors trencats">
-<!ENTITY zotero.preferences.parseRISRefer "utilitza Zotero per als fitxers descarregats BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "utilitza Paperly per als fitxers descarregats BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Etiqueta automàticament els elements amb les capçaleres de paraules clau i el tema">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automàticament els elements de la paperera que s'han suprimit fa més de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Has oblidat la contrasenya?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sincronitza automàticament">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sincronitza el contingut de text complet">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "El Zotero pot sincronitzar el contingut de text dels fitxers en les vostres biblioteques de Zotero amb zotero.org i altres dispositius vinculats, permetent-vos així cercar fàcilment en els vostres fitxers allà on sigueu. El contingut de text dels vostres fitxers no es compartirà públicament.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "El Paperly pot sincronitzar el contingut de text dels fitxers en les vostres biblioteques de Paperly amb zotero.org i altres dispositius vinculats, permetent-vos així cercar fàcilment en els vostres fitxers allà on sigueu. El contingut de text dels vostres fitxers no es compartirà públicament.">
 <!ENTITY zotero.preferences.sync.about "Quant a la sincronització">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reinicia l'historial de sincronització de dades">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusiona les dades locals amb les remotes, ignorant l'historial de sincronització">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaura de la biblioteca en línia">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobreescriu les dades locals de Zotero amb les dades de la biblioteca en línia">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobreescriu les dades locals de Paperly amb les dades de la biblioteca en línia">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Reemplaça la biblioteca en línia">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobreescriu la biblioteca en línia amb les dades locals de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobreescriu la biblioteca en línia amb les dades locals de Paperly">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reinicia l'historial de sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compara tots els fitxers adjunts amb el servei d'emmagatzematge">
 <!ENTITY zotero.preferences.sync.reset "Reinicia">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opcions de cita">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inclou les URL dels articles a les referències">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, el Zotero inclou les URL quan se citen articles de premsa, revistes i revistes acadèmiques només si l'article no té un ran dge pàgines assignat.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, el Paperly inclou les URL quan se citen articles de premsa, revistes i revistes acadèmiques només si l'article no té un ran dge pàgines assignat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format d'element:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Actualitzat">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Desa al Paperly (icona de la barra d'adreces)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
 <!ENTITY zotero.preferences.keys.newItem "Crea un element nou">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Servidors intermediaris">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Opcions del servidor intermediari">
-<!ENTITY zotero.preferences.proxies.desc_before_link "El Zotero redirigirà de manera transparent les peticions a través dels servidors intermediaris desats. Vegeu ">
+<!ENTITY zotero.preferences.proxies.desc_before_link "El Paperly redirigirà de manera transparent les peticions a través dels servidors intermediaris desats. Vegeu ">
 <!ENTITY zotero.preferences.proxies.desc_link "Documentació del servidor intermediari">
 <!ENTITY zotero.preferences.proxies.desc_after_link "per a més informació.">
 <!ENTITY zotero.preferences.proxies.transparent "Habilita la redirecció del servidor intermediari">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Migra a una nova ubicació per defecte…">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Directori base de les adjuncions enllaçades">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "El Zotero utilitzarà camins relatius per a les adjuncions de fitxer enllaçades en el directori base, permetent-vos accedir als vostres fitxers des de diferents ordinadors sempre que l'estructura de fitxers en el directori base sigui la mateixa.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "El Paperly utilitzarà camins relatius per a les adjuncions de fitxer enllaçades en el directori base, permetent-vos accedir als vostres fitxers des de diferents ordinadors sempre que l'estructura de fitxers en el directori base sigui la mateixa.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Directori base:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Tria...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Reverteix a camins absoluts…">

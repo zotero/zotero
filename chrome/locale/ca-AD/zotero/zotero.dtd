@@ -25,15 +25,15 @@
 <!ENTITY zotero.general.reset "Reinicia">
 
 
-<!ENTITY zotero.errorReport.title "Informe d'error de Zotero">
+<!ENTITY zotero.errorReport.title "Informe d'error de Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Espereu mentre s&apos;envia l&apos;informe d&apos;error.">
 <!ENTITY zotero.errorReport.submitted "L&apos;informe d&apos;error ha estat enviat correctament.">
 <!ENTITY zotero.errorReport.reportID "Número de referència de l&apos;informe:">
 <!ENTITY zotero.errorReport.postToForums "Escriu un missatge al fòrum del Zotero (forums.zotero.org) amb aquest número de referència de l&apos;informe, una descripció del problema i qualsevol pas necessari per a reproduir-lo.">
 <!ENTITY zotero.errorReport.notReviewed "Els informes d&apos;error generalment no es revisen ni no es notifiquen al fòrum.">
 
-<!ENTITY zotero.upgrade.title "Auxiliar d'actualització de Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió del Zotero.">
+<!ENTITY zotero.upgrade.title "Auxiliar d'actualització de Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Has instal·lat una nova versió del Paperly.">
 <!ENTITY zotero.upgrade.upgradeRequired "La vostra base de dades s&apos;ha d&apos;actualitzar per a funcionar amb la nova versió.">
 <!ENTITY zotero.upgrade.autoBackup "Es farà una còpia de seguertat de la base de dades existent abans de fer cap canvi">
 <!ENTITY zotero.upgrade.majorUpgrade "Aquesta és una actualització principal.">
@@ -41,7 +41,7 @@
 <!ENTITY zotero.upgrade.majorUpgradeLink "instruccions d'actualització">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "abans de continuar.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Espereu que s&apos;acabi el procés d&apos;actualització. Pot trigar uns minuts.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "La vostra base de dades del Zotero s&apos;ha actualitzat correctament">
+<!ENTITY zotero.upgrade.upgradeSucceeded "La vostra base de dades del Paperly s&apos;ha actualitzat correctament">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Mireu">
 <!ENTITY zotero.upgrade.changeLogLink "la llista de canvis">
 <!ENTITY zotero.upgrade.changeLogAfterLink "per esbrinar si hi ha novetats">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Escaneig de l'RTF">
 <!ENTITY zotero.toolbar.preferences.label "Preferències...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Assistència i documentació">
-<!ENTITY zotero.toolbar.about.label "Quant al Zotero">
+<!ENTITY zotero.toolbar.about.label "Quant al Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Localitza">
 <!ENTITY zotero.toolbar.openURL.tooltip "Cerqueu-lo a la biblioteca local">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Descàrregues:">
 <!ENTITY zotero.sync.storage.uploads "Càrregues">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "L'etiqueta següent de la biblioteca Zotero és massa llarga perquè se sincronitzi amb el servidor:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "L'etiqueta següent de la biblioteca Paperly és massa llarga perquè se sincronitzi amb el servidor:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Les etiquetes sincronitzades ha de tenir menys de 256 caràcters.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Podeu dividir l'etiqueta en diverses etiquetes, editar-la manualment per reduir-ne la longitud, o suprimir-la.">
 <!ENTITY zotero.sync.longTagFixer.split "Divideix">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Cites  ambigües">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Cites associades">
 <!ENTITY zotero.rtfScan.introPage.label "Introducció">
-<!ENTITY zotero.rtfScan.introPage.description "El Zotero pot recuperar i reformatar les cites i inserir una bibliografia als fitxers RTF. La funció d'escaneig dels fitxers RTF actualment permet les cites amb les variacions de format següents: ">
+<!ENTITY zotero.rtfScan.introPage.description "El Paperly pot recuperar i reformatar les cites i inserir una bibliografia als fitxers RTF. La funció d'escaneig dels fitxers RTF actualment permet les cites amb les variacions de format següents: ">
 <!ENTITY zotero.rtfScan.introPage.description2 "Per començar, seleccioneu un fitxer d'entrada RTF i un fitxer de sortida:">
 <!ENTITY zotero.rtfScan.scanPage.label "Escanejant en cerca de cites">
-<!ENTITY zotero.rtfScan.scanPage.description "El Zotero està escanejant el document cercant-hi cites. Tingueu pacipència.">
+<!ENTITY zotero.rtfScan.scanPage.description "El Paperly està escanejant el document cercant-hi cites. Tingueu pacipència.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verifica els elements citats">
-<!ENTITY zotero.rtfScan.citationsPage.description "Reviseu la llista de cites reconegudes següent per assegurar-vos que el Zotero ha seleccionat correctament els elements corresponents. Totes les cites desassociades o ambigües s'han de resoldre abans d'anar al següent pas.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Reviseu la llista de cites reconegudes següent per assegurar-vos que el Paperly ha seleccionat correctament els elements corresponents. Totes les cites desassociades o ambigües s'han de resoldre abans d'anar al següent pas.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formatació del document">
 <!ENTITY zotero.rtfScan.formatPage.label "Formatant les cites">
-<!ENTITY zotero.rtfScan.formatPage.description "El Zotero està processant i formatant el fitxer RTF. Tingueu paciència.">
+<!ENTITY zotero.rtfScan.formatPage.description "El Paperly està processant i formatant el fitxer RTF. Tingueu paciència.">
 <!ENTITY zotero.rtfScan.completePage.label "Escaneig de l'RFT completat">
 <!ENTITY zotero.rtfScan.completePage.description "El document ja s'ha analitzat i processat. Comproveu que s'ha formatat correctament.">
 <!ENTITY zotero.rtfScan.inputFile.label "Fitxer d'entrada">

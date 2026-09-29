@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Ustawienia Zotero">
+<!ENTITY zotero.preferences.title "Ustawienia Paperly">
 
 <!ENTITY zotero.preferences.helpButton.label "Pomoc">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "Automatycznie sprawdzaj, czy są dostępne aktualizacje translatorów i stylów">
 <!ENTITY zotero.preferences.updateNow "Aktualizuj teraz">
 <!ENTITY zotero.preferences.reportTranslationFailure "Zgłoś niedziałający translator strony">
-<!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobranych plików BibTeX/RIS/Refer">
+<!ENTITY zotero.preferences.parseRISRefer "Używaj Paperly do pobranych plików BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Automatycznie etykietuj elementy zawierające słowa kluczowe i nagłówki tematyczne">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Zapomniane hasło?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synchronizacja automatyczna">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Synchronizuj zawartość pełnotekstową">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero potrafi synchronizować zawartość pełnotekstową plików w twoich bibliotekach za pośrednictwem zotero.org i innych powiązanych urządzeń. Pozwala to łatwo przeszukiwać twoje pliki gdziekolwiek jesteś. Zawartość pełnotekstowa twoich plików nie będzie udostępniana publicznie.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly potrafi synchronizować zawartość pełnotekstową plików w twoich bibliotekach za pośrednictwem zotero.org i innych powiązanych urządzeń. Pozwala to łatwo przeszukiwać twoje pliki gdziekolwiek jesteś. Zawartość pełnotekstowa twoich plików nie będzie udostępniana publicznie.">
 <!ENTITY zotero.preferences.sync.about "Informacje o synchronizacji">
 <!ENTITY zotero.preferences.sync.fileSyncing "Synchronizacja plików">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Wyczyść historię synchronizacji danych">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Połącz lokalne dane ze zdalnymi, ignorując historię synchronizacji">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Przywróć z biblioteki zdalnej">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Nadpisz lokalne dane Zotero danymi z biblioteki zdalnej.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Nadpisz lokalne dane Paperly danymi z biblioteki zdalnej.">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Zamień zdalną bibliotekę">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Nadpisz dane w zdalnej bibliotece lokalnymi danymi Zotero.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Nadpisz dane w zdalnej bibliotece lokalnymi danymi Paperly.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porównaj wszystkie pliki załączników z przechowywanymi zdalnie.">
 <!ENTITY zotero.preferences.sync.reset "Przywróć">
@@ -98,7 +98,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "Opcje cytowania">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Dołącz adresy URL do pozycji bibliograficznych artykułów w wersji papierowej.">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Gdy ta opcja nie jest wybrana, Zotero dołącza adresy URL tylko wtedy, gdy cytowane są artykuły z czasopism, magazynów lub gazet, w których nie ma podanych zakresów stron.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Gdy ta opcja nie jest wybrana, Paperly dołącza adresy URL tylko wtedy, gdy cytowane są artykuły z czasopism, magazynów lub gazet, w których nie ma podanych zakresów stron.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Szybka kopia">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format elementu:">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualizacja">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Zotero (ikona paska adresu)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Paperly (ikona paska adresu)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Przenieś fokus na panel bibliotek (lewy)">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
 <!ENTITY zotero.preferences.keys.newItem "Utwórz nowy element">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Serwery pośredniczące">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Opcje serwerów pośredniczących">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero będzie niewidocznie przekierowywać żądania przez zapisane serwery pośredniczące. Zobacz">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly będzie niewidocznie przekierowywać żądania przez zapisane serwery pośredniczące. Zobacz">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentację serwera pośredniczącego">
 <!ENTITY zotero.preferences.proxies.desc_after_link "aby uzyskać więcej informacji.">
 <!ENTITY zotero.preferences.proxies.transparent "Włącz przekierowania przez serwery pośredniczące">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Nazwa">
-<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz „Dodaj” w menu wyszukiwania Zotero.">
+<!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz „Dodaj” w menu wyszukiwania Paperly.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 
 <!ENTITY zotero.preferences.charset "Kodowanie znaków">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "Przenieś do nowej domyślnej lokalizacji...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Katalog podstawowy załączników">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero użyje względnych ścieżek dla plików załączników w katalogu bazowym. Pozwoli ci to na dostęp do tych plików na różnych komputerach, dopóki struktura katalogów w katalogach bazowych pozostanie taka sama.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly użyje względnych ścieżek dla plików załączników w katalogu bazowym. Pozwoli ci to na dostęp do tych plików na różnych komputerach, dopóki struktura katalogów w katalogach bazowych pozostanie taka sama.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Katalog podstawowy:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Wybierz...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Przywróć absolutne ścieżki...">

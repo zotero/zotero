@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Ponastavi">
 
 
-<!ENTITY zotero.errorReport.title "Poročilo o napaki Zotero">
+<!ENTITY zotero.errorReport.title "Poročilo o napaki Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Počakajte, da je poročilo o napaki oddano.">
 <!ENTITY zotero.errorReport.submitted "Poročilo o napaki je bilo oddano.">
 <!ENTITY zotero.errorReport.reportID "ID poročila:">
 <!ENTITY zotero.errorReport.postToForums "Opišite težavo z ID-jem tega poročila na forumih Zotero (forums.zotero.org), skupaj s potrebnimi koraki za priklic takšne napake.">
 <!ENTITY zotero.errorReport.notReviewed "Poročila o napaki ponavadi niso vsa pregledana, razen če o njih poročate na forumu.">
 
-<!ENTITY zotero.upgrade.title "Čarovnik za nadgradnjo Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Namestili ste novejšo različico razširitve Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Vašo zbirko podatkov Zotero je potrebno nadgraditi, da bo delovala z novejšo različico.">
+<!ENTITY zotero.upgrade.title "Čarovnik za nadgradnjo Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Namestili ste novejšo različico razširitve Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Vašo zbirko podatkov Paperly je potrebno nadgraditi, da bo delovala z novejšo različico.">
 <!ENTITY zotero.upgrade.autoBackup "Vaša obstoječa zbirka podatkov bo samodejno varnostno kopirana, preden se opravijo spremembe.">
 <!ENTITY zotero.upgrade.majorUpgrade "To je ključna posodobitev.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Prepričajte se, da ste pregledali">
 <!ENTITY zotero.upgrade.majorUpgradeLink "navodila za posodabljanje,">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "preden nadaljujete.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Počakajte, da se postopek nadgradnje dokonča. To lahko znese nekaj minut.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Vaša zbirka podatkov Zotero je bila uspešno nadgrajena.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Vaša zbirka podatkov Paperly je bila uspešno nadgrajena.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Oglejte si">
 <!ENTITY zotero.upgrade.changeLogLink "zapisnik sprememb,">
 <!ENTITY zotero.upgrade.changeLogAfterLink "kjer so navedene novosti.">
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Prenosi s strežnika:">
 <!ENTITY zotero.sync.storage.uploads "Prenosi na strežnik:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Naslednja značka v vaši knjižnici Zotero ni več usklajena s strežnikom:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Naslednja značka v vaši knjižnici Paperly ni več usklajena s strežnikom:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Usklajene značke morajo obsegati manj kot 256 znakov.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Značko lahko razdelite na več znak, jo ročno uredite in s tem skrajšate ali pa izbrišete.">
 <!ENTITY zotero.sync.longTagFixer.split "Razdeli">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Dvoumni citati">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Povezani citati">
 <!ENTITY zotero.rtfScan.introPage.label "Uvod">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero lahko samodejno izlušči in preoblikuje citate ter vstavi bibliografijo v datoteke RTF. Za začetek spodaj izberite datoteko RTF.">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly lahko samodejno izlušči in preoblikuje citate ter vstavi bibliografijo v datoteke RTF. Za začetek spodaj izberite datoteko RTF.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Za začetek spodaj izberite vhodno datoteko RTF in izhodno datoteko:">
 <!ENTITY zotero.rtfScan.scanPage.label "Pregledovanje citatov">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero pregleduje citate v vašem dokumentu. Ostanite potrpežljivi.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly pregleduje citate v vašem dokumentu. Ostanite potrpežljivi.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Preveri citirane vnose">
-<!ENTITY zotero.rtfScan.citationsPage.description "Preglejte spodnji seznam prepoznanih citatov, da se prepričate, da je Zotero pravilno izbral ustrezne vnose. Vse nepovezane ali dvoumne citate je potrebno razločiti, preden nadaljujete na naslednji korak.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Preglejte spodnji seznam prepoznanih citatov, da se prepričate, da je Paperly pravilno izbral ustrezne vnose. Vse nepovezane ali dvoumne citate je potrebno razločiti, preden nadaljujete na naslednji korak.">
 <!ENTITY zotero.rtfScan.stylePage.label "Oblikovanje dokumenta">
 <!ENTITY zotero.rtfScan.formatPage.label "Oblikovanje citatov">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero obdeluje in oblikuje vašo datoteko RTF. Ostanite potrpežljivi.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly obdeluje in oblikuje vašo datoteko RTF. Ostanite potrpežljivi.">
 <!ENTITY zotero.rtfScan.completePage.label "Pregled dokumenta RTF dokončan">
 <!ENTITY zotero.rtfScan.completePage.description "Vaš dokument je bil pregledan in obdelan. Zagotovite, da je oblikovan pravilno.">
 <!ENTITY zotero.rtfScan.inputFile.label "Vhodna datoteka">

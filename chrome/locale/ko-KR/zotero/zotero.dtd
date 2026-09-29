@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "재설정">
 
 
-<!ENTITY zotero.errorReport.title "Zotero 오류 보고">
+<!ENTITY zotero.errorReport.title "Paperly 오류 보고">
 <!ENTITY zotero.errorReport.submissionInProgress "오류 보고가 제출되는 동안 기다려 주세요.">
 <!ENTITY zotero.errorReport.submitted "오류 보고가 제출되었습니다.">
 <!ENTITY zotero.errorReport.reportID "보고서 ID:">
 <!ENTITY zotero.errorReport.postToForums "Zotero 포럼(forums.zotero.org)에 보고서 ID, 문제 설명, 및 그것을 재연하는데 필요한 순서와 함께 메시지를 게시해주시기 바랍니다.">
 <!ENTITY zotero.errorReport.notReviewed "오류 보고서는 일반적으로 포럼내에서 언급하지 않는 한 재검토하지 않습니다.">
 
-<!ENTITY zotero.upgrade.title "Zotero 업그레이드 마법사">
-<!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Zotero를 설치했습니다.">
-<!ENTITY zotero.upgrade.upgradeRequired "Zotero 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
+<!ENTITY zotero.upgrade.title "Paperly 업그레이드 마법사">
+<!ENTITY zotero.upgrade.newVersionInstalled "새 버전의 Paperly를 설치했습니다.">
+<!ENTITY zotero.upgrade.upgradeRequired "Paperly 데이터베이스는 반드시 새 버전으로 작업하기 위해 업그레이드 해야 합니다.">
 <!ENTITY zotero.upgrade.autoBackup "현재의 데이터베이스는 어떤한 변경을 하기 전에 자동으로 백업을 할 겁니다.">
 <!ENTITY zotero.upgrade.majorUpgrade "이것은 중요 업그레이드입니다.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "업그레이드를 진행하기 전에">
 <!ENTITY zotero.upgrade.majorUpgradeLink "업그레이드 지침">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "을 참조하시기 바랍니다.">
 <!ENTITY zotero.upgrade.upgradeInProgress "업그레이드 과정이 끝나기까지 기다려 주십시오. 몇 분정도 걸릴 예정입니다.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero 데이타베이스는 성공적으로 업그레이드 되었습니다.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Paperly 데이타베이스는 성공적으로 업그레이드 되었습니다.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "새롭게 달라진 기능은 다음을 참고하십시오: ">
 <!ENTITY zotero.upgrade.changeLogLink "변경 사항">
 <!ENTITY zotero.upgrade.changeLogAfterLink "보기">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 스캔">
 <!ENTITY zotero.toolbar.preferences.label "환경설정...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "지원 및 도움말">
-<!ENTITY zotero.toolbar.about.label "Zotero 정보">
+<!ENTITY zotero.toolbar.about.label "Paperly 정보">
 <!ENTITY zotero.toolbar.openURL.label "위치">
 <!ENTITY zotero.toolbar.openURL.tooltip "로컬 라이브러리에서 검색">
 
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "모호한 인용">
 <!ENTITY zotero.rtfScan.mappedCitations.label "문헌확인된 인용">
 <!ENTITY zotero.rtfScan.introPage.label "소개">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero가 인용을 자동으로 인식하여 다시 꾸미고 참고문헌 목록을 RTF 파일에 삽입합니다. RTF 스캔 기능은 현재 다음 형식으로 작성된 인용을 인식할 수 있습니다:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly가 인용을 자동으로 인식하여 다시 꾸미고 참고문헌 목록을 RTF 파일에 삽입합니다. RTF 스캔 기능은 현재 다음 형식으로 작성된 인용을 인식할 수 있습니다:">
 <!ENTITY zotero.rtfScan.introPage.description2 "시작하려면, 입력할 RTF 파일과 출력할 RTF 파일을 선택하세요 : ">
 <!ENTITY zotero.rtfScan.scanPage.label "인용 스캔중">
 <!ENTITY zotero.rtfScan.scanPage.description "인용 조사를 위해 문서 스캔 중 입니다. 잠시만 기다려주십시오.">
 <!ENTITY zotero.rtfScan.citationsPage.label "인용된 항목 확인">
-<!ENTITY zotero.rtfScan.citationsPage.description "다음의 인식된 인용 목록을 검토하여 Zotero가 상응하는 항목을 정확하게 선택했는지 확인하세요. 애매하거나 올바르지 않은 인용이 있으면 다음 단계로 넘어가기 전에 반드시 바르게 수정해야 합니다.">
+<!ENTITY zotero.rtfScan.citationsPage.description "다음의 인식된 인용 목록을 검토하여 Paperly가 상응하는 항목을 정확하게 선택했는지 확인하세요. 애매하거나 올바르지 않은 인용이 있으면 다음 단계로 넘어가기 전에 반드시 바르게 수정해야 합니다.">
 <!ENTITY zotero.rtfScan.stylePage.label "문서 양식">
 <!ENTITY zotero.rtfScan.formatPage.label "인용 서식 적용 중">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero가 RTF 파일을 처리하고 양식을 적용하는 중입니다. 잠시 기다려 주십시오.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly가 RTF 파일을 처리하고 양식을 적용하는 중입니다. 잠시 기다려 주십시오.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 스캔 완료">
 <!ENTITY zotero.rtfScan.completePage.description "이제 문서가 스캔되어 처리되었습니다. 문서 양식이 올바른지 확인하여 주십시오.">
 <!ENTITY zotero.rtfScan.inputFile.label "입력 파일">

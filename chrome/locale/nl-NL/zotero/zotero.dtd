@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Herstellen">
 
 
-<!ENTITY zotero.errorReport.title "Zotero-foutrapportage">
+<!ENTITY zotero.errorReport.title "Paperly-foutrapportage">
 <!ENTITY zotero.errorReport.submissionInProgress "Even geduld a.u.b. totdat het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.submitted "Het foutenrapport is verstuurd.">
 <!ENTITY zotero.errorReport.reportID "Rapport ID:">
 <!ENTITY zotero.errorReport.postToForums "Plaats een bericht op het (Engelstalige) Zotero-forum (forums.zotero.org) onder vermelding van het Rapport ID, een omschrijving van het probleem, en de stappen die nodig zijn om het probleem te reproduceren.">
 <!ENTITY zotero.errorReport.notReviewed "Foutenrapporten worden niet bekeken tenzij u ernaar verwijst in het forum.">
 
-<!ENTITY zotero.upgrade.title "Zotero-Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Zotero geïnstalleerd.">
-<!ENTITY zotero.upgrade.upgradeRequired "Uw Zotero-database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
+<!ENTITY zotero.upgrade.title "Paperly-Upgrade Wizard">
+<!ENTITY zotero.upgrade.newVersionInstalled "U heeft een nieuwe versie van Paperly geïnstalleerd.">
+<!ENTITY zotero.upgrade.upgradeRequired "Uw Paperly-database moet bijgewerkt worden om te kunnen werken met de nieuwe versie.">
 <!ENTITY zotero.upgrade.autoBackup "Er zal een reservekopie van uw bestaande database worden gemaakt voordat er wijzigingen worden doorgevoerd.">
 <!ENTITY zotero.upgrade.majorUpgrade "Dit is een omvangrijke upgrade.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Lees daarom eerst de">
 <!ENTITY zotero.upgrade.majorUpgradeLink "upgrade-instructies">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "voordat u verder gaat.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Wacht totdat het upgradeproces is voltooid. Dit kan enige minuten duren.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Uw Zotero-database is met succes bijgewerkt.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Uw Paperly-database is met succes bijgewerkt.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Bekijk">
 <!ENTITY zotero.upgrade.changeLogLink "het logboek van veranderingen">
 <!ENTITY zotero.upgrade.changeLogAfterLink "om te zien wat er in de nieuwe versie veranderd is.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
 <!ENTITY zotero.toolbar.preferences.label "Voorkeuren…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Ondersteuning en documentatie">
-<!ENTITY zotero.toolbar.about.label "Over Zotero">
+<!ENTITY zotero.toolbar.about.label "Over Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Opzoeken">
 <!ENTITY zotero.toolbar.openURL.tooltip "Via uw lokale bibliotheek opzoeken">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Downloads:">
 <!ENTITY zotero.sync.storage.uploads "Uploads:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Het volgende label in uw Zotero-bibliotheek is te lang om met de server te kunnen synchroniseren:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Het volgende label in uw Paperly-bibliotheek is te lang om met de server te kunnen synchroniseren:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Gesynchroniseerde labels moeten korten zijn dan 256 tekens.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "U kunt het label opdelen in meerdere labels, het label handmatig inkorten, of het label verwijderen.">
 <!ENTITY zotero.sync.longTagFixer.split "Opdelen">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Meerduidige verwijzingen">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Herkende verwijzingen">
 <!ENTITY zotero.rtfScan.introPage.label "Introductie">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisch verwijzingen in RTF-bestanden herkennen, opnieuw opmaken en een bibliografie toevoegen. De RTF-scan-functie ondersteunt momenteel alleen verwijzingen die opgemaakt zijn volgens de onderstaande formaten:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly kan automatisch verwijzingen in RTF-bestanden herkennen, opnieuw opmaken en een bibliografie toevoegen. De RTF-scan-functie ondersteunt momenteel alleen verwijzingen die opgemaakt zijn volgens de onderstaande formaten:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Selecteer een RTF-invoerbestand en een uitvoerbestand om te beginnen:">
 <!ENTITY zotero.rtfScan.scanPage.label "Bezig met zoeken naar verwijzingen">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is uw document aan het doorzoeken naar verwijzingen. Even geduld a.u.b.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly is uw document aan het doorzoeken naar verwijzingen. Even geduld a.u.b.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Controleer geciteerde items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Bekijk de lijst met herkende verwijzingen om er zeker van te zijn dat Zotero de juiste corresponderende items heeft gevonden. Niet-herkende of meerduidige verwijzingen moeten worden nagekeken voordat naar de volgende stap kan worden gegaan.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Bekijk de lijst met herkende verwijzingen om er zeker van te zijn dat Paperly de juiste corresponderende items heeft gevonden. Niet-herkende of meerduidige verwijzingen moeten worden nagekeken voordat naar de volgende stap kan worden gegaan.">
 <!ENTITY zotero.rtfScan.stylePage.label "Opmaken van het document">
 <!ENTITY zotero.rtfScan.formatPage.label "Verwijzingen opmaken">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is het RTF-bestand aan het verwerken en opmaken. Even geduld a.u.b.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly is het RTF-bestand aan het verwerken en opmaken. Even geduld a.u.b.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF-scan voltooid">
 <!ENTITY zotero.rtfScan.completePage.description "Uw document is gescand en verwerkt. Controleer of de tekst goed is opgemaakt.">
 <!ENTITY zotero.rtfScan.inputFile.label "Invoerbestand">

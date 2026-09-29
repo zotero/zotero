@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "リセット">
 
 
-<!ENTITY zotero.errorReport.title "Zotero エラーレポート">
+<!ENTITY zotero.errorReport.title "Paperly エラーレポート">
 <!ENTITY zotero.errorReport.submissionInProgress "エラーレポートが送信されるまでお待ちください。">
 <!ENTITY zotero.errorReport.submitted "エラーレポートが送信されました。">
 <!ENTITY zotero.errorReport.reportID "レポート ID :">
 <!ENTITY zotero.errorReport.postToForums "このレポート ID、問題の説明、および問題を再現するために必要なあらゆる手順について、Zotero フォーラム (forums.zotero.org)に投稿して下さい。">
 <!ENTITY zotero.errorReport.notReviewed "エラーレポートはフォーラムで言及されない限り、調査されることはありません。">
 
-<!ENTITY zotero.upgrade.title "Zotero 更新ガイド">
-<!ENTITY zotero.upgrade.newVersionInstalled "Zotero の新しいバージョンがインストールされました。">
-<!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にあなたの Zotero データベースを更新する必要があります。">
+<!ENTITY zotero.upgrade.title "Paperly 更新ガイド">
+<!ENTITY zotero.upgrade.newVersionInstalled "Paperly の新しいバージョンがインストールされました。">
+<!ENTITY zotero.upgrade.upgradeRequired "新しいバージョンを使用する前にあなたの Paperly データベースを更新する必要があります。">
 <!ENTITY zotero.upgrade.autoBackup "変更が行われる前に既存のデータベースはすべて自動的にバックアップされます。">
 <!ENTITY zotero.upgrade.majorUpgrade "これは重要な更新です。">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "続ける前に">
 <!ENTITY zotero.upgrade.majorUpgradeLink "更新の手引きを">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "まずご確認ください。">
 <!ENTITY zotero.upgrade.upgradeInProgress "この更新が終了するまでお待ちください。数分間かかる場合もあります。">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zotero データベースは問題なく更新されました。">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Paperly データベースは問題なく更新されました。">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "新機能と改良点については">
 <!ENTITY zotero.upgrade.changeLogLink "更新履歴">
 <!ENTITY zotero.upgrade.changeLogAfterLink "をご覧ください。">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF スキャン">
 <!ENTITY zotero.toolbar.preferences.label "環境設定...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "サポートとヘルプ">
-<!ENTITY zotero.toolbar.about.label "Zotero について">
+<!ENTITY zotero.toolbar.about.label "Paperly について">
 <!ENTITY zotero.toolbar.openURL.label "出典の確認">
 <!ENTITY zotero.toolbar.openURL.tooltip "地元の図書館で検索">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "ダウンロード :">
 <!ENTITY zotero.sync.storage.uploads "アップロード :">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "あなたの Zotero ライブラリにある以下のタグは、サーバと同期させるには長過ぎます。">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "あなたの Paperly ライブラリにある以下のタグは、サーバと同期させるには長過ぎます。">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "タグを同期させるには 256 文字以下である必要があります。">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "問題のタグを複数のタグに分割するか、手動でタグを編集して短くするか、あるいは削除してください。">
 <!ENTITY zotero.sync.longTagFixer.split "分割">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "曖昧な引用文献">
 <!ENTITY zotero.rtfScan.mappedCitations.label "マップ済みの引用文献">
 <!ENTITY zotero.rtfScan.introPage.label "案内">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero は RTF ファイルから自動的に引用文献を抽出し、引用文献を再整形して、参考文献を挿入することができます。この RTF スキャン機能は現在、以下に挙げる形式の引用文献をサポートしています:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly は RTF ファイルから自動的に引用文献を抽出し、引用文献を再整形して、参考文献を挿入することができます。この RTF スキャン機能は現在、以下に挙げる形式の引用文献をサポートしています:">
 <!ENTITY zotero.rtfScan.introPage.description2 "まず最初に、RTF 入力元ファイルと出力先ファイルを下記から選んでください。">
 <!ENTITY zotero.rtfScan.scanPage.label "引用文献をスキャンしています">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero はあなたの文書の引用文献をスキャンしています。しばらくお待ちください。">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly はあなたの文書の引用文献をスキャンしています。しばらくお待ちください。">
 <!ENTITY zotero.rtfScan.citationsPage.label "引用された項目を検証する">
-<!ENTITY zotero.rtfScan.citationsPage.description "以下に表示される、 Zotero が認識した引用文献の一覧をご覧頂き、対応する文献を正しく見つけたかどうかご確認ください。次の手順に進む前に、文献不明の引用文献やあいまいな引用文献はすべて解消される必要があります。">
+<!ENTITY zotero.rtfScan.citationsPage.description "以下に表示される、 Paperly が認識した引用文献の一覧をご覧頂き、対応する文献を正しく見つけたかどうかご確認ください。次の手順に進む前に、文献不明の引用文献やあいまいな引用文献はすべて解消される必要があります。">
 <!ENTITY zotero.rtfScan.stylePage.label "文書の書式設定">
 <!ENTITY zotero.rtfScan.formatPage.label "引用文献の書式設定">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero はあなたの RTF ファイルを処理中、整形中です。しばらくお待ちください。">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly はあなたの RTF ファイルを処理中、整形中です。しばらくお待ちください。">
 <!ENTITY zotero.rtfScan.completePage.label "RTF スキャンが完了しました">
 <!ENTITY zotero.rtfScan.completePage.description "あなたの文書はスキャンされ処理が完了しました。正しく整形されていることを確認してください。">
 <!ENTITY zotero.rtfScan.inputFile.label "入力元ファイル">

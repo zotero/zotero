@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Berrezarri">
 
 
-<!ENTITY zotero.errorReport.title "Zotero errore txostena">
+<!ENTITY zotero.errorReport.title "Paperly errore txostena">
 <!ENTITY zotero.errorReport.submissionInProgress "Mesedez, itxoin errore txostena bidaltzen den bitartean.">
 <!ENTITY zotero.errorReport.submitted "Zure errore txostena bidali da.">
 <!ENTITY zotero.errorReport.reportID "Txostenaren IDa:">
 <!ENTITY zotero.errorReport.postToForums "Mesedez, bidal ezazu mezu bat Zotero foroetara (forums.zotero.org) Txosten ID hau, arazoaren deskribapen bat, eta arazoa sortzeko urratsak azalduz.">
 <!ENTITY zotero.errorReport.notReviewed "Errore txostenak ez daude ikusgarri foroetan erreferentziarik egiten ez zaien artean.">
 
-<!ENTITY zotero.upgrade.title "Zotero bertsio-berritzeko morroia">
-<!ENTITY zotero.upgrade.newVersionInstalled "Zotero-ren bertsio berria instalatu egin duzu.">
-<!ENTITY zotero.upgrade.upgradeRequired "Zure Zotero datu-basea bertsio-berritu egin behar da bertsio berriarekin erabili ahal izateko.">
+<!ENTITY zotero.upgrade.title "Paperly bertsio-berritzeko morroia">
+<!ENTITY zotero.upgrade.newVersionInstalled "Paperly-ren bertsio berria instalatu egin duzu.">
+<!ENTITY zotero.upgrade.upgradeRequired "Zure Paperly datu-basea bertsio-berritu egin behar da bertsio berriarekin erabili ahal izateko.">
 <!ENTITY zotero.upgrade.autoBackup "Zure oraingo datu-basea gorde egingo da inolako aldaketarik egin baino lehen..">
 <!ENTITY zotero.upgrade.majorUpgrade "Bertsio-berritze hau garrantzitsua da.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Irakur itzazu">
 <!ENTITY zotero.upgrade.majorUpgradeLink "bertsio-berritzerako argibideak">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "jarraitu aurretik.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Mesedez, itxaron bertsio-berritzea burutu arte. Horrek minutu batzuk iraun ditzake.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Zure Zotero datu-basea bertsio-berritu egin da.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Zure Paperly datu-basea bertsio-berritu egin da.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Ikus ezazu">
 <!ENTITY zotero.upgrade.changeLogLink "aldaketen erregistroa">
 <!ENTITY zotero.upgrade.changeLogAfterLink "berrikuntzen berri izateko.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "RTF eskaneatzea">
 <!ENTITY zotero.toolbar.preferences.label "Hobespenak...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Laguntza eta dokumentazioa">
-<!ENTITY zotero.toolbar.about.label "Zotero-ri buruz">
+<!ENTITY zotero.toolbar.about.label "Paperly-ri buruz">
 <!ENTITY zotero.toolbar.openURL.label "Aurkitu">
 <!ENTITY zotero.toolbar.openURL.tooltip "Zure tokiko liburutegiaren bitartez bilatu">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Deskargak:">
 <!ENTITY zotero.sync.storage.uploads "Igoerak:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Zure Zotero liburutegiko ondorengo etiketa luzeegia da zerbitzarian gordetzeko:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Zure Paperly liburutegiko ondorengo etiketa luzeegia da zerbitzarian gordetzeko:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Sinkronizatutako etiketek 256 karaktere baino gutxiago izan behar dituzte.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Etiketa ugaritan banatu ala eskuz editatu dezakezu etiketa laburragoa egiteko, edo ezabatu egin dezakezu.">
 <!ENTITY zotero.sync.longTagFixer.split "Banatu">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Aipu anbiguoak">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Mapeatutako aipuak">
 <!ENTITY zotero.rtfScan.introPage.label "Sarrera">
-<!ENTITY zotero.rtfScan.introPage.description "Zoterok automatitkoki erauzi eta birformatu ditzake aipuak eta bibliografia bat txertatu RTF fitxategietan. RTF eskaneatzeko ezaugarriak honako formatuen aldagaiak darabiltzaten aipuak onartzen ditu:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperlyk automatitkoki erauzi eta birformatu ditzake aipuak eta bibliografia bat txertatu RTF fitxategietan. RTF eskaneatzeko ezaugarriak honako formatuen aldagaiak darabiltzaten aipuak onartzen ditu:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Hasteko, aukeratu RTF sarrera eta irteera fitxategiak behean:">
 <!ENTITY zotero.rtfScan.scanPage.label "Aipuak eskaneatzen">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero zure fitxategia eskaneatzen ari da aipu bila. Mesedez, pazientzia izan.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly zure fitxategia eskaneatzen ari da aipu bila. Mesedez, pazientzia izan.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Baieztatu aipatutako elementuak">
-<!ENTITY zotero.rtfScan.citationsPage.description "Mesedez, gainbegiratu honako ezagututako aipuen zerrenda, Zoterok dagozkion elementuak egoki hautatu dituela baieztatzeko. Mapeatu gabeko edo anbiguoa den edozein elementu zuzendu beharko da hurrengo urratsarekin jarraitu aurretik.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Mesedez, gainbegiratu honako ezagututako aipuen zerrenda, Paperlyk dagozkion elementuak egoki hautatu dituela baieztatzeko. Mapeatu gabeko edo anbiguoa den edozein elementu zuzendu beharko da hurrengo urratsarekin jarraitu aurretik.">
 <!ENTITY zotero.rtfScan.stylePage.label "Dokumentuaren formatua">
 <!ENTITY zotero.rtfScan.formatPage.label "Aipuen formatua">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero zure RTF fitxategia prozesatzen eta formateatzen ari da. Mesedez, pazientzia izan.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly zure RTF fitxategia prozesatzen eta formateatzen ari da. Mesedez, pazientzia izan.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF eskaneatzea amaituta">
 <!ENTITY zotero.rtfScan.completePage.description "Zure dokumentua eskaneatua eta prozesatua izan da. Mesedez, ziurtatu egoki formateatua dagoela.">
 <!ENTITY zotero.rtfScan.inputFile.label "Sarrera fitxategia">

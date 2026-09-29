@@ -1,7 +1,7 @@
 <!ENTITY scaffold.toolbar.new.label						"New Translator">
 <!ENTITY scaffold.toolbar.load.label					"Open">
 <!ENTITY scaffold.toolbar.save.label					"Save">
-<!ENTITY scaffold.toolbar.saveToZotero.label			"Save to Zotero">
+<!ENTITY scaffold.toolbar.saveToZotero.label			"Save to Paperly">
 <!ENTITY scaffold.toolbar.template.newWeb.label			"Web Translator">
 <!ENTITY scaffold.toolbar.template.scrape.label			"Scrape Function Using">
 <!ENTITY scaffold.toolbar.export.label					"Export">

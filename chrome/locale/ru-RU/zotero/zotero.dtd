@@ -25,23 +25,23 @@
 <!ENTITY zotero.general.reset "Сбросить">
 
 
-<!ENTITY zotero.errorReport.title "Отчет об ошибке Zotero">
+<!ENTITY zotero.errorReport.title "Отчет об ошибке Paperly">
 <!ENTITY zotero.errorReport.submissionInProgress "Подождите, пока отчёт об ошибке будет отправлен.">
 <!ENTITY zotero.errorReport.submitted "Отчёт об ошибке отправлен.">
 <!ENTITY zotero.errorReport.reportID "Номер отчёта:">
 <!ENTITY zotero.errorReport.postToForums "Пожалуйста, оставьте сообщение на форуме Zotero (forums.zotero.org), указав этот номер отчёта, описание проблемы, и какие шаги нужно предпринять чтобы воспроизвести её.">
 <!ENTITY zotero.errorReport.notReviewed "Отчёты об ошибках не рассматриваются, пока на них не сослались в форуме.">
 
-<!ENTITY zotero.upgrade.title "Мастер обновления Zotero">
-<!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Zotero должна быть обновлена для работы с новой версией.">
+<!ENTITY zotero.upgrade.title "Мастер обновления Paperly">
+<!ENTITY zotero.upgrade.newVersionInstalled "Вы установили новую версию Paperly.">
+<!ENTITY zotero.upgrade.upgradeRequired "Ваша база данных Paperly должна быть обновлена для работы с новой версией.">
 <!ENTITY zotero.upgrade.autoBackup "Резервная копия вашей базы данных Zotero будет сделана автоматически до каких-либо изменений.">
 <!ENTITY zotero.upgrade.majorUpgrade "Это крупное обновление.">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Пожалуйста, посмотрите">
 <!ENTITY zotero.upgrade.majorUpgradeLink "инструкцию к обновлению">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "прежде чем продолжить.">
 <!ENTITY zotero.upgrade.upgradeInProgress "Дождитесь окончания процесса обновления. Это займёт некоторое время.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база данных Zotero была успешно обновлена.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "Ваша база данных Paperly была успешно обновлена.">
 <!ENTITY zotero.upgrade.changeLogBeforeLink "Пожалуйста, посмотрите">
 <!ENTITY zotero.upgrade.changeLogLink "журнал изменений">
 <!ENTITY zotero.upgrade.changeLogAfterLink "чтобы узнать что нового.">
@@ -90,7 +90,7 @@
 <!ENTITY zotero.toolbar.rtfScan.label "Поиск ссылок в RTF-документе">
 <!ENTITY zotero.toolbar.preferences.label "Настройки…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Поддержка и документация">
-<!ENTITY zotero.toolbar.about.label "О Zotero">
+<!ENTITY zotero.toolbar.about.label "О Paperly">
 <!ENTITY zotero.toolbar.openURL.label "Найти">
 <!ENTITY zotero.toolbar.openURL.tooltip "Найти в библиотеке на этом компьютере">
 
@@ -235,7 +235,7 @@
 <!ENTITY zotero.sync.storage.downloads "Загрузки:">
 <!ENTITY zotero.sync.storage.uploads "Закачки:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Данный тег в вашей библиотеке Zotero слишком длинный для синхронизации с сервером:">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Данный тег в вашей библиотеке Paperly слишком длинный для синхронизации с сервером:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Синхронизируемые теги должны быть короче 256 символов.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "Вы можете разделить этот тег на несколько, укоротить его вручную или удалить его.">
 <!ENTITY zotero.sync.longTagFixer.split "Разделить">
@@ -274,15 +274,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Неоднозначные цитаты">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Определённые цитаты">
 <!ENTITY zotero.rtfScan.introPage.label "Введение">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero может автоматически извлекать и переформатировать цитаты, а также вставлять библиографию в файл RTF. В настоящее время функция сканирования RTF распознаёт цитаты в следующих форматах:">
+<!ENTITY zotero.rtfScan.introPage.description "Paperly может автоматически извлекать и переформатировать цитаты, а также вставлять библиографию в файл RTF. В настоящее время функция сканирования RTF распознаёт цитаты в следующих форматах:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Чтобы начать, выберите ниже входной файл RTF и выходной файл:">
 <!ENTITY zotero.rtfScan.scanPage.label "Сканирование на наличие цитат">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero сканирует ваш документ на наличие цитат. Пожалуйста, подождите.">
+<!ENTITY zotero.rtfScan.scanPage.description "Paperly сканирует ваш документ на наличие цитат. Пожалуйста, подождите.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Проверить цитированные записи">
-<!ENTITY zotero.rtfScan.citationsPage.description "Пожалуйста, проверьте список распознанных цитат, чтобы убедиться, что Zotero правильно выбрал соответствующие записи. Необходимо принять решение по всем неопределённым или неоднозначным цитатам, прежде чем перейти к следующему шагу.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Пожалуйста, проверьте список распознанных цитат, чтобы убедиться, что Paperly правильно выбрал соответствующие записи. Необходимо принять решение по всем неопределённым или неоднозначным цитатам, прежде чем перейти к следующему шагу.">
 <!ENTITY zotero.rtfScan.stylePage.label "Форматирование документа">
 <!ENTITY zotero.rtfScan.formatPage.label "Форматирование цитат">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero обрабатывает и форматирует ваш файл RTF. Пожалуйста, подождите.">
+<!ENTITY zotero.rtfScan.formatPage.description "Paperly обрабатывает и форматирует ваш файл RTF. Пожалуйста, подождите.">
 <!ENTITY zotero.rtfScan.completePage.label "Сканирование RTF завершено">
 <!ENTITY zotero.rtfScan.completePage.description "Ваш документ был сканирован и обработан. Пожалуйста, проверьте, что он отформатирован правильно.">
 <!ENTITY zotero.rtfScan.inputFile.label "Входной файл">

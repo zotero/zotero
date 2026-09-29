@@ -6,7 +6,7 @@
 <!ENTITY hideOtherAppsCmdMac.label "나머지 숨기기">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "모두 보이기">
-<!ENTITY quitApplicationCmdMac.label "Zotero 종료">
+<!ENTITY quitApplicationCmdMac.label "Paperly 종료">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 <!ENTITY fileMenu.label "파일">

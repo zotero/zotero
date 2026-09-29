@@ -1,4 +1,4 @@
-<!ENTITY zotero.preferences.title "Zotero 환경설정">
+<!ENTITY zotero.preferences.title "Paperly 환경설정">
 
 <!ENTITY zotero.preferences.helpButton.label "도움말">
 
@@ -21,7 +21,7 @@
 <!ENTITY zotero.preferences.autoUpdate "중계기 및 스타일 업데이트를 자동으로 확인">
 <!ENTITY zotero.preferences.updateNow "지금 업데이트">
 <!ENTITY zotero.preferences.reportTranslationFailure "고장난 사이트 중계기 신고">
-<!ENTITY zotero.preferences.parseRISRefer "다운로드한 BibTeX/RIS/Refer 파일에 Zotero 사용">
+<!ENTITY zotero.preferences.parseRISRefer "다운로드한 BibTeX/RIS/Refer 파일에 Paperly 사용">
 <!ENTITY zotero.preferences.automaticTags "키워드와 제목으로 태그 자동 지정">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통으로 이동 후 ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "일이 지나면 자동으로 삭제">
@@ -52,7 +52,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "비밀번호를 분실하셨나요?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "자동 동기화">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "전문(全文) 동기화">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero는 Zotero 라이브러리에 있는 파일의 전체 텍스트 콘텐츠를 zotero.org 및 기타 연결된 장치와 동기화하여 어디에서든 파일을 쉽게 검색할 수 있도록 합니다. 파일의 전체 텍스트 콘텐츠는 공개적으로 공유되지 않습니다.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Paperly는 Paperly 라이브러리에 있는 파일의 전체 텍스트 콘텐츠를 zotero.org 및 기타 연결된 장치와 동기화하여 어디에서든 파일을 쉽게 검색할 수 있도록 합니다. 파일의 전체 텍스트 콘텐츠는 공개적으로 공유되지 않습니다.">
 <!ENTITY zotero.preferences.sync.about "동기화 알아보기">
 <!ENTITY zotero.preferences.sync.fileSyncing "파일 동기화">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -72,9 +72,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 초기화">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "온라인 라이브러리에서 복원">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "로컬 Zotero 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "로컬 Paperly 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "온라인 라이브러리 교체">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "온라인 라이브러리를 로컬 Zotero 데이터로 덮어씁니다">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "온라인 라이브러리를 로컬 Paperly 데이터로 덮어씁니다">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 초기화">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교합니다">
 <!ENTITY zotero.preferences.sync.reset "초기화">
@@ -121,7 +121,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "업데이트됨">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Zotero에 저장 (주소 표시줄 아이콘)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Paperly에 저장 (주소 표시줄 아이콘)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "라이브러리 창에 포커스">
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
 <!ENTITY zotero.preferences.keys.newItem "새 항목 작성">
@@ -135,7 +135,7 @@
 <!ENTITY zotero.preferences.prefpane.proxies "프록시">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "프록시 설정">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero가 요청사항을 저장된 프록시를 통해 재전송합니다. 참조 :">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Paperly가 요청사항을 저장된 프록시를 통해 재전송합니다. 참조 :">
 <!ENTITY zotero.preferences.proxies.desc_link "프록시 문서">
 <!ENTITY zotero.preferences.proxies.desc_after_link "추가 정보.">
 <!ENTITY zotero.preferences.proxies.transparent "이전에 사용한 프록시를 통해 투명하게 요청 재지정">
@@ -165,7 +165,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article 검색 엔진 메니저">
 <!ENTITY zotero.preferences.locate.description "설명">
 <!ENTITY zotero.preferences.locate.name "이름">
-<!ENTITY zotero.preferences.locate.addDescription "목록에 없는 검색 엔진을 추가하려면, 브라우저에서 원하는 검색 엔진에 접속한 뒤 Zotero의 Locate 메뉴에서 추가를 선택하세요.*">
+<!ENTITY zotero.preferences.locate.addDescription "목록에 없는 검색 엔진을 추가하려면, 브라우저에서 원하는 검색 엔진에 접속한 뒤 Paperly의 Locate 메뉴에서 추가를 선택하세요.*">
 <!ENTITY zotero.preferences.locate.restoreDefaults "기본값 복원">
 
 <!ENTITY zotero.preferences.charset "문자 인코딩">
@@ -181,7 +181,7 @@
 <!ENTITY zotero.preferences.dataDir.migrate "새로운 기본 위치로 이주...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "연결된 첨부 파일 기본 디렉토리">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero는 링크된 첨부 파일을 기본 디렉토리를 기준으로 하는 상대 경로로 참조합니다. 이를 통해 기본 디렉토리 하위의 파일 구조가 같게 유지되는 한 다른 컴퓨터에서도 파일에 접근할 수 있게 합니다.">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Paperly는 링크된 첨부 파일을 기본 디렉토리를 기준으로 하는 상대 경로로 참조합니다. 이를 통해 기본 디렉토리 하위의 파일 구조가 같게 유지되는 한 다른 컴퓨터에서도 파일에 접근할 수 있게 합니다.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "기본 경로:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "선택...">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "절대 경로로 되돌리기...">
