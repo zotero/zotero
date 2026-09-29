@@ -1,7 +1,7 @@
 export var ZOTERO_CONFIG = {
 	GUID: 'zotero@zotero.org',
 	ID: 'zotero', // used for db filename, etc.
-	CLIENT_NAME: 'Zotero',
+	CLIENT_NAME: 'Paperly',
 	DOMAIN_NAME: 'zotero.org',
 	PRODUCER: 'Digital Scholar',
 	PRODUCER_URL: 'https://digitalscholar.org',

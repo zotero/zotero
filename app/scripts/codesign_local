@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-# Perform ad-hoc code signing of Zotero.app for local usage
+# Perform ad-hoc code signing of Paperly.app for local usage
 #
 # Currently we sign only the Word dylib, since that's necessary for Zotero developers to work on
 # Word integration on Apple Silicon. If we discover other problems, we can uncomment some of the
@@ -13,7 +13,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 . "$ROOT_DIR/config.sh"
 
 if [ -z "${1:-}" ]; then
-	echo "Usage: $0 path/to/staging/Zotero.app"
+	echo "Usage: $0 path/to/staging/Paperly.app"
 	exit 1
 fi
 
@@ -26,7 +26,7 @@ entitlements_file="$ROOT_DIR/mac/entitlements.xml"
 #	"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater"
 #find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
 #find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
-#/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
+#/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/paperly"
 
 # Skip signing of Safari extension, since it's not present for local builds
 

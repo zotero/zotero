@@ -1084,7 +1084,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				relDir = 'Zotero';
 			}
 			else if (Zotero.isMac) {
-				relDir = 'org.zotero.zotero';
+				relDir = 'org.paperly.paperly';
 			}
 			else {
 				relDir = 'zotero';

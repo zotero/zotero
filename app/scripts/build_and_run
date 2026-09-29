@@ -80,7 +80,7 @@ else
 fi
 
 if [ "`uname`" = "Darwin" ]; then
-	command="Zotero.app/Contents/MacOS/zotero"
+	command="Paperly.app/Contents/MacOS/paperly"
 elif [ "`uname`" = "Linux" ]; then
 	if [[ "`uname -m`" = "aarch64" ]]; then
 		command="Zotero_linux-arm64/zotero"

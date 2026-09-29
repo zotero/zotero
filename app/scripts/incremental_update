@@ -80,7 +80,7 @@ fi
 # Make sure a staged build exists for the requested platform
 case $platform in
 	m)
-		app_dir="$STAGE_DIR/Zotero.app/Contents/Resources"
+		app_dir="$STAGE_DIR/Paperly.app/Contents/Resources"
 		;;
 	w)
 		app_dir="$STAGE_DIR/Zotero_$(get_canonical_arch w "$arch")"

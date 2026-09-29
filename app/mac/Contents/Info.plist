@@ -158,13 +158,13 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>zotero</string>
+	<string>paperly</string>
 	<key>CFBundleGetInfoString</key>
 	<string>Paperly {{VERSION}}, © 2006-2018 Contributors</string>
 	<key>CFBundleIconFile</key>
 	<string>paperly</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.zotero.zotero</string>
+	<string>org.paperly.paperly</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

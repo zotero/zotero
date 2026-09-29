@@ -169,7 +169,7 @@ fi
 # happen when the staged build is fully rebuilt -- incremental updates don't
 # touch the dylib.
 if [[ $platform = "m" ]] && [[ "$(uname -s)" = "Darwin" ]]; then
-	"$SCRIPT_DIR/codesign_local" "$STAGE_DIR/Zotero.app"
+	"$SCRIPT_DIR/codesign_local" "$STAGE_DIR/Paperly.app"
 fi
 
 echo Done

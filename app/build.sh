@@ -682,10 +682,10 @@ find "$BUILD_DIR" -name .DS_Store -exec rm -f {} \;
 
 # Mac
 if [ $BUILD_MAC == 1 ]; then
-	echo 'Building Zotero.app'
+	echo 'Building Paperly.app'
 		
 	# Set up directory structure
-	APPDIR="$STAGE_DIR/Zotero.app"
+	APPDIR="$STAGE_DIR/Paperly.app"
 	rm -rf "$APPDIR"
 	mkdir "$APPDIR"
 	chmod 755 "$APPDIR"
@@ -706,8 +706,8 @@ if [ $BUILD_MAC == 1 ]; then
 	
 	# Use our own launcher
 	check_lfs_file "$CALLDIR/mac/zotero.xz"
-	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
-	chmod 755 "$CONTENTSDIR/MacOS/zotero"
+	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/paperly"
+	chmod 755 "$CONTENTSDIR/MacOS/paperly"
 
 	# TEMP: Custom version of XUL with some backported Mozilla bug fixes
 	if [ -n "$custom_components_hash_mac" ]; then
@@ -723,7 +723,7 @@ if [ $BUILD_MAC == 1 ]; then
 	perl -pi -e "s/\{\{VERSION\}\}/$VERSION/" "$CONTENTSDIR/Info.plist"
 	perl -pi -e "s/\{\{VERSION_NUMERIC\}\}/$VERSION_NUMERIC/" "$CONTENTSDIR/Info.plist"
 	if [ $UPDATE_CHANNEL == "beta" ] || [ $UPDATE_CHANNEL == "dev" ] || [ $UPDATE_CHANNEL == "source" ]; then
-		perl -pi -e "s/org\.zotero\.zotero/org.zotero.zotero-$UPDATE_CHANNEL/" "$CONTENTSDIR/Info.plist"
+		perl -pi -e "s/org\.paperly\.paperly/org.paperly.paperly-$UPDATE_CHANNEL/" "$CONTENTSDIR/Info.plist"
 	fi
 	perl -pi -e "s/\{\{VERSION\}\}/$VERSION/" "$CONTENTSDIR/Info.plist"
 	# Needed for "monkeypatch" Windows builds: 
@@ -731,7 +731,7 @@ if [ $BUILD_MAC == 1 ]; then
 	rm -f "$CONTENTSDIR/Info.plist.bak"
 	
 	echo
-	grep -B 1 org.zotero.zotero "$CONTENTSDIR/Info.plist"
+	grep -B 1 org.paperly.paperly "$CONTENTSDIR/Info.plist"
 	echo
 	grep -A 1 CFBundleShortVersionString "$CONTENTSDIR/Info.plist"
 	echo
@@ -897,9 +897,9 @@ if [ $BUILD_MAC == 1 ]; then
 		if [ $MAC_NATIVE == 1 ]; then
 			echo "Creating Mac installer"
 			dmg="$DIST_DIR/Zotero-$VERSION.dmg"
-			"$CALLDIR/mac/pkg-dmg" --source "$STAGE_DIR/Zotero.app" \
+			"$CALLDIR/mac/pkg-dmg" --source "$STAGE_DIR/Paperly.app" \
 				--target "$dmg" \
-				--sourcefile --volname Zotero --copy "$CALLDIR/mac/DSStore:/.DS_Store" \
+				--sourcefile --volname Paperly --copy "$CALLDIR/mac/DSStore:/.DS_Store" \
 				--symlink /Applications:"/Drag Here to Install" > /dev/null
 			
 			if [ "$UPDATE_CHANNEL" != "test" ]; then
@@ -918,7 +918,7 @@ if [ $BUILD_MAC == 1 ]; then
 		else
 			echo 'Not building on Mac; creating Mac distribution as a zip file'
 			rm -f "$DIST_DIR/Zotero_mac.zip"
-			cd "$STAGE_DIR" && zip -rqX "$DIST_DIR/Zotero-${VERSION}_mac.zip" Zotero.app
+			cd "$STAGE_DIR" && zip -rqX "$DIST_DIR/Paperly-${VERSION}_mac.zip" Paperly.app
 		fi
 	fi
 fi
