@@ -168,7 +168,9 @@ pref("extensions.zotero.zeroconf.server.enabled", false);
 pref("extensions.zotero.streaming.enabled", true);
 
 // Sync
-pref("extensions.zotero.sync.autoSync", true);
+// Paperly: nothing to sync to. Left in place rather than removed so the
+// sync code keeps its switch and nothing has to be taught that it is gone.
+pref("extensions.zotero.sync.autoSync", false);
 pref("extensions.zotero.sync.server.username", "");
 pref("extensions.zotero.sync.server.compressData", true);
 pref("extensions.zotero.sync.storage.enabled", true);
@@ -184,9 +186,9 @@ pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.fulltext.enabled", true);
-pref("extensions.zotero.sync.reminder.setUp.enabled", true);
+pref("extensions.zotero.sync.reminder.setUp.enabled", false);
 pref("extensions.zotero.sync.reminder.setUp.lastDisplayed", 0);
-pref("extensions.zotero.sync.reminder.autoSync.enabled", true);
+pref("extensions.zotero.sync.reminder.autoSync.enabled", false);
 pref("extensions.zotero.sync.reminder.autoSync.lastDisplayed", 0);
 
 // Proxy

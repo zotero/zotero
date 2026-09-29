@@ -123,6 +123,21 @@ var Zotero_Preferences = {
 	 * @returns {Promise<void>}
 	 */
 	async navigateToPane(paneID, { scrollTo, action } = {}) {
+		// Paperly: Account was removed, and several places still ask for it --
+		// the welcome screen, Read Aloud, the file-storage quota warning, sync
+		// errors. Asking for a pane that is not registered would set
+		// navigation.value to a value no radio matches, so the select event
+		// never fires and `waitForPaneSelect` below never resolves: the window
+		// hangs rather than failing. Fall back to the first pane instead.
+		if (!this.panes.has(paneID)) {
+			Zotero.debug(`Preferences: no pane '${paneID}'; showing the first one`);
+			paneID = this.panes.keys().next().value;
+			if (!paneID) {
+				return;
+			}
+			scrollTo = undefined;
+			action = undefined;
+		}
 		let isNewPane = this.navigation.value !== paneID;
 		if (action) {
 			this._pendingAction = action;

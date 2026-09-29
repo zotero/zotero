@@ -46,15 +46,6 @@ Zotero.PreferencePanes = {
 			helpURL: 'https://www.zotero.org/support/preferences/general',
 		},
 		{
-			id: 'zotero-prefpane-account',
-			label: 'preferences-pane-account',
-			image: 'chrome://zotero/skin/20/universal/account.svg',
-			src: 'chrome://zotero/content/preferences/preferences_account.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_account.js'],
-			defaultXUL: true,
-			helpURL: 'https://www.zotero.org/support/preferences/sync',
-		},
-		{
 			id: 'zotero-prefpane-export',
 			label: 'zotero.preferences.prefpane.export',
 			image: 'chrome://zotero/skin/20/universal/export.svg',
@@ -81,15 +72,9 @@ Zotero.PreferencePanes = {
 			defaultXUL: true,
 			helpURL: 'https://www.zotero.org/support/preferences/advanced',
 		},
-		{
-			id: 'zotero-subpane-reset-sync',
-			parent: 'zotero-prefpane-account',
-			label: 'zotero.preferences.subpane.resetSync',
-			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_account.js'],
-			defaultXUL: true,
-			helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
-		}
+		// Paperly: the Account pane and its Reset Sync subpane are gone. Paperly
+		// does not sign in to anything, so a pane whose whole content is a login
+		// form and a file-sync quota is a door to a room that is not there.
 	]),
 
 	pluginPanes: [],

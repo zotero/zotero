@@ -2212,16 +2212,10 @@ class CollectionViewItemTree extends ItemTree {
 				p.innerHTML = html;
 				div.appendChild(p);
 
-				p = doc.createElement('p');
-				html = Zotero.getString('pane.items.intro.text3', [Zotero.clientName]);
-				// Encode special chars, which shouldn't exist
-				html = Zotero.Utilities.htmlSpecialChars(html);
-				html = html.replace(
-					/\[([^\]]+)]/,
-					'<span class="text-link" data-action="open-sync-prefs">$1</span>'
-				);
-				p.innerHTML = html;
-				div.appendChild(p);
+				// Paperly: the third paragraph invited the user to set up syncing.
+				// There is no account to sync to, and the pane it linked to is
+				// gone, so the invitation is dropped rather than left pointing at
+				// nothing.
 
 				// Activate text links
 				for (let span of div.getElementsByTagName('span')) {

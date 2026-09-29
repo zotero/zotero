@@ -909,7 +909,11 @@
 				buttons[0].focus();
 			}" />
 			
-			<toolbarbutton id="zotero-tb-sync" tabindex="-1" class="zotero-tb-button" tooltip="_child"
+			<!-- Paperly: hidden rather than removed. The id is named directly in
+			     ZoteroPane's keyboard actionsMap, and moveFocus() already skips a
+			     target that is hidden or display:none, so hiding costs one
+			     attribute where deleting would cost a rewrite of that map. -->
+			<toolbarbutton id="zotero-tb-sync" hidden="true" tabindex="-1" class="zotero-tb-button" tooltip="_child"
 					oncommand="ZoteroPane.sync()">
 				<tooltip
 						id="zotero-tb-sync-tooltip"
