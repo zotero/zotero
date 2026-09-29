@@ -1802,7 +1802,12 @@ class VirtualizedTree extends VirtualizedTable {
 	 * @returns {HTMLElement}
 	 */
 	_addIndentAndTwisty(node, index) {
-		let firstCell = node.querySelector('.cell');
+		// The expand arrow and the depth indent belong with the item's title,
+		// not with whatever is leftmost. ItemTree marks that cell
+		// `first-column` as it prepends the icon; the fallback is for trees
+		// that never set it, such as the collection tree.
+		let firstCell = node.querySelector('.cell.first-column')
+			|| node.querySelector('.cell');
 		if (!firstCell) return node;
 
 		let twisty;

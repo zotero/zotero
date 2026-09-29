@@ -2250,11 +2250,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.classList.remove('tight');
 		}
 		
-		let { firstColumn } = columns.reduce((acc, column) => {
-			return !column.hidden && column.ordinal < acc.lowestOrdinal
-				? { lowestOrdinal: column.ordinal, firstColumn: column }
-				: acc;
-		}, { lowestOrdinal: Infinity, firstColumn: null });
+		// The item icon, the .cell-text wrapper and the `first-column` class all
+		// hang off this. It used to be whichever visible column sat leftmost,
+		// which is only the same thing while Title is leftmost: put anything in
+		// front of Title and the document icon lands in that column instead,
+		// and Title loses its text wrapper. Paperly puts two narrow columns
+		// before Title, so this follows the primary column wherever it sits,
+		// and keeps the old rule as a fallback for a tree that has none.
+		let firstColumn = columns.find(column => column.primary && !column.hidden);
+		if (!firstColumn) {
+			({ firstColumn } = columns.reduce((acc, column) => {
+				return !column.hidden && column.ordinal < acc.lowestOrdinal
+					? { lowestOrdinal: column.ordinal, firstColumn: column }
+					: acc;
+			}, { lowestOrdinal: Infinity, firstColumn: null }));
+		}
 
 		this._renderCtx.firstColumn = firstColumn;
 		this._renderCtx.includeTrashed = this.rowProvider.includeTrashed;
