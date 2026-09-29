@@ -19,6 +19,10 @@ pref("extensions.zotero.debug.store.limit",500000);
 pref("extensions.zotero.debug.store.submitSize",10000000);
 pref("extensions.zotero.debug.store.submitLineLength",10000);
 pref("extensions.zotero.debug.level",5);
+// Paperly: deliberately left on. This is the translator and citation-style
+// repository (repo.zotero.org), which is what lets Paperly read a publisher's
+// page and what keeps citation styles current. It is the one call home that
+// buys something Paperly cannot produce for itself.
 pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.triggerProxyAuthentication", true);
 // Proxy auth URLs should respond successfully to HEAD requests over HTTP and HTTPS (in case of forced HTTPS requests)
@@ -226,7 +230,20 @@ pref("extensions.zotero.translators.RIS.import.ignoreUnknown", true);
 pref("extensions.zotero.translators.RIS.import.keepID", false);
 
 // Retracted Items
-pref("extensions.zotero.retractions.enabled", true);
+// Paperly: off. Measured at startup, this was the only thing still calling
+// api.zotero.org on its own -- two GETs to /retractions/list -- so it is what
+// stood between Paperly and talking to Zotero's servers unprompted.
+//
+// Worth knowing what is given up, because the feature is a good one and its
+// design is careful: it warns you when a paper in your library has been
+// retracted, and it does that without uploading your library. Each DOI is
+// SHA-1'd and only the first few characters of the hash are sent
+// (Retractions._valueToKey), the server returns everything matching those
+// prefixes, and the actual matching happens locally. The server learns hash
+// prefixes, not what you read.
+//
+// Set this back to true to have it again; nothing else has to change.
+pref("extensions.zotero.retractions.enabled", false);
 pref("extensions.zotero.retractions.recentItems", "[]");
 
 // Annotations
