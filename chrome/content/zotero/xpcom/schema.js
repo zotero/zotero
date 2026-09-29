@@ -3753,54 +3753,77 @@ Zotero.Schema = new function () {
 				}
 			}
 			
-			else if (i == 122) {
+			else if (i == 130) {
+				// Replaces steps 122-129 (added in Zotero 7, 9, and 10), checking for each change
+				// before making it, since a transaction timeout could have rolled back some of those
+				// steps after the database was marked as upgraded
+				
+				await _updateCompatibility(9);
+				
+				// 122
 				await Zotero.DB.queryAsync("REPLACE INTO fileTypes VALUES(8, 'ebook')");
 				await Zotero.DB.queryAsync("REPLACE INTO fileTypeMIMETypes VALUES(8, 'application/epub+zip')");
 				// Incorrect, for compatibility
 				await Zotero.DB.queryAsync("REPLACE INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
-			}
-			
-			else if (i == 123) {
-				await Zotero.DB.queryAsync("CREATE INDEX itemData_valueID ON itemData(valueID)");
-			}
-
-			else if (i == 124) {
-				await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastRead INT");
-				await Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastRead ON itemAttachments(lastRead)");
-			}
-
-			else if (i == 125) {
-				await Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN isAdmin INT NOT NULL DEFAULT 0");
-				// Force all groups to resync so isAdmin is populated from the API
-				await Zotero.DB.queryAsync("UPDATE groups SET version = 0");
-			}
-
-			else if (i == 126) {
-				await _updateCompatibility(8);
-
-				await Zotero.DB.queryAsync("ALTER TABLE itemDataValues ADD COLUMN valueNormalized TEXT");
-				await Zotero.DB.queryAsync("ALTER TABLE tags ADD COLUMN nameNormalized TEXT");
-				await Zotero.DB.queryAsync("ALTER TABLE creators ADD COLUMN firstNameNormalized TEXT");
-				await Zotero.DB.queryAsync("ALTER TABLE creators ADD COLUMN lastNameNormalized TEXT");
-				await Zotero.DB.queryAsync("ALTER TABLE itemAnnotations ADD COLUMN textNormalized TEXT");
-				await Zotero.DB.queryAsync("ALTER TABLE itemAnnotations ADD COLUMN commentNormalized TEXT");
-				await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
-			}
-
-			else if (i == 127) {
-				await _updateCompatibility(9);
-
-				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextItemWords");
-				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextWords");
+				
+				// 123
+				await Zotero.DB.queryAsync("CREATE INDEX IF NOT EXISTS itemData_valueID ON itemData(valueID)");
+				
+				// 124
+				if (!(await Zotero.DB.columnExists('itemAttachments', 'lastRead'))) {
+					await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastRead INT");
+				}
+				await Zotero.DB.queryAsync("CREATE INDEX IF NOT EXISTS itemAttachments_lastRead ON itemAttachments(lastRead)");
+				
+				// 125
+				if (!(await Zotero.DB.columnExists('libraries', 'isAdmin'))) {
+					await Zotero.DB.queryAsync("ALTER TABLE libraries ADD COLUMN isAdmin INT NOT NULL DEFAULT 0");
+					// Force all groups to resync so isAdmin is populated from the API
+					await Zotero.DB.queryAsync("UPDATE groups SET version = 0");
+				}
+				
+				// 126
+				let normalizedColumns = [
+					['itemDataValues', 'valueNormalized'],
+					['tags', 'nameNormalized'],
+					['creators', 'firstNameNormalized'],
+					['creators', 'lastNameNormalized'],
+					['itemAnnotations', 'textNormalized'],
+					['itemAnnotations', 'commentNormalized']
+				];
+				let normalizedColumnAdded = false;
+				for (let [table, column] of normalizedColumns) {
+					if (!(await Zotero.DB.columnExists(table, column))) {
+						await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN ${column} TEXT`);
+						normalizedColumnAdded = true;
+					}
+				}
+				if (normalizedColumnAdded) {
+					await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('search', 'normalizeBackfill', 1)");
+				}
+				
+				// 127
+				//
+				// Don't overwrite the freed pages, which makes dropping a large index much slower.
+				// The words are also in the full-text cache files and will be rewritten into
+				// fulltext.sqlite.
+				await Zotero.DB.queryAsync("PRAGMA secure_delete=false");
+				try {
+					await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextItemWords");
+					await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextWords");
+				}
+				finally {
+					await Zotero.DB.queryAsync("PRAGMA secure_delete=true");
+				}
 				Zotero.Prefs.clear('vacuum.lastTime');
-
-				await Zotero.DB.queryAsync("ALTER TABLE savedSearchConditions RENAME TO savedSearchConditionsOld");
-				await Zotero.DB.queryAsync("CREATE TABLE savedSearchConditions (\n    savedSearchID INT NOT NULL,\n    searchConditionID INT NOT NULL,\n    condition TEXT NOT NULL,\n    operator TEXT,\n    value TEXT,\n    PRIMARY KEY (savedSearchID, searchConditionID),\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
-				await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");
-				await Zotero.DB.queryAsync("DROP TABLE savedSearchConditionsOld");
-			}
-
-			else if (i == 128) {
+				if (await Zotero.DB.columnExists('savedSearchConditions', 'required')) {
+					await Zotero.DB.queryAsync("ALTER TABLE savedSearchConditions RENAME TO savedSearchConditionsOld");
+					await Zotero.DB.queryAsync("CREATE TABLE savedSearchConditions (\n    savedSearchID INT NOT NULL,\n    searchConditionID INT NOT NULL,\n    condition TEXT NOT NULL,\n    operator TEXT,\n    value TEXT,\n    PRIMARY KEY (savedSearchID, searchConditionID),\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
+					await Zotero.DB.queryAsync("INSERT INTO savedSearchConditions SELECT savedSearchID, searchConditionID, condition, operator, value FROM savedSearchConditionsOld");
+					await Zotero.DB.queryAsync("DROP TABLE savedSearchConditionsOld");
+				}
+				
+				// 128
 				let rows = await Zotero.DB.queryAsync("SELECT itemID, path FROM itemAttachments WHERE linkMode IN (0, 1) AND (path LIKE ? OR path LIKE ?)", ['storage:%/%', 'storage:%\\%']);
 				for (let row of rows) {
 					let rel = row.path.substr(8);
@@ -3813,12 +3836,12 @@ Zotero.Schema = new function () {
 					}
 					await Zotero.DB.queryAsync("UPDATE itemAttachments SET path=? WHERE itemID=?", ['storage:' + filename, row.itemID]);
 				}
-			}
-
-			else if (i == 129) {
-				let clientVersionTables = ['items', 'collections', 'savedSearches', 'libraries'];
-				for (let table of clientVersionTables) {
-					await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
+				
+				// 129
+				for (let table of ['items', 'collections', 'savedSearches', 'libraries']) {
+					if (!(await Zotero.DB.columnExists(table, 'clientVersion'))) {
+						await Zotero.DB.queryAsync(`ALTER TABLE ${table} ADD COLUMN clientVersion INT NOT NULL DEFAULT 0`);
+					}
 				}
 			}
 		}

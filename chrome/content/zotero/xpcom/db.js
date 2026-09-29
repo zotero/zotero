@@ -47,6 +47,11 @@ Zotero.DBConnection = function (dbNameOrPath) {
 		Sqlite: "resource://gre/modules/Sqlite.sys.mjs",
 	});
 	
+	// Sqlite.sys.mjs rolls back a transaction that runs longer than 5 minutes by default, but
+	// it can't stop executeTransaction(), so remaining statements autocommit one by one. Set
+	// the timeout to the maximum timer delay.
+	this.Sqlite.TRANSACTIONS_TIMEOUT_MS = 2 ** 31 - 1;
+	
 	this.closed = false;
 	this.skipBackup = false;
 	
