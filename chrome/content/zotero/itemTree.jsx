@@ -2491,6 +2491,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 		}
+		// A preserved entry carries the ordinal it had before the active set was
+		// renumbered, so it can duplicate one just assigned. VirtualizedTable
+		// renumbers on render to cope with duplicates, but the sort that runs
+		// first is arbitrary between two columns sharing an ordinal -- which is
+		// how a column registered to sit before Title came back after Creator.
+		// Renumbering the merged set keeps every relative position and makes the
+		// values unique, so the next load reads an order that means something.
+		let ordered = Object.values(prefs).sort((a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0));
+		ordered.forEach((columnPrefs, index) => {
+			columnPrefs.ordinal = index;
+		});
 		this._columnPrefs = prefs;
 		// Invalidate the cached _columns array; next _getColumns() call will
 		// rebuild canonical state from COLUMNS defs + _columnPrefs + viewType.
