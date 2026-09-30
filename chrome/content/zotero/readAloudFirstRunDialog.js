@@ -17,7 +17,7 @@ var Zotero_Read_Aloud_First_Run = new function () {
 	};
 
 	this._createReadAloudFirstRun = function () {
-		let { lang, readAloudEnabledVoices, ftl, getReadAloudRemoteInterface } = io.dataIn;
+		let { lang, readAloudEnabledVoices, ftl, getReadAloudRemoteInterface, readAloudLocalVoicesUnavailable } = io.dataIn;
 
 		let browserWindow = this._iframe.contentWindow;
 		browserWindow.wrappedJSObject.createReadAloudFirstRun(Cu.cloneInto({
@@ -26,6 +26,7 @@ var Zotero_Read_Aloud_First_Run = new function () {
 			ftl,
 			loggedIn: Zotero.Sync.Runner.enabled,
 			remoteInterface: getReadAloudRemoteInterface(browserWindow),
+			readAloudLocalVoicesUnavailable,
 			onOpenLink: (url) => {
 				let win = Services.wm.getMostRecentWindow('navigator:browser');
 				if (win) {

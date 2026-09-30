@@ -43,6 +43,13 @@ const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 const READ_ALOUD_ENABLED_VOICES_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudEnabledVoices.json');
 const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudVoiceDefaults.json');
 
+// TEMP: Local voices make loud pops at the end of every utterance on macOS 27
+// without a patch to libmozglue (a64e3671) that would be risky to backport, so
+// disable them.
+function areReadAloudLocalVoicesUnavailable() {
+	return Zotero.isMac && parseInt(Services.sysinfo.getProperty('version')) === 27;
+}
+
 // Whether the Read Aloud audio cache has been pruned of stale versions this session
 let readAloudCachePruned = false;
 
@@ -265,6 +272,7 @@ class ReaderInstance {
 			readAloudVoices: this._getReadAloudVoices(),
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
+			readAloudLocalVoicesUnavailable: areReadAloudLocalVoicesUnavailable(),
 			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
 			getSDTPack: this._createGetSDTPack(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
@@ -1902,6 +1910,7 @@ class ReaderInstance {
 				readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 				ftl,
 				getReadAloudRemoteInterface: win => this._getReadAloudRemoteInterface(win),
+				readAloudLocalVoicesUnavailable: areReadAloudLocalVoicesUnavailable(),
 			},
 			dataOut: null,
 			openVoicesDialog: ({ tier }) => {
@@ -1932,6 +1941,7 @@ class ReaderInstance {
 				readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 				ftl,
 				getReadAloudRemoteInterface: win => this._getReadAloudRemoteInterface(win),
+				readAloudLocalVoicesUnavailable: areReadAloudLocalVoicesUnavailable(),
 			},
 			dataOut: null,
 		};
