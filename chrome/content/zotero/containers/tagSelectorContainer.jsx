@@ -416,10 +416,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		
 		// If tags haven't changed, return previous array without sorting again
 		if (this.state.tags.length == tags.length) {
-			let prevTags = new Set(this.state.tags.map(tag => tag.tag));
+			let prevTags = new Set(this.state.tags.map(tag => tag.type + ':' + tag.tag));
 			let same = true;
 			for (let tag of tags) {
-				if (!prevTags.has(tag.tag)) {
+				if (!prevTags.has(tag.type + ':' + tag.tag)) {
 					same = false;
 					break;
 				}

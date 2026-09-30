@@ -127,6 +127,39 @@ describe("Tag Selector", function () {
 		}
 	});
 	
+	it("should hide a tag that's only automatic in the new view when automatic tags are hidden", async function () {
+		var collection1 = await createDataObject('collection');
+		var collection2 = await createDataObject('collection');
+		var item1 = createUnsavedDataObject('item', { collections: [collection1.id] });
+		item1.setTags(["A", "B"]);
+		var item2 = createUnsavedDataObject('item', { collections: [collection2.id] });
+		item2.setTags([{ tag: "A", type: 1 }, "B"]);
+		await Zotero.DB.executeTransaction(async function () {
+			await item1.save();
+			await item2.save();
+		});
+		
+		tagSelector.toggleShowAutomatic(false);
+		try {
+			await select(win, collection1);
+			await waitForCallback(() => getRegularTags().length == 2);
+			
+			var spy = sinon.spy(tagSelector, 'onItemViewChanged');
+			try {
+				await select(win, collection2);
+				await waitForCallback(() => spy.called);
+				await spy.lastCall.returnValue;
+			}
+			finally {
+				spy.restore();
+			}
+			assert.sameMembers(getRegularTags(), ['B']);
+		}
+		finally {
+			tagSelector.toggleShowAutomatic(true);
+		}
+	});
+	
 	it("should show tags from annotations for attachments in scope", async function () {
 		var collection = await createDataObject('collection');
 		await select(win, collection);
