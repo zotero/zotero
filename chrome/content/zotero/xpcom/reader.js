@@ -67,6 +67,7 @@ class ReaderInstance {
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 		this._readAloudGuidancePanel = null;
+		this._primaryViewState = null;
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -108,6 +109,21 @@ class ReaderInstance {
 		await this._waitForReader();
 		this._iframeWindow.focus();
 		this._internalReader?.focus();
+	}
+
+	/**
+	 * Get the index of the page currently visible in the primary view
+	 *
+	 * Unlike Zotero.Item#getAttachmentLastPageIndex(), which is persisted with a delay,
+	 * this reflects the latest view state reported by the reader.
+	 *
+	 * @returns {Number|null} - 0-based page index, or null if not a PDF or not yet known
+	 */
+	getCurrentPageIndex() {
+		if (this._type !== 'pdf') {
+			return null;
+		}
+		return this._primaryViewState?.pageIndex ?? null;
 	}
 
 	getSecondViewState() {
@@ -358,6 +374,7 @@ class ReaderInstance {
 			onChangeViewState: async (state, primary) => {
 				state = JSON.parse(JSON.stringify(state));
 				if (primary) {
+					this._primaryViewState = state;
 					await this._setState(state);
 				}
 				else if (this.tabID) {
@@ -2885,6 +2902,25 @@ class Reader {
 	
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
+	}
+	
+	/**
+	 * Get all open reader instances (tabs and windows)
+	 *
+	 * @returns {ReaderInstance[]}
+	 */
+	getReaders() {
+		return this._readers.filter(r => !r._isTabClosed);
+	}
+	
+	/**
+	 * Get open reader instances showing a given attachment
+	 *
+	 * @param {Number} itemID - Attachment item ID
+	 * @returns {ReaderInstance[]}
+	 */
+	getByItemID(itemID) {
+		return this.getReaders().filter(r => r.itemID === itemID);
 	}
 	
 	getWindowStates() {
