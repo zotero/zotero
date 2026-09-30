@@ -95,6 +95,38 @@ describe("Tag Selector", function () {
 		assert.sameMembers(getRegularTags(), ['A', 'B']);
 	});
 	
+	it("should show a manual tag when automatic tags are hidden and an automatic tag has the same name", async function () {
+		var collection = await createDataObject('collection');
+		var item1 = createUnsavedDataObject('item', { collections: [collection.id] });
+		item1.setTags([{ tag: "A", type: 1 }]);
+		var item2 = createUnsavedDataObject('item', { collections: [collection.id] });
+		item2.setTags(["A"]);
+		await Zotero.DB.executeTransaction(async function () {
+			await item1.save();
+			await item2.save();
+		});
+		var emptyCollection = await createDataObject('collection');
+		await select(win, emptyCollection);
+		await waitForCallback(() => !tagSelector.state.tags.length);
+		
+		// Same-name tags come back in no particular order, so return the automatic one first
+		var getAllWithin = Zotero.Tags.getAllWithin;
+		var stub = sinon.stub(Zotero.Tags, 'getAllWithin').callsFake(async function (...args) {
+			let tags = await getAllWithin.apply(this, args);
+			return tags.sort((a, b) => b.type - a.type);
+		});
+		tagSelector.toggleShowAutomatic(false);
+		try {
+			await select(win, collection);
+			await waitForCallback(() => tagSelector.state.tags.length);
+			assert.sameMembers(getRegularTags(), ['A']);
+		}
+		finally {
+			stub.restore();
+			tagSelector.toggleShowAutomatic(true);
+		}
+	});
+	
 	it("should show tags from annotations for attachments in scope", async function () {
 		var collection = await createDataObject('collection');
 		await select(win, collection);

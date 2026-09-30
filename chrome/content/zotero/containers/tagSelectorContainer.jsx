@@ -140,7 +140,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 				? await rows[0].getTags(...args)
 				: await Zotero.CollectionTreeRow.getTagsAcrossRows(rows, ...args);
 			// Multiple rows (collections, or collections across libraries) can return
-			// the same tag, so dedupe by name
+			// the same tag, so dedupe by name and type
 			return this._dedupeTags(tags);
 		}
 		catch (e) {
@@ -163,8 +163,9 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		let seen = new Set();
 		let result = [];
 		for (let tag of tags) {
-			if (!seen.has(tag.tag)) {
-				seen.add(tag.tag);
+			let key = tag.type + ':' + tag.tag;
+			if (!seen.has(key)) {
+				seen.add(key);
 				result.push(tag);
 			}
 		}
@@ -173,6 +174,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 
 	/**
 	 * Get all tags across the selected libraries (for "Display All Tags"), deduped by name
+	 * and type
 	 *
 	 * @param {Number[]} [tagIDs] - Limit to the given tag IDs
 	 */
