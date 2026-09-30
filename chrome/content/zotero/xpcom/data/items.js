@@ -1409,17 +1409,22 @@ Zotero.Items = function () {
 			return "";
 		}
 		
+		// Groups of creator types that are shown together, in order of precedence
 		var validCreatorTypes = [
-			Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID),
-			Zotero.CreatorTypes.getID('editor'),
+			[
+				Zotero.CreatorTypes.getPrimaryIDForType(itemTypeID),
+				Zotero.CreatorTypes.getID('composer'),
+				Zotero.CreatorTypes.getID('wordsBy')
+			],
+			[Zotero.CreatorTypes.getID('editor')],
 			// Director used to be the primary type for Video Recording before
 			// Creator (mapped to Author) was added
-			Zotero.CreatorTypes.getID('director'),
-			Zotero.CreatorTypes.getID('contributor')
+			[Zotero.CreatorTypes.getID('director')],
+			[Zotero.CreatorTypes.getID('contributor')],
 		];
 	
-		for (let creatorTypeID of validCreatorTypes) {
-			let matches = creatorsData.filter(data => data.creatorTypeID == creatorTypeID)
+		for (let creatorTypeIDs of validCreatorTypes) {
+			let matches = creatorsData.filter(data => creatorTypeIDs.includes(data.creatorTypeID));
 			if (!matches.length) {
 				continue;
 			}
@@ -1584,7 +1589,9 @@ Zotero.Items = function () {
 
 		let primaryJoin = "LEFT JOIN itemTypeCreatorTypes ITCT "
 			+ "ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) "
-			+ "WHERE itemID=O.itemID AND primaryField=1";
+			// composer and wordsBy are shown alongside primary creators (e.g., performers)
+			+ "WHERE itemID=O.itemID AND (primaryField=1 "
+			+ `OR IC.creatorTypeID IN (${Zotero.CreatorTypes.getID('composer')}, ${Zotero.CreatorTypes.getID('wordsBy')}))`;
 		function creatorTypeWhere(typeName) {
 			return `WHERE itemID=O.itemID AND creatorTypeID=${Zotero.CreatorTypes.getID(typeName)}`;
 		}
@@ -1643,7 +1650,9 @@ Zotero.Items = function () {
 
 		let primaryJoin = "LEFT JOIN itemTypeCreatorTypes ITCT "
 			+ "ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) "
-			+ "WHERE itemID=O.itemID AND primaryField=1";
+			// composer and wordsBy are shown alongside primary creators (e.g., performers)
+			+ "WHERE itemID=O.itemID AND (primaryField=1 "
+			+ `OR IC.creatorTypeID IN (${Zotero.CreatorTypes.getID('composer')}, ${Zotero.CreatorTypes.getID('wordsBy')}))`;
 		function creatorTypeWhere(typeName) {
 			return `WHERE itemID=O.itemID AND creatorTypeID=${Zotero.CreatorTypes.getID(typeName)}`;
 		}
