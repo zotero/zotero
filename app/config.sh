@@ -8,7 +8,7 @@ RUST_VERSION=1.86.0
 
 # URL prefix for custom builds of Firefox components
 custom_components_url="https://download.zotero.org/dev/firefox-components/"
-custom_components_hash_mac=""
+custom_components_hash_mac="15e328615e53f1c37374f44567f108affcf80cfdc07b100da159a5aed15d9b59"
 custom_components_hash_win_x64="8c15ae2cb9d81fcf28b004d390db15356f435bc9d6f62dd94951f89871e71310"
 custom_components_hash_win_arm64="4950dc721881be7eeeeaebe2ccf42ab898d755400c265f5bf657fc142f8b7f1b"
 custom_components_hash_win32="4b5fa2792729b1d8767f3a885f75ca13d02f5f6a1922d7e8f00fea4cd0bd1a2f"
