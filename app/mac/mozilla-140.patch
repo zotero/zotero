@@ -1,13 +1,13 @@
 diff --git a/browser/app/nsBrowserApp.cpp b/browser/app/nsBrowserApp.cpp
 --- a/browser/app/nsBrowserApp.cpp
 +++ b/browser/app/nsBrowserApp.cpp
-@@ -154,19 +154,31 @@ static bool IsArg(const char* arg, const
+@@ -156,19 +156,31 @@ static bool IsArg(const char* arg, const char* s) {
  #endif
  
    return false;
  }
  
- Bootstrap::UniquePtr gBootstrap;
+ MOZ_RUNINIT Bootstrap::UniquePtr gBootstrap;
  
  static int do_main(int argc, char* argv[], char* envp[]) {
 +  // Allow profile downgrade for Zotero
