@@ -12,7 +12,7 @@ if [ -z "${1:-}" ]; then
 	echo "Usage: $0 /path/to/firefox" >&2
 	exit 1
 fi
-GECKO_PATH=$1
+GECKO_PATH="$(cd "$1" && pwd)"
 mach=$GECKO_PATH/mach
 
 BUILD_DIR=`mktemp -d`
