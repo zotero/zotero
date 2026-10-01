@@ -14,7 +14,7 @@ var Zotero_Read_Aloud_Voices = new function () {
 	};
 
 	this._createReadAloudVoices = function () {
-		let { lang, tier, readAloudEnabledVoices, ftl, getReadAloudRemoteInterface, readAloudLocalVoicesUnavailable } = io.dataIn;
+		let { lang, tier, readAloudEnabledVoices, ftl, getReadAloudRemoteInterface } = io.dataIn;
 
 		let browserWindow = this._iframe.contentWindow;
 		browserWindow.wrappedJSObject.createReadAloudVoices(Cu.cloneInto({
@@ -23,7 +23,6 @@ var Zotero_Read_Aloud_Voices = new function () {
 			readAloudEnabledVoices,
 			ftl,
 			remoteInterface: getReadAloudRemoteInterface(browserWindow),
-			readAloudLocalVoicesUnavailable,
 			onOpenLink: (url) => {
 				let win = Services.wm.getMostRecentWindow('navigator:browser');
 				if (win) {
