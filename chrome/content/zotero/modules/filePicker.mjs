@@ -175,6 +175,13 @@ FilePicker.prototype.filterVideo = 0x200;
 			if (prop == 'displayDirectory') {
 				// Convert to nsIFile
 				val = new lazy.FileUtils.File(val);
+				// As of Firefox 140.17/153.4, this throws if the directory doesn't exist or
+				// isn't readable. Ignore that and let the platform pick the initial directory.
+				try {
+					this._fp[prop] = val;
+				}
+				catch {}
+				return;
 			}
 			this._fp[prop] = val;
 		},
