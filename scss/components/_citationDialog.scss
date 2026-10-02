@@ -81,6 +81,82 @@
 				margin-left: 12px;
 			}
 		}
+		#citation-inputs {
+			align-items: flex-start;
+			min-width: 0;
+
+			&.narrative {
+				display: block;
+				position: relative;
+				--narrative-prefix-width: 0px;
+
+				#narrative-prefix {
+					position: absolute;
+					z-index: 1;
+					inset-block-start: 0;
+					inset-inline-start: 0;
+					align-items: flex-start;
+					gap: 6px;
+					width: 100%;
+					pointer-events: none;
+
+					> * {
+						pointer-events: auto;
+					}
+				}
+
+				#narrative-infix {
+					box-sizing: border-box;
+					border: var(--material-border);
+					border-radius: 5px;
+					background-color: var(--material-background);
+					flex: 0 0 160px;
+					min-width: 70px;
+					height: 28px;
+					padding: 0 7px;
+					font-size: 15px;
+				}
+
+				#narrative-infix-separator {
+					align-self: stretch;
+					flex: 0 0 1px;
+					margin: 4px 8px;
+					background-color: var(--fill-quarternary);
+				}
+
+				#narrative-head-input {
+					flex: 0 0 auto;
+					min-width: 0;
+					max-width: 40%;
+					width: 90px;
+
+					&:has(.bubble) {
+						width: max-content;
+					}
+
+					.body {
+						flex-wrap: nowrap;
+						padding-inline-end: 0;
+					}
+				}
+
+				#bubble-input {
+					width: 100%;
+					min-width: 0;
+
+					.body::before {
+						content: "";
+						flex: 0 0 var(--narrative-prefix-width);
+						height: var(--bubble-height);
+					}
+
+					.input.full-width {
+						flex: 1 1 200px;
+						width: auto !important;
+					}
+				}
+			}
+		}
 		#progress {
 			flex: 1;
 		}
@@ -105,6 +181,35 @@
 				height: 20px;
 			}
 		}
+	}
+
+	#citation-form-area {
+		align-items: center;
+		margin-inline-start: 12px;
+		-moz-window-dragging: no-drag;
+
+		#citation-form-setting {
+			flex-shrink: 0;
+
+			.option {
+				padding-inline: 9px;
+				&[aria-disabled="true"] { opacity: .5; cursor: default; }
+			}
+		}
+
+	}
+
+	:is(#narrative-head-input .bubble, #bubble-input .bubble.narrative-head-item) {
+		background-color: color-mix(in srgb, var(--accent-yellow) 14%, var(--material-background));
+		transition: background-color .15s ease;
+
+		&:hover, &.showingDetails {
+			background-color: color-mix(in srgb, var(--accent-yellow) 20%, var(--material-background)) !important;
+		}
+	}
+	#citation-inputs:has(#narrative-head-input .bubble:hover, #bubble-input .narrative-head-item:hover)
+		:is(#narrative-head-input .bubble, #bubble-input .narrative-head-item) {
+		background-color: color-mix(in srgb, var(--accent-yellow) 20%, var(--material-background)) !important;
 	}
 
 	.divider {

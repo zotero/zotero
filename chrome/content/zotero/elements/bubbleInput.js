@@ -38,8 +38,12 @@
 			this._lastFocusedInput = null;
 			this.showJustAddedPlaceholder = false;
 
-			Utils.init(this);
-			DragDropHandler.init(this);
+			// Bubble inputs can coexist in the same dialog. Keep utility and drag state
+			// scoped to this element so events and geometry use the correct input.
+			this._utils = Object.create(Utils);
+			this._utils.init(this);
+			this._dragDropHandler = Object.create(DragDropHandler);
+			this._dragDropHandler.init(this);
 		}
 
 		set sortable(value) {
@@ -62,7 +66,7 @@
 		 * @param {Object[]} bubblesConfig - array of objects { dialogReferenceID, bubbleString, selected}
 		 * representing each bubble.
 		 */
-		refresh(bubblesConfig, dialogType) {
+		refresh(bubblesConfig, dialogType, inputL10nID = null) {
 			// Remove bubbles of items that are no longer in the citations
 			for (let bubble of this.getAllBubbles()) {
 				let bubbleDialogReferenceID = bubble.getAttribute("dialogReferenceID");
@@ -84,6 +88,7 @@
 				// Update bubble string
 				if (bubbleNode.querySelector(".text").textContent !== bubbleString) {
 					bubbleNode.querySelector(".text").textContent = bubbleString;
+					if (!Zotero.isMac) bubbleNode.setAttribute("aria-label", bubbleString);
 				}
 				// Move bubble if it's index does not correspond to the position of the item
 				let expectedIndex = allBubbles.indexOf(bubbleNode);
@@ -95,7 +100,7 @@
 			// Make sure there is an input following every bubble
 			for (let bubble of this.getAllBubbles()) {
 				let nextNode = bubble.nextElementSibling;
-				if (!nextNode || !Utils.isInput(nextNode)) {
+				if (!nextNode || !this._utils.isInput(nextNode)) {
 					let input = this._createInputElem();
 					bubble.after(input);
 				}
@@ -109,29 +114,31 @@
 				}
 			}
 			// Prepend first input
-			if (!this._body.firstChild || !Utils.isInput(this._body.firstChild)) {
+			if (!this._body.firstChild || !this._utils.isInput(this._body.firstChild)) {
 				let input = this._createInputElem();
 				this._body.prepend(input);
 			}
 			// Make sure that all inputs occupy the right width
 			for (let input of [...this.querySelectorAll(".input")]) {
-				let requiredWidth = Utils.getContentWidth(input);
+				let requiredWidth = this._utils.getContentWidth(input);
 				input.style.width = `${requiredWidth}px`;
 			}
+			// If any two inputs end up next to each other (e.g. after bubble is deleted),
+			// merge them before setting attributes on the input that remains.
+			this._utils.combineNeighboringInputs(this._body.firstChild);
 			// Add placeholder and a special aria-description to the first input when there are no bubbles
 			let isOnlyInput = this.getAllBubbles().length == 0;
 			this._body.firstChild.classList.toggle("full-width", isOnlyInput);
 			if (isOnlyInput) {
-				document.l10n.setAttributes(this._body.firstChild, `integration-citationDialog-single-input-${dialogType}`);
+				document.l10n.setAttributes(this._body.firstChild,
+					inputL10nID || `integration-citationDialog-single-input-${dialogType}`);
 			}
 			// otherwise, set default placeholders for all inputs, with special handling
 			// of the last input after a bubble is added with visible placeholder
 			else {
-				Utils.setupInputPlaceholders(this.showJustAddedPlaceholder, dialogType);
+				this._utils.setupInputPlaceholders(
+					this.showJustAddedPlaceholder, dialogType, inputL10nID);
 			}
-			// If any two inputs end up next to each other (e.g. after bubble is deleted),
-			// have them merged
-			Utils.combineNeighboringInputs(this._body.firstChild);
 			// if bubble input is scrollable, scroll to the bottom
 			if (this._body.scrollHeight > this._body.clientHeight) {
 				this._body.scrollTop = this._body.scrollHeight;
@@ -162,7 +169,7 @@
 		 * Otherwise, return last focused input, if it is still part of the bubbleInput.
 		 */
 		getCurrentInput() {
-			if (Utils.isInput(document.activeElement) && this.contains(document.activeElement)) {
+			if (this._utils.isInput(document.activeElement) && this.contains(document.activeElement)) {
 				return document.activeElement;
 			}
 			if (this._lastFocusedInput && this.contains(this._lastFocusedInput)) {
@@ -202,7 +209,7 @@
 				return;
 			}
 			let { clientX, clientY } = event;
-			let lastBubble = Utils.getLastBubbleBeforePoint(clientX, clientY);
+			let lastBubble = this._utils.getLastBubbleBeforePoint(clientX, clientY);
 			if (lastBubble) {
 				lastBubble.nextSibling.focus();
 			}
@@ -233,7 +240,10 @@
 				bubble.setAttribute("aria-label", content);
 			}
 			// On click, tell citationDialog to display the details popup
-			bubble.addEventListener("click", () => Utils.notifyDialog("show-details-popup", { dialogReferenceID: bubble.getAttribute("dialogReferenceID") }));
+			bubble.addEventListener("click", () => this._utils.notifyDialog("show-details-popup", {
+				dialogReferenceID: bubble.getAttribute("dialogReferenceID"),
+				bubble,
+			}));
 			bubble.addEventListener("keydown", this._onBubbleKeydown.bind(this));
 			let text = document.createElement("span");
 			text.textContent = content;
@@ -257,10 +267,10 @@
 				// On Shift-Left/Right swap focused bubble with it's neighbor
 				event.preventDefault();
 				event.stopPropagation();
-				let nextBubble = Utils.findNextClass("bubble", bubble, event.key == Zotero.arrowNextKey);
+				let nextBubble = this._utils.findNextClass("bubble", bubble, event.key == Zotero.arrowNextKey);
 				if (nextBubble) {
 					let nextBubbleIndex = [...this._body.querySelectorAll(".bubble")].findIndex(bubble => bubble == nextBubble);
-					Utils.notifyDialog('move-item', { dialogReferenceID: bubble.getAttribute("dialogReferenceID"), index: nextBubbleIndex });
+					this._utils.notifyDialog('move-item', { dialogReferenceID: bubble.getAttribute("dialogReferenceID"), index: nextBubbleIndex });
 				}
 				
 				bubble.focus();
@@ -269,8 +279,8 @@
 				event.preventDefault();
 				// On backspace or delete, shift focus to previous or next bubble if possible,
 				// otherwise, refocus input after the bubble is deleted
-				let previousBubble = Utils.findNextClass("bubble", bubble, false);
-				let nextBubble = Utils.findNextClass("bubble", bubble, true);
+				let previousBubble = this._utils.findNextClass("bubble", bubble, false);
+				let nextBubble = this._utils.findNextClass("bubble", bubble, true);
 				if (previousBubble) {
 					previousBubble.focus();
 				}
@@ -282,7 +292,7 @@
 				}
 				this._deleteBubble(bubble);
 			}
-			else if (Utils.isKeypressPrintable(event) && event.key !== " ") {
+			else if (this._utils.isKeypressPrintable(event) && event.key !== " ") {
 				event.preventDefault();
 				let input = this.refocusInput();
 				// Typing when you are focused on the bubble will re-focus the last input
@@ -291,7 +301,10 @@
 			}
 			// Space or arrowDown on a bubble open item details popup
 			if (event.key == " " || event.key == "ArrowDown") {
-				Utils.notifyDialog("show-details-popup", { dialogReferenceID: bubble.getAttribute("dialogReferenceID") });
+				this._utils.notifyDialog("show-details-popup", {
+					dialogReferenceID: bubble.getAttribute("dialogReferenceID"),
+					bubble,
+				});
 				event.preventDefault();
 				event.stopPropagation();
 			}
@@ -307,7 +320,7 @@
 		
 		// Citation dialog will record that the item is removed and the bubble will be gone after refresh()
 		_deleteBubble(bubble) {
-			Utils.notifyDialog('delete-item', { dialogReferenceID: bubble.getAttribute("dialogReferenceID") });
+			this._utils.notifyDialog('delete-item', { dialogReferenceID: bubble.getAttribute("dialogReferenceID") });
 		}
 
 		/**
@@ -327,23 +340,23 @@
 				// in that case, resizing does not happen
 				if (!input.classList.contains("full-width")) {
 					// Expand/shrink the input field to match the width of content
-					input.style.width = Utils.getContentWidth(input) + 'px';
+					input.style.width = this._utils.getContentWidth(input) + 'px';
 				}
 				input.classList.toggle("empty", input.value.length == 0);
-				Utils.notifyDialog("handle-input", { query: input.value, eventType: "input" });
+				this._utils.notifyDialog("handle-input", { query: input.value, eventType: "input" });
 			});
 			input.addEventListener("keydown", e => this._onInputKeydown(input, e));
 			input.addEventListener("focus", (_) => {
 				// When input is re-focused, tell citationDialog that search can be rerun
 				// without debounce
-				Utils.notifyDialog("handle-input", { query: input.value, eventType: "focus" });
+				this._utils.notifyDialog("handle-input", { query: input.value, eventType: "focus" });
 			});
 			input.addEventListener("blur", async (event) => {
 				// When the window itself loses focus (e.g., Cmd/Alt-Tab to another app),
 				// the input remains focused, so keep its state unchanged
 				if (!document.hasFocus()) return;
 				// record this input as last focused if it's not empty OR if the focus left bubbleInput altogether
-				if (!Utils.isInputEmpty(input) || !this.contains(event.relatedTarget)) {
+				if (!this._utils.isInputEmpty(input) || !this.contains(event.relatedTarget)) {
 					this._lastFocusedInput = input;
 				}
 				// Collapse a placeholder input back to regular size once focus leaves.
@@ -369,7 +382,7 @@
 
 			// Enter on an input can have multiple outcomes, they are handled in citationDialog
 			if (event.key == "Enter" && !event.shiftKey) {
-				Utils.notifyDialog("input-enter", { input });
+				this._utils.notifyDialog("input-enter", { input });
 				event.stopPropagation();
 			}
 			if (["Backspace", "Delete"].includes(event.key)
@@ -382,20 +395,21 @@
 				}
 			}
 			// Home from the beginning of an input - focus the first input
-			if (event.key == "Home" && Utils.isCursorAtInputStart(input)) {
+			if (event.key == "Home" && this._utils.isCursorAtInputStart(input)) {
 				this._body.firstChild.focus();
 			}
 			// End from the end of an input - focus the last input
-			if (event.key == "End" && Utils.isCursorAtInputEnd(input)) {
+			if (event.key == "End" && this._utils.isCursorAtInputEnd(input)) {
 				this._body.lastChild.focus();
 			}
 		}
 	}
 
-	// Singleton handling drag-drop behavior of bubbles
+	// Handles drag-drop behavior for one bubble input.
 	const DragDropHandler = {
 		init(bubbleInput) {
 			this.bubbleInput = bubbleInput;
+			this.utils = bubbleInput._utils;
 			this.dragBubble = null;
 			this.dragOver = null;
 			this.doc = bubbleInput.ownerDocument;
@@ -409,8 +423,11 @@
 
 		handleDragStart(event) {
 			if (!this.bubbleInput.sortable) return false;
-			this.dragBubble = event.target;
+			this.dragBubble = event.target.closest(".bubble");
+			if (!this.dragBubble) return false;
 			event.dataTransfer.setData("text/plain", '<span id="zotero-drag"/>');
+			event.dataTransfer.setData("zotero/citation-item",
+				this.dragBubble.getAttribute("dialogReferenceID"));
 			event.stopPropagation();
 			return true;
 		},
@@ -422,7 +439,7 @@
 		handleDragOver(event) {
 			event.preventDefault();
 			// Find the last bubble before current mouse position
-			let lastBeforeDrop = Utils.getLastBubbleBeforePoint(event.clientX, event.clientY);
+			let lastBeforeDrop = this.utils.getLastBubbleBeforePoint(event.clientX, event.clientY);
 			// If no bubble, mouse may be at the very start of the input so use the first bubble
 			if (!lastBeforeDrop) {
 				lastBeforeDrop = this.bubbleInput.getAllBubbles()[0];
@@ -459,25 +476,34 @@
 						newIndex++;
 					}
 				}
-				Utils.notifyDialog('add-dragged-item', { itemIDs, index: newIndex });
+				this.utils.notifyDialog('add-dragged-item', { itemIDs, index: newIndex });
 				setTimeout(() => {
 					this.handleDragEnd();
 				});
 				return;
 			}
-			if (!this.dragBubble || !this.dragOver) return;
-			
-			if (this.dragOver.classList.contains("drop-after")) {
-				this.dragOver.after(this.dragBubble);
-			}
-			else {
-				this.dragOver.before(this.dragBubble);
-			}
-			this.dragOver.classList.remove('drop-after', 'drop-before');
 
-			// Tell citationDialog.js where the bubble moved
-			let newIndex = [...this.bubbleInput.querySelectorAll(".bubble")].findIndex(node => node == this.dragBubble);
-			Utils.notifyDialog('move-item', { dialogReferenceID: this.dragBubble.getAttribute("dialogReferenceID"), index: newIndex });
+			// Bubble drags can cross between bubble inputs. The dialog owns the
+			// citation order, so report the intended destination and let refresh()
+			// synchronize both inputs.
+			let dialogReferenceID = event.dataTransfer.getData("zotero/citation-item");
+			if (!dialogReferenceID) return;
+			let bubbles = this.bubbleInput.getAllBubbles();
+			let newIndex = 0;
+			if (this.dragOver) {
+				newIndex = bubbles.indexOf(this.dragOver);
+				if (this.dragOver.classList.contains("drop-after")) {
+					newIndex++;
+				}
+				let currentIndex = bubbles.findIndex(bubble => (
+					bubble.getAttribute("dialogReferenceID") == dialogReferenceID
+				));
+				if (currentIndex != -1 && currentIndex < newIndex) {
+					newIndex--;
+				}
+			}
+			this.utils.notifyDialog('move-item', { dialogReferenceID, index: newIndex });
+			this.handleDragEnd();
 		},
 
 		handleDragEnd(_) {
@@ -643,7 +669,7 @@
 		// For the just-added input (the last one, when showJustAddedPlaceholder is set), the
 		// placeholder is truncated to the space remaining on its line and passed to Fluent as
 		// a variable.
-		setupInputPlaceholders(showJustAddedPlaceholder, dialogType) {
+		setupInputPlaceholders(showJustAddedPlaceholder, dialogType, inputL10nID = null) {
 			let allInputs = [...this.bubbleInput.querySelectorAll(".input")];
 			let lastInput = allInputs[allInputs.length - 1];
 			let bodyRight = this.bubbleInput._body.getBoundingClientRect().right;
@@ -664,7 +690,8 @@
 						continue;
 					}
 					input.classList.remove("just-added-placeholder");
-					document.l10n.setAttributes(input, `integration-citationDialog-input-${dialogType}`);
+					document.l10n.setAttributes(input,
+						inputL10nID || `integration-citationDialog-input-${dialogType}`);
 					// Clear any stale title and min-width left over from a previous just-added state
 					input.removeAttribute("title");
 					input.style.minWidth = "";
@@ -713,7 +740,7 @@
 					remainingInput.value = combinedValue;
 					inputToDelete.remove();
 					// Ensure the width of the combined input is correct
-					remainingInput.style.width = Utils.getContentWidth(node) + 'px';
+					remainingInput.style.width = this.getContentWidth(node) + 'px';
 				}
 				node = node.nextElementSibling;
 			}

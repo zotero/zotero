@@ -57,7 +57,14 @@
 				<div id="z-icon-container">
 					<div id="z-icon"></div>
 				</div>
-				<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1"/>
+				<div id="citation-inputs" class="hbox flex">
+					<div id="narrative-prefix" class="hbox">
+						<xul:bubble-input id="narrative-head-input" data-arrow-nav="horizontal" data-tabindex="10" tabindex="-1" hidden="true"/>
+						<input id="narrative-infix" type="text" data-tabindex="11" data-l10n-id="integration-citationDialog-narrative-infix-input" hidden="true"/>
+						<div id="narrative-infix-separator" role="separator" aria-orientation="vertical" hidden="true"></div>
+					</div>
+					<xul:bubble-input id="bubble-input" class="flex" data-arrow-nav="horizontal" data-tabindex="12" tabindex="-1"/>
+				</div>
 				<progress id="progress" max="100" hidden="true"></progress>
 				<div id="top-level-btn-group">
 					<image id="loading-spinner" class="zotero-spinner-16"/>
@@ -125,6 +132,13 @@
 					</div>
 					<div id="dialog-type-add-note" class="option keyboard-clickable" value="add-note" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-btn-type-add-note">
 						<span class="icon icon-css icon-item-type" data-item-type="note"></span>
+					</div>
+				</div>
+				<div id="citation-form-area" class="hbox" data-dialog-type="citation">
+					<div id="citation-form-setting" class="segmented-switch" data-arrow-nav="horizontal" data-tabindex="71" role="radiogroup" aria-orientation="horizontal">
+						<div id="citation-form-ordinary" class="option keyboard-clickable" value="ordinary" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-ordinary"></div>
+						<div id="citation-form-narrative" class="option keyboard-clickable" value="narrative" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-narrative"></div>
+						<div id="citation-form-author-only" class="option keyboard-clickable" value="author-only" role="radio" aria-checked="false" tabindex="-1" data-arrow-nav-enabled="true" data-l10n-id="integration-citationDialog-form-authorOnly"></div>
 					</div>
 				</div>
 				<div class="hbox" style="flex:1"></div>
