@@ -13,7 +13,7 @@ describe("Zotero.Plugins", function () {
 		});
 
 		// The fixture's bootstrap.js loads main.js from its own XPI with
-		// Services.scriptloader.loadSubScript() and no target, as most plugins do
+		// Services.scriptloader.loadSubScript(rootURI + ...), as plugins commonly do
 		it("should load scripts and default prefs from a plugin's XPI", async function () {
 			let file = getTestDataDirectory();
 			file.append('plugin-loading-test.xpi');
