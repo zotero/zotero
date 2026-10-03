@@ -40,6 +40,7 @@ const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
 	? Math.pow(2, 33)
 	: Math.pow(2, 32) - 1;
 
+const READER_STATE_FILE_NAME = '.zotero-reader-state';
 const READ_ALOUD_ENABLED_VOICES_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudEnabledVoices.json');
 const READ_ALOUD_VOICE_DEFAULTS_PATH = PathUtils.join(Zotero.Profile.dir, 'readAloudVoiceDefaults.json');
 
@@ -48,7 +49,7 @@ let readAloudCachePruned = false;
 
 class ReaderInstance {
 	constructor(options) {
-		this.stateFileName = '.zotero-reader-state';
+		this.stateFileName = READER_STATE_FILE_NAME;
 		this.annotationItemIDs = [];
 		this._item = options.item;
 		this._instanceID = Zotero.Utilities.randomString();
@@ -67,6 +68,8 @@ class ReaderInstance {
 		this._pendingWriteStateTimeout = null;
 		this._pendingWriteStateFunction = null;
 		this._readAloudGuidancePanel = null;
+		this._primaryViewState = null;
+		this._lastSecondaryPageIndex = null;
 
 		this._type = this._item.attachmentReaderType;
 		if (!this._type) {
@@ -113,6 +116,28 @@ class ReaderInstance {
 	getSecondViewState() {
 		let state = this._iframeWindow?.wrappedJSObject?.getSecondViewState?.();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
+	}
+
+	/**
+	 * Get the page currently displayed in the active view, as shown in the reader's toolbar.
+	 *
+	 * @returns {String|null} - Page, or null if the reader has no pages.
+	 */
+	getCurrentPage() {
+		let state = this._internalReader?._state;
+		if (!state) return null;
+		// The secondary view is the active one while it is focused, but the state keeps
+		// saying so after the split view is removed
+		let useSecondary = !state.primary && state.splitType;
+		let stats = useSecondary ? state.secondaryViewStats : state.primaryViewStats;
+		if (!stats || stats.pageIndex === undefined) return null;
+		if (this._type === 'pdf') {
+			return stats.pageLabel || String(stats.pageIndex + 1);
+		}
+		if (this._type === 'epub' && stats.usePhysicalPageNumbers) {
+			return stats.pageLabel || null;
+		}
+		return null;
 	}
 
 	async migrateMendeleyColors(libraryID, annotations) {
@@ -365,7 +390,22 @@ class ReaderInstance {
 					if (win) {
 						win.Zotero_Tabs.setTabData(this.tabID, { secondViewState: state });
 					}
+					// The secondary view can be the one currently shown to the user (see
+					// getCurrentPage()), so handle its page changes as well. `state` is null
+					// when the split view is removed, which switches the displayed page back
+					// to the primary view.
+					let secondaryPageIndex = state ? this._getStateLastPageIndex(state) : null;
+					if (this._lastSecondaryPageIndex !== secondaryPageIndex) {
+						this._lastSecondaryPageIndex = secondaryPageIndex;
+						await this._handleDisplayedPageChange();
+					}
 				}
+			},
+			onChangeActiveView: async () => {
+				// Which of the split views is active decides the displayed page (see
+				// getCurrentPage()), so switching between them can change it with no
+				// view state change
+				await this._handleDisplayedPageChange();
 			},
 			onOpenTagsPopup: (id, x, y) => {
 				let key = id;
@@ -1012,25 +1052,28 @@ class ReaderInstance {
 		}
 	}
 
+	_getStateLastPageIndex(state) {
+		if (this._type === 'pdf') {
+			return state.pageIndex;
+		}
+		else if (this._type === 'epub') {
+			return state.cfi;
+		}
+		else if (this._type === 'snapshot') {
+			return state.scrollYPercent;
+		}
+		else {
+			throw new Error('Unknown reader type: ' + this._type);
+		}
+	}
+	
 	async _setState(state) {
 		if (this._isTransient()) {
 			return;
 		}
 		let item = Zotero.Items.get(this._item.id);
 		if (item) {
-			let lastPageIndex;
-			if (this._type === 'pdf') {
-				lastPageIndex = state.pageIndex;
-			}
-			else if (this._type === 'epub') {
-				lastPageIndex = state.cfi;
-			}
-			else if (this._type === 'snapshot') {
-				lastPageIndex = state.scrollYPercent;
-			}
-			else {
-				throw new Error('Unknown reader type: ' + this._type);
-			}
+			let lastPageIndex = this._getStateLastPageIndex(state);
 			let pageChanged = item.getAttachmentLastPageIndex() != lastPageIndex;
 			item.setAttachmentLastPageIndex(lastPageIndex);
 
@@ -1042,38 +1085,75 @@ class ReaderInstance {
 				}
 			}
 
-			let file = Zotero.Attachments.getStorageDirectory(item);
-			if (!(await OS.File.exists(file.path))) {
-				await Zotero.Attachments.createDirectoryForItem(item);
-			}
-			file.append(this.stateFileName);
+			// Save the page displayed at the time of this state, so that it is available
+			// while the reader is not loaded (e.g. for an unloaded tab)
+			state.pageLabel = this.getCurrentPage();
+			this._primaryViewState = state;
 			
-			// Write the new state to disk
-			let path = file.path;
-
-			// State updates can be frequent (every scroll) and we need to debounce actually writing them to disk.
-			// We flush the debounced write operation when Zotero shuts down or the window/tab is closed.
-			if (this._pendingWriteStateTimeout) {
-				clearTimeout(this._pendingWriteStateTimeout);
-			}
-			this._pendingWriteStateFunction = async () => {
-				if (this._pendingWriteStateTimeout) {
-					clearTimeout(this._pendingWriteStateTimeout);
-				}
-				this._pendingWriteStateFunction = null;
-				this._pendingWriteStateTimeout = null;
-				
-				Zotero.debug('Writing reader state to ' + path);
-				// Using atomic `writeJSON` instead of `putContentsAsync` to avoid using temp file that causes conflicts
-				// on simultaneous writes (on slow systems)
-				await IOUtils.writeJSON(path, state);
-			};
-			this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
-
+			await this._writeStateDebounced(item, state);
+			
 			if (pageChanged) {
 				Zotero.Notifier.trigger('pageChange', 'file', item.id);
 			}
 		}
+	}
+	
+	// Save the page displayed for this attachment and notify listeners that it changed
+	async _handleDisplayedPageChange() {
+		await this._saveCurrentPageLabel();
+		Zotero.Notifier.trigger('pageChange', 'file', this._item.id);
+	}
+
+	// Refresh the page label saved with the state, which is used to suggest a locator while
+	// the reader is not loaded. The displayed page can belong to the secondary view of a
+	// split tab, which doesn't go through _setState().
+	async _saveCurrentPageLabel() {
+		if (this._isTransient()) {
+			return;
+		}
+		let state = this._primaryViewState;
+		if (!state) {
+			return;
+		}
+		let pageLabel = this.getCurrentPage();
+		if (state.pageLabel === pageLabel) {
+			return;
+		}
+		state.pageLabel = pageLabel;
+		let item = Zotero.Items.get(this._item.id);
+		if (item) {
+			await this._writeStateDebounced(item, state);
+		}
+	}
+	
+	async _writeStateDebounced(item, state) {
+		let file = Zotero.Attachments.getStorageDirectory(item);
+		if (!(await OS.File.exists(file.path))) {
+			await Zotero.Attachments.createDirectoryForItem(item);
+		}
+		file.append(this.stateFileName);
+		
+		// Write the new state to disk
+		let path = file.path;
+		
+		// State updates can be frequent (every scroll) and we need to debounce actually writing them to disk.
+		// We flush the debounced write operation when Zotero shuts down or the window/tab is closed.
+		if (this._pendingWriteStateTimeout) {
+			clearTimeout(this._pendingWriteStateTimeout);
+		}
+		this._pendingWriteStateFunction = async () => {
+			if (this._pendingWriteStateTimeout) {
+				clearTimeout(this._pendingWriteStateTimeout);
+			}
+			this._pendingWriteStateFunction = null;
+			this._pendingWriteStateTimeout = null;
+			
+			Zotero.debug('Writing reader state to ' + path);
+			// Using atomic `writeJSON` instead of `putContentsAsync` to avoid using temp file that causes conflicts
+			// on simultaneous writes (on slow systems)
+			await IOUtils.writeJSON(path, state);
+		};
+		this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
 	}
 	
 	async _flushState() {
@@ -2886,7 +2966,41 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
-	
+
+	/**
+	 * Get the page that was displayed when the reader for the given attachment last saved
+	 * its state by reading the state file.
+	 * @param {Number} itemID - Attachment item ID
+	 * @returns {Promise<String|null>} - Page, or null if none was saved or if it is
+	 *     out of date with the last page index stored for the item
+	 */
+	async getSavedPageLabel(itemID) {
+		try {
+			let item = Zotero.Items.get(itemID);
+			if (!item?.isFileAttachment()) return null;
+			let directory = Zotero.Attachments.getStorageDirectory(item);
+			let path = PathUtils.join(directory.path, READER_STATE_FILE_NAME);
+			if (!(await IOUtils.exists(path))) return null;
+			let state = await IOUtils.readJSON(path);
+			// The last page index is synced, so it can move past the position saved in the
+			// state file after reading on another device.
+			// If that happens, do not suggest the stale page label
+			let lastPageIndex = item.getAttachmentLastPageIndex();
+			if (lastPageIndex !== null) {
+				// PDFs store a page index, EPUBs store a CFI
+				let savedPosition = item.attachmentReaderType === 'epub' ? state.cfi : state.pageIndex;
+				if (savedPosition !== lastPageIndex) {
+					return null;
+				}
+			}
+			return state.pageLabel || null;
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	}
+
 	getWindowStates() {
 		return this._readers
 			.filter(r => r instanceof ReaderWindow)
