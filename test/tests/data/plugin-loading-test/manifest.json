@@ -1,0 +1,13 @@
+{
+  "manifest_version": 2,
+  "name": "Plugin Loading Test",
+  "version": "1.0",
+  "applications": {
+    "zotero": {
+      "id": "plugin-loading-test@zotero.org",
+      "update_url": "https://www.zotero.org/",
+      "strict_min_version": "7.0",
+      "strict_max_version": "*"
+    }
+  }
+}

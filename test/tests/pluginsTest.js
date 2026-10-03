@@ -15,9 +15,11 @@ describe("Zotero.Plugins", function () {
 		// The fixture's bootstrap.js loads main.js from its own XPI with
 		// Services.scriptloader.loadSubScript(rootURI + ...), as plugins commonly do
 		it("should load scripts and default prefs from a plugin's XPI", async function () {
-			let file = getTestDataDirectory();
-			file.append('plugin-loading-test.xpi');
-			addon = await AddonManager.installTemporaryAddon(file);
+			let dir = getTestDataDirectory();
+			dir.append('plugin-loading-test');
+			let xpiPath = PathUtils.join(await getTempDirectory(), 'plugin-loading-test.xpi');
+			await Zotero.File.zipDirectory(dir.path, xpiPath);
+			addon = await AddonManager.installTemporaryAddon(Zotero.File.pathToFile(xpiPath));
 
 			await waitForCallback(() => Zotero.PluginLoadingTest, 100, 10);
 			assert.equal(Zotero.PluginLoadingTest, 'loaded');
