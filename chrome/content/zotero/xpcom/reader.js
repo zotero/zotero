@@ -259,6 +259,7 @@ class ReaderInstance {
 			showAnnotations: true,
 			textSelectionAnnotationMode: Zotero.Prefs.get('reader.textSelectionAnnotationMode'),
 			inkSmoothing: Zotero.Prefs.get('reader.inkSmoothing'),
+			inkPressure: Zotero.Prefs.get('reader.inkPressure'),
 			customThemes: Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, 'readerCustomThemes') ?? [],
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
@@ -415,6 +416,9 @@ class ReaderInstance {
 			},
 			onChangeInkSmoothing: (smoothing) => {
 				Zotero.Prefs.set('reader.inkSmoothing', smoothing);
+			},
+			onChangeInkPressure: (pressure) => {
+				Zotero.Prefs.set('reader.inkPressure', pressure);
 			},
 			onSetPopupPosition: (id, position) => {
 				this._setPopupPosition(id, position);
@@ -679,6 +683,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.text', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.image', this._handleAutoDisableToolPrefChange),
 			Zotero.Prefs.registerObserver('reader.inkSmoothing', this._handleInkSmoothingPrefChange),
+			Zotero.Prefs.registerObserver('reader.inkPressure', this._handleInkPressurePrefChange),
 			Zotero.Prefs.registerObserver('reader.popupPositions', this._handlePopupPositionsPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloud.highlightGranularity', this._handleReadAloudHighlightGranularityChange),
@@ -1239,6 +1244,10 @@ class ReaderInstance {
 
 	_handleInkSmoothingPrefChange = () => {
 		this._internalReader.setInkSmoothing(Zotero.Prefs.get('reader.inkSmoothing'));
+	};
+
+	_handleInkPressurePrefChange = () => {
+		this._internalReader.setInkPressure(Zotero.Prefs.get('reader.inkPressure'));
 	};
 
 	_handleAutoDisableToolPrefChange = () => {
