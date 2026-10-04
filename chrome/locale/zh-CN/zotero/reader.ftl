@@ -259,6 +259,8 @@ reader-read-aloud-annotation-popup-done = 完成
 reader-read-aloud-annotation-popup-change-color = 更换颜色
 reader-read-aloud-annotation-popup-highlight = 高亮
 reader-read-aloud-annotation-popup-underline = 下划线
+reader-ink-smoothing = 平滑手写笔迹
+
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
 reader-tab-audio-pause =
