@@ -269,6 +269,9 @@ reader-read-aloud-annotation-popup-change-color = Change color
 reader-read-aloud-annotation-popup-highlight = Highlight
 reader-read-aloud-annotation-popup-underline = Underline
 
+reader-ink-smoothing = Smooth Handwriting
+reader-ink-pressure-experimental = Pen Pressure (Experimental)
+
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }
 reader-tab-audio-pause =

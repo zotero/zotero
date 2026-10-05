@@ -240,6 +240,8 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 
 // Reader
+pref("extensions.zotero.reader.inkSmoothing", true);
+pref("extensions.zotero.reader.inkPressure", false);
 pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
 pref("extensions.zotero.reader.lightTheme", "");
 pref("extensions.zotero.reader.darkTheme", "dark");
