@@ -451,6 +451,20 @@ describe("Zotero.HTTP", function () {
 				}
 			);
 			httpd.registerPathHandler(
+				'/download/referer',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.setHeader(
+							"X-Echo",
+							request.hasHeader("Referer") ? request.getHeader("Referer") : "",
+							false
+						);
+						response.write("ok");
+					}
+				}
+			);
+			httpd.registerPathHandler(
 				'/download/auth',
 				{
 					handle: function (request, response) {
@@ -515,6 +529,30 @@ describe("Zotero.HTTP", function () {
 			assert.equal(req.headers.get("X-Echo"), "test-value");
 		});
 
+		it("should send a Referer header", async function () {
+			let dest = PathUtils.join(tmpDir, "referer.bin");
+			let referrer = baseURL + "article";
+			let req = await Zotero.HTTP.download(
+				baseURL + "download/referer",
+				dest,
+				{
+					headers: { Referer: referrer }
+				}
+			);
+			assert.equal(req.headers.get("X-Echo"), referrer);
+		});
+		
+		it("should send cookies", async function () {
+			Services.cookies.removeAll();
+			let url = baseURL + "cookie-check";
+			// Set the cookie
+			await Zotero.HTTP.request('GET', url, { successCodes: false });
+			
+			let dest = PathUtils.join(tmpDir, "cookie.bin");
+			let req = await Zotero.HTTP.download(url, dest, { successCodes: false });
+			assert.equal(req.status, 200);
+		});
+		
 		it("should throw UnexpectedStatusException for non-success status", async function () {
 			let dest = PathUtils.join(tmpDir, "404.bin");
 			let e = await getPromiseError(
