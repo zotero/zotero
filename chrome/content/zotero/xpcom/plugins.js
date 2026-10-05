@@ -206,7 +206,10 @@ Zotero.Plugins = new function () {
 				uri,
 				{
 					target: scope,
-					ignoreCache: true
+					ignoreCache: true,
+					// Plugins are loaded from jar:file: URIs, which the script loader
+					// otherwise refuses (Mozilla bug 1974213)
+					allowUnsafeURL: true
 				}
 			);
 		}
@@ -528,7 +531,8 @@ Zotero.Plugins = new function () {
 				addon.getResourceURI("prefs.js").spec,
 				{
 					target: obj,
-					ignoreCache: true
+					ignoreCache: true,
+					allowUnsafeURL: true
 				}
 			);
 		}
@@ -554,7 +558,8 @@ Zotero.Plugins = new function () {
 				addon.getResourceURI("prefs.js").spec,
 				{
 					target: obj,
-					ignoreCache: true
+					ignoreCache: true,
+					allowUnsafeURL: true
 				}
 			);
 		}

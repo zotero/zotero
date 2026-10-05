@@ -54,6 +54,11 @@ pref("dom.disable_open_during_load", true);
 // scraping the page, since we don't provide any information to the site.
 pref("security.warn_viewing_mixed", false);
 
+// Temporarily allow plugins to load their own scripts from jar:file: URIs with loadSubScript()
+// without passing allowUnsafeURL (Mozilla bug 1974213). This will be disabled once plugins have
+// had time to update.
+pref("security.allow_unsafe_subscript_loads", true);
+
 // We do need synchronous XHR
 pref("network.xhr.block_sync_system_requests", false);
 
