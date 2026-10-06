@@ -2217,7 +2217,7 @@ Zotero.Attachments = new function () {
 							let refreshURL = Zotero.HTTP.getHTMLMetaRefreshURL(doc, responseURL);
 							if (refreshURL) {
 								// If the refresh points at a known bot-challenge host, the
-								// interstitial runs JS that a plain request can handle. Run
+								// interstitial runs JS that a plain request can't handle. Run
 								// it once in a hidden browser to store the resulting cookies,
 								// then retry the page over the normal path.
 								let challengeEntry = Zotero.BrowserRequest.getEntryForURL(refreshURL);
