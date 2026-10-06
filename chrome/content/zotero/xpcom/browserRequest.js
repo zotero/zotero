@@ -61,7 +61,7 @@ Zotero.BrowserRequest = {
 			// that computes a proof-of-work and POSTs it to /_sec/verify before
 			// reloading the page without the token. There's no CAPTCHA to show a
 			// user -- it's a fully automatic JS handshake -- so a hidden browser
-			// runs it to completion and banks the resulting cookies, with no
+			// runs it to completion and stores the resulting cookies, with no
 			// success cookie or viewer escalation.
 			match: '://www.mdpi.com',
 			captchaLocator: null,
