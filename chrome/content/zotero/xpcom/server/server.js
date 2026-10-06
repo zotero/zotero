@@ -109,7 +109,9 @@ Zotero.Server = new function () {
 		var decodedData = {};
 		for (let variable of splitData) {
 			var splitIndex = variable.indexOf("=");
-			decodedData[decodeURIComponent(variable.substr(0, splitIndex))] = decodeURIComponent(variable.substr(splitIndex+1));
+			let key = variable.substr(0, splitIndex).replaceAll('+', ' ');
+			let value = variable.substr(splitIndex + 1).replaceAll('+', ' ');
+			decodedData[decodeURIComponent(key)] = decodeURIComponent(value);
 		}
 		return decodedData;
 	}
