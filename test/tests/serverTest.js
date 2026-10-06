@@ -141,6 +141,38 @@ describe("Zotero.Server", function () {
 				});
 			});
 			
+			describe("application/x-www-form-urlencoded", function () {
+				it("should decode + as a space", async function () {
+					var data;
+					
+					var endpoint = "/test/" + Zotero.Utilities.randomString();
+					var handler = function () {};
+					handler.prototype = {
+						supportedMethods: ["POST"],
+						supportedDataTypes: ["application/x-www-form-urlencoded"],
+						
+						init: function (options) {
+							data = options.data;
+							return 204;
+						}
+					};
+					Zotero.Server.Endpoints[endpoint] = handler;
+					
+					await Zotero.HTTP.request(
+						"POST",
+						serverPath + endpoint,
+						{
+							headers: {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							body: "file+name=a+b%2Bc%20d.pdf"
+						}
+					);
+					
+					assert.deepEqual(data, { "file name": "a b+c d.pdf" });
+				});
+			});
+			
 			describe("multipart/form-data", function () {
 				it("should support text", async function () {
 					var called = false;
