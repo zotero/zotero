@@ -1052,7 +1052,7 @@ Zotero.HTTP = new function () {
 		if (!content) {
 			return false;
 		}
-		var parts = content.split(/;\s*url=/);
+		var parts = content.split(/;\s*url=/i);
 		// If there's a redirect to another URL in less than 15 seconds,
 		// follow it
 		if (parts.length === 2 && parseInt(parts[0]) <= 15) {

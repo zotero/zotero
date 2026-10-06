@@ -684,6 +684,8 @@ describe("Zotero.Attachments", function () {
 		var pageURL9 = 'http://website/article9';
 		var pageURL10 = 'http://website/refresh';
 		var pageURL11 = 'http://website/book';
+		var pageURL12 = 'https://www.mdpi.com/2073-4433/16/2/169';
+		var mdpiChallengeCleared = false;
 		
 		var httpd;
 		var port = 16213;
@@ -889,6 +891,20 @@ describe("Zotero.Attachments", function () {
 				if (url == pageURL10) {
 					let html = `<html><head><meta http-equiv=\"refresh\" content=\"2;url=${pageURL1}\"/></head><body></body></html>`;
 					return makeHTMLResponseFromType(html, options.responseType, pageURL10);
+				}
+
+				// MDPI serves an Akamai interstitial (meta-refresh to a bm-verify
+				// URL) until the challenge has been cleared in a hidden browser,
+				// then the real page with a PDF link.
+				if (url == pageURL12) {
+					let html;
+					if (mdpiChallengeCleared) {
+						html = getHTMLPage(true);
+					}
+					else {
+						html = `<html><head><meta http-equiv="refresh" content="5; URL='${pageURL12}?bm-verify=TOKEN'"/></head><body></body></html>`;
+					}
+					return makeHTMLResponseFromType(html, options.responseType, pageURL12);
 				}
 				
 				// OA PDF lookup
@@ -1313,6 +1329,38 @@ describe("Zotero.Attachments", function () {
 			assert.equal(json.contentType, 'application/pdf');
 			assert.equal(json.filename, 'Test.pdf');
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+		});
+		
+		it("should clear a bot challenge in a browser and retry the page", async function () {
+			mdpiChallengeCleared = false;
+			// Simulate the hidden browser solving the interstitial: once
+			// clearChallenge() runs, the page stops serving the challenge.
+			let clearStub = sinon.stub(Zotero.BrowserRequest, "clearChallenge").callsFake(async () => {
+				mdpiChallengeCleared = true;
+			});
+			try {
+				var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+				item.setField('title', 'Test');
+				item.setField('url', pageURL12);
+				await item.saveTx();
+				var attachment = await Zotero.Attachments.addAvailableFile(item);
+
+				// The challenge is cleared for the page itself, not the one-shot
+				// bm-verify token URL.
+				assert.isTrue(clearStub.calledOnce);
+				assert.equal(clearStub.firstCall.args[0], pageURL12);
+				// Interstitial, then the retried page
+				assert.equal(requestStub.getCall(0).args[1], pageURL12);
+				assert.equal(requestStub.getCall(1).args[1], pageURL12);
+				assert.ok(attachment);
+				var json = attachment.toJSON();
+				assert.equal(json.url, pdfURL);
+				assert.equal(json.contentType, 'application/pdf');
+				assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+			}
+			finally {
+				clearStub.restore();
+			}
 		});
 		
 		it("should stop after too many redirects to the same URL", async function () {

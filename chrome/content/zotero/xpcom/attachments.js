@@ -2132,6 +2132,7 @@ Zotero.Attachments = new function () {
 					let domains = new Set();
 					let redirectLimit = 10;
 					let redirectURLTries = new Map();
+					let clearedChallenges = new Set();
 					while (true) {
 						if (redirectLimit == 0) {
 							Zotero.debug("Too many redirects -- stopping");
@@ -2215,6 +2216,29 @@ Zotero.Attachments = new function () {
 							// Check for a meta redirect on HTML pages
 							let refreshURL = Zotero.HTTP.getHTMLMetaRefreshURL(doc, responseURL);
 							if (refreshURL) {
+								// If the refresh points at a known bot-challenge host, the
+								// interstitial runs JS that a plain request can't satisfy. Run
+								// it once in a hidden browser to bank the resulting cookies,
+								// then retry the page over the normal path.
+								let challengeEntry = Zotero.BrowserRequest.getEntryForURL(refreshURL);
+								if (challengeEntry && !clearedChallenges.has(responseURL)) {
+									clearedChallenges.add(responseURL);
+									try {
+										await Zotero.BrowserRequest.clearChallenge(
+											responseURL,
+											{ entry: challengeEntry }
+										);
+										doc = null;
+										nextURL = responseURL;
+										redirectLimit--;
+										continue;
+									}
+									catch (e) {
+										Zotero.debug(`Failed to clear challenge at ${responseURL}: ${e}`);
+										skip = true;
+										break;
+									}
+								}
 								if (isTriedURL(refreshURL)) {
 									Zotero.debug("Meta refresh URL has already been tried -- skipping");
 									skip = true;
@@ -2222,6 +2246,7 @@ Zotero.Attachments = new function () {
 								}
 								doc = null;
 								nextURL = refreshURL;
+								redirectLimit--;
 								continue;
 							}
 							// ProQuest does a JS redirect back to the original page after authenticating

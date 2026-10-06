@@ -55,6 +55,17 @@ Zotero.BrowserRequest = {
 			match: '://pmc.ncbi.nlm.nih.gov',
 			captchaLocator: null
 		},
+		{
+			// MDPI fronts pages with an Akamai Bot Manager interstitial: a 200
+			// whose body is a meta-refresh to a ?bm-verify= URL plus a script
+			// that computes a proof-of-work and POSTs it to /_sec/verify before
+			// reloading the page without the token. There's no CAPTCHA to show a
+			// user -- it's a fully automatic JS handshake -- so a hidden browser
+			// runs it to completion and banks the resulting cookies, with no
+			// success cookie or viewer escalation.
+			match: '://www.mdpi.com',
+			captchaLocator: null,
+		},
 	],
 	
 	PLAIN_UA_HOSTS: [
@@ -62,6 +73,7 @@ Zotero.BrowserRequest = {
 		'www.sciencedirect.com',
 		'pdf.sciencedirectassets.com',
 		'search.worldcat.org',
+		'www.mdpi.com',
 	],
 
 	/**
@@ -118,6 +130,7 @@ Zotero.BrowserRequest = {
 		// and resolves as soon as successCookie appears, which may be well
 		// before the page fully settles (or redirects somewhere else).
 		let hiddenBrowser;
+		let settled = false;
 		try {
 			hiddenBrowser = new HiddenBrowser({ userContextId, customUserAgent });
 			await hiddenBrowser._createdPromise;
@@ -125,6 +138,7 @@ Zotero.BrowserRequest = {
 				successCookie,
 				userContextId
 			});
+			settled = true;
 		}
 		catch (e) {
 			Zotero.debug('BrowserRequest: Hidden browser attempt failed');
@@ -141,6 +155,12 @@ Zotero.BrowserRequest = {
 			if (currentValue && currentValue !== initialCookieValue) {
 				return;
 			}
+		}
+		// For a fully automatic interstitial with no explicit success signal or
+		// captcha, a clean settle means the challenge JS ran to completion and
+		// left its cookies in the shared jar.
+		else if (settled && entry && !entry.captchaLocator) {
+			return;
 		}
 
 		if (!allowViewer) {

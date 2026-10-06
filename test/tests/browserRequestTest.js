@@ -155,6 +155,60 @@ describe("Zotero.BrowserRequest", function () {
 		});
 	});
 
+	describe("#clearChallenge()", function () {
+		it("resolves once the hidden browser settles for an automatic interstitial", async function () {
+			// An entry with no successCookie (e.g., an Akamai proof-of-work
+			// interstitial) has no explicit success signal, so a clean settle
+			// is what counts as cleared.
+			let settleStub = sinon.stub(Zotero.BrowserRequest, "_loadAndSettle").resolves();
+			try {
+				await Zotero.BrowserRequest.clearChallenge('https://www.mdpi.com/2073-4433/16/2/169', {
+					entry: { match: '://www.mdpi.com', captchaLocator: null }
+				});
+				assert.isTrue(settleStub.calledOnce);
+			}
+			finally {
+				settleStub.restore();
+			}
+		});
+
+		it("doesn't treat a settle as cleared for an entry with a captcha", async function () {
+			let settleStub = sinon.stub(Zotero.BrowserRequest, "_loadAndSettle").resolves();
+			let err;
+			try {
+				await Zotero.BrowserRequest.clearChallenge('https://www.sciencedirect.com/science/article/pii/S0000000000000000', {
+					entry: { match: '://www.sciencedirect.com', captchaLocator: '#captcha-box' }
+				});
+			}
+			catch (e) {
+				err = e;
+			}
+			finally {
+				settleStub.restore();
+			}
+			assert.isDefined(err);
+			assert.include(err.message, 'not cleared');
+		});
+
+		it("throws when the hidden browser fails to settle and no viewer is allowed", async function () {
+			let settleStub = sinon.stub(Zotero.BrowserRequest, "_loadAndSettle").rejects(new Error("timed out"));
+			let err;
+			try {
+				await Zotero.BrowserRequest.clearChallenge('https://www.mdpi.com/2073-4433/16/2/169', {
+					entry: { match: '://www.mdpi.com', captchaLocator: null }
+				});
+			}
+			catch (e) {
+				err = e;
+			}
+			finally {
+				settleStub.restore();
+			}
+			assert.isDefined(err);
+			assert.include(err.message, 'not cleared');
+		});
+	});
+
 	describe("translator request retry", function () {
 		function makeUtils() {
 			let fakeTranslate = {
