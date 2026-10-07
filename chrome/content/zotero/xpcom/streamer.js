@@ -347,7 +347,8 @@ Zotero.Streamer_Module.prototype = {
 			this._subscriptions.clear();
 			
 			if (this._reconnect) {
-				if (event.code >= 4400 && event.code < 4500) {
+				// Keep retrying on 4429 (Too Many Requests)
+				if (event.code >= 4400 && event.code < 4500 && event.code != 4429) {
 					Zotero.debug("Not reconnecting to WebSocket due to client error");
 					return;
 				}
