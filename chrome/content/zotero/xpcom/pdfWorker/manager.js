@@ -79,6 +79,8 @@ class PDFWorker {
 	}
 
 	async _query(action, data, transfer, options = {}) {
+		// The worker is dropped after an error, so there may be none yet
+		this._init();
 		return new Promise((resolve, reject) => {
 			this._lastPromiseID++;
 			this._waitingPromises[this._lastPromiseID] = {
@@ -179,7 +181,21 @@ class PDFWorker {
 		});
 		this._worker.addEventListener('error', (event) => {
 			Zotero.logError(`Document worker error (${event.filename}:${event.lineno}): ${event.message}`);
+			// An error outside an action's own handling leaves its request
+			// unanswered, so every pending request fails and the next one
+			// starts a fresh worker
+			this._reset(new Error(`Document worker error: ${event.message}`));
 		});
+	}
+
+	_reset(error) {
+		let pending = Object.values(this._waitingPromises);
+		this._waitingPromises = {};
+		this._worker.terminate();
+		this._worker = null;
+		for (let { reject } of pending) {
+			reject(error);
+		}
 	}
 	
 	canImport(item) {
@@ -690,6 +706,52 @@ class PDFWorker {
 
 			Zotero.debug(`Extracted structured document text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
 
+			return result;
+		}, !!isPriority);
+	}
+
+	/**
+	 * Cut a structured document text pack into chunks for embedding. The
+	 * buffer is transferred to the worker, so the caller's copy is detached.
+	 *
+	 * @param {ArrayBuffer} buf - The pack, as getStructuredDocumentText() returns it
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.isPriority]
+	 * @param {Boolean} [options.positions] - Give each chunk the reader
+	 *     `positions` its anchor resolves to
+	 * @returns {Promise<Object>} - { chunks, sourceHash, chunkerVersion }
+	 */
+	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = false } = {}) {
+		return this._enqueue(async () => {
+			try {
+				var result = await this._query('sdt.getChunks', { buf, positions }, [buf]);
+			}
+			catch (e) {
+				this._throwWorkerError('sdt.getChunks', e);
+			}
+			return result;
+		}, !!isPriority);
+	}
+
+	/**
+	 * Read chunk anchors back from a structured document text pack. The
+	 * buffer is transferred to the worker, so the caller's copy is detached.
+	 *
+	 * @param {ArrayBuffer} buf - The pack, as getStructuredDocumentText() returns it
+	 * @param {Object[]} anchors - A chunk's `anchor` per entry
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.isPriority]
+	 * @returns {Promise<Object[]>} - Per anchor, { text, outlinePath,
+	 *     pageLabel, positions } or null where it doesn't resolve
+	 */
+	async readStructuredDocumentTextAnchors(buf, anchors, { isPriority = false } = {}) {
+		return this._enqueue(async () => {
+			try {
+				var result = await this._query('sdt.readAnchors', { buf, anchors }, [buf]);
+			}
+			catch (e) {
+				this._throwWorkerError('sdt.readAnchors', e);
+			}
 			return result;
 		}, !!isPriority);
 	}

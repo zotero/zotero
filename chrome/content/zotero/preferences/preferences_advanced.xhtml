@@ -291,23 +291,47 @@
 					<label data-l10n-id="fulltext-stats-notes-indexed"/>
 					<label id="fulltext-stats-notes"/>
 				</hbox>
+				<hbox>
+					<label data-l10n-id="fulltext-stats-items-indexed"/>
+					<label id="fulltext-stats-items"/>
+				</hbox>
 			</vbox>
 		</groupbox>
 
 		<groupbox id="semantic-search">
 			<label><html:h2 data-l10n-id="preferences-advanced-semantic-search-title"/></label>
 			<hbox align="center">
-				<label data-l10n-id="preferences-advanced-semantic-search-model" control="semantic-search-model"/>
-				<menulist id="semantic-search-model" native="true">
+				<label data-l10n-id="preferences-advanced-semantic-search-enable"
+					control="semantic-search-enable"/>
+				<!-- Bound in initSemanticSearch(): the `preference` attribute
+					 writes the menu's string value, which a boolean pref can't
+					 take -->
+				<menulist id="semantic-search-enable" native="true">
 					<menupopup>
-						<menuitem value="" data-l10n-id="preferences-advanced-semantic-search-disabled"/>
-						<!-- Model items are populated from Zotero.Embeddings.getAvailableModels() -->
+						<menuitem value="true"
+							data-l10n-id="preferences-advanced-semantic-search-enabled"/>
+						<menuitem value="false"
+							data-l10n-id="preferences-advanced-semantic-search-disabled"/>
 					</menupopup>
 				</menulist>
 			</hbox>
-			<description id="semantic-search-model-description"
-				data-l10n-id="preferences-advanced-semantic-search-model-description"/>
+			<hbox align="center">
+				<label data-l10n-id="preferences-advanced-best-match-margin"
+					control="best-match-margin"/>
+				<html:input id="best-match-margin" class="html-input" type="number"
+					min="0" max="100" step="1" size="3"
+					data-preference="search.bestMatchMargin"/>
+			</hbox>
+			<description class="semantic-search-hint"
+				data-l10n-id="preferences-advanced-best-match-margin-description"/>
+			<hbox id="semantic-search-endpoint-row" align="center" hidden="true">
+				<label id="semantic-search-endpoint-status"/>
+				<button id="semantic-search-endpoint-configure"
+					data-l10n-id="preferences-advanced-semantic-search-endpoint-configure"/>
+			</hbox>
+
 			<vbox id="semantic-search-status" hidden="true">
+				<separator class="thin"/>
 				<hbox align="center">
 					<label data-l10n-id="preferences-advanced-semantic-search-status"/>
 					<label id="semantic-search-phase"/>
@@ -318,7 +342,42 @@
 						data-l10n-id="preferences-advanced-semantic-search-stop"
 						hidden="true"/>
 				</hbox>
-				<vbox class="form-grid" id="semantic-search-libraries"/>
+				<html:div id="semantic-search-progress">
+					<html:div id="semantic-search-items-row" class="semantic-search-progress-row">
+						<label data-l10n-id="preferences-advanced-semantic-search-items"/>
+						<html:progress id="semantic-search-items-progress" value="0" max="1"/>
+						<label id="semantic-search-items-value"/>
+					</html:div>
+					<html:div id="semantic-search-attachments-row" class="semantic-search-progress-row">
+						<label data-l10n-id="preferences-advanced-semantic-search-attachments"/>
+						<html:progress id="semantic-search-attachments-progress" value="0" max="1"/>
+						<label id="semantic-search-attachments-value"/>
+					</html:div>
+				</html:div>
+				<button id="semantic-search-diagnostics-toggle"
+					data-l10n-id="preferences-advanced-semantic-search-diagnostics-show"/>
+				<html:div id="semantic-search-diagnostics" hidden="true"/>
+			</vbox>
+
+			<!-- Temporary, for testing: pin best-match search to one engine -->
+			<vbox>
+				<separator class="thin"/>
+				<hbox align="center">
+					<label data-l10n-id="preferences-advanced-best-match-engine"
+						control="best-match-engine"/>
+					<menulist id="best-match-engine"
+							preference="extensions.zotero.search.bestMatchEngine"
+							native="true">
+						<menupopup>
+							<menuitem value="hybrid"
+								data-l10n-id="preferences-advanced-best-match-engine-hybrid"/>
+							<menuitem value="lexical"
+								data-l10n-id="preferences-advanced-best-match-engine-lexical"/>
+							<menuitem value="semantic"
+								data-l10n-id="preferences-advanced-best-match-engine-semantic"/>
+						</menupopup>
+					</menulist>
+				</hbox>
 			</vbox>
 		</groupbox>
 	</vbox>

@@ -513,7 +513,22 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 
 	});
-	
+
+	describe("#isLikelyReference()", function () {
+		it("should match a reference list's title in any case and punctuation", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isLikelyReference('References'));
+			assert.isTrue(Zotero.Utilities.Internal.isLikelyReference('WORKS CITED:'));
+			assert.isTrue(Zotero.Utilities.Internal.isLikelyReference('Literaturverzeichnis'));
+			assert.isTrue(Zotero.Utilities.Internal.isLikelyReference('参考文献'));
+		});
+
+		it("should not match a string that only mentions references", function () {
+			assert.isFalse(Zotero.Utilities.Internal.isLikelyReference('Sources of law'));
+			assert.isFalse(Zotero.Utilities.Internal.isLikelyReference('References to prior work'));
+			assert.isFalse(Zotero.Utilities.Internal.isLikelyReference(''));
+		});
+	});
+
 	describe("#getNextName()", function () {
 		it("should get the next available numbered name", function () {
 			var existing = ['Name', 'Name 1', 'Name 3'];

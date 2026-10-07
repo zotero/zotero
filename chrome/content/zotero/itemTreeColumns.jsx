@@ -397,9 +397,13 @@ const COLUMNS = [
 		renderCell(index, data, column, isFirstColumn, doc) {
 			let cell = doc.createElement('span');
 			cell.className = `cell ${column.className}`;
-			let fraction = this.rowProvider.getBestMatchBarFractions()
-				.get(this.getRow(index).id);
-			if (fraction !== undefined) {
+			let row = this.getRow(index);
+			// Rows that carry their own relevance (e.g. a search-match row,
+			// showing the strength of the evidence it displays) report it
+			// themselves; every other row's bar comes from the view's scores
+			let fraction = this.rowProvider.getBestMatchBarFractions().get(row.id)
+				?? row.getRelevanceFraction();
+			if (fraction !== null && fraction !== undefined) {
 				let bar = doc.createElement('span');
 				bar.className = 'relevance-bar';
 				let fill = doc.createElement('span');
@@ -408,9 +412,11 @@ const COLUMNS = [
 				bar.append(fill);
 				cell.append(bar);
 				// The rank reaches assistive technology via the row label; show
-				// it visually as a tooltip
-				doc.l10n.formatValue('items-column-relevance-rank', { rank: data })
-					.then(label => cell.title = label);
+				// it visually as a tooltip. Match rows carry no rank of their own.
+				if (data) {
+					doc.l10n.formatValue('items-column-relevance-rank', { rank: data })
+						.then(label => cell.title = label);
+				}
 			}
 			return cell;
 		}

@@ -174,6 +174,29 @@ describe("Advanced Search", function () {
 		await childOnly.eraseTx();
 	});
 
+	it("should prefill a Best Match quick search as the ranking field, keeping its conditions", async function () {
+		var item = await createDataObject('item', { title: "alpha beta" });
+		item.addTag('zztag');
+		await item.saveTx();
+
+		await zp.openAdvancedSearchFromQuickSearch('tag:zztag alpha beta', 'bestMatch');
+		var iv = zp.itemsView;
+		await iv.waitForLoad();
+
+		// The clause stays a condition; the free text ranks rather than
+		// filtering, so no word becomes a condition of its own
+		var conds = Object.values(deck.pane.search.getConditions());
+		assert.isTrue(conds.some(c => c.condition === 'tag' && c.value === 'zztag'));
+		assert.isFalse(conds.some(c => c.condition === 'anyField'));
+		assert.isTrue(conds.some(c => c.condition === 'resultLevel' && c.operator === 'item'));
+		assert.equal(deck.pane.search.getBestMatchQuery(), 'alpha beta');
+		assert.equal(deck.pane.querySelector('.best-match-input').value, 'alpha beta');
+
+		await zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		await item.eraseTx();
+	});
+
 	it("should run a cross-level search across a multi-collection selection", async function () {
 		var word = 'zmc' + Zotero.Utilities.randomString();
 		var makeMatch = async function (collection) {

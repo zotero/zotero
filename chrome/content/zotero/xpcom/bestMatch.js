@@ -1,0 +1,978 @@
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2026 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
+
+/**
+ * Zotero.BestMatch -- the engine behind best-match search: scoring a set of
+ * items by relevance to a query. The lexical engine (Zotero.Lexical) always
+ * scores; when a semantic model is enabled (Zotero.Embeddings), both engines
+ * score and their rankings are fused with Reciprocal Rank Fusion, so an item
+ * can match by its words, by its meaning, or -- ranking highest -- by both.
+ * The facade owns everything a consumer would otherwise need engine
+ * knowledge for: what counts as an empty query, how results map onto the
+ * relevance bar, and what the failure modes are.
+ */
+Zotero.BestMatch = new function () {
+	// The constant in a Reciprocal Rank Fusion contribution, 1 / (RRF_K +
+	// rank): high enough that a handful of rank positions in one engine
+	// can't drown out the other engine's opinion entirely
+	const RRF_K = 60;
+	// How a passage's two kinds of evidence weigh against each other. The
+	// model's reading leads: it is the calibrated signal, and it chose which
+	// passages are worth showing. Saying the query's own words lifts a
+	// passage above an equally similar one that only paraphrases them.
+	const SEMANTIC_WEIGHT = 0.7;
+	const LEXICAL_WEIGHT = 0.3;
+	// About a line: what a passage is quoted down to for a one-line preview
+	const SNIPPET_CHARS = 150;
+	// A sentence longer than this is quoted as a line of its words rather
+	// than whole
+	const LONG_SENTENCE_CHARS = 200;
+	// The shortest stretch of sentences the static model weighs on its own
+	const MIN_UNIT_CHARS = 60;
+	// Most passages quoted for one item. The strongest few already say what
+	// the item has to offer at a glance; the rest are still derived --
+	// they're read whole rather than quoted, which needs no line chosen.
+	const MAX_QUOTED_PASSAGES = 3;
+	// Previews derived before scoring resolves, in screen order: enough to
+	// cover the top of the results. The rest follow in the background, since
+	// reading every matched item's text takes far longer than the ranking.
+	const PRELOADED_MATCH_PREVIEWS = 10;
+	// How long background-derived previews accumulate before the consumer
+	// hears about them, so a pass redraws the view about twice a second
+	const PREVIEW_BATCH_INTERVAL = 500;
+	// How long a background derivation waits for an idle main thread before
+	// running anyway
+	const PREVIEW_IDLE_TIMEOUT = 1000;
+	// How long the pass rests after deriving a preview, as a multiple of what
+	// that preview cost. Deriving reads the item's text; run flat out, that
+	// work lands inside the frames of whatever the user is doing and
+	// scrolling stutters.
+	const PREVIEW_PAUSE_RATIO = 3;
+	const PREVIEW_MAX_PAUSE = 250;
+
+	this.MAX_QUOTED_PASSAGES = MAX_QUOTED_PASSAGES;
+	this.PRELOADED_MATCH_PREVIEWS = PRELOADED_MATCH_PREVIEWS;
+
+	let _sentenceSegmenter = null;
+
+	//
+	// Errors
+	//
+
+	/**
+	 * Thrown when scoring is abandoned via the shouldCancel callback -- e.g.
+	 * because a newer query superseded the one being scored
+	 */
+	this.ScoringCancelledError = class extends Error {
+		constructor(message = 'Scoring cancelled') {
+			super(message);
+			this.name = 'BestMatchScoringCancelledError';
+		}
+	};
+
+	// The semantic engine joins the ranking whenever a model is enabled; the
+	// lexical engine always ranks
+	function _useSemantic() {
+		return Zotero.Embeddings.isEnabled();
+	}
+
+	function _hasPreviews(itemID) {
+		return !!Zotero.Items.get(itemID)?.isFileAttachment?.();
+	}
+
+	// Resolves the next time the main thread is idle, or after
+	// PREVIEW_IDLE_TIMEOUT regardless
+	function _idle() {
+		return new Promise(resolve => requestIdleCallback(
+			resolve, { timeout: PREVIEW_IDLE_TIMEOUT }));
+	}
+
+	/**
+	 * Whether a query has anything for best-match search to rank by. The
+	 * lexical engine needs at least one scoring unit; failing that, the
+	 * semantic engine can embed any text its normalization leaves standing,
+	 * when a model is enabled. Callers treat a query that fails this as no
+	 * active search.
+	 *
+	 * @param {String} queryText
+	 * @return {Boolean}
+	 */
+	this.isSearchableQuery = function (queryText) {
+		if (Zotero.Lexical.parseQuery(queryText || '').length) {
+			return true;
+		}
+		return _useSemantic() && !!Zotero.Embeddings.normalizeQuery(queryText || '');
+	};
+
+	/**
+	 * Embedding-index coverage, for banners explaining incomplete best-match
+	 * results. Null when the semantic engine is disabled or everything
+	 * eligible is indexed. Never throws -- the state is informational and
+	 * shouldn't break a search.
+	 *
+	 * @return {Promise<Object|null>} - { type: 'indexing'|'paused', indexed,
+	 *     total }, counted in items, attachments included
+	 */
+	this.getIndexState = async function () {
+		try {
+			let status = Zotero.Embeddings.Indexing.getStatus();
+			if (!status.enabled) {
+				return null;
+			}
+			// Counts aren't populated until the indexer runs in this session
+			if (!status.items.total && !status.attachments.total) {
+				status = await Zotero.Embeddings.Indexing.refreshStatus();
+			}
+			// Coverage is coverage: attachment fulltext is reported separately
+			// in the preferences, but an incomplete index is incomplete
+			// whichever part of it is still filling in
+			let indexed = status.items.done + status.attachments.done;
+			let total = status.items.total + status.attachments.total;
+			if (indexed >= total) {
+				return null;
+			}
+			// Only an explicit pause reports as paused. Anything else --
+			// between runs (startup, the pre-run debounce) or after an error
+			// (detailed in the preferences) -- reports as indexing, since the
+			// state explains the incomplete coverage, not the indexer.
+			return {
+				type: status.paused ? 'paused' : 'indexing',
+				indexed,
+				total
+			};
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+	};
+
+	/**
+	 * Score a given set of items by relevance to a query. Items that aren't
+	 * matches by any active engine's standards aren't returned. Scores are
+	 * 0-1 against what a perfect answer to the query could show, so one
+	 * number both orders the items and sizes their relevance bars -- an item
+	 * never displays as more relevant than one ranked above it.
+	 *
+	 * With a semantic model enabled, both engines score concurrently and
+	 * their results fuse (see _fuse()). A semantic index that isn't ready --
+	 * mid-build or mid-model-switch -- drops the semantic engine from the
+	 * query instead of failing it, leaving the lexical scores alone.
+	 *
+	 * @param {String} queryText
+	 * @param {Number[]} itemIDs - Candidate item IDs to score
+	 * @param {Object} [options]
+	 * @param {Function} [options.shouldCancel] - Checked between scoring
+	 *     stages; return true to abandon scoring with a ScoringCancelledError
+	 * @return {Promise<Object>} - { scores, matches }: scores maps
+	 *     itemID -> score (0-1, higher is more relevant); matches says which
+	 *     items each engine can show match excerpts in, as { lexical,
+	 *     semantic } Sets of itemIDs (see getMatchingExcerpts()). Every
+	 *     lexical match has excerpts to show; a semantic match does only
+	 *     when a previewable chunk carries it (see
+	 *     Zotero.Embeddings.scoreItemIDs()). An engine that didn't rank
+	 *     contributes an empty Set.
+	 * @throws {Zotero.BestMatch.ScoringCancelledError}
+	 */
+	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
+		try {
+			// Temporary, for testing: the bestMatchEngine pref pins scoring to
+			// one engine instead of the hybrid default
+			let engine = Zotero.Prefs.get('search.bestMatchEngine');
+			if (engine == 'semantic') {
+				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
+				let kept = _nearTop(semantic.scores, _semanticFraction);
+				// On the model's display band, so scores are 0-1 like the other
+				// modes' -- but unclamped and rescaled by the strongest score,
+				// so a top tier past the band's ceiling keeps its ordering
+				// instead of flattening into a tie
+				let fractions = new Map([...kept].map(
+					([itemID, score]) => [itemID, _semanticFraction(score)]
+				));
+				let scale = Math.max(1, ...fractions.values());
+				return {
+					scores: new Map([...fractions].map(
+						([itemID, fraction]) => [itemID, fraction / scale]
+					)),
+					matches: {
+						lexical: new Set(),
+						semantic: new Set([...semantic.previewableIDs].filter(id => kept.has(id)))
+					}
+				};
+			}
+			// A query the semantic engine can't embed ranks lexically alone
+			if (engine == 'lexical' || !_useSemantic()
+					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
+				let scores = _nearTop(
+					await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options), share => share
+				);
+				return {
+					scores,
+					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+				};
+			}
+			// Both engines score the same candidates concurrently. allSettled
+			// rather than all, so one engine's failure still leaves the
+			// other's rejection observed rather than unhandled
+			let [lexical, semantic] = await Promise.allSettled([
+				Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options),
+				Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options)
+			]);
+			if (lexical.status == 'rejected') {
+				throw lexical.reason;
+			}
+			if (semantic.status == 'rejected') {
+				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
+					Zotero.debug("Semantic index not ready -- ranking lexically: "
+						+ semantic.reason.message);
+					let scores = _nearTop(lexical.value, share => share);
+					return {
+						scores,
+						matches: {
+							lexical: new Set(scores.keys()),
+							semantic: new Set()
+						}
+					};
+				}
+				throw semantic.reason;
+			}
+			// Each engine's tail is cut against its own strongest match, so
+			// an item enters fusion only with the evidence that stood up
+			let lexicalScores = _nearTop(lexical.value, share => share);
+			let semanticScores = _nearTop(semantic.value.scores, _semanticFraction);
+			return {
+				scores: _fuse(lexicalScores, semanticScores),
+				matches: {
+					lexical: new Set(lexicalScores.keys()),
+					semantic: new Set(
+						[...semantic.value.previewableIDs].filter(id => semanticScores.has(id))
+					)
+				}
+			};
+		}
+		catch (e) {
+			if (e instanceof Zotero.Embeddings.ScoringCancelledError
+					|| e instanceof Zotero.Lexical.ScoringCancelledError) {
+				throw new this.ScoringCancelledError(e.message);
+			}
+			throw e;
+		}
+	};
+
+	/**
+	 * A best-match search session: one query's scoring pass plus the
+	 * previews explaining its matches.
+	 *
+	 * score() ranks candidates and derives the first few previews on screen
+	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive in the
+	 * background, in the same order and paced to stay out of the user's way
+	 * (see PREVIEW_PAUSE_RATIO), reported through onPreviewsFilled and
+	 * awaitable through previewsSettled. An item's entries hold both
+	 * engines' evidence, merged, deduplicated and ordered by strength (see
+	 * getMatchingExcerpts()). A re-score keeps previews already derived;
+	 * fill() re-derives ones invalidate() dropped back to pending. A
+	 * disposed session derives nothing.
+	 */
+	this.Session = class {
+		constructor(queryText) {
+			this._queryText = queryText;
+			this._previews = new Map();
+			this._effectiveScores = new Map();
+			this._disposed = false;
+			// Bumped per background pass, so a re-score abandons the last one
+			this._derivation = 0;
+			this._previewsSettled = Promise.resolve();
+			// Set by a consumer showing previews as they arrive: called with
+			// the itemIDs filled since the last call (see
+			// PREVIEW_BATCH_INTERVAL), never for what score() derived itself
+			this.onPreviewsFilled = null;
+		}
+
+		get queryText() {
+			return this._queryText;
+		}
+
+		/**
+		 * Score candidates for this session's query (see
+		 * Zotero.BestMatch.scoreItemIDs()), rebuild the preview set from the
+		 * engines' match sets, recompute ranks and barFractions, and derive
+		 * the first pending previews on screen before resolving. Items still
+		 * matched keep their settled previews -- a re-score doesn't re-derive
+		 * kept text -- and items no longer matched lose theirs.
+		 *
+		 * The previews past PRELOADED_MATCH_PREVIEWS derive after this
+		 * resolves (see onPreviewsFilled, previewsSettled). Ranks and
+		 * barFractions are complete either way -- neither depends on a
+		 * preview.
+		 *
+		 * @param {Number[]} itemIDs - Candidate item IDs to score
+		 * @param {Object} [options] - Passed through to scoreItemIDs()
+		 * @param {Number} [options.topK] - Keep only the K best-scored items,
+		 *     with a deterministic tiebreak, so equal scores keep a stable
+		 *     membership; previews are only built and derived for the kept
+		 *     items
+		 * @param {Function} [options.shouldCancel] - Also checked between
+		 *     preview derivations
+		 * @return {Promise<Map>} - itemID -> score, as scoreItemIDs() returns
+		 * @throws {Zotero.BestMatch.ScoringCancelledError}
+		 */
+		async score(itemIDs, options = {}) {
+			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
+				this._queryText, itemIDs, options);
+			if (this._disposed) {
+				return scores;
+			}
+			if (options.topK) {
+				scores = new Map(
+					[...scores.entries()]
+						.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
+						.slice(0, options.topK)
+				);
+			}
+			let previews = new Map();
+			for (let itemID of new Set([...matches.lexical, ...matches.semantic])) {
+				if (!scores.has(itemID) || !_hasPreviews(itemID)) {
+					continue;
+				}
+				let existing = this._previews.get(itemID);
+				if (existing && existing.state != 'pending') {
+					previews.set(itemID, existing);
+					continue;
+				}
+				previews.set(itemID, {
+					state: 'pending',
+					entries: [],
+					lexical: matches.lexical.has(itemID),
+					semantic: matches.semantic.has(itemID)
+				});
+			}
+			this._previews = previews;
+			this._rank(scores);
+			// Derive in the order rows appear on screen: an item's preview
+			// rows render under its top-level ancestor, which is ranked by
+			// the best match anywhere beneath it -- an item's own score can
+			// sit far below its position
+			let pending = [...scores.keys()]
+				.filter(id => previews.get(id)?.state == 'pending')
+				.map(id => [id, this._topLevelScore(id), this._effectiveScores.get(id) ?? 0])
+				.sort((a, b) => (b[1] - a[1]) || (b[2] - a[2]) || (a[0] - b[0]))
+				.map(([id]) => id);
+			for (let itemID of pending.slice(0, PRELOADED_MATCH_PREVIEWS)) {
+				if (this._disposed) {
+					return scores;
+				}
+				if (options.shouldCancel?.()) {
+					throw new Zotero.BestMatch.ScoringCancelledError();
+				}
+				await this._derive(itemID);
+			}
+			this._previewsSettled = this._deriveRest(
+				pending.slice(PRELOADED_MATCH_PREVIEWS));
+			return scores;
+		}
+
+		/**
+		 * Resolves once the previews score() didn't wait for have derived, or
+		 * once the session is disposed
+		 *
+		 * @return {Promise}
+		 */
+		get previewsSettled() {
+			return this._previewsSettled;
+		}
+
+		// Derive the previews score() left behind, in screen order (see
+		// score()), reporting them in batches (see onPreviewsFilled). Left
+		// unawaited by score(), so a consumer draws the ranking while the
+		// explanations behind it fill in. A newer pass -- another score() --
+		// or dispose() abandons this one.
+		async _deriveRest(itemIDs) {
+			let derivation = ++this._derivation;
+			let filled = [];
+			let reportedAt = Date.now();
+			let report = () => {
+				if (!filled.length) {
+					return;
+				}
+				let reported = filled;
+				filled = [];
+				reportedAt = Date.now();
+				// A consumer that throws shouldn't strand the rest
+				try {
+					this.onPreviewsFilled?.(reported);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			};
+			for (let itemID of itemIDs) {
+				await _idle();
+				if (this._disposed || derivation !== this._derivation) {
+					return;
+				}
+				let started = Date.now();
+				await this._derive(itemID);
+				await Zotero.Promise.delay(Math.min(PREVIEW_MAX_PAUSE,
+					(Date.now() - started) * PREVIEW_PAUSE_RATIO));
+				// A preview that derived nothing has no rows to redraw
+				if (this._previews.get(itemID)?.state == 'filled') {
+					filled.push(itemID);
+				}
+				if (Date.now() - reportedAt >= PREVIEW_BATCH_INTERVAL) {
+					report();
+				}
+			}
+			report();
+		}
+
+		/**
+		 * Ranks from this session's last scoring pass: 1-based, tied
+		 * effective scores share a rank, and every row with a match anywhere
+		 * beneath it is covered (see _rank()). Empty before the first pass.
+		 *
+		 * @return {Map} - treeViewID -> rank (1 = most relevant)
+		 */
+		get ranks() {
+			return this._ranks ?? new Map();
+		}
+
+		/**
+		 * Score fractions for the relevance bars, keyed like ranks: each
+		 * row's own score alone, so a row that only inherited its rank from
+		 * a descendant shows its rank over an empty bar
+		 *
+		 * @return {Map} - treeViewID -> 0-1 fraction
+		 */
+		get barFractions() {
+			return this._barFractions ?? new Map();
+		}
+
+		// Rank the scored items, lifting each item's score onto its ancestors
+		// (annotation -> attachment -> top-level item) first, so an item's
+		// effective score -- and so its rank -- is the best match anywhere
+		// beneath it. Equal effective scores get equal ranks, so tied rows
+		// (including a child and its parent) order deterministically via the
+		// consumer's secondary sort fields.
+		_rank(scores) {
+			let effectiveScores = new Map(scores);
+			for (let [itemID, score] of scores) {
+				let parentItemID = Zotero.Items.get(itemID)?.parentItemID;
+				while (parentItemID) {
+					let current = effectiveScores.get(parentItemID);
+					if (current === undefined || score > current) {
+						effectiveScores.set(parentItemID, score);
+					}
+					parentItemID = Zotero.Items.get(parentItemID)?.parentItemID;
+				}
+			}
+			let rankOfScore = new Map(
+				[...new Set(effectiveScores.values())].sort((a, b) => b - a)
+					.map((score, i) => [score, i + 1])
+			);
+			let ranks = new Map();
+			let fractions = new Map();
+			for (let [itemID, score] of effectiveScores) {
+				let item = Zotero.Items.get(itemID);
+				if (!item) {
+					continue;
+				}
+				ranks.set(item.treeViewID, rankOfScore.get(score));
+				fractions.set(item.treeViewID, scores.get(itemID) || 0);
+			}
+			this._ranks = ranks;
+			this._barFractions = fractions;
+			this._effectiveScores = effectiveScores;
+		}
+
+		// The effective score of an item's top-level ancestor -- what places
+		// the row subtree the item's preview rows render in
+		_topLevelScore(itemID) {
+			let id = itemID;
+			let parentItemID;
+			while ((parentItemID = Zotero.Items.get(id)?.parentItemID)) {
+				id = parentItemID;
+			}
+			return this._effectiveScores.get(id) ?? 0;
+		}
+
+		/**
+		 * The preview to show for an item, or null when there's nothing to
+		 * show: no preview for it (see _hasPreviews()), or one that derived
+		 * nothing after all. Passed to consumers as a bare function, so it's
+		 * bound to its session.
+		 *
+		 * @param {Number} itemID
+		 * @return {Object|null} - { state, entries }: state is 'pending'
+		 *     (not yet derived) or 'filled'; entries are the derived entries
+		 *     (see getMatchingExcerpts()), each with a `key` unique within
+		 *     the preview and stable for as long as the preview stays filled
+		 */
+		getPreviews = (itemID) => {
+			let preview = this._previews.get(itemID);
+			return preview && preview.state != 'empty' ? preview : null;
+		};
+
+		/**
+		 * Derive the given items' previews, in order, for previews put back
+		 * to pending after scoring -- see invalidate(). Items already settled
+		 * are skipped, so filling again is free.
+		 *
+		 * @param {Number[]} itemIDs
+		 */
+		async fill(itemIDs) {
+			for (let itemID of itemIDs) {
+				if (this._disposed) {
+					return;
+				}
+				await this._derive(itemID);
+			}
+		}
+
+		/**
+		 * Drop the given items' previews back to pending, for items whose
+		 * content changed and made derived text stale
+		 *
+		 * @param {Number[]} itemIDs
+		 */
+		invalidate(itemIDs) {
+			for (let itemID of itemIDs) {
+				let preview = this._previews.get(itemID);
+				if (!preview) {
+					continue;
+				}
+				// A fresh object, so a derivation of the old one that's still
+				// in flight can't settle it (see _derive())
+				this._previews.set(itemID, {
+					...preview,
+					state: 'pending',
+					entries: []
+				});
+			}
+		}
+
+		/**
+		 * End the session: abandon in-flight derivation. A disposed session
+		 * derives nothing.
+		 */
+		dispose() {
+			this._disposed = true;
+		}
+
+		// Derive one pending item's preview and settle it with the result --
+		// its entries, all at once, each keyed for row identity. An item
+		// already settled is left alone, and a preview replaced while
+		// deriving (see invalidate()) is left to its next derivation. A
+		// derivation that failed would fail again, so it settles for showing
+		// nothing rather than being retried.
+		async _derive(itemID) {
+			let preview = this._previews.get(itemID);
+			if (!preview || preview.state != 'pending') {
+				return;
+			}
+			try {
+				let entries = await this.getMatchingExcerpts(itemID);
+				if (this._disposed || this._previews.get(itemID) != preview) {
+					return;
+				}
+				preview.entries = entries.map((entry, i) => ({ key: i, ...entry }));
+				preview.state = entries.length ? 'filled' : 'empty';
+			}
+			catch (e) {
+				Zotero.logError(e);
+				preview.state = 'empty';
+			}
+		}
+
+		/**
+		 * Every passage explaining why an item matched this session's query,
+		 * strongest first: the chunks the model matched, or else the item's
+		 * text cut the same way. Only the engines that matched the item are
+		 * asked. The strongest MAX_QUOTED_PASSAGES also carry a `snippet`, the
+		 * one line that best shows the query.
+		 *
+		 * @param {Number} itemID
+		 * @return {Promise<Object[]>} - Entries with `text`, `ranges` and
+		 *     `strength`, plus location fields where the passage knows them,
+		 *     strongest first; the first MAX_QUOTED_PASSAGES also have
+		 *     `snippet`
+		 */
+		async getMatchingExcerpts(itemID) {
+			let queryText = this._queryText;
+			let passages = await this._getPassages(itemID);
+			if (!passages.length) {
+				return [];
+			}
+			let texts = passages.map(passage => passage.text);
+			// Locating the query's words in texts already in hand is cheap,
+			// unlike scanning a document, so it isn't gated on the item
+			// having matched lexically -- only on the lexical engine being
+			// one this session listens to at all
+			let [ranges, lexical] = await Promise.all([
+				this._lexicalEnabled()
+					? Zotero.Lexical.findMatchRanges(queryText, texts)
+					: texts.map(() => []),
+				this._lexicalApplies(itemID) ? Zotero.Lexical.scoreTexts(queryText, texts) : null
+			]);
+			let entries = [];
+			for (let i = 0; i < passages.length; i++) {
+				let passage = passages[i];
+				let share = lexical ? lexical[i] : 0;
+				// A passage the model never weighed has only its words to
+				// recommend it, so one that says nothing of the query isn't a
+				// match at all
+				if (passage.score === undefined && !share) {
+					continue;
+				}
+				// Over the engines that spoke for this item, so a strength is
+				// the same 0-1 fraction whether one weighed the passage or
+				// both did
+				let weighed = passage.score !== undefined;
+				let semanticWeight = weighed ? SEMANTIC_WEIGHT : 0;
+				let lexicalWeight = lexical ? LEXICAL_WEIGHT : 0;
+				let fraction = weighed ? Zotero.Embeddings.getScoreFraction(passage.score) : 0;
+				entries.push({
+					...passage,
+					ranges: ranges[i],
+					strength: (semanticWeight * fraction + lexicalWeight * share)
+						/ (semanticWeight + lexicalWeight)
+				});
+			}
+			entries.sort((a, b) => b.strength - a.strength);
+			// Only the strongest few passages are shown as rows in the tree,
+			// so only they get a line chosen to quote
+			await this._pickSnippets(entries.slice(0, MAX_QUOTED_PASSAGES));
+			return entries;
+		}
+
+		/**
+		 * The passages of an item to weigh against the query: the chunks the
+		 * model matched, or else the item's text cut into chunks -- along its
+		 * structure where it's been extracted, which knows where each passage
+		 * sits, and flat otherwise.
+		 *
+		 * @param {Number} itemID
+		 * @return {Promise<Object[]>} - Passages, each with `text`, location
+		 *     fields where known, and a `score` from the model
+		 */
+		async _getPassages(itemID) {
+			let queryText = this._queryText;
+			if (this._semanticApplies(itemID)) {
+				try {
+					let chunks = await Zotero.Embeddings.getMatchingChunks(
+						queryText, itemID, { limit: Infinity });
+					// Only fulltext chunks carry their own text; item-level
+					// matches have nothing to excerpt
+					chunks = chunks.filter(chunk => chunk.text);
+					if (chunks.length) {
+						return chunks;
+					}
+				}
+				catch (e) {
+					if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
+						throw e;
+					}
+				}
+			}
+			if (!this._lexicalApplies(itemID)) {
+				return [];
+			}
+			return this._cutPassages(itemID);
+		}
+
+		// Cut an item's text into passages the size the index's are: along its
+		// outline where it has structured text, so each passage knows its
+		// section, page and position, and along its flat text where it doesn't
+		async _cutPassages(itemID) {
+			let item = await Zotero.Items.getAsync(itemID);
+			if (!item) {
+				return [];
+			}
+			// Only structure already extracted: generating it costs seconds,
+			// which is not a price a preview may charge. Cut and placed in the
+			// document worker, ahead of what's queued there.
+			let cut = await Zotero.SDT.getItemChunks(itemID,
+				{ cachedOnly: true, isPriority: true, positions: true });
+			if (cut.ok && cut.chunks.length) {
+				return cut.chunks;
+			}
+			let text = await item.attachmentText;
+			if (!text) {
+				return [];
+			}
+			return Zotero.SDT.getPlainTextChunks(text);
+		}
+
+		/**
+		 * Choose where in each passage to quote from: where it says the query's
+		 * words, the sentence or line the lexical engine picks; where it only
+		 * means the query, the sentence the static model finds closest;
+		 * otherwise its opening. The index's own model isn't asked, to keep
+		 * model calls off the pass that derives every preview.
+		 *
+		 * @param {Object[]} entries - Set in place
+		 */
+		async _pickSnippets(entries) {
+			let meant = [];
+			for (let entry of entries) {
+				let sentences = Zotero.BestMatch.splitSentences(entry.text);
+				let pick = entry.ranges.length
+					? await Zotero.Lexical.pickQuote(this._queryText, entry.text, sentences,
+						{ longSentence: LONG_SENTENCE_CHARS, width: SNIPPET_CHARS })
+					: null;
+				// Says the query's words: quoted where the lexical engine picks
+				if (pick) {
+					entry.snippet = pick.line || _quoteFrom(sentences, pick.sentence.start, entry.text);
+				}
+				// Means it without saying it: quoted where the static model picks
+				else if (entry.score !== undefined) {
+					meant.push({ entry, sentences });
+				}
+				else {
+					entry.snippet = _quoteFrom(sentences, 0, entry.text);
+				}
+			}
+			await this._pickMeantSentences(meant);
+		}
+
+		// Quote each passage from its sentence closest to the query, as the
+		// static model weighs them in one call, a short sentence weighed with
+		// the next. Quoted from the opening when there's nothing to choose
+		// between, or the model isn't downloaded or fails.
+		async _pickMeantSentences(passages) {
+			for (let { entry, sentences } of passages) {
+				entry.snippet = _quoteFrom(sentences, 0, entry.text);
+			}
+			passages = passages
+				.map(passage => ({ ...passage, units: _sentenceUnits(passage.entry.text, passage.sentences) }))
+				.filter(passage => passage.units.length > 1);
+			if (!passages.length || !await Zotero.Embeddings.Static.isDownloaded()) {
+				return;
+			}
+			let scores;
+			try {
+				scores = await Zotero.Embeddings.Static.similarities(this._queryText,
+					passages.flatMap(passage => passage.units.map(unit => unit.text)));
+			}
+			catch (e) {
+				Zotero.logError(e);
+				return;
+			}
+			let offset = 0;
+			for (let { entry, sentences, units } of passages) {
+				let best = null;
+				for (let unit of units) {
+					let score = scores[offset++];
+					if (!best || score > best.score) {
+						best = { unit, score };
+					}
+				}
+				entry.snippet = _quoteFrom(sentences, best.unit.start, entry.text);
+			}
+		}
+
+		// Whether this session's query reaches each engine for the item being
+		// derived: the engine has to be one the session listens to, and to
+		// have found something in the item worth speaking about.
+		_semanticApplies(itemID) {
+			return this._previews.get(itemID)?.semantic !== false
+				&& this._modelApplies();
+		}
+
+		_lexicalApplies(itemID) {
+			return this._previews.get(itemID)?.lexical !== false
+				&& this._lexicalEnabled();
+		}
+
+		// Whether each engine reaches this session at all, apart from what it
+		// made of any one item. The bestMatchEngine pref is temporary, for
+		// testing: it pins a session to a single engine, which then decides
+		// not only what matched but how a match is quoted.
+		_modelApplies() {
+			return Zotero.Prefs.get('search.bestMatchEngine') != 'lexical'
+				&& _useSemantic()
+				&& !!Zotero.Embeddings.normalizeQuery(this._queryText || '');
+		}
+
+		_lexicalEnabled() {
+			return Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
+		}
+	};
+
+	/**
+	 * Start a search session for a query (see Zotero.BestMatch.Session)
+	 *
+	 * @param {String} queryText
+	 * @return {Zotero.BestMatch.Session}
+	 */
+	this.createSession = function (queryText) {
+		return new this.Session(queryText);
+	};
+
+	/**
+	 * The sentences of a text, whole and trimmed, each as its extent
+	 * (`start`, `end`) -- the units a snippet is quoted in
+	 *
+	 * @param {String} text
+	 * @return {Object[]}
+	 */
+	this.splitSentences = function (text) {
+		if (!_sentenceSegmenter) {
+			// Sentence rules don't vary by locale, but the default locale
+			// varies by machine, so pin one
+			_sentenceSegmenter = new Intl.Segmenter('en', { granularity: 'sentence' });
+		}
+		let sentences = [];
+		for (let { segment, index } of _sentenceSegmenter.segment(text)) {
+			let trimmed = segment.trim();
+			if (!trimmed) {
+				continue;
+			}
+			let start = index + (segment.length - segment.trimStart().length);
+			sentences.push({ start, end: start + trimmed.length });
+		}
+		return sentences;
+	};
+
+	// The extent to quote from the sentence starting at `from`: sentences are
+	// added until the quote passes SNIPPET_CHARS, the one crossing it taken
+	// whole, since half a sentence reads as a truncation and the row clips
+	// what doesn't fit. A text with no sentences is quoted from its start.
+	function _quoteFrom(sentences, from, text) {
+		sentences = sentences.filter(sentence => sentence.start >= from);
+		if (!sentences.length) {
+			return { start: 0, end: Math.min(text.length, SNIPPET_CHARS) };
+		}
+		let { start, end } = sentences[0];
+		for (let i = 1; i < sentences.length && end - start < SNIPPET_CHARS; i++) {
+			end = sentences[i].end;
+		}
+		return { start, end, startsSentence: true };
+	}
+
+	// A passage's sentences as the units its closest sentence is chosen from:
+	// a sentence shorter than MIN_UNIT_CHARS is joined to the next, and a
+	// short last one to the unit before it
+	//
+	// @return {Object[]} - [{ start, end, text }]
+	function _sentenceUnits(text, sentences) {
+		let units = [];
+		let current = null;
+		for (let sentence of sentences) {
+			if (current) {
+				current.end = sentence.end;
+			}
+			else {
+				current = { start: sentence.start, end: sentence.end };
+			}
+			if (current.end - current.start >= MIN_UNIT_CHARS) {
+				units.push(current);
+				current = null;
+			}
+		}
+		if (current) {
+			if (units.length) {
+				units[units.length - 1].end = current.end;
+			}
+			else {
+				units.push(current);
+			}
+		}
+		return units.map(unit => ({ ...unit, text: text.slice(unit.start, unit.end) }));
+	}
+
+	// The semantic engine's raw score as an unclamped fraction of the display
+	// band (see Zotero.Embeddings.getScoreFraction()): the strength fusion
+	// and the margin read
+	function _semanticFraction(score) {
+		return Zotero.Embeddings.getScoreFraction(score, { clamped: false });
+	}
+
+	// An engine's results that stand within the margin of its strongest: the
+	// items whose fraction is at least (1 - margin) of the top fraction.
+	// Every engine returns a tail of items barely above its floor -- for a
+	// query with a few strong answers, hundreds of them -- that aren't
+	// matches for that query in any sense a reader would accept. Measuring
+	// the cut from the top rather than by count lets a broad query keep
+	// hundreds of comparable results while a specific one keeps a handful.
+	// A lone result is never cut. The margin is a pref, in percent.
+	function _nearTop(scores, toFraction) {
+		let margin = Zotero.Prefs.get('search.bestMatchMargin') / 100;
+		if (scores.size < 2 || !(margin < 1)) {
+			return scores;
+		}
+		let fractions = new Map([...scores].map(([itemID, score]) => [itemID, toFraction(score)]));
+		let cutoff = Math.max(...fractions.values()) * (1 - margin);
+		return new Map([...scores].filter(([itemID]) => fractions.get(itemID) >= cutoff));
+	}
+
+	// Fuse the two engines' scores with strength-weighted Reciprocal Rank
+	// Fusion: an item's fused score sums fraction / (RRF_K + rank) over the
+	// engines that matched it, where fraction is that engine's own 0-1
+	// measure of the evidence -- the lexical score, or the semantic score on
+	// the model's display band. Rank rewards agreement between the engines
+	// without calibrating their scales against each other; the fraction
+	// keeps the reward proportionate to what each engine actually found.
+	// Pure reciprocal ranks would be blind to that magnitude in both
+	// directions: a pair of barely-above-floor matches would buy the full
+	// agreement bonus, and a strong match only one engine can see -- a
+	// paraphrase without the query's words, say -- would cap at half however
+	// good it is.
+	//
+	// The semantic fractions enter unclamped: a strong query's whole top
+	// tier can sit past the display band's ceiling, where clamping would
+	// flatten the model's ordering into a tie -- and a tie decided by which
+	// items the lexical engine also happened to match, rather than by what
+	// the model actually read.
+	//
+	// Fused scores are normalized against the best possible sum
+	// (full-strength evidence at rank 1 in both engines) -- or against the
+	// strongest sum where unclamped fractions push past it -- to keep them
+	// 0-1. Within an engine, tied scores share a rank, so fusion is
+	// deterministic however a map orders its entries.
+	function _fuse(lexicalScores, semanticScores) {
+		let engines = [
+			[lexicalScores, score => Math.min(1, Math.max(0, score))],
+			[semanticScores, _semanticFraction]
+		];
+		let scores = new Map();
+		for (let [engineScores, toFraction] of engines) {
+			let rankOfScore = new Map(
+				[...new Set(engineScores.values())]
+					.sort((a, b) => b - a)
+					.map((score, i) => [score, i + 1])
+			);
+			for (let [itemID, score] of engineScores) {
+				let sum = scores.get(itemID) || 0;
+				scores.set(itemID,
+					sum + toFraction(score) / (RRF_K + rankOfScore.get(score)));
+			}
+		}
+		let ceiling = Math.max(2 / (RRF_K + 1), ...scores.values());
+		for (let [itemID, sum] of scores) {
+			scores.set(itemID, sum / ceiling);
+		}
+		return scores;
+	}
+};

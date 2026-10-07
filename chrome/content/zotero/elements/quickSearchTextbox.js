@@ -46,15 +46,14 @@
 		}
 
 		get _searchModes() {
-			let modes = {
+			// Best Match ranks with the semantic engine when one is enabled
+			// and with the lexical engine otherwise, so it's always offered
+			return {
 				titleCreatorYear: Zotero.getString('quickSearch.mode.titleCreatorYear'),
 				fields: Zotero.getString('quickSearch.mode.fieldsAndTags'),
-				everything: Zotero.getString('quickSearch.mode.everything')
+				everything: Zotero.getString('quickSearch.mode.everything'),
+				bestMatch: Zotero.getString('quickSearch-mode-best-match')
 			};
-			if (Zotero.Embeddings.isEnabled()) {
-				modes.bestMatch = Zotero.getString('quickSearch-mode-best-match');
-			}
-			return modes;
 		}
 
 		_searchModePopup = null;
@@ -68,9 +67,9 @@
 		}
 
 		disconnectedCallback() {
-			if (this._modelPrefObserverID) {
-				Zotero.Prefs.unregisterObserver(this._modelPrefObserverID);
-				this._modelPrefObserverID = null;
+			if (this._semanticSearchObserverID) {
+				Zotero.Prefs.unregisterObserver(this._semanticSearchObserverID);
+				this._semanticSearchObserverID = null;
 			}
 		}
 
@@ -138,17 +137,11 @@
 				this._advancedButton = advancedButton;
 			}
 
-			// Disabling semantic search in the preferences invalidates an active
-			// best-match mode: fall back to Fields & Tags and rerun any active
-			// search under the new mode
-			this._modelPrefObserverID = Zotero.Prefs.registerObserver('embeddings.model', () => {
-				if (Zotero.Prefs.get('search.quicksearch-mode') === 'bestMatch'
-						&& !Zotero.Embeddings.isEnabled()) {
-					Zotero.Prefs.set('search.quicksearch-mode', 'fields');
-					this.updateMode();
-					if (this.value) {
-						this.dispatchEvent(new Event('command'));
-					}
+			// Turning semantic ranking on or off changes what an active
+			// best-match search ranks with: rerun it under the new engine
+			this._semanticSearchObserverID = Zotero.Prefs.registerObserver('search.bestMatch.enableSemantic', () => {
+				if (Zotero.Prefs.get('search.quicksearch-mode') === 'bestMatch' && this.value) {
+					this.dispatchEvent(new Event('command'));
 				}
 			});
 

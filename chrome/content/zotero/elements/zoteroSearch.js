@@ -639,13 +639,10 @@
 			this._lastTopKValue = this.bestMatchTopKInput.value;
 		}
 
-		// The best-match field is a root-level modifier, offered only for
-		// top-level item results and only when semantic search is enabled (or
-		// the search already carries a query, so it stays editable)
+		// The best-match field is a root-level modifier, offered for
+		// top-level item results
 		updateBestMatchRow() {
-			this.bestMatchRow.hidden = !this.isRoot
-				|| this.resultLevel != 'item'
-				|| !(Zotero.Embeddings.isEnabled() || this.bestMatchInput.value);
+			this.bestMatchRow.hidden = !this.isRoot || this.resultLevel != 'item';
 		}
 
 		set resultLevel(val) {

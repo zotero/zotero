@@ -750,8 +750,9 @@ describe("Zotero.SearchQuery", function () {
 			assert.notInclude(conditions('fields'), 'fulltextContent');
 			assert.include(conditions('fields'), 'tag');
 			assert.include(conditions('everything'), 'fulltextContent');
-			// Best Match with no index falls back to matching text
-			assert.notInclude(conditions('bestMatch'), 'bestMatch');
+			// Best Match ranks by the text rather than filtering by it
+			assert.include(conditions('bestMatch'), 'bestMatch');
+			assert.notInclude(conditions('bestMatch'), 'tag');
 		});
 
 		it("should find items matching both the clauses and the text", async function () {

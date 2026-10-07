@@ -31,7 +31,7 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { VirtualizedTree, formatColumnName } = VirtualizedTable;
 const { COLUMNS } = require("zotero/itemTreeColumns");
-const { ItemTreeRow } = require('zotero/itemTreeRow');
+const { ItemTreeRow, SearchMatch } = require('zotero/itemTreeRow');
 const { OS } = ChromeUtils.importESModule("chrome://zotero/content/osfile.mjs");
 const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.mjs');
 
@@ -107,6 +107,9 @@ class ItemTreeRowProvider {
 		this._searchItemIDs = new Set();
 		this._searchParentIDs = new Set();
 		this._includeTrashed = false;
+		// The best-match search session whose previews rows show as match
+		// children (see SearchMatch in itemTreeRow.js), while one is active
+		this._bestMatchSession = null;
 		this.onUpdate = this.createEventBinding('update');
 	}
 
@@ -231,6 +234,7 @@ class ItemTreeRowProvider {
 		}
 		return row.isContainerEmpty({
 			includeTrashed: this._includeTrashed,
+			getMatchPreviews: this._bestMatchSession?.getPreviews,
 		});
 	}
 	
@@ -248,8 +252,22 @@ class ItemTreeRowProvider {
 
 	_refreshContainer(index, skipRowMapRefresh = false) {
 		if (!this.isContainer(index)) return;
+		// Reopening recreates child rows closed, so remember which
+		// descendants were open and reopen them afterward
+		let level = this.getLevel(index);
+		let openDescendantIDs = [];
+		for (let i = index + 1; i < this._rows.length && this.getLevel(i) > level; i++) {
+			if (this.isContainer(i) && this.isContainerOpen(i)) {
+				openDescendantIDs.push(this.getRow(i).id);
+			}
+		}
 		this._closeContainer(index, true);
 		this._openContainer(index, true);
+		if (openDescendantIDs.length) {
+			// _restoreOpenState() looks rows up by id
+			this.refreshRowMap();
+			this._restoreOpenState(openDescendantIDs);
+		}
 		if (!skipRowMapRefresh) {
 			this.refreshRowMap();
 		}
@@ -282,6 +300,7 @@ class ItemTreeRowProvider {
 				searchItemIDs: this._searchItemIDs,
 				includeTrashed: this._includeTrashed,
 				filterChildItems: this.itemTree.props.filterChildItems,
+				getMatchPreviews: this._bestMatchSession?.getPreviews,
 			});
 
 			let childRows = childRefs.map(ref => this.createRow(ref, level + 1, false));
@@ -1271,6 +1290,57 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	/**
+	 * A search-match row shows two lines -- where its passage is, and the
+	 * line of it worth reading -- so it stands a line taller than the rows
+	 * around it. Neither line wraps, so the height is the same for every one
+	 * of them and can be told without measuring anything.
+	 *
+	 * @return {Number}
+	 */
+	_getSearchMatchRowHeight() {
+		let textHeight = this.tree._renderedTextHeight
+			* (this.tree.props.disableFontSizeScaling ? 1 : Zotero.Prefs.get('fontSize'));
+		// Two lines, and half the room a one-line row leaves around its text:
+		// the second line gives the row enough weight without it
+		let padding = (this.tree._rowHeight - textHeight) / 2;
+		return Math.round(textHeight * 2 + padding);
+	}
+
+	/**
+	 * Tell the table which rows are taller than the rest.
+	 *
+	 * The heights are keyed by row index, so they mean something different
+	 * after every insertion, removal and sort -- which is why this runs from
+	 * handleRowModelUpdate(), where all of those end up, rather than from the
+	 * places that change rows.
+	 */
+	_updateSearchMatchRowHeights() {
+		if (!this.tree?._jsWindow) {
+			return;
+		}
+		let height = null;
+		let heights = [];
+		let indexes = [];
+		for (let i = 0, count = this.getRowCount(); i < count; i++) {
+			let type = this.getRow(i)?.type;
+			if (type == 'search-match') {
+				height ??= this._getSearchMatchRowHeight();
+				heights.push([i, height]);
+				indexes.push(i);
+			}
+		}
+		// Most updates leave the tall rows exactly where they were. Telling
+		// the table again would have it rebuild its offsets and forget which
+		// way the view was moving for nothing.
+		let signature = height + '|' + indexes.join(',');
+		if (signature === this._searchMatchRowHeights) {
+			return;
+		}
+		this._searchMatchRowHeights = signature;
+		this.tree.updateCustomRowHeights(heights);
+	}
+
+	/**
 	 * NOTE: This method must not trigger further update events (e.g. by calling
 	 * sort() or refresh()) to avoid recursive update loops and UI flashing.
 	 *
@@ -1281,6 +1351,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param {boolean} options.restoreSelection - Whether to restore the cached selection.
 	 * @param {boolean} options.ensureRowsAreVisible - Whether to ensure selected rows are visible.
 	 * @param {boolean} options.restoreScroll - Whether to restore the cached scroll position.
+	 * @param {boolean} options.scrollToTop - Whether to show the list from the top, ignoring
+	 *     the cached scroll position.
 	 * @param {boolean} options.loading - Whether to show loading state (hides tree, shows message).
 	 * @param {string} options.message - Optional message to display (for loading, errors, intro text).
 	 */
@@ -1313,6 +1385,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._treebox && this._treebox.scrollTo(0);
 		}
 
+		// Before anything is drawn or scrolled to: the rows just changed, and
+		// heights are what say where each one sits
+		this._updateSearchMatchRowHeights();
+
 		if (rows === true) {
 			if (this.tree) {
 				this.tree.invalidate();
@@ -1339,7 +1415,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const itemsViewInActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this;
 		const prioritizeRestore = !(options.selectInActiveWindow && itemsViewInActiveWindow);
-		const ensureVisible = options.restoreScroll ? false : options.ensureRowsAreVisible;
+		const ensureVisible = options.restoreScroll || options.scrollToTop
+			? false : options.ensureRowsAreVisible;
 
 		if (prioritizeRestore && options.restoreSelection) {
 			this._restoreSelection(null, options.expandCollapsedParents, ensureVisible);
@@ -1353,7 +1430,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		if (options.restoreScroll) {
+		if (options.scrollToTop) {
+			this._treebox?.scrollTo(0);
+		}
+		else if (options.restoreScroll) {
 			this._restoreScrollPosition();
 		}
 
@@ -1897,6 +1977,31 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	/**
+	 * The session holding the passages of the active best-match search, when
+	 * the view's rows come from one
+	 *
+	 * @return {Zotero.BestMatch.Session|null}
+	 */
+	get bestMatchSession() {
+		return this.rowProvider?.bestMatchSession ?? null;
+	}
+
+	/**
+	 * The passages the selection names, when search-match rows are all it
+	 * holds. Empty for any selection with something else in it, so a caller
+	 * can tell "these are passages" from "these are items".
+	 *
+	 * @return {Object[]} - { itemID, entry } per selected passage
+	 */
+	getSelectedSearchMatches() {
+		let selected = this.getSelectedObjects();
+		if (!selected.length || !selected.every(ref => ref instanceof SearchMatch)) {
+			return [];
+		}
+		return selected.map(ref => ({ itemID: ref.itemID, entry: ref.entry }));
+	}
+
+	/**
 	 * Get selected items, omitting collections and searches in the trash
 	 */
 	getSelectedItems(asIDs) {
@@ -2330,6 +2435,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		div.classList.toggle('first-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(prevRowID));
 		div.classList.toggle('last-highlighted', this._highlightedRows.has(rowData.id) && !this._highlightedRows.has(nextRowID));
 		div.classList.toggle('annotation-row', row.type === 'annotation');
+		div.classList.toggle('search-match-row', row.type === 'search-match');
 		div.classList.toggle('library-header-row', row.type === 'library-header');
 		div.classList.toggle('spacer-row', row.type === 'spacer');
 		if (row.type !== 'annotation') {
@@ -2406,8 +2512,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (isFirstColumn) {
+			// A row with no icon of its own gets none: the indent and twisty
+			// the tree adds don't depend on one
 			const icon = row.getIcon();
-			icon.classList.add('cell-icon', 'item-icon');
+			icon?.classList.add('cell-icon', 'item-icon');
 
 			if (cell.querySelector('.cell-text') === null) {
 				let textSpan = document.createElement('span');
@@ -2417,7 +2525,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				cell.append(textSpan);
 			}
 
-			cell.prepend(icon);
+			if (icon) {
+				cell.prepend(icon);
+			}
 			cell.classList.add('first-column');
 		}
 
@@ -2775,6 +2885,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				col.hidden = false;
 				col.sortDirection = -1;
+				// Far right, so the bar lines up across item, note, attachment,
+				// and annotation rows -- annotation rows use a custom layout
+				// that puts their bar at the row's end
+				col.ordinal = Math.max(...this._columns.map(c => c.ordinal ?? 0)) + 1;
 				this._sortedColumn = col;
 			}
 		}
@@ -2823,13 +2937,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (row === undefined) {
 			return;
 		}
-		this._treebox.scrollToRow(Math.max(row - scrollPosition.offset, 0), true);
+		var topRow = Math.max(row - scrollPosition.offset, 0);
+		// scrollToRow() aligns a row's top with the viewport's, which throws
+		// away however far into that row the view had been scrolled. Rows are
+		// tall enough now for that to read as the list jumping backwards, so
+		// restore the exact pixel when we know it.
+		if (scrollPosition.pixelOffset !== undefined) {
+			this._treebox.scrollTo(
+				this._treebox._getItemPosition(topRow) + scrollPosition.pixelOffset);
+			return;
+		}
+		this._treebox.scrollToRow(topRow, true);
 	}
 
 	/**
 	 * Return an object describing the current scroll position to restore after changes
 	 *
-	 * @return {Object|Boolean} - Object with .id (a treeViewID) and .offset, or false if no rows
+	 * @return {Object|Boolean} - Object with .id (a treeViewID), .offset (rows between the
+	 * 		anchor and the top of the view) and .pixelOffset (how far into the top row the
+	 * 		view is scrolled), or false if no rows
 	 */
 	_saveScrollPosition() {
 		if (!this._treebox) return false;
@@ -2838,6 +2964,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (first === undefined || first === null) {
 			return false;
 		}
+		// How far into the first visible row the view is scrolled. Measured
+		// against the same offset getFirstVisibleRow() reads, so the two
+		// always describe the same position.
+		var pixelOffset = typeof treebox._getItemPosition == 'function'
+			? treebox.scrollOffset - treebox._getItemPosition(first)
+			: undefined;
 		var last = treebox.getLastVisibleRow();
 		for (let i = first; i <= last; i++) {
 			// If an object is selected, keep the first selected one in position
@@ -2846,7 +2978,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (!row) return false;
 				return {
 					id: row.ref.treeViewID,
-					offset: i - first
+					offset: i - first,
+					pixelOffset
 				};
 			}
 		}
@@ -2864,7 +2997,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!row) return false;
 		return {
 			id: row.ref.treeViewID,
-			offset: 0
+			offset: 0,
+			pixelOffset
 		};
 	}
 

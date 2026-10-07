@@ -159,11 +159,7 @@ module.exports = class {
 		Object.assign(this, options);
 		const { itemHeight, targetElement, innerElem } = this;
 		const itemCount = this._getItemCount();
-		const [offsetIdx, offset] = this._rowOffsets.at(-1);
-		const listHeight = offset + (itemCount - offsetIdx) * this.itemHeight;
-		innerElem.style.position = 'relative';
-		innerElem.style.height = `${listHeight}px`;
-		
+
 		// Recalculate custom row height offsets
 		this._rowOffsets = [[0, 0]];
 		let previousRowOffset = 0;
@@ -175,6 +171,13 @@ module.exports = class {
 			previousRowIndex = index + 1;
 			previousRowOffset = offset;
 		}
+
+		// From the offsets just recalculated: the list is as tall as the rows
+		// it now has, not as the rows it had
+		const [offsetIdx, offset] = this._rowOffsets.at(-1);
+		const listHeight = offset + (itemCount - offsetIdx) * itemHeight;
+		innerElem.style.position = 'relative';
+		innerElem.style.height = `${listHeight}px`;
 
 		this.scrollDirection = 0;
 		this.scrollOffset = targetElement.scrollTop;

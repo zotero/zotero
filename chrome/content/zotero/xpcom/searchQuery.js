@@ -1503,7 +1503,9 @@ Zotero.SearchQuery = new function () {
 			? { joinMode: 'all', children: [tree] }
 			: tree);
 		if (text) {
-			if (mode === 'bestMatch' && Zotero.Embeddings?.isEnabled()) {
+			// Best Match ranks by the text -- lexically when no semantic
+			// index is available -- rather than filtering by it
+			if (mode === 'bestMatch') {
 				search.addCondition('bestMatch', 'contains', text);
 			}
 			else {

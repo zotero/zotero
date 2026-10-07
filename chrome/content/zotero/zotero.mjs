@@ -108,6 +108,8 @@ const xpcomFilesLocal = [
 	'httpIntegrationClient',
 	'id',
 	'integration',
+	'lexical',
+	'bestMatch',
 	'locale',
 	'locateManager',
 	'mime',

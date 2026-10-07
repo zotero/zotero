@@ -242,9 +242,12 @@ describe("Zotero.Search", function () {
 			sEmpty.addCondition('bestMatch', 'contains', '""');
 			assert.isFalse(sEmpty.getBestMatchQuery());
 
-			// With a cutoff, membership is the K most similar
-			let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
-				async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
+			// With a cutoff, membership is the K most relevant
+			let stub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs').callsFake(
+				async (query, itemIDs) => ({
+					scores: new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5])),
+					matches: { lexical: new Set(itemIDs), semantic: new Set() }
+				})
 			);
 			try {
 				let s2 = new Zotero.Search();

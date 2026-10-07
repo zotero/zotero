@@ -2082,7 +2082,8 @@ var ZoteroPane = new function () {
 
 		// Reproduce the quick search mode as editable conditions, one per word joined
 		// with "all": Title/Creator/Year and All Fields & Tags each map to a single
-		// condition, Everything to an "any" group of Any Field plus full-text.
+		// condition, Everything to an "any" group of Any Field plus full-text, and
+		// Best Match to the ranking field with the text as typed.
 		// Title/Creator/Year matches only top-level items, so set the result level to item.
 		if (tree) {
 			// The words are joined to the conditions with "all", so an "any"
@@ -2094,8 +2095,14 @@ var ZoteroPane = new function () {
 		if (mode === 'titleCreatorYear') {
 			search.addCondition('resultLevel', 'item');
 		}
+		// Best Match ranks by the free text rather than filtering by its
+		// words. The pane shows the ranking field for top-level item results.
 		if (mode === 'bestMatch') {
-			search.addCondition('bestMatch', 'contains', searchText.trim());
+			search.addCondition('resultLevel', 'item');
+			if (text) {
+				search.addCondition('bestMatch', 'contains', text);
+			}
+			parts = [];
 		}
 		for (let part of parts) {
 			if (mode === 'everything') {
@@ -2272,11 +2279,21 @@ var ZoteroPane = new function () {
 				return false;
 			}
 			
-			var selectedItems = this.itemsView.getSelectedObjects();
-			
+			var selectedObjects = this.itemsView.getSelectedObjects();
+
+			// A selection of search-match rows names passages rather than
+			// items, and the pane shows those instead
+			var searchMatches = this.itemsView.getSelectedSearchMatches();
+
+			// The pane shows data objects; rows standing in for something else
+			// (a search-match row, a library header) have none to show, so a
+			// selection of only those reads as an empty one
+			var selectedItems = selectedObjects.filter(o => o instanceof Zotero.DataObject);
+
 			// Display buttons at top of item pane depending on context. This needs to run even if the
 			// selection hasn't changed, because the selected items might have been modified.
 			this.itemPane.data = selectedItems;
+			this.itemPane.searchMatches = searchMatches;
 			this.itemPane.collectionTreeRows = collectionTreeRows;
 			this.itemPane.itemsView = this.itemsView;
 			this.itemPane.editable = this.collectionsView.editable;
@@ -2291,7 +2308,10 @@ var ZoteroPane = new function () {
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
 			// such as whenever selectEventsSuppressed is set to false.
-			var ids = selectedItems.map(item => item.treeViewID);
+			// Keyed on what's selected rather than what the pane shows, so
+			// moving between two passages of the same attachment still
+			// counts as a change
+			var ids = selectedObjects.map(o => o.treeViewID);
 			ids.sort();
 			if (ids.length && Zotero.Utilities.arrayEquals(_lastSelectedItems, ids)) {
 				return false;
@@ -4571,10 +4591,11 @@ var ZoteroPane = new function () {
 				show.add(m.showInLibrary);
 				show.add(m.sep1);
 			}
-			
 			[
 				m.showInLibrary,
 				m.duplicateItem,
+				m.changeParentItem,
+				m.addToCollection,
 				m.removeItems,
 				m.moveToTrash,
 				m.deleteFromLibrary,
@@ -4582,7 +4603,7 @@ var ZoteroPane = new function () {
 				m.createBib,
 				m.loadReport
 			].forEach(x => disable.add(x));
-			
+
 		}
 		
 		// Show "Export Note…" if all notes or attachments
@@ -5588,6 +5609,14 @@ var ZoteroPane = new function () {
 		let { noLocateOnMissing } = options;
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
+			// A search-match row stands in for a passage of its attachment
+			// rather than for an item, so it opens at that passage
+			if (!(item instanceof Zotero.Item)) {
+				if (item.itemID && item.entry) {
+					await this.viewSearchMatch(item.itemID, item.entry, event);
+				}
+				continue;
+			}
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
 				let attachment = await item.getBestAttachment();
@@ -5855,6 +5884,32 @@ var ZoteroPane = new function () {
 	
 	this.viewPDF = async function (itemID, location) {
 		await this.viewAttachment(itemID, null, false, { location });
+	};
+	
+	
+	/**
+	 * Open the attachment a best-match search passage came from, at the
+	 * passage.
+	 *
+	 * A PDF passage carries the page geometry the reader scrolls to and
+	 * highlights. An EPUB or snapshot passage carries none -- their views
+	 * navigate by DOM selector, which a chunk doesn't know -- so those open
+	 * where the attachment was left.
+	 *
+	 * @param {Number} itemID - The attachment the passage belongs to
+	 * @param {Object} entry - A preview entry (see
+	 *     Zotero.BestMatch.Session#getPreviews())
+	 * @param {Event} [event]
+	 * @return {Promise}
+	 */
+	this.viewSearchMatch = async function (itemID, entry, event = null) {
+		let item = Zotero.Items.get(itemID);
+		if (!item || !item.isFileAttachment()) {
+			return;
+		}
+		let position = entry?.position;
+		await this.viewAttachment(itemID, event, false,
+			position ? { location: { position } } : undefined);
 	};
 	
 	

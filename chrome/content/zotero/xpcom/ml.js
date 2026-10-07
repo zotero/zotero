@@ -27,7 +27,7 @@
  * Zotero.ML -- access to Firefox's machine-learning runtime
  * (toolkit/components/ml), which runs models in a separate, memory-gated
  * inference process using the native ONNX Runtime and llama.cpp libraries
- * Firefox ships.
+ * Firefox ships, or for static embeddings, plain JS over a token table.
  *
  * Engines are created through createEngine(), which supplies the runtime
  * configuration Zotero's build requires. Callers pass the model and task.
@@ -37,14 +37,17 @@ Zotero.ML = new function () {
 	// The runtime additionally always allows chrome://, resource://, and
 	// localhost.
 	const ALLOWED_MODEL_HOSTS = [
-		{ filter: 'ALLOW', urlPrefix: 'https://huggingface.co/' }
+		{ filter: 'ALLOW', urlPrefix: 'https://huggingface.co/' },
+		// Mozilla's hub, the one host serving static-embeddings tables
+		{ filter: 'ALLOW', urlPrefix: 'https://model-hub.mozilla.org/' }
 	];
 
-	// The backends that run on the native libraries Firefox ships. The rest
-	// either load a WebAssembly runtime from a Remote Settings attachment
+	// The backends that need no runtime this build lacks: the native libraries
+	// Firefox ships, and 'static-embeddings', plain JS over a token table. The
+	// rest either load a WebAssembly runtime from a Remote Settings attachment
 	// ('onnx' and 'wllama', plus the 'best-*' backends that fall back to them)
 	// or aren't local at all ('openai').
-	const NATIVE_BACKENDS = ['onnx-native', 'llama.cpp'];
+	const NATIVE_BACKENDS = ['onnx-native', 'llama.cpp', 'static-embeddings'];
 
 	// Default host and URL layout for models, for operations that address the
 	// model cache without creating an engine
@@ -154,15 +157,15 @@ Zotero.ML = new function () {
 	 * @return {Promise<Object[]>} - [{ taskName, name, modelId, revision }]
 	 */
 	this.listModels = async function ({ taskName } = {}) {
-		let host = new URL(MODEL_HUB_ROOT_URL).host + '/';
+		let hosts = ALLOWED_MODEL_HOSTS.map(({ urlPrefix }) => new URL(urlPrefix).host + '/');
 		let models = await _getModelHub().listModels();
 		if (taskName) {
 			models = models.filter(model => model.taskName === taskName);
 		}
-		return models.map(model => ({
-			...model,
-			modelId: model.name.startsWith(host) ? model.name.slice(host.length) : model.name
-		}));
+		return models.map((model) => {
+			let host = hosts.find(prefix => model.name.startsWith(prefix));
+			return { ...model, modelId: host ? model.name.slice(host.length) : model.name };
+		});
 	};
 
 	/**
@@ -179,13 +182,42 @@ Zotero.ML = new function () {
 		await _getModelHub().deleteModels({ taskName, model, revision, deletedBy: 'zotero' });
 	};
 
+	/**
+	 * Read a single file of a model (e.g. its tokenizer) from the runtime's
+	 * model cache, fetching it from the model hub if it isn't cached yet.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.taskName - Task the model is cached for, as
+	 *     passed to createEngine() -- the cache registers every file under it
+	 * @param {String} options.modelId - The model id, as passed to createEngine()
+	 * @param {String} options.file - File path within the model repository
+	 *     (e.g. 'tokenizer.json')
+	 * @param {String} [options.engineId]
+	 * @param {String} [options.revision='main']
+	 * @return {Promise<ArrayBuffer>}
+	 */
+	this.getModelFile = async function ({ taskName, modelId, file, engineId, revision = 'main' }) {
+		let [buffer] = await _getModelHub().getModelFileAsArrayBuffer({
+			engineId,
+			taskName,
+			model: modelId,
+			revision,
+			file
+		});
+		return buffer;
+	};
+
 	function _getModelHub() {
 		let { ModelHub } = ChromeUtils.importESModule(
 			"chrome://global/content/ml/ModelHub.sys.mjs"
 		);
 		return new ModelHub({
 			rootUrl: MODEL_HUB_ROOT_URL,
-			urlTemplate: MODEL_HUB_URL_TEMPLATE
+			urlTemplate: MODEL_HUB_URL_TEMPLATE,
+			// A hub constructed without a list denies every external host --
+			// the engine's own hub gets this same policy from the Remote
+			// Settings mock (see _configureRuntime())
+			allowDenyList: ALLOWED_MODEL_HOSTS
 		});
 	}
 

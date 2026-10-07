@@ -1620,7 +1620,184 @@ Zotero.Utilities.Internal = {
 	stringWithColon: function (str) {
 		return Zotero.getString('punctuation.colon.withString', str);
 	},
-	
+
+
+	// Section titles of a reference list, lowercase and without punctuation.
+	// The titles are the PDF extractor's (document-worker's
+	// src/pdf/structure/reference/titles.js).
+	_referenceHeadings: new Set([
+		// English
+		'references',
+		'bibliography',
+		'references and notes',
+		'works cited',
+		'literature cited',
+		'cited references',
+		'list of references',
+		'selected references',
+		'sources',
+		'citations',
+		// French
+		'références',
+		'bibliographie',
+		'références bibliographiques',
+		// German
+		'literaturverzeichnis',
+		'quellenverzeichnis',
+		'referenzen',
+		'literatur',
+		'literaturangaben',
+		// Spanish, Galician
+		'referencias',
+		'bibliografía',
+		'referencias bibliográficas',
+		// Portuguese
+		'referências',
+		'bibliografia',
+		'referências bibliográficas',
+		// Italian
+		'riferimenti',
+		'riferimenti bibliografici',
+		// Dutch
+		'referenties',
+		'literatuurlijst',
+		'bibliografie',
+		'bronnen',
+		// Swedish
+		'referenser',
+		'referenslista',
+		'litteraturförteckning',
+		'källförteckning',
+		// Norwegian, Danish
+		'referanser',
+		'referencer',
+		'litteraturliste',
+		'kildeliste',
+		// Finnish
+		'lähteet',
+		'viitteet',
+		'kirjallisuusluettelo',
+		// Polish, Czech, Slovak
+		'literatura',
+		'piśmiennictwo',
+		'wykaz literatury',
+		'seznam literatury',
+		'literatúra',
+		'zoznam literatúry',
+		// Russian
+		'список литературы',
+		'литература',
+		'библиография',
+		'источники',
+		// Ukrainian
+		'список літератури',
+		'література',
+		'бібліографія',
+		'джерела',
+		// Romanian
+		'referințe',
+		'lista de referințe',
+		// Turkish
+		'kaynaklar',
+		'kaynakça',
+		// Greek
+		'βιβλιογραφία',
+		'αναφορές',
+		'παραπομπές',
+		// Arabic
+		'المراجع',
+		'المصادر',
+		'قائمة المراجع',
+		// Persian
+		'منابع',
+		'مراجع',
+		'کتابنامه',
+		// Hebrew
+		'ביבליוגרפיה',
+		'מקורות',
+		'רשימת מקורות',
+		// Chinese, Japanese
+		'参考文献',
+		'参考资料',
+		'文献',
+		// Korean
+		'참고문헌',
+		// Hindi
+		'संदर्भ',
+		'संदर्भ सूची',
+		'ग्रंथ सूची',
+		// Bengali
+		'তথ্যসূত্র',
+		'গ্রন্থপঞ্জি',
+		// Indonesian, Malay
+		'daftar pustaka',
+		'referensi',
+		'rujukan',
+		'senarai rujukan',
+		// Vietnamese
+		'tài liệu tham khảo',
+		'tài liệu',
+		// Thai
+		'บรรณานุกรม',
+		'เอกสารอ้างอิง',
+		// Tagalog
+		'mga sanggunian',
+		'mga talaakdaan',
+		// Catalan
+		'referències',
+		// Basque
+		'erreferentziak',
+		// Hungarian
+		'irodalomjegyzék',
+		'hivatkozások',
+		// Serbian, Croatian, Bosnian, Slovenian
+		'popis literature',
+		'bibliografija',
+		'reference',
+		'viri',
+		// Lithuanian, Latvian
+		'literatūra',
+		'šaltiniai',
+		'atsauces',
+		'bibliogrāfija',
+		// Estonian
+		'kirjandus',
+		'viited',
+		'bibliograafia',
+		// Bulgarian, Macedonian
+		'използвана литература',
+		'референци',
+		'библиографија',
+		// Albanian
+		'referencat',
+		'bibliografi',
+		// Georgian
+		'ლიტერატურა',
+		'წყაროები',
+		'ბიბლიოგრაფია',
+		// Armenian
+		'գրականություն',
+		'աղբյուրներ',
+		'մատենագիտություն'
+	]),
+
+
+	/**
+	 * Whether a string is likely a reference list's title: without
+	 * punctuation and in lowercase, it's one of _referenceHeadings
+	 *
+	 * @param {String} str
+	 * @return {Boolean}
+	 */
+	isLikelyReference: function (str) {
+		let normalized = str
+			.normalize('NFKC')
+			.replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ')
+			.trim()
+			.toLowerCase();
+		return Zotero.Utilities.Internal._referenceHeadings.has(normalized);
+	},
+
 	
 	/**
 	 * Resolve `locale` to the best-fit entry in `locales`.

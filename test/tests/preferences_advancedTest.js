@@ -156,41 +156,36 @@ describe("Advanced Preferences", function () {
 	})
 
 	describe("Best-Match Search", function () {
-		it("should confirm mode changes only when leaving an enabled mode", async function () {
-			var stubs = [
-				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
-				sinon.stub(Zotero.Embeddings, 'pruneModels').resolves()
-			];
+		it("should show the indexing status only while semantic search is on", async function () {
+			var stub = sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves();
 			var win = await loadPrefPane('advanced');
-			var menu = win.document.getElementById('semantic-search-model');
 			try {
-				// Enabling from Disabled prompts nothing (the test would hang on
-				// an unexpected modal prompt)
-				menu.value = 'bge-small-en-v1.5';
-				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
-				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
+				var menu = win.document.getElementById('semantic-search-enable');
+				var statusBox = win.document.getElementById('semantic-search-status');
+				assert.equal(menu.value, 'false');
+				assert.isTrue(statusBox.hidden);
 
-				// Cancelling a switch restores the menu and leaves the pref alone
-				var promise = waitForDialog(null, 'cancel');
-				menu.value = 'multilingual-e5-small';
-				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
-				await promise;
-				assert.equal(Zotero.Prefs.get('embeddings.model'), 'bge-small-en-v1.5');
-				assert.equal(menu.value, 'bge-small-en-v1.5');
+				// Choosing Enabled writes a boolean, not the menu's string
+				menu.value = 'true';
+				menu.dispatchEvent(new win.Event('command'));
+				assert.isTrue(Zotero.Prefs.get('search.bestMatch.enableSemantic'));
+				// The pref observer re-renders the status block
+				while (statusBox.hidden) {
+					await Zotero.Promise.delay(10);
+				}
 
-				// Confirming applies the change
-				promise = waitForDialog();
-				menu.value = '';
-				await win.Zotero_Preferences.Advanced.handleSemanticSearchModeChange();
-				await promise;
-				assert.equal(Zotero.Prefs.get('embeddings.model'), '');
+				// And the menu follows the pref when something else writes it
+				Zotero.Prefs.set('search.bestMatch.enableSemantic', false);
+				while (!statusBox.hidden) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.equal(menu.value, 'false');
 			}
 			finally {
 				win.close();
-				Zotero.Prefs.set('embeddings.model', '');
-				await Zotero.Embeddings.Indexing.waitForPendingModelSwitch();
+				Zotero.Prefs.clear('search.bestMatch.enableSemantic');
 				Zotero.Prefs.clear('embeddings.indexingPaused');
-				stubs.forEach(stub => stub.restore());
+				stub.restore();
 			}
 		});
 	})
