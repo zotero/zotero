@@ -329,10 +329,6 @@ Zotero.BestMatch = new function () {
 		 *
 		 * @param {Number[]} itemIDs - Candidate item IDs to score
 		 * @param {Object} [options] - Passed through to scoreItemIDs()
-		 * @param {Number} [options.topK] - Keep only the K best-scored items,
-		 *     with a deterministic tiebreak, so equal scores keep a stable
-		 *     membership; previews are only built and derived for the kept
-		 *     items
 		 * @param {Function} [options.shouldCancel] - Also checked between
 		 *     preview derivations
 		 * @return {Promise<Map>} - itemID -> score, as scoreItemIDs() returns
@@ -343,13 +339,6 @@ Zotero.BestMatch = new function () {
 				this._queryText, itemIDs, options);
 			if (this._disposed) {
 				return scores;
-			}
-			if (options.topK) {
-				scores = new Map(
-					[...scores.entries()]
-						.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
-						.slice(0, options.topK)
-				);
 			}
 			let previews = new Map();
 			for (let itemID of new Set([...matches.lexical, ...matches.semantic])) {

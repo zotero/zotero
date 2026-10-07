@@ -221,17 +221,16 @@ describe("Zotero.Search", function () {
 	});
 
 	describe("bestMatch condition", function () {
-		it("shouldn't affect membership without a cutoff and should return the top K with one", async function () {
+		it("shouldn't affect membership", async function () {
 			let itemA = await createDataObject('item', { title: "bestmatchcondtest A" });
 			let itemB = await createDataObject('item', { title: "bestmatchcondtest B" });
 
-			// Rank-only (no cutoff): membership is unchanged
 			let s = new Zotero.Search();
 			s.libraryID = itemA.libraryID;
 			s.addCondition('resultLevel', 'item');
 			s.addCondition('title', 'contains', 'bestmatchcondtest');
 			s.addCondition('bestMatch', 'contains', 'some query');
-			assert.deepEqual(s.getBestMatchQuery(), { query: 'some query', topK: false });
+			assert.equal(s.getBestMatchQuery(), 'some query');
 			assert.sameMembers(await s.search(), [itemA.id, itemB.id]);
 
 			// A query that normalizes to nothing (e.g., just quotes) is no
@@ -241,48 +240,6 @@ describe("Zotero.Search", function () {
 			sEmpty.addCondition('resultLevel', 'item');
 			sEmpty.addCondition('bestMatch', 'contains', '""');
 			assert.isFalse(sEmpty.getBestMatchQuery());
-
-			// With a cutoff, membership is the K most relevant
-			let stub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs').callsFake(
-				async (query, itemIDs) => ({
-					scores: new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5])),
-					matches: { lexical: new Set(itemIDs), semantic: new Set() }
-				})
-			);
-			try {
-				let s2 = new Zotero.Search();
-				s2.libraryID = itemA.libraryID;
-				s2.addCondition('resultLevel', 'item');
-				s2.addCondition('title', 'contains', 'bestmatchcondtest');
-				s2.addCondition('bestMatch', '1', 'some query');
-				assert.deepEqual(s2.getBestMatchQuery(), { query: 'some query', topK: 1 });
-				assert.sameMembers(await s2.search(), [itemB.id]);
-			}
-			finally {
-				stub.restore();
-			}
-		});
-
-		it("should round-trip a numeric operator through JSON and the database", async function () {
-			let s = new Zotero.Search();
-			s.name = "bestMatch operator round trip";
-			s.libraryID = Zotero.Libraries.userLibraryID;
-			s.addCondition('resultLevel', 'item');
-			s.addCondition('title', 'contains', 'roundtriptest');
-			s.addCondition('bestMatch', '25', 'some query');
-
-			// The strict JSON path used for synced data
-			let s2 = new Zotero.Search();
-			s2.libraryID = s.libraryID;
-			s2.fromJSON(s.toJSON(), { strict: true });
-			assert.deepEqual(s2.getBestMatchQuery(), { query: 'some query', topK: 25 });
-
-			// Database persistence
-			let id = await s.saveTx();
-			await Zotero.Searches.getAsync(id);
-			let loaded = Zotero.Searches.get(id);
-			assert.deepEqual(loaded.getBestMatchQuery(), { query: 'some query', topK: 25 });
-			await loaded.eraseTx();
 		});
 	});
 

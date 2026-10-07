@@ -229,20 +229,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
 		let query = queryRow.getBestMatchQuery();
 		let source = queryRow.getBestMatchSource();
-		// Each selected row's search applies a top-K cutoff to its own scope,
-		// so K is reapplied to the merged candidates (see Session#score()) --
-		// a multi-row selection returns K members total rather than K per row.
-		// Only when the source is the transient Advanced Search, which applies
-		// uniformly to every selected row: a saved search's cutoff is part of
-		// that row's own membership and must not trim other selected rows'
-		// results.
-		let topK = queryRow.advancedSearch && source
-			? source.getBestMatchQuery().topK
-			: false;
 		// A best-match quick search shows only the items it can rank. With any
 		// search source, membership is defined by the selected rows' own
 		// searches, so keep unscoreable items -- they sort after the ranked
-		// ones. (A uniform top-K set contains no unscoreable items anyway.)
+		// ones
 		let keepUnscored = !!source;
 		let candidateIDs = items
 			.filter(item => item instanceof Zotero.Item)
@@ -266,7 +256,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			// Scoring derives the best-scored items' previews before it
 			// resolves; the rest arrive through onPreviewsFilled above
 			await session.score(candidateIDs, {
-				topK,
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
 				shouldCancel: () => generation !== this._bestMatchGeneration

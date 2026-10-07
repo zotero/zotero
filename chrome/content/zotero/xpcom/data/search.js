@@ -557,11 +557,8 @@ Zotero.Search.prototype.hasPostSearchFilter = function () {
 	this._requireData('conditions');
 	for (let i of Object.values(this._conditions)) {
 		// Applied in search() after the SQL runs, so uses of this search as a
-		// scope have to route through search() to include them. A rank-only
-		// bestMatch condition (no cutoff) doesn't affect membership, so it
-		// doesn't count.
-		if (i.condition == 'fulltextContent'
-				|| (i.condition == 'bestMatch' && this.getBestMatchQuery()?.topK)) {
+		// scope have to route through search() to include them
+		if (i.condition == 'fulltextContent') {
 			return true;
 		}
 	}
@@ -830,21 +827,6 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 	//Zotero.debug('Final result set');
 	//Zotero.debug(ids);
 
-	// A root-level 'bestMatch' condition with a top-K cutoff makes membership
-	// relevance-based: only the K results most relevant to the query match,
-	// so the saved search returns the same set when used as a source (scopes,
-	// counts, the API). Without a cutoff, best match is only a ranking in the
-	// items list and membership is untouched.
-	let bestMatch = this.getBestMatchQuery();
-	if (ids && ids.length && bestMatch && bestMatch.topK) {
-		let { scores } = await Zotero.BestMatch.scoreItemIDs(bestMatch.query, ids);
-		ids = [...scores.entries()]
-			// Deterministic order: by score, then by itemID for equal scores
-			.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]))
-			.slice(0, bestMatch.topK)
-			.map(([itemID]) => itemID);
-	}
-
 	if (!ids || !ids.length) {
 		return [];
 	}
@@ -857,10 +839,10 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 
 
 /**
- * The root-level 'bestMatch' condition, or false if none
+ * The query of the root-level 'bestMatch' condition, which the items list
+ * ranks the results by, or false if none
  *
- * @return {Object|false} - { query, topK }, with topK false when the
- *     condition is rank-only (operator 'contains') rather than a cutoff
+ * @return {String|false}
  */
 Zotero.Search.prototype.getBestMatchQuery = function () {
 	let depth = 0;
@@ -873,10 +855,7 @@ Zotero.Search.prototype.getBestMatchQuery = function () {
 		}
 		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value
 				&& Zotero.BestMatch.isSearchableQuery(condition.value)) {
-			return {
-				query: condition.value,
-				topK: parseInt(condition.operator) || false
-			};
+			return condition.value;
 		}
 	}
 	return false;
@@ -1247,8 +1226,8 @@ Zotero.Search.prototype._buildQuery = async function () {
 					lastCondition = null;
 					conditions.push({ name: 'resultLevel', operator: condition.operator });
 					continue;
-				// Applied as a filter at the end of search() and as a ranking by the
-				// items list, not as part of the condition tree
+				// Applied as a ranking by the items list, not as part of the
+				// condition tree
 				case 'bestMatch':
 					lastCondition = null;
 					continue;

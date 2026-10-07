@@ -840,20 +840,6 @@ describe("Zotero.BestMatch", function () {
 			assert.isNull(session.getPreviews(att3.id));
 		});
 
-		it("should only build and derive previews for items kept by topK", async function () {
-			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.8]]), [att1.id, att2.id]);
-			let derive = stubDerive(new Map([
-				[att1.id, [{ source: 'title', text: 'one', ranges: [], strength: 1 }]],
-				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
-			]));
-			let session = Zotero.BestMatch.createSession('owl');
-			let scores = await session.score([att1.id, att2.id], { topK: 1 });
-			assert.deepEqual([...scores.keys()], [att1.id]);
-			assert.equal(session.getPreviews(att1.id).state, 'filled');
-			assert.isNull(session.getPreviews(att2.id));
-			assert.equal(derive.callCount, 1);
-		});
-
 		it("should rank rows by the best match beneath them, with bars reporting own scores", async function () {
 			let parent = await createDataObject('item');
 			let child = await importFileAttachment('test.pdf', { parentID: parent.id });

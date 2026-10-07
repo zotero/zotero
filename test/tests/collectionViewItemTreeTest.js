@@ -1060,44 +1060,6 @@ describe("CollectionViewItemTree", function () {
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
 			});
 
-			it("shouldn't let a top-K saved search's cutoff trim other selected rows", async function () {
-				let col = await createDataObject('collection');
-				// No embeddings for colItem1, so it can only survive via keepUnscored
-				let colItem1 = await createDataObject('item', { title: "mixedsel C1", collections: [col.id] });
-				let colItem2 = await createDataObject('item', { title: "mixedsel C2", collections: [col.id] });
-				let kItem1 = await createDataObject('item', { title: "mixedselk K1" });
-				let kItem2 = await createDataObject('item', { title: "mixedselk K2" });
-				// Install the stub first: creating the saved search auto-selects
-				// it, which already runs its top-K search
-				let scores = new Map([[kItem1.id, 0.9], [kItem2.id, 0.5], [colItem2.id, 0.7]]);
-				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
-					async (query, itemIDs) => new Map(
-						itemIDs.filter(id => scores.has(id)).map(id => [id, scores.get(id)])
-					)
-				)));
-				let search = new Zotero.Search();
-				search.name = "Top-K best-match test";
-				search.libraryID = col.libraryID;
-				search.addCondition('resultLevel', 'item');
-				search.addCondition('title', 'contains', 'mixedselk');
-				search.addCondition('bestMatch', '1', 'some query');
-				await search.saveTx();
-
-				await cv.selectByID("S" + search.id);
-				await waitForItemsLoad(win);
-				cv.selection.toggleSelect(cv.getRowIndexByID("C" + col.id));
-				await zp.onCollectionSelected();
-				await zp.itemsView.waitForLoad();
-				itemsView = zp.itemsView;
-
-				// The saved search returns its own top 1; the collection keeps both of
-				// its items, including the unscoreable one
-				assert.sameMembers(
-					itemsView._rows.filter(row => row.type == 'item').map(row => row.id),
-					[kItem1.id, colItem1.id, colItem2.id]
-				);
-			});
-
 			it("should keep a rank-only advanced search's results when the index isn't ready", async function () {
 				let col = await createDataObject('collection');
 				let itemA = await createDataObject('item', { title: "notready A", collections: [col.id] });

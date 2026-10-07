@@ -153,7 +153,6 @@
 
 					case 'bestMatch':
 						stack[stack.length - 1].bestMatch = condition.value;
-						stack[stack.length - 1].bestMatchTopK = parseInt(condition.operator) || false;
 						continue;
 
 					case 'groupStart': {
@@ -311,14 +310,9 @@
 				flat.push({ condition: 'resultLevel', operator: group.resultLevel, value: null });
 			}
 			// The best-match query is a root-level modifier, offered only for
-			// top-level item results. The operator carries the optional top-K
-			// cutoff; 'contains' means rank-only.
+			// top-level item results
 			if (isRoot && group.bestMatch && group.resultLevel == 'item') {
-				flat.push({
-					condition: 'bestMatch',
-					operator: group.bestMatchTopK ? String(group.bestMatchTopK) : 'contains',
-					value: group.bestMatch
-				});
+				flat.push({ condition: 'bestMatch', operator: 'contains', value: group.bestMatch });
 			}
 			for (let child of group.conditionsContainer.children) {
 				if (child.localName == 'zoterosearchcondition') {
@@ -496,8 +490,6 @@
 				<hbox class="best-match-row" align="center" hidden="true">
 					<label class="best-match-prefix" data-l10n-id="advanced-search-best-match-prefix"/>
 					<html:input class="best-match-input" type="text" data-l10n-id="advanced-search-best-match-input"/>
-					<label class="best-match-topk-prefix" data-l10n-id="advanced-search-best-match-topk-prefix"/>
-					<html:input class="best-match-topk-input" type="number" min="0" data-l10n-id="advanced-search-best-match-topk-input"/>
 				</hbox>
 				<hbox class="level-warning" hidden="true">
 					<description/>
@@ -514,17 +506,6 @@
 			this.levelWarning = this.querySelector('.level-warning');
 			this.bestMatchRow = this.querySelector('.best-match-row');
 			this.bestMatchInput = this.querySelector('.best-match-input');
-			this.bestMatchTopKInput = this.querySelector('.best-match-topk-input');
-			// The cutoff has no zero -- empty means "all" -- so route 0 by
-			// direction: stepping down from 1 goes back to empty, and stepping
-			// up from empty (which the browser floors at min) goes to 1
-			this._lastTopKValue = this.bestMatchTopKInput.value;
-			this.bestMatchTopKInput.addEventListener('input', () => {
-				if (this.bestMatchTopKInput.value === '0') {
-					this.bestMatchTopKInput.value = this._lastTopKValue === '' ? '1' : '';
-				}
-				this._lastTopKValue = this.bestMatchTopKInput.value;
-			});
 
 			// The result level is tracked here and reflected to whichever control is active: the root's
 			// result-level menu ("Find ..."), or a nested group's binding menu ("... in the
@@ -623,20 +604,6 @@
 		set bestMatch(val) {
 			this.bestMatchInput.value = val || '';
 			this.updateBestMatchRow();
-		}
-
-		/**
-		 * Optional top-K cutoff for the best-match query: with a value, only
-		 * the K most similar results match; empty means rank-only
-		 */
-		get bestMatchTopK() {
-			let val = parseInt(this.bestMatchTopKInput.value);
-			return val > 0 ? val : false;
-		}
-
-		set bestMatchTopK(val) {
-			this.bestMatchTopKInput.value = val || '';
-			this._lastTopKValue = this.bestMatchTopKInput.value;
 		}
 
 		// The best-match field is a root-level modifier, offered for
@@ -866,7 +833,6 @@
 			this.joinMode = 'all';
 			this.resultLevel = 'any';
 			this.bestMatch = '';
-			this.bestMatchTopK = false;
 			while (this.conditionsContainer.firstChild) {
 				this.conditionsContainer.removeChild(this.conditionsContainer.firstChild);
 			}

@@ -756,30 +756,7 @@ Zotero.CollectionTreeRow.prototype.getBestMatchQuery = function () {
 		return false;
 	}
 	let source = this.getBestMatchSource();
-	return source ? source.getBestMatchQuery().query : this.searchText;
-};
-
-/**
- * Whether an active best-match search has a top-K cutoff, which trims
- * membership by score and so makes the underlying
- * Zotero.Search.prototype.search() itself depend on the embeddings. Without
- * one, the search results are stable across embedding changes, so they can be
- * reused while only the ranking is recomputed.
- *
- * @return {Boolean}
- */
-Zotero.CollectionTreeRow.prototype.hasBestMatchCutoff = function () {
-	let source = this.getBestMatchSource();
-	if (source) {
-		return !!source.getBestMatchQuery().topK;
-	}
-	// A quick-search best-match doesn't trim membership itself, but a selected
-	// saved search may still carry its own top-K cutoff
-	if (this.isSearch() && this.ref instanceof Zotero.Search) {
-		let query = this.ref.getBestMatchQuery();
-		return !!(query && query.topK);
-	}
-	return false;
+	return source ? source.getBestMatchQuery() : this.searchText;
 };
 
 Zotero.CollectionTreeRow.prototype.isSortable = function () {

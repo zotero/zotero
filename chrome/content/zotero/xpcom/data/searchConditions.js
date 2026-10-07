@@ -266,10 +266,8 @@ Zotero.SearchConditions = new function () {
 				}
 			},
 
-			// Root-level modifier rather than a regular condition: restricts the
-			// results to items with a stored embedding, and the items list ranks
-			// them by semantic similarity to the value (see
-			// CollectionViewItemTreeRowProvider._applyBestMatch())
+			// Root-level modifier rather than a regular condition: the items
+			// list ranks the results by how well they match the value
 			{
 				name: 'bestMatch',
 				operators: {
