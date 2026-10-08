@@ -237,7 +237,9 @@ Zotero.DataDirectory = {
 				let title = Zotero.getString('general.accessDenied');
 				let msg = Zotero.getString('dataDir.dirCannotBeCreated', [Zotero.appName, dataDir])
 					+ "\n\n"
-					+ Zotero.getString('dataDir.checkDirWriteAccess', Zotero.appName);
+					+ Zotero.ftl.formatValueSync(
+						'data-dir-check-parent-write-access', { path: PathUtils.parent(dataDir) }
+					);
 				
 				// The default location needs to be writable, so don't offer an alternative
 				if (isDefaultDir) {

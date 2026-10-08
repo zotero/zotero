@@ -178,6 +178,7 @@ describe("Zotero.DataDirectory", function () {
 				
 				assert.isTrue(alertStub.calledOnce);
 				assert.include(alertStub.firstCall.args[2], dataDir);
+				assert.include(alertStub.firstCall.args[2], `write access to ${parentDir} `);
 				assert.isFalse(confirmStub.called);
 				assert.isTrue(quitStub.calledOnce);
 				assert.isFalse(await IOUtils.exists(dataDir));
