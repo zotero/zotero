@@ -343,7 +343,7 @@ export class CitationDialogHelpers {
 		return height + margins + border;
 	}
 
-	buildBubbleString(bubbleItem) {
+	buildBubbleString(bubbleItem, { narrativePart } = {}) {
 		let item = bubbleItem.item;
 		let annotationContent = "";
 		// Construct annotation string if relevant
@@ -378,11 +378,13 @@ export class CitationDialogHelpers {
 		else if (!str) {
 			str = Zotero.getString("integration-citationDialog-bubble-empty");
 		}
+		if (narrativePart == "head") return str;
+		if (narrativePart == "remainder") str = "";
 		
 		// Date
 		var date = item.getField("date", true, true);
 		if (date && (date = date.substr(0, 4)) !== "0000") {
-			str += ", " + parseInt(date);
+			str += (str ? ", " : "") + parseInt(date);
 		}
 
 		// If original item is an annotation, return the bubble string with the annotation info
@@ -396,7 +398,7 @@ export class CitationDialogHelpers {
 			// If there is no locator label, default to "page" for now
 			let label = (Zotero.Cite.getLocatorString(bubbleItem.label || 'page', 'short') || '').toLocaleLowerCase();
 			
-			str += `, ${label} ${bubbleItem.locator}`;
+			str += `${str ? ", " : ""}${label} ${bubbleItem.locator}`;
 		}
 		
 		// Prefix
@@ -413,7 +415,7 @@ export class CitationDialogHelpers {
 			str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(bubbleItem.suffix) ? " " : "") + suffix;
 		}
 		
-		return str;
+		return str || Zotero.getString("integration-citationDialog-bubble-empty");
 	}
 
 	getLocatorLabels(loc) {

@@ -756,17 +756,20 @@ Object.defineProperty(Zotero.Style.prototype, 'effectiveLocale', {
  * @param {boolean} [options.automaticJournalAbbreviations] Abbreviate publication titles automatically
  * @param {boolean} [options.cache] Use the global CSL.Engine cache. CSL.Engine is highly stateful,
  * 		so this should only be used if you're aware of the pitfalls of reusing CSL.Engine instances.
+ * @param {boolean} [options.narrativeCitations] Enable Zotero's compatibility bridge for
+ * 		unreleased CSL cs:intext support. This currently requires citeproc-js.
  *
  * @typedef {{
  *     automaticJournalAbbreviations?: boolean;
  *     cache?: boolean;
+ *     narrativeCitations?: boolean;
  * }} GetCiteProcOptions
  */
 Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	if (typeof options === 'boolean') {
 		options = { automaticJournalAbbreviations: options };
 	}
-	let { automaticJournalAbbreviations, cache } = options;
+	let { automaticJournalAbbreviations, cache, narrativeCitations } = options;
 	
 	locale = locale || Zotero.locale || 'en-US';
 	format = format || 'text';
@@ -776,7 +779,7 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	// format is excluded from the cache key because setOutputFormat() can switch
 	// it cheaply.
 	let cacheKey = cache && this.path
-		? JSON.stringify({ locale, automaticJournalAbbreviations })
+		? JSON.stringify({ locale, automaticJournalAbbreviations, narrativeCitations: !!narrativeCitations })
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
 		let engine = this._cachedEngines.get(cacheKey);
@@ -850,6 +853,10 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	}
 	
 	xml = this._eventToEventTitle(xml);
+	if (narrativeCitations) {
+		let effectiveStyle = this.source ? parentStyle : this;
+		xml = this._addInText(xml, effectiveStyle.styleID);
+	}
 	
 	try {
 		var citeproc = new Zotero.CiteProc.CSL.Engine(
@@ -882,6 +889,97 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 
 Zotero.Style.prototype.clearEngineCache = function () {
 	this._cachedEngines.clear();
+};
+
+/**
+ * Add the unreleased CSL cs:intext element needed by citeproc-js for styles
+ * whose ordinary citation does not provide a suitable Narrative Head.
+ * Native definitions always take precedence.
+ */
+Zotero.Style.prototype._addInText = function (xml, styleID) {
+	let parser = new DOMParser();
+	let doc = parser.parseFromString(xml, "text/xml");
+	let root = doc.documentElement;
+	let directChild = name => Array.from(root.children).find(elem => elem.localName == name);
+	if (directChild("intext")) return xml;
+
+	let citation = directChild("citation");
+	if (!citation) return xml;
+	let shortID = styleID?.match(/\/?([^/]+)$/)?.[1] || "";
+	let isAPA = /^apa($|-)/.test(shortID);
+	let info = directChild("info");
+	let citationFormat = Array.from(info?.children || []).find(elem => (
+		elem.localName == "category" && elem.hasAttribute("citation-format")
+	))
+		?.getAttribute("citation-format");
+	let macros = new Map(Array.from(root.children)
+		.filter(elem => elem.localName == "macro")
+		.map(elem => [elem.getAttribute("name"), elem]));
+	let containsNumericVariable = (elem, visited = new Set()) => {
+		if (elem.querySelector('[variable~="citation-number"], [variable~="citation-label"]')) {
+			return true;
+		}
+		for (let macroRef of elem.querySelectorAll("[macro]")) {
+			let name = macroRef.getAttribute("macro");
+			if (visited.has(name)) continue;
+			visited.add(name);
+			let macro = macros.get(name);
+			if (macro && containsNumericVariable(macro, visited)) return true;
+		}
+		return false;
+	};
+	let isNumericOrTrigraph = ["numeric", "label"].includes(citationFormat)
+		|| containsNumericVariable(citation);
+	if (!isAPA && !isNumericOrTrigraph) return xml;
+
+	const ns = root.namespaceURI || "http://purl.org/net/xbiblio/csl";
+	let create = (name, attrs = {}) => {
+		let elem = doc.createElementNS(ns, name);
+		for (let [key, value] of Object.entries(attrs)) {
+			elem.setAttribute(key, value);
+		}
+		return elem;
+	};
+
+	let intext = create("intext");
+	// The intext area has citation options of its own. Copy options affecting
+	// names/disambiguation so injected output follows the citation as closely as possible.
+	for (let attr of citation.attributes) {
+		if (!["collapse", "year-suffix-delimiter", "after-collapse-delimiter"]
+				.includes(attr.name)) {
+			intext.setAttribute(attr.name, attr.value);
+		}
+	}
+	let layout = create("layout");
+	intext.appendChild(layout);
+
+	let apaAuthorMacro = isAPA && Array.from(root.children).find(elem => (
+		elem.localName == "macro" && elem.getAttribute("name") == "author-intext"
+	));
+	if (apaAuthorMacro) {
+		let narrativeMacro = apaAuthorMacro.cloneNode(true);
+		narrativeMacro.setAttribute("name", "zotero-narrative-author");
+		for (let name of narrativeMacro.querySelectorAll('name[and="symbol"]')) {
+			name.setAttribute("and", "text");
+		}
+		root.insertBefore(narrativeMacro, citation);
+		layout.appendChild(create("text", { macro: "zotero-narrative-author" }));
+	}
+	else {
+		let names = create("names", { variable: "author" });
+		names.appendChild(create("name", { form: "short", and: "text" }));
+		let substitute = create("substitute");
+		let editors = create("names", { variable: "editor" });
+		editors.appendChild(create("name", { form: "short", and: "text" }));
+		substitute.appendChild(editors);
+		substitute.appendChild(create("text", { variable: "title", form: "short" }));
+		names.appendChild(substitute);
+		layout.appendChild(names);
+	}
+
+	let bibliography = directChild("bibliography");
+	root.insertBefore(intext, bibliography || null);
+	return new XMLSerializer().serializeToString(doc);
 };
 
 /**

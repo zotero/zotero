@@ -1,0 +1,86 @@
+#citation-explorer-wizard-window {
+	display: flex;
+	min-height: 500px;
+
+	.citation-explorer-wizard {
+		width: 100%;
+		height: 100%;
+
+		wizardpage {
+			display: flex;
+			flex-direction: column;
+		}
+
+		.page-description {
+			display: block;
+			margin: 0 0 16px;
+		}
+
+		#item-operation {
+			margin: 0;
+
+			radio {
+				margin-inline-start: 0;
+			}
+
+			.option-description {
+				display: block;
+				margin: 2px 0 14px 24px;
+				color: var(--fill-secondary);
+			}
+		}
+
+		.target-picker {
+			margin-top: 12px;
+			max-width: 420px;
+
+			label {
+				margin: 0 0 6px;
+			}
+
+			#item-target {
+				margin: 0;
+			}
+		}
+
+		.cell.action {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			padding-block: 1px;
+
+			.item-action-select {
+				flex: 1 1 auto;
+				min-width: 0;
+				margin: 0;
+
+				&.skip-selected::part(icon) {
+					color: var(--accent-red);
+					fill: var(--accent-red) !important;
+					-moz-context-properties: fill, color;
+				}
+			}
+
+			.choose-item-button {
+				flex: 0 0 auto;
+				margin: 0;
+			}
+		}
+
+		.skip-action > .menu-icon {
+			color: var(--accent-red);
+			fill: var(--accent-red) !important;
+			-moz-context-properties: fill, color;
+		}
+
+		.row.selected .item-action-select {
+			color: inherit;
+
+			&::part(icon) {
+				color: inherit;
+				fill: currentColor !important;
+				-moz-context-properties: fill, color;
+			}
+		}
+	}
+}
