@@ -29,6 +29,7 @@
  * scores; when a semantic model is enabled (Zotero.Embeddings), both engines
  * score and their rankings are fused with Reciprocal Rank Fusion, so an item
  * can match by its words, by its meaning, or -- ranking highest -- by both.
+ * A query can also name one engine to rank with alone.
  * The facade owns everything a consumer would otherwise need engine
  * knowledge for: what counts as an empty query, how results map onto the
  * relevance bar, and what the failure modes are.
@@ -111,19 +112,26 @@ Zotero.BestMatch = new function () {
 
 	/**
 	 * Whether a query has anything for best-match search to rank by. The
-	 * lexical engine needs at least one scoring unit; failing that, the
-	 * semantic engine can embed any text its normalization leaves standing,
-	 * when a model is enabled. Callers treat a query that fails this as no
-	 * active search.
+	 * lexical engine needs at least one scoring unit; the semantic engine
+	 * can embed any text its normalization leaves standing, when a model is
+	 * enabled. Callers treat a query that fails this as no active search.
 	 *
 	 * @param {String} queryText
+	 * @param {String} [engine='hybrid'] - 'hybrid', 'lexical' or 'semantic'
+	 *     (see scoreItemIDs())
 	 * @return {Boolean}
 	 */
-	this.isSearchableQuery = function (queryText) {
-		if (Zotero.Lexical.parseQuery(queryText || '').length) {
-			return true;
+	this.isSearchableQuery = function (queryText, engine = 'hybrid') {
+		let lexical = !!Zotero.Lexical.parseQuery(queryText || '').length;
+		let semantic = _useSemantic() && !!Zotero.Embeddings.normalizeQuery(queryText || '');
+		if (engine == 'lexical') {
+			return lexical;
 		}
-		return _useSemantic() && !!Zotero.Embeddings.normalizeQuery(queryText || '');
+		// Semantic alone falls back to lexical when there's no model
+		if (engine == 'semantic') {
+			return _useSemantic() ? semantic : lexical;
+		}
+		return lexical || semantic;
 	};
 
 	/**
@@ -184,6 +192,9 @@ Zotero.BestMatch = new function () {
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
 	 * @param {Object} [options]
+	 * @param {String} [options.engine='hybrid'] - 'lexical' or 'semantic'
+	 *     ranks with that engine alone; semantic falls back to lexical when
+	 *     no model is enabled or the query embeds as nothing
 	 * @param {Function} [options.shouldCancel] - Checked between scoring
 	 *     stages; return true to abandon scoring with a ScoringCancelledError
 	 * @return {Promise<Object>} - { scores, matches }: scores maps
@@ -198,10 +209,10 @@ Zotero.BestMatch = new function () {
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
 		try {
-			// Temporary, for testing: the bestMatchEngine pref pins scoring to
-			// one engine instead of the hybrid default
-			let engine = Zotero.Prefs.get('search.bestMatchEngine');
-			if (engine == 'semantic') {
+			let engine = options.engine || 'hybrid';
+			let semanticApplies = _useSemantic()
+				&& !!Zotero.Embeddings.normalizeQuery(queryText || '');
+			if (engine == 'semantic' && semanticApplies) {
 				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
 				let kept = _nearTop(semantic.scores, _semanticFraction);
 				// On the model's display band, so scores are 0-1 like the other
@@ -223,8 +234,7 @@ Zotero.BestMatch = new function () {
 				};
 			}
 			// A query the semantic engine can't embed ranks lexically alone
-			if (engine == 'lexical' || !_useSemantic()
-					|| !Zotero.Embeddings.normalizeQuery(queryText || '')) {
+			if (engine == 'lexical' || !semanticApplies) {
 				let scores = _nearTop(
 					await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options), share => share
 				);
@@ -296,8 +306,9 @@ Zotero.BestMatch = new function () {
 	 * disposed session derives nothing.
 	 */
 	this.Session = class {
-		constructor(queryText) {
+		constructor(queryText, { engine = 'hybrid' } = {}) {
 			this._queryText = queryText;
+			this._engine = engine;
 			this._previews = new Map();
 			this._effectiveScores = new Map();
 			this._disposed = false;
@@ -312,6 +323,11 @@ Zotero.BestMatch = new function () {
 
 		get queryText() {
 			return this._queryText;
+		}
+
+		// The engine this session ranks with (see scoreItemIDs())
+		get engine() {
+			return this._engine;
 		}
 
 		/**
@@ -336,7 +352,7 @@ Zotero.BestMatch = new function () {
 		 */
 		async score(itemIDs, options = {}) {
 			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
-				this._queryText, itemIDs, options);
+				this._queryText, itemIDs, { ...options, engine: this._engine });
 			if (this._disposed) {
 				return scores;
 			}
@@ -795,17 +811,18 @@ Zotero.BestMatch = new function () {
 		}
 
 		// Whether each engine reaches this session at all, apart from what it
-		// made of any one item. The bestMatchEngine pref is temporary, for
-		// testing: it pins a session to a single engine, which then decides
-		// not only what matched but how a match is quoted.
+		// made of any one item: the session's engine decides not only what
+		// matched but how a match is quoted
 		_modelApplies() {
-			return Zotero.Prefs.get('search.bestMatchEngine') != 'lexical'
+			return this._engine != 'lexical'
 				&& _useSemantic()
 				&& !!Zotero.Embeddings.normalizeQuery(this._queryText || '');
 		}
 
+		// Semantic alone ranked lexically after all when the model couldn't
+		// take the query (see scoreItemIDs())
 		_lexicalEnabled() {
-			return Zotero.Prefs.get('search.bestMatchEngine') != 'semantic';
+			return this._engine != 'semantic' || !this._modelApplies();
 		}
 	};
 
@@ -813,10 +830,12 @@ Zotero.BestMatch = new function () {
 	 * Start a search session for a query (see Zotero.BestMatch.Session)
 	 *
 	 * @param {String} queryText
+	 * @param {Object} [options]
+	 * @param {String} [options.engine='hybrid'] - See scoreItemIDs()
 	 * @return {Zotero.BestMatch.Session}
 	 */
-	this.createSession = function (queryText) {
-		return new this.Session(queryText);
+	this.createSession = function (queryText, options = {}) {
+		return new this.Session(queryText, options);
 	};
 
 	/**

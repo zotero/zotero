@@ -312,37 +312,39 @@ describe("Zotero.BestMatch", function () {
 				assert.sameMembers([...matches.semantic], [1]);
 			});
 
-			it("should cut the tail in single-engine modes too", async function () {
+			it("should cut the tail when ranking with one engine too", async function () {
 				margin(50);
-				let saved = Zotero.Prefs.get('search.bestMatchEngine');
-				try {
-					Zotero.Prefs.set('search.bestMatchEngine', 'semantic');
-					stubEngines({
-						enabled: true,
-						semantic: async () => new Map([[1, 1.8], [2, 1.2], [3, 0.3]]),
-						fraction: (score, options) => (options && options.clamped === false
-							? score
-							: Math.min(1, score))
-					});
-					let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
-					assert.sameMembers([...scores.keys()], [1, 2]);
-					// Rescaled by the strongest kept fraction
-					assert.equal(scores.get(1), 1);
-					assert.closeTo(scores.get(2), 1.2 / 1.8, 1e-12);
+				stubEngines({
+					enabled: true,
+					semantic: async () => new Map([[1, 1.8], [2, 1.2], [3, 0.3]]),
+					fraction: (score, options) => (options && options.clamped === false
+						? score
+						: Math.min(1, score))
+				});
+				let { scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3], { engine: 'semantic' });
+				assert.sameMembers([...scores.keys()], [1, 2]);
+				// Rescaled by the strongest kept fraction
+				assert.equal(scores.get(1), 1);
+				assert.closeTo(scores.get(2), 1.2 / 1.8, 1e-12);
 
-					Zotero.Prefs.set('search.bestMatchEngine', 'lexical');
-					stubs.forEach(stub => stub.restore());
-					stubs = [];
-					stubEngines({
-						enabled: true,
-						lexical: async () => new Map([[1, 0.9], [2, 0.3]])
-					});
-					({ scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]));
-					assert.sameMembers([...scores.keys()], [1]);
-				}
-				finally {
-					Zotero.Prefs.set('search.bestMatchEngine', saved);
-				}
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+				stubEngines({
+					enabled: true,
+					lexical: async () => new Map([[1, 0.9], [2, 0.3]])
+				});
+				({ scores } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2], { engine: 'lexical' }));
+				assert.sameMembers([...scores.keys()], [1]);
+			});
+
+			it("should rank lexically when asked for meaning without a model", async function () {
+				let lexical = sinon.stub().resolves(new Map([[1, 0.9]]));
+				stubEngines({ enabled: false, lexical });
+				let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2], { engine: 'semantic' });
+				assert.isTrue(lexical.calledOnce);
+				assert.sameMembers([...scores.keys()], [1]);
+				assert.sameMembers([...matches.lexical], [1]);
+				assert.isEmpty([...matches.semantic]);
 			});
 		});
 	});
@@ -370,16 +372,6 @@ describe("Zotero.BestMatch", function () {
 		// A session that has scored the attachment, recording which engines
 		// matched it -- what getMatchingExcerpts() consults instead of being
 		// told per call
-		// Pin the temporary bestMatchEngine pref, leaving every other pref
-		// reading through to the profile
-		function pinEngine(engine) {
-			let get = Zotero.Prefs.get;
-			stubs.push(sinon.stub(Zotero.Prefs, 'get').callsFake(
-				(key, ...rest) => (key == 'search.bestMatchEngine'
-					? engine
-					: get.call(Zotero.Prefs, key, ...rest))));
-		}
-
 		// The item's text as its structure cuts it, into passages saying
 		// nothing of where they sit
 		function cutInto(texts) {
@@ -391,7 +383,7 @@ describe("Zotero.BestMatch", function () {
 			}));
 		}
 
-		async function sessionFor({ lexical = true, semantic = true } = {}) {
+		async function sessionFor({ lexical = true, semantic = true, engine = 'hybrid' } = {}) {
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores: new Map([[attachment.id, 0.9]]),
 				matches: {
@@ -399,7 +391,7 @@ describe("Zotero.BestMatch", function () {
 					semantic: new Set(semantic ? [attachment.id] : [])
 				}
 			}));
-			let session = Zotero.BestMatch.createSession('owl');
+			let session = Zotero.BestMatch.createSession('owl', { engine });
 			await session.score([attachment.id]);
 			return session;
 		}
@@ -553,8 +545,7 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([{ text, score: 0.6 }]));
-			pinEngine('semantic');
-			let session = await sessionFor();
+			let session = await sessionFor({ engine: 'semantic' });
 			// Scoring derived the preview already; count this derivation alone
 			staticStub.resetHistory();
 			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
@@ -665,10 +656,9 @@ describe("Zotero.BestMatch", function () {
 			let pickStub = sinon.stub(Zotero.Lexical, 'pickQuote');
 			stubs.push(pickStub);
 
-			pinEngine('semantic');
-			// The item matched lexically too, so only the pin can be keeping
-			// the lexical engine out of the quote
-			let session = await sessionFor();
+			// The item matched lexically too, so only the engine can be
+			// keeping the lexical engine out of the quote
+			let session = await sessionFor({ engine: 'semantic' });
 			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
 
 			assert.isFalse(rangesStub.called);
@@ -723,8 +713,7 @@ describe("Zotero.BestMatch", function () {
 				{ text: [first, second, third, fourth].join(' '), score: 0.6 }
 			]));
 
-			pinEngine('semantic');
-			let session = await sessionFor();
+			let session = await sessionFor({ engine: 'semantic' });
 			let [excerpt] = await session.getMatchingExcerpts(attachment.id);
 			let quoted = excerpt.text.slice(excerpt.snippet.start, excerpt.snippet.end);
 

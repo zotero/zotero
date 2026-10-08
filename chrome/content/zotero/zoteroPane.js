@@ -2067,6 +2067,13 @@ var ZoteroPane = new function () {
 		// search; what's left is split into words (keeping quoted phrases
 		// intact), as the quick search does
 		let { tree, text } = Zotero.SearchQuery.parse(searchText);
+		// An engine marker ("meaning:") asks for Best Match ranking from any
+		// mode, with the engine it names
+		let engine = null;
+		if (tree) {
+			({ tree, engine } = Zotero.SearchQuery.extractBestMatch(tree));
+		}
+		let ranked = mode === 'bestMatch' || !!engine;
 		let parts = Zotero.SearchConditions.parseSearchString(text);
 		if (!parts.length && !tree) {
 			await this.toggleAdvancedSearchState('open');
@@ -2092,15 +2099,14 @@ var ZoteroPane = new function () {
 				? { joinMode: 'all', children: [tree] }
 				: tree);
 		}
-		if (mode === 'titleCreatorYear') {
+		if (mode === 'titleCreatorYear' || ranked) {
 			search.addCondition('resultLevel', 'item');
 		}
 		// Best Match ranks by the free text rather than filtering by its
 		// words. The pane shows the ranking field for top-level item results.
-		if (mode === 'bestMatch') {
-			search.addCondition('resultLevel', 'item');
+		if (ranked) {
 			if (text) {
-				search.addCondition('bestMatch', 'contains', text);
+				search.addCondition('bestMatch', engine || 'hybrid', text);
 			}
 			parts = [];
 		}

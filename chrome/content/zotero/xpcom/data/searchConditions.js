@@ -267,11 +267,15 @@ Zotero.SearchConditions = new function () {
 			},
 
 			// Root-level modifier rather than a regular condition: the items
-			// list ranks the results by how well they match the value
+			// list ranks the results by how well they match the value. The
+			// operator is the engine: 'hybrid' ranks with both, fused;
+			// 'lexical' by the words alone; 'semantic' by meaning alone.
 			{
 				name: 'bestMatch',
 				operators: {
-					contains: true
+					hybrid: true,
+					lexical: true,
+					semantic: true
 				}
 			},
 

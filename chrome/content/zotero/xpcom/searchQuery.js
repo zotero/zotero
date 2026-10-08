@@ -57,7 +57,9 @@ Zotero.SearchQuery = new function () {
 		'search-query-keyword-date-before': { condition: 'date', operator: 'isBefore' },
 		'search-query-keyword-date-after': { condition: 'date', operator: 'isAfter' },
 		'search-query-keyword-date-added': { condition: 'dateAdded' },
-		'search-query-keyword-date-modified': { condition: 'dateModified' }
+		'search-query-keyword-date-modified': { condition: 'dateModified' },
+		'search-query-keyword-best-match-lexical': { condition: 'bestMatch', operator: 'lexical' },
+		'search-query-keyword-best-match-semantic': { condition: 'bestMatch', operator: 'semantic' }
 	};
 
 	// The same short names in English, which keep working in every locale so
@@ -86,7 +88,16 @@ Zotero.SearchQuery = new function () {
 		abstract: { condition: 'abstractNote' },
 		// The only colored thing that's searchable, so `type is annotation
 		// and color is red` reads the way people write it
-		color: { condition: 'annotationColor' }
+		color: { condition: 'annotationColor' },
+		// Best Match's engines, as markers that say how the free text ranks:
+		// `meaning: owl migration` ranks by meaning alone, `lexical:` by the
+		// words alone. The engine is the bestMatch condition's operator and
+		// the free text its value (see getSearch()), so a marker has no value
+		// of its own.
+		lexical: { condition: 'bestMatch', operator: 'lexical' },
+		words: { condition: 'bestMatch', operator: 'lexical' },
+		semantic: { condition: 'bestMatch', operator: 'semantic' },
+		meaning: { condition: 'bestMatch', operator: 'semantic' }
 	};
 
 	// Conditions matched against an item's children, beyond the ones whose own
@@ -202,8 +213,9 @@ Zotero.SearchQuery = new function () {
 		'<': 'isLessThan'
 	};
 
-	// Operators that take no value
-	const UNARY = new Set(['isEmpty', 'isNotEmpty']);
+	// Operators that take no value: the empty tests, and the Best Match
+	// engines, which rank the free text rather than taking a value
+	const UNARY = new Set(['isEmpty', 'isNotEmpty', 'lexical', 'semantic']);
 
 	// Operators that come before a condition instead of after it, reading
 	// the way they're said: `no doi`, `has doi`
@@ -537,7 +549,9 @@ Zotero.SearchQuery = new function () {
 		_fields = {};
 		// Conditions by their stored name, which the tables below refer to
 		// but the syntax doesn't expose
-		let byCondition = {};
+		// Only reachable through its aliases and keywords, since the syntax
+		// doesn't expose the condition itself
+		let byCondition = { bestMatch: { condition: 'bestMatch', operators: ['lexical', 'semantic'] } };
 		let add = (name, field) => {
 			let key = (name || '').toLowerCase();
 			if (key && !_fields[key]) {
@@ -1469,7 +1483,12 @@ Zotero.SearchQuery = new function () {
 	 */
 	this.getSearch = function (query, { libraryID, mode } = {}) {
 		let { tree, text } = this.parse(query);
-		if (!tree) {
+		let engine = null;
+		if (tree) {
+			({ tree, engine } = this.extractBestMatch(tree));
+		}
+		// An engine marker with nothing to rank is no query either
+		if (!tree && !(engine && text)) {
 			return false;
 		}
 		let search = new Zotero.Search();
@@ -1486,7 +1505,7 @@ Zotero.SearchQuery = new function () {
 		// and the other conditions map to it -- `type:attachment by:smith`
 		// means Smith's attachments.
 		let resultLevel = 'item';
-		if (tree.joinMode === 'all') {
+		if (tree && tree.joinMode === 'all') {
 			let pins = tree.children.filter(child => !child.children
 				&& child.condition === 'itemType' && child.operator === 'is'
 				&& ['attachment', 'note', 'annotation'].includes(child.value));
@@ -1499,14 +1518,15 @@ Zotero.SearchQuery = new function () {
 		search.addCondition('resultLevel', resultLevel);
 		// Free text is joined to the clauses with "all", so an "any" query
 		// becomes a group rather than something the text is OR'd into
-		this.addToSearch(search, text && tree.joinMode === 'any'
+		this.addToSearch(search, text && tree?.joinMode === 'any'
 			? { joinMode: 'all', children: [tree] }
 			: tree);
 		if (text) {
 			// Best Match ranks by the text -- lexically when no semantic
-			// index is available -- rather than filtering by it
-			if (mode === 'bestMatch') {
-				search.addCondition('bestMatch', 'contains', text);
+			// index is available -- rather than filtering by it; an engine
+			// marker asks for that ranking from any mode
+			if (engine || mode === 'bestMatch') {
+				search.addCondition('bestMatch', engine || 'hybrid', text);
 			}
 			else {
 				let quicksearchMode = ['titleCreatorYear', 'everything'].includes(mode)
@@ -1516,6 +1536,40 @@ Zotero.SearchQuery = new function () {
 			}
 		}
 		return search;
+	};
+
+	/**
+	 * Take the Best Match engine markers out of a parsed query. A marker
+	 * ranks the whole query however deep it was written, so it's lifted out
+	 * wherever it sits; the last one named wins. A group left empty goes
+	 * with it.
+	 *
+	 * @param {Object} tree - From parse()
+	 * @return {Object} - { tree, engine }: the tree without the markers, or
+	 *     null if nothing else was in it, and the engine ('lexical' or
+	 *     'semantic'), or null without a marker
+	 */
+	this.extractBestMatch = function (tree) {
+		let engine = null;
+		let strip = (node) => {
+			let children = [];
+			for (let child of node.children) {
+				if (child.children) {
+					let group = strip(child);
+					if (group) {
+						children.push(group);
+					}
+				}
+				else if (child.condition === 'bestMatch') {
+					engine = child.operator;
+				}
+				else {
+					children.push(child);
+				}
+			}
+			return children.length ? { ...node, children } : null;
+		};
+		return { tree: strip(tree), engine };
 	};
 
 	/**

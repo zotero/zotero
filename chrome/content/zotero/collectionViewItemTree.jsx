@@ -227,16 +227,28 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// With multiple selected rows carrying different best-match sources,
 		// the first in collections-list order supplies the query
 		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
-		let query = queryRow.getBestMatchQuery();
+		let { query, engine } = queryRow.getBestMatchQuery();
 		let source = queryRow.getBestMatchSource();
 		// A best-match quick search shows only the items it can rank. With any
 		// search source, membership is defined by the selected rows' own
 		// searches, so keep unscoreable items -- they sort after the ranked
 		// ones
 		let keepUnscored = !!source;
-		let candidateIDs = items
-			.filter(item => item instanceof Zotero.Item)
-			.map(item => item.id);
+		// A search source returns the items its conditions describe, which
+		// are top-level; the ranking weighs what's beneath them too -- an
+		// attachment's text, a note, an annotation -- as it does the quick
+		// search's whole scope. So the descendants join the candidates, and
+		// the ones that match join the results.
+		let descendants = source
+			? items.flatMap(item => (item instanceof Zotero.Item ? item.getDescendants() : []))
+			: [];
+		let candidates = new Map();
+		for (let item of [...items, ...descendants]) {
+			if (item instanceof Zotero.Item) {
+				candidates.set(item.id, item);
+			}
+		}
+		let candidateIDs = [...candidates.keys()];
 		let generation = this._bestMatchGeneration;
 		// The session scores the query and owns the match previews the tree
 		// shows as child rows. A new query gets a fresh session -- the old
@@ -245,10 +257,10 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// previews survive; the previews of the items that actually changed
 		// are invalidated in notify().
 		let session = this._bestMatchSession;
-		let newQuery = !session || session.queryText !== query;
+		let newQuery = !session || session.queryText !== query || session.engine !== engine;
 		if (newQuery) {
 			session?.dispose();
-			session = Zotero.BestMatch.createSession(query);
+			session = Zotero.BestMatch.createSession(query, { engine });
 			session.onPreviewsFilled = itemIDs => this._showFilledPreviews(session, itemIDs);
 			this._bestMatchSession = session;
 		}
@@ -296,6 +308,13 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				continue;
 			}
 			kept.push(item);
+		}
+		let keptIDs = new Set(kept.map(item => item.treeViewID));
+		for (let item of descendants) {
+			if (session.ranks.has(item.treeViewID) && !keptIDs.has(item.treeViewID)) {
+				kept.push(item);
+				keptIDs.add(item.treeViewID);
+			}
 		}
 		this._bestMatchIndexState = await this._getBestMatchIndexState();
 		return kept;

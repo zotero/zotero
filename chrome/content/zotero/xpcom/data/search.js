@@ -839,10 +839,11 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 
 
 /**
- * The query of the root-level 'bestMatch' condition, which the items list
- * ranks the results by, or false if none
+ * The root-level 'bestMatch' condition, which the items list ranks the
+ * results by, or false if none
  *
- * @return {String|false}
+ * @return {Object|false} - { query, engine }, the engine being the operator:
+ *     'hybrid', 'lexical' or 'semantic'
  */
 Zotero.Search.prototype.getBestMatchQuery = function () {
 	let depth = 0;
@@ -854,8 +855,8 @@ Zotero.Search.prototype.getBestMatchQuery = function () {
 			depth--;
 		}
 		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value
-				&& Zotero.BestMatch.isSearchableQuery(condition.value)) {
-			return condition.value;
+				&& Zotero.BestMatch.isSearchableQuery(condition.value, condition.operator)) {
+			return { query: condition.value, engine: condition.operator };
 		}
 	}
 	return false;

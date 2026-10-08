@@ -229,16 +229,23 @@ describe("Zotero.Search", function () {
 			s.libraryID = itemA.libraryID;
 			s.addCondition('resultLevel', 'item');
 			s.addCondition('title', 'contains', 'bestmatchcondtest');
-			s.addCondition('bestMatch', 'contains', 'some query');
-			assert.equal(s.getBestMatchQuery(), 'some query');
+			s.addCondition('bestMatch', 'hybrid', 'some query');
+			assert.deepEqual(s.getBestMatchQuery(), { query: 'some query', engine: 'hybrid' });
 			assert.sameMembers(await s.search(), [itemA.id, itemB.id]);
+
+			// The operator names the engine
+			let sLexical = new Zotero.Search();
+			sLexical.libraryID = itemA.libraryID;
+			sLexical.addCondition('resultLevel', 'item');
+			sLexical.addCondition('bestMatch', 'lexical', 'some query');
+			assert.deepEqual(sLexical.getBestMatchQuery(), { query: 'some query', engine: 'lexical' });
 
 			// A query that normalizes to nothing (e.g., just quotes) is no
 			// query at all
 			let sEmpty = new Zotero.Search();
 			sEmpty.libraryID = itemA.libraryID;
 			sEmpty.addCondition('resultLevel', 'item');
-			sEmpty.addCondition('bestMatch', 'contains', '""');
+			sEmpty.addCondition('bestMatch', 'hybrid', '""');
 			assert.isFalse(sEmpty.getBestMatchQuery());
 		});
 	});

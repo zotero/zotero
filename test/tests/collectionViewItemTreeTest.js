@@ -1046,7 +1046,7 @@ describe("CollectionViewItemTree", function () {
 				search.libraryID = itemA.libraryID;
 				search.addCondition('resultLevel', 'item');
 				search.addCondition('title', 'contains', 'savedsimtest');
-				search.addCondition('bestMatch', 'contains', 'saved query');
+				search.addCondition('bestMatch', 'hybrid', 'saved query');
 				await search.saveTx();
 
 				// Selecting the saved search activates ranking from its own marker
@@ -1071,7 +1071,7 @@ describe("CollectionViewItemTree", function () {
 				s.libraryID = col.libraryID;
 				s.addCondition('resultLevel', 'item');
 				s.addCondition('title', 'contains', 'notready');
-				s.addCondition('bestMatch', 'contains', 'some query');
+				s.addCondition('bestMatch', 'hybrid', 'some query');
 
 				await select(win, col);
 				itemsView = zp.itemsView;
@@ -1080,6 +1080,36 @@ describe("CollectionViewItemTree", function () {
 				// Membership is untouched; the rows just aren't ranked
 				assert.sameMembers(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
 				assert.equal(itemsView.getCellText(0, 'relevance'), '');
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should rank an advanced search's items by the matches beneath them", async function () {
+				let col = await createDataObject('collection');
+				let plain = await createDataObject('item', { title: "beneath A", collections: [col.id] });
+				let parent = await createDataObject('item', { title: "beneath B", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: parent.id });
+				// Only the attachment's text answers the query
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(
+						itemIDs.filter(id => id == attachment.id).map(id => [id, 0.9])
+					)
+				)));
+				let s = new Zotero.Search();
+				s.libraryID = col.libraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'beneath');
+				s.addCondition('bestMatch', 'hybrid', 'some query');
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('advanced-search', s);
+
+				// The search returned top-level items only, but the attachment
+				// was ranked, lifting its parent above the item nothing matched
+				// in, and it shows as a match beneath it
+				let topLevel = itemsView._rows.filter(row => row.level == 0).map(row => row.id);
+				assert.deepEqual(topLevel, [parent.id, plain.id]);
+				assert.isNumber(itemsView.getRowIndexByID(attachment.id));
 				await itemsView.setFilter('advanced-search', null);
 			});
 

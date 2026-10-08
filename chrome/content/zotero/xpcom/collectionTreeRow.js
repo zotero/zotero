@@ -747,16 +747,18 @@ Zotero.CollectionTreeRow.prototype.isBestMatchSearch = function () {
 };
 
 /**
- * Query text an active best-match search ranks by (see isBestMatchSearch())
+ * What an active best-match search ranks by (see isBestMatchSearch()): the
+ * query text and the engine, as Zotero.Search#getBestMatchQuery() gives
+ * them; a quick search ranks with both engines
  *
- * @return {String|false}
+ * @return {Object|false} - { query, engine }
  */
 Zotero.CollectionTreeRow.prototype.getBestMatchQuery = function () {
 	if (!this.isBestMatchSearch()) {
 		return false;
 	}
 	let source = this.getBestMatchSource();
-	return source ? source.getBestMatchQuery() : this.searchText;
+	return source ? source.getBestMatchQuery() : { query: this.searchText, engine: 'hybrid' };
 };
 
 Zotero.CollectionTreeRow.prototype.isSortable = function () {

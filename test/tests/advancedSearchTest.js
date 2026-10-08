@@ -189,7 +189,7 @@ describe("Advanced Search", function () {
 		assert.isTrue(conds.some(c => c.condition === 'tag' && c.value === 'zztag'));
 		assert.isFalse(conds.some(c => c.condition === 'anyField'));
 		assert.isTrue(conds.some(c => c.condition === 'resultLevel' && c.operator === 'item'));
-		assert.equal(deck.pane.search.getBestMatchQuery(), 'alpha beta');
+		assert.deepEqual(deck.pane.search.getBestMatchQuery(), { query: 'alpha beta', engine: 'hybrid' });
 		assert.equal(deck.pane.querySelector('.best-match-input').value, 'alpha beta');
 
 		await zp.setAdvancedSearchState('closed');
@@ -654,7 +654,7 @@ describe("Advanced Search", function () {
 			s.addCondition('joinMode', 'any');
 			s.addCondition('title', 'contains', 'flagfoo');
 			s.addCondition('creator', 'contains', 'flagbar');
-			s.addCondition('bestMatch', 'contains', 'some query');
+			s.addCondition('bestMatch', 'hybrid', 'some query');
 			pane.search = s;
 
 			var promptService = Services.prompt;
@@ -676,7 +676,7 @@ describe("Advanced Search", function () {
 			assert.ok(saved);
 			// The 'any' conditions were wrapped in a group, but the bestMatch marker
 			// stayed at the root, where getBestMatchQuery() finds it
-			assert.equal(saved.getBestMatchQuery(), 'some query');
+			assert.deepEqual(saved.getBestMatchQuery(), { query: 'some query', engine: 'hybrid' });
 		}
 		finally {
 			if (saved) {

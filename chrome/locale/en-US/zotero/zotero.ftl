@@ -989,6 +989,14 @@ advanced-search-best-match-prefix =
 advanced-search-best-match-input =
     .aria-label = Sort results by best match for
     .placeholder = Enter a topic or phrase
+advanced-search-best-match-engine =
+    .aria-label = How to rank
+advanced-search-best-match-engine-hybrid =
+    .label = by words and meaning
+advanced-search-best-match-engine-lexical =
+    .label = by words
+advanced-search-best-match-engine-semantic =
+    .label = by meaning
 advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
 advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
 advanced-search-group-warning-unreachable =
@@ -1039,6 +1047,10 @@ search-query-keyword-date-after = after, since
 # Typed as "added:", meaning when the item was saved to the library
 search-query-keyword-date-added = added
 search-query-keyword-date-modified = modified
+# Typed as "meaning: owl migration", ranking the rest of the query by meaning
+# alone, or "lexical: owl migration", by its words alone
+search-query-keyword-best-match-lexical = lexical, words
+search-query-keyword-best-match-semantic = meaning, semantic
 # Whole phrases that can be typed to find items that have none or some of
 # something. Each is a comma-separated list, and the phrases are matched
 # exactly as written, so include every form someone would type.
@@ -1102,6 +1114,7 @@ search-conditions-annotationColor = Annotation Color
 search-conditions-annotationAuthor = Annotation Author
 search-conditions-anyField = Any Field
 search-conditions-titleCreatorYear = Title, Creator, Year
+search-conditions-bestMatch = Best Match
 
 # Submenu headings grouping the attachment- and annotation-level conditions
 search-conditions-submenu-attachment = Attachment

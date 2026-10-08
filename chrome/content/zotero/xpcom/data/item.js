@@ -4297,6 +4297,28 @@ Zotero.Item.prototype.getAttachments = function (includeTrashed) {
 
 
 /**
+ * Returns everything beneath this item: a regular item's child attachments
+ * and notes, and the annotations of each file attachment among them -- or of
+ * this item, when it's a file attachment itself
+ *
+ * @param {Boolean} [includeTrashed=false] - Include descendants in trash
+ * @return {Zotero.Item[]}
+ */
+Zotero.Item.prototype.getDescendants = function (includeTrashed) {
+	var children = this.isRegularItem()
+		? Zotero.Items.get([...this.getAttachments(includeTrashed), ...this.getNotes(includeTrashed)])
+		: [];
+	var descendants = [...children];
+	for (let item of [this, ...children]) {
+		if (item.isFileAttachment()) {
+			descendants.push(...item.getAnnotations(includeTrashed));
+		}
+	}
+	return descendants;
+};
+
+
+/**
  * Looks for attachment in the following order: oldest PDF attachment matching parent URL,
  * oldest non-PDF attachment matching parent URL, oldest PDF attachment not matching URL,
  * old non-PDF attachment not matching URL

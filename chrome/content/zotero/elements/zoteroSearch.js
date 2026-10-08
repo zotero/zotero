@@ -153,6 +153,7 @@
 
 					case 'bestMatch':
 						stack[stack.length - 1].bestMatch = condition.value;
+						stack[stack.length - 1].bestMatchEngine = condition.operator;
 						continue;
 
 					case 'groupStart': {
@@ -310,9 +311,13 @@
 				flat.push({ condition: 'resultLevel', operator: group.resultLevel, value: null });
 			}
 			// The best-match query is a root-level modifier, offered only for
-			// top-level item results
+			// top-level item results; the operator is the engine
 			if (isRoot && group.bestMatch && group.resultLevel == 'item') {
-				flat.push({ condition: 'bestMatch', operator: 'contains', value: group.bestMatch });
+				flat.push({
+					condition: 'bestMatch',
+					operator: group.bestMatchEngine,
+					value: group.bestMatch
+				});
 			}
 			for (let child of group.conditionsContainer.children) {
 				if (child.localName == 'zoterosearchcondition') {
@@ -490,6 +495,13 @@
 				<hbox class="best-match-row" align="center" hidden="true">
 					<label class="best-match-prefix" data-l10n-id="advanced-search-best-match-prefix"/>
 					<html:input class="best-match-input" type="text" data-l10n-id="advanced-search-best-match-input"/>
+					<menulist class="best-match-engine" native="true" data-l10n-id="advanced-search-best-match-engine">
+						<menupopup>
+							<menuitem value="hybrid" data-l10n-id="advanced-search-best-match-engine-hybrid"/>
+							<menuitem value="lexical" data-l10n-id="advanced-search-best-match-engine-lexical"/>
+							<menuitem value="semantic" data-l10n-id="advanced-search-best-match-engine-semantic"/>
+						</menupopup>
+					</menulist>
 				</hbox>
 				<hbox class="level-warning" hidden="true">
 					<description/>
@@ -506,6 +518,8 @@
 			this.levelWarning = this.querySelector('.level-warning');
 			this.bestMatchRow = this.querySelector('.best-match-row');
 			this.bestMatchInput = this.querySelector('.best-match-input');
+			this.bestMatchEngineMenu = this.querySelector('.best-match-engine');
+			this.bestMatchEngineMenu.value = 'hybrid';
 
 			// The result level is tracked here and reflected to whichever control is active: the root's
 			// result-level menu ("Find ..."), or a nested group's binding menu ("... in the
@@ -604,6 +618,18 @@
 		set bestMatch(val) {
 			this.bestMatchInput.value = val || '';
 			this.updateBestMatchRow();
+		}
+
+		/**
+		 * The engine the best-match query ranks with: 'hybrid', 'lexical' or
+		 * 'semantic' (see Zotero.BestMatch.scoreItemIDs())
+		 */
+		get bestMatchEngine() {
+			return this.bestMatchEngineMenu.value || 'hybrid';
+		}
+
+		set bestMatchEngine(val) {
+			this.bestMatchEngineMenu.value = val || 'hybrid';
 		}
 
 		// The best-match field is a root-level modifier, offered for
@@ -833,6 +859,7 @@
 			this.joinMode = 'all';
 			this.resultLevel = 'any';
 			this.bestMatch = '';
+			this.bestMatchEngine = 'hybrid';
 			while (this.conditionsContainer.firstChild) {
 				this.conditionsContainer.removeChild(this.conditionsContainer.firstChild);
 			}

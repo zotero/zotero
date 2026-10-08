@@ -1862,6 +1862,24 @@ describe("Zotero.Item", function () {
 			});
 		});
 
+		describe("#getDescendants()", function () {
+			it("should return a regular item's children and their annotations", async function () {
+				var item = await createDataObject('item');
+				var attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+				var annotation = await createAnnotation('highlight', attachment);
+				var trashed = await createAnnotation('highlight', attachment);
+				trashed.deleted = true;
+				await trashed.saveTx();
+
+				assert.sameMembers(item.getDescendants(), [attachment, note, annotation]);
+				assert.sameMembers(item.getDescendants(true), [attachment, note, annotation, trashed]);
+				// A file attachment's descendants are its annotations
+				assert.sameMembers(attachment.getDescendants(), [annotation]);
+				assert.isEmpty(note.getDescendants());
+			});
+		});
+
 		describe("#hasEmbeddedAnnotations()", function () {
 			it("should recognize a highlight annotation", async function () {
 				let attachment = await importFileAttachment('duplicatesMerge_annotated_1.pdf');
