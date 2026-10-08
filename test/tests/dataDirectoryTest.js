@@ -156,6 +156,43 @@ describe("Zotero.DataDirectory", function () {
 	};
 	
 	
+	describe("#init()", function () {
+		it("should show an error and quit if the default directory can't be created", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			}
+			
+			var parentDir = await getTempDirectory();
+			var dataDir = OS.Path.join(parentDir, 'Zotero');
+			var forceDataDir = Zotero.forceDataDir;
+			var defaultDirStub = sinon.stub(Zotero.DataDirectory, 'defaultDir').get(() => dataDir);
+			var promptService = Services.prompt;
+			var alertStub = sinon.stub();
+			var confirmStub = sinon.stub();
+			Services.prompt = { alert: alertStub, confirmEx: confirmStub };
+			var quitStub = sinon.stub(Zotero.Utilities.Internal, 'quit');
+			await IOUtils.setPermissions(parentDir, 0o555);
+			try {
+				Zotero.forceDataDir = dataDir;
+				await Zotero.DataDirectory.init();
+				
+				assert.isTrue(alertStub.calledOnce);
+				assert.include(alertStub.firstCall.args[2], dataDir);
+				assert.isFalse(confirmStub.called);
+				assert.isTrue(quitStub.calledOnce);
+				assert.isFalse(await IOUtils.exists(dataDir));
+			}
+			finally {
+				Zotero.forceDataDir = forceDataDir;
+				Zotero.restarting = false;
+				Services.prompt = promptService;
+				defaultDirStub.restore();
+				quitStub.restore();
+				await IOUtils.setPermissions(parentDir, 0o755);
+			}
+		});
+	});
+	
 	describe("#checkForMigration()", function () {
 		let fileMoveStub;
 		

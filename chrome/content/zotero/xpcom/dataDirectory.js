@@ -230,47 +230,25 @@ Zotero.DataDirectory = {
 			await Zotero.File.createDirectoryIfMissingAsync(dataDir);
 		}
 		catch (e) {
-			// TEMP: OS.Constants.Win.ERROR_ACCESS_DENIED no longer available, but we should
-			// switch to IOUtils anyway
-			const WIN_ERROR_ACCESS_DENIED = 5;
-			if (e instanceof OS.File.Error
-					&& (('unixErrno' in e && e.unixErrno == ChromeUtils.getLibcConstants().EACCES)
-						|| ('winLastError' in e && e.winLastError == WIN_ERROR_ACCESS_DENIED))) {
+			if (DOMException.isInstance(e) && e.name == 'NotAllowedError') {
 				Zotero.restarting = true;
 				let isDefaultDir = dataDir == Zotero.DataDirectory.defaultDir;
 				let ps = Services.prompt;
-				let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-				if (!isDefaultDir) {
-					buttonFlags += ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
-				}
 				let title = Zotero.getString('general.accessDenied');
 				let msg = Zotero.getString('dataDir.dirCannotBeCreated', [Zotero.appName, dataDir])
 					+ "\n\n"
 					+ Zotero.getString('dataDir.checkDirWriteAccess', Zotero.appName);
 				
-				let index;
+				// The default location needs to be writable, so don't offer an alternative
 				if (isDefaultDir) {
-					index = ps.confirmEx(null,
-						title,
-						msg,
-						buttonFlags,
-						Zotero.getString('dataDir.chooseNewDataDirectory'),
-						Zotero.getString('general.quit'),
-						null, null, {}
-					);
-					if (index == 0) {
-						let changed = await Zotero.DataDirectory.choose(true);
-						if (!changed) {
-							Zotero.Utilities.Internal.quit();
-						}
-					}
-					else if (index == 1) {
-						Zotero.Utilities.Internal.quit();
-					}
+					ps.alert(null, title, msg);
+					Zotero.Utilities.Internal.quit();
 				}
 				else {
-					index = ps.confirmEx(null,
+					let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
+						+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+					let index = ps.confirmEx(null,
 						title,
 						msg,
 						buttonFlags,

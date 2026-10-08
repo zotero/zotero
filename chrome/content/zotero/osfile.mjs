@@ -116,6 +116,7 @@ export let OS = {
 						throw osFileError;
 					}
 				}
+				throw e;
 			}
 		}),
 		
