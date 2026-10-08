@@ -1515,6 +1515,127 @@ describe("Zotero.Sync.Data.Local", function () {
 	
 	
 	describe("#showConflictResolutionWindow()", function () {
+		// WCAG contrast ratio between an element's text color and the first opaque
+		// background behind it
+		function getContrast(win, elem) {
+			var parse = s => s.match(/[\d.]+/g).map(Number);
+			var luminance = ([r, g, b]) => {
+				var [R, G, B] = [r, g, b].map((c) => {
+					c /= 255;
+					return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+				});
+				return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+			};
+			var fg = parse(win.getComputedStyle(elem).color);
+			var bg = null;
+			for (let node = elem; node && node.nodeType == Node.ELEMENT_NODE; node = node.parentNode) {
+				let rgba = parse(win.getComputedStyle(node).backgroundColor);
+				if (rgba.length < 4 || rgba[3] == 1) {
+					bg = rgba;
+					break;
+				}
+			}
+			assert.ok(bg, "no opaque background found");
+			var [l1, l2] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
+			return (l1 + 0.05) / (l2 + 0.05);
+		}
+
+		function annotationConflict(annotation) {
+			var json = annotation.toJSON();
+			return {
+				libraryID: annotation.libraryID,
+				key: annotation.key,
+				processed: false,
+				conflict: true,
+				left: json,
+				right: Object.assign({}, json, { annotationComment: "Changed" }),
+				changes: [],
+				conflicts: []
+			};
+		}
+
+		it("should show annotation conflicts legibly in dark mode", async function () {
+			// The annotation box's page label needs the CSL locales
+			await Zotero.Styles.init();
+			var attachment = await importPDFAttachment();
+			var annotation = await createAnnotation('highlight', attachment);
+			Services.prefs.setIntPref('browser.theme.toolbar-theme', 0);
+			try {
+				var promise = waitForWindow('chrome://zotero/content/merge.xhtml', async function (dialog) {
+					var doc = dialog.document;
+					var wizard = doc.querySelector('wizard');
+					try {
+						assert.isTrue(dialog.matchMedia('(prefers-color-scheme: dark)').matches);
+
+						// The annotation box renders asynchronously
+						var container;
+						for (let i = 0; i < 100; i++) {
+							container = doc.querySelector('#left-pane .AnnotationBox .container');
+							if (container) break;
+							await Zotero.Promise.delay(50);
+						}
+						assert.ok(container, "annotation box not rendered");
+						for (let selector of ['.header', '.text', '.comment']) {
+							let elem = container.querySelector(selector);
+							assert.isAtLeast(getContrast(dialog, elem), 4.5, selector);
+						}
+					}
+					finally {
+						wizard.getButton('finish').click();
+					}
+				});
+
+				Zotero.Sync.Data.Local.showConflictResolutionWindow([annotationConflict(annotation)]);
+				await promise;
+			}
+			finally {
+				Services.prefs.clearUserPref('browser.theme.toolbar-theme');
+			}
+		});
+
+		it("should scale column headings with the font size", async function () {
+			var item = await createDataObject('item');
+			var json = item.toJSON();
+			var fontSize = Zotero.Prefs.get('fontSize');
+			Zotero.Prefs.set('fontSize', '1.38');
+			try {
+				var promise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
+					var doc = dialog.document;
+					var wizard = doc.querySelector('wizard');
+					try {
+						var page = doc.querySelector('wizardpage');
+						var pageSize = parseFloat(dialog.getComputedStyle(page).fontSize);
+						for (let h2 of doc.querySelectorAll('merge-pane h2')) {
+							let size = parseFloat(dialog.getComputedStyle(h2).fontSize);
+							// Name the rules that set the size, if it's too small
+							let rules = dialog.InspectorUtils.getMatchingCSSRules(h2)
+								.filter(r => r.style.fontSize || r.style.font)
+								.map(r => `${r.parentStyleSheet?.href} ${r.selectorText} ${r.style.fontSize || r.style.font}`);
+							assert.isAtLeast(size, pageSize, h2.textContent + " " + JSON.stringify(rules));
+						}
+					}
+					finally {
+						wizard.getButton('finish').click();
+					}
+				});
+
+				Zotero.Sync.Data.Local.showConflictResolutionWindow([{
+					libraryID: item.libraryID,
+					key: item.key,
+					processed: false,
+					conflict: true,
+					left: json,
+					right: Object.assign({}, json, { title: "Changed" }),
+					changes: [],
+					conflicts: []
+				}]);
+				await promise;
+			}
+			finally {
+				Zotero.Prefs.set('fontSize', fontSize);
+			}
+		});
+
 		it("should show title of note parent", async function () {
 			var parentItem = await createDataObject('item', { title: "Parent" });
 			var note = new Zotero.Item('note');
