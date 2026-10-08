@@ -56,6 +56,7 @@ general-clear = Wyczyść
 clear-button =
     .label = { general-clear }
 general-update = Zaktualizuj
+general-reset-to-default = Przywróć domyślne
 general-back = Wstecz
 general-edit = Edytuj
 general-cut = Wytnij
@@ -73,6 +74,9 @@ general-more-information = Więcej informacji
 general-warning = Ostrzeżenie
 general-type-to-continue = Wpisz “{ $text }”, aby kontynuować.
 general-continue = Dalej
+general-allow = Zezwól
+general-always-allow = Zawsze zezwól
+general-deny = Odmów
 general-red = Czerwony
 general-orange = Pomarańczowy
 general-yellow = Żółty
@@ -86,8 +90,8 @@ general-maroon = Kasztanowy
 general-gray = Szary
 general-black = Czarny
 general-loading = Wczytywanie...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Sprawdzanie spójności bazy danych...
+db-repairing = Naprawianie bazy danych...
 citation-style-label = Styl cytowania:
 language-label = Język:
 menu-custom-group-submenu =
@@ -176,6 +180,10 @@ collections-menu-show-recently-read =
     .label = Pokaż { recently-read }
 item-menu-remove-from-recently-read =
     .label = Usuń z { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Clear All Last Read Dates…
+recently-read-clear-all-confirm = All Last Read dates in this library will be erased.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [one] { $count } wybrana kolekcja
@@ -185,13 +193,17 @@ items-section-collections-selected =
     }
 items-section-searches-selected =
     { $count ->
-        [one] { $count } saved search selected
-       *[other] { $count } saved searches selected
+        [one] { $count } wybrane zapisane wyszukiwanie
+        [few] { $count } wybrane zapisane wyszukiwania
+        [many] { $count } wybranych zapisanych wyszukiwań
+       *[other] { $count } wybranych zapisanych wyszukiwań
     }
 items-section-sources-selected =
     { $count ->
-        [one] { $count } source selected
-       *[other] { $count } sources selected
+        [one] { $count } wybrane źródło
+        [few] { $count } wybrane źródła
+        [many] { $count } wybranych źródeł
+       *[other] { $count } wybranych źródeł
     }
 items-section-library-collections =
     { $count ->
@@ -228,29 +240,37 @@ collections-menu-generate-report =
 collections-menu-create-bibliography =
     .label = Stwórz bibliografię...
 collections-menu-unsubscribe =
-    .label = Unsubscribe…
+    .label = Anuluj subskrypcję...
 collections-menu-delete =
     .label =
         { $count ->
-            [one] Delete Collection…
-           *[other] Delete Collections…
+            [one] Usuń kolekcję...
+            [few] Usuń kolekcje...
+            [many] Usuń kolekcje...
+           *[other] Usuń kolekcje...
         }
 collections-menu-delete-with-items =
     .label =
         { $count ->
-            [one] Delete Collection and Items…
-           *[other] Delete Collections and Items…
+            [one] Usuń kolekcję i elementy...
+            [few] Usuń kolekcje i elementy...
+            [many] Usuń kolekcje i elementy...
+           *[other] Usuń kolekcje i elementy...
         }
 collections-menu-delete-search =
     .label =
         { $count ->
-            [one] Delete Search…
-           *[other] Delete Searches…
+            [one] Usuń wyszukiwanie....
+            [few] Usuń wyszukiwania....
+            [many] Usuń wyszukiwania....
+           *[other] Usuń wyszukiwania....
         }
 collections-delete-title =
     { $count ->
-        [one] Delete Collection
-       *[other] Delete Collections
+        [one] Usuń kolekcję
+        [few] Usuń kolekcje
+        [many] Usuń kolekcje
+       *[other] Usuń kolekcje
     }
 collections-delete-message =
     { $count ->
@@ -264,8 +284,10 @@ collections-delete-keep-items =
     }
 collections-delete-with-items-title =
     { $count ->
-        [one] Delete Collection and Items
-       *[other] Delete Collections and Items
+        [one] Usuń kolekcję i elementy
+        [few] Usuń kolekcje i elementy
+        [many] Usuń kolekcje i elementy
+       *[other] Usuń kolekcje i elementy
     }
 collections-delete-with-items-message =
     { $count ->
@@ -274,13 +296,17 @@ collections-delete-with-items-message =
     }
 collections-delete-search-title =
     { $count ->
-        [one] Delete Search
-       *[other] Delete Searches
+        [one] Usuń wyszukiwanie
+        [few] Usuń wyszukiwania
+        [many] Usuń wyszukiwania
+       *[other] Usuń wyszukiwania
     }
 collections-delete-search-message =
     { $count ->
-        [one] Are you sure you want to delete this search?
-       *[other] Are you sure you want to delete { $count } searches?
+        [one] Czy na pewno chcesz usunąć { $count } wyszukiwanie?
+        [few] Czy na pewno chcesz usunąć { $count } wyszukiwania?
+        [many] Czy na pewno chcesz usunąć { $count } wyszukiwań?
+       *[other] Czy na pewno chcesz usunąć { $count } wyszukiwań?
     }
 item-creator-moveDown =
     .label = Przenieś w dół
@@ -328,6 +354,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = Zmieniono nazwę pliku na { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = Otwórz menu kontekstowe
 itembox-button-merge =
@@ -383,7 +410,9 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = Nie można odczytać wybranej bazy danych Mendeley, ponieważ jest zaszyfrowana. Aby uzyskać więcej informacji, zobacz <a data-l10n-name="mendeley-import-kb">Jak zaimportować bibliotekę Mendeley do Zotero?</a>.
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = Podczas importowania wybranego pliku z “{ $translator }” pojawił się błąd. Proszę, upewnij się, że ten plik jest poprawny i spróbuj ponownie.
 import-online-intro = W następnym kroku zostaniesz poproszony(a), aby zalogować się do { $targetAppOnline } i udzielić dostępu { -app-name }. Jest to niezbędne, aby zaimportować twoją bibliotekę { $targetApp } do { -app-name }.
 import-online-intro2 = { -app-name } nigdy nie zobaczy ani nie zapisze twojego { $targetApp } hasła.
@@ -481,6 +510,7 @@ styleEditor-editor =
     .aria-label = Edytor stylów
 styleEditor-preview =
     .aria-label = Podgląd
+stylePreview-generating = Generowanie podglądów...
 publications-intro-page = Moje publikacje
 publications-intro = Elementy dodane do Moich Publikacji będą wyświetlone na twojej stronie na zotero.org. Jeśli wybierzesz dołączenie plików, zostaną one upublicznione na określonej przez ciebie licencji. Pamiętaj, by dodać tu tylko te prace, których jesteś autorem oraz tylko te pliki, które masz prawo i chęć udostępnić.
 publications-include-checkbox-files =
@@ -755,9 +785,9 @@ quicksearch-advanced-search-button =
 advanced-search-close =
     .tooltiptext = Zamknij zaawansowane wyszukiwanie
 advanced-search-expand =
-    .tooltiptext = Expand Advanced Search
+    .tooltiptext = Rozwiń zaawansowane wyszukiwanie
 advanced-search-collapse =
-    .tooltiptext = Collapse Advanced Search
+    .tooltiptext = Zwiń zaawansowane wyszukiwanie
 item-pane-header-view-as =
     .label = Wyświetl jako
 item-pane-header-none =
@@ -833,35 +863,35 @@ advanced-search-group-btn =
 advanced-search-remove-group-btn =
     .tooltiptext = Usuń grupę
 advanced-search-ungroup-btn =
-    .tooltiptext = Ungroup Conditions
+    .tooltiptext = Rozgrupuj warunki
 advanced-search-result-level-menu =
     .aria-label = Typ wyniku
 advanced-search-result-level-prefix-root =
     .value = Znajdź
 advanced-search-join-prefix-root =
-    .value = matching
+    .value = zawierające
 advanced-search-result-level-any =
-    .label = any items
+    .label = jakikolwiek element
 advanced-search-result-level-item =
     .label = top-level items
 advanced-search-result-level-attachment =
-    .label = attachments
+    .label = załączniki
 advanced-search-result-level-note =
-    .label = notes
+    .label = notatki
 advanced-search-result-level-annotation =
     .label = adnotacje
 advanced-search-binding-menu =
     .aria-label = Match against the same item
 advanced-search-binding-separate =
-    .label = separately
+    .label = osobno
 advanced-search-binding-same-attachment =
-    .label = in the same attachment
+    .label = w tym samym załączniku
 advanced-search-binding-same-note =
-    .label = in the same note
+    .label = w tej samej notatce
 advanced-search-binding-same-annotation =
-    .label = in the same annotation
+    .label = w tej samej adnotacji
 advanced-search-of-the-following =
-    .value = of the following
+    .value = z następujących
 advanced-search-binding-hint-attachment =
     .value = These conditions can match separate attachments.
 advanced-search-binding-hint-note =
@@ -892,17 +922,46 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Wartość
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = jest pusty
+search-operator-isNotEmpty = nie jest pusty
 search-conditions-tooltip-fields = Pola:
 search-conditions-collection = Kolekcja
 search-conditions-savedSearch = Zapisane wyszukiwanie
 search-conditions-itemTypeID = Typ elementu
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Etykieta
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = # znaczników
+search-conditions-numNotes = # notatek
+search-conditions-numAttachments = # załączników
+search-conditions-numAnnotations = # adnotacji
 search-conditions-note = Notatka
 search-conditions-childNote = Notatka podrzędna
 search-conditions-creator = Twórca
@@ -978,9 +1037,9 @@ file-type-video = Wideo
 file-type-presentation = Prezentacja
 file-type-document = Dokument
 file-type-ebook = Ebook
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = Zapisany plik
+attachment-storage-type-linkedFile = Odnośnik do pliku
+attachment-storage-type-webLink = Odnośnik do zasobu internetowego
 post-upgrade-message = <span data-l10n-name="post-upgrade-appver">{ -app-name } został zaktualizowany do wersji { $version }</span>! Dowiedz się <a data-l10n-name="new-features-link">co nowego?</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -989,23 +1048,25 @@ post-upgrade-done =
 text-action-paste-and-search =
     .label = Wklej i wyszukaj
 mac-word-plugin-install-message = Do instalacji wtyczki Word wymagany jest dostęp Zotero do danych Word.
-mac-word-plugin-install-folder-message = { -app-name } needs access to Word’s startup folder to install the Word plugin.
+mac-word-plugin-install-folder-message = Aby zainstalować wtyczkę Word, { -app-name } wymaga dostępu do katalogu startowego Worda.
 mac-word-plugin-install-action-button =
     .label = Zainstaluj wtyczkę Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
+mac-word-plugin-install-folder-dialog-title = Zainstaluj wtyczkę w katalogu startowym Worda
 mac-word-plugin-install-folder-dialog-button = Zainstaluj
-mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
+mac-word-plugin-install-wrong-folder-selected = Należy wybrać sugerowany katalog. Proszę spróbuj ponownie bez wybierania innego katalogu.
 file-renaming-banner-message = { -app-name } teraz automatycznie synchronizuje nazwy plików załączników podczas dokonywania zmian w elementach.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = Łącznik { -app-name } musi zostać zaktualizowany, aby działać z tą wersją { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+migrate-extra-fields-progress-headline = Aktualizowanie elementów...
 migrate-extra-fields-progress-message = Migracja nowych pól z pola Dodatkowe
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indeksowanie
+fulltext-indexing-progress-message = Wyniki wyszukiwania pełnotekstowego mogą nie być kompletne, dopóki indeksowanie nie zakończy się.
 long-tag-fixer-window-title =
     .title = Podziel znaczniki
 long-tag-fixer-button-dont-split =
@@ -1019,35 +1080,51 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = Ta wtyczka została wyłączona przez { -app-name }.
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 search-button =
     .label = Wyszukiwanie
 save-search-new-button =
-    .label = Save Search…
+    .label = Zapisz wyszukiwanie...
 save-search-edit-button =
     .label = Zapisz
 save-search-name-title = Zapisz wyszukiwanie
-save-search-name-message = Enter a name for the saved search:
-saved-search-close-confirmation-title = Editing Saved Search
-saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
+save-search-name-message = Podaj nazwę dla zapisanego wyszukiwania:
+saved-search-close-confirmation-title = Edytowanie zapisanego wyszukiwania
+saved-search-close-confirmation-body = Czy chcesz zapisać zmiany w tym zapisanym wyszukiwaniu?
 item-pane-batch-editing-prompt =
     .aria-label = Edycja wsadowa
 item-pane-batch-editing-enable =
     .label = Edytuj wiele elementów...
 item-pane-batch-editing-multiple-values-placeholder = Multiple
-item-pane-batch-editing-clear-values = Clear all values
+item-pane-batch-editing-clear-values = Wyczyść wszystkie wartości
 item-pane-batch-editing-header =
     { $count ->
         [one] Editing { $count } item
@@ -1154,5 +1231,7 @@ undo-action-merge-items =
         [one] Merge Item
        *[other] Merge { $count } Items
     }
-menu-edit-undo-action = Undo { $action }
-menu-edit-redo-action = Redo { $action }
+menu-edit-undo-action = Cofnij { $action }
+menu-edit-redo-action = Ponów { $action }
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.

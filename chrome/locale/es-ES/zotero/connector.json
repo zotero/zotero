@@ -162,7 +162,7 @@
     "message": "El $1 fue habilitado para comunicar con la aplicación de escritorio de $2. El Conector puede guardar algunas páginas directamente en su cuenta $3, pero para obtener mejores resultados debe asegurarse de que $2 está abierto antes de intentar guardar."
   },
   "error_connection_downloadOrTroubleshoot": {
-    "message": "Puedes <a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
+    "message": "Puede <a href=\"$1\">descargar $2</a> o <a href=\"$3\">solucionar problemas de la conexión</a> si es necesario."
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Habilitar guardar en la biblioteca en línea"

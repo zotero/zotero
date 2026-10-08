@@ -47,6 +47,9 @@
   "itemType_epub": {
     "message": "EPUB-bilaga"
   },
+  "itemType_snapshot": {
+    "message": "Ögonblicksbild"
+  },
   "itemType_note": {
     "message": "Anteckning"
   },
@@ -65,8 +68,35 @@
   "progressWindow_detailsBtnHide": {
     "message": "Dölj detaljer"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Val av målsamling"
+  },
+  "progressWindow_savingItems": {
+    "message": "Sparar $1 poster. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Sparar post $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Post $1: $2"
+  },
   "progressWindow_downloadComplete": {
     "message": "Sparade $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Sparade $1 för post $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Hämtning av $1 misslyckades"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Hämtning av $1 för post $2 misslyckades"
+  },
+  "progressWindow_allDone": {
+    "message": "Sparandet är klart. Dialogrutan stängs nu."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Poster från den här webbsidan har redan sparats."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiketter (avdelade med kommatecken)"
@@ -77,8 +107,14 @@
   "progressWindow_error_translation": {
     "message": "Ett fel uppstod när källan skulle sparas.  Se $1 för mer information."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Ett fel uppstod när posten sparades. $1 kan begränsa hur många poster du kan spara samtidigt. Läs $2 för mer information."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Felsök problem med källfångare"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Webbplatsens åtkomstbegränsningar"
   },
   "progressWindow_error_fallback": {
     "message": "Ett fel uppstod när informationen sparades med $1. Försöker att spara med $2 istället."
@@ -89,11 +125,32 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "senaste versionen"
   },
+  "itemSelector_title": {
+    "message": "Välj vilka poster du vill lägga till i ditt bibliotek:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 Connector är inte tillgänglig på den här sidan"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 Connector är inte tillgänglig för fil-URL:er"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 Connector är inte tillgänglig på tilläggssidor"
+  },
   "appConnector": {
     "message": "$1 Connector"
   },
   "upgradeApp": {
     "message": "Uppgradera $1"
+  },
+  "firstRun_title": {
+    "message": "Du har installerat $1 Connector!"
+  },
+  "firstRun_text1": {
+    "message": "$1 Connector låter dig <a href=\"$2\">spara poster i $1</a> från webbläsaren med ett enda klick."
+  },
+  "firstRun_text2": {
+    "message": "Om du inte redan har gjort det bör du <a href=\"$2\">hämta</a> programmet $1 för bästa upplevelse."
   },
   "firstRun_acceptButton": {
     "message": "Jag förstår"
@@ -140,6 +197,18 @@
   "integration_googleDocs_docxAlert": {
     "message": "$1 integreringen är inte tillgänglig när du redigerar Microsoft Word .docx files direkt i Google Docs. Välj Arkiv → Spara som Google Docs för att aktivera denna funktionalitet.<br/><br/>Om du vill föra över ett Word-dokument med $1 referenser till Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytta dokument mellan ordbehandlare</a>."
   },
+  "integration_googleDocs_documentLocked": {
+    "message": "Dokumentets citeringar redigeras av en annan användare av $1. Försök igen senare."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 låser dokumentet för att förhindra att flera användare redigerar citeringar samtidigt. Samtidig citeringsredigering i dokumentet kan skada citeringar eller dokumentet. Vissa oförutsedda omständigheter, till exempel nätverksfel, kan göra att dokumentet låses permanent. Om du tror att detta har hänt kan du åsidosätta låset.<br/><br/>Vill du åsidosätta dokumentlåset?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1 behöver behörighet att redigera dina Google Dokument för att kunna infoga citeringar. Försök igen och se till att tillåta att $1 får visa, redigera, skapa och ta bort dina Google Dokument."
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Det Google-konto du valde har inte behörighet att redigera det här dokumentet. Försök igen och välj kontot med redigeringsbehörighet."
+  },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Visa avlänkade $1 referenser"
   },
@@ -151,6 +220,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Dessa referenser har blivit <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">avlänkade från $1</a>. Du kommer att behöva omlänka dem innan de uppdateras eller visas i din källförteckning."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopiera länk utan proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopiera sid-URL utan proxy"
+  },
+  "reloadViaProxy": {
+    "message": "Läs in igen via proxy"
+  },
+  "reloadVia": {
+    "message": "Läs in igen via $1"
   },
   "general_saveTo": {
     "message": "Spara till $1"

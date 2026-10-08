@@ -56,6 +56,7 @@ general-clear = Очистить
 clear-button =
     .label = { general-clear }
 general-update = Обновить
+general-reset-to-default = Сбросить настройки к умолчаниям
 general-back = Назад
 general-edit = Редактировать
 general-cut = Вырезать
@@ -73,6 +74,9 @@ general-more-information = Дополнительные сведения
 general-warning = Внимание
 general-type-to-continue = Введите “{ $text }”, чтобы продолжить.
 general-continue = Продолжить
+general-allow = Разрешить
+general-always-allow = Всегда разрешать
+general-deny = Запретить
 general-red = Красный
 general-orange = Оранжевый
 general-yellow = Жёлтый
@@ -86,12 +90,12 @@ general-maroon = Тёмно-бордовый
 general-gray = Серый
 general-black = Чёрный
 general-loading = Загрузка...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Проверка целостности базы данных…
+db-repairing = Восстановление базы данных…
 citation-style-label = Стиль цитирования:
 language-label = Язык:
 menu-custom-group-submenu =
-    .label = More Options…
+    .label = Дополнительные параметры…
 menu-file-show-in-finder =
     .label = Показать в файловом менеджере
 menu-file-show-file =
@@ -176,6 +180,10 @@ collections-menu-show-recently-read =
     .label = Показать { recently-read }
 item-menu-remove-from-recently-read =
     .label = Удалить из { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Очистить все даты последнего чтения…
+recently-read-clear-all-confirm = Все даты последнего чтения в этой библиотеке будут удалены.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [one] { $count } коллекция выбрана
@@ -185,38 +193,48 @@ items-section-collections-selected =
     }
 items-section-searches-selected =
     { $count ->
-        [one] { $count } saved search selected
-       *[other] { $count } saved searches selected
+        [one] { $count } сохранённый поисковый запрос выбран
+        [few] { $count } сохранённых поисковых запроса выбраны
+        [many] { $count } сохранённых поисковых запросов выбраны
+       *[other] { $count } сохранённых поисковых запросов выбраны
     }
 items-section-sources-selected =
     { $count ->
-        [one] { $count } source selected
-       *[other] { $count } sources selected
+        [one] { $count } выбранный источник
+        [few] { $count } выбранных источника
+        [many] { $count } выбранных источников
+       *[other] { $count } выбранных источников
     }
 items-section-library-collections =
     { $count ->
-        [one] { $library } ({ $count } collection selected)
-       *[other] { $library } ({ $count } collections selected)
+        [one] { $library } ({ $count } коллекция выбрана)
+        [few] { $library } ({ $count } коллекции выбраны)
+        [many] { $library } ({ $count } коллекций выбраны)
+       *[other] { $library } ({ $count } коллекций выбраны)
     }
 items-section-library-searches =
     { $count ->
-        [one] { $library } ({ $count } saved search selected)
-       *[other] { $library } ({ $count } saved searches selected)
+        [one] { $library } ({ $count } сохранённый поисковый запрос выбран)
+        [few] { $library } ({ $count } сохранённых поисковых запроса выбраны)
+        [many] { $library } ({ $count } сохранённых поисковых запросов выбраны)
+       *[other] { $library } ({ $count } сохранённых поисковых запросов выбраны)
     }
 items-section-library-sources =
     { $count ->
-        [one] { $library } ({ $count } source selected)
-       *[other] { $library } ({ $count } sources selected)
+        [one] { $library } ({ $count } источник выбран)
+        [few] { $library } ({ $count } источника выбраны)
+        [many] { $library } ({ $count } источников выбраны)
+       *[other] { $library } ({ $count } источников выбраны)
     }
 items-section-library-recently-read = { $library } ({ recently-read })
 items-section-library = { $library }
 collections-menu-rename =
-    .label = Rename
-edit-saved-search = Редактировать сохранённый поиск
+    .label = Переименовать
+edit-saved-search = Редактировать сохранённый поисковый запрос
 collections-menu-edit-search =
-    .label = Edit Search
+    .label = Редактировать поисковый запрос
 collections-menu-duplicate-search =
-    .label = Duplicate Search
+    .label = Дублировать поисковый запрос
 collections-menu-move-collection =
     .label = Переместить в
 collections-menu-copy-collection =
@@ -224,63 +242,83 @@ collections-menu-copy-collection =
 collections-menu-export =
     .label = Экспорт…
 collections-menu-generate-report =
-    .label = Generate Report…
+    .label = Создать отчёт…
 collections-menu-create-bibliography =
-    .label = Create Bibliography…
+    .label = Создать библиографию…
 collections-menu-unsubscribe =
-    .label = Unsubscribe…
+    .label = Отписаться…
 collections-menu-delete =
     .label =
         { $count ->
-            [one] Delete Collection…
-           *[other] Delete Collections…
+            [one] Удалить коллекцию…
+            [few] Удалить коллекции…
+            [many] Удалить коллекции…
+           *[other] Удалить коллекции…
         }
 collections-menu-delete-with-items =
     .label =
         { $count ->
-            [one] Delete Collection and Items…
-           *[other] Delete Collections and Items…
+            [one] Удалить коллекцию и элементы…
+            [few] Удалить коллекции и элементы…
+            [many] Удалить коллекции и элементы…
+           *[other] Удалить коллекции и элементы…
         }
 collections-menu-delete-search =
     .label =
         { $count ->
-            [one] Delete Search…
-           *[other] Delete Searches…
+            [one] Удалить поисковый запрос…
+            [few] Удалить поисковые запросы…
+            [many] Удалить поисковые запросы…
+           *[other] Удалить поисковые запросы…
         }
 collections-delete-title =
     { $count ->
-        [one] Delete Collection
-       *[other] Delete Collections
+        [one] Удалить коллекцию
+        [few] Удалить коллекции
+        [many] Удалить коллекции
+       *[other] Удалить коллекции
     }
 collections-delete-message =
     { $count ->
-        [one] Are you sure you want to delete this collection?
-       *[other] Are you sure you want to delete { $count } collections?
+        [one] Вы уверены, что хотите удалить эту коллекцию?
+        [few] Вы уверены, что хотите удалить { $count } коллекции?
+        [many] Вы уверены, что хотите удалить { $count } коллекций?
+       *[other] Вы уверены, что хотите удалить { $count } коллекций?
     }
 collections-delete-keep-items =
     { $count ->
-        [one] Items within this collection will not be deleted.
-       *[other] Items within these collections will not be deleted.
+        [one] Элементы в этой коллекции не будут удалены.
+        [few] Элементы в этих коллекциях не будут удалены.
+        [many] Элементы в этих коллекциях не будут удалены.
+       *[other] Элементы в этих коллекциях не будут удалены.
     }
 collections-delete-with-items-title =
     { $count ->
-        [one] Delete Collection and Items
-       *[other] Delete Collections and Items
+        [one] Удалить коллекцию и элементы
+        [few] Удалить коллекции и элементы
+        [many] Удалить коллекции и элементы
+       *[other] Удалить коллекции и элементы
     }
 collections-delete-with-items-message =
     { $count ->
-        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
-       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+        [one] Вы уверены, что хотите удалить эту коллекцию и переместить все элементы из неё в корзину?
+        [few] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
+        [many] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
+       *[other] Вы уверены, что хотите удалить коллекции { $count } и переместить все элементы из них в корзину?
     }
 collections-delete-search-title =
     { $count ->
-        [one] Delete Search
-       *[other] Delete Searches
+        [one] Удалить поисковый запрос
+        [few] Удалить поисковые запросы
+        [many] Удалить поисковые запросы
+       *[other] Удалить поисковые запросы
     }
 collections-delete-search-message =
     { $count ->
-        [one] Are you sure you want to delete this search?
-       *[other] Are you sure you want to delete { $count } searches?
+        [one] Вы уверены, что хотите удалить этот поисковый запрос?
+        [few] Вы уверены, что хотите удалить { $count } поисковых запросов?
+        [many] Вы уверены, что хотите удалить { $count } поисковых запросов?
+       *[other] Вы уверены, что хотите удалить { $count } поисковых запросов?
     }
 item-creator-moveDown =
     .label = Переместить вниз
@@ -303,8 +341,8 @@ item-menu-viewAttachment =
                 { $attachmentType ->
                     [pdf] PDF
                     [epub] EPUB
-                    [snapshot] Снапшоты
-                    [note] Заметки
+                    [snapshot] Снапшот
+                    [note] Заметка
                    *[other] Вложения
                 }
         } { $openIn ->
@@ -328,6 +366,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = Файл переименован в { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = Открыть контекстное меню
 itembox-button-merge =
@@ -369,7 +408,7 @@ import-online-new =
 import-mendeley-username = Имя пользователя
 import-mendeley-password = Пароль
 general-error = Ошибка
-file-interface-import-error = Произошла ошибка во время импорта выбранного файла. Убедитесь что файл валиден и попробуйте ещё раз.
+file-interface-import-error = Произошла ошибка при импорте выбранного файла. Убедитесь что файл валиден и попробуйте ещё раз.
 file-interface-import-complete = Импорт завершён
 file-interface-items-were-imported =
     { $numItems ->
@@ -383,7 +422,9 @@ file-interface-items-were-relinked =
         [one] Один элемент был повторно связан
        *[other] { $numRelinked } элементов были повторно связаны
     }
-import-mendeley-encrypted = Выбранную базу данных Mendeley невозможно прочитать, вероятно она зашифрована. См. раздел <a data-l10n-name="mendeley-import-kb">Как импортировать библиотеку Mendeley в Zotero?</a> для подробностей.
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = Произошла ошибка при импорте выбранного файла с помощью “{ $translator }”. Убедитесь, что файл валиден, и повторите попытку.
 import-online-intro = На следующем шаге вам будет предложено войти в { $targetAppOnline } и предоставить доступ { -app-name }. Это необходимо для импорта вашей библиотеки { $targetApp } в { -app-name }.
 import-online-intro2 = { -app-name } никогда не увидит и не сохранит ваш { $targetApp } пароль.
@@ -394,7 +435,7 @@ import-online-relink-only =
     .label = Заменить ссылки на цитирования из Mendeley Desktop
 import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } не смог подсоединиться к { $targetApp }. Пожалуйста, проверьте своё подключение к интернету и попробуйте снова.
-tab-title-multiple-collections = Multiple
+tab-title-multiple-collections = Множественный
 items-table-cell-notes =
     .aria-label =
         { $count ->
@@ -425,7 +466,7 @@ rtfScan-intro-page = Введение
 rtfScan-scan-page = Сканирование на наличие цитат
 rtfScan-scanPage-description = { -app-name } сканирует цитирования в документе. Пожалуйста подождите.
 rtfScan-citations-page = Проверить цитированные записи
-rtfScan-citations-page-description = Просмотрите список распознанных цитат ниже, чтобы убедиться, что { -app-name } правильно выбрал соответствующие элементы. Любые несопоставленные или двусмысленные цитаты должны быть устранены, до перехода к следующему шагу.
+rtfScan-citations-page-description = Просмотрите список распознанных цитат ниже, чтобы убедиться, что { -app-name } правильно выбрал соответствующие элементы. Любые несопоставленные или двусмысленные цитаты должны быть устранены до перехода к следующему шагу.
 rtfScan-style-page = Форматирование документа
 rtfScan-format-page = Форматирование цитат
 rtfScan-format-page-description = { -app-name } обрабатывает и форматирует ваш RTF-файл. Пожалуйста, будьте терпеливы.
@@ -456,9 +497,9 @@ bibliography-outputMode-label = Режим вывода:
 bibliography-outputMode-citations =
     .label =
         { $type ->
-            [citation] Citations
-            [note] Notes
-           *[other] Citations
+            [citation] Цитирования
+            [note] Заметки
+           *[other] Цитирования
         }
 bibliography-outputMode-bibliography =
     .label = Библиография
@@ -481,6 +522,7 @@ styleEditor-editor =
     .aria-label = Редактор стилей
 styleEditor-preview =
     .aria-label = Предпросмотр
+stylePreview-generating = Generating previews…
 publications-intro-page = Мои публикации
 publications-intro = Записи, добавленные в раздел Мои публикации, будут показаны на странице вашего профиля в zotero.org. Если вы присоединили файлы, они будут доступны публично под указанной вами лицензией. Добавляйте только ваши собственные работы и размещайте только те файлы, для которых у вас есть разрешение на распространение.
 publications-include-checkbox-files =
@@ -618,10 +660,10 @@ section-button-collapse =
     .label = Свернуть { $section } секцию
 annotations-count =
     { $count ->
-        [one] { $count } аннотация
-        [few] { $count } аннотации
-        [many] { $count } аннотаций
-       *[other] { $count } аннотаций
+        [one] { $count } Аннотация
+        [few] { $count } Аннотации
+        [many] { $count } Аннотаций
+       *[other] { $count } Аннотаций
     }
 section-button-annotations =
     .title = { annotations-count }
@@ -653,45 +695,45 @@ sidenav-related =
 sidenav-main-btn-grouping =
     .aria-label = { pane-item-details }
 sidenav-reorder-up =
-    .label = Переместить блок вверх
+    .label = Переместить секцию вверх
 sidenav-reorder-down =
-    .label = Переместить блок вниз
+    .label = Переместить секцию вниз
 sidenav-reorder-reset =
-    .label = Сбросить порядок блоков
+    .label = Сбросить порядок секций
 toggle-item-pane =
-    .tooltiptext = Переключить панель записи
+    .tooltiptext = Переключить панель элемента
 toggle-context-pane =
     .tooltiptext = Переключить контекстную панель
 pin-section =
-    .label = Закрепить блок
+    .label = Закрепить секцию
 unpin-section =
-    .label = Открепить блок
+    .label = Открепить секцию
 collapse-other-sections =
-    .label = Свернуть другие блоки
+    .label = Свернуть другие секции
 expand-all-sections =
-    .label = Развернуть все блоки
+    .label = Развернуть все секции
 abstract-field =
-    .placeholder = Добавить аннотацию…
+    .placeholder = Добавить Абстракт…
 tag-field =
     .aria-label = { general-tag }
 tagselector-search =
-    .placeholder = Фитровать теги
+    .placeholder = Фильтровать Теги
 context-notes-search =
-    .placeholder = Искать заметки
+    .placeholder = Искать Заметки
 context-notes-return-button =
     .aria-label = { general-go-back }
-new-collection = Новая коллекция…
+new-collection = Новая Коллекция…
 menu-new-collection =
     .label = { new-collection }
 toolbar-new-collection =
     .tooltiptext = { new-collection }
 new-collection-dialog =
-    .title = Новая коллекция
-    .buttonlabelaccept = Создать коллекцию
+    .title = Новая Коллекция
+    .buttonlabelaccept = Создать Коллекцию
 new-collection-name = Название:
 new-collection-create-in = Создать в:
 show-publications-menuitem =
-    .label = Показать Мои публикации
+    .label = Показать Мои Публикации
 attachment-info-title = Название
 attachment-info-filename = Имя файла
 attachment-info-accessed = Дата доступа
@@ -700,14 +742,14 @@ attachment-info-modified = Изменено
 attachment-info-index = Проиндексировано
 attachment-info-convert-note =
     .label =
-        Мигрировать { $type ->
+        Мигрировать в { $type ->
            *[standalone] Отдельный
         } Заметка
     .tooltiptext = Добавление примечаний к вложениям больше не поддерживается, но вы можете редактировать эту заметку, перенеся её в отдельную заметку.
 section-note-info =
     .label = { pane-note-info }
 note-info-title = Название
-note-info-parent-item = Родительская запись
+note-info-parent-item = Родительский Элемент
 note-info-parent-item-button =
     { $hasParentItem ->
         [true] { $parentItemTitle }
@@ -715,18 +757,18 @@ note-info-parent-item-button =
     }
     .title =
         { $hasParentItem ->
-            [true] Показать родительскую запись в библиотеке
-           *[false] Показать запись заметки в библиотеке
+            [true] Показать родительский элемент в библиотеке
+           *[false] Показать заметку в библиотеке
         }
-note-info-date-created = Создана
-note-info-date-modified = Изменена
+note-info-date-created = Создано
+note-info-date-modified = Изменено
 note-info-size = Размер
 note-info-word-count = Количество слов
 note-info-character-count = Количество символов
 item-title-empty-note = Заметка без названия
 attachment-preview-placeholder = Нет вложений для предпросмотра
 attachment-rename-from-parent =
-    .tooltiptext = Переименовать файл в соответствии с родительской записью
+    .tooltiptext = Переименовать файл в соответствии с родительским элементом
 account-log-in = Войти
 account-not-logged-in-text = Войдите в свой аккаунт Zotero для синхронизации данных.
 account-error-login-session-expired = Время вашей сессии входа закончилось. Пожалуйста, попробуйте ещё раз.
@@ -751,11 +793,11 @@ quicksearch-advanced-search-button =
     .tooltiptext = { advanced-search }
     .aria-label = { advanced-search }
 advanced-search-close =
-    .tooltiptext = Close Advanced Search
+    .tooltiptext = Закрыть расширенный поиск
 advanced-search-expand =
-    .tooltiptext = Expand Advanced Search
+    .tooltiptext = Развернуть расширенный поиск
 advanced-search-collapse =
-    .tooltiptext = Collapse Advanced Search
+    .tooltiptext = Свернуть расширенный поиск
 item-pane-header-view-as =
     .label = Показать как
 item-pane-header-none =
@@ -770,9 +812,9 @@ item-pane-header-more-options =
     .label = Больше опций
 item-pane-message-items-selected =
     { $count ->
-        [0] Не выбрана ни одна запись
-        [one] { $count } запись выбрана
-       *[other] { $count } записей выбрано
+        [0] Не выбран ни один элементов
+        [one] { $count } элемент выбран
+       *[other] { $count } элементов выбрано
     }
 item-pane-message-collections-selected =
     { $count ->
@@ -783,41 +825,37 @@ item-pane-message-collections-selected =
     }
 item-pane-message-searches-selected =
     { $count ->
-        [one] { $count } поиск выбран
-        [few] { $count } поиска выбрано
-        [many] { $count } поисков выбрано
-       *[other] { $count } поиска выбрано
+        [one] { $count } поисковый запрос выбран
+        [few] { $count } поисковых запроса выбрано
+        [many] { $count } поисковых запросов выбрано
+       *[other] { $count } поисковых запросов выбрано
     }
 item-pane-message-objects-selected =
     { $count ->
         [one] { $count } объект выбран
         [few] { $count } объекта выбрано
         [many] { $count } объектов выбрано
-       *[other] { $count } объекта выбрано
+       *[other] { $count } объектов выбрано
     }
 item-pane-message-unselected =
     { $count ->
-        [0] Нет записей в этом представлении нет записей
-        [one] { $count } запись в этом представлении
-        [few] { $count } записей в этом представлении
-        [many] { $count } записей в этом представлении
-       *[other] { $count } записей в этом представлении
+        [0] Нет элементов в этом представлении
+        [one] { $count } элемент в этом представлении
+       *[other] { $count } элементов в этом представлении
     }
 item-pane-message-objects-unselected =
     { $count ->
         [0] Нет объектов в этом представлении
         [one] { $count } объект в этом представлении
-        [few] { $count } объекта в этом представлении
-        [many] { $count } объектов в этом представлении
-       *[other] { $count } объекта в этом представлении
+       *[other] { $count } объектов в этом представлении
     }
 item-pane-duplicates-merge-items =
     .label =
         { $count ->
-            [one] Объединить { $count } запись
+            [one] Объединить { $count } элемент
             [few] Объединить { $count } элемента
-            [many] Объединить { $count } записей
-           *[other] Объединить { $count } записей
+            [many] Объединить { $count } элементов
+           *[other] Объединить { $count } элементов
         }
 locate-library-lookup-no-resolver = Вы должны выбрать резолвер из { $pane } панели { -app-name } настроек.
 architecture-win32-warning-message = Переключитесь на 64-bit { -app-name } для лучшей производительности. Данные не будут затронуты.
@@ -827,64 +865,64 @@ architecture-x64-on-arm64-action = Скачать { -app-name } для ARM64
 first-run-guidance-authorMenu = { -app-name } позволяет также указать редакторов и переводчиков. Вы можете превратить автора в редактора или переводчика, выбрав это меню.
 first-run-guidance-readAloud = { -app-name } теперь может читать ваши документы с естественным звучанием голоса.
 advanced-search-remove-btn =
-    .tooltiptext = Remove Condition
+    .tooltiptext = Удалить условие
 advanced-search-add-btn =
-    .tooltiptext = Add Condition
+    .tooltiptext = Добавить условие
 advanced-search-group-btn =
-    .tooltiptext = Add Condition Group
+    .tooltiptext = Добавить группу условий
 advanced-search-remove-group-btn =
-    .tooltiptext = Remove Group
+    .tooltiptext = Удалить группу
 advanced-search-ungroup-btn =
-    .tooltiptext = Ungroup Conditions
+    .tooltiptext = Разгруппировать условия
 advanced-search-result-level-menu =
-    .aria-label = Result type
+    .aria-label = Тип результата
 advanced-search-result-level-prefix-root =
     .value = Найти
 advanced-search-join-prefix-root =
-    .value = matching
+    .value = сопоставление
 advanced-search-result-level-any =
-    .label = any items
+    .label = любые элементы
 advanced-search-result-level-item =
-    .label = top-level items
+    .label = элементы верхнего уровня
 advanced-search-result-level-attachment =
-    .label = attachments
+    .label = вложения
 advanced-search-result-level-note =
-    .label = notes
+    .label = заметки
 advanced-search-result-level-annotation =
     .label = аннотации
 advanced-search-binding-menu =
-    .aria-label = Match against the same item
+    .aria-label = Сопоставить с тем же элементом
 advanced-search-binding-separate =
-    .label = separately
+    .label = отдельно
 advanced-search-binding-same-attachment =
-    .label = in the same attachment
+    .label = в том же вложении
 advanced-search-binding-same-note =
-    .label = in the same note
+    .label = в той же заметке
 advanced-search-binding-same-annotation =
-    .label = in the same annotation
+    .label = в той же аннотации
 advanced-search-of-the-following =
-    .value = of the following
+    .value = из следующих
 advanced-search-binding-hint-attachment =
-    .value = These conditions can match separate attachments.
+    .value = Этим условиям могут соответствовать отдельные вложения.
 advanced-search-binding-hint-note =
-    .value = These conditions can match separate notes.
+    .value = Этим условиям могут соответствовать отдельные заметки.
 advanced-search-binding-hint-annotation =
-    .value = These conditions can match separate annotations.
-advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
-advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+    .value = Этим условиям могут соответствовать отдельные аннотации.
+advanced-search-level-warning-mixed = Эти условия не могут соответствовать одному и тому же элементу, поэтому этот поиск никогда не даст результатов. Попробуйте сопоставить “{ $matchAny }”  из них или установите тип результата “{ $topLevelItems }”.
+advanced-search-level-warning-unreachable = У этого поиска есть условие, которое не может применяться к выбранному типу результатов. Установите тип результата “{ $topLevelItems }” или удалите несовместимое условие.
 advanced-search-group-warning-unreachable =
-    A condition here cannot be in the same { $entity ->
+    Условие здесь не может находиться в одной и той же { $entity ->
         [attachment] attachment
         [note] note
        *[annotation] annotation
-    }. Match these separately or remove the incompatible condition.
-advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+    }. Сопоставьте их отдельно или удалите несовместимое условие.
+advanced-search-group-warning-mixed = Эти условия не могут соответствовать одному и тому же элементу, поэтому эта группа никогда не будет совпадать. Попробуйте сопоставить “{ $matchAny }” из них или установите тип результата “{ $topLevelItems }”.
 advanced-search-bind-same-attachment =
-    .label = Match the same attachment
+    .label = Соответствует тому же вложению
 advanced-search-bind-same-note =
-    .label = Match the same note
+    .label = Соответствует той же заметке
 advanced-search-bind-same-annotation =
-    .label = Match the same annotation
+    .label = Соответствует той же аннотации
 advanced-search-conditions-menu =
     .aria-label = Условия поиска
     .label = { $label }
@@ -894,17 +932,46 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Значение
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = пусто
+search-operator-isNotEmpty = не пусто
 search-conditions-tooltip-fields = Поля:
 search-conditions-collection = Коллекция
 search-conditions-savedSearch = Сохранённый поиск
 search-conditions-itemTypeID = Тип записи
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Тег
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = # Тегов
+search-conditions-numNotes = # Заметок
+search-conditions-numAttachments = # Вложений
+search-conditions-numAnnotations = # Аннотаций
 search-conditions-note = Заметка
 search-conditions-childNote = Дочерняя заметка
 search-conditions-creator = Автор
@@ -923,25 +990,25 @@ search-conditions-dateModified = Дата изменения
 search-conditions-fulltextContent = Содержание Вложения
 search-conditions-programmingLanguage = Язык программирования
 search-conditions-fileTypeID = Тип Вложения
-search-conditions-attachmentStorageType = Attachment Storage Type
+search-conditions-attachmentStorageType = Тип хранилища вложений
 search-conditions-lastRead = Вложение Последнее прочитанное
 search-conditions-annotationText = Текст аннотации
 search-conditions-annotationComment = Комментарий к аннотации
-search-conditions-annotationType = Annotation Type
-search-conditions-annotationColor = Annotation Color
-search-conditions-annotationAuthor = Annotation Author
+search-conditions-annotationType = Тип аннотации
+search-conditions-annotationColor = Цвет аннотации
+search-conditions-annotationAuthor = Автор аннотации
 search-conditions-anyField = Любое поле
 search-conditions-titleCreatorYear = Название, Автор, Год
 search-conditions-submenu-attachment = Вложение
 search-conditions-submenu-annotation = Аннотация
-search-conditions-short-fulltextContent = Content
+search-conditions-short-fulltextContent = Содержимое
 search-conditions-short-fileTypeID = Тип файла
-search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-attachmentStorageType = Тип хранилища
 search-conditions-short-lastRead = Последнее прочитанное
-search-conditions-short-annotationText = Text
-search-conditions-short-annotationComment = Comment
+search-conditions-short-annotationText = Текст
+search-conditions-short-annotationComment = Комментарий
 search-conditions-short-annotationType = Тип
-search-conditions-short-annotationColor = Color
+search-conditions-short-annotationColor = Цвет
 search-conditions-short-annotationAuthor = Автор
 find-pdf-files-added =
     { $count ->
@@ -980,9 +1047,9 @@ file-type-video = Видео
 file-type-presentation = Презентация
 file-type-document = Документ
 file-type-ebook = Электронная книга
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = Сохранённый файл
+attachment-storage-type-linkedFile = Связанные файлы
+attachment-storage-type-webLink = Web-ссылка
 post-upgrade-message = Вы проапгрейдились до <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Узнайте <a data-l10n-name="new-features-link">что нового</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -991,23 +1058,25 @@ post-upgrade-done =
 text-action-paste-and-search =
     .label = Вставить и Искать
 mac-word-plugin-install-message = Zotero необходим доступ к данным Word для установки плагина для Word.
-mac-word-plugin-install-folder-message = { -app-name } needs access to Word’s startup folder to install the Word plugin.
+mac-word-plugin-install-folder-message = { -app-name } необходим доступ к папке автозагрузки Word для установки плагина Word.
 mac-word-plugin-install-action-button =
     .label = Установить плагин для Word
 mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
-mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
+mac-word-plugin-install-folder-dialog-title = Установите плагин в папку автозагрузки Word
 mac-word-plugin-install-folder-dialog-button = Установить
-mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
+mac-word-plugin-install-wrong-folder-selected = Предложенная папка должна быть выбрана. Пожалуйста, повторите попытку, не выбирая другую папку.
 file-renaming-banner-message = { -app-name } теперь автосинхронизирует имена файлов вложений при внесении изменений в элементы.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } коннектор должен быть обновлён для работы с этой версией { -app-name }.
 userjs-pref-warning = Некоторые настройки { -app-name } были переопределены с помощью неподдерживаемого метода. { -app-name } отменяет их и перезапускает.
+migrate-extra-fields-progress-headline = Обновление элементов…
 migrate-extra-fields-progress-message = Перенос новых полей из Extra field
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Индексирование
+fulltext-indexing-progress-message = Результаты полнотекстового поиска могут быть неполными до завершения индексирования.
 long-tag-fixer-window-title =
     .title = Разделить теги
 long-tag-fixer-button-dont-split =
@@ -1026,140 +1095,194 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = Этот плагин был отключён { -app-name }.
 data-dir-unsupported-storage = Это может произойти, если каталог данных { -app-name } находится в папке облачного хранилища (OneDrive, Dropbox и т. д.) или в общей сетевой папке.
-login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
+login-manager-reset = { -app-name } не смог прочитать сохраненную информацию для входа в систему, поэтому она была сброшена. Пожалуйста, войдите снова в { preferences-pane-account } панель настроек { -app-name }.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 search-button =
     .label = Поиск
 save-search-new-button =
-    .label = Save Search…
+    .label = Сохранить поисковый запрос…
 save-search-edit-button =
     .label = Сохранить:
 save-search-name-title = Сохранить поиск
-save-search-name-message = Enter a name for the saved search:
-saved-search-close-confirmation-title = Editing Saved Search
-saved-search-close-confirmation-body = Do you want to save changes you made to this saved search?
+save-search-name-message = Введите имя для сохранённого поискового запроса:
+saved-search-close-confirmation-title = Редактировать сохранённый поисковый запрос
+saved-search-close-confirmation-body = Хотите сохранить изменения, внесённые в этот сохранённый поисковый запрос?
 item-pane-batch-editing-prompt =
-    .aria-label = Batch editing
+    .aria-label = Пакетное редактирование
 item-pane-batch-editing-enable =
-    .label = Edit Multiple Items…
-item-pane-batch-editing-multiple-values-placeholder = Multiple
-item-pane-batch-editing-clear-values = Clear all values
+    .label = Редактировать несколько элементов…
+item-pane-batch-editing-multiple-values-placeholder = Множественный
+item-pane-batch-editing-clear-values = Очистить все значения
 item-pane-batch-editing-header =
     { $count ->
-        [one] Editing { $count } item
-       *[other] Editing { $count } items
+        [one] Редактирование { $count } элемент
+        [few] Редактирование { $count } элемента
+        [many] Редактирование { $count } элементов
+       *[other] Редактирование { $count } элементов
     }
 item-pane-batch-editing-done =
     .label = { general-done }
 undo-action-edit-metadata =
     { $count ->
-        [one] Edit Metadata
-       *[other] Edit Metadata for { $count } Items
+        [one] Редактировать метаданные
+        [few] Редактировать метаданные для { $count } элементов
+        [many] Редактировать метаданные для { $count } элементов
+       *[other] Редактировать метаданные для { $count } элементов
     }
 undo-action-edit-field =
     { $count ->
-        [one] Edit of “{ $field }”
-       *[other] Edit of “{ $field }” for { $count } Items
+        [one] Изменение “{ $field }”
+        [few] Изменение “{ $field }” для { $count } элементов
+        [many] Изменение “{ $field }” для { $count } элементов
+       *[other] Изменение “{ $field }” для { $count } элементов
     }
-undo-action-normalize-attachment-titles = Normalize Attachment Title
+undo-action-normalize-attachment-titles = Нормализовать заголовок вложения
 undo-action-trash =
     { $count ->
-        [one] Trash Item
-       *[other] Trash { $count } Items
+        [one] Корзина элемент
+        [few] Корзина { $count } элементов
+        [many] Корзина { $count } элементов
+       *[other] Корзина { $count } элементов
     }
 undo-action-restore-items =
     { $count ->
-        [one] Restore Item
-       *[other] Restore { $count } Items
+        [one] Восстановить элемент
+        [few] Восстановить { $count } элементов
+        [many] Восстановить { $count } элементов
+       *[other] Восстановить { $count } элементов
     }
 undo-action-trash-collection =
     { $count ->
-        [one] Trash Collection
-       *[other] Trash { $count } Collections
+        [one] Корзина Коллекция
+        [few] Корзина { $count } Коллекций
+        [many] Корзина { $count } Коллекций
+       *[other] Корзина { $count } Коллекций
     }
 undo-action-trash-search =
     { $count ->
-        [one] Trash Saved Search
-       *[other] Trash { $count } Saved Searches
+        [one] Корзина Сохранённый поисковый запрос
+        [few] Корзина { $count } Сохранённых поисковых запросов
+        [many] Корзина { $count } Сохранённых поисковых запросов
+       *[other] Корзина { $count } Сохранённых поисковых запросов
     }
 undo-action-restore-collection =
     { $count ->
-        [one] Restore Collection
-       *[other] Restore { $count } Collections
+        [one] Восстановить Коллекцию
+        [few] Восстановить { $count } Коллекций
+        [many] Восстановить { $count } Коллекций
+       *[other] Восстановить { $count } Коллекций
     }
 undo-action-restore-objects =
     { $count ->
-        [one] Restore Object
-       *[other] Restore { $count } Objects
+        [one] Восстановить Объект
+        [few] Восстановить { $count } Объектов
+        [many] Восстановить { $count } Объектов
+       *[other] Восстановить { $count } Объектов
     }
 undo-action-add-to-collection =
     { $count ->
-        [one] Add to Collection
-       *[other] Add { $count } Items to Collection
+        [one] Добавить в Коллекцию
+        [few] Добавить { $count } элементов в Коллекцию
+        [many] Добавить { $count } элементов в Коллекцию
+       *[other] Добавить { $count } элементов в Коллекцию
     }
 undo-action-remove-from-collection =
     { $count ->
-        [one] Remove from Collection
-       *[other] Remove { $count } Items from Collection
+        [one] Удалить из Коллекции
+        [few] Удалить { $count } элементов из Коллекции
+        [many] Удалить { $count } элементов из Коллекции
+       *[other] Удалить { $count } элементов из Коллекции
     }
 undo-action-move-to-collection =
     { $count ->
-        [one] Move to Collection
-       *[other] Move { $count } Items to Collection
+        [one] Переместить в Коллекцию
+        [few] Переместить { $count } элементов в Коллекцию
+        [many] Переместить { $count } элементов в Коллекцию
+       *[other] Переместить { $count } элементов в Коллекцию
     }
 undo-action-rename-collection = Переименовать коллекцию
-undo-action-move-collection = Move Collection
+undo-action-move-collection = Переместить Коллекцию
 undo-action-add-tag =
     { $count ->
-        [one] Add Tag
-       *[other] Add Tag to { $count } Items
+        [one] Добавить Тег
+        [few] Добавить Тег к { $count } Элементам
+        [many] Добавить Тег к { $count } Элементам
+       *[other] Добавить Тег к { $count } Элементам
     }
-undo-action-change-tag = Change Tag
-undo-action-split-tag = Split Tag
+undo-action-change-tag = Изменить Тег
+undo-action-split-tag = Разделить Тег
 undo-action-remove-tag =
     { $count ->
-        [one] Remove Tag
-       *[other] Remove Tag from { $count } Items
+        [one] Удалить Тег
+        [few] Удалить Тег из { $count } Элементов
+        [many] Удалить Тег из { $count } Элементов
+       *[other] Удалить Тег из { $count } Элементов
     }
 undo-action-remove-tags-from-item =
     { $count ->
-        [one] Remove Tag
-       *[other] Remove { $count } Tags
+        [one] Удалить Тег
+        [few] Удалить { $count } Тегов
+        [many] Удалить { $count } Тегов
+       *[other] Удалить { $count } Тегов
     }
-undo-action-remove-all-tags = Remove All Tags
+undo-action-remove-all-tags = Удалить все Теги
 undo-action-edit-note = Редактировать заметку
-undo-action-add-creator = Add Creator
-undo-action-remove-creator = Remove Creator
-undo-action-edit-creator = Edit Creator
-undo-action-reorder-creator = Reorder Creator
+undo-action-add-creator = Добавить Создателя
+undo-action-remove-creator = Удалить Создателя
+undo-action-edit-creator = Редактировать Создателя
+undo-action-reorder-creator = Переупорядочить Создателя
 undo-action-change-type = Изменить тип записи
 undo-action-change-parent-item =
     { $count ->
-        [one] Change Parent Item
-       *[other] Change Parent for { $count } Items
+        [one] Изменить Родительский элемент
+        [few] Изменить Родительский элемент для { $count } Элементов
+        [many] Изменить Родительский элемент для { $count } Элементов
+       *[other] Изменить Родительский элемент для { $count } Элементов
     }
 undo-action-convert-to-standalone =
     { $count ->
-        [one] Convert to Standalone
-       *[other] Convert { $count } Items to Standalone
+        [one] Преобразовать в Автономный
+        [few] Преобразовать { $count } Элементов в Автономные
+        [many] Преобразовать { $count } Элементов в Автономные
+       *[other] Преобразовать { $count } Элементов в Автономные
     }
-undo-action-add-related = Add Related
-undo-action-remove-related = Remove Related
+undo-action-add-related = Добавить Относящееся
+undo-action-remove-related = Удалить Относящееся
 undo-action-merge-items =
     { $count ->
-        [one] Merge Item
-       *[other] Merge { $count } Items
+        [one] Объединить Элемент
+        [few] Объединить { $count } Элементов
+        [many] Объединить { $count } Элементов
+       *[other] Объединить { $count } Элементов
     }
-menu-edit-undo-action = Undo { $action }
-menu-edit-redo-action = Redo { $action }
+menu-edit-undo-action = Отменить { $action }
+menu-edit-redo-action = Повторить { $action }
+local-api-authorize-title = Локальная API авторизация
+local-api-authorize-text = “{ $appName }”, приложение, работающее на вашем компьютере, хочет изменить вашу библиотеку { -app-name }.

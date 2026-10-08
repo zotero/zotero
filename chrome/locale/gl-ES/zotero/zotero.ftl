@@ -31,7 +31,7 @@ delete-or-backspace =
        *[other] Linux
     }
 general-print = Imprimir
-general-remove = Remove
+general-remove = Eliminar
 general-add = Engadir
 general-remind-me-later = Acórdamo despois
 general-dont-ask-again = Non preguntar de novo
@@ -40,7 +40,7 @@ general-open-settings = Abrir axustes
 general-settings = Axustes...
 general-help = Axuda
 general-tag = Etiqueta
-general-got-it = Got It
+general-got-it = Acadado
 general-done = Feito
 general-view-troubleshooting-instructions = Ver instrucións para solución de problemas
 general-go-back = Voltar
@@ -56,6 +56,7 @@ general-clear = Borrar
 clear-button =
     .label = { general-clear }
 general-update = Actualizar
+general-reset-to-default = Restituír os valores predeterminados
 general-back = Atrás
 general-edit = Editar
 general-cut = Cortar
@@ -73,6 +74,9 @@ general-more-information = Máis información
 general-warning = Advertencia
 general-type-to-continue = Escribe “{ $text }” para continuar.
 general-continue = Continuar
+general-allow = Permitir
+general-always-allow = Permitir sempre
+general-deny = Denegar
 general-red = Vermello
 general-orange = Laranxa
 general-yellow = Amarelo
@@ -86,14 +90,14 @@ general-maroon = Marrón
 general-gray = Gris
 general-black = Negro
 general-loading = Cargando...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Revisando a integridade da base de datos...
+db-repairing = Reparando a base de datos...
 citation-style-label = Estilo de cita:
 language-label = Lingua:
 menu-custom-group-submenu =
     .label = Máis opcións...
 menu-file-show-in-finder =
-    .label = Show in Finder
+    .label = Mostrar no Finder
 menu-file-show-file =
     .label = Mostrar o ficheiro
 menu-file-show-files =
@@ -131,15 +135,15 @@ menu-deletePermanently =
 menu-tools-plugins =
     .label = Complementos
 menu-view-columns-move-left =
-    .label = Move Column Left
+    .label = Mover a columna á esquerda
 menu-view-columns-move-right =
-    .label = Move Column Right
+    .label = Mover a columna á dereita
 menu-view-hide-context-annotation-rows =
-    .label = Hide Non-Matching Annotations
+    .label = Esconder as anotacións non concordantes
 menu-view-note-font-size =
     .label = Tamaño tipográfico das notas
 menu-view-note-tab-font-size =
-    .label = Note Tab Font Size
+    .label = Tamaño de fonte da lapela de nota
 menu-show-tabs-menu =
     .label = Amosar menú das lapelas
 menu-edit-copy-annotation =
@@ -164,9 +168,9 @@ zotero-tabs-menu-filter =
 zotero-tabs-menu-close-button =
     .title = Pechar lapela
 zotero-toolbar-tabs-scroll-forwards =
-    .title = Scroll forwards
+    .title = Desprazar cara adiante
 zotero-toolbar-tabs-scroll-backwards =
-    .title = Scroll backwards
+    .title = Desprazar cara atrás
 toolbar-add-attachment =
     .tooltiptext = { add-attachment }
 recently-read = Lido recentemente
@@ -174,6 +178,10 @@ collections-menu-show-recently-read =
     .label = Amosar { recently-read }
 item-menu-remove-from-recently-read =
     .label = Eliminar de { recently-read }
+collections-menu-clear-all-last-read =
+    .label = Limpar tódalas datas das últimas lecturas...
+recently-read-clear-all-confirm = Tódalas datas das últimas lecturas nesta biblioteca serán borradas.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [one] { $count } colección seleccionada
@@ -181,38 +189,38 @@ items-section-collections-selected =
     }
 items-section-searches-selected =
     { $count ->
-        [one] { $count } saved search selected
-       *[other] { $count } saved searches selected
+        [one] { $count } busca gardada seleccionada
+       *[other] { $count } buscas gardadas seleccionadas
     }
 items-section-sources-selected =
     { $count ->
-        [one] { $count } source selected
-       *[other] { $count } sources selected
+        [one] { $count } fonte seleccionada
+       *[other] { $count } fontes seleccionadas
     }
 items-section-library-collections =
     { $count ->
-        [one] { $library } ({ $count } collection selected)
-       *[other] { $library } ({ $count } collections selected)
+        [one] { $library } ({ $count } colección seleccionada)
+       *[other] { $library } ({ $count } coleccións seleccionadas)
     }
 items-section-library-searches =
     { $count ->
-        [one] { $library } ({ $count } saved search selected)
-       *[other] { $library } ({ $count } saved searches selected)
+        [one] { $library } ({ $count } busca gardada seleccionada)
+       *[other] { $library } ({ $count } buscas gardadas seleccionadas)
     }
 items-section-library-sources =
     { $count ->
-        [one] { $library } ({ $count } source selected)
-       *[other] { $library } ({ $count } sources selected)
+        [one] { $library } ({ $count } fonte seleccionada)
+       *[other] { $library } ({ $count } fontes seleccionadas)
     }
 items-section-library-recently-read = { $library } ({ recently-read })
 items-section-library = { $library }
 collections-menu-rename =
-    .label = Rename
+    .label = Renomear
 edit-saved-search = Editar Procura Gravada
 collections-menu-edit-search =
-    .label = Edit Search
+    .label = Editar busca
 collections-menu-duplicate-search =
-    .label = Duplicate Search
+    .label = Duplicar busca
 collections-menu-move-collection =
     .label = Mover a
 collections-menu-copy-collection =
@@ -220,63 +228,63 @@ collections-menu-copy-collection =
 collections-menu-export =
     .label = Exportar...
 collections-menu-generate-report =
-    .label = Generate Report…
+    .label = Xerar informe
 collections-menu-create-bibliography =
-    .label = Create Bibliography…
+    .label = Crear bibliografía
 collections-menu-unsubscribe =
-    .label = Unsubscribe…
+    .label = Cancela-la subscrición...
 collections-menu-delete =
     .label =
         { $count ->
-            [one] Delete Collection…
-           *[other] Delete Collections…
+            [one] Eliminar colección...
+           *[other] Eliminar coleccións...
         }
 collections-menu-delete-with-items =
     .label =
         { $count ->
-            [one] Delete Collection and Items…
-           *[other] Delete Collections and Items…
+            [one] Eliminar colección e elementos...
+           *[other] Eliminar coleccións e elementos...
         }
 collections-menu-delete-search =
     .label =
         { $count ->
-            [one] Delete Search…
-           *[other] Delete Searches…
+            [one] Eliminar busca...
+           *[other] Eliminar buscas...
         }
 collections-delete-title =
     { $count ->
-        [one] Delete Collection
-       *[other] Delete Collections
+        [one] Eliminar colección
+       *[other] Eliminar coleccións
     }
 collections-delete-message =
     { $count ->
-        [one] Are you sure you want to delete this collection?
-       *[other] Are you sure you want to delete { $count } collections?
+        [one] Seguro que quere eliminar esta colección?
+       *[other] Seguro que quere eliminar { $count } coleccións?
     }
 collections-delete-keep-items =
     { $count ->
-        [one] Items within this collection will not be deleted.
-       *[other] Items within these collections will not be deleted.
+        [one] Os elementos nesta colección non serán eliminados.
+       *[other] Os elementos nestas coleccións non serán eliminados.
     }
 collections-delete-with-items-title =
     { $count ->
-        [one] Delete Collection and Items
-       *[other] Delete Collections and Items
+        [one] Eliminar colección e elementos
+       *[other] Eliminar coleccións e elementos
     }
 collections-delete-with-items-message =
     { $count ->
-        [one] Are you sure you want to delete this collection and move all items within it to the Trash?
-       *[other] Are you sure you want to delete { $count } collections and move all items within them to the Trash?
+        [one] Seguro que quere eliminar esta colección e mover tódolos elementos nela ao Lixo?
+       *[other] Seguro que quere eliminar { $count } coleccións e mover tódolos elementos nelas ao Lixo?
     }
 collections-delete-search-title =
     { $count ->
-        [one] Delete Search
-       *[other] Delete Searches
+        [one] Eliminar busca
+       *[other] Eliminar buscas
     }
 collections-delete-search-message =
     { $count ->
-        [one] Are you sure you want to delete this search?
-       *[other] Are you sure you want to delete { $count } searches?
+        [one] Seguro que quere eliminar esta busca?
+       *[other] Seguro que quere eliminar { $count } buscas?
     }
 item-creator-moveDown =
     .label = Baixar
@@ -324,6 +332,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = File renamed to { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = Open context menu
 itembox-button-merge =
@@ -379,7 +388,9 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
 import-online-intro = In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
 import-online-intro2 = { -app-name } will never see or store your { $targetApp } password.
@@ -475,6 +486,7 @@ styleEditor-editor =
     .aria-label = Style editor
 styleEditor-preview =
     .aria-label = Vista previa
+stylePreview-generating = Generating previews…
 publications-intro-page = As miñas publicacións
 publications-intro = Os elementos que se engaden ás Miñas publicacións móstranse no teu perfil público na páxina de zotero.org. Se escolleu engadir ficheiros anexos, estes van a estar accesibles ao público baixo a licenza que especificase. Engade só aquel traballo que fixeras ti, e só aqueles ficheiros dos cales teñas permiso e queiras distribuílos.
 publications-include-checkbox-files =
@@ -874,6 +886,35 @@ search-conditions-tooltip-fields = Campos:
 search-conditions-collection = Colección:
 search-conditions-savedSearch = Busca gardada
 search-conditions-itemTypeID = Tipo de elemento
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Etiqueta
 search-conditions-numTags = # of Tags
 search-conditions-numNotes = # of Notes
@@ -950,7 +991,7 @@ file-type-document = Documento
 file-type-ebook = Libro electrónico
 attachment-storage-type-storedFile = Stored File
 attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-webLink = Ligazón web
 post-upgrade-message = You’ve been upgraded to <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Learn about <a data-l10n-name="new-features-link">what’s new</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -974,8 +1015,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = The { -app-name } Connector must be updated to work with this version of { -app-name }.
 userjs-pref-warning = Some { -app-name } settings have been overridden using an unsupported method. { -app-name } will revert them and restart.
+migrate-extra-fields-progress-headline = Updating Items…
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indexing
+fulltext-indexing-progress-message = Full-text search results may be incomplete until indexing finishes.
 long-tag-fixer-window-title =
     .title = Dividir etiquetas
 long-tag-fixer-button-dont-split =
@@ -994,18 +1037,34 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 search-button =
     .label = Buscar
@@ -1131,3 +1190,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Undo { $action }
 menu-edit-redo-action = Redo { $action }
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.

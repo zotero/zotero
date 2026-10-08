@@ -51,7 +51,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "重複項目を表示">
 <!ENTITY zotero.collections.showUnfiledItems "未整理の項目を表示">
-<!ENTITY zotero.collections.showRetractedItems "取り消し済みの項目を表示">
+<!ENTITY zotero.collections.showRetractedItems "撤回された項目を表示">
 
 <!ENTITY zotero.items.itemType "項目の種類">
 <!ENTITY zotero.items.creator_column "著者">

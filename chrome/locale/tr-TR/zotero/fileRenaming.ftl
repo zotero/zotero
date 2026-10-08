@@ -24,6 +24,7 @@ file-renaming-format-instructions-example = For example, "{ $example }" in this 
 file-renaming-format-instructions-more = Daha fazla bilgi için <label data-l10n-name="file-renaming-format-help-link">belgelere</label> bakın.
 file-renaming-format-template = Dosya adı şablonu:
 file-renaming-format-preview = Önizleme:
+file-renaming-template-invalid = This filename template contains a syntax error and won’t be used.
 file-renaming-preview-changes = Değişiklikleri Önizle...
 file-renaming-rename-files =
     .label = Dosyaları Yeniden Adlandır
@@ -36,6 +37,9 @@ file-renaming-auto-rename-prompt-body = Yeni ayarlarla uyumlu olmaları için, k
 file-renaming-auto-rename-prompt-body-library = Would you like to rename existing files in library "{ $library }" to match the new settings?
 file-renaming-auto-rename-prompt-yes = { file-renaming-preview-changes }
 file-renaming-auto-rename-prompt-no = Varolan dosyaların Adlarını Tut
+file-renaming-invalid-template-prompt-title = Invalid Filename Template
+file-renaming-invalid-template-prompt-body = The filename template contains a syntax error and cannot be saved. Would you like to reset it to the default template?
+file-renaming-invalid-template-prompt-body-library = The filename template for “{ $library }” contains a syntax error and cannot be saved. Would you like to reset it to the default template?
 file-renaming-preview-window =
     .title = Dosyaları Yeniden Adlandır
 file-renaming-preview-window-loading = Yükleniyor...

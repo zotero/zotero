@@ -41,21 +41,20 @@ integration-citationDialog-details-showInLibrary = { general-show-in-library }
 integration-citationDialog-settings-title = Innstillinger for henvisninger
 integration-citationDialog-lib-message-citation =
     { $search ->
-        [true] Ingen valgte, åpne eller henviste elementer samsvarer med det aktuelle søket
+        [true] Ingen valgte, åpne eller henviste elementer matcher det aktuelle søket
        *[other] Ingen valgte eller åpne elementer
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] Ingen valgte notater samsvarer med det aktuelle søket
-       *[other] ingen notater er valgt
+        [true] Ingen valgte eller åpne notater samsvarer med det aktuelle søket
+       *[other] Ingen valgte eller åpne notater
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
-        [true] Ingen elementer med merknader samsvarer med det aktuelle søket
+        [true] Ingen elementer med merknader matcher det aktuelle søket
        *[other] Ingen valgte eller åpne elementer med merknader
     }
 integration-citationDialog-settings-keepSorted = Behold sortering av kildene
-integration-citationDialog-preview-empty = Forhåndsvisning
 integration-citationDialog-preview-error = Forhåndsvisning ikke tilgjengelig
 integration-citationDialog-btn-displayPreview =
     .title = Vis forhåndsvisning av henvisning
@@ -101,9 +100,16 @@ integration-citationDialog-collections-table =
     .aria-label = Samlinger.
     .aria-description = Velg en samling og trykk Tab for å bla gjennom elementene.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Dette elementet er lagt til i henvisningen. Trykk { return-or-enter } for å legge den til igjen, eller { delete-or-backspace } for å fjerne den.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Legg til henvisning
+       *[other] Legg til { $count } elementer til henvisning
+    }
 integration-citationDialog-add-all = Legg til alle
 integration-citationDialog-collapse-section =
     .title = Skjul seksjon

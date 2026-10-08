@@ -56,6 +56,7 @@ general-clear = Limpiar
 clear-button =
     .label = { general-clear }
 general-update = Actualizar
+general-reset-to-default = Restablecer valores predeterminados
 general-back = Atrás
 general-edit = Editar
 general-cut = Cortar
@@ -73,6 +74,9 @@ general-more-information = Más información
 general-warning = Advertencia
 general-type-to-continue = Introduzca “{ $text }” para continuar.
 general-continue = Continuar
+general-allow = Permitir
+general-always-allow = Permitir siempre
+general-deny = Negar
 general-red = Rojo
 general-orange = Naranja
 general-yellow = Amarillo
@@ -86,8 +90,8 @@ general-maroon = Granate
 general-gray = Gris
 general-black = Negro
 general-loading = Cargando...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Comprobando la integridad de la base de datos…
+db-repairing = Reparando la base de datos…
 citation-style-label = Estilo de cita:
 language-label = Idioma:
 menu-custom-group-submenu =
@@ -139,7 +143,7 @@ menu-view-hide-context-annotation-rows =
 menu-view-note-font-size =
     .label = Tamaño de fuente de notas
 menu-view-note-tab-font-size =
-    .label = Tamaño de fuente de la pestaña Nota
+    .label = Tamaño de fuente de la pestaña Notas
 menu-show-tabs-menu =
     .label = Mostrar menú de pestañas
 menu-edit-copy-annotation =
@@ -175,6 +179,10 @@ collections-menu-show-recently-read =
     .label = Mostrar { recently-read }
 item-menu-remove-from-recently-read =
     .label = Eliminar de { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Borrar todas las fechas de última lectura…
+recently-read-clear-all-confirm = Se borrarán todas las fechas de «Última lectura» de esta biblioteca.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [one] { $count } colección seleccionada
@@ -341,6 +349,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = Archivo renombrado a { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = Abrir menú contextual
 itembox-button-merge =
@@ -396,7 +405,9 @@ file-interface-items-were-relinked =
         [one] Se ha vuelto a vincular un elemento
        *[other] { $numRelinked } elementos se han vuelto a vincular
     }
-import-mendeley-encrypted = La base de datos Mendeley seleccionada no se puede leer, probablemente porque está encriptada. Consulte <a data-l10n-name="mendeley-import-kb">¿Cómo importo una biblioteca Mendeley a Zotero?</a> para obtener más información.
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = Se ha producido un error al importar el archivo seleccionado con "{ $translator }". Asegúrese de que el archivo es válido e inténtelo de nuevo.
 import-online-intro = En el siguiente paso se le pedirá que inicie sesión en { $targetAppOnline } y conceda acceso a { -app-name }. Esto es necesario para importar su biblioteca { $targetApp } a { -app-name }.
 import-online-intro2 = { -app-name } nunca verá ni almacenará su contraseña de { $targetApp }.
@@ -493,6 +504,7 @@ styleEditor-editor =
     .aria-label = Editor de estilo
 styleEditor-preview =
     .aria-label = Previsualizar
+stylePreview-generating = Generando vistas previas…
 publications-intro-page = Mis publicaciones
 publications-intro = Los elementos que añada a Mis publicaciones se mostrarán en su página de perfil en zotero.org. Si elige incluir los archivos adjuntos, se pondrán a disposición del público bajo la licencia que especifique. Añada únicamente trabajos que usted mismo haya creado e incluya archivos solo si tiene los derechos para distribuirlos y desea hacerlo.
 publications-include-checkbox-files =
@@ -895,17 +907,46 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Valor
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = está vacío
+search-operator-isNotEmpty = No está vacío
 search-conditions-tooltip-fields = Campos:
 search-conditions-collection = Colección
 search-conditions-savedSearch = Búsqueda guardada
 search-conditions-itemTypeID = Tipo de elemento
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Etiqueta
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = N.º de etiquetas
+search-conditions-numNotes = N.º de notas
+search-conditions-numAttachments = N.º de archivos adjuntos
+search-conditions-numAnnotations = N.º de anotaciones
 search-conditions-note = Nota
 search-conditions-childNote = Nota subordinada
 search-conditions-creator = Creador
@@ -924,7 +965,7 @@ search-conditions-dateModified = Fecha de modificación
 search-conditions-fulltextContent = Contenido del adjunto
 search-conditions-programmingLanguage = Lenguage de programación
 search-conditions-fileTypeID = Tipo de fichero adjunto
-search-conditions-attachmentStorageType = Attachment Storage Type
+search-conditions-attachmentStorageType = Tipo de almacenamiento de archivos adjuntos
 search-conditions-lastRead = Última lectura del archivo adjunto
 search-conditions-annotationText = Texto de la anotación
 search-conditions-annotationComment = Comentario de la anotación
@@ -937,7 +978,7 @@ search-conditions-submenu-attachment = Adjunto
 search-conditions-submenu-annotation = Anotación
 search-conditions-short-fulltextContent = Contenido
 search-conditions-short-fileTypeID = Tipo de archivo
-search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-attachmentStorageType = Tipo de almacenamiento
 search-conditions-short-lastRead = Última lectura
 search-conditions-short-annotationText = Texto
 search-conditions-short-annotationComment = Comentario
@@ -978,9 +1019,9 @@ file-type-video = Vídeo
 file-type-presentation = Presentación
 file-type-document = Documento
 file-type-ebook = Libro electrónico
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = Archivo guardado
+attachment-storage-type-linkedFile = Archivo enlazado
+attachment-storage-type-webLink = Enlace web
 post-upgrade-message = ¡Se le ha actualizado a <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Descubra <a data-l10n-name="new-features-link">las novedades</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -1004,8 +1045,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = El conector { -app-name } debe actualizarse para funcionar con esta versión de { -app-name }.
 userjs-pref-warning = Algunos ajustes de { -app-name } se han sobrescrito usando un método no compatible. { -app-name } lo revertirá y se reiniciará.
+migrate-extra-fields-progress-headline = Actualizando elementos…
 migrate-extra-fields-progress-message = Migración de nuevos campos desde el campo adicional
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indexación
+fulltext-indexing-progress-message = Los resultados de la búsqueda de texto completo pueden estar incompletos hasta que finalice la indexación.
 long-tag-fixer-window-title =
     .title = Dividir etiquetas
 long-tag-fixer-button-dont-split =
@@ -1019,18 +1062,34 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = Este complemento ha sido desactivado por { -app-name }.
 data-dir-unsupported-storage = Esto puede ocurrir si el directorio de datos de { -app-name } se encuentra en una carpeta de almacenamiento en la nube (OneDrive, Dropbox, etc.) o en un recurso compartido de red.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } no ha podido leer sus datos de inicio de sesión guardados, por lo que se han restablecido. Inicie sesión de nuevo en el panel { preferences-pane-account } de los ajustes de { -app-name }.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
-        [macOS] { -app-name } no ha podido acceder al llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el llavero esté accesible e inténtelo de nuevo.
-        [windows] { -app-name } no ha podido guardar sus credenciales de forma segura. Inténtelo de nuevo o reinicia { -app-name }.
-       *[other] { -app-name } no ha podido acceder a su llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el servicio de llavero esté en ejecución e inténtelo de nuevo.
+        [macos] { -app-name } no ha podido acceder al llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que el llavero esté accesible e inténtalo de nuevo.
+        [Windows] { -app-name } no ha podido utilizar el gestor de credenciales de { -os-name } para guardar sus credenciales de forma segura. Inténtelo de nuevo o reinicie { -app-name }.
+       *[Otro] { -app-name } no ha podido acceder a su llavero de { -os-name } para guardar sus credenciales de forma segura. Asegúrese de que se esté ejecutando un servicio de llavero, como GNOME Keyring o KWallet, e inténtelo de nuevo.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } no ha podido acceder al llavero de { -os-name } para leer sus credenciales guardadas. Asegúrese de que el llavero esté accesible e inténtelo de nuevo.
+        [Windows] { -app-name } no ha podido utilizar el gestor de credenciales de { -os-name } para leer sus credenciales guardadas. Inténtelo de nuevo o reinicie { -app-name }.
+       *[Otro] { -app-name } no ha podido acceder a su llavero de { -os-name } para leer sus credenciales guardadas. Asegúrese de que se esté ejecutando un servicio de llavero, como GNOME Keyring o KWallet, e inténtelo de nuevo.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } puede guardar sus credenciales sin cifrar. Cualquier persona que tenga acceso a la carpeta de su perfil de { -app-name } podría leerlas.
+os-keystore-save-unencrypted-button = Guardar de todos modos
 os-keystore-migrate-failed =
     { PLATFORM() ->
-        [macos] { -app-name } no ha podido acceder al llavero de { -os-name } para cifrar tus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que se pueda acceder al llavero y reinicia { -app-name }.
-        [windows] { -app-name } no ha podido cifrar tus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Reinicie { -app-name } e inténtalo de nuevo.
-       *[other] { -app-name } no ha podido acceder a su llavero de { -os-name } para cifrar sus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que el servicio de llavero esté en ejecución y reinicia { -app-name }.
+        [macOS] { -app-name } no ha podido acceder al llavero de { -os-name } para cifrar sus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que se pueda acceder al llavero y reinicie { -app-name }.
+        [Windows] { -app-name } no ha podido cifrar tus credenciales almacenadas. Tus credenciales permanecen almacenadas sin cifrar en el disco. Reinicie { -app-name } e inténtelo de nuevo.
+       *[Otro] { -app-name } no ha podido acceder a su llavero de { -os-name } para cifrar sus credenciales almacenadas. Sus credenciales permanecen almacenadas sin cifrar en el disco. Asegúrese de que se esté ejecutando un servicio de llavero, como GNOME Keyring o KWallet, y reinicie { -app-name }.
     }
 search-button =
     .label = Buscar
@@ -1174,3 +1233,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Deshacer { $action }
 menu-edit-redo-action = Rehacer { $action }
+local-api-authorize-title = Autorización de la API local
+local-api-authorize-text = «{ $appName }», una aplicación que se está ejecutando en tu equipo, quiere modificar tu biblioteca { -app-name }.

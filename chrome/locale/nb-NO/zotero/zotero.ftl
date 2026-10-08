@@ -56,6 +56,7 @@ general-clear = Fjern
 clear-button =
     .label = { general-clear }
 general-update = Oppdater
+general-reset-to-default = Gjenopprett til standardvalg
 general-back = Tilbake
 general-edit = Rediger
 general-cut = Klipp
@@ -73,6 +74,9 @@ general-more-information = Mer informasjon
 general-warning = Advarsel
 general-type-to-continue = Skriv «{ $text }» for å fortsette.
 general-continue = Fortsett
+general-allow = Tillat
+general-always-allow = Tillat alltid
+general-deny = Forby
 general-red = Rød
 general-orange = Oransje
 general-yellow = Gul
@@ -86,8 +90,8 @@ general-maroon = Rødbrun
 general-gray = Grå
 general-black = Svart
 general-loading = Laster inn...
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = Kontrollerer databasen…
+db-repairing = Reparerer databasen…
 citation-style-label = Henvisningsstil:
 language-label = Språk:
 menu-custom-group-submenu =
@@ -135,7 +139,7 @@ menu-view-columns-move-left =
 menu-view-columns-move-right =
     .label = Flytt kolonne til høyre
 menu-view-hide-context-annotation-rows =
-    .label = Skjul kommentarer uten treff
+    .label = Skjul kommentarer som ikke matcher
 menu-view-note-font-size =
     .label = Skriftstørrelse for notat
 menu-view-note-tab-font-size =
@@ -174,6 +178,10 @@ collections-menu-show-recently-read =
     .label = Vis { recently-read }
 item-menu-remove-from-recently-read =
     .label = Fjern fra { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Fjern alle sist lest datoer…
+recently-read-clear-all-confirm = Alle sist lest datoer i dette biblioteket vil bli slettet.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [one] { $count } samling valgt
@@ -324,6 +332,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = Fil endret navn til { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = Åpne kontekstmenyen
 itembox-button-merge =
@@ -379,7 +388,9 @@ file-interface-items-were-relinked =
         [one] Ett elementer ble koblet sammen
        *[other] { $numRelinked } elementer ble koblet sammen
     }
-import-mendeley-encrypted = Den valgte Mendeley-databasen kan ikke leses, sannsynligvis fordi den er kryptert. Se  <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero? (Engelsk)</a> for mer informasjon.
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = Det oppstod en feil ved import av den valgte filen med "{ $translator }". Kontroller at filen er gyldig, og prøv på nytt.
 import-online-intro = I neste trinn blir du bedt om å logge inn på { $targetAppOnline } og gi { -app-name } tilgang. Dette er nødvendig for å importere { $targetApp }-biblioteket ditt til { -app-name }.
 import-online-intro2 = { -app-name } vil aldri se eller lagre passordet ditt { $targetApp }.
@@ -428,7 +439,7 @@ rtfScan-complete-page-description = Zotero har nå gått gjennom dokumentet ditt
 rtfScan-action-find-match =
     .title = Velg matchende element
 rtfScan-action-accept-match =
-    .title = Godta dette treffet
+    .title = Godta denne matchen
 runJS-title = Kjør JavaScript
 runJS-editor-label = Kode:
 runJS-run = Kjør
@@ -475,6 +486,7 @@ styleEditor-editor =
     .aria-label = Redigeringsprogram for stiler
 styleEditor-preview =
     .aria-label = Forhåndsvisning
+stylePreview-generating = Lager forhåndsvisninger…
 publications-intro-page = Mine publikasjoner
 publications-intro = Elementer du legger til Mine publikasjoner vil bli vist på din profilside på zotero.org. Hvis du velger å inkludere vedlegg vil de bli gjort offentlig tilgjengelig under lisensen du angir. Legg kun til arbeid du selv har opprettet og inkluder vedlegg kun dersom du har rettighetene til å distribuere de og ønsker å gjøre det.
 publications-include-checkbox-files =
@@ -712,7 +724,7 @@ note-info-character-count = Tegntelling
 item-title-empty-note = Notat uten tittel
 attachment-preview-placeholder = Intet vedlegg å forhåndsvise
 attachment-rename-from-parent =
-    .tooltiptext = Endre navn på fil for å samsvare med overordnet element
+    .tooltiptext = Endre navn på fil for å matche overordnet element
 account-log-in = Logg inn
 account-not-logged-in-text = Logg inn på Zotero-kontoen din for å synkronisere dataene dine.
 account-error-login-session-expired = Påloggingsøkten din har utløpt. Prøv på nytt.
@@ -815,7 +827,7 @@ advanced-search-result-level-menu =
 advanced-search-result-level-prefix-root =
     .value = Finn
 advanced-search-join-prefix-root =
-    .value = finner
+    .value = som matcher
 advanced-search-result-level-any =
     .label = et hvilket som helst element
 advanced-search-result-level-item =
@@ -827,7 +839,7 @@ advanced-search-result-level-note =
 advanced-search-result-level-annotation =
     .label = kommentarer
 advanced-search-binding-menu =
-    .aria-label = Finn mot samme element
+    .aria-label = Match mot samme element
 advanced-search-binding-separate =
     .label = separat
 advanced-search-binding-same-attachment =
@@ -837,28 +849,28 @@ advanced-search-binding-same-note =
 advanced-search-binding-same-annotation =
     .label = i samme kommentar
 advanced-search-of-the-following =
-    .value = av følgende
+    .value = av det følgende
 advanced-search-binding-hint-attachment =
-    .value = Disse betingelsene kan samsvare med separate vedlegg.
+    .value = Disse betingelsene kan matche separate vedlegg.
 advanced-search-binding-hint-note =
-    .value = Disse betingelsene kan samsvare med separate notater.
+    .value = Disse betingelsene kan matche separate notater.
 advanced-search-binding-hint-annotation =
-    .value = Disse betingelsene kan samsvare med separate kommentarer.
-advanced-search-level-warning-mixed = Disse betingelsene kan ikke alle samsvare med samme element, så dette søket vil aldri gi noen resultater. Prøv å søke på «{ $matchAny }» blant dem, eller sett resultattypen til «{ $topLevelItems }».
+    .value = Disse betingelsene kan matche separate kommentarer.
+advanced-search-level-warning-mixed = Disse betingelsene kan ikke alle matche samme element, så dette søket vil aldri gi noen resultater. Prøv å søke på «{ $matchAny }» blant dem, eller sett resultattypen til «{ $topLevelItems }».
 advanced-search-level-warning-unreachable = Dette søket inneholder et søkevilkår som ikke kan brukes på den valgte resultattypen. Angi resultattypen til «{ $topLevelItems }», eller fjern det uforenlige søkevilkåret.
 advanced-search-group-warning-unreachable =
     En betingelse her kan ikke forekomme i samme { $entity ->
         [attachment] vedlegg
         [note] notat
        *[annotation] kommentar
-    }. Sammenlign disse separat, eller fjern den uforenlige betingelsen.
-advanced-search-group-warning-mixed = Disse betingelsene kan ikke alle samsvare med samme element, så denne gruppen vil aldri gi treff. Prøv å søke etter «{ $matchAny }» blant dem, eller sett resultattypen til «{ $topLevelItems }».
+    }. Match disse separat, eller fjern den uforenlige betingelsen.
+advanced-search-group-warning-mixed = Disse betingelsene kan ikke alle matche samme element, så denne gruppen vil aldri gi treff. Prøv å matche «{ $matchAny }» blant dem, eller sett resultattypen til «{ $topLevelItems }».
 advanced-search-bind-same-attachment =
-    .label = Finn det samme vedlegget
+    .label = Match det samme vedlegget
 advanced-search-bind-same-note =
-    .label = Finn det samme notatet
+    .label = Match det samme notatet
 advanced-search-bind-same-annotation =
-    .label = Finn den samme kommentaren
+    .label = Match den samme kommentaren
 advanced-search-conditions-menu =
     .aria-label = Søketilstand
     .label = { $label }
@@ -868,17 +880,46 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = Verdi
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = er tom
+search-operator-isNotEmpty = er ikke tom
 search-conditions-tooltip-fields = Felter:
 search-conditions-collection = Samling
 search-conditions-savedSearch = Lagret søk
 search-conditions-itemTypeID = Elementtype
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = Emneord
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = # av emneord
+search-conditions-numNotes = # av notater
+search-conditions-numAttachments = # av vedlegg
+search-conditions-numAnnotations = # av kommentarer
 search-conditions-note = Notat
 search-conditions-childNote = Underordnet notat
 search-conditions-creator = Opphaver
@@ -897,7 +938,7 @@ search-conditions-dateModified = Dato endret
 search-conditions-fulltextContent = Vedleggsinnhold
 search-conditions-programmingLanguage = Programmeringsspråk
 search-conditions-fileTypeID = Vedleggets filtype
-search-conditions-attachmentStorageType = Attachment Storage Type
+search-conditions-attachmentStorageType = Type lagret vedlegg
 search-conditions-lastRead = Vedlegg sist lest
 search-conditions-annotationText = Kommentartekst
 search-conditions-annotationComment = Merknad til kommentar
@@ -910,7 +951,7 @@ search-conditions-submenu-attachment = Vedlegg
 search-conditions-submenu-annotation = Kommentar
 search-conditions-short-fulltextContent = Innhold
 search-conditions-short-fileTypeID = Filtype
-search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-attachmentStorageType = Type lagret
 search-conditions-short-lastRead = Sist lest
 search-conditions-short-annotationText = Tekst
 search-conditions-short-annotationComment = Merknad
@@ -948,9 +989,9 @@ file-type-video = Video
 file-type-presentation = Presentasjon
 file-type-document = Dokument
 file-type-ebook = E-bok
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = Lagret fil
+attachment-storage-type-linkedFile = Lenket fil
+attachment-storage-type-webLink = Nettlenke
 post-upgrade-message = Du har blitt oppgradert til <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! Lær om <a data-l10n-name="new-features-link">hva som er nytt </a>
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -974,8 +1015,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } Tilknytter må oppdateres for å fungere med denne versjonen av { -app-name }.
 userjs-pref-warning = Noen { -app-name }-innstillinger er blitt overskrevet ved hjelp av en metode som ikke støttes. { -app-name } vil tilbakestille dem og starte på nytt.
+migrate-extra-fields-progress-headline = Oppdaterer element…
 migrate-extra-fields-progress-message = Migrerer nye felt fra Ekstra-feltet
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indekserer
+fulltext-indexing-progress-message = Fulltekst søkeresultat kan være ufullstendig før indekseringen er ferdig.
 long-tag-fixer-window-title =
     .title = Del opp emneord
 long-tag-fixer-button-dont-split =
@@ -986,26 +1029,42 @@ normalize-attachment-titles-title = Normaliser vedleggstitler
 normalize-attachment-titles-text =
     { -app-name } endrer automatisk navn på filer på disken ved hjelp av metadata fra overordnet element, men bruker separate, enklere titler som «Fulltekst-PDF», «Preprint-PDF» eller «PDF» for primære vedlegg for å holde elementlisten ryddigere og unngå duplisering av informasjon.
     
-    I eldre versjoner av { -app-name }, samt ved bruk av visse programtillegg, kunne vedleggstitler endres unødvendig for å samsvare med filnavnene.
+    I eldre versjoner av { -app-name }, samt ved bruk av visse programtillegg, kunne vedleggstitler endres unødvendig for å matche filnavnene.
     
-    Ønsker du å oppdatere de valgte vedleggene for å bruke enklere titler? Bare primære vedlegg med titler som samsvarer med filnavnet vil bli endret.
+    Ønsker du å oppdatere de valgte vedleggene for å bruke enklere titler? Bare primære vedlegg med titler som matcher filnavnet vil bli endret.
 banner-close-button =
     .aria-label = Avvis varsel
 plugins-blocked-plugin =
     .message = Dette programtillegget har blitt deaktivert av { -app-name }.
 data-dir-unsupported-storage = Dette kan skje hvis datamappen til { -app-name } ligger i en mappe i skylagring (OneDrive, Dropbox osv.) eller på en nettverksressurs.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } klarte ikke å lese de lagrede påloggingsopplysningene dine, så de er blitt tilbakestilt. Vennligst logg inn på nytt i { preferences-pane-account }-panelet i innstillingene for { -app-name }.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen for å lagre påloggingsopplysningene dine på en sikker måte. Sørg for at nøkkelringen er tilgjengelig, og prøv på nytt.
-        [windows] { -app-name } klarte ikke å lagre påloggingsopplysningene dine på en sikker måte. Prøv på nytt eller start { -app-name } på nytt.
-       *[other] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen din for å lagre påloggingsopplysningene dine på en sikker måte. Sørg for at en nøkkelringstjeneste kjører, og prøv på nytt.
+        [windows] { -app-name } kunne ikke bruke { -os-name }-påloggingsbehandleren til å lagre påloggingsopplysningene dine på en sikker måte. Prøv på nytt eller start { -app-name } på nytt.
+       *[other] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen din for å lagre påloggingsopplysningene dine på en sikker måte. Sørg for at en nøkkelringstjeneste som GNOME Keyring eller KWallet kjører, og prøv på nytt.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen for å lese dine lagrede påloggingsopplysninger. Sørg for at nøkkelringen er tilgjengelig, og prøv på nytt.
+        [windows] { -app-name } kunne ikke bruke { -os-name }-påloggingsbehandleren til å lese dine lagrede påloggingsopplysninger. Prøv på nytt eller start { -app-name } på nytt.
+       *[other] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen din for å lese de lagrede påloggingsopplysningene dine. Sørg for at en nøkkelringstjeneste som GNOME Keyring eller KWallet kjører, og prøv på nytt.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } kan i stedet lagre påloggingsopplysningene dine ukryptert. Alle som har tilgang til { -app-name }-profilmappen din, vil da kunne lese dem.
+os-keystore-save-unencrypted-button = Lagre likevel
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen for å kryptere dine lagrede påloggingsopplysninger. Påloggingsopplysningene dine forblir lagret ukryptert på disken. Sørg for at nøkkelringen din er tilgjengelig, og start { -app-name } på nytt.
         [windows] { -app-name } klarte ikke å kryptere dine lagrede påloggingsopplysninger. Påloggingsopplysningene dine forblir lagret ukryptert på disken. Start { -app-name } på nytt og prøv igjen.
-       *[other] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen for å kryptere de lagrede påloggingsopplysningene dine. Påloggingsopplysningene dine forblir lagret ukryptert på disken. Sørg for at en nøkkelringstjeneste kjører, og start { -app-name } på nytt.
+       *[other] { -app-name } fikk ikke tilgang til { -os-name }-nøkkelringen din for å kryptere de lagrede påloggingsopplysningene dine. Påloggingsopplysningene dine forblir lagret ukryptert på disken. Sørg for at en nøkkelringstjeneste som GNOME Keyring eller KWallet kjører, og start { -app-name } på nytt.
     }
 search-button =
     .label = Søk
@@ -1131,3 +1190,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Angre { $action }
 menu-edit-redo-action = Gjør om { $action }
+local-api-authorize-title = Lokal API-autorisasjon
+local-api-authorize-text = “{ $appName }”, et program som kjører på datamaskinen din, ønsker å endre { -app-name }-biblioteket ditt.

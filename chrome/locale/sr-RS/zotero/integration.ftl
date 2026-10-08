@@ -9,79 +9,78 @@ integration-editBibliography-add-button =
 integration-editBibliography-remove-button =
     .aria-label = { general-remove }
 integration-editBibliography-editor =
-    .aria-label = Edit reference
--integration-editBibliography-include-uncited = To include an uncited item in your bibliography, select it from the items list and press { general-add }.
--integration-editBibliography-exclude-cited = You can also exclude a cited item by selecting it from the list of references and pressing { general-remove }.
--integration-editBibliography-edit-reference = To change how a reference is formatted, use the text editor.
+    .aria-label = Uredi referencu
+-integration-editBibliography-include-uncited = Da biste uključili necitiranu stavku u svoju bibliografiju, izaberite je sa liste stavki i pritisnite { general-add }.
+-integration-editBibliography-exclude-cited = Takođe možete isključiti citiranu stavku tako što ćete je izabrati sa liste referenci i pritisnuti { general-remove }.
+-integration-editBibliography-edit-reference = Da biste promenili formatiranje reference, koristite uređivač teksta.
 integration-editBibliography-wrapper =
-    .aria-label = Edit Bibliography dialog
+    .aria-label = Dijalog za uređivanje bibliografije
     .aria-description =
         { -integration-editBibliography-include-uncited }
         { -integration-editBibliography-exclude-cited }
         { -integration-editBibliography-edit-reference }
-integration-citationDialog = Citation Dialog
-integration-citationDialog-section-open = Open Documents ({ $count })
-integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
-integration-citationDialog-section-selectedAnnotations = Selected Annotations
+integration-citationDialog = Dijalog za citiranje
+integration-citationDialog-section-open = Otvoreni dokumenti ({ $count })
+integration-citationDialog-section-selected = Izabrane stavke ({ $count }/{ $total })
+integration-citationDialog-section-selectedAnnotations = Izabrane napomene
 integration-citationDialog-section-selectedItems = Изабране ставке
 integration-citationDialog-section-cited =
     { $count ->
-        [0] Cited Items
-       *[other] Cited Items ({ $count })
+        [0] Citirane stavke
+       *[other] Citirane stavke ({ $count })
     }
-integration-citationDialog-details-suffix = Suffix
-integration-citationDialog-details-prefix = Prefix
+integration-citationDialog-details-suffix = Sufiks
+integration-citationDialog-details-prefix = Prefiks
 integration-citationDialog-details-suppressAuthor = Прескочи аутора
-integration-citationDialog-details-locator-info = Tip: You can also type page numbers and other locators directly into the main field. <a data-l10n-name="docs-link">Learn more</a>
-integration-citationDialog-details-includeComments = Include Comments
+integration-citationDialog-details-locator-info = Savet: Možete i direktno uneti brojeve stranica i druge lokatore u glavno polje. <a data-l10n-name="docs-link">Saznajte više</a>
+integration-citationDialog-details-includeComments = Uključi komentare
 integration-citationDialog-details-remove = { general-remove }
 integration-citationDialog-details-done =
     .label = { general-done }
 integration-citationDialog-details-showInLibrary = { general-show-in-library }
-integration-citationDialog-settings-title = Citation Settings
+integration-citationDialog-settings-title = Podešavanja citiranja
 integration-citationDialog-lib-message-citation =
     { $search ->
-        [true] No selected, open, or cited items match the current search
-       *[other] No selected or open items
+        [true] Nijedna izabrana, otvorena ili citirana stavka se ne poklapa sa trenutnom pretragom
+       *[other] Nema izabranih ili otvorenih stavki
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] No selected notes match the current search
-       *[other] No notes are selected
+        [true] Nijedna izabrana ili otvorena beleška se ne poklapa sa trenutnom pretragom
+       *[other] Nema izabranih ili otvorenih beleški
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
-        [true] No items with annotations match the current search
-       *[other] No selected or open items with annotations
+        [true] Nijedna stavka sa napomenama ne odgovara trenutnoj pretrazi
+       *[other] Nema izabranih ili otvorenih stavki sa napomenama
     }
-integration-citationDialog-settings-keepSorted = Keep sources sorted
-integration-citationDialog-preview-empty = Преглед
-integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-settings-keepSorted = Zadrži izvore poređane
+integration-citationDialog-preview-error = Pregled nije dostupan
 integration-citationDialog-btn-displayPreview =
-    .title = Display citation preview
+    .title = Prikaži pregled citata
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Библиотека
-integration-citationDialog-mode-list = List
+integration-citationDialog-mode-list = Lista
 integration-citationDialog-btn-type-citation =
     .title = Додај/уреди цитат
 integration-citationDialog-btn-type-add-note =
     .title = Додај белешку
 integration-citationDialog-btn-type-annotations =
-    .title = Add Annotations
+    .title = Dodaj napomene
 integration-citationDialog-btn-accept =
     .title = { general-accept }
 integration-citationDialog-btn-cancel =
     .title = { general-cancel }
-integration-citationDialog-general-instructions = Use Left/Right-Arrow to navigate the items of this citation. Press Tab to select items to add to this citation.
-integration-citationDialog-enter-to-add-item = Press { return-or-enter } to add this item to the citation.
-integration-citationDialog-search-for-items = Search for items to add to the citation
+integration-citationDialog-general-instructions = Koristite strelice levo/desno za navigaciju kroz stavke ovog citata. Pritisnite Tab da izaberete stavke za dodavanje u ovaj citat.
+integration-citationDialog-enter-to-add-item = Pritisnite { return-or-enter } da dodate ovu stavku u citat.
+integration-citationDialog-search-for-items = Pretražite stavke za dodavanje u citat
 integration-citationDialog-aria-bubble =
-    .aria-description = This item is included in the citation. Press space bar to customize the item. { integration-citationDialog-general-instructions }
+    .aria-description = Ova stavka je uključena u citat. Pritisnite razmaknicu da prilagodite stavku. { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
-    .aria-description = Press Tab to select items to add to this citation. Press Escape to discard the changes and close the dialog.
-integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+    .aria-description = Pritisnite Tab da izaberete stavke za dodavanje u ovaj citat. Pritisnite Escape da odbacite izmene i zatvorite dijalog.
+integration-citationDialog-just-added-input-placeholder = Ukucajte „10-15” da citirate stranice, ili pretražite stavke
 integration-citationDialog-just-added-input-citation =
     .placeholder = { $placeholder }
     .title = { $title }
@@ -90,28 +89,36 @@ integration-citationDialog-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = { integration-citationDialog-general-instructions }
 integration-citationDialog-single-input-add-note =
-    .placeholder = Search for a note to insert into the document
+    .placeholder = Pretražite belešku za umetanje u dokument
 integration-citationDialog-single-input-annotations =
-    .placeholder = Search for annotations to insert into the document
+    .placeholder = Pretražite napomene za umetanje u dokument
 integration-citationDialog-aria-item-list =
-    .aria-description = Use Up/Down Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Koristite strelice gore/dole da promenite izbor stavke. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-aria-item-library =
-    .aria-description = Use Right/Left Arrow to change item selection. { integration-citationDialog-enter-to-add-item }
+    .aria-description = Koristite strelice desno/levo da promenite izbor stavke. { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-collections-table =
-    .aria-label = Collections.
-    .aria-description = Select a collection and press Tab to navigate its items.
+    .aria-label = Zbirke.
+    .aria-description = Izaberite zbirku i pritisnite Tab za navigaciju kroz njene stavke.
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
-    .aria-label = This item has been added to the citation. Press { return-or-enter } to add it again or { delete-or-backspace } to remove it.
-integration-citationDialog-add-all = Add all
+    .title = { integration-citationDialog-add-to-citation-tooltip }
+    .aria-label = Ova stavka je dodata u citat. Pritisnite { return-or-enter } da je ponovo dodate ili { delete-or-backspace } da je uklonite.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Dodaj u citat
+        [few] Dodaj { $count } stavke u citat
+       *[other] Dodaj { $count } stavki u citat
+    }
+integration-citationDialog-add-all = Dodaj sve
 integration-citationDialog-collapse-section =
     .title = Скупи одељак
-integration-citationDialog-bubble-empty = (no title)
-integration-citationDialog-add-to-citation = Add to Citation
+integration-citationDialog-bubble-empty = (bez naslova)
+integration-citationDialog-add-to-citation = Dodaj u citat
 integration-citationDialog-annotations-filter =
-    .placeholder = Filter annotations
-integration-citationDialog-annotations-empty = Select an item, attachment, or annotation to view annotation details
+    .placeholder = Filtriraj napomene
+integration-citationDialog-annotations-empty = Izaberite stavku, prilog ili napomenu da biste videli detalje napomene
 integration-prefs-displayAs-label = Прикажи цитате као:
 integration-prefs-footnotes =
     .label = Фусноте
@@ -135,12 +142,12 @@ integration-prefs-automaticJournalAbbeviations-description = Поље „Скр�
 integration-prefs-exportDocument =
     .label = Пребаците се на други програм за обраду текста…
 integration-error-unable-to-find-winword = { -app-name } не може да пронађе покренути Word програм.
-integration-warning-citation-changes-will-be-lost = You have made changes to a citation that will be lost if you continue.
-integration-warning-bibliography-changes-will-be-lost = You have made changes to the bibliography that will be lost if you continue.
-integration-warning-documentPreferences-changes-will-be-lost = You have made changes to the document preferences that will be lost if you continue.
-integration-warning-discard-changes = Discard Changes
-integration-warning-command-is-running = A word processor integration command is already running.
+integration-warning-citation-changes-will-be-lost = Napravili ste izmene u citatu koje će biti izgubljene ako nastavite.
+integration-warning-bibliography-changes-will-be-lost = Napravili ste izmene u bibliografiji koje će biti izgubljene ako nastavite.
+integration-warning-documentPreferences-changes-will-be-lost = Napravili ste izmene u podešavanjima dokumenta koje će biti izgubljene ako nastavite.
+integration-warning-discard-changes = Odbaci izmene
+integration-warning-command-is-running = Komanda za integraciju sa procesorom teksta je već pokrenuta.
 first-run-guidance-citationDialog =
-    Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
+    Kliknite na oblačić ili koristite tastere ← i ↓ da biste videli detalje citata i prilagodili opcije kao što su broj stranice, prefiks i sufiks.
     
-    You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.
+    Takođe možete dodati broj stranice ili drugi lokator tako što ćete ga uključiti u svoje termine za pretragu (npr. „istorija { $locator }”) ili tako što ćete ga ukucati nakon oblačića i pritisnuti { return-or-enter }.

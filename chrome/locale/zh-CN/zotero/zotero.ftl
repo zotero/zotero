@@ -56,6 +56,7 @@ general-clear = 清空
 clear-button =
     .label = { general-clear }
 general-update = 更新
+general-reset-to-default = 重置为默认值
 general-back = 后退
 general-edit = 编辑
 general-cut = 剪切
@@ -73,6 +74,9 @@ general-more-information = 更多信息
 general-warning = 警告
 general-type-to-continue = 输入 “{ $text }” 以继续
 general-continue = 继续
+general-allow = 允许
+general-always-allow = 始终允许
+general-deny = 拒绝
 general-red = 红色
 general-orange = 橙色
 general-yellow = 黄色
@@ -86,8 +90,8 @@ general-maroon = 深红色
 general-gray = 灰色
 general-black = 黑色
 general-loading = 加载中…
-db-checking-integrity = Checking database integrity…
-db-repairing = Repairing database…
+db-checking-integrity = 正在检查数据库完整性…
+db-repairing = 正在修复数据库…
 citation-style-label = 参考文献样式:
 language-label = 语言：
 menu-custom-group-submenu =
@@ -173,6 +177,10 @@ collections-menu-show-recently-read =
     .label = 显示 { recently-read }
 item-menu-remove-from-recently-read =
     .label = 从 { recently-read } 中移除…
+collections-menu-clear-all-last-read =
+    .label = 清除所有最后阅读时间…
+recently-read-clear-all-confirm = 此文库中的所有最后阅读时间都将被删除。
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
        *[other] 已选择 { $count } 个分类
@@ -307,6 +315,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = 文件已重命名为 { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = 打开上下文菜单
 itembox-button-merge =
@@ -362,7 +371,9 @@ file-interface-items-were-relinked =
         [one] 已重新链接 1 个条目
        *[other] 已重新链接 { $numRelinked } 个条目
     }
-import-mendeley-encrypted = 无法读取所选的 Mendeley 数据库，可能是因为它已加密。请参阅<a data-l10n-name="mendeley-import-kb">如何将 Mendeley 库导入 Zotero？</a>了解更多信息。
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = 使用“{ $translator }”导入所选文件时发生错误。请确保该文件有效，然后重试。
 import-online-intro = 在下一步中，您需要登录 { $targetAppOnline } 并授予 { -app-name } 访问权限。这是将您的 { $targetApp } 库导入到 { -app-name } 所必需的。
 import-online-intro2 = { -app-name } 永远不会知道或存储您的 { $targetApp } 密码。
@@ -379,7 +390,7 @@ items-table-cell-notes =
         { $count ->
            *[other] { $count } 个笔记
         }
-items-column-added-by = 创建人
+items-column-added-by = 添加人
 items-column-modified-by = 修改人
 items-column-last-read = 最后阅读时间
 report-error =
@@ -457,6 +468,7 @@ styleEditor-editor =
     .aria-label = 样式编辑器
 styleEditor-preview =
     .aria-label = 预览
+stylePreview-generating = Generating previews…
 publications-intro-page = 我的出版物
 publications-intro = 你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。
 publications-include-checkbox-files =
@@ -726,7 +738,7 @@ item-pane-header-none =
 item-pane-header-title =
     .label = 标题
 item-pane-header-titleCreatorYear =
-    .label = 标题、创建者、年份
+    .label = 标题、创作者、年份
 item-pane-header-bibEntry =
     .label = 参考文献表条目
 item-pane-header-more-options =
@@ -802,7 +814,7 @@ advanced-search-result-level-annotation =
 advanced-search-binding-menu =
     .aria-label = 与同一条目匹配
 advanced-search-binding-separate =
-    .label = separately
+    .label = 单独地
 advanced-search-binding-same-attachment =
     .label = 在同一附件中
 advanced-search-binding-same-note =
@@ -817,15 +829,15 @@ advanced-search-binding-hint-note =
     .value = 这些条件可以匹配不同的笔记。
 advanced-search-binding-hint-annotation =
     .value = 这些条件可以匹配不同的注释。
-advanced-search-level-warning-mixed = These conditions cannot all match the same item, so this search will never return results. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
-advanced-search-level-warning-unreachable = This search has a condition that cannot apply to the chosen result type. Set the result type to “{ $topLevelItems }” or remove the incompatible condition.
+advanced-search-level-warning-mixed = 这些条件无法全部匹配同一条目，因此此搜索将永远不会返回结果。请尝试匹配其中的“{ $matchAny }”项，或将结果类型设置为“{ $topLevelItems }”。
+advanced-search-level-warning-unreachable = 此搜索包含一个无法应用于所选结果类型的条件。请将结果类型设置为“{ $topLevelItems }”，或移除不兼容的条件。
 advanced-search-group-warning-unreachable =
-    A condition here cannot be in the same { $entity ->
-        [attachment] attachment
-        [note] note
-       *[annotation] annotation
-    }. Match these separately or remove the incompatible condition.
-advanced-search-group-warning-mixed = These conditions cannot all match the same item, so this group will never match. Try matching “{ $matchAny }” of them, or set the result type to “{ $topLevelItems }”.
+    这里的某个条件不能与同一 { $entity ->
+        [attachment] 附件
+        [note] 笔记
+       *[annotation] 注释
+    }共存。请分别匹配这些条件，或移除不兼容的条件。
+advanced-search-group-warning-mixed = 这些条件无法同时匹配同一个条目，因此该组永远不会匹配。请尝试匹配其中的“{ $matchAny }”项，或将结果类型设置为“{ $topLevelItems }”。
 advanced-search-bind-same-attachment =
     .label = 匹配相同的附件
 advanced-search-bind-same-note =
@@ -841,20 +853,49 @@ advanced-search-operators-menu =
 advanced-search-condition-input =
     .aria-label = 值
     .label = { $label }
-search-operator-isEmpty = is empty
-search-operator-isNotEmpty = is not empty
+search-operator-isEmpty = 为空
+search-operator-isNotEmpty = 不为空
 search-conditions-tooltip-fields = 字段：
 search-conditions-collection = 分类
 search-conditions-savedSearch = 保存的搜索
 search-conditions-itemTypeID = 条目类型
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = 标签
-search-conditions-numTags = # of Tags
-search-conditions-numNotes = # of Notes
-search-conditions-numAttachments = # of Attachments
-search-conditions-numAnnotations = # of Annotations
+search-conditions-numTags = 标签数量
+search-conditions-numNotes = 笔记数量
+search-conditions-numAttachments = 附件数量
+search-conditions-numAnnotations = 注释数量
 search-conditions-note = 笔记
 search-conditions-childNote = 子笔记
-search-conditions-creator = 创建者
+search-conditions-creator = 创作者
 search-conditions-thesisType = 论文类型
 search-conditions-reportType = 报告类型
 search-conditions-videoRecordingFormat = 视频格式
@@ -870,7 +911,7 @@ search-conditions-dateModified = 修改日期
 search-conditions-fulltextContent = 附件内容
 search-conditions-programmingLanguage = 编程语言
 search-conditions-fileTypeID = 附件类型
-search-conditions-attachmentStorageType = Attachment Storage Type
+search-conditions-attachmentStorageType = 附件存储类型
 search-conditions-lastRead = 附件最后阅读时间
 search-conditions-annotationText = 文本注释
 search-conditions-annotationComment = 注释评论
@@ -878,12 +919,12 @@ search-conditions-annotationType = 注释类型
 search-conditions-annotationColor = 注释颜色
 search-conditions-annotationAuthor = 注释作者
 search-conditions-anyField = 任何字段
-search-conditions-titleCreatorYear = 标题、创建者、年份
+search-conditions-titleCreatorYear = 标题、创作者、年份
 search-conditions-submenu-attachment = 附件
 search-conditions-submenu-annotation = 注释
 search-conditions-short-fulltextContent = 内容
 search-conditions-short-fileTypeID = 音频文件类型
-search-conditions-short-attachmentStorageType = Storage Type
+search-conditions-short-attachmentStorageType = 存储类型
 search-conditions-short-lastRead = 最后阅读时间
 search-conditions-short-annotationText = 文本
 search-conditions-short-annotationComment = 评论
@@ -918,9 +959,9 @@ file-type-video = 视频
 file-type-presentation = 演示文档
 file-type-document = 文档
 file-type-ebook = 电子书
-attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-storedFile = 存储文件
+attachment-storage-type-linkedFile = 链接的文件
+attachment-storage-type-webLink = 网页链接
 post-upgrade-message = 你已升级到 <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version } </span>！了解一下<a data-l10n-name="new-features-link">新特性</a>。
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -944,8 +985,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = { -app-name } Connector 必须更新才能与该版本的 { -app-name } 兼容。
 userjs-pref-warning = 某些 { -app-name } 设置已通过不支持的方法被覆盖。{ -app-name } 将恢复这些设置并重新启动。
+migrate-extra-fields-progress-headline = 更新条目…
 migrate-extra-fields-progress-message = 从其他字段迁移至新字段
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = 正在索引
+fulltext-indexing-progress-message = 全文搜索结果在索引完成之前可能不完整。
 long-tag-fixer-window-title =
     .title = 拆分标签
 long-tag-fixer-button-dont-split =
@@ -964,18 +1007,34 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = 此插件已被 { -app-name } 禁用。
 data-dir-unsupported-storage = 如果 { -app-name } 的数据目录位于云存储文件夹（如OneDrive、Dropbox等）或网络共享位置，则可能会出现这种情况。
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } 无法读取您保存的登录信息，因此已重置。请在 { -app-name } 设置的 { preferences-pane-account } 窗格中重新登录。
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 search-button =
     .label = 搜索
@@ -1030,8 +1089,7 @@ undo-action-restore-collection =
     }
 undo-action-restore-objects =
     { $count ->
-        [one] Restore Object
-       *[other] Restore { $count } Objects
+       *[other] 恢复 { $count } 个对象
     }
 undo-action-add-to-collection =
     { $count ->
@@ -1063,10 +1121,10 @@ undo-action-remove-tags-from-item =
     }
 undo-action-remove-all-tags = 删除所有标签
 undo-action-edit-note = 编辑笔记
-undo-action-add-creator = 添加创建者
-undo-action-remove-creator = 移除创建者
-undo-action-edit-creator = 编辑创建者
-undo-action-reorder-creator = 重新排序创建者
+undo-action-add-creator = 添加创作者
+undo-action-remove-creator = 移除创作者
+undo-action-edit-creator = 编辑创作者
+undo-action-reorder-creator = 重新排序创作者
 undo-action-change-type = 更改条目类型
 undo-action-change-parent-item =
     { $count ->
@@ -1084,3 +1142,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = 撤销 { $action }
 menu-edit-redo-action = 重做 { $action }
+local-api-authorize-title = 本地 API 授权
+local-api-authorize-text = 正在您计算机上运行的应用程序“{ $appName }”想要修改您的{ -app-name } 文库。

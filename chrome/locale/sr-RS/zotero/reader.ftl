@@ -1,7 +1,7 @@
 reader-annotations = Напомене
 reader-show-annotations = Прикажи напомене
 reader-search-annotations = Претражи напомене
-reader-search-outline = Search Outline
+reader-search-outline = Pretraži pregled
 reader-no-annotations = Направите напомену да би је видели у бочној траци
 reader-no-extracted-text = Није извучен текст
 reader-add-comment = Додај коментар
@@ -18,13 +18,17 @@ reader-add-note = Додај белешку
 reader-add-text = Додај текст
 reader-select-area = Изабери подручје
 reader-highlight-annotation = Истакнута забелешка
-reader-highlight-annotation-short = Highlight
+reader-highlight-annotation-short = Istakni
 reader-underline-annotation = Подвучена забелешка
 reader-underline-annotation-short = Подвучено
 reader-note-annotation = Забелешка са коментаром
+reader-note-annotation-short = Белешка
 reader-text-annotation = Текстуална забелешка
+reader-text-annotation-short = Tekst
 reader-image-annotation = Забелешка са сликом
-reader-ink-annotation = Ink Annotation
+reader-image-annotation-short = Слика
+reader-ink-annotation = Napomena mastilom
+reader-ink-annotation-short = Mastilo
 reader-search-result-index = Резултати претраге
 reader-search-result-total = Сви резултати претраге
 reader-draw = Нацртај
@@ -45,19 +49,21 @@ reader-page = Страница
 reader-location = Локација
 reader-read-only = Само за читање
 reader-prompt-transfer-from-pdf-title = Увези напомене
-reader-prompt-transfer-from-pdf-text = Annotations stored in the PDF file will be moved to { $target }.
+reader-prompt-transfer-from-pdf-text = Napomene sačuvane u PDF datoteci biće premeštene u { $target }.
 reader-prompt-password-protected = Ова радња није подржана у ПДФ датотекама које су заштићене лозинком.
 reader-prompt-delete-pages-title = Обриши странице
 reader-prompt-delete-pages-text =
     { $count ->
-        [one] Are you sure you want to delete { $count } page from the PDF file?
-       *[other] Are you sure you want to delete { $count } pages from the PDF file?
+        [one] Da li ste sigurni da želite da obrišete { $count } stranicu iz PDF datoteke?
+        [few] Da li ste sigurni da želite da obrišete { $count } stranice iz PDF datoteke?
+       *[other] Da li ste sigurni da želite da obrišete { $count } stranica iz PDF datoteke?
     }
-reader-prompt-delete-annotations-title = Delete Annotations
+reader-prompt-delete-annotations-title = Obriši napomene
 reader-prompt-delete-annotations-text =
     { $count ->
-        [one] Are you sure you want to delete the selected annotation?
-       *[other] Are you sure you want to delete the selected annotations?
+        [one] Da li ste sigurni da želite da obrišete izabranu napomenu?
+        [few] Da li ste sigurni da želite da obrišete izabrane napomene?
+       *[other] Da li ste sigurni da želite da obrišete izabrane napomene?
     }
 reader-rotate-left = Ротирај улево
 reader-rotate-right = Ротирај удесно
@@ -103,48 +109,48 @@ reader-convert-to-underline = Претвори у подвучено
 reader-size = Величина
 reader-merge = Споји
 reader-copy-link = Копирај везу
-reader-theme-original = Original
-reader-theme-snow = Snow
-reader-theme-sepia = Sepia
+reader-theme-original = Originalno
+reader-theme-snow = Sneg
+reader-theme-sepia = Sepija
 reader-theme-dark = Тамно
 reader-theme-black = Црно
-reader-add-theme = Add Theme
-reader-theme-invert-images = Invert Images
-reader-scroll-mode = Scrolling
-reader-spread-mode = Spreads
-reader-flow-mode = Page Layout
+reader-add-theme = Dodaj temu
+reader-theme-invert-images = Invertuj slike
+reader-scroll-mode = Pomeranje
+reader-spread-mode = Dvolisno
+reader-flow-mode = Raspored stranice
 reader-columns = Колоне
-reader-split-view = Split View
-reader-themes = Themes
-reader-vertical = Vertical
-reader-horizontal = Horizontal
-reader-wrapped = Wrapped
+reader-split-view = Podeljeni prikaz
+reader-themes = Teme
+reader-vertical = Vertikalno
+reader-horizontal = Horizontalno
+reader-wrapped = Prelomljeno
 reader-none = Ништа
-reader-odd = Odd
-reader-even = Even
+reader-odd = Neparno
+reader-even = Parno
 reader-paginated = По страницама
 reader-scrolled = Листање
-reader-single = Single
-reader-double = Double
-reader-theme-name = Theme Name:
-reader-background = Background:
-reader-foreground = Foreground:
-reader-reading-mode = Reading Mode
-reader-reading-mode-not-supported = Reading Mode is not supported in this document.
+reader-single = Jednostruko
+reader-double = Dvostruko
+reader-theme-name = Ime teme:
+reader-background = Pozadina:
+reader-foreground = Prednji plan:
+reader-reading-mode = Režim čitanja
+reader-reading-mode-not-supported = Režim čitanja nije podržan u ovom dokumentu.
 reader-clear-selection = Очисти избор
-reader-epub-encrypted = This ebook is encrypted and cannot be opened.
+reader-epub-encrypted = Ova e-knjiga je šifrovana i ne može se otvoriti.
 reader-move-annotation-start-key =
     { PLATFORM() ->
         [macos] { general-key-command }
        *[other] { general-key-alt }
     }
 reader-a11y-move-annotation = Користите стрелице тастатуре да се крећете кроз забелешке.
-reader-a11y-edit-text-annotation = To move the end of the text annotation, hold { general-key-shift } and use the left/right arrow keys. To move the start of the annotation, hold { general-key-shift }-{ reader-move-annotation-start-key } and use the arrow keys.
+reader-a11y-edit-text-annotation = Da biste pomerili kraj tekstualne napomene, držite { general-key-shift } i koristite tastere sa strelicama levo/desno. Da biste pomerili početak napomene, držite { general-key-shift }-{ reader-move-annotation-start-key } i koristite tastere sa strelicama.
 reader-a11y-resize-annotation = Да промените величину забелешке, држите { general-key-shift } и користите стрелице.
 reader-a11y-annotation-popup-appeared = Користите Tab да се крећете кроз искачуће забелешке.
 reader-a11y-annotation-created = { $type } је направљена.
 reader-a11y-annotation-selected = { $type } је изабрана.
--reader-a11y-textual-annotation-instruction = To annotate text via the keyboard, first use “{ reader-find-in-document }” to locate the phrase, and then press { general-key-control }-{ option-or-alt }-{ $number } to turn the search result into an annotation.
+-reader-a11y-textual-annotation-instruction = Da biste dodali napomenu u tekst pomoću tastature, prvo koristite „{ reader-find-in-document }” da pronađete frazu, a zatim pritisnite { general-key-control }-{ option-or-alt }-{ $number } da pretvorite rezultat pretrage u napomenu.
 -reader-a11y-annotation-instruction = Да додате ову забелешку у документ, отворите документ и притисните { general-key-control }-{ option-or-alt }-{ $number }.
 reader-toolbar-highlight =
     .aria-description = { -reader-a11y-textual-annotation-instruction(number: 1) }
@@ -169,94 +175,96 @@ reader-find-in-document-input =
     .placeholder = { reader-find-in-document }
     .aria-description = Да претворите резултат претраге у истакнуту забелешку, притисните { general-key-control }-{ option-or-alt }-1. Да претворите резултат претраге у подвучену забелешку, притисните { general-key-control }-{ option-or-alt }-2.
 reader-import-from-epub =
-    .label = Import Ebook Annotations…
-reader-import-from-epub-prompt-title = Import Ebook Annotations
+    .label = Uvezi napomene iz e-knjige…
+reader-import-from-epub-prompt-title = Uvezi napomene iz e-knjige
 reader-import-from-epub-prompt-text =
-    { -app-name } found { $count ->
-        [one] { $count } { $tool } annotation
-       *[other] { $count } { $tool } annotations
-    }, last edited { $lastModifiedRelative }.
+    { -app-name } je pronašao { $count ->
+        [one] { $count } { $tool } napomenu
+        [few] { $count } { $tool } napomene
+       *[other] { $count } { $tool } napomena
+    }, poslednji put izmenjeno { $lastModifiedRelative }.
     
-    Any { -app-name } annotations that were previously imported from this ebook will be updated.
+    Sve { -app-name } napomene koje su prethodno uvezene iz ove e-knjige biće ažurirane.
 reader-import-from-epub-no-annotations-current-file =
-    This ebook does not appear to contain any importable annotations.
+    Izgleda da ova e-knjiga ne sadrži napomene koje se mogu uvesti.
     
-    { -app-name } can import ebook annotations created in Calibre and KOReader.
+    { -app-name } može da uveze napomene iz e-knjiga napravljene u programima Calibre i KOReader.
 reader-import-from-epub-no-annotations-other-file =
-    “{ $filename }” does not appear to contain any Calibre or KOReader annotations.
+    Izgleda da „{ $filename }” ne sadrži Calibre ili KOReader napomene.
     
-    If this ebook has been annotated with KOReader, try selecting a “metadata.epub.lua” file directly.
-reader-import-from-epub-select-other = Select Other File…
+    Ako je ova e-knjiga imala napomene dodate pomoću KOReader-a, pokušajte da direktno izaberete datoteku „metadata.epub.lua”.
+reader-import-from-epub-select-other = Izaberi drugu datoteku…
 reader-selected-pages =
     { $count ->
-        [one] 1 page selected
-       *[other] { $count } pages selected
+        [one] Izabrana je 1 stranica
+        [few] Izabrane su { $count } stranice
+       *[other] Izabrano je { $count } stranica
     }
-reader-page-options = Page Options
-reader-read-aloud = Read Aloud
-reader-read-aloud-from-here = Read Aloud from Here
+reader-page-options = Opcije stranice
+reader-read-aloud = Čitaj naglas
+reader-read-aloud-from-here = Čitaj naglas odavde
 reader-read-aloud-options = Опције
-reader-read-aloud-skip-back = Skip Back
-reader-read-aloud-skip-back-sentence = Skip Back by Sentence
-reader-read-aloud-skip-ahead = Skip Ahead
-reader-read-aloud-skip-ahead-sentence = Skip Ahead by Sentence
-reader-read-aloud-add-annotation = Annotate Sentence ({ $key1 }/{ $key2 })
-reader-read-aloud-play = Play
-reader-read-aloud-pause = Pause
-reader-read-aloud-speed = Reading Speed
-reader-read-aloud-voice = Voice
-reader-read-aloud-voice-tier = Voice Mode
-reader-read-aloud-voice-tier-local = Local
+reader-read-aloud-skip-back = Preskoči na prethodni pasus
+reader-read-aloud-skip-back-sentence = Preskoči na prethodnu rečenicu
+reader-read-aloud-skip-ahead = Preskoči na sledeći pasus
+reader-read-aloud-skip-ahead-sentence = Preskoči na sledeću rečenicu
+reader-read-aloud-add-annotation = Dodaj napomenu na rečenicu ({ $key1 }/{ $key2 })
+reader-read-aloud-play = Pusti
+reader-read-aloud-pause = Pauziraj
+reader-read-aloud-speed = Brzina čitanja
+reader-read-aloud-voice = Glas
+reader-read-aloud-voice-tier = Režim glasa
+reader-read-aloud-voice-tier-local = Lokalni
 reader-read-aloud-voice-tier-standard = Уобичајени
-reader-read-aloud-voice-tier-premium = Premium
-reader-read-aloud-more-voices = More Voices…
+reader-read-aloud-voice-tier-premium = Premijum
+reader-read-aloud-more-voices = Više glasova…
 reader-read-aloud-language = Језик
-reader-read-aloud-remaining-time = Remaining reading time
-reader-read-aloud-log-in-link = <log-in>Log in</log-in> to access { -app-name } Voices.
-reader-read-aloud-log-in-button = Log In
+reader-read-aloud-remaining-time = Preostalo vreme čitanja
+reader-read-aloud-log-in-link = <log-in>Prijavite se</log-in> da biste pristupili { -app-name } glasovima.
+reader-read-aloud-log-in-button = Prijavi se
 reader-read-aloud-done-button = { general-done }
-reader-read-aloud-add-more-time = Add more time
+reader-read-aloud-add-more-time = Dodaj još vremena
 reader-read-aloud-quota-exceeded-message =
-    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
-        [standard] Standard Voices
-       *[local] Local Voices
+    <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> ili nastavite čitanje sa { $tier ->
+        [standard] Standardnim glasovima
+       *[local] Lokalnim glasovima
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Дошло је до непознате грешке.
-reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
-reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
-reader-read-aloud-retry = Retry
-reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
-reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Voices provided by your operating system
-reader-read-aloud-first-run-voice-tier-local-bullet-offline = Available without an internet connection
-reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Available without a { -app-name } account
-reader-read-aloud-first-run-voice-tier-local-bullet-free = Free to use
-reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Natural-sounding voices
-reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Limited language selection
-reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = No multilingual support
-reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Source text doesn’t leave { -app-name } servers
-reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Unlimited use with a { -subscription-name } subscription
-reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Highest-quality voices
-reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Only available with an internet connection
-reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Requires a { -app-name } account
-reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
-reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Multilingual support
-reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
-reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
-reader-read-aloud-sample-text = I am the local voice { $name }
-reader-read-aloud-voices-none-available = No voices available
-reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
+reader-read-aloud-error-network = Nije moguće povezivanje sa uslugom čitanja naglas. Proverite svoju internet vezu.
+reader-read-aloud-error-daily-limit-exceeded = Premašili ste dnevni limit za { -app-name } glasove.
+reader-read-aloud-retry = Pokušaj ponovo
+reader-read-aloud-first-run-title = Izaberite željeni glas za čitanje naglas:
+reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Glasovi koje obezbeđuje vaš operativni sistem
+reader-read-aloud-first-run-voice-tier-local-bullet-offline = Dostupno bez internet veze
+reader-read-aloud-first-run-voice-tier-local-bullet-no-account = Dostupno bez { -app-name } naloga
+reader-read-aloud-first-run-voice-tier-local-bullet-free = Besplatno za korišćenje
+reader-read-aloud-first-run-voice-tier-standard-bullet-natural-sounding = Glasovi koji zvuče prirodno
+reader-read-aloud-first-run-voice-tier-standard-bullet-online-only = Dostupno samo sa internet vezom
+reader-read-aloud-first-run-voice-tier-standard-bullet-account-required = Zahteva { -app-name } nalog
+reader-read-aloud-first-run-voice-tier-standard-bullet-limited-languages = Ograničen izbor jezika
+reader-read-aloud-first-run-voice-tier-standard-bullet-no-multilingual = Nema višejezične podrške
+reader-read-aloud-first-run-voice-tier-standard-bullet-internal-processing = Izvorni tekst ne napušta { -app-name } servere
+reader-read-aloud-first-run-voice-tier-standard-bullet-unlimited-with-subscription = Neograničeno korišćenje uz { -subscription-name } pretplatu
+reader-read-aloud-first-run-voice-tier-premium-bullet-highest-quality = Glasovi najvišeg kvaliteta
+reader-read-aloud-first-run-voice-tier-premium-bullet-online-only = Dostupno samo sa internet vezom
+reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Zahteva { -app-name } nalog
+reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Širok izbor jezika
+reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Višejezična podrška
+reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Izvorni tekst obrađuju spoljni pružaoci usluga pretvaranja teksta u govor
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } planovi uključuju mesečne Premium Voice minute
+reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Zatražite kredite za dodatne minute tokom beta faze
+reader-read-aloud-sample-text = Ja sam lokalni glas { $name }
+reader-read-aloud-voices-none-available = Nema dostupnih glasova
+reader-read-aloud-first-run-no-voices-for-language = { $tier } glasovi ne podržavaju { $language }.
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = Аутоматски
-reader-read-aloud-annotation-popup-move = Move annotation by sentence
-reader-read-aloud-annotation-popup-extend = Extend annotation by sentence
+reader-read-aloud-annotation-popup-move = Pomeri napomenu za jednu rečenicu
+reader-read-aloud-annotation-popup-extend = Proširi napomenu za jednu rečenicu
 reader-read-aloud-annotation-popup-delete = Обриши
 reader-read-aloud-annotation-popup-done = Готово
-reader-read-aloud-annotation-popup-change-color = Change color
-reader-read-aloud-annotation-popup-highlight = Highlight
+reader-read-aloud-annotation-popup-change-color = Promeni boju
+reader-read-aloud-annotation-popup-highlight = Istakni
 reader-read-aloud-annotation-popup-underline = Подвучено
 reader-tab-audio-play =
     .title = { reader-read-aloud-play }

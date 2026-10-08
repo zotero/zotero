@@ -46,8 +46,8 @@ integration-citationDialog-lib-message-citation =
     }
 integration-citationDialog-lib-message-add-note =
     { $search ->
-        [true] Keine ausgewählte Notizen entsprechen der aktuellen Suche
-       *[other] Keine Notizen ausgewählt
+        [true] No selected or open notes match the current search
+       *[other] No selected or open notes
     }
 integration-citationDialog-lib-message-annotations =
     { $search ->
@@ -55,10 +55,9 @@ integration-citationDialog-lib-message-annotations =
        *[other] Kein Eintrag mit Anmerkungen ausgewählt oder geöffnet
     }
 integration-citationDialog-settings-keepSorted = Quellen sortiert lassen
-integration-citationDialog-preview-empty = Vorschau
-integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-preview-error = Vorschau nicht verfügbar
 integration-citationDialog-btn-displayPreview =
-    .title = Display citation preview
+    .title = Zitationsvorschau anzeigen
 integration-citationDialog-btn-settings =
     .title = { general-open-settings }
 integration-citationDialog-mode-library = Bibliothek
@@ -81,7 +80,7 @@ integration-citationDialog-aria-bubble =
 integration-citationDialog-single-input-citation =
     .placeholder = { integration-citationDialog-search-for-items }
     .aria-description = Drücken Sie die Tabulatortaste, um Elemente auszuwählen, die Sie zu diesem Zitat hinzufügen möchten. Drücken Sie die Escape-Taste, um die Änderungen zu verwerfen und das Dialogfeld zu schließen.
-integration-citationDialog-just-added-input-placeholder = Type “10-15” to cite pages, or search for items
+integration-citationDialog-just-added-input-placeholder = „10-15“ eintippen, um Seiten zu zitieren, oder weitere Einträge suchen
 integration-citationDialog-just-added-input-citation =
     .placeholder = { $placeholder }
     .title = { $title }
@@ -101,9 +100,16 @@ integration-citationDialog-collections-table =
     .aria-label = Sammlungen.
     .aria-description = Sammlung auswählen und mit Tab durch die Einträge navigieren
 integration-citationDialog-items-table =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = { integration-citationDialog-enter-to-add-item }
 integration-citationDialog-items-table-added =
+    .title = { integration-citationDialog-add-to-citation-tooltip }
     .aria-label = Dieser Eintrag wurde der Zitation hinzugefügt.  { return-or-enter } drücken, um ihn erneut hinzuzufügen oder { delete-or-backspace } drücken, um ihn zu entfernen.
+integration-citationDialog-add-to-citation-tooltip =
+    { $count ->
+        [one] Add to Citation
+       *[other] Add { $count } Items to Citation
+    }
 integration-citationDialog-add-all = Alle hinzufügen
 integration-citationDialog-collapse-section =
     .title = Abschnitt einklappen

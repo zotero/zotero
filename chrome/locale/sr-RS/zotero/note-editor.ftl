@@ -6,8 +6,8 @@ note-editor-unlink = Уклони везу
 note-editor-right-to-left = Здесна налево
 note-editor-left-to-right = Слева надесно
 note-editor-update-notice =
-    This note was edited with a newer version of { -app-name }.
-    Please update { -app-name } to make changes.
+    Ova beleška je uređena novijom verzijom programa { -app-name }.
+    Molimo vas da ažurirate { -app-name } da biste uneli izmene.
 note-editor-enter-link = Унеси везу
 note-editor-heading-1 = Наслов 1
 note-editor-heading-2 = Наслов 2
@@ -35,6 +35,8 @@ note-editor-align = Поравнај
 note-editor-align-left = Поравнај слева
 note-editor-align-center = Поравнај по средини
 note-editor-align-right = Поравнај здесна
+note-editor-decrease-indent = Decrease Indent
+note-editor-increase-indent = Increase Indent
 note-editor-insert-citation = Уметни цитат
 note-editor-go-to-page = Иди на страницу
 note-editor-show-item = Прикажи ставку
@@ -61,6 +63,6 @@ note-editor-insert-column-after = Уметни колону десно
 note-editor-delete-row = Обриши ред
 note-editor-delete-column = Обриши колону
 note-editor-delete-table = Обриши табелу
-note-editor-link-popup-appeared = Link popup appeared. Use Shift-Tab to navigate it.
-note-editor-citation-popup-appeared = Citation popup appeared. Use Shift-Tab to navigate it.
+note-editor-link-popup-appeared = Pojavio se iskačući prozor za vezu. Koristite Shift-Tab za navigaciju.
+note-editor-citation-popup-appeared = Pojavio se iskačući prozor za citat. Koristite Shift-Tab za navigaciju.
 note-editor-toggle-context-pane = Приказ контекстне површи

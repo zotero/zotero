@@ -51,9 +51,9 @@
 <!ENTITY standardView.label "По умолчанию">
 <!ENTITY stackedView.label "Стопками">
 <!ENTITY collectionsPane.label "Панель коллекций">
-<!ENTITY itemPane.label "Панель записей">
+<!ENTITY itemPane.label "Панель элементов">
 <!ENTITY tagSelector.label "Селектор тегов">
-<!ENTITY recursiveCollections.label "Показывать записи из вложенных коллекций">
+<!ENTITY recursiveCollections.label "Показывать элементы из вложенных коллекций">
 <!ENTITY fontSize.label "Размер шрифта">
 <!ENTITY noteFontSize.label "Размер шрифта заметок">
 <!ENTITY columns.label "Колонки">

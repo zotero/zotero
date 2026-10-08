@@ -26,16 +26,16 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Ta automatiskt bort källor från papperskorgen som lagts dit för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
 
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Visa flikar som">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Upphovsperson – år – titel">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titel – upphovsperson – år">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnamn">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
 <!ENTITY zotero.preferences.groups.childNotes "tillhörande anteckningar">
 <!ENTITY zotero.preferences.groups.childFiles "tillhörande sparade hemsidor och lokala filer">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "annoteringar">
 <!ENTITY zotero.preferences.groups.childLinks "tillhörande länkar">
 <!ENTITY zotero.preferences.groups.tags "etiketter">
 
@@ -78,7 +78,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bifogade filer med lagringstjänsten">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Visa återställningsalternativ…">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 
 
@@ -101,8 +101,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt lägger Zotero bara till webblänken om artikeln inte har ett sidintervall specificerat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snabbkopiera">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Postformat:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Anteckningsformat:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiera som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webbplats-specifika inställningar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">

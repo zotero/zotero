@@ -56,6 +56,7 @@ general-clear = تفريغ
 clear-button =
     .label = { general-clear }
 general-update = تحديث
+general-reset-to-default = Reset to Default
 general-back = ارجع
 general-edit = تحرير
 general-cut = قص
@@ -73,6 +74,9 @@ general-more-information = المزيد من المعلومات
 general-warning = تحذير
 general-type-to-continue = اكتب ”{ $text }“ للمتابعة.
 general-continue = استمر
+general-allow = Allow
+general-always-allow = Always Allow
+general-deny = Deny
 general-red = أحمر
 general-orange = برتقالي
 general-yellow = أصفر
@@ -178,6 +182,10 @@ collections-menu-show-recently-read =
     .label = Show { recently-read }
 item-menu-remove-from-recently-read =
     .label = Remove from { recently-read }…
+collections-menu-clear-all-last-read =
+    .label = Clear All Last Read Dates…
+recently-read-clear-all-confirm = All Last Read dates in this library will be erased.
+items-list-load-error-plugin = Error loading items list. Disabling the “{ $plugin }” plugin and restarting { -app-name } may fix this.
 items-section-collections-selected =
     { $count ->
         [zero] { $count } مجموعة مختارة
@@ -332,6 +340,7 @@ item-menu-option-view-online =
 item-button-view-online =
     .tooltiptext = { view-online }
 file-renaming-file-renamed-to = تمت إعادة تسمية الملف إلى { $filename }
+file-access-error-fs-corrupted = { -os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file.
 itembox-button-options =
     .tooltiptext = فتح قائمة السياق
 itembox-button-merge =
@@ -387,7 +396,9 @@ file-interface-items-were-relinked =
         [one] One item was relinked
        *[other] { $numRelinked } items were relinked
     }
-import-mendeley-encrypted = لا يمكن قراءة قاعدة بيانات مندلي المحددة، على الأرجح لأنها مشفرة. للمزيد من المعلومات راجع <a data-l10n-name="mendeley-import-kb">كيف يمكنني استيراد مكتبة مندلي إلى زوتيرو؟</a>
+import-mendeley-cannot-decrypt = The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-unsupported = The selected file does not appear to be a Mendeley database. See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
+import-mendeley-db-in-use = The selected Mendeley database is in use. Please quit Mendeley Desktop and try again.
 file-interface-import-error-translator = حدث خطأ في استيراد الملف المحدد بـ “{ $translator }”. يرجى التأكد من صلاحية الملف والمحاولة مرة أخرى.
 import-online-intro = في الخطوة التالية، سيُطلب منك تسجيل الدخول إلى { $targetAppOnline } ومنح { -app-name } حق الوصول. هذا ضروري لاستيراد مكتبة { $targetApp } الخاصة بك إلى { -app-name }.
 import-online-intro2 = { -app-name }  لن يرى أو يخزن كلمة مرور { $targetApp } أبدًا.
@@ -487,6 +498,7 @@ styleEditor-editor =
     .aria-label = محرر الأسلوب
 styleEditor-preview =
     .aria-label = معاينة
+stylePreview-generating = Generating previews…
 publications-intro-page = منشوراتي
 publications-intro = سيتم عرض العناصر التي تضيفها إلى منشوراتي على صفحة ملفك الشخصي على zotero.org. إذا اخترت تضمين الملفات المرفقة، سيتم إتاحتها للجمهور تحت الرخصة التي تحددها. أضف الأعمال التي ألفتها فقط، و لا تضمن الملفات إلا إن كان لديك الحق في توزيعها وترغب في القيام بذلك.
 publications-include-checkbox-files =
@@ -922,6 +934,35 @@ search-conditions-tooltip-fields = الحقول:
 search-conditions-collection = مجموعة العناصر
 search-conditions-savedSearch = بحث مخزن
 search-conditions-itemTypeID = نوع العنصر
+search-query-keyword-creator = by
+search-query-keyword-publication = in, publication, journal
+search-query-keyword-item-type = type
+search-query-keyword-language = lang
+search-query-keyword-abstract = abstract
+search-query-keyword-fulltext = fulltext, text
+search-query-keyword-date = year
+search-query-keyword-date-before = before
+search-query-keyword-date-after = after, since
+search-query-keyword-date-added = added
+search-query-keyword-date-modified = modified
+search-query-keyword-no-annotations = no annotations
+search-query-keyword-has-annotations = has annotations
+search-query-keyword-no-notes = no notes
+search-query-keyword-has-notes = has notes
+search-query-keyword-no-tags = no tags
+search-query-keyword-has-tags = has tags
+search-query-keyword-no-attachments = no attachments
+search-query-keyword-has-attachments = has attachments
+search-query-keyword-and = and
+search-query-keyword-or = or
+search-query-keyword-no = no
+search-query-keyword-has = has
+search-query-keyword-days = day, days
+search-query-keyword-weeks = week, weeks
+search-query-keyword-months = month, months
+search-query-keyword-years = year, years
+search-query-keyword-range = between 2020 and 2025, from 2020 to 2025, 2020 to 2025
+search-query-keyword-range-excluded = not between 2020 and 2025
 search-conditions-tag = وسم
 search-conditions-numTags = # of Tags
 search-conditions-numNotes = # of Notes
@@ -1009,8 +1050,8 @@ file-type-presentation = عرض تقديمي
 file-type-document = مستند
 file-type-ebook = الكتاب الإلكتروني
 attachment-storage-type-storedFile = Stored File
-attachment-storage-type-linkedFile = Linked File
-attachment-storage-type-webLink = Web Link
+attachment-storage-type-linkedFile = ملف مرتبط
+attachment-storage-type-webLink = رابط الويب
 post-upgrade-message = لقد تمت ترقيتك إلى <span data-l10n-name="post-upgrade-appver">{ -app-name } { $version }</span>! تعرف على <a data-l10n-name="new-features-link">ما الجديد</a>.
 post-upgrade-remind-me-later =
     .label = { general-remind-me-later }
@@ -1034,8 +1075,10 @@ file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
 connector-version-warning = يجب تحديث موصل { -app-name } لكي يعمل مع هذا الإصدار من { -app-name }.
 userjs-pref-warning = تم تجاوز بعض إعدادات { -app-name } باستخدام طريقة غير مدعومة. سيقوم { -app-name } بإعادتها وإعادة التشغيل.
+migrate-extra-fields-progress-headline = Updating Items…
 migrate-extra-fields-progress-message = Migrating new fields from Extra field
-search-normalization-progress-message = Indexing items for search
+fulltext-indexing-progress-title = Indexing
+fulltext-indexing-progress-message = Full-text search results may be incomplete until indexing finishes.
 long-tag-fixer-window-title =
     .title = علامات التقسيم
 long-tag-fixer-button-dont-split =
@@ -1054,18 +1097,34 @@ banner-close-button =
 plugins-blocked-plugin =
     .message = This plugin has been disabled by { -app-name }.
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
+data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
+login-manager-open-profile-directory = Open Profile Directory
 os-keystore-save-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.
-        [windows] { -app-name } couldn’t securely save your credentials. Try again or restart { -app-name }.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to securely save your credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
     }
+os-keystore-read-failed =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t access the { -os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.
+        [windows] { -app-name } couldn’t use { -os-name } Credential Manager to read your saved credentials. Try again or restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is running and try again.
+    }
+os-keystore-read-unrecoverable =
+    { PLATFORM() ->
+        [macos] { -app-name } couldn’t read your saved credentials from the { -os-name } Keychain.
+        [windows] { -app-name } couldn’t read your saved credentials from { -os-name } Credential Manager.
+       *[other] { -app-name } couldn’t read your saved credentials from your { -os-name } keyring.
+    } You’ll need to set up syncing again in the { -app-name } settings.
+os-keystore-save-unencrypted = { -app-name } can save your credentials unencrypted instead. Anyone with access to your { -app-name } profile folder would then be able to read them.
+os-keystore-save-unencrypted-button = Save Anyway
 os-keystore-migrate-failed =
     { PLATFORM() ->
         [macos] { -app-name } couldn’t access the { -os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { -app-name }.
         [windows] { -app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { -app-name } and try again.
-       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { -app-name }.
+       *[other] { -app-name } couldn’t access your { -os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is running and restart { -app-name }.
     }
 search-button =
     .label = بحث
@@ -1191,3 +1250,5 @@ undo-action-merge-items =
     }
 menu-edit-undo-action = Undo { $action }
 menu-edit-redo-action = Redo { $action }
+local-api-authorize-title = Local API Authorization
+local-api-authorize-text = “{ $appName }”, an application running on your computer, wants to modify your { -app-name } library.

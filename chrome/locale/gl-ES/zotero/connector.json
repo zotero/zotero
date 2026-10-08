@@ -68,6 +68,9 @@
   "progressWindow_detailsBtnHide": {
     "message": "Agochar detalles"
   },
+  "progressWindow_collectionSelector": {
+    "message": "Selector de colección"
+  },
   "progressWindow_savingItems": {
     "message": "Gardando $1 elementos. $2"
   },
@@ -88,6 +91,12 @@
   },
   "progressWindow_downloadFailedPlural": {
     "message": "Non se puido descargar $1 para o elemento $2"
+  },
+  "progressWindow_allDone": {
+    "message": "O gardado completouse. O diálogo pecharase agora."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Os elementos desta páxina web xa foron gardados."
   },
   "progressWindow_tagPlaceholder": {
     "message": "Etiquetas (separadas por comas)"
@@ -116,6 +125,18 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versión"
   },
+  "itemSelector_title": {
+    "message": "Escolle que elementos lle gustaría engadir á súa biblioteca:"
+  },
+  "extensionIsDisabled": {
+    "message": "O conector $1 non está dispoñíbel nesta páxina"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "O conector $1 non está dispoñíbel en URLs de arquivo"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "O conector $1 non está dispoñíbel en páxinas de extensión"
+  },
   "appConnector": {
     "message": "Conector $1"
   },
@@ -127,6 +148,9 @@
   },
   "firstRun_text1": {
     "message": "O Conector $1 permite que <a href=\"$2\">se garden elementos en $1</a> desde o navegador facendo un só clic."
+  },
+  "firstRun_text2": {
+    "message": "Se inda non o fixo, <a href=\"$2\">descargue</a> a aplicación $1 para a mellor experiencia."
   },
   "firstRun_acceptButton": {
     "message": "Enténdoo."
@@ -178,6 +202,9 @@
   },
   "integration_googleDocs_documentLocked_moreInfo": {
     "message": "$1 bloquea os documentos para previr que varios usuarios estean a editar as citas ao mesmo tempo. Editar as citas ao mesmo tempo nun documento pode derivar en introducir erros nas citas ou danar o documento. Causas imprevistas, como a perda de conexión á rede, poden facer que o seu documento quede bloqueado permanentemente. Se pensa que foi o que aconteceu, podes retirar o bloqueo. <br/><br/> Quere retirarlle o bloqueo ao documento?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "$1precisa permiso para editar os seus documentos de Google Docs para insertar citas. Por favor inténteo de novo, e asegúrese de permitir a $1editar, crear e eliminar os seus documentos de Google Docs."
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "A conta de Google seleccionado non ten permisos para editar este documento. Por favor inténtao de novo e asegúrate de escoller unha conta con permiso para editar."
