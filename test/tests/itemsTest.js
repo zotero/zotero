@@ -799,4 +799,75 @@ describe("Zotero.Items", function () {
 			assert.include(ids, att.id);
 		});
 	});
+
+	describe("#_loadItemData()", function () {
+		// Point a stored field at a raw value, bypassing setField(), then reload from the DB
+		async function loadRaw(item, field, raw) {
+			var fieldID = Zotero.ItemFields.getID(field);
+			var valueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=?", raw);
+			if (!valueID) {
+				valueID = Zotero.ID.get('itemDataValues');
+				await Zotero.DB.queryAsync("INSERT INTO itemDataValues (valueID, value) VALUES (?, ?)", [valueID, raw]);
+			}
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO itemData (itemID, fieldID, valueID) VALUES (?, ?, ?)", [item.id, fieldID, valueID]
+			);
+			await Zotero.Items._loadDataTypeInLibrary('itemData', item.libraryID, [item.id]);
+		}
+
+		it("should strip newlines from single-line fields when loading", async function () {
+			var item = await createDataObject('item', { title: "Title" });
+			await loadRaw(item, 'title', "Line one\nLine two");
+			assert.equal(item.getField('title'), "Line one Line two");
+		});
+
+		it("should keep newlines in multiline fields when loading", async function () {
+			var item = await createDataObject('item');
+			await loadRaw(item, 'abstractNote', "Line one\nLine two");
+			assert.equal(item.getField('abstractNote'), "Line one\nLine two");
+		});
+
+		it("should hyphenate ISBNs when loading", async function () {
+			var item = await createDataObject('item', { itemType: 'book' });
+			await loadRaw(item, 'ISBN', "9780306406157");
+			assert.equal(item.getField('ISBN'), "978-0-306-40615-7");
+		});
+
+		it("should load a base-mapped field into the item type's field", async function () {
+			var item = await createDataObject('item', { itemType: 'thesis' });
+			await loadRaw(item, 'university', "University of Somewhere");
+			assert.equal(item.getField('university'), "University of Somewhere");
+			assert.equal(item.getField('publisher', false, true), "University of Somewhere");
+		});
+
+		it("should set absent fields to empty", async function () {
+			var item = await createDataObject('item', { itemType: 'book' });
+			await Zotero.Items._loadDataTypeInLibrary('itemData', item.libraryID, [item.id]);
+			assert.strictEqual(item.getField('volume'), "");
+		});
+
+		// Plugins wrap Zotero.Item.prototype.setField (e.g., zotero-plugin-toolkit's
+		// FieldHook), so loading must keep calling it for every value
+		it("should call setField for every loaded value", async function () {
+			var item = await createDataObject('item', { itemType: 'book', title: "Called" });
+			var original = Zotero.Item.prototype.setField;
+			var calls = [];
+			Zotero.Item.prototype.setField = function (field, value, loadIn) {
+				if (this.id == item.id) {
+					calls.push([field, value, loadIn]);
+				}
+				return original.apply(this, arguments);
+			};
+			try {
+				await Zotero.Items._loadDataTypeInLibrary('itemData', item.libraryID, [item.id]);
+			}
+			finally {
+				Zotero.Item.prototype.setField = original;
+			}
+			var titleID = Zotero.ItemFields.getID('title');
+			assert.deepInclude(calls, [titleID, "Called", true]);
+			// One call per field of the item type: stored values plus absent ones set empty
+			assert.lengthOf(calls, Zotero.ItemFields.getItemTypeFields(item.itemTypeID).length);
+		});
+	});
 });

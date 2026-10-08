@@ -555,14 +555,17 @@ Zotero.DataObjects.prototype._loadPrimaryData = async function (libraryID, ids, 
 		sql += ' AND O.' + this._ZDO_id + ' IN (' + ids.join(',') + ')';
 	}
 	
+	var columns = Object.keys(this._primaryDataSQLParts);
+	var idColumn = columns.indexOf(this._ZDO_id);
 	await Zotero.DB.queryAsync(
 		sql,
 		params,
 		{
 			noCache: true,
 			onRow: function (row) {
-				var id = row.getResultByName(this._ZDO_id);
-				var columns = Object.keys(this._primaryDataSQLParts);
+				var id = idColumn != -1
+					? row.getResultByIndex(idColumn)
+					: row.getResultByName(this._ZDO_id);
 				var rowObj = {};
 				for (let i=0; i<columns.length; i++) {
 					rowObj[columns[i]] = row.getResultByIndex(i);

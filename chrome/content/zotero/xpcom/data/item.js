@@ -794,7 +794,30 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 	if (!itemTypeID) {
 		throw new Error('Item type must be set before setting field data');
 	}
-	
+
+	// Loading calls this for every stored value, so use cached field lookups.
+	// Same result as the general path below.
+	if (loadIn && typeof field == 'number') {
+		let info = Zotero.ItemFields._getLoadInfo(itemTypeID, field);
+		if (info && !info.isISBN) {
+			if (field == info.titleID && this.isNote()) {
+				this._noteTitle = value ? value : "";
+				return true;
+			}
+			if (value !== false && !info.valid) {
+				Zotero.debug("'" + field + "' is not a valid field for type '"
+					+ Zotero.ItemTypes.getName(itemTypeID) + "'" + " -- ignoring value '" + value + "'", 2);
+				return false;
+			}
+			if (typeof value == 'string' && !info.multiline
+					&& (value.includes('\n') || value.includes('\r'))) {
+				value = value.replace(/[\r\n]+/g, " ");
+			}
+			this._itemData[info.fieldID] = value;
+			return true;
+		}
+	}
+
 	var fieldID = Zotero.ItemFields.getID(field);
 	if (!fieldID) {
 		throw new Error('"' + field + '" is not a valid itemData field');
