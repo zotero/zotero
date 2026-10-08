@@ -2268,18 +2268,25 @@ describe("Zotero.Embeddings", function () {
 			// Known but not cached, as the items of a library not yet viewed
 			// are: the run reads its text from the tables and loads nothing
 			delete Zotero.Items._objectCache[item.id];
-			let looked = sinon.spy(Zotero.Embeddings.Indexing.Sources, 'getItemTexts');
-			stubs.push(looked);
-			await Zotero.Embeddings.Indexing.startIndexing();
-			assert.isTrue(lookedAt(looked, item));
-			assert.isUndefined(Zotero.Items._objectCache[item.id]);
-			let record = (await Zotero.Embeddings.Indexing.Store.getIndexStates([item.id])).get(item.id);
-			assert.isNull(record.contentHash);
-			assert.equal(record.clientDateModified, '2026-01-01 00:00:00');
+			try {
+				let looked = sinon.spy(Zotero.Embeddings.Indexing.Sources, 'getItemTexts');
+				stubs.push(looked);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.isTrue(lookedAt(looked, item));
+				assert.isUndefined(Zotero.Items._objectCache[item.id]);
+				let record = (await Zotero.Embeddings.Indexing.Store.getIndexStates([item.id])).get(item.id);
+				assert.isNull(record.contentHash);
+				assert.equal(record.clientDateModified, '2026-01-01 00:00:00');
 
-			looked.resetHistory();
-			await Zotero.Embeddings.Indexing.startIndexing();
-			assert.isFalse(lookedAt(looked, item));
+				looked.resetHistory();
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.isFalse(lookedAt(looked, item));
+			}
+			finally {
+				// An item missing from the cache of a loaded library is read
+				// later as an unloaded one, so it's erased by ID
+				await Zotero.Items.erase(item.id);
+			}
 		});
 
 		it("should drop an item's rows once its text is gone", async function () {
@@ -2325,6 +2332,9 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				Indexing.ATTACHMENT_PAGE_SIZE = pageSize;
+				// Attachments missing from the cache of a loaded library are
+				// read later as unloaded ones, so they're erased by ID
+				await Zotero.Items.erase(attachments.map(attachment => attachment.id));
 			}
 		});
 
