@@ -18,6 +18,52 @@ integration-editBibliography-wrapper =
     .aria-description = { -integration-editBibliography-include-uncited }
     { -integration-editBibliography-exclude-cited }
     { -integration-editBibliography-edit-reference }
+
+integration-citationExplorer-window =
+    .title = Citation Explorer
+integration-citationExplorer-citations = Citations
+integration-citationExplorer-citation-search =
+    .placeholder = Citation Content
+integration-citationExplorer-citation-column = Citation
+integration-citationExplorer-linked-column = Is Linked
+integration-citationExplorer-show-in-document =
+    .value = Show in Document
+integration-citationExplorer-edit-citation =
+    .value = Edit Citation
+integration-citationExplorer-items-in-bibliography = Items in Bibliography
+integration-citationExplorer-item-search =
+    .placeholder = Title, Creator, Year
+integration-citationExplorer-show-in-zotero =
+    .value = Show in Zotero
+integration-citationExplorer-manage-items =
+    .value = Add/Link to Collection
+
+integration-citationExplorerWizard-window =
+    .title = Add/Link to Collection
+integration-citationExplorerWizard-choose-header = Choose an Action and Destination
+integration-citationExplorerWizard-choose-description = Choose how to handle items used in this document and where to place them.
+integration-citationExplorerWizard-operation-relink =
+    .label = Relink unlinked items
+integration-citationExplorerWizard-operation-relink-description = Link only unlinked document items to matching items, or add them to the selected library or collection.
+integration-citationExplorerWizard-operation-add-to-target =
+    .label = Copy and relink all items
+integration-citationExplorerWizard-operation-add-to-target-description = Ensure that all document items are linked to items in the selected library or collection.
+integration-citationExplorerWizard-target = Destination:
+integration-citationExplorerWizard-review-header = Review Item Actions
+integration-citationExplorerWizard-review-description = Review the proposed action for each item. Choose “Do nothing” to leave an item unchanged.
+integration-citationExplorerWizard-action-column = Action
+integration-citationExplorerWizard-action-add-to-target = Add to { $target }
+integration-citationExplorerWizard-action-relink = Relink to existing item “{ $title }”
+integration-citationExplorerWizard-action-copy = Copy an existing item from { $library }
+integration-citationExplorerWizard-action-choose = Choose Item…
+integration-citationExplorerWizard-action-skip = Do nothing
+integration-citationExplorerWizard-choose-button = Choose…
+integration-citationExplorerWizard-status-finding = Finding matching items…
+integration-citationExplorerWizard-status-find-error = Unable to determine item actions.
+integration-citationExplorerWizard-status-no-changes = No changes are needed.
+integration-citationExplorerWizard-status-applying = Applying changes…
+integration-citationExplorerWizard-status-apply-error = An error occurred while applying changes.
+
 integration-citationDialog = Citation Dialog
 integration-citationDialog-section-open = Open Documents ({ $count })
 integration-citationDialog-section-selected = Selected Items ({ $count }/{ $total })
@@ -152,4 +198,3 @@ integration-warning-command-is-running = A word processor integration command is
 first-run-guidance-citationDialog = Click the bubble or use the ← and ↓ keys to view the citation details and customize options such as page number, prefix, and suffix.
     
     You can also add a page number or other locator by including it with your search terms (e.g., “history { $locator }”) or by typing it after the bubble and pressing { return-or-enter }.
-
