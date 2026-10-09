@@ -8,7 +8,7 @@ const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils'
 const { buildsURL } = require('./config');
 
 const sharedAssetDirs = ['cmaps', 'standard_fonts'];
-const requiredFiles = ['worker.js', 'metadata.json', 'structured-document-text.js'];
+const requiredFiles = ['worker.js', 'metadata.json'];
 
 async function getDocumentWorker(signatures) {
 	const t1 = Date.now();

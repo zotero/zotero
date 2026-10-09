@@ -189,17 +189,951 @@ describe("CollectionViewItemTree", function () {
 			let col = await createDataObject('collection');
 			let item = await createDataObject('item', { title: "test", collections: [col.id] });
 			await zp.collectionsView.selectCollection(col.id);
-			
+
 			quicksearch.value = "test";
 			quicksearch.doCommand();
 			await itemsView._refreshPromise;
-			
+
 			await zp.itemsView.selectItems([item.id]);
 			item.removeFromCollection(col.id);
 			await item.saveTx();
 
 			await itemsView._refreshPromise;
 			assert.equal(quicksearch.value, "test");
+		});
+
+		describe("in best-match mode without embeddings", function () {
+			var stubs = [];
+
+			beforeEach(function () {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false));
+				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+			});
+
+			afterEach(async function () {
+				Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+				await zp.itemsView.setFilter('search', '');
+				await selectLibrary(win);
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+			});
+
+			it("should rank items lexically", async function () {
+				// Ranking is under test, not membership: keep the two-word
+				// match that the result margin would otherwise cut
+				Zotero.Prefs.set('search.bestMatchMargin', 100);
+				try {
+					let col = await createDataObject('collection');
+					// Unrelated items, so the query words the matches share still
+					// separate documents in this corpus -- in a corpus of nothing
+					// but matches, FTS5 floors their idf as separating nothing
+					// and no match earns a score
+					for (let i = 0; i < 6; i++) {
+						await createDataObject('item', { title: `unrelated filler number ${i}` });
+					}
+					let full = await createDataObject('item',
+						{ title: 'Lexint owl migration patterns', collections: [col.id] });
+					// Three of the query's four terms, ranked below the full match
+					let partial = await createDataObject('item',
+						{ title: 'Lexint owl migration handbook', collections: [col.id] });
+					// Two of four, ranked below both
+					let sparse = await createDataObject('item',
+						{ title: 'Lexint owl guidebook', collections: [col.id] });
+
+					await select(win, col);
+					let itemsView = zp.itemsView;
+					await itemsView.setFilter('search', 'lexint owl migration patterns');
+
+					// Scored items only, ranked by coverage, most relevant first
+					assert.deepEqual(itemsView._rows.map(row => row.id),
+						[full.id, partial.id, sparse.id]);
+					assert.equal(itemsView.getSortField(), 'relevance');
+					// The bars carry the lexical scores directly
+					let fractions = itemsView.rowProvider.getBestMatchBarFractions();
+					assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
+					assert.isAbove(fractions.get(partial.id), fractions.get(sparse.id));
+					assert.isAtMost(fractions.get(full.id), 1);
+					assert.isAbove(fractions.get(sparse.id), 0);
+				}
+				finally {
+					Zotero.Prefs.clear('search.bestMatchMargin');
+				}
+			});
+		});
+
+		describe("in best-match mode", function () {
+			var stubs = [];
+
+			// Embeddings scoreItemIDs fakes below supply bare score Maps (or a
+			// function returning one); wrap them in the engine's real
+			// { scores, previewableIDs } envelope
+			function scoreEnvelope(fake) {
+				return async (...args) => ({
+					scores: await (typeof fake == 'function' ? fake(...args) : fake),
+					previewableIDs: new Set()
+				});
+			}
+
+			beforeEach(function () {
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+				// No lexical matches, so the fused ranking and the bars carry
+				// the semantic scores these tests control
+				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves(new Map()));
+				// A fully built index by default, so no indexing banner appears
+				stubs.push(sinon.stub(Zotero.Embeddings.Indexing, 'getStatus').returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					items: { done: 1, total: 1 },
+					attachments: { done: 0, total: 0, awaiting: 0 }
+				}));
+				Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+			});
+
+			afterEach(async function () {
+				Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+				await zp.itemsView.setFilter('search', '');
+				// Deselect any semantic saved search created by the test before
+				// its scoring stubs are restored
+				await selectLibrary(win);
+				stubs.forEach(stub => stub.restore());
+				stubs = [];
+			});
+
+			it("should show scored items ordered by a forced Relevance sort and restore the sort when cleared", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "B", collections: [col.id] });
+				let itemC = await createDataObject('item', { title: "C", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(async (query, itemIDs) => {
+					let scores = new Map();
+					if (itemIDs.includes(itemA.id)) {
+						scores.set(itemA.id, 0.5);
+					}
+					if (itemIDs.includes(itemB.id)) {
+						scores.set(itemB.id, 0.9);
+					}
+					return scores;
+				})));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				let defaultSortField = itemsView.getSortField();
+
+				await itemsView.setFilter('search', 'some query');
+
+				// Only the scored items, most similar first, despite title order
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+				assert.equal(itemsView.getSortField(), 'relevance');
+				// Descending, so the fullest bars read as first
+				assert.equal(itemsView.getSortDirection(), -1);
+				// The Relevance cells show the ranks
+				assert.equal(itemsView.getCellText(0, 'relevance'), 1);
+				assert.equal(itemsView.getCellText(1, 'relevance'), 2);
+				// The bars carry the fused scores, so they agree with the
+				// ranking: with no lexical matches, a semantic match at rank
+				// 1 fuses to half its fraction, rank 2 to fraction * 61/124
+				let barFractions = itemsView.rowProvider.getBestMatchBarFractions();
+				assert.closeTo(barFractions.get(itemB.id), 0.9 / 2, 1e-12);
+				assert.closeTo(barFractions.get(itemA.id), 0.5 * 61 / 124, 1e-12);
+				assert.isFalse(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+				// The rendered header shows the column
+				assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				// The rows' bars are styled (a selector regression would leave
+				// collapsed inline spans) and filled. Row painting is async, so poll
+				// (the test times out on failure).
+				let bar;
+				for (let i = 0; i < 50 && !bar; i++) {
+					bar = itemsView.tree._jsWindow.getElementByIndex(0)
+						?.querySelector('.cell.relevance .relevance-bar');
+					if (!bar) {
+						await Zotero.Promise.delay(10);
+					}
+				}
+				if (!bar) {
+					let row0 = itemsView.tree._jsWindow.getElementByIndex(0);
+					dump('\nDIAG-BAR cells=' + [...row0.querySelectorAll('.cell')].map(c => c.className.split(' ')[1]).join(',')
+						+ ' visibleCols=' + itemsView.tree._columns.getAsArray().filter(c => !c.hidden).map(c => c.dataKey).join(',')
+						+ '\n');
+				}
+				assert.equal(win.getComputedStyle(bar).height, '6px');
+				assert.notEqual(bar.firstChild.style.width, '0%');
+
+				// Clearing the search restores the previous sort and columns
+				await itemsView.setFilter('search', '');
+				assert.equal(itemsView.getSortField(), defaultSortField);
+				assert.isTrue(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
+				assert.notOk(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				assert.deepEqual(
+					itemsView._rows.map(row => row.id),
+					[itemA.id, itemB.id, itemC.id]
+				);
+			});
+
+			it("should rank a row by the best match beneath it, with the bar reporting only its own score", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "liftrank paper", collections: [col.id] });
+				let attachment = await importPDFAttachment(item);
+				let annotation = await createAnnotation('highlight', attachment,
+					{ comment: 'lift comment' });
+				let other = await createDataObject('item', { title: "liftrank other", collections: [col.id] });
+				// Only the annotation and the unrelated peer match on their own
+				// text -- the paper's own abstract says nothing about the query
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(async (query, itemIDs) => {
+					let scores = new Map();
+					if (itemIDs.includes(annotation.id)) {
+						scores.set(annotation.id, 0.9);
+					}
+					if (itemIDs.includes(other.id)) {
+						scores.set(other.id, 0.5);
+					}
+					return scores;
+				})));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// The annotation lifts its paper above the peer that matched
+				// on its own text
+				assert.deepEqual(
+					itemsView._rows.filter(row => row.level == 0).map(row => row.id),
+					[item.id, other.id]
+				);
+				// The whole chain under the annotation carries its rank
+				let ranks = itemsView.rowProvider.getBestMatchRanks();
+				assert.equal(ranks.get(annotation.id), 1);
+				assert.equal(ranks.get(attachment.id), 1);
+				assert.equal(ranks.get(item.id), 1);
+				assert.equal(ranks.get(other.id), 2);
+				// The bar reports only the row's own score: the annotation gets
+				// its match (fused: a rank-1 semantic match at half its
+				// fraction), the rows ranked by it get an empty bar
+				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
+				assert.closeTo(fractions.get(annotation.id), 0.45, 1e-12);
+				assert.equal(fractions.get(attachment.id), 0);
+				assert.equal(fractions.get(item.id), 0);
+				assert.closeTo(fractions.get(other.id), 0.5 * 61 / 124, 1e-12);
+
+				// The matched annotation's ancestors auto-expand, and its row
+				// renders a relevance bar of its own. Row painting is async, so
+				// poll (the test times out on failure).
+				let annotationRow = itemsView.getRowIndexByID(annotation.id);
+				assert.notEqual(annotationRow, false);
+				let bar;
+				while (!bar) {
+					bar = itemsView.tree._jsWindow.getElementByIndex(annotationRow)
+						?.querySelector('.cell.relevance .relevance-bar');
+					if (!bar) {
+						await Zotero.Promise.delay(10);
+					}
+				}
+				assert.equal(bar.firstChild.style.width, '45%');
+
+				// An annotation row's bar has to be the same width as every
+				// other row's. The tight annotation layout drops cell padding,
+				// and the bar fills its cell's content box, so without an
+				// exception for this cell the bar would render wider.
+				let peerRow = itemsView.getRowIndexByID(other.id);
+				let peerBar = itemsView.tree._jsWindow.getElementByIndex(peerRow)
+					.querySelector('.cell.relevance .relevance-bar');
+				assert.isTrue(bar.closest('.row').classList.contains('tight'),
+					"annotation row should use the tight layout for this to be meaningful");
+				assert.equal(
+					bar.getBoundingClientRect().width,
+					peerBar.getBoundingClientRect().width
+				);
+			});
+
+			it("should move the Relevance column to the far right and restore it when cleared", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "farright A", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, 0.5]))
+				)));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				let visibleBefore = itemsView._getColumns()
+					.filter(column => !column.hidden).map(column => column.dataKey);
+
+				await itemsView.setFilter('search', 'some query');
+				let visible = itemsView._getColumns().filter(column => !column.hidden);
+				assert.equal(visible[visible.length - 1].dataKey, 'relevance');
+				// The rendered header agrees
+				let headerCells = [...win.document.querySelectorAll('.virtualized-table-header .cell')];
+				assert.isTrue(headerCells[headerCells.length - 1].classList.contains('relevance'));
+
+				// Clearing the search puts the columns back
+				await itemsView.setFilter('search', '');
+				assert.deepEqual(
+					itemsView._getColumns().filter(column => !column.hidden).map(column => column.dataKey),
+					visibleBefore
+				);
+			});
+
+			it("should override a persisted column sort while a best-match search is active", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "persistsort A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "persistsort B", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == itemB.id ? 0.9 : 0.5]))
+				)));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				// Sort by Date Modified via the header, as a real profile would have
+				let cols = itemsView._getColumns();
+				let dmIndex = cols.findIndex(c => c.dataKey == 'dateModified');
+				if (cols[dmIndex].hidden) {
+					itemsView.tree._columns.toggleHidden(dmIndex);
+				}
+				itemsView.tree._columns.toggleSort(dmIndex);
+				await itemsView.waitForLoad();
+				assert.equal(itemsView.getSortField(), 'dateModified');
+
+				try {
+					await itemsView.setFilter('search', 'some query');
+
+					assert.equal(itemsView.getSortField(), 'relevance');
+					assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+					assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+					// The replaced sort's column doesn't keep its indicator
+					assert.notOk(win.document.querySelector('.virtualized-table-header .cell.dateModified .sort-indicator'));
+
+					// Clearing restores the persisted sort
+					await itemsView.setFilter('search', '');
+					assert.equal(itemsView.getSortField(), 'dateModified');
+					assert.notOk(win.document.querySelector('.virtualized-table-header .cell.relevance'));
+				}
+				finally {
+					// Restore the profile's column state
+					delete itemsView._columnPrefs.dateModified;
+					itemsView._columnsId = null;
+					itemsView._sortedColumn = null;
+				}
+			});
+
+			it("should show match rows under matched attachments, derived before the rows appear", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchrow A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ source: 'title', text: 'matchrow owls', ranges: [[9, 13]], strength: 1 },
+					{ source: 'abstract', text: 'about owls', ranges: [[6, 10]], strength: 0.5 }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// One row per derived entry, already in place when the search
+				// resolves
+				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				assert.notStrictEqual(matchRow, false);
+				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachment.id + '-1'), false);
+				assert.equal(itemsView.getRow(matchRow).ref.entry.text, 'matchrow owls');
+				// The parent and the matched attachment both auto-expanded
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(item.id)));
+				assert.isTrue(itemsView.isContainerOpen(itemsView.getRowIndexByID(attachment.id)));
+				assert.equal(itemsView.getLevel(matchRow), 2);
+
+				// Clearing the search removes the match rows
+				await itemsView.setFilter('search', '');
+				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
+			});
+
+			it("should place a semantic match's rows under its attachment", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "chunkcount A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(
+					async (query, itemIDs) => ({
+						scores: new Map(itemIDs.includes(attachment.id)
+							? [[attachment.id, 0.9]] : []),
+						previewableIDs: new Set(itemIDs.includes(attachment.id)
+							? [attachment.id] : [])
+					})
+				));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ source: 'content', text: 'chunkcount owls', ranges: [], strength: 1 }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				assert.notStrictEqual(matchRow, false);
+				// Under the attachment, which auto-expanded to show it
+				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+				assert.equal(itemsView.getParentIndex(matchRow), attachmentRow);
+			});
+
+			it("should drop a non-matching annotation row when a search starts", async function () {
+				Zotero.Prefs.set("hideContextAnnotationRows", true);
+				try {
+					let col = await createDataObject('collection');
+					let item = await createDataObject('item',
+						{ title: "annstale A", collections: [col.id] });
+					let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+					// One annotation the search matches and one it doesn't --
+					// with a match among them, the non-matching one is context
+					let matching = await createAnnotation('highlight', attachment);
+					let context = await createAnnotation('highlight', attachment);
+					Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+						[attachment.id, matching.id]
+							.filter(id => itemIDs.includes(id))
+							.map(id => [id, 0.8])));
+					stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+						.callsFake(scoreEnvelope(new Map())));
+					stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype,
+						'getMatchingExcerpts').resolves([]));
+
+					await select(win, col);
+					itemsView = zp.itemsView;
+					// Open the container before searching, so its children are
+					// built while no search is filtering them
+					itemsView.expandAllRows(true);
+					assert.notStrictEqual(itemsView.getRowIndexByID(context.id), false,
+						'the annotation is a row to begin with');
+
+					await itemsView.setFilter('search', 'some query');
+
+					// The search excludes it and the pref hides non-matching
+					// annotations, so its row shouldn't have survived
+					assert.isFalse(itemsView.getRowIndexByID(context.id));
+					// ...while the one it matched stays
+					assert.notStrictEqual(itemsView.getRowIndexByID(matching.id), false);
+				}
+				finally {
+					Zotero.Prefs.set("hideContextAnnotationRows", false);
+				}
+			});
+
+			it("should show no match rows for a matched note", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "notematch A", collections: [col.id] });
+				let note = new Zotero.Item('note');
+				note.parentID = item.id;
+				note.setNote('<p>notematch text</p>');
+				await note.saveTx();
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(note.id) ? [[note.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// Only file attachments show match rows, so a matched note
+				// stays a plain, childless row
+				let noteRow = itemsView.getRowIndexByID(note.id);
+				assert.notStrictEqual(noteRow, false);
+				assert.isFalse(itemsView.isContainer(noteRow));
+				assert.isFalse(itemsView.getRowIndexByID('SM' + note.id + '-0'));
+			});
+
+			it("should show selected match rows as passages in the item pane", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchselect A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'matchselect owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 16 } },
+					{ key: 1, text: 'more about owls', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 15 } }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let first = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				let second = itemsView.getRowIndexByID('SM' + attachment.id + '-1');
+				itemsView.selection.select(second);
+				// A passage isn't an item, so no item is selected
+				assert.lengthOf(itemsView.getSelectedItems(), 0);
+				let matches = itemsView.getSelectedSearchMatches();
+				assert.lengthOf(matches, 1);
+				assert.equal(matches[0].itemID, attachment.id);
+				assert.equal(matches[0].entry.key, 1);
+
+				await zp.itemSelected();
+				// The passage is shown on its own, not the attachment's fields
+				assert.equal(zp.itemPane.mode, 'search-results');
+				let pane = zp.itemPane.querySelector('#zotero-search-results-pane');
+				assert.lengthOf(pane.querySelectorAll('search-result-row'), 1);
+
+				// Every selected passage gets a card, under its attachment
+				itemsView.selection.clearSelection();
+				itemsView.selection.rangedSelect(first, second, true);
+				await zp.itemSelected();
+				assert.lengthOf(itemsView.getSelectedSearchMatches(), 2);
+				assert.equal(zp.itemPane.mode, 'search-results');
+				assert.lengthOf(pane.querySelectorAll('search-result-row'), 2);
+				assert.lengthOf(pane.querySelectorAll('collapsible-section'), 1);
+
+				// A selection holding anything that isn't a passage names none
+				itemsView.selection.clearSelection();
+				itemsView.selection.rangedSelect(
+					itemsView.getRowIndexByID(attachment.id), second, true);
+				assert.isEmpty(itemsView.getSelectedSearchMatches());
+			});
+
+			it("should mark a cut in a match row's line, but not a line opening on a sentence", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchcut A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				let text = 'First part. Second sentence here, and more text follows.';
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text, ranges: [], strength: 1,
+						snippet: { start: 12, end: 32, startsSentence: true } },
+					{ key: 1, text, ranges: [], strength: 0.5,
+						snippet: { start: 34, end: 56 } }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let line = id => itemsView.getRow(itemsView.getRowIndexByID(id)).getQuotedLine().text;
+				assert.equal(line('SM' + attachment.id + '-0'), 'Second sentence here…');
+				assert.equal(line('SM' + attachment.id + '-1'), '…and more text follows.');
+			});
+
+			it("should mark the quoted line in a selected match row's passage", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchmark A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				let text = 'An opening sentence. The owl sentence is quoted. A closing one.';
+				let start = text.indexOf('The owl');
+				let end = text.indexOf(' A closing');
+				let owl = text.indexOf('owl');
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text, ranges: [[owl, owl + 3]], strength: 1,
+						snippet: { start, end, startsSentence: true } }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'owl');
+
+				itemsView.selection.select(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
+				await zp.itemSelected();
+				let quote = zp.itemPane.querySelector('#zotero-search-results-pane search-result-row .quote');
+				// The whole passage, with the tree's line marked and the match
+				// bold inside it
+				assert.equal(quote.textContent, text);
+				let marked = quote.querySelector('.snippet');
+				assert.equal(marked.textContent, 'The owl sentence is quoted.');
+				assert.equal(marked.querySelector('.match').textContent, 'owl');
+			});
+
+			it("should hide non-matching annotations when the attachment has match rows", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "annhide A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				// Random text, so it never matches the query
+				await createAnnotation('highlight', attachment);
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'annhide owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 12 } }
+				]));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let attachmentRow = itemsView.getRowIndexByID(attachment.id);
+				let childrenFor = () => itemsView.getRow(attachmentRow).getChildItems({
+					searchMode: true,
+					searchItemIDs: new Set([attachment.id]),
+					getMatchPreviews: itemsView.bestMatchSession.getPreviews
+				});
+
+				Zotero.Prefs.set("hideContextAnnotationRows", true);
+				try {
+					// The annotation didn't match, and the match rows are what
+					// the attachment expands to instead
+					let children = childrenFor();
+					assert.isFalse(children.some(ref => ref.isAnnotation?.()));
+					assert.isAbove(children.length, 0);
+				}
+				finally {
+					Zotero.Prefs.set("hideContextAnnotationRows", false);
+				}
+				// With the pref off it stays alongside the match rows
+				assert.isTrue(childrenFor().some(ref => ref.isAnnotation?.()));
+			});
+
+			it("should open a match at its passage from the tree and the item pane", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "openmatch A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				let position = { pageIndex: 3, rects: [[1, 2, 3, 4]] };
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'openmatch owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 14 }, position },
+					// A passage with no geometry to navigate to
+					{ key: 1, text: 'openmatch more owls', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 19 } }
+				]));
+				let viewAttachment = sinon.stub(zp, 'viewAttachment').resolves();
+				stubs.push(viewAttachment);
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				let withPosition = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+
+				// From the tree: the attachment, at the passage's geometry
+				await itemsView.handleActivate({}, [withPosition]);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.equal(viewAttachment.firstCall.args[0], attachment.id);
+				assert.deepEqual(viewAttachment.firstCall.args[3], { location: { position } });
+
+				// A passage with no geometry opens the attachment as it stands
+				viewAttachment.resetHistory();
+				await itemsView.handleActivate(
+					{}, [itemsView.getRowIndexByID('SM' + attachment.id + '-1')]);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.isUndefined(viewAttachment.firstCall.args[3]);
+
+				// From the item pane: selecting the row shows its card, and
+				// double-clicking the card opens the same place
+				viewAttachment.resetHistory();
+				itemsView.selection.select(withPosition);
+				await zp.itemSelected();
+				let card = zp.itemPane
+					.querySelector('#zotero-search-results-pane search-result-row');
+				assert.ok(card);
+				card.dispatchEvent(new win.MouseEvent('dblclick', { bubbles: true }));
+				await Zotero.Promise.delay(50);
+				assert.isTrue(viewAttachment.calledOnce);
+				assert.equal(viewAttachment.firstCall.args[0], attachment.id);
+				assert.deepEqual(viewAttachment.firstCall.args[3], { location: { position } });
+			});
+
+			it("should show only the quoted matches as rows", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "quotedrows A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				let entries = [0, 1, 2, 3, 4].map(i => ({
+					key: i,
+					text: `quotedrows passage ${i}`,
+					ranges: [],
+					strength: 1 - i / 10,
+					snippet: i < 3 ? { start: 0, end: 10 } : undefined
+				}));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.resolves(entries));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// The tree shows the quoted passages; the rest are read in
+				// the item pane
+				for (let i = 0; i < Zotero.BestMatch.MAX_QUOTED_PASSAGES; i++) {
+					assert.notStrictEqual(
+						itemsView.getRowIndexByID('SM' + attachment.id + '-' + i), false,
+						`passage ${i} has a row`);
+				}
+				assert.isFalse(itemsView.getRowIndexByID(
+					'SM' + attachment.id + '-' + Zotero.BestMatch.MAX_QUOTED_PASSAGES));
+				// The preview still holds them all
+				assert.lengthOf(
+					itemsView.bestMatchSession.getPreviews(attachment.id).entries, 5);
+			});
+
+			it("should show match rows for previews derived after the search resolves", async function () {
+				this.timeout(60000);
+				// One more attachment than score() derives before resolving,
+				// so the last preview arrives after the results are on screen
+				let preloaded = Zotero.BestMatch.PRELOADED_MATCH_PREVIEWS;
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "backfill A", collections: [col.id] });
+				let attachments = [];
+				for (let i = 0; i <= preloaded; i++) {
+					attachments.push(await importFileAttachment('test.pdf', { parentID: item.id }));
+				}
+				// Descending, so the extra attachment is the one left over
+				let ids = attachments.map(att => att.id);
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					ids.filter(id => itemIDs.includes(id)).map((id, i) => [id, 0.9 - i / 100])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				// Held open, so the search has to resolve without it
+				let release;
+				let held = new Promise(resolve => release = resolve);
+				let derived = 0;
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.callsFake(async () => {
+						if (++derived > preloaded) {
+							await held;
+						}
+						return [{ source: 'content', text: 'backfill owls', ranges: [], strength: 1 }];
+					}));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let last = attachments[attachments.length - 1];
+				// The preloaded ones are on screen with the results...
+				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + attachments[0].id + '-0'), false);
+				// ...while the leftover is still deriving, so it has no rows
+				assert.isFalse(itemsView.getRowIndexByID('SM' + last.id + '-0'));
+
+				release();
+				await itemsView.bestMatchSession.previewsSettled;
+				// Filling expanded the attachment and added the match row
+				let matchRow = itemsView.getRowIndexByID('SM' + last.id + '-0');
+				assert.notStrictEqual(matchRow, false);
+				assert.equal(itemsView.getParentIndex(matchRow),
+					itemsView.getRowIndexByID(last.id));
+			});
+
+			it("should show no match rows when derivation finds nothing to show", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "emptyfill A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([]));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				assert.isFalse(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
+				// The item stays -- it's still a scored result
+				assert.notStrictEqual(itemsView.getRowIndexByID(item.id), false);
+			});
+
+			it("should show an indexing-progress banner while the index is incomplete", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "A", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map([[item.id, 0.7]]))));
+				// The counts are split between the item and attachment pairs, so
+				// the banner's totals prove the two are summed
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: true,
+					paused: false,
+					items: { done: 700, total: 9000 },
+					attachments: { done: 52, total: 553, awaiting: 0 }
+				});
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				// Localization is async, so poll for the translated counts (the
+				// test times out on failure)
+				let banner = win.document.querySelector('.best-match-index-banner');
+				assert.ok(banner);
+				while (!/752 of 9,553/.test(banner.textContent)) {
+					await Zotero.Promise.delay(10);
+				}
+
+				// The paused wording requires the explicit paused flag -- the
+				// indexer merely not running at the moment (startup, the pre-run
+				// debounce) still reports indexing
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					items: { done: 700, total: 9000 },
+					attachments: { done: 52, total: 553, awaiting: 0 }
+				});
+				await itemsView.setFilter('search', 'between runs query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing');
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: true,
+					items: { done: 700, total: 9000 },
+					attachments: { done: 52, total: 553, awaiting: 0 }
+				});
+				await itemsView.setFilter('search', 'paused query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing-paused');
+
+				// A complete index shows no banner
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: false,
+					items: { done: 9000, total: 9000 },
+					attachments: { done: 553, total: 553, awaiting: 0 }
+				});
+				await itemsView.setFilter('search', 'another query');
+				assert.notOk(win.document.querySelector('.best-match-index-banner'));
+			});
+
+			it("should score once across a multi-collection selection", async function () {
+				let col1 = await createDataObject('collection');
+				let col2 = await createDataObject('collection');
+				let shared = await createDataObject('item', { collections: [col1.id, col2.id] });
+				let other = await createDataObject('item', { collections: [col2.id] });
+				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == shared.id ? 0.9 : 0.5]))
+				));
+				stubs.push(scoreStub);
+
+				await cv.selectByID("C" + col1.id);
+				await waitForItemsLoad(win);
+				cv.selection.toggleSelect(cv.getRowIndexByID("C" + col2.id));
+				await zp.onCollectionSelected();
+				await zp.itemsView.waitForLoad();
+				itemsView = zp.itemsView;
+
+				await itemsView.setFilter('search', 'some query');
+
+				// One scoring call for the whole selection, with the shared item deduplicated
+				assert.equal(scoreStub.callCount, 1);
+				assert.sameMembers(scoreStub.firstCall.args[1], [shared.id, other.id]);
+				assert.deepEqual(
+					itemsView._rows.filter(row => row.type == 'item').map(row => row.id),
+					[shared.id, other.id]
+				);
+			});
+
+			it("should rank a saved search with a bestMatch condition and let a quick search override it", async function () {
+				let itemA = await createDataObject('item', { title: "savedsimtest A" });
+				let itemB = await createDataObject('item', { title: "savedsimtest B" });
+				// Install the stub first: creating the saved search auto-selects
+				// it, which already runs a best-match refresh
+				let stub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(itemIDs.map((id) => {
+						let best = query == 'saved query' ? itemA.id : itemB.id;
+						return [id, id == best ? 0.9 : 0.5];
+					})))
+				);
+				stubs.push(stub);
+				let search = new Zotero.Search();
+				search.name = "Saved best-match test";
+				search.libraryID = itemA.libraryID;
+				search.addCondition('resultLevel', 'item');
+				search.addCondition('title', 'contains', 'savedsimtest');
+				search.addCondition('bestMatch', 'hybrid', 'saved query');
+				await search.saveTx();
+
+				// Selecting the saved search activates ranking from its own marker
+				await select(win, search);
+				itemsView = zp.itemsView;
+				assert.equal(itemsView.getSortField(), 'relevance');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// An active best-match quick search overrides the saved marker
+				await itemsView.setFilter('search', 'typed query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
+			});
+
+			it("should keep a rank-only advanced search's results when the index isn't ready", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "notready A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "notready B", collections: [col.id] });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async () => {
+					throw new Zotero.Embeddings.IndexNotReadyError('test');
+				}));
+				let s = new Zotero.Search();
+				s.libraryID = col.libraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'notready');
+				s.addCondition('bestMatch', 'hybrid', 'some query');
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('advanced-search', s);
+
+				// Membership is untouched; the rows just aren't ranked
+				assert.sameMembers(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+				assert.equal(itemsView.getCellText(0, 'relevance'), '');
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should rank an advanced search's items by the matches beneath them", async function () {
+				let col = await createDataObject('collection');
+				let plain = await createDataObject('item', { title: "beneath A", collections: [col.id] });
+				let parent = await createDataObject('item', { title: "beneath B", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: parent.id });
+				// Only the attachment's text answers the query
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(
+						itemIDs.filter(id => id == attachment.id).map(id => [id, 0.9])
+					)
+				)));
+				let s = new Zotero.Search();
+				s.libraryID = col.libraryID;
+				s.addCondition('resultLevel', 'item');
+				s.addCondition('title', 'contains', 'beneath');
+				s.addCondition('bestMatch', 'hybrid', 'some query');
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('advanced-search', s);
+
+				// The search returned top-level items only, but the attachment
+				// was ranked, lifting its parent above the item nothing matched
+				// in, and it shows as a match beneath it
+				let topLevel = itemsView._rows.filter(row => row.level == 0).map(row => row.id);
+				assert.deepEqual(topLevel, [parent.id, plain.id]);
+				assert.isNumber(itemsView.getRowIndexByID(attachment.id));
+				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("shouldn't rerank on a refresh", async function () {
+				let col = await createDataObject('collection');
+				let itemA = await createDataObject('item', { title: "norerank A", collections: [col.id] });
+				let itemB = await createDataObject('item', { title: "norerank B", collections: [col.id] });
+				let best = itemA.id;
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+					async (query, itemIDs) => new Map(itemIDs.map(id => [id, id == best ? 0.9 : 0.5]))
+				)));
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+
+				// A refresh (e.g. a field change) leaves the ranking alone
+				best = itemB.id;
+				await Zotero.Notifier.trigger('refresh', 'item', [itemA.id, itemB.id]);
+				await itemsView._refreshPromise;
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
+			});
+
 		});
 
 		it("should expand parent item and attachment for an annotation match", async function () {

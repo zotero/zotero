@@ -154,4 +154,39 @@ describe("Advanced Preferences", function () {
 			});
 		})
 	})
+
+	describe("Best-Match Search", function () {
+		it("should show the indexing status only while semantic search is on", async function () {
+			var stub = sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves();
+			var win = await loadPrefPane('advanced');
+			try {
+				var menu = win.document.getElementById('semantic-search-enable');
+				var statusBox = win.document.getElementById('semantic-search-status');
+				assert.equal(menu.value, 'false');
+				assert.isTrue(statusBox.hidden);
+
+				// Choosing Enabled writes a boolean, not the menu's string
+				menu.value = 'true';
+				menu.dispatchEvent(new win.Event('command'));
+				assert.isTrue(Zotero.Prefs.get('search.bestMatch.enableSemantic'));
+				// The pref observer re-renders the status block
+				while (statusBox.hidden) {
+					await Zotero.Promise.delay(10);
+				}
+
+				// And the menu follows the pref when something else writes it
+				Zotero.Prefs.set('search.bestMatch.enableSemantic', false);
+				while (!statusBox.hidden) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.equal(menu.value, 'false');
+			}
+			finally {
+				win.close();
+				Zotero.Prefs.clear('search.bestMatch.enableSemantic');
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+				stub.restore();
+			}
+		});
+	})
 })

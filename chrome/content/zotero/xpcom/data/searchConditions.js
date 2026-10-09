@@ -266,6 +266,19 @@ Zotero.SearchConditions = new function () {
 				}
 			},
 
+			// Root-level modifier rather than a regular condition: the items
+			// list ranks the results by how well they match the value. The
+			// operator is the engine: 'hybrid' ranks with both, fused;
+			// 'lexical' by the words alone; 'semantic' by meaning alone.
+			{
+				name: 'bestMatch',
+				operators: {
+					hybrid: true,
+					lexical: true,
+					semantic: true
+				}
+			},
+
 			// Shortcuts for adding collections and searches by id
 			{
 				name: 'collectionID',
@@ -900,17 +913,17 @@ Zotero.SearchConditions = new function () {
 	 */
 	function hasOperator(condition, operator){
 		var [condition, mode] = this.parseCondition(condition);
-		
+
 		if (!_conditions) {
 			throw new Zotero.Exception.UnloadedDataException("Search conditions not yet loaded");
 		}
-		
+
 		if (!_conditions[condition]){
 			let e = new Error("Invalid condition '" + condition + "' in hasOperator()");
 			e.name = "ZoteroInvalidDataError";
 			throw e;
 		}
-		
+
 		if (!operator && typeof _conditions[condition]['operators'] == 'undefined'){
 			return true;
 		}

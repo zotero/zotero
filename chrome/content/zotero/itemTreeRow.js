@@ -12,6 +12,10 @@ XPCOMUtils.defineLazyPreferenceGetter(
 
 const ATTACHMENT_STATE_LOAD_DELAY = 150;
 
+// Headings named above a search match. The path from the document's root can
+// be several levels deep, and the deepest are the ones that place the passage.
+const LOCATION_HEADINGS = 2;
+
 /**
  * Base row in an ItemTree.
  *
@@ -101,6 +105,17 @@ class ItemTreeRow {
 
 	getIcon() {
 		return getCSSItemTypeIcon('document');
+	}
+
+	/**
+	 * The 0-1 fraction the Relevance column's bar shows for this row on its
+	 * own, for rows carrying their own relevance rather than taking it from
+	 * the view's best-match scores, or null for rows that don't
+	 *
+	 * @return {Number|null}
+	 */
+	getRelevanceFraction() {
+		return null;
 	}
 
 	renderRow(div, index, columns, rowData, renderCtx) {
@@ -461,23 +476,30 @@ class FileItemTreeRow extends ZoteroItemTreeRow {
 		return true;
 	}
 
-	isContainerEmpty() {
+	isContainerEmpty({ getMatchPreviews } = {}) {
+		// An attachment with search matches to show can be expanded even
+		// with no annotations of its own
+		if (getMatchPreviews?.(this.ref.id)?.state == 'filled') {
+			return false;
+		}
 		return this.ref.numAnnotations() == 0;
 	}
 
-	getChildItems({ searchMode, searchItemIDs } = {}) {
+	getChildItems({ searchMode, searchItemIDs, getMatchPreviews } = {}) {
 		let annotations = this.ref.getAnnotations();
-		// With "Hide Non-Matching Annotations" enabled, if any of the attachment's
-		// annotations match a search, show only those and hide the rest. If none match,
-		// show them all, since otherwise the attachment couldn't be expanded to browse its
-		// annotations at all.
+		let matchRows = SearchMatch.forItem(this.ref, getMatchPreviews);
+		// With "Hide Non-Matching Annotations" enabled, show only the annotations
+		// that matched a search. When none of them did, they're shown anyway rather
+		// than leaving an attachment that can't be expanded to browse them at all --
+		// unless it has match rows, which are already something to expand to.
 		if (searchMode && Zotero.Prefs.get("hideContextAnnotationRows")) {
 			let matches = annotations.filter(annotation => searchItemIDs.has(annotation.id));
-			if (matches.length) {
+			if (matches.length || matchRows.length) {
 				annotations = matches;
 			}
 		}
-		return annotations;
+		// Fulltext match rows come after the annotations
+		return [...annotations, ...matchRows];
 	}
 
 	_supportsBestAttachmentState() {
@@ -562,6 +584,214 @@ class AnnotationItemTreeRow extends ZoteroItemTreeRow {
 				div.append(cell);
 			}
 		}
+
+		// The relevance bar while a best-match search shows the Relevance column
+		let relevanceColumn = columns.find(column => column.dataKey == 'relevance');
+		if (relevanceColumn && !relevanceColumn.hidden) {
+			let cell = renderCtx.renderCell(index, rowData?.relevance, relevanceColumn, false);
+			if (cell) {
+				div.append(cell);
+			}
+		}
+	}
+}
+
+/**
+ * The reference a search-match row wraps: one place a best-match search
+ * matched inside an item.
+ *
+ * Item tree rows normally wrap data objects. A preview isn't a stored
+ * object, so this stands in as the tree's reference to one.
+ */
+class SearchMatch {
+	constructor(itemID, entry) {
+		this.itemID = itemID;
+		// A preview entry (see Zotero.BestMatch.Session#getPreviews())
+		this.entry = entry;
+		this.treeViewID = 'SM' + itemID + '-' + entry.key;
+		this.id = this.treeViewID;
+	}
+
+	/**
+	 * The search-match refs to materialize under an item, from its
+	 * best-match preview: one ref per quoted entry, and nothing when the
+	 * item has no filled preview or its preview derived nothing.
+	 *
+	 * A preview holds every passage the item matched in; the tree shows the
+	 * strongest few, which are the ones with a line quoted. The rest are
+	 * read whole in the item pane.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Function} [getMatchPreviews] - itemID -> preview accessor (see
+	 *     Zotero.BestMatch.Session#getPreviews()), passed by the row
+	 *     provider while a best-match search is active
+	 * @return {SearchMatch[]}
+	 */
+	static forItem(item, getMatchPreviews) {
+		let preview = getMatchPreviews?.(item.id);
+		if (preview?.state != 'filled') {
+			return [];
+		}
+		return preview.entries
+			.slice(0, Zotero.BestMatch.MAX_QUOTED_PASSAGES)
+			.map(entry => new SearchMatch(item.id, entry));
+	}
+}
+
+/**
+ * Row showing one place a best-match search matched inside its parent row's
+ * item: a derived excerpt with its matches highlighted. The ref is a
+ * SearchMatch carrying the preview entry it shows.
+ */
+class SearchMatchItemTreeRow extends ItemTreeRow {
+	get type() {
+		return 'search-match';
+	}
+
+	/**
+	 * The line of the passage this row shows: its snippet, with ellipses
+	 * where it cuts -- none before a line opening on a sentence -- and the
+	 * query's matches located within it. The whole passage stays on the
+	 * entry.
+	 *
+	 * @return {Object} - { text, ranges }
+	 */
+	getQuotedLine() {
+		let { text, ranges, snippet } = this.ref.entry;
+		let start = snippet ? snippet.start : 0;
+		let end = snippet ? snippet.end : text.length;
+		let prefix = start > 0 && !snippet?.startsSentence ? '…' : '';
+		let quoted = prefix + text.slice(start, end) + (end < text.length ? '…' : '');
+		let quotedRanges = [];
+		for (let [rangeStart, rangeEnd] of ranges || []) {
+			let from = Math.max(rangeStart, start);
+			let to = Math.min(rangeEnd, end);
+			if (from >= to) {
+				continue;
+			}
+			quotedRanges.push([
+				from - start + prefix.length,
+				to - start + prefix.length
+			]);
+		}
+		return { text: quoted, ranges: quotedRanges };
+	}
+
+	getDisplayTitle() {
+		return this.getQuotedLine().text;
+	}
+
+	getField(field) {
+		if (field == 'title') {
+			return this.getDisplayTitle();
+		}
+		return super.getField(field);
+	}
+
+	/**
+	 * Where in the document this row's passage sits, for the line above the
+	 * quote: the headings it falls under and the page it starts on. Only the
+	 * deepest headings are named -- a full outline path is longer than the
+	 * line, and the leaf is what says where you'd land.
+	 *
+	 * Empty for a passage that knows neither, which is what a document with
+	 * no structured text to read gives.
+	 *
+	 * @return {String}
+	 */
+	getLocationLabel() {
+		let { outlinePath, pageLabel } = this.ref.entry;
+		let parts = [];
+		if (outlinePath) {
+			parts.push(outlinePath.split(' > ').slice(-LOCATION_HEADINGS).join(' › '));
+		}
+		if (pageLabel) {
+			parts.push(Zotero.ftl.formatValueSync(
+				'items-search-match-page', { page: pageLabel }));
+		}
+		return parts.join(' · ');
+	}
+
+	/**
+	 * A match row's bar shows the strength of the evidence it displays,
+	 * rather than its item's relevance
+	 */
+	getRelevanceFraction() {
+		return this.ref.entry?.strength ?? null;
+	}
+
+	/**
+	 * No icon: every match row would carry the same one, which would say
+	 * nothing while taking room from the quote
+	 */
+	getIcon() {
+		return null;
+	}
+
+	/**
+	 * A match row spans the tree's whole width with one cell. It shows a
+	 * passage rather than an item, so the columns describe nothing about it
+	 * -- including the relevance bar, which would rank passages against each
+	 * other where the eye is meant to be reading them.
+	 */
+	renderRow(div, index, columns, rowData, renderCtx) {
+		let titleColumn = Object.assign(
+			{},
+			columns.find(column => column.dataKey == 'title'),
+			{ className: 'title' }
+		);
+		div.appendChild(renderCtx.renderCell(index, rowData.title, titleColumn, true));
+	}
+
+	/**
+	 * Stack the row's lines beside the tree's indent and twisty, which are
+	 * added to the first cell of every row and would otherwise be stacked
+	 * along with them
+	 *
+	 * @param {...Element} lines
+	 * @return {Element}
+	 */
+	_renderLines(...lines) {
+		let wrapper = document.createElement('span');
+		wrapper.className = 'search-match-lines';
+		wrapper.append(...lines);
+		return wrapper;
+	}
+
+	/**
+	 * Two lines: where the passage is, and the line of it worth reading.
+	 * Neither wraps, so every match row is the same height and the tree can
+	 * tell what that height is without measuring (see
+	 * ItemTree#_getSearchMatchRowHeight()).
+	 */
+	renderPrimaryCell(index, data, column) {
+		let span = document.createElement('span');
+		span.className = `cell ${column.className} primary`;
+
+		let locationSpan = document.createElement('span');
+		locationSpan.className = 'search-match-location';
+		locationSpan.textContent = this.getLocationLabel();
+
+		let textSpan = document.createElement('span');
+		textSpan.className = 'cell-text';
+		let { text, ranges } = this.getQuotedLine();
+		let last = 0;
+		for (let [start, end] of ranges || []) {
+			if (start > last) {
+				textSpan.append(text.slice(last, start));
+			}
+			let mark = document.createElement('span');
+			mark.className = 'search-match-highlight';
+			mark.textContent = text.slice(start, end);
+			textSpan.append(mark);
+			last = end;
+		}
+		if (last < text.length) {
+			textSpan.append(text.slice(last));
+		}
+
+		span.append(this._renderLines(locationSpan, textSpan));
+		return span;
 	}
 }
 
@@ -742,6 +972,7 @@ class SpacerItemTreeRow extends ItemTreeRow {
 ItemTreeRow.create = function (ref, level, isOpen) {
 	if (ref instanceof Zotero.Collection) return new CollectionItemTreeRow(ref, level, isOpen);
 	if (ref instanceof Zotero.Search) return new SearchItemTreeRow(ref, level, isOpen);
+	if (ref instanceof SearchMatch) return new SearchMatchItemTreeRow(ref, level, isOpen);
 	if (ref.isAnnotation?.()) return new AnnotationItemTreeRow(ref, level, isOpen);
 	if (ref.isFileAttachment?.()) return new FileItemTreeRow(ref, level, isOpen);
 	return new ZoteroItemTreeRow(ref, level, isOpen);
@@ -752,6 +983,8 @@ module.exports.ItemTreeRow = ItemTreeRow;
 module.exports.ZoteroItemTreeRow = ZoteroItemTreeRow;
 module.exports.FileItemTreeRow = FileItemTreeRow;
 module.exports.AnnotationItemTreeRow = AnnotationItemTreeRow;
+module.exports.SearchMatchItemTreeRow = SearchMatchItemTreeRow;
+module.exports.SearchMatch = SearchMatch;
 module.exports.CollectionItemTreeRow = CollectionItemTreeRow;
 module.exports.SearchItemTreeRow = SearchItemTreeRow;
 module.exports.SpacerItemTreeRow = SpacerItemTreeRow;

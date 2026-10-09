@@ -31,6 +31,128 @@ describe("Zotero.SDT", function () {
 		assert.deepEqual(progress, []);
 	});
 
+	it("should cut a cached pack into chunks", async function () {
+		// Cold worker startup
+		this.timeout(60000);
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [1] },
+			],
+			pages: [
+				{ label: '1', contentRange: [[0], [2]] },
+			],
+			blocks: [
+				testBlock('Front matter on the title page', 0, [10, 700, 300, 720]),
+				testBlock('Introduction', 0, [10, 650, 300, 670], 'heading'),
+				testBlock('Owls are nocturnal birds of prey.', 0, [10, 600, 300, 620]),
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let result = await Zotero.SDT.getItemChunks(item.id);
+		assert.isTrue(result.ok);
+		assert.equal(result.contentHash, TEST_PDF_HASH);
+		let { chunks } = result;
+		assert.lengthOf(chunks, 1);
+		assert.include(chunks[0].text, 'Front matter on the title page');
+		assert.include(chunks[0].text, 'Owls are nocturnal birds of prey.');
+		assert.isTrue(chunks[0].anchor.pageRects.every(rect => rect[0] === 0));
+
+		// A pack that isn't cached isn't generated when the caller says so
+		let other = await importFileAttachment('test.pdf');
+		assert.deepEqual(await Zotero.SDT.getItemChunks(other.id, { cachedOnly: true }),
+			{ ok: false, reason: 'not-cached' });
+	});
+
+	it("should read chunk anchors back as their text", async function () {
+		// Cold worker startup fetches the wasm runtime
+		this.timeout(60000);
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [0] },
+				{ title: 'Methods', ref: [2] },
+			],
+			pages: [
+				{ label: 'ix', contentRange: [[0], [2]] },
+				{ label: '10', contentRange: [[2], [4]] },
+			],
+			blocks: [
+				testBlock('Introduction', 0, [10, 700, 300, 720], 'heading'),
+				testBlock('Owls are nocturnal birds of prey. '.repeat(40), 0, [10, 600, 300, 680]),
+				testBlock('Methods', 1, [10, 700, 300, 720], 'heading'),
+				testBlock('We tracked forty owls with GPS loggers. '.repeat(40), 1, [10, 600, 300, 680]),
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let { chunks } = await Zotero.SDT.getItemChunks(item.id, { positions: true });
+		assert.lengthOf(chunks, 2);
+		// Each chunk is anchored on its own page
+		assert.deepEqual(chunks.map(chunk => chunk.anchor.pageRects.map(rect => rect[0])), [[0], [1]]);
+
+		// Each chunk's anchor gives back its text, with where it sits -- the
+		// section it starts in and its page -- and the reader position to
+		// open it at, the one the chunk was cut with. Anchors on nothing the
+		// document has read back as nothing.
+		let anchors = [
+			chunks[0].anchor,
+			chunks[1].anchor,
+			null,
+			{ pageRects: [[5, 0, 0, 1, 1]] },
+			{ pageRects: [[0, 0, 0, 1, 1]] },
+		];
+		let spy = sinon.spy(Zotero.PDFWorker, 'readStructuredDocumentTextAnchors');
+		try {
+			var read = await Zotero.SDT.readAnchors(item.id, anchors);
+			assert.isTrue(spy.calledOnce);
+		}
+		finally {
+			spy.restore();
+		}
+		assert.isTrue(read.ok);
+		assert.lengthOf(read.chunks, 5);
+		assert.equal(read.chunks[0].text, chunks[0].text);
+		assert.equal(read.chunks[0].outlinePath, 'Introduction');
+		assert.equal(read.chunks[0].pageLabel, 'ix');
+		assert.equal(read.chunks[0].position.pageIndex, 0);
+		assert.equal(read.chunks[1].text, chunks[1].text);
+		assert.equal(read.chunks[1].outlinePath, 'Methods');
+		assert.equal(read.chunks[1].pageLabel, '10');
+		assert.equal(read.chunks[1].position.pageIndex, 1);
+		assert.isNull(read.chunks[2]);
+		assert.isNull(read.chunks[3]);
+		assert.isNull(read.chunks[4]);
+		assert.deepEqual(read.chunks[1].position, chunks[1].position);
+
+		// A worker failure is reported, not worked around
+		let stub = sinon.stub(Zotero.PDFWorker, 'readStructuredDocumentTextAnchors')
+			.rejects(new Error('Worker down'));
+		try {
+			assert.deepEqual(await Zotero.SDT.readAnchors(item.id, anchors),
+				{ ok: false, reason: 'failed' });
+		}
+		finally {
+			stub.restore();
+		}
+	});
+
+	it("should report the expected extraction identity from getProcessorVersion()", async function () {
+		let item = await importFileAttachment('test.pdf');
+		let version = await Zotero.SDT.getProcessorVersion(item);
+		let { CHUNKER_VERSION } = getTestRequire()(
+			'resource://zotero/document-worker/structured-document-text-chunker.js');
+		assert.equal(version, 'pdf/' + documentWorkerMetadata.SDT_PROCESSOR_VERSIONS.pdf
+			+ '/' + parseInt(documentWorkerMetadata.SDT_SCHEMA_VERSION)
+			+ '/' + CHUNKER_VERSION);
+		// Unsupported attachment types have no extraction identity
+		let unsupported = await importFileAttachment('test.png');
+		assert.isNull(await Zotero.SDT.getProcessorVersion(unsupported));
+	});
+
 	it("should generate the pack when missing", async function () {
 		let item = await importFileAttachment('test.pdf');
 		let cachePath = getSDTCachePath(item);
@@ -180,6 +302,25 @@ describe("Zotero.SDT", function () {
 		}
 	});
 
+	it("should regenerate a stale-processor pack before returning it with allowStale: false", async function () {
+		let item = await importFileAttachment('test.pdf');
+		await writeTestSDTCache(item, getStaleProcessorVersionSDTPackBytes());
+
+		let workerStub = sinon.stub(Zotero.PDFWorker, 'getStructuredDocumentText')
+			.resolves({ buf: getTestSDTPackBuffer() });
+		try {
+			// A consumer that stores references into the pack's content gets
+			// the current extraction, never one about to be replaced
+			let result = await Zotero.SDT.getPack(item.id, { allowStale: false });
+			assert.isTrue(result.ok);
+			assert.deepEqual(new Uint8Array(result.bytes), getTestSDTPackBytes());
+			assert.isTrue(workerStub.calledOnce);
+		}
+		finally {
+			workerStub.restore();
+		}
+	});
+
 	it("should regenerate a pack with the wrong processor type", async function () {
 		let item = await importFileAttachment('test.pdf');
 		await writeTestSDTCache(item, getWrongProcessorTypeSDTPackBytes());
@@ -294,6 +435,95 @@ describe("Zotero.SDT", function () {
 		assert.equal(result.reason, 'unavailable');
 	});
 
+	it("should cut chunks in the document worker", async function () {
+		// Cold worker startup
+		this.timeout(60000);
+
+		let item = await importFileAttachment('test.pdf');
+		let pako = getTestRequire()('pako');
+		let bytes = makeTestSDTPackV1WithContent(documentWorkerMetadata, pako, {
+			outline: [
+				{ title: 'Introduction', ref: [0] },
+				{ title: 'Methods', ref: [2] },
+			],
+			pages: [
+				{ label: 'ix', contentRange: [[0], [2]] },
+				{ label: '10', contentRange: [[2], [4]] },
+			],
+			blocks: [
+				testBlock('Introduction', 0, [10, 700, 300, 720], 'heading'),
+				testBlock('Owls are nocturnal birds of prey. '.repeat(40), 0, [10, 600, 300, 680]),
+				testBlock('Methods', 1, [10, 700, 300, 720], 'heading'),
+				testBlock('We tracked forty owls with GPS loggers. '.repeat(40), 1, [10, 600, 300, 680]),
+			],
+		});
+		await writeTestSDTCache(item, bytes);
+
+		let spy = sinon.spy(Zotero.PDFWorker, 'getStructuredDocumentTextChunks');
+		try {
+			let result = await Zotero.SDT.getItemChunks(item.id);
+			assert.isTrue(spy.calledOnce);
+			assert.isTrue(result.ok);
+			assert.equal(result.contentHash, TEST_PDF_HASH);
+			let { chunks } = result;
+			assert.lengthOf(chunks, 2);
+			assert.include(chunks[0].text, 'Owls are nocturnal');
+			assert.include(chunks[1].text, 'We tracked forty owls');
+			assert.deepEqual(chunks.map(chunk => chunk.outlinePath), ['Introduction', 'Methods']);
+			assert.deepEqual(chunks.map(chunk => chunk.anchor.pageRects.map(rect => rect[0])), [[0], [1]]);
+			assert.isFalse('position' in chunks[0]);
+
+			// Asked for, each chunk also carries the position it opens at
+			result = await Zotero.SDT.getItemChunks(item.id, { positions: true });
+			assert.isTrue(result.ok);
+			assert.deepEqual(result.chunks.map(chunk => chunk.position.pageIndex), [0, 1]);
+			assert.isFalse('positions' in result.chunks[0]);
+		}
+		finally {
+			spy.restore();
+		}
+
+		// A worker failure, or a chunker the metadata doesn't describe, is
+		// reported as a failed cut rather than worked around
+		let stub = sinon.stub(Zotero.PDFWorker, 'getStructuredDocumentTextChunks')
+			.rejects(new Error('Worker down'));
+		try {
+			assert.deepEqual(await Zotero.SDT.getItemChunks(item.id),
+				{ ok: false, reason: 'cut-failed' });
+			stub.resolves({ chunks: [], sourceHash: TEST_PDF_HASH, chunkerVersion: 999 });
+			assert.deepEqual(await Zotero.SDT.getItemChunks(item.id),
+				{ ok: false, reason: 'cut-failed' });
+		}
+		finally {
+			stub.restore();
+		}
+	});
+
+	it("should fail pending worker requests on a worker error and start afresh", async function () {
+		this.timeout(60000);
+		let item = await importFileAttachment('test.pdf');
+		await writeTestSDTCache(item);
+
+		// A request in flight when the worker errors
+		Zotero.PDFWorker._init();
+		let pending = Zotero.PDFWorker._query('sdt.readAnchors', { buf: new ArrayBuffer(0), anchors: [] }, []);
+		Zotero.PDFWorker._worker.dispatchEvent(new ErrorEvent('error', { message: 'Worker down' }));
+		let error = null;
+		try {
+			await pending;
+		}
+		catch (e) {
+			error = e;
+		}
+		assert.include(error?.message, 'Worker down');
+		assert.isNull(Zotero.PDFWorker._worker);
+
+		// The next request gets a new worker
+		let result = await Zotero.SDT.getItemChunks(item.id);
+		assert.isTrue(result.ok);
+		assert.isNotNull(Zotero.PDFWorker._worker);
+	});
+
 	it("should generate and open a pack with the real document worker", async function () {
 		// Cold worker startup fetches the wasm runtime and segmentation models
 		this.timeout(120000);
@@ -317,12 +547,11 @@ describe("Zotero.SDT", function () {
 		assert.equal(progress.at(-1), 100);
 		assert.isTrue(progress.some(value => value > 0 && value < 100));
 
-		// getReader() should return a parsed pack from the cache without
-		// re-extracting
-		let reader = await Zotero.SDT.getReader(item.id);
-		assert.isOk(reader);
-		let metadata = await reader.getMetadata();
-		assert.equal(metadata.source.hash, TEST_PDF_HASH);
+		// The cached pack cuts in the worker without re-extracting
+		let cut = await Zotero.SDT.getItemChunks(item.id);
+		assert.isTrue(cut.ok);
+		assert.equal(cut.contentHash, TEST_PDF_HASH);
+		assert.isNotEmpty(cut.chunks);
 	});
 
 	function getSDTCachePath(item) {
@@ -447,6 +676,80 @@ describe("Zotero.SDT", function () {
 		// and one empty block-start entry.
 		bytes.set(metadataBytes, payloadOffset);
 		bytes.set(catalogBytes, payloadOffset + metadataBytes.byteLength);
+		return bytes;
+	}
+
+	// A block of one text node laid out on a page, with the character
+	// geometry the chunker requires of a PDF: one run along the rect, each
+	// non-whitespace character an equal share of it
+	function testBlock(text, pageIndex, [x1, y1, x2, y2], type = 'paragraph') {
+		let count = text.replace(/\s/g, '').length;
+		let width = (x2 - x1) / Math.max(1, count);
+		return {
+			type,
+			anchor: { pageRects: [[pageIndex, x1, y1, x2, y2]] },
+			content: [{
+				text,
+				anchor: { textMap: JSON.stringify([[0, pageIndex, x1, y1, x2, y2, ...new Array(count).fill(width)]]) }
+			}]
+		};
+	}
+
+	// A v1 pack with real content blocks and catalog, for section/outline
+	// consumers (see makeEmptyTestSDTPackV1() for the layout)
+	function makeTestSDTPackV1WithContent(metadata, pako, { outline = [], pages = [], blocks = [] } = {}) {
+		if (metadata.SDT_PACK_VERSION !== 1) {
+			throw new Error('Unsupported test SDT pack version');
+		}
+		const HEADER_LENGTH = 16;
+		// Two entries each of chunk byte offsets and chunk block starts, after
+		// the metadata and catalog lengths
+		const INDEX_LENGTH = 8 + 2 * 4 + 2 * 4;
+		let encoder = new TextEncoder();
+		let schemaVersion = metadata.SDT_SCHEMA_VERSION.split('.').map(Number);
+		let metadataBytes = pako.deflateRaw(JSON.stringify({
+			processor: {
+				type: 'pdf',
+				version: metadata.SDT_PROCESSOR_VERSIONS.pdf,
+			},
+			dateCreated: '2026-01-01T00:00:00.000Z',
+			source: { hash: TEST_PDF_HASH },
+		}));
+		let catalogBytes = pako.deflateRaw(JSON.stringify({ pages, outline }));
+		// One content chunk: an offset table, then the block JSON back to back
+		let blockByteArrays = blocks.map(block => encoder.encode(JSON.stringify(block)));
+		let chunkBytes = new Uint8Array(
+			blocks.length * 4 + blockByteArrays.reduce((sum, b) => sum + b.byteLength, 0)
+		);
+		let chunkView = new DataView(chunkBytes.buffer);
+		let blockOffset = 0;
+		let writeOffset = blocks.length * 4;
+		for (let i = 0; i < blockByteArrays.length; i++) {
+			chunkView.setUint32(i * 4, blockOffset, true);
+			blockOffset += blockByteArrays[i].byteLength;
+			chunkBytes.set(blockByteArrays[i], writeOffset);
+			writeOffset += blockByteArrays[i].byteLength;
+		}
+		let compressedChunk = pako.deflateRaw(chunkBytes);
+
+		let payloadOffset = HEADER_LENGTH + INDEX_LENGTH;
+		let bytes = new Uint8Array(
+			payloadOffset + metadataBytes.byteLength + catalogBytes.byteLength
+				+ compressedChunk.byteLength
+		);
+		bytes.set(SDT_PACK_MAGIC, 0);
+		bytes.set([metadata.SDT_PACK_VERSION, ...schemaVersion], 8);
+		let view = new DataView(bytes.buffer);
+		view.setUint32(12, INDEX_LENGTH, true);
+		view.setUint32(HEADER_LENGTH, metadataBytes.byteLength, true);
+		view.setUint32(HEADER_LENGTH + 4, catalogBytes.byteLength, true);
+		// chunkByteOffsets [0, byteLength], chunkBlockStarts [0, blockCount]
+		view.setUint32(HEADER_LENGTH + 12, compressedChunk.byteLength, true);
+		view.setUint32(HEADER_LENGTH + 20, blocks.length, true);
+		bytes.set(metadataBytes, payloadOffset);
+		bytes.set(catalogBytes, payloadOffset + metadataBytes.byteLength);
+		bytes.set(compressedChunk,
+			payloadOffset + metadataBytes.byteLength + catalogBytes.byteLength);
 		return bytes;
 	}
 

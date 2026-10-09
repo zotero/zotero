@@ -536,6 +536,94 @@ Zotero.Sync.APIClient.prototype = {
 	},
 	
 	
+	/**
+	 * Which of a library's embeddings of a model have changed since a
+	 * version: the library's current version and, per item key, the version
+	 * its rows last changed at, with the models the server embeds the
+	 * library with when it says.
+	 *
+	 * @param {String} model - Zotero.Embeddings.getModelVersion()
+	 * @param {Integer} [since]
+	 * @return {Promise<Object|false>} - { version, items: { key: version },
+	 *     models }, or false when nothing has changed since `since`
+	 */
+	getEmbeddingVersions: async function (libraryType, libraryTypeID, model, since) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			target: "embeddings",
+			format: "versions",
+			model
+		};
+		if (since) {
+			params.since = since;
+		}
+		var uri = this.buildRequestURI(params);
+		var options = {
+			successCodes: [200, 304, 404]
+		};
+		if (since) {
+			options.headers = {
+				"If-Modified-Since-Version": since
+			};
+		}
+		var xmlhttp = await this.makeRequest("GET", uri, options);
+		if (xmlhttp.status == 304) {
+			return false;
+		}
+		if (xmlhttp.status == 404) {
+			return { version: 0, items: {}, models: [] };
+		}
+		var json = this._parseJSON(xmlhttp.responseText);
+		return {
+			version: json.version || 0,
+			items: json.items || {},
+			models: json.models || null
+		};
+	},
+
+
+	/**
+	 * The server's answer for each of the given items, in a model: its
+	 * embeddings, each vector base64 of its stored int8 form, and the
+	 * version they're from; a refusal; or word that the server is still
+	 * working on it. The model is echoed.
+	 *
+	 * @param {String} model - Zotero.Embeddings.getModelVersion()
+	 * @param {String[]} itemKeys
+	 * @return {Promise<Object>} - { model, dtype, items: [
+	 *     { key, status: 'success', contentHash, chunks, version,
+	 *         rows: [{ chunkIndex, embedding, anchor }] }
+	 *     | { key, status: 'declined' }
+	 *     | { key, status: 'pending' } ] },
+	 *     each embedding base64 in the encoding `dtype` names; model and dtype
+	 *     null and items empty when the server has no embeddings for the
+	 *     library
+	 */
+	getEmbeddings: async function (libraryType, libraryTypeID, model, itemKeys = []) {
+		var params = {
+			libraryType: libraryType,
+			libraryTypeID: libraryTypeID,
+			target: "embeddings",
+			model
+		};
+		if (itemKeys.length) {
+			params.itemKey = itemKeys.join(',');
+		}
+		var uri = this.buildRequestURI(params);
+		var xmlhttp = await this.makeRequest("GET", uri, { successCodes: [200, 404] });
+		if (xmlhttp.status == 404) {
+			return { model: null, dtype: null, items: [] };
+		}
+		var json = this._parseJSON(xmlhttp.responseText);
+		return {
+			model: json.model || null,
+			dtype: json.dtype || null,
+			items: json.items || []
+		};
+	},
+
+
 	createAPIKeyFromCredentials: async function (username, password) {
 		var body = JSON.stringify({
 			username,
@@ -825,7 +913,8 @@ Zotero.Sync.APIClient.prototype = {
 			'sort',
 			'direction',
 			'since',
-			'sincetime'
+			'sincetime',
+			'model'
 		];
 		queryParams = {};
 		

@@ -556,7 +556,9 @@ Zotero.Search.prototype.getConditions = function (){
 Zotero.Search.prototype.hasPostSearchFilter = function () {
 	this._requireData('conditions');
 	for (let i of Object.values(this._conditions)) {
-		if (i.condition == 'fulltextContent'){
+		// Applied in search() after the SQL runs, so uses of this search as a
+		// scope have to route through search() to include them
+		if (i.condition == 'fulltextContent') {
 			return true;
 		}
 	}
@@ -824,15 +826,40 @@ Zotero.Search.prototype.search = async function (asTempTable) {
 	
 	//Zotero.debug('Final result set');
 	//Zotero.debug(ids);
-	
+
 	if (!ids || !ids.length) {
 		return [];
 	}
-	
+
 	if (asTempTable) {
 		return Zotero.Search.idsToTempTable(ids);
 	}
 	return ids;
+};
+
+
+/**
+ * The root-level 'bestMatch' condition, which the items list ranks the
+ * results by, or false if none
+ *
+ * @return {Object|false} - { query, engine }, the engine being the operator:
+ *     'hybrid', 'lexical' or 'semantic'
+ */
+Zotero.Search.prototype.getBestMatchQuery = function () {
+	let depth = 0;
+	for (let condition of Object.values(this._conditions)) {
+		if (condition.condition == 'groupStart') {
+			depth++;
+		}
+		else if (condition.condition == 'groupEnd') {
+			depth--;
+		}
+		else if (depth == 0 && condition.condition == 'bestMatch' && condition.value
+				&& Zotero.BestMatch.isSearchableQuery(condition.value, condition.operator)) {
+			return { query: condition.value, engine: condition.operator };
+		}
+	}
+	return false;
 };
 
 
@@ -1199,6 +1226,11 @@ Zotero.Search.prototype._buildQuery = async function () {
 				case 'resultLevel':
 					lastCondition = null;
 					conditions.push({ name: 'resultLevel', operator: condition.operator });
+					continue;
+				// Applied as a ranking by the items list, not as part of the
+				// condition tree
+				case 'bestMatch':
+					lastCondition = null;
 					continue;
 				case 'groupStart':
 					lastCondition = null;

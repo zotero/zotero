@@ -91,6 +91,102 @@ preferences-advanced-local-api-clear-authorizations =
 preferences-advanced-server-disabled = The { -app-name } HTTP server is disabled.
 preferences-advanced-server-enable-and-restart =
     .label = Enable and Restart
+preferences-advanced-semantic-search-title = Best-Match Search
+preferences-advanced-semantic-search-status = Status:
+preferences-advanced-semantic-search-enable = Enable search by semantic meaning:
+preferences-advanced-semantic-search-enabled =
+    .label = Enabled
+preferences-advanced-semantic-search-disabled =
+    .label = Disabled
+preferences-advanced-best-match-margin = Quality cutoff below top (%):
+preferences-advanced-best-match-margin-description = At 30%, results scoring up to 30% below the best one are kept; 100% keeps every result, 0 drops everything but the top match.
+preferences-advanced-semantic-search-downloading = Downloading…
+preferences-advanced-semantic-search-downloading-progress = Downloading… { $percent }%
+preferences-advanced-semantic-search-preparing = Preparing documents…
+preferences-advanced-semantic-search-preparing-progress = Preparing documents… { $done } / { $total }
+preferences-advanced-semantic-search-indexing-documents = Indexing documents…
+preferences-advanced-semantic-search-fetching-documents = Syncing semantic data… { $done } / { $total }
+preferences-advanced-semantic-search-indexing-documents-locally =
+    { $declined ->
+        [0] Generating semantic data locally for { $count ->
+                [one] { $count } item
+               *[other] { $count } items
+            }…
+       *[other] Generating semantic data locally for { $count ->
+                [one] { $count } item
+               *[other] { $count } items
+            }… ({ $declined ->
+                [one] { $declined } not available
+               *[other] { $declined } not available
+            } from the server)
+    }
+preferences-advanced-semantic-search-awaiting = Waiting for embeddings from the server…
+preferences-advanced-semantic-search-server-unreachable =
+    { $minutes ->
+        [one] The server couldn’t be reached. Trying again in { $minutes } minute…
+       *[other] The server couldn’t be reached. Trying again in { $minutes } minutes…
+    }
+preferences-advanced-semantic-search-indexing = Indexing…
+preferences-advanced-semantic-search-stopping = Stopping…
+preferences-advanced-semantic-search-idle = Up to date
+preferences-advanced-semantic-search-paused = Indexing paused
+preferences-advanced-semantic-search-error = Indexing stopped: { $error }
+preferences-advanced-semantic-search-resume =
+    .label = Resume
+preferences-advanced-semantic-search-stop =
+    .label = Stop
+preferences-advanced-semantic-search-items = Metadata, notes, annotations
+preferences-advanced-semantic-search-attachments = Attachments
+preferences-advanced-semantic-search-progress-value = { $percent }%
+preferences-advanced-semantic-search-diagnostics-show =
+    .label = Show Diagnostics
+preferences-advanced-semantic-search-diagnostics-hide =
+    .label = Hide Diagnostics
+preferences-advanced-semantic-search-endpoint-configure =
+    .label = Configure Endpoint…
+preferences-advanced-semantic-search-endpoint-off =
+    .value = Embedding endpoint: not configured
+preferences-advanced-semantic-search-endpoint-unverified =
+    .value = Embedding endpoint: not verified
+preferences-advanced-semantic-search-endpoint-valid =
+    .value = Embedding endpoint: valid
+preferences-advanced-semantic-search-endpoint-unreachable =
+    .value = Embedding endpoint: unreachable
+preferences-advanced-semantic-search-endpoint-invalid =
+    .value = Embedding endpoint: not valid
+preferences-advanced-semantic-search-endpoint-dialog =
+    .title = Configure Embedding Endpoint
+preferences-advanced-semantic-search-endpoint-intro =
+    .value = Send the embedding workload to a local or remote server:
+preferences-advanced-semantic-search-endpoint-url =
+    .value = Server URL:
+preferences-advanced-semantic-search-endpoint-privacy = A remote server receives the text of your library.
+preferences-advanced-semantic-search-endpoint-requirements =
+    .value = The server must serve the model Zotero is using:
+preferences-advanced-semantic-search-endpoint-model =
+    .value = Model:
+preferences-advanced-semantic-search-endpoint-pooling =
+    .value = Pooling:
+preferences-advanced-semantic-search-endpoint-file =
+    .value = File:
+preferences-advanced-semantic-search-endpoint-llama =
+    .value = Run with llama.cpp:
+preferences-advanced-semantic-search-endpoint-then-use =
+    .value = Then use { $url }
+preferences-advanced-semantic-search-endpoint-copy =
+    .label = Copy
+preferences-advanced-semantic-search-endpoint-verifying =
+    .value = Checking that the server’s vectors match the model’s…
+preferences-advanced-semantic-search-endpoint-accept =
+    .label = Verify and Use
+preferences-advanced-semantic-search-endpoint-remove =
+    .label = Stop Using Endpoint
+preferences-advanced-semantic-search-endpoint-error-unreachable = The server didn’t respond.
+preferences-advanced-semantic-search-endpoint-error-unauthorized = The server requires authentication, which isn’t supported.
+preferences-advanced-semantic-search-endpoint-error-not-embeddings = That URL isn’t an embeddings endpoint Zotero can use (OpenAI-style or Text Embeddings Inference).
+preferences-advanced-semantic-search-endpoint-error-width-mismatch = The server is serving a different model.
+preferences-advanced-semantic-search-endpoint-error-low-agreement = The server’s vectors don’t match this model’s. Check that it serves the model above with { $pooling } pooling.
+preferences-advanced-semantic-search-endpoint-error-context-too-small = The server can’t embed long passages. Start it with a context of at least 4096 tokens.
 preferences-advanced-language-and-region-title = Language and Region
 preferences-advanced-enable-bidi-ui =
     .label = Enable bidirectional text editing utilities
@@ -163,3 +259,4 @@ fulltext-stats-attachments-indexed = Attachments indexed:
 fulltext-stats-partially-indexed = Partially indexed:
 fulltext-stats-not-available = Full-text content or file not available:
 fulltext-stats-notes-indexed = Notes indexed:
+fulltext-stats-items-indexed = Items and annotations indexed:

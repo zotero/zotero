@@ -393,7 +393,7 @@
 		}
 
 		get _disableSavingOpenState() {
-			return !!this.closest('merge-pane, scaffold-item-preview, annotation-items-pane');
+			return !!this.closest('merge-pane, scaffold-item-preview, annotation-items-pane, search-results-pane');
 		}
 
 		get _disableContextMenu() {

@@ -304,6 +304,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					attempt++;
 					continue;
 				}
+
+				_stopCheck();
+
+				await _doEmbeddingsCheck(client, [...successfulLibraries]);
 				break;
 			}
 		}
@@ -831,6 +835,23 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		return resyncLibraries;
 	}.bind(this);
+
+
+	/**
+	 * Have each library's embeddings fetched again if the server has embedded
+	 * it anew.
+	 */
+	var _doEmbeddingsCheck = async function (client, libraries) {
+		for (let libraryID of libraries) {
+			_stopCheck();
+			try {
+				await Zotero.Embeddings.Sync.checkLibrary(client, libraryID);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+	};
 	
 	
 	/**

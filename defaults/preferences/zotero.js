@@ -108,11 +108,29 @@ pref("extensions.zotero.keys.toggleRead", "`");
 pref("extensions.zotero.keys.showTabsMenu", ";");
 
 pref("extensions.zotero.search.quicksearch-mode", "fields");
+// How far below an engine's strongest match an item may fall and still count
+// as one of its results, as a percentage of that strongest score -- 10 keeps
+// items within 10 percent of the top, 100 keeps everything above the floor
+pref("extensions.zotero.search.bestMatchMargin", 50);
+// Whether best-match search ranks semantically. Off, nothing is indexed and
+// ranking is lexical only; what's already indexed is kept either way.
+pref("extensions.zotero.search.bestMatch.enableSemantic", false);
 
 // Fulltext indexing
 pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 pref("extensions.zotero.search.useLeftBound", true);
+
+// Set when the user stops indexing or turns semantic search off; nothing is indexed until indexing is started again
+pref("extensions.zotero.embeddings.indexingPaused", false);
+// An OpenAI-style /v1/embeddings URL to send indexing to, used only once
+// verified to serve the active model (see Zotero.Embeddings.Endpoint)
+pref("extensions.zotero.embeddings.endpoint", "");
+// Whether attachments kept in Zotero Storage are left for the server to
+// embed, their rows fetched as indexing reaches them. Not shown in the UI:
+// an override for testing, since a syncing account uses the server as a
+// matter of course.
+pref("extensions.zotero.embeddings.sync.enabled", true);
 
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");

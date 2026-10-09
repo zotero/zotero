@@ -57,6 +57,289 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('zotero-prefpane-advanced-enable-local-api').addEventListener('synctopreference', () => {
 			this.updateLocalAPIUI();
 		});
+
+		this.initSemanticSearch();
+	},
+
+
+	initSemanticSearch: function () {
+		// Bound by hand rather than through the `preference` attribute, which
+		// would write the menu's string value to a boolean preference
+		let enableMenu = document.getElementById('semantic-search-enable');
+		enableMenu.value = String(Zotero.Embeddings.isEnabled());
+		enableMenu.addEventListener('command', () => {
+			Zotero.Prefs.set('search.bestMatch.enableSemantic', enableMenu.value === 'true');
+		});
+
+		// Live progress updates from the background indexer
+		this._semanticSearchListener = status => this.updateSemanticSearchUI(status);
+		Zotero.Embeddings.Indexing.addProgressListener(this._semanticSearchListener);
+		// Full engine threads while the user is watching indexing progress
+		Zotero.Embeddings.setThreadBoost('prefs-open', true);
+		let enablePrefObserverID = Zotero.Prefs.registerObserver(
+			'search.bestMatch.enableSemantic',
+			() => {
+				enableMenu.value = String(Zotero.Embeddings.isEnabled());
+				this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+			}
+		);
+
+		document.getElementById('zotero-prefpane-advanced').addEventListener('unload', () => {
+			Zotero.Embeddings.Indexing.removeProgressListener(this._semanticSearchListener);
+			Zotero.Embeddings.setThreadBoost('prefs-open', false);
+			Zotero.Prefs.unregisterObserver(enablePrefObserverID);
+		});
+
+		document.getElementById('semantic-search-resume').addEventListener('command', () => {
+			Zotero.Embeddings.Indexing.startIndexing();
+		});
+
+		document.getElementById('semantic-search-stop').addEventListener('command', () => {
+			Zotero.Embeddings.Indexing.stopIndexing();
+		});
+
+		document.getElementById('semantic-search-endpoint-configure').addEventListener('command', () => {
+			this.openSemanticSearchEndpointDialog();
+		});
+
+		let diagnostics = document.getElementById('semantic-search-diagnostics');
+		let toggle = document.getElementById('semantic-search-diagnostics-toggle');
+		toggle.addEventListener('command', () => {
+			diagnostics.hidden = !diagnostics.hidden;
+			document.l10n.setAttributes(toggle, diagnostics.hidden
+				? 'preferences-advanced-semantic-search-diagnostics-show'
+				: 'preferences-advanced-semantic-search-diagnostics-hide');
+		});
+		// The endpoint's stored verdict is read lazily; have it in memory
+		// before the status line first renders
+		Zotero.Embeddings.Endpoint.load().then(() => {
+			this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+		});
+
+		// Render current state, then compute up-to-date per-library counts
+		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+		Zotero.Embeddings.Indexing.refreshStatus();
+	},
+
+
+	updateSemanticSearchUI: function (status) {
+		let statusBox = document.getElementById('semantic-search-status');
+		statusBox.hidden = !status.enabled;
+		this.updateSemanticSearchEndpointUI(status.endpoint, status.enabled);
+		if (!status.enabled) {
+			return;
+		}
+
+		// Phase / status message
+		let phaseLabel = document.getElementById('semantic-search-phase');
+		// Attachments rather than chunks: the chunk counts cover only the
+		// documents cut here, so they can't say what's left
+		let hasRemaining = status.items.done < status.items.total
+			|| status.attachments.done < status.attachments.total;
+		if (status.error) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
+		}
+		else if (status.stopping) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-stopping');
+		}
+		else if (status.phase === 'downloading') {
+			let progress = status.downloadProgress;
+			if (progress) {
+				document.l10n.setAttributes(
+					phaseLabel,
+					'preferences-advanced-semantic-search-downloading-progress',
+					{ percent: Math.round(progress.fraction * 100) }
+				);
+			}
+			else {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading');
+			}
+		}
+		// Preparing shows how far through the library's attachments its pass
+		// has got, since nothing else reports that step
+		else if (status.phase === 'preparing') {
+			if (status.sweep.total) {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-preparing-progress', {
+					done: status.sweep.done,
+					total: status.sweep.total
+				});
+			}
+			else {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-preparing');
+			}
+		}
+		// The server's attachments are asked for, with how far through the
+		// library the step has got
+		else if (status.phase === 'fetching-documents') {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-fetching-documents', {
+				done: status.sweep.done,
+				total: status.sweep.total
+			});
+		}
+		// Then the rest are embedded here -- "here" being worth saying only
+		// when there's a server that might have done it, and whose refusals
+		// are the reason for some of it
+		else if (status.phase === 'indexing-documents') {
+			if (status.server && status.embedWork) {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing-documents-locally', {
+					count: status.embedWork.own,
+					declined: status.embedWork.declined
+				});
+			}
+			else {
+				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing-documents');
+			}
+		}
+		else if (status.phase === 'indexing') {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');
+		}
+		// The server couldn't be reached: its attachments wait for the
+		// retry, which Resume brings forward
+		else if (status.serverUnreachable && !status.indexing && !status.paused) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-server-unreachable', {
+				minutes: Math.max(1, Math.round((status.serverUnreachable.retryAt - Date.now()) / 60000))
+			});
+		}
+		// Between runs, with attachments still to come from the server
+		else if (status.attachments.awaiting && !status.paused) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-awaiting');
+		}
+		else {
+			document.l10n.setAttributes(phaseLabel,
+				(status.paused || hasRemaining)
+					? 'preferences-advanced-semantic-search-paused'
+					: 'preferences-advanced-semantic-search-idle');
+		}
+
+		// Offer a manual restart when enabled but not currently indexing and
+		// indexing is stopped, there's outstanding work, the server couldn't
+		// be reached, or the last run errored out
+		document.getElementById('semantic-search-resume').hidden
+			= status.indexing || !(status.error || status.paused || hasRemaining || status.serverUnreachable);
+
+		// Offer to stop indexing while it's running; a requested stop takes
+		// effect once the current batch finishes, so disable the button in
+		// the meantime
+		let stopButton = document.getElementById('semantic-search-stop');
+		stopButton.hidden = !status.indexing;
+		stopButton.disabled = !!status.stopping;
+
+		// One bar for items, notes and annotations, one for attachment full
+		// text
+		document.getElementById('semantic-search-items-row').hidden = !status.items.total;
+		this._updateSemanticSearchBar('items', status.items);
+		document.getElementById('semantic-search-attachments-row').hidden = !status.attachments.total;
+		this._updateSemanticSearchBar('attachments', status.attachments);
+		this._updateSemanticSearchDiagnostics(status);
+	},
+
+
+	// Whether the model can be served at all, and how the configured
+	// server stands
+	updateSemanticSearchEndpointUI: function (endpoint, enabled) {
+		let row = document.getElementById('semantic-search-endpoint-row');
+		// Shown only while semantic search is on and the model can be served
+		row.hidden = !enabled || !Zotero.Embeddings.Endpoint.isSupported();
+		if (row.hidden) {
+			return;
+		}
+		let label = document.getElementById('semantic-search-endpoint-status');
+		let id = {
+			off: 'off',
+			unknown: null,
+			unverified: 'unverified',
+			ok: 'valid',
+			unreachable: 'unreachable'
+		}[endpoint.state];
+		if (id === null) {
+			label.removeAttribute('data-l10n-id');
+			label.value = '';
+			return;
+		}
+		document.l10n.setAttributes(label, `preferences-advanced-semantic-search-endpoint-${id || 'invalid'}`);
+	},
+
+
+	openSemanticSearchEndpointDialog: function () {
+		let io = { ok: false };
+		window.openDialog('chrome://zotero/content/preferences/embeddingsEndpoint.xhtml',
+			'zotero-preferences-embeddingsEndpoint', 'chrome,modal,centerscreen', io);
+		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
+	},
+
+
+	// Key/value rows of pipeline diagnostics for developers, so the labels
+	// are plain English rather than localized
+	_updateSemanticSearchDiagnostics: function ({ items, chunks: indexed, diagnostics, eta }) {
+		let n = (value, digits = 0) => (value ?? 0).toLocaleString(undefined, {
+			maximumFractionDigits: digits, minimumFractionDigits: digits
+		});
+		let pct = value => Math.round((value || 0) * 100) + '%';
+		let mb = bytes => n(bytes / 1024 / 1024) + ' MB';
+		let speed = rate => `${n(rate.chunksPerSecond, 1)} chunks/s, ${n(rate.tokensPerSecond)} tokens/s`;
+		let bucketList = (buckets, total, unit) => buckets.map(({ from, to, count }) => {
+			let range = from === null ? `< ${n(to)}` : (to === null ? `≥ ${n(from)}` : `${n(from)}–${n(to - 1)}`);
+			return `${range}${unit}: ${n(count)} (${pct(total ? count / total : 0)})`;
+		}).join(' · ');
+		let proc = p => (p ? `${mb(p.memory)}${p.cpu === null ? '' : `, CPU ${p.cpu}%`}` : '—');
+		let duration = (seconds) => {
+			let h = Math.floor(seconds / 3600);
+			let m = Math.floor(seconds % 3600 / 60);
+			return h ? `${h} h ${m} m` : `${m} m ${Math.floor(seconds % 60)} s`;
+		};
+
+		let rows = [];
+		let { window, run, engine, processes, slice, chunks } = diagnostics;
+		rows.push(['Items indexed', `${n(items.done)} / ${n(items.total)}`]);
+		rows.push(['Chunks for local inference', `${n(indexed.done)} / ${n(indexed.total)}`]);
+		rows.push(['Local inference ETA', eta === null ? '—' : duration(eta)]);
+		rows.push(['Throughput (2 min)', window ? speed(window) : '—']);
+		rows.push(['Inference speed (run)', run ? speed(run) : '—']);
+		rows.push(['Padding efficiency', window || run
+			? `${window ? pct(window.paddingEfficiency) : '—'} (2 min), ${run ? pct(run.paddingEfficiency) : '—'} (run)`
+			: '—']);
+		rows.push(['Batches (run)', run
+			? `${n(run.batches)} · ${n(run.chunksPerBatch, 1)} chunks · ${n(run.tokensPerBatch)} tokens avg`
+			: '—']);
+		rows.push(['Token budget', `${n(diagnostics.tokenBudget)} · ${n(diagnostics.pressureEvents)} memory-pressure events`]);
+		rows.push(['Engine threads', `${engine.threads} of ${engine.optimalThreads}`
+			+ (engine.boosts.length ? ` (boost: ${engine.boosts.join(', ')})` : '')]);
+		rows.push(['Engine restarts (run)', `memory ${diagnostics.restarts.memory}, threads ${diagnostics.restarts.threads}`]);
+		rows.push(['Inference process', proc(processes?.inference)]);
+		rows.push(['Main process', proc(processes?.main)]);
+		rows.push(['Available memory', processes?.available ? mb(processes.available) : '—']);
+		rows.push(['Slice', slice ? `${n(slice.done)} / ${n(slice.total)} chunks` : '—']);
+		if (chunks) {
+			let { perDocument } = chunks;
+			rows.push(['Chunks per document', `${n(perDocument.count)} documents · mean ${n(perDocument.mean, 1)} · median ${n(perDocument.median)} · max ${n(perDocument.max)}`]);
+			rows.push(['Documents by chunks', bucketList(perDocument.buckets, perDocument.count, '')]);
+		}
+
+		let box = document.getElementById('semantic-search-diagnostics');
+		while (box.childElementCount < rows.length * 2) {
+			box.append(document.createXULElement('label'), document.createXULElement('label'));
+		}
+		while (box.childElementCount > rows.length * 2) {
+			box.lastElementChild.remove();
+		}
+		rows.forEach(([label, value], i) => {
+			box.children[i * 2].value = label;
+			box.children[i * 2 + 1].value = value;
+		});
+	},
+
+
+	// Fill one progress bar. The percentage is rounded down, so it reads
+	// 100% only when everything is done.
+	_updateSemanticSearchBar: function (name, { done, total }) {
+		let bar = document.getElementById(`semantic-search-${name}-progress`);
+		bar.max = Math.max(total, 1);
+		bar.value = done;
+		document.l10n.setAttributes(
+			document.getElementById(`semantic-search-${name}-value`),
+			'preferences-advanced-semantic-search-progress-value',
+			{ percent: total ? Math.floor(done / total * 100) : 0 }
+		);
 	},
 	
 	
@@ -396,15 +679,16 @@ Zotero_Preferences.Advanced = {
 		document.getElementById('fulltext-stats-notes').textContent = stats.notesIndexed.toLocaleString();
 		document.getElementById('fulltext-stats-not-available').textContent = stats.notAvailable.toLocaleString();
 
-		// Indexed + Partial + indexed notes are already what's in the search index, so they're the
-		// bar's numerator. Pending work across the auto-draining queues: extracted content not yet
-		// in the index (remaining), indexable attachments not yet extracted (unindexedQueue), and
-		// notes not yet indexed or edited since their last index update (noteQueue). Show the bar
-		// while anything's pending; otherwise "up to date". Items with no local file or content
-		// aren't counted here -- nothing local can index them -- so "up to date" can sit next to a
-		// nonzero "not available".
-		let inIndex = stats.indexed + stats.partial + stats.notesIndexed;
-		let pending = stats.remaining + stats.unindexedQueue + stats.noteQueue;
+		// Indexed + Partial + indexed notes + indexed item text are already what's in the search
+		// index, so they're the bar's numerator. Pending work across the auto-draining queues:
+		// extracted content not yet in the index (remaining), indexable attachments not yet
+		// extracted (unindexedQueue), notes not yet indexed or edited since their last index update
+		// (noteQueue), and items and annotations not yet in the item-text index (itemTextQueue).
+		// Show the bar while anything's pending; otherwise "up to date". Items with no local file
+		// or content aren't counted here -- nothing local can index them -- so "up to date" can sit
+		// next to a nonzero "not available".
+		let inIndex = stats.indexed + stats.partial + stats.notesIndexed + stats.itemTextIndexed;
+		let pending = stats.remaining + stats.unindexedQueue + stats.noteQueue + stats.itemTextQueue;
 		let total = inIndex + pending;
 		let complete = document.getElementById('fulltext-stats-complete');
 		if (pending > 0 && total > 0) {
@@ -423,6 +707,7 @@ Zotero_Preferences.Advanced = {
 			await Zotero.FullText.processAttachmentIndexQueue({ maxTime: 500 });
 			await Zotero.FullText.processAttachmentExtractionQueue({ maxTime: 500 });
 			await Zotero.FullText.processNoteIndexQueue({ maxTime: 500 });
+			await Zotero.FullText.processItemTextIndexQueue({ maxTime: 500 });
 			this._indexStatsTimeoutID = setTimeout(() => this.updateIndexStats(), 250);
 		}
 		else {

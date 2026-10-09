@@ -39,14 +39,17 @@ Zotero.SDT = new function () {
 	let _documentWorkerMetadata = null;
 	let _documentWorkerMetadataErrorLogged = false;
 
-	// Load the bundled SDT module lazily, so that a missing or broken
-	// resource degrades to an 'unavailable' result instead of breaking
-	// Zotero startup. Load failures aren't cached, so a load is retried
-	// on the next call (require() itself caches successful loads)
+	// Load the bundled SDT modules -- the pack reader and the chunker --
+	// lazily, so a missing or broken resource degrades to 'unavailable'
+	// rather than breaking startup; a failed load is retried on the next
+	// call (require() itself caches successful loads)
 	function _getModule() {
 		if (!_module) {
 			try {
-				_module = require('resource://zotero/document-worker/structured-document-text.js');
+				_module = {
+					...require('resource://zotero/document-worker/structured-document-text.js'),
+					...require('resource://zotero/document-worker/structured-document-text-chunker.js')
+				};
 			}
 			catch (e) {
 				if (!_moduleErrorLogged) {
@@ -61,22 +64,23 @@ Zotero.SDT = new function () {
 
 	/**
 	 * Get the structured document text pack for a PDF, EPUB, or snapshot
-	 * attachment, generating and caching it if necessary. The returned bytes
-	 * are owned by the caller -- a later regeneration can't affect them.
-	 *
-	 * If the cached pack was produced by an older (but still readable)
-	 * processor version, it's returned as is and a regeneration is started in
-	 * the background, so that processor bumps don't block consumers.
+	 * attachment, generating and caching it if necessary. A pack from an
+	 * older but readable processor version is returned as is and regenerated
+	 * in the background, unless allowStale is false.
 	 *
 	 * @param {Integer} itemID
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority] - Put a needed extraction at the
 	 *     front of the worker queue (for user-initiated requests)
+	 * @param {Boolean} [options.allowStale=true] - Whether a cached pack from
+	 *     an older processor version may be returned
+	 * @param {Boolean} [options.cachedOnly] - Return 'not-cached' rather than
+	 *     extracting the document when no pack is cached
 	 * @param {Function} [options.onProgress] - Called with SDT generation
 	 *     progress from 0 to 100 when generation is needed
 	 * @returns {Promise<Object>} { ok: true, bytes: ArrayBuffer, packVersion,
 	 *     schemaMajorVersion }, or { ok: false, reason: 'unavailable' |
-	 *     'password-required' | 'failed' }
+	 *     'password-required' | 'not-cached' | 'failed' }
 	 */
 	this.getPack = async function (itemID, options = {}) {
 		try {
@@ -87,12 +91,19 @@ Zotero.SDT = new function () {
 			if (!context.ok) {
 				return { ok: false, reason: context.reason };
 			}
-			let cache = await _readValidCache(context, { allowStaleProcessorVersion: true });
+			let cache = await _readValidCache(context, {
+				allowStaleProcessorVersion: options.allowStale !== false
+			});
 			if (cache.ok) {
 				if (cache.staleProcessorVersion) {
 					_generate(context, {}).catch(e => Zotero.logError(e));
 				}
 				return _makeResult(cache);
+			}
+			// Extracting a document costs seconds; a caller that only wants
+			// structure if it's already there says so rather than waiting
+			if (options.cachedOnly) {
+				return { ok: false, reason: 'not-cached' };
 			}
 			return await _generate(context, options);
 		}
@@ -103,13 +114,9 @@ Zotero.SDT = new function () {
 	};
 
 	/**
-	 * Ensure that a current pack is cached for an attachment, generating or
-	 * regenerating it if necessary, without returning it. For warming up the
-	 * cache (e.g., at import time), so that later getPack() calls are hits.
-	 *
-	 * Unlike getPack(), which returns a stale-processor pack immediately and
-	 * regenerates in the background, this resolves only once the cache is
-	 * fully current.
+	 * Ensure a current pack is cached for an attachment, generating or
+	 * regenerating it if necessary, without returning it. Unlike getPack(),
+	 * this resolves only once the cache is current.
 	 *
 	 * @param {Integer} itemID
 	 * @param {Object} [options] - See getPack()
@@ -138,19 +145,158 @@ Zotero.SDT = new function () {
 	};
 
 	/**
-	 * Get a parsed pack reader for in-process consumers
+	 * Whether a pack is cached for an attachment, by the cache file's
+	 * presence alone -- nothing read or validated, for deciding cheaply
+	 * whether to extract ahead of time
 	 *
 	 * @param {Integer} itemID
-	 * @param {Object} [options] - See getPack()
-	 * @returns {Promise<Object|null>}
+	 * @returns {Promise<Boolean>}
 	 */
-	this.getReader = async function (itemID, options = {}) {
+	this.isCached = async function (itemID) {
+		let item = await Zotero.Items.getAsync(itemID, { noCache: true });
+		if (!item || !item.isAttachment() || !_getProcessorType(item)) {
+			return false;
+		}
+		return IOUtils.exists(_getCachePath(item));
+	};
+
+	/**
+	 * The chunks of an attachment's structured text, for embedding, cut in
+	 * the document worker so that neither inflating the pack nor cutting it
+	 * blocks this thread. Each carries its plain `text`, the `embedText`
+	 * with outline context woven in, its estimated `tokens`, `outlinePath`,
+	 * `pageLabel` and `anchor` -- where in the file its text is, null when
+	 * the document has no geometry for it.
+	 *
+	 * @param {Integer} itemID
+	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
+	 *     the cut at the front of the worker queue too
+	 * @param {Boolean} [options.positions] - Give each chunk the reader
+	 *     `position` its anchor opens at: the first of the positions its
+	 *     text is shown at, null when the anchor doesn't resolve
+	 * @returns {Promise<Object>} - { ok: true, chunks, contentHash }, the
+	 *     hash being the source file's as the pack records it, or
+	 *     { ok: false, reason }: getPack()'s reasons, or 'cut-failed' when
+	 *     the pack is there but the worker couldn't cut it
+	 */
+	this.getItemChunks = async function (itemID, { positions = false, ...options } = {}) {
 		let result = await this.getPack(itemID, options);
 		if (!result.ok) {
+			return { ok: false, reason: result.reason };
+		}
+		let cut;
+		try {
+			cut = await Zotero.PDFWorker.getStructuredDocumentTextChunks(
+				result.bytes, { isPriority: options.isPriority, positions });
+		}
+		catch {
+			// Logged by the worker manager
+			return { ok: false, reason: 'cut-failed' };
+		}
+		// The worker and the bundled chunker come from the same build, so a
+		// mismatch is a build defect, not something to work around
+		let version = _getModule().CHUNKER_VERSION;
+		if (cut.chunkerVersion !== version) {
+			Zotero.logError(new Error(`Document worker chunker version ${cut.chunkerVersion} `
+				+ `doesn't match the bundled chunker's ${version}`));
+			return { ok: false, reason: 'cut-failed' };
+		}
+		let chunks = positions ? cut.chunks.map(_withFirstPosition) : cut.chunks;
+		return { ok: true, chunks, contentHash: cut.sourceHash };
+	};
+
+	/**
+	 * The chunks of a plain text with no structure, paragraphs separated by
+	 * blank lines, as getItemChunks() gives them but without an anchor
+	 *
+	 * @param {String} text
+	 * @param {Object} [options] - The module's chunking options
+	 * @returns {Object[]}
+	 */
+	this.getPlainTextChunks = function (text, options = {}) {
+		return _getModule().getPlainTextChunks(text, options);
+	};
+
+	/**
+	 * Read chunks back from an attachment's structured text by their stored
+	 * anchors, in the document worker so that neither inflating the pack
+	 * nor reading it blocks this thread. An anchor on nothing the current
+	 * extraction has, as after the file changed, reads back as null.
+	 *
+	 * @param {Integer} itemID
+	 * @param {Object[]} anchors - A chunk's `anchor` per entry
+	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
+	 *     the read at the front of the worker queue too
+	 * @returns {Promise<Object>} { ok: true, chunks: [{ text, outlinePath,
+	 *     pageLabel, position } | null] }, `position` the reader position
+	 *     the chunk opens at, or { ok: false, reason }: getPack()'s
+	 *     reasons, or 'failed' when the worker couldn't read the pack
+	 */
+	this.readAnchors = async function (itemID, anchors, options = {}) {
+		let result = await this.getPack(itemID, options);
+		if (!result.ok) {
+			return { ok: false, reason: result.reason };
+		}
+		try {
+			let chunks = await Zotero.PDFWorker.readStructuredDocumentTextAnchors(
+				result.bytes, anchors, { isPriority: options.isPriority });
+			return { ok: true, chunks: chunks.map(chunk => chunk && _withFirstPosition(chunk)) };
+		}
+		catch {
+			// Logged by the worker manager
+			return { ok: false, reason: 'failed' };
+		}
+	};
+
+	/**
+	 * The identity of the extraction and division this module would produce
+	 * for an attachment right now: its processor type and version, the pack
+	 * schema's major version and the chunker's version. Null when the
+	 * attachment isn't a supported type or the extraction module isn't
+	 * available.
+	 *
+	 * @param {Zotero.Item} item
+	 * @returns {Promise<String|null>} - e.g. 'pdf/3/1/1'
+	 */
+	this.getProcessorVersion = async function (item) {
+		let processorType = _getProcessorType(item);
+		if (!processorType) {
 			return null;
 		}
-		return _openPack(new Uint8Array(result.bytes));
+		let metadata = await _getDocumentWorkerMetadata();
+		if (!metadata) {
+			return null;
+		}
+		return _getProcessorVersion(metadata, processorType);
 	};
+
+	/**
+	 * The identities getProcessorVersion() gives right now, one per
+	 * processor type. Empty when the extraction module isn't available.
+	 *
+	 * @returns {Promise<String[]>}
+	 */
+	this.getProcessorVersions = async function () {
+		let metadata = await _getDocumentWorkerMetadata();
+		if (!metadata) {
+			return [];
+		}
+		return Object.keys(metadata.SDT_PROCESSOR_VERSIONS)
+			.map(processorType => _getProcessorVersion(metadata, processorType));
+	};
+
+	function _getProcessorVersion(metadata, processorType) {
+		return processorType
+			+ '/' + metadata.SDT_PROCESSOR_VERSIONS[processorType]
+			+ '/' + _getSchemaMajorVersion(metadata.SDT_SCHEMA_VERSION)
+			+ '/' + _getModule().CHUNKER_VERSION;
+	}
+
+	// A chunk from the worker with only the first of its positions, the one
+	// the reader opens at
+	function _withFirstPosition({ positions, ...chunk }) {
+		return { ...chunk, position: positions?.[0] || null };
+	}
 
 	async function _readValidCache({ sourceHash, cachePath, processorType }, options) {
 		let bytes;
@@ -378,8 +524,10 @@ Zotero.SDT = new function () {
 	}
 
 	async function _getAttachmentContext(itemID) {
-		// getAsync() returns false, not null, for a nonexistent item
-		let item = await Zotero.Items.getAsync(itemID);
+		// getAsync() returns false, not null, for a nonexistent item. The
+		// item is read, never shown or saved, so it isn't kept in the cache
+		// when it wasn't there already.
+		let item = await Zotero.Items.getAsync(itemID, { noCache: true });
 		if (!item || !item.isAttachment()) {
 			return { ok: false, reason: 'unavailable' };
 		}

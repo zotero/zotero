@@ -737,6 +737,65 @@ describe("Zotero.SearchQuery", function () {
 		});
 	});
 
+	describe("Best Match engine markers", function () {
+		let bestMatch = search => Object.values(search.getConditions())
+			.find(condition => condition.condition === 'bestMatch');
+
+		it("should rank the free text with the named engine, keeping the clauses", function () {
+			let search = Zotero.SearchQuery.getSearch("meaning: owl migration lang:en", { mode: 'fields' });
+			let conditions = Object.values(search.getConditions());
+			assert.isTrue(conditions.some(c => c.condition === 'language' && c.value === 'en'));
+			assert.deepEqual(bestMatch(search), {
+				condition: 'bestMatch', operator: 'semantic', value: 'owl migration', ...bestMatch(search)
+			});
+			// Ranked, not filtered
+			assert.isFalse(conditions.some(c => c.condition.startsWith('quicksearch')));
+
+			search = Zotero.SearchQuery.getSearch("lexical: owl migration", { mode: 'fields' });
+			assert.equal(bestMatch(search).operator, 'lexical');
+			assert.equal(bestMatch(search).value, 'owl migration');
+
+			// The English aliases and a marker anywhere in the query
+			search = Zotero.SearchQuery.getSearch("owl words: migration", { mode: 'bestMatch' });
+			assert.equal(bestMatch(search).operator, 'lexical');
+			assert.equal(bestMatch(search).value, 'owl migration');
+		});
+
+		it("should take the marker out of the tree wherever it was written", function () {
+			let { tree } = Zotero.SearchQuery.parse("(tag:foo or meaning:) owl");
+			let { tree: stripped, engine } = Zotero.SearchQuery.extractBestMatch(tree);
+			assert.equal(engine, 'semantic');
+			// The group stays, with the tag clause alone in it
+			assert.deepEqual(stripped.children[0].children.map(c => c.condition), ['tag']);
+			// A group holding only a marker goes with it
+			({ tree } = Zotero.SearchQuery.parse("(meaning:) owl"));
+			assert.isNull(Zotero.SearchQuery.extractBestMatch(tree).tree);
+		});
+
+		it("should be no query without text to rank", function () {
+			assert.isFalse(Zotero.SearchQuery.getSearch("meaning:", { mode: 'fields' }));
+			// ...but a clause still makes one
+			let search = Zotero.SearchQuery.getSearch("meaning: tag:foo", { mode: 'fields' });
+			assert.isUndefined(bestMatch(search));
+			assert.isTrue(Object.values(search.getConditions()).some(c => c.condition === 'tag'));
+		});
+
+		it("should offer the markers as fields and highlight them", function () {
+			let completions = Zotero.SearchQuery.getCompletions("mea").completions;
+			let meaning = completions.find(c => c.text === 'meaning:');
+			assert.isDefined(meaning);
+			// Described by the condition it's a form of, as `after:` is by Date
+			assert.equal(meaning.description, 'Best Match');
+			let tokens = Zotero.SearchQuery.tokenize("meaning: owl");
+			assert.equal(tokens[0].type, 'field');
+			assert.equal(tokens[0].name, 'meaning');
+			assert.equal(tokens[1].type, 'operator');
+			assert.equal(tokens[1].name, 'semantic');
+			// The word itself stays text
+			assert.equal(Zotero.SearchQuery.tokenize("the meaning of life")[2].type, 'text');
+		});
+	});
+
 	describe("#getSearch()", function () {
 		it("should return false for a query with no clauses", function () {
 			assert.isFalse(Zotero.SearchQuery.getSearch("crispr screens"));
@@ -750,8 +809,9 @@ describe("Zotero.SearchQuery", function () {
 			assert.notInclude(conditions('fields'), 'fulltextContent');
 			assert.include(conditions('fields'), 'tag');
 			assert.include(conditions('everything'), 'fulltextContent');
-			// Best Match with no index falls back to matching text
-			assert.notInclude(conditions('bestMatch'), 'bestMatch');
+			// Best Match ranks by the text rather than filtering by it
+			assert.include(conditions('bestMatch'), 'bestMatch');
+			assert.notInclude(conditions('bestMatch'), 'tag');
 		});
 
 		it("should find items matching both the clauses and the text", async function () {

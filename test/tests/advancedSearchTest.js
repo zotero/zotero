@@ -174,6 +174,29 @@ describe("Advanced Search", function () {
 		await childOnly.eraseTx();
 	});
 
+	it("should prefill a Best Match quick search as the ranking field, keeping its conditions", async function () {
+		var item = await createDataObject('item', { title: "alpha beta" });
+		item.addTag('zztag');
+		await item.saveTx();
+
+		await zp.openAdvancedSearchFromQuickSearch('tag:zztag alpha beta', 'bestMatch');
+		var iv = zp.itemsView;
+		await iv.waitForLoad();
+
+		// The clause stays a condition; the free text ranks rather than
+		// filtering, so no word becomes a condition of its own
+		var conds = Object.values(deck.pane.search.getConditions());
+		assert.isTrue(conds.some(c => c.condition === 'tag' && c.value === 'zztag'));
+		assert.isFalse(conds.some(c => c.condition === 'anyField'));
+		assert.isTrue(conds.some(c => c.condition === 'resultLevel' && c.operator === 'item'));
+		assert.deepEqual(deck.pane.search.getBestMatchQuery(), { query: 'alpha beta', engine: 'hybrid' });
+		assert.equal(deck.pane.querySelector('.best-match-input').value, 'alpha beta');
+
+		await zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		await item.eraseTx();
+	});
+
 	it("should run a cross-level search across a multi-collection selection", async function () {
 		var word = 'zmc' + Zotero.Utilities.randomString();
 		var makeMatch = async function (collection) {
@@ -616,7 +639,54 @@ describe("Advanced Search", function () {
 		await collection.eraseTx();
 		await selectLibrary(win);
 	});
-	
+
+	it("should keep the bestMatch marker at the root when scoping a 'Match any' search", async function () {
+		var collection = await createDataObject('collection');
+		var saved;
+		try {
+			await selectCollection(win, collection.id);
+			await zp.toggleAdvancedSearchState('open');
+			var pane = deck.pane;
+
+			var s = new Zotero.Search();
+			s.libraryID = Zotero.Libraries.userLibraryID;
+			s.addCondition('resultLevel', 'item');
+			s.addCondition('joinMode', 'any');
+			s.addCondition('title', 'contains', 'flagfoo');
+			s.addCondition('creator', 'contains', 'flagbar');
+			s.addCondition('bestMatch', 'hybrid', 'some query');
+			pane.search = s;
+
+			var promptService = Services.prompt;
+			Services.prompt = {
+				prompt: (parent, title, message, nameObj) => {
+					nameObj.value = 'Scoped Semantic';
+					return true;
+				}
+			};
+			try {
+				await pane.save();
+			}
+			finally {
+				Services.prompt = promptService;
+			}
+
+			saved = (await Zotero.Searches.getAll(Zotero.Libraries.userLibraryID))
+				.find(x => x.name == 'Scoped Semantic');
+			assert.ok(saved);
+			// The 'any' conditions were wrapped in a group, but the bestMatch marker
+			// stayed at the root, where getBestMatchQuery() finds it
+			assert.deepEqual(saved.getBestMatchQuery(), { query: 'some query', engine: 'hybrid' });
+		}
+		finally {
+			if (saved) {
+				await saved.eraseTx();
+			}
+			await collection.eraseTx();
+			await selectLibrary(win);
+		}
+	});
+
 	it("should group the scope and the existing conditions when saving an 'any' search with a collection and a saved search selected", async function () {
 		var scopeSearch = new Zotero.Search();
 		scopeSearch.libraryID = Zotero.Libraries.userLibraryID;
