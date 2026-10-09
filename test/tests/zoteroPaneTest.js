@@ -1898,6 +1898,82 @@ describe("ZoteroPane", function () {
 			doc.activeElement.dispatchEvent(leftArrow);
 			assert.equal(doc.activeElement.id, "zotero-tb-add");
 		});
+
+		it("should include plugin toolbarbuttons in the Tab and arrow routes", async function () {
+			if (!await activatePaneWindow()) {
+				this.skip();
+			}
+			let toolbar = doc.getElementById('zotero-items-toolbar');
+			let buttons = ['first', 'second'].map(name => {
+				let button = doc.createXULElement('toolbarbutton');
+				button.id = `test-plugin-${name}`;
+				button.setAttribute('tabindex', '0');
+				toolbar.append(button);
+				return button;
+			});
+			try {
+				// The plugin buttons are appended after the search and pane-toggle
+				// controls, so keyboard traversal must reach them in that order.
+				doc.getElementById('zotero-tb-add').focus();
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement.id, 'zotero-tb-search-textbox');
+				let paneToggle = doc.getElementById('zotero-tb-toggle-item-pane-stacked');
+				paneToggle.dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[0]);
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement,
+					doc.getElementById('zotero-items-tree').querySelector('.virtualized-table'));
+				doc.activeElement.dispatchEvent(shiftTab);
+				assert.equal(doc.activeElement, buttons[1]);
+				doc.activeElement.dispatchEvent(shiftTab);
+				assert.equal(doc.activeElement, buttons[0]);
+				doc.activeElement.dispatchEvent(shiftTab);
+				let toggleHidden = paneToggle.disabled || paneToggle.hidden
+					|| paneToggle.parentNode.hidden
+					|| win.getComputedStyle(paneToggle).display === 'none';
+				assert.equal(doc.activeElement.id, toggleHidden
+					? 'zotero-tb-search-advanced-button' : paneToggle.id);
+				doc.getElementById('zotero-tb-lookup').focus();
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement.id, 'zotero-tb-search-textbox');
+				doc.getElementById('zotero-tb-attachment-add').focus();
+				doc.activeElement.dispatchEvent(tab);
+				assert.equal(doc.activeElement.id, 'zotero-tb-search-textbox');
+
+				doc.getElementById('zotero-tb-note-add').focus();
+				doc.activeElement.dispatchEvent(rightArrow);
+				assert.equal(doc.activeElement.id, 'zotero-tb-note-add');
+				buttons[0].focus();
+				doc.activeElement.dispatchEvent(leftArrow);
+				assert.equal(doc.activeElement, buttons[0]);
+				doc.activeElement.dispatchEvent(rightArrow);
+				assert.equal(doc.activeElement, buttons[1]);
+				doc.activeElement.dispatchEvent(leftArrow);
+				assert.equal(doc.activeElement, buttons[0]);
+
+				buttons[0].hidden = true;
+				paneToggle.dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
+				buttons[0].hidden = false;
+				buttons[0].disabled = true;
+				paneToggle.dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
+				buttons[0].disabled = false;
+				buttons[0].style.display = 'none';
+				paneToggle.dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
+				buttons[0].style.display = '';
+				buttons[0].disabled = true;
+				doc.getElementById('zotero-tb-add').focus();
+				buttons[0].dispatchEvent(tab);
+				assert.equal(doc.activeElement, buttons[1]);
+			}
+			finally {
+				buttons.forEach(button => button.remove());
+			}
+		});
 	});
 	
 	describe("#addAttachmentFromDialog()", function () {
