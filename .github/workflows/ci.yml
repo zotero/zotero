@@ -10,9 +10,10 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  # Decide whether to run the network-filesystem tests: always for manual and scheduled
-  # runs, and otherwise only when the changes touch the Gecko version or the files
-  # responsible for network-filesystem database handling
+  # Decide whether to run the network-filesystem and Windows tests: always for manual and
+  # scheduled runs, and otherwise only when the changes touch the Gecko version, the files
+  # responsible for network-filesystem database handling, or (for Windows) the files that
+  # make up the Windows build
   changes:
     name: Detect changes
     runs-on: ubuntu-latest
@@ -21,6 +22,7 @@ jobs:
       || github.event.pull_request.head.repo.full_name != github.repository
     outputs:
       network: ${{ steps.check.outputs.network }}
+      windows: ${{ steps.check.outputs.windows }}
     steps:
       - name: Check for network-filesystem-related changes
         id: check
@@ -32,8 +34,10 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
           network=false
+          windows=false
           if [[ "$EVENT" == "workflow_dispatch" || "$EVENT" == "schedule" ]]; then
             network=true
+            windows=true
           else
             base="$BASE"
             [[ -z "$base" ]] && base="$BEFORE"
@@ -45,12 +49,20 @@ jobs:
             if [[ -z "$base" || "$base" == 0000000000000000000000000000000000000000 ]] \
                 || ! git fetch -q --depth 1 origin "$base" 2>/dev/null; then
               network=true
-            elif git diff --name-only "$base" "$SHA" \
-                | grep -qE '^(app/config\.sh|chrome/content/zotero/xpcom/(db|file)\.js|\.github/workflows/ci\.yml)$'; then
-              network=true
+              windows=true
+            else
+              files=$(git diff --name-only "$base" "$SHA")
+              if grep -qE '^(app/config\.sh|chrome/content/zotero/xpcom/(db|file)\.js|\.github/workflows/ci\.yml)$' <<< "$files"; then
+                network=true
+                windows=true
+              fi
+              if grep -qE '^app/(win/|build\.sh$|scripts/(dir_build|fetch_xulrunner|prepare_build)$)' <<< "$files"; then
+                windows=true
+              fi
             fi
           fi
           echo "network=$network" >> "$GITHUB_OUTPUT"
+          echo "windows=$windows" >> "$GITHUB_OUTPUT"
 
   test:
     name: Test (${{ matrix.shard }})
@@ -250,7 +262,7 @@ jobs:
     timeout-minutes: 40
     needs: changes
     if: >
-      needs.changes.outputs.network == 'true'
+      needs.changes.outputs.windows == 'true'
       && (github.event_name != 'pull_request'
       || github.event.pull_request.head.repo.full_name != github.repository)
     strategy:
