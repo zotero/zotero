@@ -5206,6 +5206,10 @@ describe("Zotero.Sync.Data.Engine", function () {
 			for (let type of types) {
 				let plural = Zotero.DataObjectUtilities.getObjectTypePlural(type);
 				let suffix = type == 'item' ? '&includeTrashed=1' : '';
+				// Only the first request of the restore is marked
+				if (type == types[0]) {
+					suffix += '&restoreToServer=1';
+				}
 				
 				let json = {};
 				json[objectJSON[type][0].key] = objectJSON[type][0].version;

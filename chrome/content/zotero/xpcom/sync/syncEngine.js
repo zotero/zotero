@@ -2045,11 +2045,13 @@ Zotero.Sync.Data.Engine.prototype._restoreToServer = async function () {
 		let ObjectType = Zotero.Utilities.capitalize(objectType);
 		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(objectType);
 		
-		// Get all object versions from the API
+		// Get all object versions from the API, marking the first request so that restores can
+		// be identified in server logs
 		let results = await this.apiClient.getVersions(
 			this.library.libraryType,
 			this.libraryTypeID,
-			objectType
+			objectType,
+			libraryVersion ? undefined : { restoreToServer: 1 }
 		);
 		if (libraryVersion && libraryVersion != results.libraryVersion) {
 			throw new Error(remoteUpdatedError
