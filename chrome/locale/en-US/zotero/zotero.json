@@ -320,6 +320,9 @@
 	"recently-read-clear-all-confirm": {
 		"string": "All Last Read dates in this library will be erased."
 	},
+	"items-list-load-error-plugin": {
+		"string": "Error loading items list. Disabling the “{ plugin }” plugin and restarting { app-name } may fix this."
+	},
 	"items-section-collections-selected": {
 		"string": "{count, plural, one {{ count } collection selected} other {{ count } collections selected}}"
 	},
@@ -428,11 +431,17 @@
 	"item-menu-relate-items.label": {
 		"string": "Relate Items"
 	},
+	"item-menu-unrelate-items.label": {
+		"string": "Unrelate Items"
+	},
 	"view-online": {
 		"string": "View Online"
 	},
 	"file-renaming-file-renamed-to": {
 		"string": "File renamed to { filename }"
+	},
+	"file-access-error-fs-corrupted": {
+		"string": "{ os-name } reported that the file or disk is corrupted. Run a disk check on the drive containing the file."
 	},
 	"itembox-button-options.tooltiptext": {
 		"string": "Open context menu"
@@ -527,8 +536,14 @@
 	"file-interface-items-were-relinked": {
 		"string": "{numRelinked, plural, =0 {No items were relinked} one {One item was relinked} other {{ numRelinked } items were relinked}}"
 	},
-	"import-mendeley-encrypted": {
-		"string": "The selected Mendeley database cannot be read, likely because it is encrypted. See <a data-l10n-name=\"mendeley-import-kb\">How do I import a Mendeley library into Zotero?</a> for more information."
+	"import-mendeley-cannot-decrypt": {
+		"string": "The selected Mendeley database could not be decrypted. This can happen if the database file has been renamed. See <a data-l10n-name=\"mendeley-import-kb\">How do I import a Mendeley library into Zotero?</a> for more information."
+	},
+	"import-mendeley-unsupported": {
+		"string": "The selected file does not appear to be a Mendeley database. See <a data-l10n-name=\"mendeley-import-kb\">How do I import a Mendeley library into Zotero?</a> for more information."
+	},
+	"import-mendeley-db-in-use": {
+		"string": "The selected Mendeley database is in use. Please quit Mendeley Desktop and try again."
 	},
 	"file-interface-import-error-translator": {
 		"string": "An error occurred importing the selected file with “{ translator }”. Please ensure that the file is valid and try again."
@@ -697,6 +712,9 @@
 	},
 	"styleEditor-preview.aria-label": {
 		"string": "Preview"
+	},
+	"stylePreview-generating": {
+		"string": "Generating previews…"
 	},
 	"publications-intro-page": {
 		"string": "My Publications"
@@ -1220,6 +1238,93 @@
 	"search-conditions-itemTypeID": {
 		"string": "Item Type"
 	},
+	"search-query-keyword-creator": {
+		"string": "by"
+	},
+	"search-query-keyword-publication": {
+		"string": "in, publication, journal"
+	},
+	"search-query-keyword-item-type": {
+		"string": "type"
+	},
+	"search-query-keyword-language": {
+		"string": "lang"
+	},
+	"search-query-keyword-abstract": {
+		"string": "abstract"
+	},
+	"search-query-keyword-fulltext": {
+		"string": "fulltext, text"
+	},
+	"search-query-keyword-date": {
+		"string": "year"
+	},
+	"search-query-keyword-date-before": {
+		"string": "before"
+	},
+	"search-query-keyword-date-after": {
+		"string": "after, since"
+	},
+	"search-query-keyword-date-added": {
+		"string": "added"
+	},
+	"search-query-keyword-date-modified": {
+		"string": "modified"
+	},
+	"search-query-keyword-no-annotations": {
+		"string": "no annotations"
+	},
+	"search-query-keyword-has-annotations": {
+		"string": "has annotations"
+	},
+	"search-query-keyword-no-notes": {
+		"string": "no notes"
+	},
+	"search-query-keyword-has-notes": {
+		"string": "has notes"
+	},
+	"search-query-keyword-no-tags": {
+		"string": "no tags"
+	},
+	"search-query-keyword-has-tags": {
+		"string": "has tags"
+	},
+	"search-query-keyword-no-attachments": {
+		"string": "no attachments"
+	},
+	"search-query-keyword-has-attachments": {
+		"string": "has attachments"
+	},
+	"search-query-keyword-and": {
+		"string": "and"
+	},
+	"search-query-keyword-or": {
+		"string": "or"
+	},
+	"search-query-keyword-no": {
+		"string": "no"
+	},
+	"search-query-keyword-has": {
+		"string": "has"
+	},
+	"search-query-keyword-days": {
+		"string": "day, days"
+	},
+	"search-query-keyword-weeks": {
+		"string": "week, weeks"
+	},
+	"search-query-keyword-months": {
+		"string": "month, months"
+	},
+	"search-query-keyword-years": {
+		"string": "year, years"
+	},
+	"search-query-keyword-range": {
+		"string": "between 2020 and 2025, from 2020 to 2025, 2020 to 2025"
+	},
+	"search-query-keyword-range-excluded": {
+		"string": "not between 2020 and 2025"
+	},
 	"search-conditions-tag": {
 		"string": "Tag"
 	},
@@ -1469,14 +1574,32 @@
 	"data-dir-unsupported-storage": {
 		"string": "This can happen if the { app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share."
 	},
+	"data-dir-check-parent-write-access": {
+		"string": "Make sure you have write access to { path } and that security software isn’t preventing { app-name } from writing to the disk."
+	},
 	"login-manager-reset": {
 		"string": "{ app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { app-name } settings."
 	},
+	"login-manager-open-profile-directory": {
+		"string": "Open Profile Directory"
+	},
 	"os-keystore-save-failed": {
-		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.} windows {{ app-name } couldn’t securely save your credentials. Try again or restart { app-name }.} other {{ app-name } couldn’t access your { os-name } keyring to securely save your credentials. Make sure a keyring service is running and try again.}}"
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to securely save your credentials. Make sure your Keychain is accessible and try again.} windows {{ app-name } couldn’t use { os-name } Credential Manager to securely save your credentials. Try again or restart { app-name }.} other {{ app-name } couldn’t access your { os-name } keyring to securely save your credentials. Make sure a keyring service such as GNOME Keyring or KWallet is installed and running, and try again.}}"
+	},
+	"os-keystore-read-failed": {
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to read your saved credentials. Make sure your Keychain is accessible and try again.} windows {{ app-name } couldn’t use { os-name } Credential Manager to read your saved credentials. Try again or restart { app-name }.} other {{ app-name } couldn’t access your { os-name } keyring to read your saved credentials. Make sure a keyring service such as GNOME Keyring or KWallet is installed and running, and try again.}}"
+	},
+	"os-keystore-read-unrecoverable": {
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t read your saved credentials from the { os-name } Keychain.} windows {{ app-name } couldn’t read your saved credentials from { os-name } Credential Manager.} other {{ app-name } couldn’t read your saved credentials from your { os-name } keyring.}} You’ll need to set up syncing again in the { app-name } settings."
+	},
+	"os-keystore-save-unencrypted": {
+		"string": "{ app-name } can save your credentials unencrypted instead. Anyone with access to your { app-name } profile folder would then be able to read them."
+	},
+	"os-keystore-save-unencrypted-button": {
+		"string": "Save Anyway"
 	},
 	"os-keystore-migrate-failed": {
-		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { app-name }.} windows {{ app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { app-name } and try again.} other {{ app-name } couldn’t access your { os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service is running and restart { app-name }.}}"
+		"string": "{PLATFORM(), select, macos {{ app-name } couldn’t access the { os-name } Keychain to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure your Keychain is accessible and restart { app-name }.} windows {{ app-name } couldn’t encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Restart { app-name } and try again.} other {{ app-name } couldn’t access your { os-name } keyring to encrypt your stored credentials. Your credentials remain stored unencrypted on disk. Make sure a keyring service such as GNOME Keyring or KWallet is installed and running, and restart { app-name }.}}"
 	},
 	"search-button.label": {
 		"string": "Search"
@@ -1603,6 +1726,12 @@
 	},
 	"undo-action-remove-related": {
 		"string": "Remove Related"
+	},
+	"undo-action-relate-items": {
+		"string": "Relate Items"
+	},
+	"undo-action-unrelate-items": {
+		"string": "Unrelate Items"
 	},
 	"undo-action-merge-items": {
 		"string": "{count, plural, one {Merge Item} other {Merge { count } Items}}"
@@ -1952,14 +2081,26 @@
 	"reader-note-annotation": {
 		"string": "Note Annotation"
 	},
+	"reader-note-annotation-short": {
+		"string": "Note"
+	},
 	"reader-text-annotation": {
 		"string": "Text Annotation"
+	},
+	"reader-text-annotation-short": {
+		"string": "Text"
 	},
 	"reader-image-annotation": {
 		"string": "Image Annotation"
 	},
+	"reader-image-annotation-short": {
+		"string": "Image"
+	},
 	"reader-ink-annotation": {
 		"string": "Ink Annotation"
+	},
+	"reader-ink-annotation-short": {
+		"string": "Ink"
 	},
 	"reader-search-result-index": {
 		"string": "Search result"
@@ -2812,6 +2953,12 @@
 	},
 	"note-editor-align-right": {
 		"string": "Align Right"
+	},
+	"note-editor-decrease-indent": {
+		"string": "Decrease Indent"
+	},
+	"note-editor-increase-indent": {
+		"string": "Increase Indent"
 	},
 	"note-editor-insert-citation": {
 		"string": "Insert Citation"
