@@ -2720,7 +2720,7 @@ var ZoteroPane = new function () {
 			skipDateModifiedUpdate: true
 		};
 		await Zotero.DB.executeTransaction(async () => {
-			Zotero.UndoHistory.stageAction('undo-action-add-related');
+			Zotero.UndoHistory.stageAction('undo-action-relate-items');
 			for (let index1 = 0; index1 < selectedItems.length; index1++) {
 				for (let index2 = index1 + 1; index2 < selectedItems.length; index2++) {
 					let item1 = selectedItems[index1];

@@ -1334,6 +1334,7 @@ undo-action-convert-to-standalone = { $count ->
 }
 undo-action-add-related = Add Related
 undo-action-remove-related = Remove Related
+undo-action-relate-items = Relate Items
 undo-action-merge-items = { $count ->
     [one] Merge Item
    *[other] Merge { $count } Items
