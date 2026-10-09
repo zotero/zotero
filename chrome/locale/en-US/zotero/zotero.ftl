@@ -353,6 +353,8 @@ item-menu-change-parent-item =
      .label = Change Parent Item…
 item-menu-relate-items =
     .label = Relate Items
+item-menu-unrelate-items =
+    .label = Unrelate Items
 
 view-online = View Online
 item-menu-option-view-online =
@@ -1335,6 +1337,7 @@ undo-action-convert-to-standalone = { $count ->
 undo-action-add-related = Add Related
 undo-action-remove-related = Remove Related
 undo-action-relate-items = Relate Items
+undo-action-unrelate-items = Unrelate Items
 undo-action-merge-items = { $count ->
     [one] Merge Item
    *[other] Merge { $count } Items

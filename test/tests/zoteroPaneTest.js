@@ -1421,6 +1421,44 @@ describe("ZoteroPane", function () {
 			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
 			assert.isTrue(restoreMenuItem.disabled);
 		});
+		
+		it("should show “Unrelate Items” only when some selected items are related to each other", async function () {
+			let item1 = await createDataObject('item');
+			let item2 = await createDataObject('item');
+			let item3 = await createDataObject('item');
+			item1.addRelatedItem(item3);
+			await item1.saveTx();
+			item3.addRelatedItem(item1);
+			await item3.saveTx();
+			
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let unrelateMenuItem = menu.querySelector('.zotero-menuitem-unrelate-items');
+			
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+			assert.isTrue(unrelateMenuItem.hidden);
+			
+			await zp.selectItems([item1.id, item2.id, item3.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(unrelateMenuItem.hidden);
+		});
+	});
+	
+	describe("#unrelateSelectedItems()", function () {
+		it("should remove relations among the selected items only", async function () {
+			let item1 = await createDataObject('item');
+			let item2 = await createDataObject('item');
+			let item3 = await createDataObject('item');
+			await zp.selectItems([item1.id, item2.id, item3.id]);
+			await zp.relateSelectedItems();
+			
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.unrelateSelectedItems();
+			
+			assert.sameMembers(item1.relatedItems, [item3.key]);
+			assert.sameMembers(item2.relatedItems, [item3.key]);
+			assert.sameMembers(item3.relatedItems, [item1.key, item2.key]);
+		});
 	});
 
 	describe("#restoreSelectedItems()", function () {

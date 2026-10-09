@@ -2735,6 +2735,32 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	this.unrelateSelectedItems = async function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		
+		let selectedItems = this.getSelectedItems();
+		let saveOptions = {
+			skipDateModifiedUpdate: true
+		};
+		await Zotero.DB.executeTransaction(async () => {
+			Zotero.UndoHistory.stageAction('undo-action-unrelate-items');
+			for (let index1 = 0; index1 < selectedItems.length; index1++) {
+				for (let index2 = index1 + 1; index2 < selectedItems.length; index2++) {
+					let item1 = selectedItems[index1];
+					let item2 = selectedItems[index2];
+					await item1.removeRelatedItem(item2);
+					await item2.removeRelatedItem(item1);
+					await item1.save(saveOptions);
+					await item2.save(saveOptions);
+				}
+			}
+		});
+	};
+	
+	
 	this.deleteSelectedCollection = async function (deleteItems) {
 		var collectionTreeRows = this.getCollectionTreeRows();
 		if (!collectionTreeRows.length) {
@@ -4227,6 +4253,7 @@ var ZoteroPane = new function () {
 			'deleteFromLibrary',
 			'mergeItems',
 			'relateItems',
+			'unrelateItems',
 			'sep4',
 			'exportItems',
 			'createBib',
@@ -4294,7 +4321,7 @@ var ZoteroPane = new function () {
 				multiple = '.multiple';
 				
 				var canMerge = true,
-					showRelate = true, canRelate = true,
+					showRelate = true, canRelate = true, canUnrelate = false,
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true;
@@ -4310,8 +4337,13 @@ var ZoteroPane = new function () {
 						if (item.isFeedItem) {
 							showRelate = false;
 						}
-						else if (canRelate && items.every(otherItem => otherItem === item || otherItem.relatedItems.includes(item.key))) {
-							canRelate = false;
+						else {
+							if (canRelate && items.every(otherItem => otherItem === item || otherItem.relatedItems.includes(item.key))) {
+								canRelate = false;
+							}
+							if (!canUnrelate && items.some(otherItem => otherItem !== item && otherItem.relatedItems.includes(item.key))) {
+								canUnrelate = true;
+							}
 						}
 					}
 					
@@ -4340,6 +4372,9 @@ var ZoteroPane = new function () {
 					show.add(m.relateItems);
 					if (!canRelate) {
 						disable.add(m.relateItems);
+					}
+					if (canUnrelate) {
+						show.add(m.unrelateItems);
 					}
 				}
 				

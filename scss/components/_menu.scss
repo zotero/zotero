@@ -69,6 +69,7 @@ $menu-icons: (
 	copy-collection: 'copy-collection',
 	move-collection: 'move-collection',
 	relate-items: 'related',
+	unrelate-items: 'related',
 );
 
 @each $cls, $icon in $menu-icons {
