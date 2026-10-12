@@ -327,14 +327,16 @@ class PluginAPIBase {
 			return;
 		}
 		this._lastUpdateID = this._generateRandomKey();
-		await lazy.Zotero.DB.executeTransaction(async () => {
-			lazy.Zotero.Notifier.queue(
-				this._config.notifyAction,
-				this._config.notifyType,
-				ids,
-				extraData,
-			);
-		});
+		// register(), unregister(), and refresh() call _refresh() without awaiting it, so yield
+		// first to keep observers -- and the plugin hooks they call -- from running before those
+		// calls return
+		await Promise.resolve();
+		await lazy.Zotero.Notifier.trigger(
+			this._config.notifyAction,
+			this._config.notifyType,
+			ids,
+			extraData,
+		);
 	}
 
 	/**
