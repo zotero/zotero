@@ -1323,6 +1323,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	async notify(action, type, ids, extraData) {
 		// Reset columns on custom column change
 		if (type === "itemtree" && action === "refresh") {
+			// If the table hasn't been rendered yet, just clear the cached columns so that
+			// it gets the new ones when it is
+			if (!this.tree) {
+				this._columnsId = null;
+				return;
+			}
 			await this._resetColumns();
 			await this.refreshAndMaintainSelection();
 			return;
