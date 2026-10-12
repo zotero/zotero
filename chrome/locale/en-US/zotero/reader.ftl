@@ -205,6 +205,17 @@ reader-selected-pages = { $count ->
 }
 reader-page-options = Page Options
 
+reader-reference-popup = Reference
+reader-reference-expand = Expand reference
+reader-reference-collapse = Collapse reference
+reader-reference-no-match = No match found
+reader-reference-error = Could not complete this request.
+reader-reference-retry = Retry
+reader-reference-find-online = Find Online
+reader-reference-existing = In your library
+reader-reference-action-add-to-library = Add to Library
+reader-reference-action-open-attachment = Open Attachment
+
 reader-read-aloud = Read Aloud
 reader-read-aloud-from-here = Read Aloud from Here
 reader-read-aloud-options = Options

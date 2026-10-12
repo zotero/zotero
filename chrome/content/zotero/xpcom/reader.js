@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { ReaderReferenceSession } = ChromeUtils.importESModule('chrome://zotero/content/xpcom/readerReferences.mjs');
+
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
@@ -231,6 +233,9 @@ class ReaderInstance {
 			}
 		}
 
+		this._referenceSession?.dispose();
+		this._referenceSession = new ReaderReferenceSession(this._item, this);
+
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
 			data,
@@ -268,6 +273,7 @@ class ReaderInstance {
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
 			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
 			getSDTPack: this._createGetSDTPack(this._iframeWindow),
+			...this._referenceSession.readerOptions,
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -702,6 +708,8 @@ class ReaderInstance {
 			return;
 		}
 		this._isUninitialized = true;
+		this._referenceSession?.dispose();
+		this._referenceSession = null;
 		if (this._customEventHandler && this._iframeWindow) {
 			try {
 				this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
