@@ -185,6 +185,8 @@ class ReaderInstance {
 
 		await this._waitForReader();
 
+		this._addReadAloudLeakWorkaround();
+
 		if (this._customEventHandler) {
 			this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
 		}
@@ -692,6 +694,32 @@ class ReaderInstance {
 		};
 	}
 
+	// When Read Aloud cancels a playing utterance (pause, skip, etc.), kill the system speech
+	// extension process (e.g., MauiAUSP) once it has grown large (over 1 GB). It leaks memory
+	// every time an utterance is stopped mid-sentence and is relaunched for the next one.
+	_addReadAloudLeakWorkaround() {
+		if (!Zotero.isMac) {
+			return;
+		}
+		let win = this._iframeWindow;
+		let synth = win.speechSynthesis;
+		win.wrappedJSObject.speechSynthesis.cancel = Cu.exportFunction(() => {
+			if (synth.speaking) {
+				try {
+					// Run synchronously -- killing the process after the next utterance has
+					// started would stop that utterance without an "end" event
+					let proc = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
+					proc.init(Zotero.File.pathToFile('/bin/sh'));
+					proc.run(true, ['-c', "ps -axo pid=,rss=,comm= | awk '$3 ~ /AUSP$/ && $2 > 1048576 { print $1 }' | xargs kill"], 2);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+			synth.cancel();
+		}, win.wrappedJSObject);
+	}
+	
 	uninit() {
 		if (this._isUninitialized) {
 			return;
