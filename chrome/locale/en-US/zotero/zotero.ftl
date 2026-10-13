@@ -66,6 +66,7 @@ general-copy = Copy
 general-paste = Paste
 general-find = Find
 general-delete = Delete
+general-hide = Hide
 general-insert = Insert
 general-and = and
 general-et-al = et al.
@@ -276,6 +277,8 @@ collections-menu-delete-search =
         [one] Delete Search…
        *[other] Delete Searches…
     }
+collections-menu-hide =
+    .label = { general-hide }
 
 collections-delete-title =
     { $count ->

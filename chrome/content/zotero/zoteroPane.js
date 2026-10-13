@@ -4094,14 +4094,14 @@ var ZoteroPane = new function () {
 				show.push('clearAllLastRead');
 			}
 			
-			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
+			document.l10n.setAttributes(m.deleteCollection, 'collections-menu-hide');
 			useHideOrDelete = "hide";
 		}
 		else if (collectionTreeRows[0].isHeader()) {
 		}
 		else if (collectionTreeRows[0].isPublications()) {
 			show = ['exportFile', 'deleteCollection'];
-			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
+			document.l10n.setAttributes(m.deleteCollection, 'collections-menu-hide');
 			useHideOrDelete = "hide";
 		}
 		// Library
