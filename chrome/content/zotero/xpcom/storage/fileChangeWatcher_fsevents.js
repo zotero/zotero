@@ -32,9 +32,9 @@
  * closed are still detected.
  *
  * The journal is volume-wide, so replaying it can keep fseventsd busy for minutes on a busy
- * volume. Rather than flushing the stream synchronously, the replay is pumped in short run-loop
- * slices between turns of the app's event loop, and a replay that runs too long is abandoned in
- * favor of full scans.
+ * volume. Rather than flushing the stream synchronously, the stream's run-loop source is polled
+ * for delivered events between turns of the app's event loop, and a replay that runs too long is
+ * abandoned in favor of full scans.
  */
 Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 	_ctypes: null,
@@ -57,10 +57,16 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 	// Longest to spend replaying the journal before falling back to full scans
 	_MAX_REPLAY_TIME: 30000, // 30 seconds
 
-	// How long each run-loop pump may hold the main thread before yielding to the app
-	_REPLAY_SLICE_TIME: 20, // ms
+	// How long to let the app run between polls of the stream's run-loop source
+	_REPLAY_POLL_INTERVAL: 10, // ms
 
-	// Private run-loop mode for the stream, so only the pump calls ever run its callback
+	// Longest a poll may keep handling batches of events before yielding to the app
+	_REPLAY_BURST_TIME: 8, // ms
+
+	// How long a poll waits for the next batch after handling one
+	_REPLAY_BATCH_WAIT: 2, // ms
+
+	// Private run-loop mode for the stream, so only the polls ever run its callback
 	_REPLAY_RUN_LOOP_MODE: "org.zotero.FileChangeWatcher.replay",
 
 	// Stream of a pending replay, holding its callback until native code is done with it
@@ -399,6 +405,7 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		// closure referenced where close() can also find the stream to tear it down
 		this._activeStream = { stream, callbackFn, started: false };
 		const kCFRunLoopRunFinished = 1;
+		const kCFRunLoopRunHandledSource = 4;
 		let outcome = 'timeout';
 		// Where the next replay resumes from
 		let resumeId;
@@ -414,16 +421,24 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 			}
 			this._activeStream.started = true;
 
-			// fseventsd walks the journal in its own process, so pump the stream's run-loop
-			// source in short slices and let the app handle its own events in between
-			let maxSlices = Math.ceil(this._MAX_REPLAY_TIME / this._REPLAY_SLICE_TIME);
-			for (let i = 0; i < maxSlices; i++) {
-				// The mode string is autoreleased, so make it afresh for each slice
-				let result = this._CFRunLoopRunInMode(
-					this._nsStr(this._REPLAY_RUN_LOOP_MODE),
-					this._REPLAY_SLICE_TIME / 1000,
-					false
-				);
+			// fseventsd walks the journal in its own process, so poll the stream's run-loop
+			// source for delivered events and leave the main thread to the app in between.
+			// fseventsd sends each batch only after the callback for the previous one returns,
+			// so once a batch arrives, keep handling batches for a short burst.
+			let deadline = Date.now() + this._MAX_REPLAY_TIME;
+			while (true) {
+				let burstEnd = Date.now() + this._REPLAY_BURST_TIME;
+				let wait = 0;
+				let result;
+				do {
+					// The mode string is autoreleased, so make it afresh for each call
+					result = this._CFRunLoopRunInMode(
+						this._nsStr(this._REPLAY_RUN_LOOP_MODE), wait, true
+					);
+					wait = this._REPLAY_BATCH_WAIT / 1000;
+				}
+				while (result == kCFRunLoopRunHandledSource && !historyDone
+					&& Date.now() < burstEnd);
 				if (historyDone) {
 					outcome = 'done';
 					break;
@@ -433,7 +448,10 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 					outcome = 'unscheduled';
 					break;
 				}
-				await Zotero.Promise.delay(0);
+				if (Date.now() >= deadline) {
+					break;
+				}
+				await Zotero.Promise.delay(this._REPLAY_POLL_INTERVAL);
 				if (!this._activeStream) {
 					outcome = 'closed';
 					break;
@@ -446,7 +464,7 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 				resumeId = this._FSEventsGetCurrentEventId();
 				this._CFRunLoopRunInMode(
 					this._nsStr(this._REPLAY_RUN_LOOP_MODE),
-					this._REPLAY_SLICE_TIME / 1000,
+					this._REPLAY_POLL_INTERVAL / 1000,
 					false
 				);
 			}
