@@ -214,6 +214,275 @@ describe("Reader", function () {
 			}
 		}
 
+		it('should record annotation changes in the app-wide undo history', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				let annotation = annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+				assert.equal(attachment.getAnnotations()[0].key, annotation.id);
+				assert.isTrue(Zotero.UndoHistory.canUndo());
+				assert.equal(
+					Zotero.UndoHistory.getUndoAction().action, 'undo-action-add-annotation'
+				);
+
+				// Undoing from outside the reader should remove the annotation
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('delete');
+				assert.lengthOf(attachment.getAnnotations(), 0);
+
+				// Redoing should bring it back (with a new key, to avoid sync conflicts)
+				assert.isTrue(await Zotero.UndoHistory.redo());
+				await waitForItemEvent('add');
+				assert.lengthOf(attachment.getAnnotations(), 1);
+
+				// An edit should be undoable as its own step
+				annotationManager.updateAnnotations(
+					Components.utils.cloneInto([{
+						id: attachment.getAnnotations()[0].key,
+						text: 'test2'
+					}], reader._iframeWindow)
+				);
+				await waitForItemEvent('modify');
+				assert.equal(
+					Zotero.UndoHistory.getUndoAction().action, 'undo-action-edit-annotation'
+				);
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('modify');
+				assert.equal(attachment.getAnnotations()[0].annotationText, 'test');
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+
+			// A closed reader can't apply its steps anymore
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it('should keep recording annotation edits after the undo history is cleared', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				let annotation = annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				let editComment = async (comment) => {
+					annotationManager.updateAnnotations(
+						Components.utils.cloneInto([{ id: annotation.id, comment }], reader._iframeWindow)
+					);
+					await waitForItemEvent('modify');
+				};
+				// The second edit is joined into the first one's history step,
+				// as continued typing in a comment is
+				await editComment('a');
+				await editComment('ab');
+
+				// A sync applying remote changes discards the history
+				Zotero.UndoHistory.clear();
+				assert.isFalse(Zotero.UndoHistory.canUndo());
+
+				// Typing in the same comment is joined into that step again, but
+				// it's still a change we haven't recorded, so it has to be undoable
+				await editComment('abc');
+				assert.isTrue(Zotero.UndoHistory.canUndo());
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('modify');
+				// The reader's step reverts the last change joined into it
+				assert.equal(attachment.getAnnotations()[0].annotationComment, 'ab');
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should select the reader tab when undoing an annotation change from the library', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				win.Zotero_Tabs.select('zotero-pane');
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				await waitForItemEvent('delete');
+				assert.equal(win.Zotero_Tabs.selectedID, reader.tabID);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should select the library tab when undoing a library change from a reader', async function () {
+			let reader;
+			try {
+				win.Zotero_Tabs.select('zotero-pane');
+				let collection = await createDataObject('collection', { name: 'Original' });
+				Zotero.UndoHistory.clear();
+				collection.name = 'Modified';
+				await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.itemID);
+				await reader._initPromise;
+				assert.equal(win.Zotero_Tabs.selectedID, reader.tabID);
+
+				assert.isTrue(await Zotero.UndoHistory.undo());
+				assert.equal(collection.name, 'Original');
+				assert.equal(win.Zotero_Tabs.selectedID, 'zotero-pane');
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should run undo commands from the app-wide history while a reader view has focus', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				await reader.focus();
+				await Zotero.Promise.delay(100);
+				// Focus only moves into the reader while its window is active.
+				// It lands in a view iframe, whose frame tree is rooted at the
+				// reader itself.
+				if (win.document.commandDispatcher.focusedWindow?.top !== reader._iframeWindow) {
+					Zotero.debug("Skipping test -- reader couldn't be focused");
+					this.skip();
+				}
+
+				assert.isFalse(Zotero.UndoHistory.hasNativeUndo(win.document));
+				// As the Edit menu and key_undo do
+				win.goDoCommand('cmd_undo');
+				await waitForItemEvent('delete');
+				assert.lengthOf(attachment.getAnnotations(), 0);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should leave undo to text editing while a reader text box has focus', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+				let doc = reader._iframeWindow.document;
+				let pageNumberInput = doc.getElementById('pageNumber');
+				pageNumberInput.focus();
+				await Zotero.Promise.delay(100);
+				// Focus only moves into the reader while its window is active
+				if (win.document.commandDispatcher.focusedWindow !== reader._iframeWindow
+						|| doc.activeElement !== pageNumberInput) {
+					Zotero.debug("Skipping test -- reader text box couldn't be focused");
+					this.skip();
+				}
+
+				assert.isTrue(Zotero.UndoHistory.hasNativeUndo(win.document));
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
+		it('should not leave undo to text editing while a reader checkbox has focus', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID);
+			try {
+				await reader._initPromise;
+				await reader._internalReader._primaryView.initializedPromise;
+				reader._internalReader.toggleFindPopup(
+					Components.utils.cloneInto({ open: true }, reader._iframeWindow)
+				);
+				let doc = reader._iframeWindow.document;
+				// The find popup focuses its own text box when it opens
+				let checkbox = await waitForCallback(() => doc.getElementById('highlight-all'));
+				await Zotero.Promise.delay(200);
+				checkbox.focus();
+				await Zotero.Promise.delay(100);
+				// Focus only moves into the reader while its window is active
+				if (win.document.commandDispatcher.focusedWindow !== reader._iframeWindow
+						|| doc.activeElement !== checkbox) {
+					Zotero.debug("Skipping test -- reader checkbox couldn't be focused");
+					this.skip();
+				}
+
+				// A checkbox has no text editing component, so there's nothing
+				// for native text editing to undo
+				assert.isFalse(Zotero.UndoHistory.hasNativeUndo(win.document));
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+
 		it('should reopen a reader whose tab closes during a notifier transaction', async function () {
 			let reader, reopenedReader;
 			let title = Zotero.Promise.defer();
@@ -349,6 +618,45 @@ describe("Reader", function () {
 					win.Zotero_Tabs.close(unloadedTabID);
 				}
 				await cleanupReaders(reader, windowReader);
+			}
+		});
+
+		it('should name the undone action in a reader window Edit menu', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				let doc = reader._window.document;
+				Zotero.UndoHistory.updateMenuItems(doc);
+				let undoItem = doc.getElementById('menu_undo');
+				assert.isFalse(undoItem.hasAttribute('data-l10n-id'));
+				assert.equal(
+					undoItem.getAttribute('label'),
+					Zotero.ftl.formatValueSync('menu-edit-undo-action', {
+						action: Zotero.ftl.formatValueSync('undo-action-add-annotation', { count: 1 })
+					})
+				);
+			}
+			finally {
+				await cleanupReaders(reader);
 			}
 		});
 

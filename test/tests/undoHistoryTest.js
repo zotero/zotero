@@ -1577,6 +1577,343 @@ describe("Zotero.UndoHistory", function () {
 		});
 	});
 
+	describe("external providers", function () {
+		// Stands in for a reader instance: keeps its own stack of steps, reports
+		// it after every change, and steps it on request
+		function createProvider(providerID) {
+			let provider = {
+				id: providerID,
+				undoSteps: [],
+				redoSteps: [],
+				revealCount: 0,
+				_lastStepID: 0,
+
+				register() {
+					Zotero.UndoHistory.registerProvider(this.id, {
+						libraryID: Zotero.Libraries.userLibraryID,
+						undo: () => this.undo(),
+						redo: () => this.redo(),
+						reveal: () => this.revealCount++
+					});
+					return this;
+				},
+
+				addStep(action = 'undo-action-edit-annotation', count = 1) {
+					let step = {
+						id: ++this._lastStepID,
+						revision: 0,
+						action,
+						actionArgs: { count }
+					};
+					this.undoSteps.push(step);
+					this.redoSteps = [];
+					this.report();
+					return step;
+				},
+
+				// A change joined into the newest step, as continued typing is
+				reviseNewestStep() {
+					this.undoSteps[this.undoSteps.length - 1].revision++;
+					this.redoSteps = [];
+					this.report();
+				},
+
+				// An outside change invalidating everything up to and including
+				// the given step
+				invalidateThrough(step) {
+					this.undoSteps = this.undoSteps.slice(this.undoSteps.indexOf(step) + 1);
+					this.report();
+				},
+
+				undo() {
+					let step = this.undoSteps.pop();
+					if (!step) {
+						return false;
+					}
+					this.redoSteps.push(step);
+					this.report();
+					return true;
+				},
+
+				redo() {
+					let step = this.redoSteps.pop();
+					if (!step) {
+						return false;
+					}
+					this.undoSteps.push(step);
+					this.report();
+					return true;
+				},
+
+				report() {
+					Zotero.UndoHistory.setProviderSteps(this.id, {
+						undoSteps: this.undoSteps,
+						redoSteps: this.redoSteps
+					});
+				}
+			};
+			return provider;
+		}
+
+		var provider;
+
+		beforeEach(function () {
+			provider = createProvider('provider-' + Zotero.Utilities.randomString()).register();
+		});
+
+		afterEach(function () {
+			Zotero.UndoHistory.unregisterProvider(provider.id);
+		});
+
+		it("should undo and redo a provider step", async function () {
+			provider.addStep('undo-action-add-annotation');
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+			assert.deepEqual(
+				Zotero.UndoHistory.getUndoAction(),
+				{ action: 'undo-action-add-annotation', actionArgs: { count: 1 } }
+			);
+
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.lengthOf(provider.undoSteps, 0);
+			assert.lengthOf(provider.redoSteps, 1);
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+			assert.equal(
+				Zotero.UndoHistory.getRedoAction().action, 'undo-action-add-annotation'
+			);
+
+			assert.isTrue(await Zotero.UndoHistory.redo());
+			assert.lengthOf(provider.undoSteps, 1);
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it("should ask the provider to reveal itself after applying a step", async function () {
+			provider.addStep();
+
+			await Zotero.UndoHistory.undo();
+			assert.equal(provider.revealCount, 1);
+
+			await Zotero.UndoHistory.redo();
+			assert.equal(provider.revealCount, 2);
+		});
+
+		it("should not reveal a provider that declined to step", async function () {
+			provider.addStep();
+			provider.undoSteps = [];
+
+			assert.isFalse(await Zotero.UndoHistory.undo());
+			assert.equal(provider.revealCount, 0);
+		});
+
+		it("should interleave provider steps with captured changes", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			provider.addStep('undo-action-add-annotation');
+
+			// The provider step came last, so it goes first
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.lengthOf(provider.undoSteps, 0);
+			assert.equal(collection.name, 'Modified');
+
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.equal(collection.name, 'Original');
+		});
+
+		it("should move a revised step back to the top of the stack", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			provider.addStep();
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			// The provider's step now covers a change made after the rename
+			provider.reviseNewestStep();
+
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.lengthOf(provider.undoSteps, 0);
+			assert.equal(collection.name, 'Modified');
+		});
+
+		it("should record a change absorbed into a step after history was cleared", async function () {
+			provider.addStep();
+			provider.addStep();
+			// As a sync that applied remote changes does
+			Zotero.UndoHistory.clear();
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+
+			// A change joined into a step we've already seen is still a change
+			// we haven't recorded, so it has to become undoable
+			provider.reviseNewestStep();
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.lengthOf(provider.undoSteps, 1);
+
+			// The step from before the clear stays discarded
+			assert.isFalse(await Zotero.UndoHistory.undo());
+		});
+
+		it("should clear the redo stack when a provider records a new step", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			await Zotero.UndoHistory.undo();
+			assert.isTrue(Zotero.UndoHistory.canRedo());
+
+			provider.addStep();
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it("should clear the redo stack when a provider revises a step", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			provider.addStep();
+			provider.addStep();
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			await Zotero.UndoHistory.undo();
+			assert.equal(collection.name, 'Original');
+			assert.isTrue(Zotero.UndoHistory.canRedo());
+
+			// The provider's newest step now covers a further change, so
+			// redoing the rename over it is no longer valid
+			provider.reviseNewestStep();
+			assert.isFalse(Zotero.UndoHistory.canRedo());
+		});
+
+		it("should drop entries for steps the provider no longer has", async function () {
+			let firstStep = provider.addStep();
+			provider.addStep();
+			provider.invalidateThrough(firstStep);
+
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.isFalse(await Zotero.UndoHistory.undo());
+		});
+
+		it("should not restore steps that were already discarded", async function () {
+			provider.addStep();
+			Zotero.UndoHistory.clear();
+
+			// Reporting the older step again along with a new one shouldn't
+			// bring the cleared entry back
+			provider.addStep();
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.isFalse(await Zotero.UndoHistory.undo());
+		});
+
+		it("should discard a provider's entries when it declines to step", async function () {
+			let collection = await createDataObject('collection', { name: 'Original' });
+			Zotero.UndoHistory.clear();
+
+			collection.name = 'Modified';
+			await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+			provider.addStep();
+			provider.addStep();
+			// Provider has lost track of its own history
+			provider.undoSteps = [];
+
+			assert.isFalse(await Zotero.UndoHistory.undo());
+			// The remaining provider entry is gone, but the captured change isn't
+			assert.isTrue(await Zotero.UndoHistory.undo());
+			assert.equal(collection.name, 'Original');
+		});
+
+		it("should discard entries when a provider is unregistered", async function () {
+			provider.addStep();
+			assert.isTrue(Zotero.UndoHistory.canUndo());
+
+			Zotero.UndoHistory.unregisterProvider(provider.id);
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+		});
+
+		it("should discard provider entries for an erased library", async function () {
+			provider.addStep();
+			Zotero.UndoHistory.clearForLibrary(Zotero.Libraries.userLibraryID);
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+		});
+
+		it("should ignore steps from an unregistered provider", function () {
+			Zotero.UndoHistory.unregisterProvider(provider.id);
+			provider.addStep();
+			assert.isFalse(Zotero.UndoHistory.canUndo());
+		});
+	});
+
+	describe("deferring to native text editing", function () {
+		var providerID, htmlDoc;
+
+		// A provider frame with the given element focused within it
+		function createFrame(activeElement) {
+			let frame = {
+				document: { activeElement },
+				get parent() {
+					return frame;
+				}
+			};
+			Zotero.UndoHistory.registerProvider(providerID, {
+				libraryID: Zotero.Libraries.userLibraryID,
+				undo: () => true,
+				redo: () => true,
+				window: frame
+			});
+			return frame;
+		}
+
+		// A main window document with focus inside the given frame
+		function createDocument(focusedWindow) {
+			return {
+				defaultView: {},
+				commandDispatcher: { focusedWindow, focusedElement: null }
+			};
+		}
+
+		function createInput(type) {
+			let input = htmlDoc.createElement('input');
+			if (type) {
+				input.type = type;
+			}
+			return input;
+		}
+
+		before(function () {
+			htmlDoc = new DOMParser().parseFromString(
+				'<!DOCTYPE html><html><body></body></html>', 'text/html');
+		});
+
+		beforeEach(function () {
+			providerID = 'provider-' + Zotero.Utilities.randomString();
+		});
+
+		afterEach(function () {
+			Zotero.UndoHistory.unregisterProvider(providerID);
+		});
+
+		function assertDefers(el, shouldDefer) {
+			let doc = createDocument(createFrame(el));
+			let desc = el.localName === 'input' ? `input[type=${el.type}]` : el.localName;
+			assert.equal(Zotero.UndoHistory.hasNativeUndo(doc), shouldDefer, desc);
+			assert.equal(Zotero.UndoHistory.hasNativeRedo(doc), shouldDefer, desc);
+		}
+
+		it("should defer for a focused text box", function () {
+			for (let type of ['', 'text', 'search', 'password', 'number']) {
+				assertDefers(createInput(type), true);
+			}
+			assertDefers(htmlDoc.createElement('textarea'), true);
+		});
+
+		it("should not defer for a focused input that holds no text", function () {
+			for (let type of ['checkbox', 'radio', 'button', 'range', 'file']) {
+				assertDefers(createInput(type), false);
+			}
+		});
+	});
+
 	describe("step limit pref", function () {
 		afterEach(function () {
 			Zotero.Prefs.clear('undoHistory.steps');
