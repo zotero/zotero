@@ -4016,6 +4016,7 @@ var ZoteroPane = new function () {
 				show.push('clearAllLastRead');
 			}
 			
+			m.deleteCollection.removeAttribute('data-l10n-id');
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
 			useHideOrDelete = "hide";
 		}
@@ -4023,6 +4024,7 @@ var ZoteroPane = new function () {
 		}
 		else if (collectionTreeRows[0].isPublications()) {
 			show = ['exportFile', 'deleteCollection'];
+			m.deleteCollection.removeAttribute('data-l10n-id');
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
 			useHideOrDelete = "hide";
 		}

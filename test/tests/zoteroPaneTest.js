@@ -1134,6 +1134,25 @@ describe("ZoteroPane", function () {
 
 			await group.eraseTx();
 		});
+
+		it("should restore the Delete Collection label after the menu is built for a hideable row", async function () {
+			let collection = await createDataObject('collection');
+
+			await selectCollectionRows(["C" + collection.id]);
+			await zp.buildCollectionContextMenu();
+			let menuitem = win.document.getElementById('deleteCollection');
+			await win.document.l10n.translateElements([menuitem]);
+			let label = menuitem.label;
+
+			await selectCollectionRows(["U" + Zotero.Libraries.userLibraryID]);
+			await zp.buildCollectionContextMenu();
+			assert.equal(menuitem.label, Zotero.getString('general.hide'));
+
+			await selectCollectionRows(["C" + collection.id]);
+			await zp.buildCollectionContextMenu();
+			await win.document.l10n.translateElements([menuitem]);
+			assert.equal(menuitem.label, label);
+		});
 	});
 
 	describe("#buildAddItemToCollectionMenu()", function () {
