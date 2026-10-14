@@ -210,7 +210,11 @@ class ChangesBase {
 			}
 			revision = other.revision;
 		}
-		// A ref-addressed editor and the one creating that ref collapse into the creating entry
+		// A ref-addressed editor and the one creating that ref collapse into the creating entry; two
+		// creators under one ref are a mistake to report, not a merge
+		if (this._state.create !== undefined && other._state.create !== undefined) {
+			throw new Error(`${this._describe()} is created twice`);
+		}
 		let merged = this._derive({ revision, create: this._state.create ?? other._state.create });
 		for (let { op, ...params } of other.ops) {
 			merged = merged._push(op, params);

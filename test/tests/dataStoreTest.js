@@ -152,6 +152,13 @@ describe("Zotero.DataStore", function () {
 				type: "item", ref: "a", create: { libraryID, itemType: "book" }, revision: 1, ops: [],
 			}), codes.INVALID_PARAMS);
 		});
+
+		it("should refuse two editors that create one ref", function () {
+			let a = CS.item({ libraryID, itemType: "book" }, { ref: "x" });
+			let b = CS.item({ libraryID, itemType: "note" }, { ref: "x" });
+			assert.throws(() => CS.of(a, b), /created twice/);
+			assert.throws(() => CS.from({ changes: [a.toPlain(), b.toPlain()] }), /created twice/);
+		});
 	});
 
 	describe("commit semantics", function () {
