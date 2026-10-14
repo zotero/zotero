@@ -240,6 +240,21 @@ describe("Zotero.ItemTreeManager", function () {
 			"a plugin .svg URL label resolves against the plugin root");
 	});
 
+	it("should resolve iconPath relative to the plugin root", function () {
+		let register = iconPath => plugin.run(iconPath => Zotero.ItemTreeManager.registerColumn({
+			dataKey: "sandbox-icon-col",
+			label: "Icon Column",
+			iconPath,
+			dataProvider: () => "",
+		}), iconPath);
+		assert.isFalse(register("https://evil.example.com/x.svg"), "an undeclared remote origin");
+
+		let key = register("icons/column.svg");
+		assert.isString(key);
+		assert.equal(Zotero.ItemTreeManager._columnManager._optionsCache[key].iconPath,
+			Zotero.Plugins.getBaseURI(plugin.id) + "icons/column.svg");
+	});
+
 	it("should warn about a deprecated option only when it is given", function () {
 		let warn = sinon.spy(Zotero.ItemTreeManager._columnManager, "_log");
 		try {
