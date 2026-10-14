@@ -46,7 +46,7 @@ var scopes = new Map();
  *
  * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
  */
-function loadScope(addon, globalVars = {}) {
+async function loadScope(addon, globalVars = {}) {
 	let currentPermissions = VarCheck.getPermissionsString(VarCheck.resolvePermissions(addon.installPermissions.permissions));
 	let uuid = PluginUUID.getByID(addon.id);
 
@@ -55,7 +55,7 @@ function loadScope(addon, globalVars = {}) {
 		unloadScope(addon.id);
 	}
 
-	PluginFileAccess.register(addon.id, uuid);
+	let ready = PluginFileAccess.register(addon.id, uuid);
 
 	// Record plugin name so that its data can be identified after uninstall.
 	PluginNames.record(addon.id, addon.name);
@@ -77,6 +77,8 @@ function loadScope(addon, globalVars = {}) {
 		scope = loadUnprivilegedScope(addon, uuid, globalVars);
 	}
 	
+	// The plugin's directory exists before any of its code runs
+	await ready;
 	try {
 		let uri = PluginProtocol.getBaseURI(addon.id) + 'bootstrap.js';
 		Services.scriptloader.loadSubScriptWithOptions(

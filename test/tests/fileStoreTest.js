@@ -5,15 +5,17 @@ describe("Zotero.FileStore", function () {
 	var codes;
 	var root;
 
+	var { FileIO } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileIO.mjs");
+
 	before(async function () {
 		FS = Zotero.FileStore.ChangeSet;
 		codes = Zotero.FileStore.errorCodes;
 		root = PathUtils.join(await getTempDirectory(), "fileStoreTest-" + Zotero.Utilities.randomString());
-		await IOUtils.makeDirectory(root);
+		await FileIO.makeDirectory(root);
 	});
 
 	after(async function () {
-		await IOUtils.remove(root, { recursive: true, ignoreAbsent: true });
+		await FileIO.remove(root, { recursive: true, ignoreAbsent: true });
 	});
 
 	// The store's join takes nested segments, which PathUtils.join refuses
@@ -76,14 +78,14 @@ describe("Zotero.FileStore", function () {
 		it("should refuse overwrite: false on an existing file and a stale revision", async function () {
 			let path = under("guarded.txt");
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("v1", { overwrite: false, flush: true })));
-			assert.equal(await IOUtils.readUTF8(path), "v1");
+			assert.equal(await FileIO.readUTF8(path), "v1");
 			await failing(Zotero.FileStore.commit(FS.file(path).writeFile("v2", { overwrite: false })), codes.INVALID_PARAMS);
 
 			let snapshot = await ok(Zotero.FileStore.query("stat", { path }));
-			await IOUtils.writeUTF8(path, "changed behind the store's back");
+			await FileIO.writeUTF8(path, "changed behind the store's back");
 			let error = await failing(Zotero.FileStore.commit(FS.file(snapshot).writeFile("too late")), codes.CONFLICT);
 			assert.lengthOf(error.data.conflicts, 1);
-			assert.equal(await IOUtils.readUTF8(path), "changed behind the store's back");
+			assert.equal(await FileIO.readUTF8(path), "changed behind the store's back");
 		});
 
 		it("should append, truncate and carry bytes as bytes", async function () {
@@ -93,7 +95,7 @@ describe("Zotero.FileStore", function () {
 			// The builder copied the bytes on the way in
 			bytes[0] = 99;
 			await ok(Zotero.FileStore.commit(editor));
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [0, 1, 254, 255, 10, 13]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [0, 1, 254, 255, 10, 13]);
 
 			await ok(Zotero.FileStore.commit(FS.file(path).appendFile(new Uint8Array([42]))));
 			let read = await ok(Zotero.FileStore.query("readFile", { path }));
@@ -104,18 +106,18 @@ describe("Zotero.FileStore", function () {
 			assert.deepEqual(Array.from(Uint8Array.fromBase64(base64.data)), [0, 1, 254, 255, 10, 13, 42]);
 
 			await ok(Zotero.FileStore.commit(FS.file(path).truncate(2)));
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [0, 1]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [0, 1]);
 			// Beyond the size, Node zero-pads
 			await ok(Zotero.FileStore.commit(FS.file(path).truncate(4)));
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [0, 1, 0, 0]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [0, 1, 0, 0]);
 
 			// Any view writes its bytes; a base64 string decodes; malformed base64 fails before any write
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile(new Float32Array([1]).subarray(0, 1))));
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [0, 0, 128, 63]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [0, 0, 128, 63]);
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("AQI=", { encoding: "base64" })));
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [1, 2]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [1, 2]);
 			await failing(Zotero.FileStore.commit(FS.file(path).writeFile("not base64!", { encoding: "base64" })), codes.INVALID_PARAMS);
-			assert.deepEqual(Array.from(await IOUtils.read(path)), [1, 2]);
+			assert.deepEqual(Array.from(await FileIO.read(path)), [1, 2]);
 		});
 
 		// Content far past any 32K chunk boundary, where a chunked encoder would drop or repeat a piece
@@ -145,22 +147,22 @@ describe("Zotero.FileStore", function () {
 			let src = under("move-me.txt");
 			let dest = under("moved.txt");
 			let copy = under("copied.txt");
-			await IOUtils.writeUTF8(dest, "in the way");
+			await FileIO.writeUTF8(dest, "in the way");
 			await ok(Zotero.FileStore.commit(FS.file(src).writeFile("payload")));
 			await failing(Zotero.FileStore.commit(FS.file(src).rename(dest)), codes.INVALID_PARAMS);
-			assert.isTrue(await IOUtils.exists(src));
+			assert.isTrue(await FileIO.exists(src));
 			// Onto itself, even with overwrite
 			await failing(Zotero.FileStore.commit(FS.file(src).copyFile(src, { overwrite: true })), codes.INVALID_PARAMS);
 			await failing(Zotero.FileStore.commit(FS.file(src).rename(src, { overwrite: true })), codes.INVALID_PARAMS);
-			assert.equal(await IOUtils.readUTF8(src), "payload");
+			assert.equal(await FileIO.readUTF8(src), "payload");
 
 			// Later operations and the result follow the rename
 			let result = await ok(Zotero.FileStore.commit(
 				FS.file(src).rename(dest, { overwrite: true }).copyFile(copy)));
 			assert.equal(result.objects[0].path, Zotero.File.normalizeToUnix(dest));
-			assert.isFalse(await IOUtils.exists(src));
-			assert.equal(await IOUtils.readUTF8(dest), "payload");
-			assert.equal(await IOUtils.readUTF8(copy), "payload");
+			assert.isFalse(await FileIO.exists(src));
+			assert.equal(await FileIO.readUTF8(dest), "payload");
+			assert.equal(await FileIO.readUTF8(copy), "payload");
 		});
 
 		it("should tell a file from its other spellings", async function () {
@@ -168,20 +170,20 @@ describe("Zotero.FileStore", function () {
 			let lower = under("spelling.txt");
 			await ok(Zotero.FileStore.commit(FS.file(upper).writeFile("payload")));
 			// On a case-sensitive file system another spelling is simply another file
-			if (!(await IOUtils.exists(lower))) {
+			if (!(await FileIO.exists(lower))) {
 				await ok(Zotero.FileStore.commit(FS.file(upper).copyFile(lower)));
-				assert.equal(await IOUtils.readUTF8(lower), "payload");
+				assert.equal(await FileIO.readUTF8(lower), "payload");
 				return;
 			}
 			await failing(Zotero.FileStore.commit(FS.file(upper).copyFile(lower, { overwrite: true })), codes.INVALID_PARAMS);
-			assert.equal(await IOUtils.readUTF8(upper), "payload");
+			assert.equal(await FileIO.readUTF8(upper), "payload");
 			// A rename may recase
 			let result = await ok(Zotero.FileStore.commit(FS.file(upper).rename(lower)));
 			assert.equal(result.objects[0].path, Zotero.File.normalizeToUnix(lower));
 			let listing = await ok(Zotero.FileStore.query("readDir", { path: root }));
 			assert.include(listing.entries, "spelling.txt");
 			assert.notInclude(listing.entries, "Spelling.txt");
-			assert.equal(await IOUtils.readUTF8(lower), "payload");
+			assert.equal(await FileIO.readUTF8(lower), "payload");
 		});
 
 		// The file system's own answer is simulated, so this runs the same on every OS and volume
@@ -196,13 +198,13 @@ describe("Zotero.FileStore", function () {
 				await failing(Zotero.FileStore.commit(FS.file(upper).copyFile(lower, { overwrite: true })), codes.INVALID_PARAMS);
 				await failing(Zotero.FileStore.commit(FS.file(upper).copyFile(alias, { overwrite: true })), codes.INVALID_PARAMS);
 				await failing(Zotero.FileStore.commit(FS.file(upper).rename(alias, { overwrite: true })), codes.INVALID_PARAMS);
-				assert.equal(await IOUtils.readUTF8(upper), "payload");
+				assert.equal(await FileIO.readUTF8(upper), "payload");
 				let result = await ok(Zotero.FileStore.commit(FS.file(upper).rename(lower)));
 				assert.equal(result.objects[0].path, Zotero.File.normalizeToUnix(lower));
 				let listing = await ok(Zotero.FileStore.query("readDir", { path: root }));
 				assert.include(listing.entries, "simulated.txt");
 				assert.notInclude(listing.entries, "Simulated.txt");
-				assert.equal(await IOUtils.readUTF8(lower), "payload");
+				assert.equal(await FileIO.readUTF8(lower), "payload");
 			}
 			finally {
 				stub.restore();
@@ -210,9 +212,11 @@ describe("Zotero.FileStore", function () {
 		});
 
 		it("should write a name of the longest legal length", async function () {
-			let path = under("n".repeat(251) + ".txt");
+			// Windows caps the whole path at 260 unless long paths are enabled, so the name shrinks to fit there
+			let max = Zotero.isWin ? Math.min(255, 259 - root.length - 1) : 255;
+			let path = under("n".repeat(max - 4) + ".txt");
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("long")));
-			assert.equal(await IOUtils.readUTF8(path), "long");
+			assert.equal(await FileIO.readUTF8(path), "long");
 			await ok(Zotero.FileStore.commit(FS.file(path).rm()));
 		});
 
@@ -221,7 +225,7 @@ describe("Zotero.FileStore", function () {
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("x")));
 			let result = await ok(Zotero.FileStore.commit(FS.file(path).rm()));
 			assert.isTrue(result.objects[0].erased);
-			assert.isFalse(await IOUtils.exists(path));
+			assert.isFalse(await FileIO.exists(path));
 			await failing(Zotero.FileStore.commit(FS.file(path).rm()), codes.INVALID_PARAMS);
 			await ok(Zotero.FileStore.commit(FS.file(path).rm({ force: true })));
 			let exists = await ok(Zotero.FileStore.query("exists", { path }));
@@ -235,8 +239,8 @@ describe("Zotero.FileStore", function () {
 			await failing(Zotero.FileStore.commit(FS.directory(dir).makeDir()), codes.NOT_FOUND);
 			await ok(Zotero.FileStore.commit(FS.of(
 				FS.directory(dir).makeDir({ recursive: true }),
-				FS.file(PathUtils.join(dir, "a.txt")).writeFile("a"),
-				FS.directory(PathUtils.join(dir, "sub")).makeDir()
+				FS.file(Zotero.FileStore.path.join(dir, "a.txt")).writeFile("a"),
+				FS.directory(Zotero.FileStore.path.join(dir, "sub")).makeDir()
 			)));
 			let listing = await ok(Zotero.FileStore.query("readDir", { path: dir, withFileTypes: true }));
 			assert.sameDeepMembers(listing.entries, [{ name: "a.txt", type: "file" }, { name: "sub", type: "directory" }]);
@@ -244,26 +248,26 @@ describe("Zotero.FileStore", function () {
 			let moved = under("tree/moved");
 			let copied = under("tree/copied");
 			await ok(Zotero.FileStore.commit(FS.directory(dir).rename(moved).cp(copied)));
-			assert.isFalse(await IOUtils.exists(dir));
-			assert.equal(await IOUtils.readUTF8(PathUtils.join(copied, "a.txt")), "a");
+			assert.isFalse(await FileIO.exists(dir));
+			assert.equal(await FileIO.readUTF8(Zotero.FileStore.path.join(copied, "a.txt")), "a");
 
 			// An existing destination is refused, or replaced as a whole with overwrite
-			await IOUtils.writeUTF8(PathUtils.join(copied, "extra.txt"), "stale");
+			await FileIO.writeUTF8(Zotero.FileStore.path.join(copied, "extra.txt"), "stale");
 			await failing(Zotero.FileStore.commit(FS.directory(moved).cp(copied)), codes.INVALID_PARAMS);
 			await ok(Zotero.FileStore.commit(FS.directory(moved).cp(copied, { overwrite: true })));
-			assert.isFalse(await IOUtils.exists(PathUtils.join(copied, "extra.txt")));
-			assert.equal(await IOUtils.readUTF8(PathUtils.join(copied, "a.txt")), "a");
+			assert.isFalse(await FileIO.exists(Zotero.FileStore.path.join(copied, "extra.txt")));
+			assert.equal(await FileIO.readUTF8(Zotero.FileStore.path.join(copied, "a.txt")), "a");
 			assert.notInclude((await ok(Zotero.FileStore.query("readDir", { path: under("tree") }))).entries.map(name => name.endsWith(".tmp")), true);
 
 			// Onto or into itself, as Node refuses too
-			await failing(Zotero.FileStore.commit(FS.directory(moved).cp(PathUtils.join(moved, "inner"), { overwrite: true })), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.directory(moved).cp(Zotero.FileStore.path.join(moved, "inner"), { overwrite: true })), codes.INVALID_PARAMS);
 			await failing(Zotero.FileStore.commit(FS.directory(moved).rename(`${moved}/`)), codes.INVALID_PARAMS);
-			assert.isFalse(await IOUtils.exists(PathUtils.join(moved, "inner")));
+			assert.isFalse(await FileIO.exists(Zotero.FileStore.path.join(moved, "inner")));
 
 			await failing(Zotero.FileStore.commit(FS.directory(moved).rm()), codes.INVALID_PARAMS);
 			await ok(Zotero.FileStore.commit(FS.directory(moved).rm({ recursive: true })));
-			await ok(Zotero.FileStore.commit(FS.directory(PathUtils.join(copied, "sub")).rm({ recursive: true })));
-			assert.isFalse(await IOUtils.exists(moved));
+			await ok(Zotero.FileStore.commit(FS.directory(Zotero.FileStore.path.join(copied, "sub")).rm({ recursive: true })));
+			assert.isFalse(await FileIO.exists(moved));
 		});
 
 		it("should refuse an existing directory to makeDir without recursive", async function () {
@@ -296,8 +300,9 @@ describe("Zotero.FileStore", function () {
 			await failing(Zotero.FileStore.query("stat", { path: under("nope.txt") }), codes.NOT_FOUND);
 			await failing(Zotero.FileStore.commit(FS.file(dir).writeFile("x")), codes.NOT_FOUND);
 			await failing(Zotero.FileStore.query("readDir", { path: under("plain.txt") }), codes.INVALID_PARAMS);
-			// An OS refusal is NotAllowed with the platform's reason, not a bug of ours
-			await failing(Zotero.FileStore.query("stat", { path: under("z".repeat(300)) }), codes.NOT_ALLOWED);
+			// An OS refusal is NotAllowed with the platform's reason, not a bug of ours; Windows says NotFound instead
+			await failing(Zotero.FileStore.query("stat", { path: under("z".repeat(300)) }),
+				Zotero.isWin ? codes.NOT_FOUND : codes.NOT_ALLOWED);
 		});
 
 		it("should refuse a relative path and an unknown encoding", async function () {
@@ -324,7 +329,7 @@ describe("Zotero.FileStore", function () {
 				FS.file(under("missing.txt")).rm()
 			)), codes.INVALID_PARAMS);
 			assert.isUndefined(error.data && error.data.applied);
-			assert.isFalse(await IOUtils.exists(first));
+			assert.isFalse(await FileIO.exists(first));
 
 			// A failure while applying, after an earlier entry: the report says so
 			error = await failing(Zotero.FileStore.commit(FS.of(
@@ -335,8 +340,8 @@ describe("Zotero.FileStore", function () {
 			assert.equal(error.data.applied[0].id, Zotero.File.normalizeToUnix(first));
 			assert.equal(error.data.failed.index, 1);
 			assert.lengthOf(error.data.pending, 0);
-			assert.equal(await IOUtils.readUTF8(first), "first");
-			assert.isFalse(await IOUtils.exists(second));
+			assert.equal(await FileIO.readUTF8(first), "first");
+			assert.isFalse(await FileIO.exists(second));
 		});
 
 		// Checks run in operation order, so a later operation of an entry may rely on an earlier one
@@ -345,8 +350,8 @@ describe("Zotero.FileStore", function () {
 			let moved = under("write-then-move-done.txt");
 			let result = await ok(Zotero.FileStore.commit(FS.file(written).writeFile("payload").rename(moved)));
 			assert.equal(result.objects[0].path, Zotero.File.normalizeToUnix(moved));
-			assert.isFalse(await IOUtils.exists(written));
-			assert.equal(await IOUtils.readUTF8(moved), "payload");
+			assert.isFalse(await FileIO.exists(written));
+			assert.equal(await FileIO.readUTF8(moved), "payload");
 		});
 
 		it("should validate a set without writing", async function () {
@@ -356,7 +361,7 @@ describe("Zotero.FileStore", function () {
 			}));
 			assert.lengthOf(result.issues, 1);
 			assert.equal(result.issues[0].code, codes.INVALID_PARAMS);
-			assert.isFalse(await IOUtils.exists(path));
+			assert.isFalse(await FileIO.exists(path));
 		});
 
 		it("should answer dirs with nothing for a chrome caller", async function () {
@@ -388,8 +393,8 @@ describe("Zotero.FileStore", function () {
 			assert.throws(() => FS.file(under("x")).expect(""), /revision/);
 		});
 
-		// What join and normalize apply on Windows: the core normalizer itself, with the platform it asks
-		// about answered as Windows, so this runs on any OS without touching core
+		// The core normalizer with the platform it asks about answered as Windows, plus the module's own alias
+		// fold, so this runs on any OS without touching core
 		it("should normalize Windows path shapes by the Windows rules", function () {
 			let appinfo = Object.getOwnPropertyDescriptor(Services, "appinfo");
 			let wasWin = Zotero.isWin;
@@ -406,15 +411,19 @@ describe("Zotero.FileStore", function () {
 			}
 			try {
 				Zotero.isWin = true;
-				let win = p => Zotero.File.normalizeToUnix(p);
+				let win = p => Zotero.FileStore.path.normalize(p);
 				assert.equal(win("C:\\a\\..\\b"), "C:/b");
 				assert.equal(win("C:/a/./b//c/"), "C:/a/b/c");
 				assert.equal(win("C:\\"), "C:/");
+				assert.equal(win("C:"), "C:/");
 				assert.equal(win("Z:\\mapped\\x\\..\\y"), "Z:/mapped/y");
 				assert.equal(win("\\\\server\\share\\a\\..\\b"), "//server/share/b");
 				assert.equal(win("\\\\wsl$\\Ubuntu\\home\\u\\..\\x"), "//wsl$/Ubuntu/home/x");
 				assert.equal(win("//wsl.localhost/Ubuntu/home/u/../x"), "//wsl.localhost/Ubuntu/home/x");
-				assert.equal(win("\\\\?\\C:\\long\\path\\..\\x"), "//?/C:/long/x");
+				// Win32's own aliases of a path fold into its one spelling
+				assert.equal(win("\\\\?\\C:\\long\\path\\..\\x"), "C:/long/x");
+				assert.equal(win("\\\\.\\C:\\x"), "C:/x");
+				assert.equal(win("\\\\?\\UNC\\server\\share\\x"), "//server/share/x");
 				assert.throws(() => win("C:\\a\\..\\..\\b"), /root/);
 				assert.throws(() => win("\\\\server\\share\\..\\..\\x"), /root/);
 			}
@@ -447,6 +456,7 @@ describe("Zotero.FileStore", function () {
 				assert.equal(path.dirname("C:/a/b/c.txt"), "C:/a/b");
 				assert.equal(path.dirname("C:/a"), "C:/");
 				assert.equal(path.dirname("C:/"), "C:/");
+				assert.equal(path.dirname("//server/share/x"), "//server/share");
 				assert.equal(path.basename("C:/"), "");
 				assert.isTrue(path.isAbsolute("C:\\a"));
 				assert.throws(() => path.normalize("C:/.."), /root/);
