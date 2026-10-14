@@ -397,511 +397,547 @@
 			super();
 			this.config = {
 				apiName: "DataStore",
-				permissions: "dataWrite",
+				permissions: "dataRead",
+				commitPermissions: "dataWrite",
 				transaction: fn => Zotero.DB.executeTransaction(fn),
-				queries: {
-					item: {
-						params: lazy.DataParams.address("itemID"),
-						handler: ({ itemID, libraryID, key }) => this._readSnapshot("item", { id: itemID, libraryID, key }),
+				queries: this._queryCatalog(),
+				objectTypes: {
+					item: this._itemType(),
+					collection: this._collectionType(),
+					search: this._searchType(),
+					library: this._libraryType(),
+				},
+			};
+		}
+
+		/**
+		 * @returns {Record<string, RequestDef>}
+		 */
+		_queryCatalog() {
+			return {
+				item: {
+					params: lazy.DataParams.address("itemID"),
+					handler: ({ itemID, libraryID, key }) => this._readSnapshot("item", { id: itemID, libraryID, key }),
+				},
+				items: {
+					params: { itemIDs: lazy.Params.intList },
+					handler: ({ itemIDs }) => this._getSnapshots("item", itemIDs, "items"),
+				},
+				collection: {
+					params: lazy.DataParams.address("collectionID"),
+					handler: ({ collectionID, libraryID, key }) => this._readSnapshot("collection", { id: collectionID, libraryID, key }),
+				},
+				collections: {
+					params: { collectionIDs: lazy.Params.intList },
+					handler: ({ collectionIDs }) => this._getSnapshots("collection", collectionIDs, "collections"),
+				},
+				search: {
+					params: lazy.DataParams.address("searchID"),
+					handler: ({ searchID, libraryID, key }) => this._readSnapshot("search", { id: searchID, libraryID, key }),
+				},
+				searches: {
+					params: { searchIDs: lazy.Params.intList },
+					handler: ({ searchIDs }) => this._getSnapshots("search", searchIDs, "searches"),
+				},
+				library: {
+					params: { libraryID: "number" },
+					handler: ({ libraryID }) => this._readSnapshot("library", { id: libraryID }),
+				},
+				libraries: {
+					handler: () => ({
+						userLibraryID: Zotero.Libraries.userLibraryID,
+						libraries: Zotero.Libraries.getAll().map(lazy.DataSnapshots.library),
+					}),
+				},
+				findItems: {
+					params: {
+						libraryID: "number",
+						conditions: lazy.DataParams.conditionList(true),
+						includeTrashed: { type: "boolean", optional: true },
 					},
-					items: {
-						params: { itemIDs: lazy.Params.intList },
-						handler: ({ itemIDs }) => this._getSnapshots("item", itemIDs, "items"),
+					handler: ({ libraryID, conditions, includeTrashed }) => this._findItems(libraryID, conditions, includeTrashed),
+				},
+				findCollections: {
+					params: {
+						libraryID: "number",
+						parentID: { type: "number", optional: true },
+						recursive: { type: "boolean", optional: true },
 					},
-					collection: {
-						params: lazy.DataParams.address("collectionID"),
-						handler: ({ collectionID, libraryID, key }) => this._readSnapshot("collection", { id: collectionID, libraryID, key }),
-					},
-					collections: {
-						params: { collectionIDs: lazy.Params.intList },
-						handler: ({ collectionIDs }) => this._getSnapshots("collection", collectionIDs, "collections"),
-					},
-					search: {
-						params: lazy.DataParams.address("searchID"),
-						handler: ({ searchID, libraryID, key }) => this._readSnapshot("search", { id: searchID, libraryID, key }),
-					},
-					searches: {
-						params: { searchIDs: lazy.Params.intList },
-						handler: ({ searchIDs }) => this._getSnapshots("search", searchIDs, "searches"),
-					},
-					library: {
-						params: { libraryID: "number" },
-						handler: ({ libraryID }) => this._readSnapshot("library", { id: libraryID }),
-					},
-					libraries: {
-						handler: () => ({
-							userLibraryID: Zotero.Libraries.userLibraryID,
-							libraries: Zotero.Libraries.getAll().map(lazy.DataSnapshots.library),
-						}),
-					},
-					findItems: {
-						params: {
-							libraryID: "number",
-							conditions: lazy.DataParams.conditionList(true),
-							includeTrashed: { type: "boolean", optional: true },
-						},
-						handler: ({ libraryID, conditions, includeTrashed }) => this._findItems(libraryID, conditions, includeTrashed),
-					},
-					findCollections: {
-						params: {
-							libraryID: "number",
-							parentID: { type: "number", optional: true },
-							recursive: { type: "boolean", optional: true },
-						},
-						handler: ({ libraryID, parentID, recursive }) => this._findCollections(libraryID, parentID, recursive),
-					},
-					findSearches: {
-						params: { libraryID: "number" },
-						handler: ({ libraryID }) => {
-							this._requireLibrary(libraryID);
-							return { searchIDs: Zotero.Searches.getByLibrary(libraryID).map(search => search.id) };
-						},
-					},
-					tags: {
-						params: { libraryID: "number" },
-						handler: ({ libraryID }) => this._getTags(libraryID),
-					},
-					schema: {
-						params: { itemType: { type: "string", optional: true } },
-						handler: ({ itemType }) => this._getSchema(itemType),
-					},
-					findDuplicates: {
-						params: { libraryID: "number" },
-						handler: ({ libraryID }) => this._findDuplicates(libraryID),
-					},
-					topLevelItems: {
-						params: { itemIDs: lazy.Params.intList },
-						handler: ({ itemIDs }) => this._getTopLevelItems(itemIDs),
-					},
-					fulltext: {
-						params: { itemID: "number" },
-						handler: ({ itemID }) => this._getFulltext(itemID),
-					},
-					file: {
-						params: { itemID: "number" },
-						handler: ({ itemID }, { caller }) => this._getFile(itemID, caller),
+					handler: ({ libraryID, parentID, recursive }) => this._findCollections(libraryID, parentID, recursive),
+				},
+				findSearches: {
+					params: { libraryID: "number" },
+					handler: ({ libraryID }) => {
+						this._requireLibrary(libraryID);
+						return { searchIDs: Zotero.Searches.getByLibrary(libraryID).map(search => search.id) };
 					},
 				},
-				objectTypes: {
-					item: {
-						resolve: id => resolveObject(OBJECTS.item, id),
-						address: lazy.DataAddress.objectAddress(OBJECTS.item),
-						create: {
-							params: {
-								libraryID: { type: "number", optional: true },
-								itemType: "string",
-								parent: lazy.DataParams.idRef("item", true),
-								linkMode: { type: "string", optional: true },
-								file: { ...lazy.Params.nonEmptyString, optional: true },
-								...Object.fromEntries(lazy.DataItemFields.createFields().map(field => [field, {
-									...lazy.Params.scalarOrObject,
-									optional: true,
-								}])),
-							},
-							// Core imports or links a file in transactions of its own
-							transactional: ({ file }) => file === undefined,
-							prepare: (params, ctx) => this._prepareFile(params, ctx),
-							handler: async (params, ctx) => {
-								let { itemType, linkMode, file } = params;
-								let { libraryID, parentID } = this._placeCreated("item", params, ctx);
-								if (!Zotero.ItemTypes.getID(itemType)) {
-									throw new Error(`Unknown item type '${itemType}'`);
-								}
-								if (file !== undefined) {
-									return this._createFileAttachment(linkMode, file, libraryID, parentID);
-								}
-								let item = new Zotero.Item(itemType);
-								item.libraryID = libraryID;
-								if (linkMode !== undefined) {
-									if (linkMode !== "linked_url") {
-										throw new Error(`linkMode '${linkMode}' cannot be created; file attachments are imported_file or linked_file`);
-									}
-									// Core refuses it on another kind
-									item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_URL;
-								}
-								// Core would save one without
-								else if (itemType === "attachment") {
-									throw new Error("An attachment needs a linkMode");
-								}
-								if (parentID !== undefined) {
-									item.parentID = parentID;
-								}
-								if (itemType === "annotation") {
-									await this._requireAnnotatable(item, params);
-								}
-								// Under setField's rules, which refuse another kind's property
-								for (let field of lazy.DataItemFields.createFields()) {
-									if (params[field] === undefined) {
-										continue;
-									}
-									let reason = lazy.DataItemFields.check(item, field, params[field]);
-									if (reason) {
-										throw new Error(reason);
-									}
-									lazy.DataItemFields.apply(item, field, params[field]);
-								}
-								return item;
-							},
-						},
-						revision: item => item.clientVersion,
-						isEditable: item => item.isEditable(),
-						save: (item, ctx) => item.save({ tx: !ctx.transactional }),
-						restore: item => item.reload(null, true),
-						// A file attachment core imported or linked before a later step of its entry failed
-						discard: item => item.eraseTx(),
-						describe: item => ({ id: item.id, key: item.key, libraryID: item.libraryID }),
-						snapshot: lazy.DataSnapshots.item,
-						operations: {
-							setType: {
-								params: { itemType: "string" },
-								check: (item, { itemType }) => !Zotero.ItemTypes.getID(itemType) && `unknown item type '${itemType}'`,
-								apply: (item, { itemType }) => {
-									item.setType(Zotero.ItemTypes.getID(itemType));
-								},
-							},
-							setField: {
-								params: { field: "string", value: lazy.Params.scalarOrObject },
-								check: (item, { field, value }) => lazy.DataItemFields.check(item, field, value),
-								apply: (item, { field, value }) => lazy.DataItemFields.apply(item, field, value),
-							},
-							setCreators: {
-								params: { creators: "array" },
-								apply: (item, { creators }) => {
-									item.setCreators(creators, { strict: true });
-								},
-							},
-							addCreator: {
-								params: { creator: "object" },
-								apply: (item, { creator }) => {
-									item.setCreator(item.numCreators(), creator, { strict: true });
-								},
-							},
-							setTags: {
-								params: { tags: "array" },
-								apply: (item, { tags }) => {
-									item.setTags(tags);
-								},
-							},
-							addTag: {
-								params: { tag: lazy.Params.nonEmptyString, type: { type: "number", optional: true } },
-								apply: (item, { tag, type }) => {
-									item.addTag(tag, type);
-								},
-							},
-							removeTag: {
-								params: { tag: "string" },
-								apply: (item, { tag }) => {
-									item.removeTag(tag);
-								},
-							},
-							setCollections: {
-								params: { collections: lazy.DataParams.idRefList("collection") },
-								apply: (item, { collections }, ctx) => {
-									item.setCollections(collections.map(value => ctx.resolveID("collection", value,
-										{ scope: item.libraryID, what: "Param 'collections'" })));
-								},
-							},
-							addToCollection: {
-								params: { collection: lazy.DataParams.idRef("collection") },
-								apply: (item, { collection }, ctx) => {
-									item.addToCollection(ctx.resolveID("collection", collection,
-										{ scope: item.libraryID, what: "Param 'collection'" }));
-								},
-							},
-							removeFromCollection: {
-								params: { collection: lazy.DataParams.idRef("collection") },
-								apply: (item, { collection }, ctx) => {
-									item.removeFromCollection(ctx.resolveID("collection", collection,
-										{ scope: item.libraryID, what: "Param 'collection'" }));
-								},
-							},
-							setRelations: {
-								params: { relations: "object" },
-								apply: (item, { relations }) => {
-									item.setRelations(relations);
-								},
-							},
-							addRelation: {
-								params: { predicate: "string", object: "string" },
-								apply: (item, { predicate, object }) => {
-									item.addRelation(predicate, object);
-								},
-							},
-							removeRelation: {
-								params: { predicate: "string", object: "string" },
-								apply: (item, { predicate, object }) => {
-									item.removeRelation(predicate, object);
-								},
-							},
-							setNote: {
-								params: { note: "string" },
-								apply: (item, { note }) => {
-									item.setNote(note);
-								},
-							},
-							setParent: {
-								params: { parent: lazy.DataParams.nullableIDRef("item") },
-								apply: (item, { parent }, ctx) => {
-									item.parentID = parent === null
-										? false
-										: ctx.resolveID("item", parent, { scope: item.libraryID, what: "Param 'parent'" });
-								},
-							},
-							setInPublications: {
-								params: { value: "boolean" },
-								apply: (item, { value }) => {
-									item.inPublications = value;
-								},
-							},
-							trash: {
-								needsID: true,
-								check: item => !Zotero.Libraries.get(item.libraryID)?.hasTrash && "this library has no trash",
-								apply: (item, _params, ctx) => (ctx.transactional ? Zotero.Items.trash([item.id]) : Zotero.Items.trashTx([item.id])),
-							},
-							restore: {
-								apply: (item) => {
-									item.deleted = false;
-								},
-							},
-							erase: {
-								terminal: true,
-								needsID: true,
-								apply: (item, _params, ctx) => item.erase({ tx: !ctx.transactional }),
-							},
-							relinkAttachmentFile: {
-								// Core saves the item in a transaction of its own
-								transactional: false,
-								params: { file: lazy.Params.nonEmptyString },
-								prepare: (item, { file }, ctx) => this._prepareRelink(item, file, ctx),
-								apply: (item, { file }) => this._relinkAttachmentFile(item, file),
-							},
+				tags: {
+					params: { libraryID: "number" },
+					handler: ({ libraryID }) => this._getTags(libraryID),
+				},
+				schema: {
+					params: { itemType: { type: "string", optional: true } },
+					handler: ({ itemType }) => this._getSchema(itemType),
+				},
+				findDuplicates: {
+					params: { libraryID: "number" },
+					handler: ({ libraryID }) => this._findDuplicates(libraryID),
+				},
+				topLevelItems: {
+					params: { itemIDs: lazy.Params.intList },
+					handler: ({ itemIDs }) => this._getTopLevelItems(itemIDs),
+				},
+				fulltext: {
+					params: { itemID: "number" },
+					handler: ({ itemID }) => this._getFulltext(itemID),
+				},
+				file: {
+					params: { itemID: "number" },
+					handler: ({ itemID }, { caller }) => this._getFile(itemID, caller),
+				},
+			};
+		}
+
+		/**
+		 * @returns {StoreObjectTypeDef}
+		 */
+		_itemType() {
+			return {
+				resolve: id => resolveObject(OBJECTS.item, id),
+				address: lazy.DataAddress.objectAddress(OBJECTS.item),
+				create: {
+					params: {
+						libraryID: { type: "number", optional: true },
+						itemType: "string",
+						parent: lazy.DataParams.idRef("item", true),
+						linkMode: { type: "string", optional: true },
+						file: { ...lazy.Params.nonEmptyString, optional: true },
+						...Object.fromEntries(lazy.DataItemFields.createFields().map(field => [field, {
+							...lazy.Params.scalarOrObject,
+							optional: true,
+						}])),
+					},
+					// Core imports or links a file in transactions of its own
+					transactional: ({ file }) => file === undefined,
+					prepare: (params, ctx) => this._prepareFile(params, ctx),
+					handler: async (params, ctx) => {
+						let { itemType, linkMode, file } = params;
+						let { libraryID, parentID } = this._placeCreated("item", params, ctx);
+						if (!Zotero.ItemTypes.getID(itemType)) {
+							throw new Error(`Unknown item type '${itemType}'`);
+						}
+						if (file !== undefined) {
+							return this._createFileAttachment(linkMode, file, libraryID, parentID);
+						}
+						let item = new Zotero.Item(itemType);
+						item.libraryID = libraryID;
+						if (linkMode !== undefined) {
+							if (linkMode !== "linked_url") {
+								throw new Error(`linkMode '${linkMode}' cannot be created; file attachments are imported_file or linked_file`);
+							}
+							// Core refuses it on another kind
+							item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_URL;
+						}
+						// Core would save one without
+						else if (itemType === "attachment") {
+							throw new Error("An attachment needs a linkMode");
+						}
+						if (parentID !== undefined) {
+							item.parentID = parentID;
+						}
+						if (itemType === "annotation") {
+							await this._requireAnnotatable(item, params);
+						}
+						// Under setField's rules, which refuse another kind's property
+						for (let field of lazy.DataItemFields.createFields()) {
+							if (params[field] === undefined) {
+								continue;
+							}
+							let reason = lazy.DataItemFields.check(item, field, params[field]);
+							if (reason) {
+								throw new Error(reason);
+							}
+							lazy.DataItemFields.apply(item, field, params[field]);
+						}
+						return item;
+					},
+				},
+				revision: item => item.clientVersion,
+				isEditable: item => item.isEditable(),
+				save: (item, ctx) => item.save({ tx: !ctx.transactional }),
+				restore: item => item.reload(null, true),
+				// A file attachment core imported or linked before a later step of its entry failed
+				discard: item => item.eraseTx(),
+				describe: item => ({ id: item.id, key: item.key, libraryID: item.libraryID }),
+				snapshot: lazy.DataSnapshots.item,
+				operations: {
+					setType: {
+						params: { itemType: "string" },
+						check: (item, { itemType }) => !Zotero.ItemTypes.getID(itemType) && `unknown item type '${itemType}'`,
+						apply: (item, { itemType }) => {
+							item.setType(Zotero.ItemTypes.getID(itemType));
 						},
 					},
-					collection: {
-						resolve: id => resolveObject(OBJECTS.collection, id),
-						address: lazy.DataAddress.objectAddress(OBJECTS.collection),
-						create: {
-							params: {
-								libraryID: { type: "number", optional: true },
-								name: lazy.Params.nonEmptyString,
-								parent: lazy.DataParams.idRef("collection", true),
-							},
-							handler: (params, ctx) => {
-								let { libraryID, parentID } = this._placeCreated("collection", params, ctx);
-								let collection = new Zotero.Collection();
-								collection.libraryID = libraryID;
-								collection.name = params.name;
-								if (parentID !== undefined) {
-									collection.parentID = parentID;
-								}
-								return collection;
-							},
-						},
-						revision: collection => collection.clientVersion,
-						isEditable: collection => collection.isEditable(),
-						save: collection => collection.save(),
-						restore: collection => collection.reload(null, true),
-						describe: collection => ({ id: collection.id, key: collection.key, libraryID: collection.libraryID }),
-						snapshot: lazy.DataSnapshots.collection,
-						operations: {
-							setName: {
-								params: { name: lazy.Params.nonEmptyString },
-								apply: (collection, { name }) => {
-									collection.name = name;
-								},
-							},
-							setParent: {
-								params: { parent: lazy.DataParams.nullableIDRef("collection") },
-								apply: (collection, { parent }, ctx) => {
-									collection.parentID = parent === null
-										? false
-										: ctx.resolveID("collection", parent, { scope: collection.libraryID, what: "Param 'parent'" });
-								},
-							},
-							addItems: {
-								needsID: true,
-								params: { items: lazy.DataParams.idRefList("item") },
-								apply: (collection, { items }, ctx) => collection.addItems(
-									items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
-								),
-							},
-							removeItems: {
-								needsID: true,
-								params: { items: lazy.DataParams.idRefList("item") },
-								apply: (collection, { items }, ctx) => collection.removeItems(
-									items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
-								),
-							},
-							trash: {
-								apply: (collection) => {
-									collection.deleted = true;
-								},
-							},
-							restore: {
-								apply: (collection) => {
-									collection.deleted = false;
-								},
-							},
-							erase: {
-								terminal: true,
-								needsID: true,
-								apply: collection => collection.erase(),
-							},
+					setField: {
+						params: { field: "string", value: lazy.Params.scalarOrObject },
+						check: (item, { field, value }) => lazy.DataItemFields.check(item, field, value),
+						apply: (item, { field, value }) => lazy.DataItemFields.apply(item, field, value),
+					},
+					setCreators: {
+						params: { creators: "array" },
+						apply: (item, { creators }) => {
+							item.setCreators(creators, { strict: true });
 						},
 					},
-					search: {
-						resolve: id => resolveObject(OBJECTS.search, id),
-						address: lazy.DataAddress.objectAddress(OBJECTS.search),
-						create: {
-							params: { libraryID: "number", name: "string", conditions: lazy.DataParams.conditionList(true) },
-							handler: ({ libraryID, name, conditions = [] }) => {
-								this._requireEditableLibrary(libraryID);
-								let search = new Zotero.Search();
-								search.libraryID = libraryID;
-								search.name = name;
-								setSearchConditions(search, conditions);
-								return search;
-							},
-						},
-						revision: search => search.clientVersion,
-						isEditable: search => search.isEditable(),
-						save: search => search.save(),
-						restore: search => search.reload(null, true),
-						describe: search => ({ id: search.id, key: search.key, libraryID: search.libraryID }),
-						snapshot: lazy.DataSnapshots.search,
-						operations: {
-							setName: {
-								params: { name: "string" },
-								apply: (search, { name }) => {
-									search.name = name;
-								},
-							},
-							setConditions: {
-								params: { conditions: lazy.DataParams.conditionList() },
-								apply: (search, { conditions }) => setSearchConditions(search, conditions),
-							},
-							addCondition: {
-								params: lazy.DataParams.condition,
-								apply: (search, { condition, operator, value }) => {
-									search.addCondition(condition, operator, value ?? "");
-								},
-							},
-							erase: {
-								terminal: true,
-								needsID: true,
-								apply: search => search.erase(),
-							},
+					addCreator: {
+						params: { creator: "object" },
+						apply: (item, { creator }) => {
+							item.setCreator(item.numCreators(), creator, { strict: true });
 						},
 					},
-					library: {
-						// Feeds and the tag helpers open their own transactions, so these run after the store's
+					setTags: {
+						params: { tags: "array" },
+						apply: (item, { tags }) => {
+							item.setTags(tags);
+						},
+					},
+					addTag: {
+						params: { tag: lazy.Params.nonEmptyString, type: { type: "number", optional: true } },
+						apply: (item, { tag, type }) => {
+							item.addTag(tag, type);
+						},
+					},
+					removeTag: {
+						params: { tag: "string" },
+						apply: (item, { tag }) => {
+							item.removeTag(tag);
+						},
+					},
+					setCollections: {
+						params: { collections: lazy.DataParams.idRefList("collection") },
+						apply: (item, { collections }, ctx) => {
+							item.setCollections(collections.map(value => ctx.resolveID("collection", value,
+								{ scope: item.libraryID, what: "Param 'collections'" })));
+						},
+					},
+					addToCollection: {
+						params: { collection: lazy.DataParams.idRef("collection") },
+						apply: (item, { collection }, ctx) => {
+							item.addToCollection(ctx.resolveID("collection", collection,
+								{ scope: item.libraryID, what: "Param 'collection'" }));
+						},
+					},
+					removeFromCollection: {
+						params: { collection: lazy.DataParams.idRef("collection") },
+						apply: (item, { collection }, ctx) => {
+							item.removeFromCollection(ctx.resolveID("collection", collection,
+								{ scope: item.libraryID, what: "Param 'collection'" }));
+						},
+					},
+					setRelations: {
+						params: { relations: "object" },
+						apply: (item, { relations }) => {
+							item.setRelations(relations);
+						},
+					},
+					addRelation: {
+						params: { predicate: "string", object: "string" },
+						apply: (item, { predicate, object }) => {
+							item.addRelation(predicate, object);
+						},
+					},
+					removeRelation: {
+						params: { predicate: "string", object: "string" },
+						apply: (item, { predicate, object }) => {
+							item.removeRelation(predicate, object);
+						},
+					},
+					setNote: {
+						params: { note: "string" },
+						apply: (item, { note }) => {
+							item.setNote(note);
+						},
+					},
+					setParent: {
+						params: { parent: lazy.DataParams.nullableIDRef("item") },
+						apply: (item, { parent }, ctx) => {
+							item.parentID = parent === null
+								? false
+								: ctx.resolveID("item", parent, { scope: item.libraryID, what: "Param 'parent'" });
+						},
+					},
+					setInPublications: {
+						params: { value: "boolean" },
+						apply: (item, { value }) => {
+							item.inPublications = value;
+						},
+					},
+					trash: {
+						needsID: true,
+						check: item => !Zotero.Libraries.get(item.libraryID)?.hasTrash && "this library has no trash",
+						apply: (item, _params, ctx) => (ctx.transactional ? Zotero.Items.trash([item.id]) : Zotero.Items.trashTx([item.id])),
+					},
+					restore: {
+						apply: (item) => {
+							item.deleted = false;
+						},
+					},
+					erase: {
+						terminal: true,
+						needsID: true,
+						apply: (item, _params, ctx) => item.erase({ tx: !ctx.transactional }),
+					},
+					relinkAttachmentFile: {
+						// Core saves the item in a transaction of its own
 						transactional: false,
-						resolve: id => Zotero.Libraries.get(id) || null,
-						address: lazy.DataAddress.objectAddress(),
-						create: {
-							params: {
-								libraryType: {
-									type: "string",
-									checkHook: value => value === "feed" || "only feed libraries can be created",
-								},
-								name: lazy.Params.nonEmptyString,
-								...lazy.DataParams.feedSettings,
-								url: lazy.Params.nonEmptyString,
-							},
-							handler: ({ libraryType: _type, name, ...settings }) => {
-								this._requireNewFeedURL(settings.url);
-								return new Zotero.Feed(
-									Object.fromEntries([["name", name], ...Object.entries(settings).filter(([, value]) => value !== undefined)])
-								);
-							},
+						params: { file: lazy.Params.nonEmptyString },
+						prepare: (item, { file }, ctx) => this._prepareRelink(item, file, ctx),
+						apply: (item, { file }) => this._relinkAttachmentFile(item, file),
+					},
+				},
+			};
+		}
+
+		/**
+		 * @returns {StoreObjectTypeDef}
+		 */
+		_collectionType() {
+			return {
+				resolve: id => resolveObject(OBJECTS.collection, id),
+				address: lazy.DataAddress.objectAddress(OBJECTS.collection),
+				create: {
+					params: {
+						libraryID: { type: "number", optional: true },
+						name: lazy.Params.nonEmptyString,
+						parent: lazy.DataParams.idRef("collection", true),
+					},
+					handler: (params, ctx) => {
+						let { libraryID, parentID } = this._placeCreated("collection", params, ctx);
+						let collection = new Zotero.Collection();
+						collection.libraryID = libraryID;
+						collection.name = params.name;
+						if (parentID !== undefined) {
+							collection.parentID = parentID;
+						}
+						return collection;
+					},
+				},
+				revision: collection => collection.clientVersion,
+				isEditable: collection => collection.isEditable(),
+				save: collection => collection.save(),
+				restore: collection => collection.reload(null, true),
+				describe: collection => ({ id: collection.id, key: collection.key, libraryID: collection.libraryID }),
+				snapshot: lazy.DataSnapshots.collection,
+				operations: {
+					setName: {
+						params: { name: lazy.Params.nonEmptyString },
+						apply: (collection, { name }) => {
+							collection.name = name;
 						},
-						// Feeds are not user-editable libraries, but their own settings are
-						isEditable: library => library.editable || !!library.isFeed,
-						save: library => (feedChanged(library) ? library.saveTx() : undefined),
-						// A failed save leaves the feed's settings changed in memory; core's own reload, used by its save
-						restore: library => (feedChanged(library) ? library._reloadFromDB() : undefined),
-						discard: library => library.eraseTx(),
-						describe: library => ({ id: library.libraryID }),
-						snapshot: lazy.DataSnapshots.library,
-						operations: {
-							setName: {
-								params: { name: lazy.Params.nonEmptyString },
-								check: feedOnly("can be renamed"),
-								apply: (library, { name }) => {
-									library.name = name;
-								},
-							},
-							setFeed: {
-								params: lazy.DataParams.feedSettings,
-								check: (library, { url }) => feedOnly("have feed settings")(library)
-									|| (url !== undefined && this._requireNewFeedURL(url, library.libraryID)),
-								apply: (library, settings) => {
-									for (let setting of Object.keys(lazy.DataParams.feedSettings)) {
-										if (settings[setting] !== undefined) {
-											library[setting] = settings[setting];
-										}
-									}
-								},
-							},
-							refreshFeed: {
-								needsID: true,
-								check: feedOnly("can be refreshed"),
-								apply: library => library.updateFeed(),
-							},
-							clearExpiredFeedItems: {
-								needsID: true,
-								check: feedOnly("have expiring items"),
-								apply: library => library.clearExpiredItems(),
-							},
-							markRead: {
-								needsID: true,
-								params: { items: lazy.DataParams.idRefList("item"), read: "boolean" },
-								check: feedOnly("have items with a read state"),
-								apply: async (library, { items, read }, ctx) => {
-									for (let value of items) {
-										let itemID = ctx.resolveID("item", value, { scope: library.libraryID, what: "Param 'items'" });
-										let item = await Zotero.Items.getAsync(itemID);
-										if (!item?.isFeedItem || item.libraryID !== library.libraryID) {
-											throw new Error(`Item ${itemID} is not an item of this feed`);
-										}
-										await item.toggleRead(read);
-									}
-								},
-							},
-							erase: {
-								terminal: true,
-								needsID: true,
-								check: feedOnly("can be erased"),
-								apply: library => library.eraseTx(),
-							},
-							// Deferred entries apply after the store transaction, so an unknown tag is caught before it commits
-							renameTag: {
-								params: { from: lazy.Params.nonEmptyString, to: lazy.Params.nonEmptyString },
-								check: (library, { from }) => !Zotero.Tags.getID(from) && `tag '${from}' not found`,
-								apply: (library, { from, to }) => Zotero.Tags.rename(library.libraryID, from, to),
-							},
-							removeTag: {
-								params: { tag: lazy.Params.nonEmptyString },
-								check: (library, { tag }) => !Zotero.Tags.getID(tag) && `tag '${tag}' not found`,
-								apply: (library, { tag }) => Zotero.Tags.removeFromLibrary(library.libraryID, [Zotero.Tags.getID(tag)]),
-							},
-							setTagColor: {
-								params: {
-									tag: lazy.Params.nonEmptyString,
-									color: {
-										type: "any",
-										checkHook: value => value === null || /^#[0-9a-f]{6}$/i.test(value) || "must be a hex color such as #ff6666, or null",
-									},
-									position: { type: "number", optional: true },
-								},
-								// Core keeps the limit in the tag selector only
-								check: (library, { tag, color }) => color !== null
-									&& !Zotero.Tags.getColor(library.libraryID, tag)
-									&& Zotero.Tags.getColors(library.libraryID).size >= Zotero.Tags.MAX_COLORED_TAGS
-									&& `at most ${Zotero.Tags.MAX_COLORED_TAGS} tags can have a color`,
-								apply: (library, { tag, color, position }) => Zotero.Tags.setColor(library.libraryID, tag, color, position),
-							},
+					},
+					setParent: {
+						params: { parent: lazy.DataParams.nullableIDRef("collection") },
+						apply: (collection, { parent }, ctx) => {
+							collection.parentID = parent === null
+								? false
+								: ctx.resolveID("collection", parent, { scope: collection.libraryID, what: "Param 'parent'" });
 						},
+					},
+					addItems: {
+						needsID: true,
+						params: { items: lazy.DataParams.idRefList("item") },
+						apply: (collection, { items }, ctx) => collection.addItems(
+							items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
+						),
+					},
+					removeItems: {
+						needsID: true,
+						params: { items: lazy.DataParams.idRefList("item") },
+						apply: (collection, { items }, ctx) => collection.removeItems(
+							items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
+						),
+					},
+					trash: {
+						apply: (collection) => {
+							collection.deleted = true;
+						},
+					},
+					restore: {
+						apply: (collection) => {
+							collection.deleted = false;
+						},
+					},
+					erase: {
+						terminal: true,
+						needsID: true,
+						apply: collection => collection.erase(),
+					},
+				},
+			};
+		}
+
+		/**
+		 * @returns {StoreObjectTypeDef}
+		 */
+		_searchType() {
+			return {
+				resolve: id => resolveObject(OBJECTS.search, id),
+				address: lazy.DataAddress.objectAddress(OBJECTS.search),
+				create: {
+					params: { libraryID: "number", name: "string", conditions: lazy.DataParams.conditionList(true) },
+					handler: ({ libraryID, name, conditions = [] }) => {
+						this._requireEditableLibrary(libraryID);
+						let search = new Zotero.Search();
+						search.libraryID = libraryID;
+						search.name = name;
+						setSearchConditions(search, conditions);
+						return search;
+					},
+				},
+				revision: search => search.clientVersion,
+				isEditable: search => search.isEditable(),
+				save: search => search.save(),
+				restore: search => search.reload(null, true),
+				describe: search => ({ id: search.id, key: search.key, libraryID: search.libraryID }),
+				snapshot: lazy.DataSnapshots.search,
+				operations: {
+					setName: {
+						params: { name: "string" },
+						apply: (search, { name }) => {
+							search.name = name;
+						},
+					},
+					setConditions: {
+						params: { conditions: lazy.DataParams.conditionList() },
+						apply: (search, { conditions }) => setSearchConditions(search, conditions),
+					},
+					addCondition: {
+						params: lazy.DataParams.condition,
+						apply: (search, { condition, operator, value }) => {
+							search.addCondition(condition, operator, value ?? "");
+						},
+					},
+					erase: {
+						terminal: true,
+						needsID: true,
+						apply: search => search.erase(),
+					},
+				},
+			};
+		}
+
+		/**
+		 * @returns {StoreObjectTypeDef}
+		 */
+		_libraryType() {
+			return {
+				// Feeds and the tag helpers open their own transactions, so these run after the store's
+				transactional: false,
+				resolve: id => Zotero.Libraries.get(id) || null,
+				address: lazy.DataAddress.objectAddress(),
+				create: {
+					params: {
+						libraryType: {
+							type: "string",
+							checkHook: value => value === "feed" || "only feed libraries can be created",
+						},
+						name: lazy.Params.nonEmptyString,
+						...lazy.DataParams.feedSettings,
+						url: lazy.Params.nonEmptyString,
+					},
+					handler: ({ libraryType: _type, name, ...settings }) => {
+						this._requireNewFeedURL(settings.url);
+						return new Zotero.Feed(
+							Object.fromEntries([["name", name], ...Object.entries(settings).filter(([, value]) => value !== undefined)])
+						);
+					},
+				},
+				// Feeds are not user-editable libraries, but their own settings are
+				isEditable: library => library.editable || !!library.isFeed,
+				save: library => (feedChanged(library) ? library.saveTx() : undefined),
+				// A failed save leaves the feed's settings changed in memory; core's own reload, used by its save
+				restore: library => (feedChanged(library) ? library._reloadFromDB() : undefined),
+				discard: library => library.eraseTx(),
+				describe: library => ({ id: library.libraryID }),
+				snapshot: lazy.DataSnapshots.library,
+				operations: {
+					setName: {
+						params: { name: lazy.Params.nonEmptyString },
+						check: feedOnly("can be renamed"),
+						apply: (library, { name }) => {
+							library.name = name;
+						},
+					},
+					setFeed: {
+						params: lazy.DataParams.feedSettings,
+						check: (library, { url }) => feedOnly("have feed settings")(library)
+							|| (url !== undefined && this._requireNewFeedURL(url, library.libraryID)),
+						apply: (library, settings) => {
+							for (let setting of Object.keys(lazy.DataParams.feedSettings)) {
+								if (settings[setting] !== undefined) {
+									library[setting] = settings[setting];
+								}
+							}
+						},
+					},
+					refreshFeed: {
+						needsID: true,
+						check: feedOnly("can be refreshed"),
+						apply: library => library.updateFeed(),
+					},
+					clearExpiredFeedItems: {
+						needsID: true,
+						check: feedOnly("have expiring items"),
+						apply: library => library.clearExpiredItems(),
+					},
+					markRead: {
+						needsID: true,
+						params: { items: lazy.DataParams.idRefList("item"), read: "boolean" },
+						check: feedOnly("have items with a read state"),
+						apply: async (library, { items, read }, ctx) => {
+							for (let value of items) {
+								let itemID = ctx.resolveID("item", value, { scope: library.libraryID, what: "Param 'items'" });
+								let item = await Zotero.Items.getAsync(itemID);
+								if (!item?.isFeedItem || item.libraryID !== library.libraryID) {
+									throw new Error(`Item ${itemID} is not an item of this feed`);
+								}
+								await item.toggleRead(read);
+							}
+						},
+					},
+					erase: {
+						terminal: true,
+						needsID: true,
+						check: feedOnly("can be erased"),
+						apply: library => library.eraseTx(),
+					},
+					// Deferred entries apply after the store transaction, so an unknown tag is caught before it commits
+					renameTag: {
+						params: { from: lazy.Params.nonEmptyString, to: lazy.Params.nonEmptyString },
+						check: (library, { from }) => !Zotero.Tags.getID(from) && `tag '${from}' not found`,
+						apply: (library, { from, to }) => Zotero.Tags.rename(library.libraryID, from, to),
+					},
+					removeTag: {
+						params: { tag: lazy.Params.nonEmptyString },
+						check: (library, { tag }) => !Zotero.Tags.getID(tag) && `tag '${tag}' not found`,
+						apply: (library, { tag }) => Zotero.Tags.removeFromLibrary(library.libraryID, [Zotero.Tags.getID(tag)]),
+					},
+					setTagColor: {
+						params: {
+							tag: lazy.Params.nonEmptyString,
+							color: {
+								type: "any",
+								checkHook: value => value === null || /^#[0-9a-f]{6}$/i.test(value) || "must be a hex color such as #ff6666, or null",
+							},
+							position: { type: "number", optional: true },
+						},
+						// Core keeps the limit in the tag selector only
+						check: (library, { tag, color }) => color !== null
+							&& !Zotero.Tags.getColor(library.libraryID, tag)
+							&& Zotero.Tags.getColors(library.libraryID).size >= Zotero.Tags.MAX_COLORED_TAGS
+							&& `at most ${Zotero.Tags.MAX_COLORED_TAGS} tags can have a color`,
+						apply: (library, { tag, color, position }) => Zotero.Tags.setColor(library.libraryID, tag, color, position),
 					},
 				},
 			};

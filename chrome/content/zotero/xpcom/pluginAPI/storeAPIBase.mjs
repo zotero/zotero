@@ -31,7 +31,8 @@
  *     store also gets `validate`, which dry-runs a change set, and `snapshot`, which reads one object by the
  *     address a change set entry gives it, unless it defines its own
  * @property {Record<string, StoreObjectTypeDef>} objectTypes - What a change set can address, by type name
- * @property {string | string[]} [permissions] - What every commit requires; a type or operation can add to it
+ * @property {string | string[]} [permissions] - What every request requires, commits included, as on any request API
+ * @property {string | string[]} [commitPermissions] - What every commit requires on top of that
  * @property {(fn: () => Promise<void>) => Promise<void>} [transaction]
  *     - Runs the transactional entries of a commit; defaults to calling fn directly
  *
@@ -179,6 +180,7 @@ class StoreAPIBase extends RequestAPIBase {
 	_config = {
 		apiName: "StoreAPIBase",
 		permissions: [],
+		commitPermissions: [],
 		transaction: fn => fn(),
 	};
 
@@ -380,7 +382,7 @@ class StoreAPIBase extends RequestAPIBase {
 				this._throw(PERMISSION_DENIED, `${what} requires permission ${[].concat(permissions).join(", ")}`);
 			}
 		};
-		requirePermissions(this._config.permissions, "commit");
+		requirePermissions([].concat(this._config.permissions, this._config.commitPermissions), "commit");
 
 		let refs = new Set();
 		let entries = changeSet.changes.map((entry, index) => {
