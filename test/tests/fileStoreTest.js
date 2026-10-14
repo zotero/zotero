@@ -884,6 +884,22 @@ describe("Zotero.FileStore", function () {
 				file = await requestResult(fileOf(attachment.id));
 				await requestResult(writeFile(file.path, "changed"));
 				assert.equal(await FileIO.readUTF8(file.path), "changed");
+
+				// The grant is to edit the file; removing it is the data store's erase, and for a linked file it
+				// would be the user's own document
+				let error = await requestError(commit(path => FS.file(path).rm(), file.path), codes.NOT_ALLOWED);
+				assert.include(error.message, "remove the attachment through Zotero.DataStore");
+				assert.isTrue(await FileIO.exists(file.path));
+				await requestResult(commit(path => FS.file(path).truncate(0), file.path));
+				let linked = await Zotero.Attachments.linkFromFile({ file: outsidePath, libraryID: Zotero.Libraries.userLibraryID });
+				try {
+					let own = await requestResult(fileOf(linked.id));
+					await requestError(commit(path => FS.file(path).rm(), own.path), codes.NOT_ALLOWED);
+					assert.equal(await FileIO.readUTF8(own.path), "outside content");
+				}
+				finally {
+					await linked.eraseTx();
+				}
 			}
 			finally {
 				await attachment.eraseTx();

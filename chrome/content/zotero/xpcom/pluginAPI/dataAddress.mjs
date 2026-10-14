@@ -48,7 +48,10 @@ const DataAddress = {
 
 			plan(entry, defaults, fail) {
 				if (Number.isInteger(entry.id)) {
-					return { id: entry.id };
+					// A library given along with an ID is a claim to hold the caller to, not a lookup key
+					return keyToID && Number.isInteger(entry.libraryID)
+						? { id: entry.id, libraryID: entry.libraryID, type: entry.type }
+						: { id: entry.id };
 				}
 				if (typeof entry.key === "string" && entry.key) {
 					if (!keyToID) {
@@ -66,6 +69,10 @@ const DataAddress = {
 
 			resolve(address, fail) {
 				if (address.id !== undefined) {
+					let placed = address.libraryID !== undefined && objects.getLibraryAndKeyFromID(address.id);
+					if (placed && placed.libraryID !== address.libraryID) {
+						fail.notFound(`no ${address.type} with ID ${address.id} in library ${address.libraryID}`);
+					}
 					return address.id;
 				}
 				let id = keyToID(address.libraryID, address.key);

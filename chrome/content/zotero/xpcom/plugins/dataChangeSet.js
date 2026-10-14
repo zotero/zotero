@@ -107,10 +107,8 @@ class DataObjectChanges extends ChangesBase {
 
 	_addressJSON() {
 		let { id, key, libraryID } = this._state;
-		if (id !== undefined) {
-			return { id };
-		}
-		return libraryID === undefined ? { key } : { key, libraryID };
+		let address = id !== undefined ? { id } : { key };
+		return libraryID === undefined ? address : { ...address, libraryID };
 	}
 
 	_addressKey() {
@@ -403,13 +401,14 @@ function existing(type, target, { revision, libraryID } = {}, keyed = true) {
 		}
 		else if (keyed && isKey(target.key)) {
 			state.key = target.key;
-			if (target.libraryID !== undefined) {
-				assertInteger(target.libraryID, `${type} libraryID`);
-				state.libraryID = target.libraryID;
-			}
 		}
 		else {
 			throw new TypeError(`A ${type} snapshot needs an id${keyed ? " or a key" : ""}`);
+		}
+		// With a key the library resolves it; with an ID the store holds the object to it
+		if (keyed && target.libraryID !== undefined) {
+			assertInteger(target.libraryID, `${type} libraryID`);
+			state.libraryID = target.libraryID;
 		}
 		if (revision === undefined) {
 			revision = target.revision;
@@ -467,7 +466,7 @@ class DataChangeSet extends ChangeSet {
 			editor = new (editorClass(entry.type))({ type: entry.type, ref: entry.ref });
 		}
 		else {
-			editor = existing(entry.type, entry.id ?? { key: entry.key, libraryID: entry.libraryID },
+			editor = existing(entry.type, entry.id !== undefined ? { id: entry.id, libraryID: entry.libraryID } : { key: entry.key, libraryID: entry.libraryID },
 				{ revision: entry.revision }, KEYED.includes(entry.type));
 		}
 		return this._replay(editor, entry.ops);
