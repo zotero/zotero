@@ -267,6 +267,8 @@
 
 		_getUIHookProps() {
 			return {
+				itemID: this.item?.id,
+				// @deprecated Privileged plugins only; the manager strips it for everyone else
 				item: this.item,
 				tabType: this.tabType,
 				editable: this.editable,

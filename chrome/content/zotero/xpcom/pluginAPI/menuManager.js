@@ -89,10 +89,9 @@
 
 	/**
 	 * @callback MenuHook
-	 * @param {object} context - Menu context: target-specific data plus `setL10nArgs`,
-	 * `setEnabled`, `setVisible`, and `setIcon`.
-	 * Privileged plugins are instead called with a legacy `(event, context)` signature;
-	 * the leading DOM event and `context.menuElem` are @deprecated.
+	 * @param {object} context - Target-specific data plus `setL10nArgs`, `setEnabled`, `setVisible`,
+	 * `setIcon`, and the selection as `itemIDs`, `libraryIDs`, `collectionIDs`. Privileged plugins take a
+	 * legacy `(event, context)` signature and also get @deprecated live `items`, `collectionTreeRows`, `menuElem`
 	 * @returns {void}
 	 */
 
@@ -263,19 +262,24 @@
 			return option;
 		}
 
-		// The chrome DOM event and `context.menuElem` (deprecated, kept for old
-		// privileged plugins) must never cross into unprivileged sandboxes
+		// Contexts carry the selection as IDs; this drops what only privileged plugins still get, all
+		// @deprecated: the live `items` and `collectionTreeRows`, `menuElem` and the leading DOM event
 		_wrapHook(hook, pluginID) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
 			let scope = lazy.PluginSandbox.getScope(pluginID);
-			if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
-				return wrapped;
+			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			if (privileged) {
+				return (event, source) => wrapped(event, source);
 			}
-			return (event, context) => {
-				if (context) {
+			return (event, source) => {
+				let context = source;
+				if (source) {
 					// Copy descriptors so context getters aren't evaluated here
-					let descriptors = Object.getOwnPropertyDescriptors(context);
+					let descriptors = Object.getOwnPropertyDescriptors(source);
 					delete descriptors.menuElem;
+					delete descriptors.collectionTreeRow;
+					delete descriptors.items;
+					delete descriptors.collectionTreeRows;
 					context = Object.defineProperties({}, descriptors);
 				}
 				return wrapped(context);

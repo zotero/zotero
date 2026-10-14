@@ -210,6 +210,10 @@
 					getContext: () => {
 						let getItems = () => [this._getCurrentAttachment()];
 						let ret = {
+							get itemIDs() {
+								return getItems().map(item => item?.id).filter(id => id);
+							},
+							// @deprecated Privileged plugins only
 							get items() {
 								return getItems();
 							},
@@ -237,6 +241,10 @@
 					getContext: () => {
 						let getItems = () => [this._getCurrentAttachment()];
 						let ret = {
+							get itemIDs() {
+								return getItems().map(item => item?.id).filter(id => id);
+							},
+							// @deprecated Privileged plugins only
 							get items() {
 								return getItems();
 							},
