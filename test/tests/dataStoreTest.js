@@ -245,7 +245,7 @@ describe("Zotero.DataStore", function () {
 					CS.item(item.id).setField("title", "Applied"),
 					// Deferred: the tag helpers open their own transactions
 					CS.library(libraryID).renameTag(tag, tag + '-renamed')
-				)), codes.INVALID_PARAMS);
+				)), codes.INTERNAL_ERROR);
 
 				assert.equal(Zotero.Items.get(item.id).getField('title'), "Applied",
 					"the transactional entry stays applied");
@@ -258,6 +258,48 @@ describe("Zotero.DataStore", function () {
 			finally {
 				rename.restore();
 			}
+		});
+
+		it("should report the core rejecting data in memory as InvalidParams naming the operation", async function () {
+			let item = await createDataObject('item', { title: 'Kept' });
+			// The params only ask for an array, so the creator type reaches the core, which refuses it
+			let error = await failing(Zotero.DataStore.commit(CS.of(
+				CS.item(item.id).setField("title", "Applied first")
+					.setCreators([{ firstName: "A", lastName: "B", creatorType: "nonsense" }])
+			)), codes.INVALID_PARAMS);
+			assert.match(error.message, /^changes\[0\]\.ops\[1\] \(item\.setCreators\): .*creator type 'nonsense'/);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Kept');
+		});
+
+		it("should report a bug in an operation as InternalError", async function () {
+			let { DataItemFields } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/dataItemFields.mjs");
+			let item = await createDataObject('item', { title: 'Kept' });
+			let apply = sinon.stub(DataItemFields, 'apply').throws(new TypeError("x is undefined"));
+			try {
+				let error = await failing(Zotero.DataStore.commit(CS.of(
+					CS.item(item.id).setField("title", "Crashed")
+				)), codes.INTERNAL_ERROR);
+				assert.include(error.message, "x is undefined");
+			}
+			finally {
+				apply.restore();
+			}
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Kept');
+		});
+
+		it("should report a failure while saving as InternalError and leave the object as it was", async function () {
+			let item = await createDataObject('item', { title: 'Kept' });
+			let save = sinon.stub(Zotero.Item.prototype, 'save').rejects(new Error("database is locked"));
+			try {
+				let error = await failing(Zotero.DataStore.commit(CS.of(
+					CS.item(item.id).setField("title", "Lost")
+				)), codes.INTERNAL_ERROR);
+				assert.include(error.message, "database is locked");
+			}
+			finally {
+				save.restore();
+			}
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Kept');
 		});
 
 		it("should refuse to rename an unknown tag before applying anything", async function () {

@@ -27,12 +27,11 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		loadEmbeddedPluginPage: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 	});
 
@@ -154,7 +153,7 @@
 				return false;
 			}
 			// Resolve the src to the plugin's own .html page; reject anything else
-			let url = lazy.resolvePluginPage(option.pluginID, option.src);
+			let url = lazy.PluginProtocol.resolvePage(option.pluginID, option.src);
 			if (!url) {
 				this._log(`Invalid section: 'src' must be an .html page within the plugin, got ${option.src}`, "warn");
 				return false;

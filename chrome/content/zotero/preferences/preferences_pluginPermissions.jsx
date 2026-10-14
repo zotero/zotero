@@ -33,7 +33,7 @@ var { PluginUUID } = ChromeUtils.importESModule(
 var { PluginNames } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/names.mjs");
 var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule(
-	"chrome://zotero/content/xpcom/plugins/file.mjs");
+	"chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
 var { PluginSandbox } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 var { VarCheck } = ChromeUtils.importESModule(
