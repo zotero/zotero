@@ -30,6 +30,10 @@
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
+		loadPluginPageInBrowser: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
+		sanitizeWindowFeatures: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
+		stopAutoResize: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
+		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	// Main window panes that can be toggled
@@ -43,6 +47,18 @@
 	 * @property {boolean} focused
 	 * @property {number} [itemID] - The reader or note item for readerWindow and noteWindow
 	 * @property {string} [pluginID] - The owning plugin for pluginWindow
+	 */
+
+	/**
+	 * The window.open-style features of a plugin window by name, such as width or centerscreen
+	 * @typedef {Object<string, boolean | number>} PluginWindowFeatures
+	 */
+
+	/**
+	 * A plugin's own window, opened by openPluginWindow; the chrome wrapper itself never crosses
+	 * @typedef {object} PluginWindowHandle
+	 * @property {object} page - The page messenger
+	 * @property {number} windowID - For focusWindow, getWindowState and closeWindow
 	 */
 
 
@@ -62,14 +78,18 @@
 	 *
 	 * @typedef {object} WindowControllerCommandParams
 	 * @property {{ windowID: number }} focusWindow
+	 * @property {{ windowID: number }} closeWindow
 	 * @property {{ windowID: number, pane: "item" | "tagSelector" | "context" }} togglePane
 	 * @property {{ type: "reader" | "note", itemID: number, location?: object }} openWindow
+	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, fitContent?: boolean, parentWindowID?: number }} openPluginWindow
 	 *
 	 *
 	 * @typedef {object} WindowControllerCommandResults
 	 * @property {{}} focusWindow
+	 * @property {{}} closeWindow
 	 * @property {{ open: boolean }} togglePane
 	 * @property {{ windowID: number }} openWindow
+	 * @property {PluginWindowHandle} openPluginWindow
 	 */
 
 	class WindowControllerInternal extends lazy.ControllerAPIBase {
@@ -114,6 +134,10 @@
 						params: { windowID: "number" },
 						handler: ({ windowID, pluginID }) => this._focusWindow(windowID, pluginID),
 					},
+					closeWindow: {
+						params: { windowID: "number" },
+						handler: ({ windowID, pluginID }) => this._closeWindow(windowID, pluginID),
+					},
 					togglePane: {
 						params: {
 							windowID: "number",
@@ -136,6 +160,25 @@
 							location: { type: "object", optional: true },
 						},
 						handler: ({ type, itemID, location }) => this._openWindow(type, itemID, location),
+					},
+					openPluginWindow: {
+						params: {
+							url: "string",
+							features: {
+								type: "object",
+								optional: true,
+								checkHook: value => value === undefined
+									|| (value !== null && !Array.isArray(value)
+										&& Object.values(value).every(v => ["boolean", "number"].includes(typeof v)))
+									|| "every feature must be a boolean or a number",
+							},
+							name: { type: "string", optional: true },
+							notitle: { type: "boolean", optional: true },
+							fitContent: { type: "boolean", optional: true },
+							parentWindowID: { type: "number", optional: true },
+						},
+						scopedResult: true,
+						handler: params => this._openPluginWindow(params),
 					},
 				},
 			};
@@ -190,6 +233,15 @@
 		}
 
 		/**
+		 * Close a window of any type
+		 * @param {number} windowID
+		 * @param {string} [pluginID] - The calling plugin, which reaches only its own plugin windows
+		 */
+		_closeWindow(windowID, pluginID) {
+			lazy.WindowUtils.getWindow(windowID, undefined, pluginID).close();
+		}
+
+		/**
 		 * Toggle a pane of a main window; the same paths the View menu and toolbar use
 		 * @param {number} windowID
 		 * @param {"item" | "tagSelector" | "context"} pane
@@ -229,6 +281,103 @@
 				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `No window opened for item ${itemID}`);
 			}
 			return { windowID: lazy.WindowUtils.getWindowID(win) };
+		}
+
+		/**
+		 * Open one of the calling plugin's .html pages in a chrome wrapper window
+		 * @param {WindowControllerCommandParams["openPluginWindow"] & { pluginID?: string }} params
+		 * @returns {Promise<PluginWindowHandle>} Wrapped for the plugin's scope
+		 */
+		async _openPluginWindow({ url, features, name, notitle, fitContent, parentWindowID, pluginID }) {
+			// Only a sandbox caller has a plugin whose pages this can open
+			if (!pluginID) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, "Only a plugin can open its own window");
+			}
+			let resolved = lazy.resolvePluginPage(pluginID, url);
+			if (!resolved) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'url' must be an .html page within the plugin: ${url}`);
+			}
+			let { str: safeFeatures, values: featureValues } = lazy.sanitizeWindowFeatures(features);
+			let resizable = featureValues.resizable !== false;
+			// A parent window is the opener, the screen and scale the position features resolve
+			// against, and the owner of a dependent window
+			let parent = parentWindowID === undefined ? null : lazy.WindowUtils.getWindow(parentWindowID, undefined, pluginID);
+			// The wrapper draws its own title bar when notitle is set; titlebar=no looks worse
+			let win = Services.ww.openWindow(
+				parent,
+				"chrome://zotero/content/pluginWindow.xhtml",
+				null,
+				"chrome,dialog=no," + (safeFeatures || "resizable"),
+				{ notitle: !!notitle }
+			);
+			await new Promise(resolve => win.addEventListener("load", resolve, { once: true }));
+			try {
+				let browser = win.document.getElementById("plugin-browser");
+				win.PluginWindow.init(name, pluginID);
+				let { messenger, dispose } = await lazy.loadPluginPageInBrowser(browser, resolved, {
+					channel: true,
+					pluginID,
+					// The page actor keeps the browser at the document scroll size
+					autoResize: fitContent ? { height: true, width: true, content: true } : {},
+					// The page controls its own window as zoteroHost.api.<name>(params)
+					hostAPI: {
+						close: () => win.close(),
+						moveTo: ({ x, y }) => win.moveTo(x, y),
+						getState: () => lazy.WindowUtils.getWindowState(win),
+					},
+				});
+				if (!messenger) {
+					throw new Error(`Failed to load ${url}`);
+				}
+				win.addEventListener("unload", dispose, { once: true });
+				browser.addEventListener("contextmenu", (event) => {
+					if (event.target?.closest?.("input, textarea, [contenteditable]")) {
+						return;
+					}
+					event.preventDefault();
+				});
+				browser.focus();
+				if (fitContent) {
+					this._fitPluginWindow(win, browser, resizable);
+				}
+				return lazy.ScopeVariables.toScope({
+					page: messenger,
+					windowID: lazy.WindowUtils.getWindowID(win),
+				}, pluginID);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				try {
+					win.close();
+				}
+				catch {}
+				throw e;
+			}
+		}
+
+		/**
+		 * Size the wrapper to the page once the actor applies the first content size; a resizable
+		 * window is then left to the user, a fixed one keeps following the content
+		 * @param {Window} win
+		 * @param {XULElement} browser
+		 * @param {boolean} resizable
+		 */
+		_fitPluginWindow(win, browser, resizable) {
+			let mo = new win.MutationObserver(() => {
+				mo.disconnect();
+				browser.removeAttribute("flex");
+				win.sizeToContent();
+				if (resizable) {
+					lazy.stopAutoResize(browser);
+				}
+				else {
+					let ro = new win.ResizeObserver(Zotero.Utilities.debounce(() => win.sizeToContent(), 100));
+					ro.observe(browser);
+					win.addEventListener("unload", () => ro.disconnect(), { once: true });
+				}
+			});
+			mo.observe(browser, { attributes: true, attributeFilter: ["style"] });
+			win.addEventListener("unload", () => mo.disconnect(), { once: true });
 		}
 
 		/**

@@ -81,6 +81,8 @@
  *     one that exposed the API method
  * @property {Record<string, PluginAPIOptDefValue>} [params]
  *     - Type definition for the params object; unknown keys are rejected
+ * @property {boolean} [scopedResult] - The handler already made its result safe for the caller's
+ *     scope (see ScopeVariables.toScope); pass it through instead of the JSON round trip
  * @property {(params: object, context: ControllerRequestContext) => (object | Promise<object>)} handler
  *     - Called with the controller as `this`; must return a JSON-serializable object. For an
  *     unprivileged caller, `params.pluginID` (a reserved key) is the calling plugin
@@ -567,6 +569,9 @@ class ControllerAPIBase extends PluginAPIBase {
 		}
 
 		let result = await def.handler.call(this, validated.obj, { kind, name });
+		if (def.scopedResult) {
+			return result;
+		}
 		return this._toPlainResult(name, result);
 	}
 
