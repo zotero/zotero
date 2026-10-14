@@ -2946,10 +2946,10 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, primaryViewState, secondViewState, preventJumpback, window: ownerWindow } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, primaryViewState, secondViewState, preventJumpback, window: ownerWindow, mainWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = ownerWindow || Zotero.getMainWindow();
+		let win = ownerWindow || mainWindow || Zotero.getMainWindow();
 
 		await library.waitForDataLoad('item');
 
@@ -2971,8 +2971,9 @@ class Reader {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return undefined;
+					// Selecting the unloaded tab runs its load hook, which resolves with the reader it opened
+					reader = await win.Zotero_Tabs.select(existingTabID, false, { location });
+					return { instance: reader, tabID: existingTabID, win };
 				}
 			}
 		}
@@ -3001,7 +3002,8 @@ class Reader {
 		}
 		else if (openInWindow) {
 			// The new window selects and focuses its reader tab as it opens
-			return this._openInNewWindow(item, { title, location, secondViewState });
+			reader = await this._openInNewWindow(item, { title, location, secondViewState });
+			return { instance: reader, tabID: reader?.tabID, win: reader?._window };
 		}
 		else {
 			reader = new ReaderTab({
@@ -3040,7 +3042,10 @@ class Reader {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
-		return reader;
+		if (openInWindow) {
+			return { instance: reader, tabID: reader.tabID, win: reader._window };
+		}
+		return { instance: reader, tabID: reader.tabID, win };
 	}
 
 	/**
