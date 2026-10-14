@@ -3495,8 +3495,8 @@ describe("Plugin API", function () {
 		);
 		const ControllerErrorCode = ControllerAPIBase.errorCodes;
 		const { getWindow, getMainWindow } = ChromeUtils.importESModule(
-			"chrome://zotero/content/xpcom/pluginAPI/utils.mjs"
-		);
+			"chrome://zotero/content/xpcom/plugins/window.mjs"
+		).WindowUtils;
 		const { PluginSandbox } = ChromeUtils.importESModule(
 			"chrome://zotero/content/xpcom/plugins/sandbox.mjs"
 		);
@@ -3615,6 +3615,20 @@ describe("Plugin API", function () {
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default", "dataRead"] }));
 				assert.deepEqual(await api.query("gated", {}, UNPRIV_ID), { ok: true });
 			});
+
+			it("should hand an unprivileged caller's params its pluginID and reject a supplied one", async function () {
+				let { params } = await api.query("echo", { value: 1 });
+				assert.notProperty(params, "pluginID", "chrome callers have no pluginID");
+				assert.equal(await rejectionName(api.query("echo", { pluginID: "x" })), ControllerErrorCode.INVALID_PARAMS);
+
+				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default"] }));
+				({ params } = await api.query("echo", { value: 1 }, UNPRIV_ID));
+				assert.deepEqual(params, { value: 1, pluginID: UNPRIV_ID });
+				assert.equal(
+					await rejectionName(api.query("echo", { pluginID: "x" }, UNPRIV_ID)),
+					ControllerErrorCode.INVALID_PARAMS
+				);
+			});
 		});
 
 		describe("Zotero.WindowController", function () {
@@ -3647,6 +3661,49 @@ describe("Plugin API", function () {
 			it("should reject an unknown window type", async function () {
 				let e = await getPromiseError(Zotero.WindowController.query("windows", { type: "popup" }));
 				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
+			});
+
+			it("should list plugin windows with their owner and hide them from other plugins", async function () {
+				const OWNER = "window-owner@zotero.org";
+				let pluginWin = Services.ww.openWindow(
+					null, "chrome://zotero/content/pluginWindow.xhtml", null,
+					"chrome,dialog=no,resizable,width=300,height=200", { notitle: false }
+				);
+				await new Promise(resolve => pluginWin.addEventListener("load", resolve, { once: true }));
+				pluginWin.PluginWindow.init("owned", OWNER);
+				let windowID = pluginWin.browsingContext.id;
+				try {
+					// Chrome sees every plugin window, with its owner
+					let { windows } = await Zotero.WindowController.query("windows", { type: "pluginWindow" });
+					let info = windows.find(w => w.windowID === windowID);
+					assert.ok(info, "plugin window not listed");
+					assert.equal(info.type, "pluginWindow");
+					assert.equal(info.pluginID, OWNER);
+					assert.strictEqual(getWindow(windowID, "pluginWindow"), pluginWin);
+
+					// The owner reaches it; another plugin gets NotFound, as for an unknown ID
+					assert.strictEqual(getWindow(windowID, undefined, OWNER), pluginWin);
+					let e = assert.throws(() => getWindow(windowID, undefined, "other@zotero.org"), /No window with ID/);
+					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					// Ownership only applies to plugin windows
+					assert.strictEqual(getWindow(win.browsingContext.id, "mainWindow", "other@zotero.org"), win);
+
+					// Through the controller, an unprivileged caller neither lists nor reaches it
+					PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default", "window"] }));
+					({ windows } = await Zotero.WindowController.query("windows", { type: "pluginWindow" }, UNPRIV_ID));
+					assert.isFalse(windows.some(w => w.windowID === windowID), "another plugin's window listed");
+					e = await getPromiseError(Zotero.WindowController.query("getWindowState", { windowID }, UNPRIV_ID));
+					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					e = await getPromiseError(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID));
+					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+				}
+				finally {
+					try {
+						PluginSandbox.unloadScope(UNPRIV_ID);
+					}
+					catch {}
+					pluginWin.close();
+				}
 			});
 
 			it("should focus a window by ID", async function () {

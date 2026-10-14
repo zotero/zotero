@@ -37,7 +37,11 @@ const WINDOW_TYPES = Object.freeze({
 	readerWindow: "zotero:reader",
 	noteWindow: "zotero:note",
 	preferencePane: "zotero:pref",
+	pluginWindow: "zotero:pluginWindow",
 });
+
+// Set on a plugin window's root element by PluginWindow.init()
+const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
 
 /**
  * Stable per-window handle used as the plugin-facing window ID
@@ -49,11 +53,32 @@ function getWindowID(win) {
 }
 
 /**
+ * @param {Window} win
+ * @returns {string | null} The owning plugin ID of a plugin window; null for any other window
+ */
+function getPluginWindowOwner(win) {
+	return win.document.documentElement.getAttribute(PLUGIN_WINDOW_OWNER_ATTR);
+}
+
+/**
+ * Whether a plugin may see a window: any Zotero window, but only its own plugin windows
+ * @param {Window} win
+ * @param {string} callerPluginID
+ * @returns {boolean}
+ */
+function canAccessWindow(win, callerPluginID) {
+	let root = win.document.documentElement;
+	return root.getAttribute("windowtype") !== WINDOW_TYPES.pluginWindow
+		|| root.getAttribute(PLUGIN_WINDOW_OWNER_ATTR) === callerPluginID;
+}
+
+/**
  * @param {number} windowID
  * @param {WindowType} [type] - Reject a window of another type
+ * @param {string} [callerPluginID] - Reject another plugin's window as not found; omitted by chrome
  * @returns {Window}
  */
-function getWindow(windowID, type) {
+function getWindow(windowID, type, callerPluginID) {
 	let win = null;
 	for (let candidate of Services.wm.getEnumerator(null)) {
 		if (!candidate.closed && getWindowID(candidate) === windowID) {
@@ -61,7 +86,7 @@ function getWindow(windowID, type) {
 			break;
 		}
 	}
-	if (!win) {
+	if (!win || (callerPluginID && !canAccessWindow(win, callerPluginID))) {
 		throw ControllerAPIBase.createError(NOT_FOUND, `No window with ID ${windowID}`);
 	}
 	if (type && win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
@@ -118,4 +143,14 @@ function getWindowState(win) {
 	};
 }
 
-export { WINDOW_TYPES, getWindowID, getWindow, getMainWindow, getWindowState };
+const WindowUtils = Object.freeze({
+	WINDOW_TYPES,
+	getWindowID,
+	getWindow,
+	getMainWindow,
+	getWindowState,
+	getPluginWindowOwner,
+	canAccessWindow,
+});
+
+export { WindowUtils };
