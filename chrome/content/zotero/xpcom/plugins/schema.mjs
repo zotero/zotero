@@ -413,7 +413,6 @@ const PERMISSION_SCHEMAS = {
 		},
 	},
 	window: {
-		// Also exposes the `openWindow` global, set up by setupOpenWindow() in globals.mjs
 		Zotero: {
 			WindowController: {
 				query: "CustomParserCallable",
