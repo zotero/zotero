@@ -600,6 +600,272 @@ describe("Zotero.DataStore", function () {
 		});
 	});
 
+	describe("attachment files", function () {
+		var { PluginFileAccess } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
+		var { FileIO } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileIO.mjs");
+		var PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
+
+		beforeEach(function () {
+			load(["default", "dataRead", "dataWrite", "fileSystemRead", "fileSystemWrite"]);
+		});
+
+		afterEach(function () {
+			Zotero.Prefs.clear(PREF_PREFIX + plugin.uuid, true);
+		});
+
+		function load(permissions) {
+			plugin.load(permissions);
+			plugin.eval(`var CS = Zotero.DataStore.ChangeSet, FS = Zotero.FileStore?.ChangeSet, libraryID = ${libraryID};`);
+		}
+
+		// As a plugin does before it imports
+		function writeTemp(text) {
+			return plugin.run(async (text) => {
+				let { temp } = (await Zotero.FileStore.query("dirs")).result;
+				let path = Zotero.FileStore.path.join(temp, `file-${Date.now()}-${Math.random().toString(36).slice(2)}.txt`);
+				let { success, error } = await Zotero.FileStore.commit(FS.file(path).writeFile(text));
+				if (!success) {
+					throw new Error(error.message);
+				}
+				return path;
+			}, text);
+		}
+
+		async function titled(title) {
+			let search = new Zotero.Search();
+			search.libraryID = libraryID;
+			search.addCondition("title", "is", title);
+			return search.search();
+		}
+
+		it("should import a file the plugin wrote as a stored copy, indexed and readable through the file store", async function () {
+			let parent = await createDataObject('item');
+			let source = await writeTemp("Imported through the stores");
+			let { objects } = await requestResult(commit((file, parent) => CS.item({ itemType: "attachment", linkMode: "imported_file", file, parent }),
+				source, parent.id));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(attachment.attachmentLinkMode, Zotero.Attachments.LINK_MODE_IMPORTED_FILE);
+			assert.equal(attachment.parentID, parent.id);
+			assert.equal(attachment.attachmentContentType, "text/plain");
+			let path = await attachment.getFilePathAsync();
+			assert.equal(PathUtils.parent(path), Zotero.Attachments.getStorageDirectory(attachment).path);
+			assert.isTrue(await FileIO.exists(source), "core copies the file");
+			assert.equal((await requestResult(query("fulltext", { itemID: attachment.id }))).state, "indexed");
+
+			let read = await plugin.run(async (itemID) => {
+				let { path } = (await Zotero.DataStore.query("file", { itemID })).result;
+				return (await Zotero.FileStore.query("readFile", { path, encoding: "utf8" })).result.data;
+			}, attachment.id);
+			assert.equal(read, "Imported through the stores");
+		});
+
+		it("should import a PDF as core does, with its content type and reader", async function () {
+			let source = Zotero.FileStore.path.join(await PluginFileAccess.getTempDir(plugin.id), "paper.pdf");
+			await FileIO.copy(PluginFileAccess.canonicalize(PathUtils.join(getTestDataDirectory().path, "test.pdf")), source);
+			let { objects } = await requestResult(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "imported_file", file }),
+				source));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(attachment.attachmentContentType, "application/pdf");
+			assert.equal(attachment.attachmentReaderType, "pdf");
+			assert.equal(attachment.attachmentFilename, "paper.pdf");
+		});
+
+		it("should import under a parent the set creates, after the store transaction", async function () {
+			let source = await writeTemp("Child");
+			let { objects } = await requestResult(commit((file) => {
+				let parent = CS.item({ libraryID, itemType: "book" }).setField("title", "Parent");
+				let child = CS.item({ itemType: "attachment", linkMode: "imported_file", file, parent }).setField("title", "Child file");
+				return CS.of(child, parent);
+			}, source));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(attachment.parentID, objects[1].id);
+			assert.equal(attachment.getField("title"), "Child file");
+
+			// The other way round no order satisfies
+			let error = await requestError(commit((file) => {
+				let pdf = CS.item({ libraryID, itemType: "attachment", linkMode: "imported_file", file });
+				return CS.of(pdf, CS.collection({ libraryID, name: "Holds it" }).addItems([pdf]));
+			}, source), codes.INVALID_PARAMS);
+			assert.include(error.message, "is created after the store transaction this entry applies in");
+		});
+
+		it("should link a file the plugin may write, in the user library only", async function () {
+			let source = await writeTemp("Linked");
+			let { objects } = await requestResult(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "linked_file", file }),
+				source));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(attachment.attachmentLinkMode, Zotero.Attachments.LINK_MODE_LINKED_FILE);
+			assert.equal(PluginFileAccess.canonicalize(await attachment.getFilePathAsync()), source);
+
+			let group = await createGroup();
+			try {
+				let error = await requestError(commit((file, groupLibraryID) => CS.item({
+					libraryID: groupLibraryID, itemType: "attachment", linkMode: "linked_file", file,
+				}), source, group.libraryID), codes.INVALID_PARAMS);
+				assert.include(error.message, "changes[0].create (item): Linked files can only be added to the user library");
+			}
+			finally {
+				await group.eraseTx();
+			}
+		});
+
+		it("should refuse a file the plugin may not read or write before applying anything", async function () {
+			let outside = await getTempDirectory();
+			let file = PathUtils.join(outside, "outside.txt");
+			await IOUtils.writeUTF8(file, "Outside");
+			let title = "Not created " + Zotero.Utilities.randomString();
+			let build = (file, title, linkMode) => CS.of(
+				CS.item({ libraryID, itemType: "book" }).setField("title", title),
+				CS.item({ libraryID, itemType: "attachment", linkMode, file })
+			);
+
+			let validate = (...args) => requestResult(plugin.run(
+				`(...args) => Zotero.DataStore.query("validate", { changes: (${build})(...args).toJSON() })`, ...args));
+
+			// A persisted deny answers the gate without a prompt
+			Zotero.Prefs.set(PREF_PREFIX + plugin.uuid, JSON.stringify([[PluginFileAccess.canonicalize(outside), { mode: "deny" }]]), true);
+			let error = await requestError(commit(build, file, title, "imported_file"), codes.PERMISSION_DENIED);
+			assert.include(error.message, "changes[1].create (item): ");
+			let { issues } = await validate(file, title, "imported_file");
+			assert.equal(issues[0].code, codes.PERMISSION_DENIED);
+
+			// Read lets the plugin import the file, while linking it needs write
+			Zotero.Prefs.set(PREF_PREFIX + plugin.uuid, JSON.stringify([[PluginFileAccess.canonicalize(file), { mode: "read" }]]), true);
+			load(["default", "dataRead", "dataWrite", "fileSystemRead"]);
+			assert.isEmpty((await validate(file, title, "imported_file")).issues);
+			error = await requestError(commit(build, file, title, "linked_file"), codes.PERMISSION_DENIED);
+			assert.include(error.message, "Permission fileSystemWrite is required");
+			load(["default", "dataRead", "dataWrite"]);
+			error = await requestError(commit(build, file, title, "imported_file"), codes.PERMISSION_DENIED);
+			assert.include(error.message, "Permission fileSystemRead is required");
+			assert.isEmpty(await titled(title));
+		});
+
+		it("should refuse a file with another link mode or item type, a file link mode without one, and a missing file", async function () {
+			let source = await writeTemp("Refused");
+			let build = create => CS.item({ libraryID, ...create });
+			for (let [create, reason] of [
+				[{ itemType: "attachment", linkMode: "imported_file" }, "linkMode 'imported_file' needs a file"],
+				[{ itemType: "attachment", linkMode: "linked_url", file: source }, "A file makes an attachment with linkMode imported_file or linked_file"],
+				[{ itemType: "book", linkMode: "imported_file", file: source }, "A file makes an attachment with linkMode imported_file or linked_file"],
+				[{ itemType: "attachment", linkMode: "imported_url" }, "linkMode 'imported_url' cannot be created"],
+				[{ itemType: "attachment", linkMode: "imported_file", file: "relative.txt" }, "Param 'file': "],
+				[{ itemType: "attachment", linkMode: "imported_file", file: source, annotationType: "highlight" }, "'annotationType' applies to annotations only"],
+			]) {
+				let error = await requestError(commit(build, create), codes.INVALID_PARAMS);
+				assert.include(error.message, "changes[0].create (item): ", reason);
+				assert.include(error.message, reason);
+			}
+			let missing = Zotero.FileStore.path.join(Zotero.FileStore.path.dirname(source), "missing.txt");
+			let error = await requestError(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "imported_file", file }), missing),
+				codes.NOT_FOUND);
+			assert.include(error.message, "is not a file");
+		});
+
+		it("should refuse a file in a library that keeps its files", async function () {
+			let group = await createGroup({ filesEditable: false });
+			try {
+				let source = await writeTemp("Kept out");
+				let error = await requestError(commit((file, groupLibraryID) => CS.item({
+					libraryID: groupLibraryID, itemType: "attachment", linkMode: "imported_file", file,
+				}), source, group.libraryID), codes.NOT_ALLOWED);
+				assert.include(error.message, "does not allow file changes");
+			}
+			finally {
+				await group.eraseTx();
+			}
+		});
+
+		it("should apply a file attachment's operations after the store transaction", async function () {
+			let source = await writeTemp("Trashed");
+			let { objects } = await requestResult(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "imported_file", file })
+				.setField("title", "Straight to the trash")
+				.trash(), source));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(attachment.getField("title"), "Straight to the trash");
+			assert.isTrue(attachment.deleted);
+		});
+
+		it("should relink a stored attachment to a copy of a file the plugin wrote", async function () {
+			let attachment = await importFileAttachment("test.txt");
+			let source = await writeTemp("Relinked copy");
+			await requestResult(commit((itemID, file) => CS.item(itemID).relinkAttachmentFile(file), attachment.id, source));
+			let path = await attachment.getFilePathAsync();
+			assert.equal(PathUtils.parent(path), Zotero.Attachments.getStorageDirectory(attachment).path);
+			assert.equal(PathUtils.filename(path), Zotero.FileStore.path.basename(source));
+			assert.equal(await IOUtils.readUTF8(path), "Relinked copy");
+			assert.isTrue(await FileIO.exists(source), "core copies a stored attachment's file");
+		});
+
+		it("should point a linked attachment at another file the plugin may write", async function () {
+			let first = await writeTemp("First");
+			let second = await writeTemp("Second");
+			let { objects } = await requestResult(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "linked_file", file }),
+				first));
+			await requestResult(commit((itemID, file) => CS.item(itemID).relinkAttachmentFile(file), objects[0].id, second));
+			let attachment = Zotero.Items.get(objects[0].id);
+			assert.equal(PluginFileAccess.canonicalize(await attachment.getFilePathAsync()), second);
+		});
+
+		it("should refuse a relink the target or the plugin's access does not allow, before applying anything", async function () {
+			let stored = await importFileAttachment("test.txt");
+			let book = await createDataObject('item', { title: 'Kept' });
+			let outside = await getTempDirectory();
+			let file = PathUtils.join(outside, "outside.txt");
+			await IOUtils.writeUTF8(file, "Outside");
+			let relink = (itemID, file) => commit((bookID, itemID, file) => CS.of(
+				CS.item(bookID).setField("title", "Applied"),
+				CS.item(itemID).relinkAttachmentFile(file)
+			), book.id, itemID, file);
+
+			// The target's link mode decides what the gate asks, before the transaction
+			Zotero.Prefs.set(PREF_PREFIX + plugin.uuid, JSON.stringify([[PluginFileAccess.canonicalize(outside), { mode: "deny" }]]), true);
+			let error = await requestError(relink(stored.id, file), codes.PERMISSION_DENIED);
+			assert.include(error.message, "changes[1].ops[0] (item.relinkAttachmentFile): ");
+			let { issues } = await requestResult(plugin.run((itemID, file) => Zotero.DataStore.query("validate", {
+				changes: CS.item(itemID).relinkAttachmentFile(file).toJSON(),
+			}), stored.id, file));
+			assert.equal(issues[0].code, codes.PERMISSION_DENIED);
+
+			let linked = await requestResult(commit(file => CS.item({ libraryID, itemType: "attachment", linkMode: "linked_file", file }),
+				await writeTemp("Linked")));
+			load(["default", "dataRead", "dataWrite", "fileSystemRead"]);
+			error = await requestError(relink(linked.objects[0].id, await PluginFileAccess.getTempDir(plugin.id) + "/x.txt"),
+				codes.PERMISSION_DENIED);
+			assert.include(error.message, "Permission fileSystemWrite is required");
+
+			let note = await createDataObject('item', { itemType: 'note' });
+			error = await requestError(relink(note.id, file), codes.INVALID_PARAMS);
+			assert.include(error.message, "Only a file attachment has a file to relink");
+			error = await requestError(commit(file => CS.item({ libraryID, itemType: "note" }).relinkAttachmentFile(file), file),
+				codes.INVALID_PARAMS);
+			assert.include(error.message, "Only an existing attachment can be relinked");
+
+			let group = await createGroup();
+			let inGroup = await importFileAttachment("test.txt", { libraryID: group.libraryID });
+			group.filesEditable = false;
+			await group.saveTx();
+			try {
+				await requestError(relink(inGroup.id, file), codes.NOT_ALLOWED);
+			}
+			finally {
+				await group.eraseTx();
+			}
+			assert.equal(book.getField('title'), 'Kept');
+		});
+
+		it("should drop what a failed relink's entry changed only in memory", async function () {
+			let attachment = await importFileAttachment("test.txt");
+			let missing = Zotero.FileStore.path.join(await PluginFileAccess.getTempDir(plugin.id), "missing.txt");
+			let error = await requestError(commit((itemID, file) => CS.item(itemID)
+				.setField("title", "Only in memory")
+				.relinkAttachmentFile(file), attachment.id, missing), codes.NOT_FOUND);
+			assert.include(error.message, "is not a file");
+			assert.equal(attachment.getField("title"), "test");
+			assert.equal(attachment.attachmentFilename, "test.txt");
+		});
+	});
+
 	describe("validate", function () {
 		it("should report a bad operation without touching the object", async function () {
 			let item = await createDataObject('item', { title: 'Validated' });
