@@ -30,7 +30,7 @@
 var DataChangeSet = (() => {
 "use strict";
 
-const { ChangesBase, ChangeSet, clonePlain, nextRef } = ChangeSetBase;
+const { ChangesBase, ChangeSet, ObjectHandle, clonePlain, nextRef } = ChangeSetBase;
 
 // Zotero object keys: 8 characters from this alphabet
 const KEY_RE = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/;
@@ -45,8 +45,11 @@ function assertInteger(value, what) {
 	}
 }
 
-// How an operation names another object: an ID, a key (bare, or with its library), { ref } or an editor
+// How an operation names another object: an ID, a key (bare, or with its library), { ref }, an editor or a handle
 function toIDRef(value, what) {
+	if (value instanceof ObjectHandle) {
+		value = value.editor;
+	}
 	if (value instanceof DataObjectChanges) {
 		if (value.ref !== undefined) {
 			return { ref: value.ref };
@@ -71,7 +74,7 @@ function toIDRef(value, what) {
 			return { key: value.key, libraryID: value.libraryID };
 		}
 	}
-	throw new TypeError(`${what} must be an ID, a key, { key, libraryID }, { ref } or an editor`);
+	throw new TypeError(`${what} must be an ID, a key, { key, libraryID }, { ref }, an editor or a handle`);
 }
 
 function toIDRefList(values, what) {
@@ -336,13 +339,16 @@ function editorClass(type) {
 }
 
 /**
- * An editor for one object. An ID, key or snapshot addresses a saved object; a ref, or an editor carrying
- * one, addresses the object another editor of the set creates; any other object describes one to create
+ * An editor for one object. An ID, key or snapshot addresses a saved object; a ref, or an editor or handle
+ * carrying one, addresses the object another editor of the set creates; any other object describes one to create
  * @param {string} type
  * @param {number | string | object} target
  * @param {EditorOptions} [options]
  */
 function editorFor(type, target, { revision, libraryID, ref } = {}) {
+	if (target instanceof ObjectHandle) {
+		target = target.editor;
+	}
 	let isObject = target !== null && typeof target === "object";
 	if (isObject && target.id === undefined && target.key === undefined) {
 		if (target.type !== undefined && target.type !== type) {
@@ -520,8 +526,8 @@ class DataChangeSet extends ChangeSet {
 }
 
 /**
- * What names another object in an operation: an ID, a key, { key, libraryID }, { ref } or an editor
- * @typedef {number | string | { key: string, libraryID?: number } | { ref: string } | DataObjectChanges} IDRefInput
+ * What names another object in an operation: an ID, a key, { key, libraryID }, { ref }, an editor or a handle
+ * @typedef {number | string | { key: string, libraryID?: number } | { ref: string } | DataObjectChanges | ObjectHandle} IDRefInput
  *
  *
  * @typedef {object} EditorOptions
