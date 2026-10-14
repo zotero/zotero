@@ -122,6 +122,8 @@ const xpcomFilesLocal = [
 	'pluginAPI/pluginInteropManager',
 	'sdt',
 	'reader',
+	// Depends on Zotero.Reader for reader toolbar rendering
+	'pluginAPI/buttonManager',
 	'progressQueue',
 	'progressQueueDialog',
 	'quickCopy',

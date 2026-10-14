@@ -1185,6 +1185,469 @@ describe("Plugin API", function () {
 		});
 	});
 
+	describe("Custom button", function () {
+		let defaultOption = {
+			buttonID: "default-test",
+			pluginID: "zotero@zotero.org",
+			target: "main/library/toolbar",
+			l10nID: "menu-print",
+			icon: "chrome://zotero/skin/16/universal/plus.svg",
+			onCommand: (event, context) => {
+				updateCache("onCommand", context);
+			},
+		};
+
+		function getToolbarButtonsElem() {
+			return doc.querySelector("#zotero-tb-custom-buttons");
+		}
+
+		async function registerButton(option = {}) {
+			option = Object.assign({}, defaultOption, option);
+			let notifyPromise = waitForNotifierEvent("refresh", "custom-button");
+			let buttonID = Zotero.ButtonManager.registerButton(option);
+			assert.isString(buttonID);
+			await notifyPromise;
+			return buttonID;
+		}
+
+		async function unregisterButton(buttonID) {
+			let notifyPromise = waitForNotifierEvent("refresh", "custom-button");
+			assert.isTrue(Zotero.ButtonManager.unregisterButton(buttonID));
+			await notifyPromise;
+		}
+
+		async function simulateMenuOpen(menu) {
+			return new Promise((resolve) => {
+				menu.addEventListener("popupshown", resolve, { once: true });
+				menu.dispatchEvent(new MouseEvent("popupshowing"));
+				menu.dispatchEvent(new MouseEvent("popupshown"));
+			});
+		}
+
+		async function simulateMenuClosed(menu) {
+			return new Promise((resolve) => {
+				menu.addEventListener("popuphidden", resolve, { once: true });
+				menu.dispatchEvent(new MouseEvent("popuphiding"));
+				menu.dispatchEvent(new MouseEvent("popuphidden"));
+			});
+		}
+
+		before(function () {
+			Zotero_Tabs.select("zotero-pane");
+		});
+
+		beforeEach(function () {
+			resetCaches();
+		});
+
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+		});
+
+		it("should reject invalid options", function () {
+			// Missing both onCommand and menus
+			assert.isFalse(Zotero.ButtonManager.registerButton(
+				Object.assign({}, defaultOption, { onCommand: undefined })
+			));
+			// Both onCommand and menus
+			assert.isFalse(Zotero.ButtonManager.registerButton(
+				Object.assign({}, defaultOption, {
+					menus: [{ menuType: "menuitem", l10nID: "menu-print" }],
+				})
+			));
+			// Empty menus
+			assert.isFalse(Zotero.ButtonManager.registerButton(
+				Object.assign({}, defaultOption, { onCommand: undefined, menus: [] })
+			));
+			// Invalid target
+			assert.isFalse(Zotero.ButtonManager.registerButton(
+				Object.assign({}, defaultOption, { target: "main/unknown" })
+			));
+		});
+
+		it("should render a click button in the items toolbar", async function () {
+			initCache("onCommand");
+			let buttonID = await registerButton();
+
+			let elem = getToolbarButtonsElem();
+			let button = elem.querySelector(`.zotero-custom-button.${CSS.escape(buttonID)}`);
+			assert.exists(button, "Button should be rendered in the items toolbar");
+			assert.isFalse(button.hidden, "Button should be visible");
+
+			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
+			let context = await getCache("onCommand");
+			assert.equal(context.buttonElem, button);
+			assert.equal(context.tabType, "library");
+			assert.equal(context.tabID, "zotero-pane");
+			assert.isArray(context.items);
+
+			await unregisterButton(buttonID);
+			assert.notExists(
+				elem.querySelector(`.${CSS.escape(buttonID)}`),
+				"Button should be removed after unregistering"
+			);
+		});
+
+		it("should render a dropdown button and populate its menu", async function () {
+			initCache("onCommand");
+			let buttonID = await registerButton({
+				buttonID: "dropdown-test",
+				onCommand: undefined,
+				menus: [
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onCommand: (event, context) => {
+							updateCache("onCommand", context);
+						},
+					},
+				],
+			});
+
+			let elem = getToolbarButtonsElem();
+			let button = elem.querySelector(`.zotero-custom-button.${CSS.escape(buttonID)}`);
+			assert.exists(button, "Dropdown button should be rendered");
+			assert.equal(button.getAttribute("type"), "menu");
+
+			let popup = button.querySelector("menupopup");
+			await simulateMenuOpen(popup);
+			let menuItem = popup.querySelector(".zotero-custom-menu-item");
+			assert.exists(menuItem, "Dropdown menu should contain the registered menu item");
+
+			menuItem.dispatchEvent(new MouseEvent("command", { bubbles: false }));
+			let context = await getCache("onCommand");
+			assert.equal(context.tabType, "library");
+			await simulateMenuClosed(popup);
+
+			// The internal menu registration should be removed with the button
+			let menuKey = Zotero.ButtonManager.getButtonOptions("main/library/toolbar")
+				.find(option => option.buttonID === buttonID)._menuKey;
+			assert.exists(Zotero.MenuManager._menuManager._optionsCache[menuKey]);
+			await unregisterButton(buttonID);
+			assert.notExists(Zotero.MenuManager._menuManager._optionsCache[menuKey]);
+		});
+
+		it("should collapse buttons into the overflow menu when space is not enough", async function () {
+			initCache("onCommand");
+
+			// Make sure the window is wide enough to show all buttons
+			let originalWidth = win.outerWidth;
+			if (originalWidth < 1200) {
+				win.resizeTo(1200, win.outerHeight);
+				await waitForCallback(() => win.outerWidth >= 1150, 50, 3).catch(() => {});
+			}
+
+			let menuIcon = "chrome://zotero/skin/16/universal/plus-circle.svg";
+			let buttonIDs = [];
+			for (let i = 0; i < 3; i++) {
+				buttonIDs.push(await registerButton({
+					buttonID: `overflow-test-${i}`,
+					// The first button provides a dedicated overflow menu icon
+					menuIcon: i === 0 ? menuIcon : undefined,
+				}));
+			}
+
+			let elem = getToolbarButtonsElem();
+			elem._updateOverflow();
+			let initialCount = elem._visibleCount;
+			assert.isAbove(initialCount, 0, "Some buttons should be visible initially");
+
+			// Consume all free space in the toolbar to force a collapse. The resize
+			// observer can't see pure content overflow (in real usage the toolbar
+			// itself resizes), so run the overflow update manually
+			let spacer = elem.previousElementSibling;
+			let dummy = doc.createXULElement("box");
+			dummy.style.minWidth = "10000px";
+			dummy.style.flexShrink = "0";
+			spacer.parentElement.insertBefore(dummy, spacer);
+			try {
+				elem._updateOverflow();
+				let parentBox = elem.parentElement;
+				let searchBox = doc.getElementById("zotero-tb-search");
+				let diag = `spacer=${spacer.getBoundingClientRect().width}`
+					+ ` search=${searchBox.getBoundingClientRect().width}`
+					+ ` parentScroll=${parentBox.scrollWidth} parentClient=${parentBox.clientWidth}`
+					+ ` elemW=${elem.getBoundingClientRect().width}`
+					+ ` dummyW=${dummy.getBoundingClientRect().width}`;
+				assert.equal(elem._visibleCount, 0, "All buttons should be collapsed: " + diag);
+				let overflowButton = elem.querySelector(".zotero-custom-button-overflow");
+				assert.isFalse(overflowButton.hidden, "Overflow button should be visible");
+
+				let popup = overflowButton.querySelector("menupopup");
+				await simulateMenuOpen(popup);
+				let overflowItems = popup.querySelectorAll(".zotero-custom-button-overflow-item");
+				assert.equal(overflowItems.length, 3, "All buttons should be in the overflow menu");
+
+				// The dedicated menu icon should be preferred over the button icon
+				assert.equal(
+					overflowItems[0].style.getPropertyValue("--custom-menu-icon-light"),
+					`url(${menuIcon})`
+				);
+				assert.equal(
+					overflowItems[1].style.getPropertyValue("--custom-menu-icon-light"),
+					`url(${defaultOption.icon})`
+				);
+
+				overflowItems[0].dispatchEvent(new MouseEvent("command", { bubbles: false }));
+				let context = await getCache("onCommand");
+				assert.equal(context.tabType, "library");
+				await simulateMenuClosed(popup);
+			}
+			finally {
+				dummy.remove();
+			}
+
+			// Buttons should expand again when the space is restored
+			elem._updateOverflow();
+			assert.equal(elem._visibleCount, initialCount,
+				"Buttons should expand again after the space is restored");
+
+			for (let buttonID of buttonIDs) {
+				await unregisterButton(buttonID);
+			}
+			if (originalWidth < 1200) {
+				win.resizeTo(originalWidth, win.outerHeight);
+			}
+		});
+
+		it("should render buttons in the reader toolbar", async function () {
+			initCache("onCommand");
+			let lightIcon = "chrome://zotero/skin/16/universal/plus.svg";
+			let darkIcon = "chrome://zotero/skin/16/universal/minus.svg";
+			// Register a button before the reader is opened
+			let buttonID = await registerButton({
+				buttonID: "reader-test",
+				target: "reader/toolbar",
+				icon: lightIcon,
+				darkIcon,
+				onCommand: (event, context) => {
+					updateCache("onCommand", context);
+				},
+			});
+
+			let pdfAttachment = await importFileAttachment("test.pdf");
+			await ZoteroPane.viewItems([pdfAttachment]);
+			let tabID = Zotero_Tabs.selectedID;
+			let reader = Zotero.Reader.getByTabID(tabID);
+			await reader._initPromise;
+
+			let readerWin = reader._iframeWindow;
+			let buttonSelector = `.zotero-custom-button.${CSS.escape(buttonID)}`;
+			let button = await waitForCallback(
+				() => readerWin.document.querySelector(buttonSelector), 50, 5);
+			assert.exists(button, "Button should be rendered in the reader toolbar");
+
+			// The icon's resolved background should match the reader's theme,
+			// swapping between light/dark via the injected stylesheet
+			let iconEl = button.querySelector(".zotero-custom-button-icon");
+			let forced = readerWin.document.documentElement.dataset.colorScheme;
+			let dark = forced
+				? forced === "dark"
+				: readerWin.matchMedia("(prefers-color-scheme: dark)").matches;
+			let bg = readerWin.getComputedStyle(iconEl).backgroundImage;
+			assert.include(bg, dark ? darkIcon : lightIcon,
+				"Reader icon should use the theme-appropriate variant");
+
+			button.click();
+			let context = await getCache("onCommand");
+			assert.equal(context.tabType, "reader");
+			assert.equal(context.tabSubType, "pdf");
+			assert.equal(context.reader, reader);
+
+			// Register another button while the reader is open
+			let buttonID2 = await registerButton({
+				buttonID: "reader-test-2",
+				target: "reader/toolbar",
+			});
+			let button2Selector = `.zotero-custom-button.${CSS.escape(buttonID2)}`;
+			let button2 = await waitForCallback(
+				() => reader._iframeWindow.document.querySelector(button2Selector), 50, 5);
+			assert.exists(button2, "Button registered while the reader is open should be rendered");
+
+			// A button restricted to other reader types should not be rendered
+			let buttonID3 = await registerButton({
+				buttonID: "reader-test-3",
+				target: "reader/toolbar",
+				enableForTabTypes: ["reader/epub"],
+			});
+			let button3Selector = `.zotero-custom-button.${CSS.escape(buttonID3)}`;
+			assert.notExists(reader._iframeWindow.document.querySelector(button3Selector),
+				"Button for other reader types should not be rendered");
+
+			await unregisterButton(buttonID);
+			await waitForCallback(
+				() => !reader._iframeWindow.document.querySelector(buttonSelector), 50, 5);
+			await unregisterButton(buttonID2);
+			await unregisterButton(buttonID3);
+
+			Zotero_Tabs.close(tabID);
+		});
+
+		it("should not let the search box internals overflow while collapsing", async function () {
+			// Make sure the window is wide enough to show all buttons
+			let originalWidth = win.outerWidth;
+			if (originalWidth < 1200) {
+				win.resizeTo(1200, win.outerHeight);
+				await waitForCallback(() => win.outerWidth >= 1150, 50, 3).catch(() => {});
+			}
+			let ids = [];
+			for (let i = 0; i < 3; i++) {
+				ids.push(await registerButton({ buttonID: `squeeze-test-${i}` }));
+			}
+			let elem = getToolbarButtonsElem();
+			let spacer = elem.previousElementSibling;
+			let search = doc.getElementById("zotero-tb-search");
+			let advancedButton = search.querySelector("#zotero-tb-search-advanced-button");
+			// Simulate a locale where the input's intrinsic width (font-metric
+			// dependent) exceeds the search box's flex basis
+			let inputField = search.searchTextbox.inputField;
+			inputField.setAttribute("size", "40");
+			let dummy = doc.createXULElement("box");
+			dummy.style.flexShrink = "0";
+			spacer.parentElement.insertBefore(dummy, spacer);
+			try {
+				// Gradually squeeze the toolbar and make sure the search box
+				// internals never stick out of the search box
+				for (let w = 0; w <= 500; w += 10) {
+					dummy.style.minWidth = w + "px";
+					elem._updateOverflow();
+					let stickOut = advancedButton.getBoundingClientRect().right
+						- search.getBoundingClientRect().right;
+					assert.isAtMost(stickOut, 1,
+						`Search box internals should not overflow at squeeze width ${w}`);
+				}
+			}
+			finally {
+				inputField.removeAttribute("size");
+				dummy.remove();
+				for (let id of ids) {
+					await unregisterButton(id);
+				}
+				if (originalWidth < 1200) {
+					win.resizeTo(originalWidth, win.outerHeight);
+				}
+			}
+		});
+
+		it("should support keyboard navigation through the toolbar buttons", async function () {
+			// Make sure the window is wide enough to show all buttons
+			let originalWidth = win.outerWidth;
+			if (originalWidth < 1200) {
+				win.resizeTo(1200, win.outerHeight);
+				await waitForCallback(() => win.outerWidth >= 1150, 50, 3).catch(() => {});
+			}
+			let buttonIDs = [];
+			for (let i = 0; i < 2; i++) {
+				buttonIDs.push(await registerButton({ buttonID: `keynav-test-${i}` }));
+			}
+			let elem = getToolbarButtonsElem();
+			let buttons = elem.querySelectorAll(".zotero-custom-button");
+			let noteAdd = doc.getElementById("zotero-tb-note-add");
+			let pressKey = (target, key) => {
+				target.focus();
+				target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+			};
+
+			// Arrow from the New Note button into the custom buttons and back
+			pressKey(noteAdd, Zotero.arrowNextKey);
+			assert.equal(doc.activeElement, buttons[0]);
+			pressKey(buttons[0], Zotero.arrowNextKey);
+			assert.equal(doc.activeElement, buttons[1]);
+			pressKey(buttons[1], Zotero.arrowPreviousKey);
+			assert.equal(doc.activeElement, buttons[0]);
+			pressKey(buttons[0], Zotero.arrowPreviousKey);
+			assert.equal(doc.activeElement, noteAdd);
+
+			for (let buttonID of buttonIDs) {
+				await unregisterButton(buttonID);
+			}
+			if (originalWidth < 1200) {
+				win.resizeTo(originalWidth, win.outerHeight);
+			}
+		});
+
+		it("should compute the visible button count with hysteresis", function () {
+			let compute = (budget, currentCount) => Zotero.ButtonManager._readerRenderer
+				._computeVisibleCount([36, 36, 36], 40, budget, currentCount, 0);
+
+			// Everything fits
+			assert.equal(compute(108, 3), 3);
+			// Not enough for all -- two buttons + chevron (112) don't fit either,
+			// so only one button + chevron (76) remains
+			assert.equal(compute(107, 3), 1);
+			// All three buttons (108) still fit
+			assert.equal(compute(112, 3), 3);
+			// Only the chevron fits
+			assert.equal(compute(41, 3), 0);
+			// Don't expand without comfortable extra space
+			assert.equal(compute(112, 2), 2);
+			// Expand when there's enough space
+			assert.equal(compute(108 + 24, 2), 3);
+		});
+
+		describe("unprivileged plugin restrictions", function () {
+			var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+			const UNPRIV_ID = "test-button-unpriv@zotero.org";
+			const UNPRIV_GUID = "{00000000-0000-0000-0000-000000000031}";
+			var tmpDir;
+
+			function ownURL(fileName) {
+				return WebExtensionPolicy.getByID(UNPRIV_ID).getURL(fileName);
+			}
+
+			before(async function () {
+				tmpDir = PathUtils.join(Zotero.getTempDirectory().path, "button-" + Zotero.Utilities.randomString());
+				await IOUtils.makeDirectory(tmpDir);
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "icon.svg"),
+					"<svg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/>"
+				);
+			});
+
+			after(async function () {
+				await IOUtils.remove(tmpDir, { recursive: true, ignoreAbsent: true });
+			});
+
+			beforeEach(function () {
+				PluginSandbox.loadScope(createMockPlugin({
+					id: UNPRIV_ID,
+					name: "Button Unpriv",
+					syncGUID: UNPRIV_GUID,
+					permissions: ["default", "ui"],
+					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+				}));
+			});
+
+			afterEach(function () {
+				try {
+					PluginSandbox.unloadScope(UNPRIV_ID);
+				}
+				catch {}
+			});
+
+			it("rejects buttons with disallowed icon URLs", function () {
+				let register = icon => Zotero.ButtonManager.registerButton({
+					buttonID: "icon-test",
+					pluginID: UNPRIV_ID,
+					target: "main/library/toolbar",
+					l10nID: "menu-print",
+					icon,
+					onCommand: () => {},
+				});
+				// javascript: is unsafe regardless of origin
+				assert.isFalse(register("javascript:alert(1)"));
+				// An undeclared remote origin (no host_permissions)
+				assert.isFalse(register("https://evil.example.com/icon.svg"));
+				// Another plugin's moz-extension resource
+				assert.isFalse(register("moz-extension://00000000-0000-0000-0000-000000000099/x.svg"));
+				// The plugin's own resource is allowed
+				let id = register(ownURL("icon.svg"));
+				assert.isString(id);
+				Zotero.ButtonManager.unregisterButton(id, UNPRIV_ID);
+			});
+		});
+	});
+
 	describe("Window resource manager", function () {
 		let pluginID = "test-plugin@zotero.org";
 

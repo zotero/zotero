@@ -369,7 +369,30 @@ var ZoteroPane = new function () {
 		});
 
 		itemTreeToolbar.addEventListener("keydown", (event) => {
+			// Custom plugin buttons between the New Note button and the search box,
+			// keyed by class since their ids are dynamic. Collapsed buttons are
+			// skipped; the overflow button is hidden unless some are collapsed.
+			let customButtonActions = {
+				ArrowNext: () => {
+					let next = event.target.nextElementSibling;
+					while (next?.hidden) {
+						next = next.nextElementSibling;
+					}
+					return next;
+				},
+				ArrowPrevious: () => {
+					let prev = event.target.previousElementSibling;
+					while (prev?.hidden) {
+						prev = prev.previousElementSibling;
+					}
+					return prev || document.getElementById("zotero-tb-note-add");
+				},
+				Tab: () => document.getElementById("zotero-tb-search").focus(),
+				ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
+			};
 			let actionsMap = {
+				'zotero-custom-button': customButtonActions,
+				'zotero-custom-button-overflow': customButtonActions,
 				'zotero-tb-add': {
 					ArrowNext: () => document.getElementById("zotero-tb-lookup"),
 					ArrowPrevious: () => null,
@@ -399,7 +422,8 @@ var ZoteroPane = new function () {
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
-					ArrowNext: () => null,
+					ArrowNext: () => document.querySelector(
+						"#zotero-tb-custom-buttons > toolbarbutton:not([hidden])"),
 					ArrowPrevious: () => document.getElementById("zotero-tb-attachment-add"),
 					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
@@ -3265,9 +3289,8 @@ var ZoteroPane = new function () {
 		if (!runAdvanced && Zotero.SearchQuery.hasOpenQuote(searchVal)) {
 			return;
 		}
-		var spinner = document.getElementById('zotero-tb-search-spinner');
-		spinner.setAttribute("status", "animate");
-		spinner.style.visibility = 'visible';
+		// Spin the search box's magnifier icon while the search is running
+		search.toggleAttribute("searching", true);
 		// A query with conditions in it ("by:smith crispr") filters by those
 		// and matches whatever text is left over the way the current mode
 		// does; anything else is text to search for, as typed
@@ -3294,8 +3317,7 @@ var ZoteroPane = new function () {
 			await this.itemsView.setFilter('search',
 				Zotero.SearchQuery.parse(searchVal).text);
 		}
-		spinner.style.removeProperty("visibility");
-		spinner.removeAttribute("status");
+		search.removeAttribute("searching");
 	};
 	
 	

@@ -231,6 +231,11 @@
 									return true;
 								}
 							}
+							// button/<buttonKey>: dropdown menus of custom buttons,
+							// managed by Zotero.ButtonManager
+							if (parts[0] === "button" && value.length > "button/".length) {
+								return true;
+							}
 							return `Option 'target' must be one of ${VALID_TARGETS.join(", ")} or a valid pluginWindow target, got ${value}`;
 						}
 					},
