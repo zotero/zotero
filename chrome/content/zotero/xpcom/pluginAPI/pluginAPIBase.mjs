@@ -74,8 +74,6 @@
  * @typedef {object} ControllerRequestContext
  * @property {"query" | "command"} kind
  * @property {string} name - The request name the handler was invoked as
- * @property {string | undefined} pluginID - Caller plugin ID; undefined for chrome callers
- * @property {boolean} privileged - Whether the caller bypasses permission checks
  *
  *
  * @typedef {object} ControllerRequestDef
@@ -84,7 +82,8 @@
  * @property {Record<string, PluginAPIOptDefValue>} [params]
  *     - Type definition for the params object; unknown keys are rejected
  * @property {(params: object, context: ControllerRequestContext) => (object | Promise<object>)} handler
- *     - Called with the controller as `this`; must return a JSON-serializable object
+ *     - Called with the controller as `this`; must return a JSON-serializable object. For an
+ *     unprivileged caller, `params.pluginID` (a reserved key) is the calling plugin
  */
 
 
@@ -562,12 +561,12 @@ class ControllerAPIBase extends PluginAPIBase {
 			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS, `Invalid params for ${kind} '${name}'`);
 		}
 
-		let result = await def.handler.call(this, validated.obj, {
-			kind,
-			name,
-			pluginID: context.pluginID,
-			privileged: context.privileged,
-		});
+		// An unprivileged caller's params carry its pluginID (a reserved key), as manager options do
+		if (!context.privileged) {
+			validated.obj.pluginID = context.pluginID;
+		}
+
+		let result = await def.handler.call(this, validated.obj, { kind, name });
 		return this._toPlainResult(name, result);
 	}
 
