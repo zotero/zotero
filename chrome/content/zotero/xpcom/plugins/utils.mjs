@@ -35,6 +35,8 @@ const INSTANCE_PROXY_FACTORY = "__zoteroInstanceProxyFactory__";
 
 const CHROME_GLOBAL = Cu.getGlobalForObject({});
 
+const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
+
 /**
  * Cache the facades per instance - scope - rule to avoid duplication
  * The GC of the instance or scope should clear the weak map entry
@@ -493,6 +495,24 @@ const VarCheck = {
 };
 
 const ScopeUtils = {
+
+	/**
+	 * Load a store's change set builder over ChangeSetBase: into a sandbox, so a draft is a plain object of the
+	 * plugin's compartment until commit hands its JSON to chrome, or without one for chrome's own copy
+	 * @param {string} url - The store's builder script, evaluated after the base
+	 * @param {Object} [options]
+	 * @param {Object} [options.scope] - The sandbox; omitted for chrome
+	 * @param {Object} [options.globals] - Free variables the scripts read, put on the holder first
+	 * @returns {Object} The holder the scripts defined their classes on
+	 */
+	loadChangeSet(url, { scope, globals = {} } = {}) {
+		let holder = scope ? Cu.createObjectIn(scope) : {};
+		Object.assign(holder, globals);
+		for (let script of [CHANGE_SET_BASE_URL, url]) {
+			Services.scriptloader.loadSubScript(script, holder);
+		}
+		return holder;
+	},
 
 	/**
 	 * Build a forwarding-Proxy facade in `scope` from a traps object (get / set /

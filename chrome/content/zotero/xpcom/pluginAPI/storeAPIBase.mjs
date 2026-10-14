@@ -210,6 +210,13 @@ class StoreAPIBase extends ControllerAPIBase {
 	}
 
 	/**
+	 * @returns {string[]} The object types a change set can address
+	 */
+	get objectTypes() {
+		return [...this._objectTypes.keys()];
+	}
+
+	/**
 	 * @returns {Record<string, string[]>} Operation names by object type, for feature detection
 	 */
 	get operationNames() {
