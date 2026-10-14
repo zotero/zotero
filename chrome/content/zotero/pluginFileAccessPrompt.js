@@ -24,6 +24,8 @@
 */
 
 
+var { FilePath, PathIdentity } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/filePath.mjs");
+
 var PluginFileAccessPrompt = {
 	_args: null,
 	_resolved: false,
@@ -46,8 +48,9 @@ var PluginFileAccessPrompt = {
 				pluginName,
 				action: mode,
 				type: isDirectory ? "folder" : "file",
-				fileName: PathUtils.filename(path),
-				directoryName: parentPath ?? "",
+				// The gate speaks canonical paths; the user reads the platform's spelling
+				fileName: FilePath.basename(path),
+				directoryName: parentPath ? PathIdentity.toNative(parentPath) : "",
 				hasDirectory: parentPath ? "yes" : "no",
 			},
 		);
