@@ -31,7 +31,6 @@ Zotero.Plugins = new function () {
 		Blocklist: "resource://gre/modules/Blocklist.sys.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
@@ -140,7 +139,11 @@ Zotero.Plugins = new function () {
 		mainWindows.add(window);
 		let { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
-			await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: lazy.WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
+			let extraParams = {};
+			if (lazy.VarCheck.isPrivilegedPermission(addon)) {
+				extraParams.window = window;
+			}
+			await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, extraParams);
 		}
 	};
 	
@@ -156,7 +159,11 @@ Zotero.Plugins = new function () {
 		}
 		let { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
-			await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, { window: lazy.WindowScopeVariables.createSafeWindow(window, addon.id, { rootNode: null }) });
+			let extraParams = {};
+			if (lazy.VarCheck.isPrivilegedPermission(addon)) {
+				extraParams.window = window;
+			}
+			await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, extraParams);
 		}
 	};
 	
