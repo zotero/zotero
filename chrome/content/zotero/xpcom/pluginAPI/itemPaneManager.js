@@ -28,7 +28,10 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
 	});
 
 
@@ -221,6 +224,10 @@
 						type: "string",
 						optional: true,
 					},
+					src: {
+						type: "string",
+						optional: true,
+					},
 					onInit: {
 						type: "function",
 						optional: true,
@@ -349,6 +356,28 @@
 			if (builtInPaneIDs.includes(mainKey)) {
 				this._log(`'paneID' must not conflict with built-in paneID, got ${mainKey}`, "warn");
 				return false;
+			}
+
+			// Unprivileged plugins can't insert markup into the pane document, so
+			// their section body must be a page in an embedded content browser.
+			let scope = lazy.PluginSandbox.getScope(option.pluginID);
+			if (scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
+				if (option.bodyXHTML) {
+					this._log("'bodyXHTML' only available for privileged plugins. Provide a page at 'src' instead", "warn");
+					delete option.bodyXHTML;
+				}
+				if (!option.src) {
+					this._log("'src' must be provided", "warn");
+					return false;
+				}
+			}
+			if (option.src) {
+				let src = lazy.resolvePluginPage(option.pluginID, option.src);
+				if (!src) {
+					this._log(`'src' must be an .html page within the plugin, got ${option.src}`, "warn");
+					return false;
+				}
+				option.src = src;
 			}
 
 			return super._validate(option);
@@ -522,6 +551,12 @@
 		 * @param {SectionL10n | SectionIcon} options.header - Header options. Icon should be 16*16 and `label` need to be localized.
 		 * @param {SectionL10n | SectionIcon} options.sidenav - Sidenav options.  Icon should be 20*20 and `tooltiptext` need to be localized.
 		 * @param {string} [options.bodyXHTML] - Pane body's innerHTML, defaults to XUL namespace.
+		 * 		Only available for privileged plugins.
+		 * @param {string} [options.src] - URI of a full HTML page within the plugin, optionally relative
+		 * 		to the plugin's root, shown in an embedded content browser as the section body.
+		 * 		Required for unprivileged plugins, which can't use `bodyXHTML`; optional for
+		 * 		privileged plugins, where it takes precedence over `bodyXHTML`. Lifecycle hooks
+		 * 		receive the page's document as `doc`/`body` and only fire after the page loads.
 		 * @param {SectionInitHook} [options.onInit] - Lifecycle hook called when section is initialized.
 		 *
 		 * Do:

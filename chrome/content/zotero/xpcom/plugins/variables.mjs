@@ -94,6 +94,11 @@ const ScopeVariables = {
 			);
 		}
 		if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
+			// The plugin's own pages are same-origin with its sandbox and can
+			// be scripted directly, no facade needed
+			if (WindowScopeVariables.isPluginOwnContent(value, pluginID)) {
+				return value;
+			}
 			return WindowScopeVariables.createSafeWindowObject(
 				value,
 				pluginID,
@@ -1641,6 +1646,13 @@ const WindowScopeVariables = {
 		catch {
 			return null;
 		}
+	},
+
+	// Whether a window/node belongs to a page from the plugin's own origin,
+	// which its sandbox holds the content principal for
+	isPluginOwnContent(value, pluginID) {
+		let doc = VarCheck.isWindowObject(value) ? value.document : (value.ownerDocument || value);
+		return doc?.nodePrincipal?.addonPolicy?.id === pluginID;
 	},
 
 	// Whether a URL points at an *undeclared* resource -- enforces an origin

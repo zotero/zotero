@@ -29,6 +29,7 @@
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
 	});
 
 	/**
@@ -208,15 +209,15 @@
 				}
 			}
 
-			let src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
+			let src;
 			if (embedded) {
-				if (!src.startsWith(Zotero.Plugins.getBaseURI(options.pluginID))) {
-					throw new Error(`Plugin ${options.pluginID}: pane src must be a page within the plugin`);
+				src = lazy.resolvePluginPage(options.pluginID, options.src);
+				if (!src) {
+					throw new Error(`Plugin ${options.pluginID}: pane src must be an .html page within the plugin`);
 				}
-				let pathname = new URL(src).pathname.toLowerCase();
-				if (!pathname.endsWith('.html') && !pathname.endsWith('.htm')) {
-					throw new Error(`Plugin ${options.pluginID}: pane src must be an .html file`);
-				}
+			}
+			else {
+				src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
 			}
 
 			let onLoad = null;
