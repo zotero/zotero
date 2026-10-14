@@ -53,6 +53,7 @@ Zotero.Notifier = new function () {
 		'itemtree',
 		'itempane',
 		'infobox',
+		'custom-button',
 	];
 	var _transactionID = false;
 	var _queue = {};
