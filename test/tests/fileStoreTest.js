@@ -624,11 +624,13 @@ describe("Zotero.FileStore", function () {
 				catch (e) {
 					after = e.message;
 				}
-				return { made: made.type, removed, after };
+				let again = await directory.save().then(() => "saved", e => e.message);
+				return { made: made.type, removed, after, again };
 			}, dir);
 			assert.equal(out.made, "directory");
 			assert.isTrue(out.removed.erased);
 			assert.match(out.after, /No operation can follow rm/);
+			assert.match(out.again, /gone after rm/);
 			assert.isFalse(await IOUtils.exists(dir));
 		});
 
@@ -662,6 +664,55 @@ describe("Zotero.FileStore", function () {
 			assert.equal(readOnly.code, codes.PERMISSION_DENIED);
 			assert.equal(readOnly.directory, "function");
 			assert.equal(await FileIO.readUTF8(path), "read only");
+		});
+
+		// save() calls take turns; what is pushed while one runs waits for the next
+		it("should keep what is pushed while a save is in flight for the next save", async function () {
+			let path = under("handle-in-flight.txt");
+			let gate = Zotero.Promise.defer();
+			let write = sinon.stub(FileIO, 'write').callsFake(async function (...args) {
+				await gate.promise;
+				return write.wrappedMethod.apply(this, args);
+			});
+			try {
+				let saving = plugin.run((path) => {
+					globalThis.file = Zotero.FileStore.Handle.file(path).writeFile("v1");
+					return globalThis.file.save();
+				}, path);
+				for (let i = 0; i < 100 && !write.called; i++) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.isTrue(write.called, "the commit reached the write");
+				plugin.eval('file.appendFile(", v2")');
+				gate.resolve();
+				await saving;
+			}
+			finally {
+				gate.resolve();
+				write.restore();
+			}
+			assert.equal(plugin.eval("file.ops.length"), 1);
+			assert.equal(await FileIO.readUTF8(path), "v1");
+			await plugin.run(() => globalThis.file.save());
+			assert.equal(plugin.eval("file.ops.length"), 0);
+			assert.equal(await FileIO.readUTF8(path), "v1, v2");
+		});
+
+		it("should append once when saves overlap", async function () {
+			let path = under("handle-overlap.txt");
+			let out = await plugin.run(async (path) => {
+				let file = Zotero.FileStore.Handle.file(path).writeFile("a");
+				await file.save();
+				file.appendFile("b");
+				let first = file.save();
+				file.appendFile("c");
+				let second = file.save();
+				let [a, b] = await Promise.all([first, second]);
+				return { same: a.path === b.path, pending: file.ops.length };
+			}, path);
+			assert.isTrue(out.same);
+			assert.equal(out.pending, 0);
+			assert.equal(await FileIO.readUTF8(path), "abc");
 		});
 	});
 
