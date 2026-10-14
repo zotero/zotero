@@ -28,6 +28,8 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 	});
 
@@ -63,39 +65,28 @@
 				optionTypeDefinition: {
 					resourceID: "string",
 					pluginID: "string",
-					target: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (!VALID_TARGETS.includes(value)) {
-								return `Option 'target' must be one of ${VALID_TARGETS.join(", ")}, got ${value}`;
-							}
-							return true;
-						}
-					},
-					type: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (!VALID_TYPES.includes(value)) {
-								return `Option 'type' must be one of ${VALID_TYPES.join(", ")}, got ${value}`;
-							}
-							return true;
-						}
-					},
+					target: lazy.Params.oneOf(VALID_TARGETS),
+					type: lazy.Params.oneOf(VALID_TYPES),
 					url: "string",
 				},
 			};
 		}
 
-		register(option) {
-			let mainKey = this._add(option);
-			if (!mainKey) {
-				return false;
+		// Applied to the open windows as it is added, removed from them as it goes; there is no notifier
+		_add(option) {
+			let mainKey = super._add(option);
+			if (mainKey) {
+				this._applyResource(this._optionsCache[mainKey]);
 			}
-			this._addPluginShutdownObserver();
-			this._applyResource(this._optionsCache[mainKey]);
 			return mainKey;
+		}
+
+		_remove(mainKey) {
+			let option = this._optionsCache[mainKey];
+			if (option) {
+				this._removeResource(option);
+			}
+			return super._remove(mainKey);
 		}
 
 		/**
@@ -104,25 +95,9 @@
 		 * @returns {ChromeWindow[]}
 		 */
 		_getTargetWindows(target) {
-			if (target === "mainWindow") {
-				return Zotero.getMainWindows();
-			}
-			let windowType;
-			if (target === "preferencePane") {
-				windowType = "zotero:pref";
-			}
-			else if (target === "readerWindow") {
-				windowType = "zotero:reader";
-			}
-			else {
-				return [];
-			}
-			let windows = [];
-			let enumerator = Services.wm.getEnumerator(windowType);
-			while (enumerator.hasMoreElements()) {
-				windows.push(enumerator.getNext());
-			}
-			return windows;
+			// getEnumerator(null) lists every window, so a target with no windowtype gets none
+			let windowType = lazy.WindowUtils.WINDOW_TYPES[target];
+			return windowType ? Array.from(Services.wm.getEnumerator(windowType)) : [];
 		}
 
 		/**
@@ -171,28 +146,6 @@
 					{ path: option.url },
 				]);
 			}
-		}
-
-		_remove(mainKey) {
-			let option = this._optionsCache[mainKey];
-			if (!option) {
-				this._log(`Can't remove unknown option '${mainKey}'`, "warn");
-				return false;
-			}
-			this._removeResource(option);
-			delete this._optionsCache[mainKey];
-			return true;
-		}
-
-		async _unregisterByPluginID(pluginID) {
-			let keys = Object.keys(this._optionsCache).filter(
-				id => this._getOptionPluginID(this._optionsCache[id]) == pluginID);
-			if (keys.length === 0) {
-				return [];
-			}
-			keys.forEach(id => this._remove(id));
-			this._log(`Registrations for plugin ${pluginID} are unregistered due to shutdown`);
-			return keys;
 		}
 
 		/**

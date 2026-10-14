@@ -42,7 +42,8 @@
 
 		MODIFIERS: ["accel", "control", "alt", "shift"],
 
-		_FKEY_RE: /^F([1-9]|1[0-2])$/,
+		// The function keys a combo can use
+		FKEY_RE: /^F([1-9]|1[0-2])$/,
 
 		_DIGIT_CODE_RE: /^(?:Digit|Numpad)([0-9])$/,
 
@@ -384,7 +385,7 @@
 			if (digitMatch) {
 				keys.push(digitMatch[1]);
 			}
-			else if (this._FKEY_RE.test(event.key)) {
+			else if (this.FKEY_RE.test(event.key)) {
 				keys.push(event.key);
 			}
 			else {

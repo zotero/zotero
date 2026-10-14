@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
@@ -107,16 +108,7 @@
 				optionTypeDefinition: {
 					buttonID: "string",
 					pluginID: "string",
-					target: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (!VALID_TARGETS.includes(value)) {
-								return `Option 'target' must be one of ${VALID_TARGETS.join(", ")}, got ${value}`;
-							}
-							return true;
-						}
-					},
+					target: lazy.Params.oneOf(VALID_TARGETS),
 					l10nID: "string",
 					icon: {
 						type: "string",

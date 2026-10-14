@@ -88,6 +88,15 @@ class PluginAPIBase {
 	}
 
 	/**
+	 * The options a definition types as functions, which a manager wraps for the plugin's scope
+	 * @param {Record<string, PluginAPIOptDefValue>} [typeDef]
+	 * @returns {string[]}
+	 */
+	_functionOptionNames(typeDef = this._config.optionTypeDefinition) {
+		return Object.keys(typeDef).filter(key => typeDef[key] === "function" || typeDef[key]?.type === "function");
+	}
+
+	/**
 	 * Validate an object against type definition or check hook
 	 * @param {object} obj - The object to validate
 	 * @param {object} typeDef - The type definition to validate against
