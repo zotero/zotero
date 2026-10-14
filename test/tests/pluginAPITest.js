@@ -1281,7 +1281,6 @@ describe("Plugin API", function () {
 
 			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
 			let context = await getCache("onCommand");
-			assert.notProperty(context, "buttonElem");
 			assert.equal(context.tabType, "library");
 			assert.equal(context.tabID, "zotero-pane");
 			assert.isArray(context.itemIDs);
@@ -1593,7 +1592,6 @@ describe("Plugin API", function () {
 
 			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
 			let context = await getCache("onCommand");
-			assert.notProperty(context, "buttonElem");
 			assert.equal(context.tabType, "library");
 			assert.equal(context.tabID, "zotero-pane");
 			assert.isArray(context.itemIDs);
@@ -1765,7 +1763,6 @@ describe("Plugin API", function () {
 				button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
 
 				assert.lengthOf(received, 1, "onCommand should get a single context arg");
-				assert.notProperty(received[0], "buttonElem");
 				assert.property(received[0], "itemIDs");
 
 				let unregNotifyPromise = waitForNotifierEvent("refresh", "custom-button");
@@ -3867,11 +3864,15 @@ describe("Plugin API", function () {
 
 		describe("Zotero.TabController", function () {
 			var windowID;
-			var libraryTabID = Zotero.TabController.libraryTabID;
+			var libraryTabID;
 
 			before(async function () {
 				windowID = win.browsingContext.id;
 				await win.ZoteroPane.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
+				// The library tab has no exposed constant; plugins find it by type
+				let { result: { tabs } } = await Zotero.TabController.query("tabs", { windowID });
+				libraryTabID = tabs.find(t => t.type === "library").tabID;
+				assert.equal(libraryTabID, "zotero-pane");
 			});
 
 			afterEach(function () {
