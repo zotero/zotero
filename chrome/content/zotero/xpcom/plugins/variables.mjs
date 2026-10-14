@@ -46,13 +46,10 @@ const ScopeVariables = {
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
 	toScope(value, pluginID, { path = null, _seen = null } = {}) {
-		if (!pluginID) {
+		if (!pluginID || PluginSandbox.isPrivileged(pluginID)) {
 			return value;
 		}
 		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return value;
-		}
 
 		// Early return for primitives
 		if (!VarCheck.isObjectLike(value)) {
@@ -160,11 +157,7 @@ const ScopeVariables = {
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
 	fromScope(value, pluginID, { trace = null, _seen = null } = {}) {
-		if (!pluginID) {
-			return value;
-		}
-		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)) {
+		if (!pluginID || PluginSandbox.isPrivileged(pluginID)) {
 			return value;
 		}
 
@@ -289,14 +282,21 @@ const ScopeVariables = {
 	 * Wrap a host function using a custom arg parser attached on the
 	 * function itself via `setCustomParser`.
 	 */
-	createCustomParserCallable(func, thisArg, pluginID, { trace } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
+	createCustomParserCallable(func, thisArg, pluginID, scope, { trace } = {}) {
+		// A sandbox unloaded or replaced by a reload no longer speaks for its plugin ID
+		let ensureLoaded = () => {
+			if (!scope || PluginSandbox.getScope(pluginID) !== scope) {
+				throw new Error(`Plugin ${pluginID} is not loaded`);
+			}
+		};
+		ensureLoaded();
 		let parser = func[CUSTOM_PARSER_KEY];
 		if (typeof parser !== "function") {
 			return ScopeUtils.ensureCallableInScope(func, thisArg, scope, { trace });
 		}
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
 			argParser: (args) => {
+				ensureLoaded();
 				parser({ pluginID, thisArg, args });
 				return args;
 			},
@@ -324,10 +324,10 @@ const ScopeVariables = {
 	 * @returns {Object} The mirrored object in scope
 	 */
 	createAllowlistMirrorObject(target, schema, pluginID, { frozen = true, mutable = true, cache = false, strong = false, pathPrefix = "" } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)) {
+		if (PluginSandbox.isPrivileged(pluginID)) {
 			return target;
 		}
+		let scope = PluginSandbox.getScope(pluginID);
 
 		// Facade cache to preserve identity and handle cycles for schema-based traversal
 		let allowlistFacadeCache = new WeakMap();
@@ -400,7 +400,7 @@ const ScopeVariables = {
 								trace,
 							});
 						case "CustomParserCallable":
-							return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
+							return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, scope, { trace });
 						default:
 							VarCheck.throwPropError("access", prop, "unknown schema handler");
 					}
