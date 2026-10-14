@@ -103,7 +103,7 @@
 		_read(flavor, as) {
 			let forms = FORMS[flavor] || FORMS.other;
 			let form = as ?? Object.keys(forms)[0];
-			if (!(form in forms)) {
+			if (!Object.hasOwn(forms, form)) {
 				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `'${flavor}' cannot be read as '${as}'`);
 			}
 			let data = Zotero.Utilities.Internal.getClipboard(flavor, forms[form]);

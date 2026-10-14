@@ -3651,6 +3651,16 @@ describe("Plugin API", function () {
 				assert.include(error.message, "Unknown param 'nope'");
 			});
 
+			it("should treat a prototype name as an unknown param", async function () {
+				assert.equal(await failureCode(api.query("echo", { constructor: 1 })), ControllerErrorCode.INVALID_PARAMS);
+				let { error } = await api.query("echo", JSON.parse('{ "__proto__": { "value": 1 } }'));
+				assert.include(error.message, "Unknown param '__proto__'");
+			});
+
+			it("should deny a caller naming a plugin that is not loaded", async function () {
+				assert.equal(await failureCode(api.query("echo", {}, "never-loaded@zotero.org")), ControllerErrorCode.PERMISSION_DENIED);
+			});
+
 			it("should hand the handler a detached plain copy of the params", async function () {
 				let params = { value: { list: [1, 2] } };
 				let { result: { params: received } } = await api.query("echo", params);
@@ -4064,6 +4074,13 @@ describe("Plugin API", function () {
 				assert.equal(await failureCode(Zotero.TabController.query("tabs")), errorCodes.INVALID_PARAMS);
 				assert.equal(await failureCode(Zotero.TabController.command("selectTab", { tabID: libraryTabID })), errorCodes.INVALID_PARAMS);
 				assert.equal(await failureCode(Zotero.TabController.query("tabs", { windowID: -1 })), errorCodes.NOT_FOUND);
+			});
+
+			it("should check every entry of a list param", async function () {
+				let errorCodes = Zotero.TabController.errorCodes;
+				assert.equal(await failureCode(Zotero.TabController.command("closeTabs", { windowID, tabIDs: [1] })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectItems", { windowID, itemIDs: ["1"] })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "library", ids: [1.5] })), errorCodes.INVALID_PARAMS);
 			});
 
 			it("should describe the library tab with its selection", async function () {

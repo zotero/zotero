@@ -175,6 +175,7 @@
 				pluginID: this._pluginID,
 				autoResize: { height: true },
 				channel: true,
+				tracePath: "Zotero.ItemPaneManager.registerSection.page",
 			});
 			this._embeddedBrowser = element;
 			this._pageMessenger = messenger;

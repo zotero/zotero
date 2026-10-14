@@ -454,6 +454,7 @@
 				pluginID: pane.pluginID,
 				autoResize: { height: true },
 				channel: true,
+				tracePath: 'Zotero.PreferencePanes.register.page',
 				hostAPI: {
 					navigate: ({ paneID }) => {
 						paneID = String(paneID);
