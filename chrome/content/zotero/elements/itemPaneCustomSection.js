@@ -30,7 +30,7 @@
 		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
 		{ global: "current" }
 	);
-	const { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
+	const { loadEmbeddedPluginPage } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs");
 
 	class ItemPaneCustomSection extends ItemPaneSectionElementBase {
 		_hooks = {};
@@ -56,7 +56,7 @@
 				</collapsible-section>
 				<html:style class="custom-style"></html:style>
 			`;
-			return WindowScopeVariables.sanitizeFragment(MozXULElement.parseXULToFragment(content), this._pluginID);
+			return MozXULElement.parseXULToFragment(content);
 		}
 
 		get pluginID() {
@@ -89,12 +89,18 @@
 		set bodyXHTML(bodyXHTML) {
 			this._bodyXHTML = bodyXHTML;
 			if (this.initialized) {
-				let frag = MozXULElement.parseXULToFragment(bodyXHTML);
 				this._body.replaceChildren(
-					document.importNode(WindowScopeVariables.sanitizeFragment(frag, this._pluginID), true)
+					document.importNode(MozXULElement.parseXULToFragment(bodyXHTML), true)
 				);
-				WindowScopeVariables.activateInlineHandlers(this._body, this._pluginID);
 			}
+		}
+
+		get src() {
+			return this._src;
+		}
+
+		set src(src) {
+			this._src = src;
 		}
 
 		get fullHeight() {
@@ -109,8 +115,6 @@
 			this._section = this.querySelector("collapsible-section");
 			this._body = this._section.querySelector('[data-type="body"]');
 			this._style = this.querySelector(".custom-style");
-
-			WindowScopeVariables.activateInlineHandlers(this._body, this._pluginID);
 
 			if (this.paneID) this.dataset.pane = this.paneID;
 			if (this._label) this._section.label = this._label;
@@ -128,6 +132,7 @@
 					darkIcon = icon;
 				}
 				let listener = (event) => {
+					if (!this._hooksReady) return;
 					let props = this._assembleProps(
 						this._getHookProps(),
 						{ event },
@@ -146,10 +151,42 @@
 			this._section.addEventListener("toggle", this._handleToggle);
 			this._sectionListeners.push({ type: "toggle", listener: this._handleToggle });
 
-			this._handleInit();
+			if (this._src) {
+				// Hooks fire once the page has loaded (_initEmbeddedBrowser)
+				this._initEmbeddedBrowser().catch(e => Zotero.logError(e));
+			}
+			else {
+				this._handleInit();
+			}
 
 			// Disable refresh until data is load
 			this._refreshDisabled = false;
+		}
+
+		/**
+		 * Load `src` in an embedded content browser as the section body, then
+		 * fire the init hook and render. Hooks get the page's own document.
+		 */
+		async _initEmbeddedBrowser() {
+			this._body.replaceChildren();
+			let { browser, loadPromise } = loadEmbeddedPluginPage(this._body, this._src, {
+				className: "plugin-section-browser",
+			});
+			this._embeddedBrowser = browser;
+			await loadPromise;
+
+			this._embeddedLoaded = true;
+			this._handleInit();
+			// Replay an item change that happened while the page was loading
+			if (this.item) {
+				this._handleItemChange();
+			}
+			await this._forceRenderAll();
+		}
+
+		// Embedded sections must not fire hooks before the page has loaded
+		get _hooksReady() {
+			return !this._src || !!this._embeddedLoaded;
 		}
 
 		destroy() {
@@ -209,6 +246,15 @@
 		}
 		
 		_getBasicHookProps() {
+			// Embedded sections give hooks the plugin page's own document
+			if (this._src) {
+				let doc = this._embeddedBrowser?.contentDocument;
+				return {
+					paneID: this.paneID,
+					doc,
+					body: doc?.body,
+				};
+			}
 			return {
 				paneID: this.paneID,
 				doc: document,
@@ -253,19 +299,20 @@
 		}
 
 		_handleDestroy() {
-			if (!this._hooks.destroy) return;
+			// If the embedded page never loaded, the init hook never fired
+			if (!this._hooks.destroy || !this._hooksReady) return;
 			let props = this._assembleProps(this._getBasicHookProps());
 			this._hooks.destroy(props);
 		}
 
 		render() {
-			if (!this._hooks.render) return false;
+			if (!this._hooks.render || !this._hooksReady) return false;
 			if (!this.initialized || this._isAlreadyRendered()) return false;
 			return this._hooks.render(this._assembleProps(this._getHookProps()));
 		}
 
 		async asyncRender() {
-			if (!this._hooks.asyncRender) return false;
+			if (!this._hooks.asyncRender || !this._hooksReady) return false;
 			if (!this.initialized || this._isAlreadyRendered("async")) return false;
 			return this._hooks.asyncRender(this._assembleProps(this._getHookProps()));
 		}
@@ -276,7 +323,7 @@
 		}
 
 		_handleToggle = (event) => {
-			if (!this._hooks.toggle) return;
+			if (!this._hooks.toggle || !this._hooksReady) return;
 			let props = this._assembleProps(
 				this._getHookProps(),
 				{ event },
@@ -285,7 +332,7 @@
 		};
 
 		_handleItemChange() {
-			if (!this._hooks.itemChange) return;
+			if (!this._hooks.itemChange || !this._hooksReady) return;
 			let props = this._assembleProps(this._getHookProps());
 			this._hooks.itemChange(props);
 		}
