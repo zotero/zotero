@@ -294,6 +294,10 @@
 							getContext: () => {
 								let container = this.container;
 								let ret = {
+									get itemIDs() {
+										return container?.item ? [container.item.id] : [];
+									},
+									// @deprecated Privileged plugins only
 									get items() {
 										return container ? [container.item] : [];
 									},

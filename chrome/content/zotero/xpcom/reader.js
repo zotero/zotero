@@ -2394,6 +2394,10 @@ class ReaderWindow extends ReaderInstance {
 			getContext: () => {
 				let item = this._item;
 				return {
+					get itemIDs() {
+						return item ? [item.id] : [];
+					},
+					// @deprecated Privileged plugins only
 					get items() {
 						return item ? [item] : [];
 					},

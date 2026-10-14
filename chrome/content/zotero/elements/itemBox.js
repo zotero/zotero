@@ -1155,6 +1155,7 @@
 			try {
 				onItemChange({
 					rowID,
+					itemID: this.item?.id,
 					item: this.item,
 					tabType: this.tabType,
 					editable: this.editable,
@@ -1181,6 +1182,7 @@
 			try {
 				data = onGetData({
 					rowID,
+					itemID: this.item?.id,
 					item: this.item,
 					tabType: this.tabType,
 					editable: this.editable,
@@ -2440,6 +2442,7 @@
 					try {
 						onSetData({
 							rowID,
+							itemID: this.item?.id,
 							item: this.item,
 							tabType: this.tabType,
 							editable: this.editable,
@@ -3043,6 +3046,10 @@
 					getContext: () => {
 						let item = this.item;
 						return {
+							get itemIDs() {
+								return item ? [item.id] : [];
+							},
+							// @deprecated Privileged plugins only
 							get items() {
 								return [item];
 							},
