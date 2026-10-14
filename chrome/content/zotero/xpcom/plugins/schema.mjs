@@ -170,9 +170,10 @@ const PERMISSION_SCHEMAS = {
 	},
 	// FilePicker is set up by setupFilePicker() with fileSystemRead or fileSystemWrite
 	preferences: {
-		// Zotero.Prefs is set up directly by setupPreferences() in globals.mjs.
-		// By default, plugin can access the prefixed `extensions.<GUID>` branch.
-		// For other branches, access is gated by the pref_permissions declared in the manifest.
+		// Zotero.Prefs is set up directly by setupPreferences() in globals.mjs, and prefs.js defaults
+		// go through the same PluginPrefs gate (Zotero.Plugins). By default, plugin can access the
+		// prefixed `extensions.<GUID>` branch; for other branches, access is gated by the
+		// pref_permissions declared in the manifest.
 	},
 	itemTree: {
 		Zotero: {
