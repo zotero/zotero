@@ -80,7 +80,7 @@
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number }} closeWindow
 	 * @property {{ windowID: number, pane: "item" | "tagSelector" | "context" }} togglePane
-	 * @property {{ type: "reader" | "note", itemID: number, location?: object }} openWindow
+	 * @property {{ type: "reader" | "note" | "preferencePane", itemID?: number, location?: object }} openWindow
 	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, fitContent?: boolean, parentWindowID?: number }} openPluginWindow
 	 *
 	 *
@@ -153,10 +153,10 @@
 						params: {
 							type: {
 								type: "string",
-								checkHook: value => lazy.WindowUtils.OPENABLE_TYPES.includes(value)
-									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_TYPES.join(", ")}, got ${value}`,
+								checkHook: value => lazy.WindowUtils.OPENABLE_WINDOW_TYPES.includes(value)
+									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_WINDOW_TYPES.join(", ")}, got ${value}`,
 							},
-							itemID: "number",
+							itemID: { type: "number", optional: true },
 							location: { type: "object", optional: true },
 						},
 						handler: ({ type, itemID, location }) => this._openWindow(type, itemID, location),
@@ -216,10 +216,17 @@
 				title: win.document.title,
 				focused: Services.focus.activeWindow === win,
 			};
-			if (type === "pluginWindow") {
+			if (type === "readerWindow") {
+				info.itemID = win.reader?.itemID;
+			}
+			else if (type === "noteWindow") {
+				// note.xhtml gets its item through the window's io argument
+				let io = win.arguments?.[0];
+				info.itemID = parseInt((io?.wrappedJSObject || io)?.itemID) || undefined;
+			}
+			else if (type === "pluginWindow") {
 				info.pluginID = lazy.WindowUtils.getPluginWindowOwner(win);
 			}
-			// TODO: itemID for readerWindow (win.reader.itemID) and noteWindow
 			return info;
 		}
 
@@ -265,13 +272,20 @@
 		}
 
 		/**
-		 * Open an item in its own window; an existing window for the item is focused instead
-		 * @param {"reader" | "note"} type
-		 * @param {number} itemID
-		 * @param {object} [location]
+		 * Open an item, or the preferences window
+		 * @param {"reader" | "note" | "preferencePane"} type
+		 * @param {number} [itemID] - Required for reader and note, ignored for preferencePane
+		 * @param {object} [location] - The opener's location, or { pane } for preferencePane
 		 * @returns {Promise<WindowControllerCommandResults["openWindow"]>}
 		 */
 		async _openWindow(type, itemID, location) {
+			let { INVALID_PARAMS } = lazy.ControllerAPIBase.errorCodes;
+			if (type === "preferencePane") {
+				return this._openPreferences(location?.pane);
+			}
+			if (itemID === undefined) {
+				this._throw(INVALID_PARAMS, `Param 'itemID' is required for ${type}`);
+			}
 			lazy.WindowUtils.getOpenableItem(itemID, type);
 			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
 			let { instance, win } = await opener.open(itemID, location, { openInWindow: true });
@@ -279,6 +293,31 @@
 			await instance._initPromise;
 			if (!win || win.closed) {
 				throw new Error(`No window opened for item ${itemID}`);
+			}
+			return { windowID: lazy.WindowUtils.getWindowID(win) };
+		}
+
+		/**
+		 * Open the preferences, or focus the open window, on any registered pane, which may still be loading
+		 * @param {string} [pane] - A pane ID
+		 * @returns {Promise<WindowControllerCommandResults["openWindow"]>}
+		 */
+		async _openPreferences(pane) {
+			let { INVALID_PARAMS, NOT_FOUND } = lazy.ControllerAPIBase.errorCodes;
+			if (pane !== undefined) {
+				if (typeof pane !== "string") {
+					this._throw(INVALID_PARAMS, "Param 'location.pane' must be a string");
+				}
+				let known = [...Zotero.PreferencePanes.builtInPanes, ...Zotero.PreferencePanes.pluginPanes]
+					.some(p => p.id === pane);
+				if (!known) {
+					this._throw(NOT_FOUND, `No preference pane with ID ${pane}`);
+				}
+			}
+			let win = Zotero.Utilities.Internal.openPreferences(pane);
+			// A new window holds a blank document until it loads, and is listed as a preferencePane only then
+			if (!win.Zotero_Preferences) {
+				await new Promise(resolve => win.addEventListener("load", resolve, { once: true }));
 			}
 			return { windowID: lazy.WindowUtils.getWindowID(win) };
 		}
