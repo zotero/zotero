@@ -188,7 +188,7 @@ class RequestAPIBase extends PluginAPIBase {
 				`${kind} '${name}' requires permission ${permissions.join(", ")}`);
 		}
 
-		params = this._toPlainParams(name, params);
+		params = this._toPlainParams(name, params, context);
 		let validated = this._validateParams(params, def.params);
 		if (!validated.valid) {
 			this._throw(RequestAPIBase.errorCodes.INVALID_PARAMS,
@@ -226,8 +226,11 @@ class RequestAPIBase extends PluginAPIBase {
 
 	/**
 	 * Detach params from the caller's compartment; functions and getters are read once or dropped
+	 * @param {string} name
+	 * @param {object} params
+	 * @param {RequestCaller} [_context] - For a subclass that reads params in the caller's terms first
 	 */
-	_toPlainParams(name, params) {
+	_toPlainParams(name, params, _context) {
 		if (params === undefined || params === null) {
 			return {};
 		}
