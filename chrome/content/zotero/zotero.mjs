@@ -123,6 +123,7 @@ const xpcomFilesLocal = [
 	'pluginAPI/pluginInteropManager',
 	'pluginAPI/windowController',
 	'pluginAPI/tabController',
+	'pluginAPI/clipboardController',
 	'pluginAPI/dataStore',
 	'pluginAPI/fileStore',
 	'sdt',
