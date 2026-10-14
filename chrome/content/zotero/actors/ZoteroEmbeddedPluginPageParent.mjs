@@ -2,6 +2,11 @@ ChromeUtils.defineESModuleGetters(globalThis, {
 	Zotero: "chrome://zotero/content/zotero.mjs"
 });
 
+const lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	PluginTrace: "chrome://zotero/content/xpcom/plugins/trace.mjs",
+});
+
 // Chrome-side hub for an embedded plugin page: relays page messages (via
 // PluginPageChannel), dispatches zoteroHost.api calls, and applies resizes.
 export class ZoteroEmbeddedPluginPageParent extends JSWindowActorParent {
@@ -53,20 +58,47 @@ export class ZoteroEmbeddedPluginPageParent extends JSWindowActorParent {
 			await this._hostAPIDeferred.promise;
 		}
 		let name = String(data?.name || "");
-		let handler = Object.prototype.hasOwnProperty.call(this._hostAPI, name)
-			? this._hostAPI[name]
-			: null;
-		if (typeof handler !== "function") {
-			throw new Error("Unknown host API");
+		// A page call is plugin code reaching chrome, traced like a sandbox call under the page it came from
+		let t = lazy.PluginTrace.start();
+		let failure;
+		try {
+			let handler = Object.prototype.hasOwnProperty.call(this._hostAPI, name)
+				? this._hostAPI[name]
+				: null;
+			if (typeof handler !== "function") {
+				throw new Error("Unknown host API");
+			}
+			// Host APIs take a single JSON-object argument
+			let params = data.params ?? {};
+			if (typeof params !== "object" || Array.isArray(params)) {
+				throw new Error("params must be a plain object");
+			}
+			return await handler(params);
 		}
-		// Host APIs take a single JSON-object argument
-		let params = data.params ?? {};
-		if (typeof params !== "object" || Array.isArray(params)) {
-			throw new Error("params must be a plain object");
+		catch (e) {
+			failure = e;
+			throw e;
 		}
-		return handler(params);
+		finally {
+			if (t) lazy.PluginTrace.end(t, this._pluginID, "call", `${this._pagePath}:zoteroHost.api.${name}`, failure);
+		}
 	}
-	
+
+	// The page's principal is the plugin's own moz-extension policy
+	get _pluginID() {
+		return this.manager?.documentPrincipal?.addonPolicy?.id || "unknown";
+	}
+
+	// The page within the plugin, as its URL path; the host is the plugin's UUID, which the plugin ID covers
+	get _pagePath() {
+		try {
+			return this.manager?.documentURI?.pathQueryRef || "";
+		}
+		catch {
+			return "";
+		}
+	}
+
 	_deliver(data) {
 		for (let fn of this._listeners) {
 			try {

@@ -48,9 +48,10 @@
  * @property {boolean} [optional] - Whether the value is optional, default false
  * @property {PluginAPIOptDefCheckHook} [checkHook]
  *  - A function to check the value, returning true if it is valid
- * @property {PluginAPIOptDefConfig} [children]
+ * @property {PluginAPIOptDefConfig | PluginAPIOptDefType} [children]
  *  - The type definition of the children of the object. The children can be
- * an object or an array of objects with the same structure
+ * an object or an array of objects with the same structure; for an array, a type
+ * name instead is what every element must be
  * @property {any} [fallbackReturn] - The value to return if the check hook fails
  * The fallback return is only used if the value is a function and it throws an error
  * If no fallback return is defined, the function will return null
@@ -94,7 +95,8 @@ class PluginAPIBase {
 	 * @returns {{obj?: object, valid: boolean, reason?: string}} - The validated object if valid, else why not
 	 */
 	_validateObject(obj, typeDef, path = "") {
-		obj = Object.assign({}, obj);
+		// A copy of the own properties; through Object.assign, a __proto__ key would set the prototype
+		obj = Object.fromEntries(Object.entries(obj ?? {}));
 
 		try {
 			for (let key of Object.keys(typeDef)) {
@@ -148,8 +150,14 @@ class PluginAPIBase {
 
 				if (requirement.children) {
 					if (Array.isArray(val)) {
-						// Only validate array elements if they are objects
-						if (val.length > 0 && typeof val[0] == "object") {
+						// A type name is checked on every element; a definition validates object elements
+						if (typeof requirement.children === "string") {
+							let bad = val.findIndex(v => typeof v !== requirement.children);
+							if (bad !== -1) {
+								throw new Error(`Option ${fullPath}[${bad}] must be ${requirement.children}, got ${typeof val[bad]}`);
+							}
+						}
+						else if (val.length > 0 && typeof val[0] == "object") {
 							for (let i = 0; i < val.length; i++) {
 								let result = this._validateObject(val[i], requirement.children, `${path}.${key}[${i}].`);
 								if (!result.valid) {
