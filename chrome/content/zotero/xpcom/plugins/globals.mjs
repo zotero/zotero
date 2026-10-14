@@ -165,11 +165,11 @@ function setupOpenWindow(scope) {
 							pluginID,
 							// The page actor keeps the browser at the document scroll size
 							autoResize: fitContent ? { height: true, width: true, content: true } : {},
-							// Reserved host message so the page can close its own window
-							onHostMessage: (data) => {
-								if (data?.type === "close") {
+							// The page can close its own window as zoteroHost.api.close()
+							hostAPI: {
+								close: () => {
 									win.close();
-								}
+								},
 							},
 						});
 						if (!messenger) {
