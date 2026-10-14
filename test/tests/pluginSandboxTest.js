@@ -3326,57 +3326,121 @@ describe("Plugin Sandbox", function () {
 				evalInScope("Zotero.ItemTreeManager.unregisterColumn(_dupColDataKey)");
 			});
 
-			it("should pass a safe document to renderCell", function () {
-				// Register a column with renderCell that probes doc restrictions
+			it("should render renderCell SVG URLs as an image", function () {
 				evalInScope(`
-					var _renderResults = {};
 					var _renderColKey = Zotero.ItemTreeManager.registerColumn({
 						dataKey: 'sandbox-render-col',
 						label: 'Render Column',
 						pluginID: '${ADDON_ID}',
 						dataProvider: function(item, dataKey) { return 'test'; },
-						renderCell: function(index, data, column, isFirstColumn, doc) {
-							_renderResults.hasDoc = !!doc;
-							_renderResults.typeofDoc = typeof doc;
-							// Safe document should expose createElement
-							_renderResults.hasCreateElement = typeof doc.createElement === 'function';
-							_renderResults.hasCreateXULElement = typeof doc.createXULElement === 'function';
-							// Safe document should not expose querySelector, getElementById, etc.
-							_renderResults.hasQuerySelector = typeof doc.querySelector === 'function';
-							_renderResults.hasGetElementById = typeof doc.getElementById === 'function';
-							_renderResults.hasDocumentElement = typeof doc.documentElement !== 'undefined';
-							// Create an element and return it
-							var span = doc.createElement('span');
-							_renderResults.createdTag = span.tagName;
-							return span;
+						renderCell: function(index, data, column, isFirstColumn) {
+							switch (index) {
+								// Raw markup is not accepted, to test the fallback
+								case 1: return '<svg xmlns="http://www.w3.org/2000/svg"/>';
+								// A plugin-internal .svg URL
+								case 2: return 'cell.svg';
+								// An external .svg URL, which must be rejected
+								case 3: return 'https://example.com/x.svg';
+								// A data: URL of a non-SVG type, which must be rejected
+								case 4: return 'data:text/html,<script>bad()</script>';
+								default: return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+									'<svg xmlns="http://www.w3.org/2000/svg" width="40" height="12">'
+									+ '<text x="0" y="10">' + data + '</text></svg>');
+							}
 						}
 					});
 				`);
 				let dataKey = evalInScope("_renderColKey");
 				assert.isString(dataKey);
 				let option = Zotero.ItemTreeManager._columnManager._optionsCache[dataKey];
-				let renderCell = option.renderCell;
 
 				try {
-					// Invoke renderCell with a real document
-					renderCell(0, 'test', { className: 'test-col' }, false, pluginWin.document);
+					let cell = option.renderCell(0, "test", { className: "test-col" }, false, pluginWin.document);
+					assert.equal(cell.localName, "span");
+					assert.equal(cell.className, "cell test-col",
+						"the cell element itself should be chrome-built");
+					let img = cell.firstElementChild;
+					assert.equal(img.localName, "img",
+						"an SVG data URL should be shown as an image");
+					assert.match(img.src, /^data:image\/svg\+xml/);
+					assert.include(decodeURIComponent(img.src), "test");
+					assert.equal(img.alt, "test");
 
-					assert.isTrue(evalInScope("_renderResults.hasDoc"),
-						"doc should be accessible");
-					assert.isTrue(evalInScope("_renderResults.hasCreateElement"),
-						"createElement should be exposed on safe document");
-					assert.isTrue(evalInScope("_renderResults.hasCreateXULElement"),
-						"createXULElement should be exposed on safe document");
-					assert.isTrue(evalInScope("_renderResults.hasQuerySelector"),
-						"querySelector should be exposed on safe document");
-					assert.isTrue(evalInScope("_renderResults.hasGetElementById"),
-						"getElementById should be exposed on safe document");
-					assert.equal(evalInScope("_renderResults.createdTag"), "span",
-						"createElement should return elements");
+					// Raw markup falls back to the plain cell data
+					let fallback = option.renderCell(1, "test", { className: "test-col" }, false, pluginWin.document);
+					assert.equal(fallback.className, "cell test-col");
+					assert.equal(fallback.textContent, "test");
+					assert.equal(fallback.childElementCount, 0,
+						"raw markup must not become an image");
+
+					// A plugin-internal .svg URL resolves against the plugin root
+					let urlCell = option.renderCell(2, "test", { className: "test-col" }, false, pluginWin.document);
+					assert.equal(urlCell.firstElementChild.src,
+						Zotero.Plugins.getBaseURI(ADDON_ID) + "cell.svg");
+
+					// An external .svg URL falls back to the plain cell data
+					let externalCell = option.renderCell(3, "test", { className: "test-col" }, false, pluginWin.document);
+					assert.equal(externalCell.childElementCount, 0,
+						"external URLs must be rejected");
+					assert.equal(externalCell.textContent, "test");
+
+					// A non-SVG data: URL falls back to the plain cell data
+					let htmlDataCell = option.renderCell(4, "test", { className: "test-col" }, false, pluginWin.document);
+					assert.equal(htmlDataCell.childElementCount, 0,
+						"non-SVG data: URLs must be rejected");
 				}
 				finally {
 					evalInScope("Zotero.ItemTreeManager.unregisterColumn(_renderColKey)");
 				}
+			});
+
+			it("should restrict htmlLabel to SVG URLs", function () {
+				let stringLabelKey = evalInScope(`
+					Zotero.ItemTreeManager.registerColumn({
+						dataKey: 'sandbox-strlabel-col',
+						label: 'Label Column',
+						pluginID: '${ADDON_ID}',
+						htmlLabel: '<b onclick="alert(1)">evil</b>',
+						dataProvider: function() { return ''; },
+					});
+				`);
+				assert.isString(stringLabelKey);
+				let option = Zotero.ItemTreeManager._columnManager._optionsCache[stringLabelKey];
+				assert.isUndefined(option.htmlLabel, "an HTML label should be dropped");
+				Zotero.ItemTreeManager.unregisterColumn(stringLabelKey);
+
+				let svgLabelKey = evalInScope(`
+					Zotero.ItemTreeManager.registerColumn({
+						dataKey: 'sandbox-svglabel-col',
+						label: 'Label Column',
+						pluginID: '${ADDON_ID}',
+						htmlLabel: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+							'<svg xmlns="http://www.w3.org/2000/svg" width="40" height="12">'
+							+ '<text x="0" y="10">fancy</text></svg>'),
+						dataProvider: function() { return ''; },
+					});
+				`);
+				assert.isString(svgLabelKey);
+				option = Zotero.ItemTreeManager._columnManager._optionsCache[svgLabelKey];
+				assert.match(option.htmlLabel.svgSrc, /^data:image\/svg\+xml/,
+					"an SVG data URL label should be kept");
+				assert.include(decodeURIComponent(option.htmlLabel.svgSrc), "fancy");
+				Zotero.ItemTreeManager.unregisterColumn(svgLabelKey);
+
+				let urlLabelKey = evalInScope(`
+					Zotero.ItemTreeManager.registerColumn({
+						dataKey: 'sandbox-urllabel-col',
+						label: 'Label Column',
+						pluginID: '${ADDON_ID}',
+						htmlLabel: 'label.svg',
+						dataProvider: function() { return ''; },
+					});
+				`);
+				assert.isString(urlLabelKey);
+				option = Zotero.ItemTreeManager._columnManager._optionsCache[urlLabelKey];
+				assert.equal(option.htmlLabel.svgSrc, Zotero.Plugins.getBaseURI(ADDON_ID) + "label.svg",
+					"a plugin .svg URL label should resolve against the plugin root");
+				Zotero.ItemTreeManager.unregisterColumn(urlLabelKey);
 			});
 		});
 
