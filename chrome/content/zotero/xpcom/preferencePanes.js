@@ -28,7 +28,6 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
 	});
 
@@ -148,15 +147,15 @@
 		 * @param {string} [options.image] URI of an icon to be displayed in the navigation sidebar, optionally relative to
 		 * 		the plugin's root. If not provided, the plugin's icon (from manifest.json) is used.
 		 * @param {string[]} [options.scripts] Array of URIs of scripts to load along with the pane, optionally relative to
-		 * 		the plugin's root. Only available for privileged plugins.
+		 * 		the plugin's root. @deprecated Privileged plugins only; load scripts from the page at `src` instead.
 		 * @param {string[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane, optionally
-		 * 		relative to the plugin's root. Only available for privileged plugins.
+		 * 		relative to the plugin's root. @deprecated Privileged plugins only; load stylesheets from the page at `src` instead.
 		 * @param {string[]} [options.l10nFiles] Array of Fluent (.ftl) file paths to load for localization.
 		 * 		Registered once via `Zotero.WindowResourceManager` and applied to every preferences window.
-		 * 		Only available for privileged plugins.
+		 * 		@deprecated Privileged plugins only; use `<link rel="localization">` in the page at `src` instead.
 		 * @param {Function} [options.onLoad] Called after the pane content is loaded and inserted into the document.
 		 * 		Receives `{ doc, body }` where `doc` is the preferences document and `body` is the pane container element.
-		 * 		Only available for privileged plugins.
+		 * 		@deprecated Privileged plugins only; run scripts from the page at `src` instead.
 		 * @param {string} [options.helpURL] If provided, a help button will be displayed under the pane
 		 * 		and the provided URL will open when it is clicked
 		 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
@@ -220,14 +219,8 @@
 				src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
 			}
 
-			let onLoad = null;
-			if (typeof options.onLoad === 'function') {
-				onLoad = lazy.ScopeVariables.fromScope(
-					options.onLoad,
-					options.pluginID,
-					{ rootNode: props => props.body }
-				);
-			}
+			// onLoad is dropped above for unprivileged plugins, so no sandbox wrapping is needed
+			let onLoad = typeof options.onLoad === 'function' ? options.onLoad : null;
 
 			let addPaneOptions = {
 				id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,
