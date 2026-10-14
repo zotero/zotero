@@ -27,7 +27,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
@@ -223,7 +223,7 @@
 	 */
 
 
-	class ItemPaneSectionManagerInternal extends lazy.PluginAPIBase {
+	class ItemPaneSectionManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
 			super();
 			this.config = {
@@ -474,7 +474,7 @@
 	 */
 
 
-	class ItemPaneInfoRowManagerInternal extends lazy.PluginAPIBase {
+	class ItemPaneInfoRowManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
 			super();
 			this.config = {

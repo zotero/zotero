@@ -29,13 +29,12 @@ window.PluginWindow = {
 	/**
 	 * Initialize the plugin chrome window.
 	 *
-	 * @param {string} [windowId] - Unique window identifier provided by the plugin.
-	 *       menubar:      "pluginWindow/<windowId>/menubar/{file,edit,view,window,help}"
-	 *       context menu: "pluginWindow/<windowId>/context"
+	 * @param {string} [name] - Name for this kind of window, unique within the plugin; the <name> in
+	 *     "pluginWindow/<name>/menubar/{file,edit,view,window,help}" and "pluginWindow/<name>/context"
 	 * @param {string} [pluginID] - Plugin ID owning this window. When set,
 	 *     the window will close automatically on plugin shutdown.
 	 */
-	init(windowId, pluginID) {
+	init(name, pluginID) {
 		let browser = document.getElementById("plugin-browser");
 
 		browser.docShell.windowDraggingAllowed = true;
@@ -54,11 +53,11 @@ window.PluginWindow = {
 			document.title = browser.contentDocument?.title || "";
 		}, true);
 
-		if (windowId) {
+		if (name) {
 			if (!notitle) {
-				this._setupMenus(windowId);
+				this._setupMenus(name, pluginID);
 			}
-			this._setupContextMenu(windowId);
+			this._setupContextMenu(name, pluginID);
 		}
 
 		if (pluginID) {
@@ -89,36 +88,36 @@ window.PluginWindow = {
 		}, { once: true });
 	},
 
-	_setupMenus(windowId) {
+	_setupMenus(name, pluginID) {
 		let menubar = document.getElementById("main-menubar");
 
 		// Menu IDs follow the pattern "menu-{type}"
 		for (let menu of menubar.querySelectorAll("menu[id^='menu-']")) {
 			let type = menu.id.split("-")[1];
-			let target = `pluginWindow/${windowId}/menubar/${type}`;
+			let target = `pluginWindow/${name}/menubar/${type}`;
 			let popup = menu.querySelector("menupopup");
 			if (!popup) continue;
 
 			popup.addEventListener("popupshowing", (event) => {
 				if (event.target !== event.currentTarget) return;
-				Zotero.MenuManager.updateMenuPopup(popup, target, { event });
+				Zotero.MenuManager.updateMenuPopup(popup, target, { event, pluginID });
 			});
 
 			// Show the menu only if items are registered for this target
-			if (Zotero.MenuManager.hasMenus(target)) {
+			if (Zotero.MenuManager.hasMenus(target, pluginID)) {
 				menu.hidden = false;
 			}
 		}
 	},
 
-	_setupContextMenu(windowId) {
+	_setupContextMenu(name, pluginID) {
 		let popup = document.getElementById("pluginContentContextMenu");
 		if (!popup) return;
-		let target = `pluginWindow/${windowId}/context`;
+		let target = `pluginWindow/${name}/context`;
 
 		popup.addEventListener("popupshowing", (event) => {
 			if (event.target !== event.currentTarget) return;
-			Zotero.MenuManager.updateMenuPopup(popup, target, { event });
+			Zotero.MenuManager.updateMenuPopup(popup, target, { event, pluginID });
 		});
 	},
 };
