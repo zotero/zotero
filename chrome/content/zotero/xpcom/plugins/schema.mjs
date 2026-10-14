@@ -166,32 +166,20 @@ const PERMISSION_SCHEMAS = {
 	},
 	fileSystemRead: {
 		Zotero: {
-			File: {
-				getBinaryContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
-				getContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
-				// getContentsFromURLAsync is injected by setupFile() for network access control
-				directoryIsEmpty: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
-				generateDataURI: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
-				iterateDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0] } },
-				// withAccessSession, requestFileAccess, getPluginDir are
-				// injected directly onto the File mirror by setupFile().
+			// Files are read as snapshots and changed through change sets, each path gated by PluginFileAccess.
+			// ChangeSet, path and withSession are added per sandbox by setupFileStore() in globals.mjs
+			FileStore: {
+				query: "CustomParserCallable",
+				errorCodes: true,
+				objectTypes: true,
+				operationNames: true,
 			},
 		},
 	},
 	fileSystemWrite: {
 		Zotero: {
-			File: {
-				putContentsAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
-				// download is injected by setupFile() for network access control
-				rename: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
-				removeIfExists: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
-				moveDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0, 1] } },
-				setNormalFilePermissions: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
-				moveToUnique: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0, 1] } },
-				copyToUnique: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
-				copyDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
-				createDirectoryIfMissingAsync: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { write: [0] } },
-				zipDirectory: { [SchemaKey.HANDLER]: "FileAccessCallable", [SchemaKey.SCHEMA]: { read: [0], write: [1] } },
+			FileStore: {
+				commit: "CustomParserCallable",
 			},
 		},
 	},

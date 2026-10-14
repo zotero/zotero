@@ -23,19 +23,17 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-// The change set builder for Zotero.DataStore: a dependency-free script that loadSubScript evaluates in
-// chrome and in each sandbox. The IIFE hides the helpers, since loaders take every top-level var
+// The change set builder for Zotero.DataStore: the data half on top of ChangeSetBase, which loadSubScript
+// evaluated into the same holder first, in chrome and in each sandbox
+/* global ChangeSetBase */
+// eslint-disable-next-line no-unused-vars
 var DataChangeSet = (() => {
 "use strict";
 
+const { ChangesBase, ChangeSet, clonePlain, nextRef } = ChangeSetBase;
+
 // Zotero object keys: 8 characters from this alphabet
 const KEY_RE = /^[23456789ABCDEFGHIJKLMNPQRSTUVWXYZ]{8}$/;
-
-// Operations after which the object no longer exists; mirrors the store's `terminal` flags, which decide
-const TERMINAL_OPS = new Set(["erase"]);
-
-let refCounter = 0;
 
 function isKey(value) {
 	return typeof value === "string" && KEY_RE.test(value);
@@ -47,34 +45,9 @@ function assertInteger(value, what) {
 	}
 }
 
-// Operation params and create blocks are plain JSON data; copied on the way in and out, so neither the
-// caller's later edits nor edits to a JSON export reach the shared internal state
-function clonePlain(value) {
-	if (Array.isArray(value)) {
-		return value.map(clonePlain);
-	}
-	if (value !== null && typeof value === "object") {
-		return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, clonePlain(entry)]));
-	}
-	return value;
-}
-
-// A persistent operation list: versions share their tail, so deriving an editor never copies
-function appendOp(list, op) {
-	return { op, prev: list, length: list ? list.length + 1 : 1 };
-}
-
-function opsToArray(list) {
-	let ops = new Array(list ? list.length : 0);
-	for (let node = list; node; node = node.prev) {
-		ops[node.length - 1] = clonePlain(node.op);
-	}
-	return ops;
-}
-
 // How an operation names another object: an ID, a key (bare, or with its library), { ref } or an editor
 function toIDRef(value, what) {
-	if (value instanceof ObjectChanges) {
+	if (value instanceof DataObjectChanges) {
 		if (value.ref !== undefined) {
 			return { ref: value.ref };
 		}
@@ -109,155 +82,45 @@ function toIDRefList(values, what) {
 }
 
 /**
- * The operations queued for one object, in order. Immutable: every method returns a new editor
+ * A data object's editor, addressed by ID, by key and library, or by ref
  */
-class ObjectChanges {
-	#state;
-
-	constructor(state) {
-		this.#state = Object.freeze({ ...state });
-	}
-
-	get type() {
-		return this.#state.type;
-	}
+class DataObjectChanges extends ChangesBase {
+	static TERMINAL_OPS = new Set(["erase"]);
 
 	get id() {
-		return this.#state.id;
+		return this._state.id;
 	}
 
 	get key() {
-		return this.#state.key;
+		return this._state.key;
 	}
 
 	/**
 	 * The library a key-addressed editor resolves in; unset means the change set's library
 	 */
 	get libraryID() {
-		return this.#state.libraryID;
+		return this._state.libraryID;
 	}
 
-	get ref() {
-		return this.#state.ref;
-	}
-
-	get revision() {
-		return this.#state.revision;
-	}
-
-	/**
-	 * Whether this editor creates its object, as opposed to addressing one another editor creates
-	 */
-	get isNew() {
-		return this.#state.create !== undefined;
-	}
-
-	get ops() {
-		return opsToArray(this.#state.ops);
-	}
-
-	get isTerminal() {
-		return !!this.#state.terminal;
-	}
-
-	/**
-	 * Fail the commit unless the object is still at this snapshot revision
-	 * @param {string | number} revision
-	 * @returns {this}
-	 */
-	expect(revision) {
-		if (this.#state.ref !== undefined) {
-			throw new Error(`${this._describe()} is not saved yet, so it has no revision to expect`);
-		}
-		if (!(typeof revision === "string" && revision) && !Number.isInteger(revision)) {
-			throw new TypeError("revision must be a non-empty string or an integer");
-		}
-		if (this.#state.revision !== undefined && this.#state.revision !== revision) {
-			throw new Error(`${this._describe()} already expects revision ${this.#state.revision}`);
-		}
-		return this._derive({ revision });
-	}
-
-	toJSON() {
-		let { type, id, key, libraryID, ref, create, revision } = this.#state;
-		let json = { type };
-		if (ref !== undefined) {
-			json.ref = ref;
-			if (create !== undefined) {
-				json.create = clonePlain(create);
-			}
-		}
-		else if (id !== undefined) {
-			json.id = id;
-		}
-		else {
-			json.key = key;
-			if (libraryID !== undefined) {
-				json.libraryID = libraryID;
-			}
-		}
-		if (revision !== undefined) {
-			json.revision = revision;
-		}
-		json.ops = this.ops;
-		return json;
-	}
-
-	_describe() {
-		let { type, id, key, ref } = this.#state;
-		return `${type} ${ref !== undefined ? `ref '${ref}'` : (id ?? key)}`;
-	}
-
-	// What two editors of one set must agree on to be the same object
-	_address() {
-		let { type, id, key, libraryID, ref } = this.#state;
-		if (ref !== undefined) {
-			return `ref:${ref}`;
-		}
+	_addressJSON() {
+		let { id, key, libraryID } = this._state;
 		if (id !== undefined) {
-			return `${type}:${id}`;
+			return { id };
 		}
-		return `${type}:${key}@${libraryID ?? ""}`;
+		return libraryID === undefined ? { key } : { key, libraryID };
 	}
 
-	_derive(patch) {
-		return new this.constructor({ ...this.#state, ...patch });
+	_addressKey() {
+		let { id, key, libraryID } = this._state;
+		return id !== undefined ? String(id) : `${key}@${libraryID ?? ""}`;
 	}
 
-	_push(op, params = {}) {
-		if (this.#state.terminal) {
-			throw new Error(`No operation can follow ${this.#state.terminal} on ${this._describe()}`);
-		}
-		let editor = this._derive({ ops: appendOp(this.#state.ops, { op, ...clonePlain(params) }) });
-		return TERMINAL_OPS.has(op) ? editor._derive({ terminal: op }) : editor;
-	}
-
-	/**
-	 * The same object addressed twice in a set: the later editor's operations follow this one's
-	 * @param {ObjectChanges} other
-	 * @returns {ObjectChanges}
-	 */
-	_merge(other) {
-		if (other.constructor !== this.constructor) {
-			throw new TypeError(`Cannot merge a ${other.type} editor into ${this._describe()}`);
-		}
-		let revision = this.#state.revision;
-		if (other.revision !== undefined) {
-			if (revision !== undefined && revision !== other.revision) {
-				throw new Error(`${this._describe()} is expected at two different revisions`);
-			}
-			revision = other.revision;
-		}
-		// A ref-addressed editor and the one creating that ref collapse into the creating entry
-		let merged = this._derive({ revision, create: this.#state.create ?? other.#state.create });
-		for (let { op, ...params } of other.ops) {
-			merged = merged._push(op, params);
-		}
-		return merged;
+	_addressLabel() {
+		return String(this._state.id ?? this._state.key);
 	}
 }
 
-class ItemChanges extends ObjectChanges {
+class ItemChanges extends DataObjectChanges {
 	setType(itemType) {
 		return this._push("setType", { itemType });
 	}
@@ -351,7 +214,7 @@ class ItemChanges extends ObjectChanges {
 	}
 }
 
-class CollectionChanges extends ObjectChanges {
+class CollectionChanges extends DataObjectChanges {
 	setName(name) {
 		return this._push("setName", { name });
 	}
@@ -381,7 +244,7 @@ class CollectionChanges extends ObjectChanges {
 	}
 }
 
-class SearchChanges extends ObjectChanges {
+class SearchChanges extends DataObjectChanges {
 	setName(name) {
 		return this._push("setName", { name });
 	}
@@ -402,7 +265,7 @@ class SearchChanges extends ObjectChanges {
 	}
 }
 
-class LibraryChanges extends ObjectChanges {
+class LibraryChanges extends DataObjectChanges {
 	// Feeds only
 	setName(name) {
 		return this._push("setName", { name });
@@ -462,8 +325,15 @@ const EDITORS = {
 	library: LibraryChanges,
 };
 
-// Types addressed by key as well as by ID; mirrors the store's address hooks, which are the authority
+// Types addressed by key as well as by ID; mirrors the store's address hooks, which decide
 const KEYED = ["item", "collection", "search"];
+
+function editorClass(type) {
+	if (!EDITORS[type]) {
+		throw new TypeError(`Unknown object type '${type}'`);
+	}
+	return EDITORS[type];
+}
 
 /**
  * An editor for one object. An ID, key or snapshot addresses a saved object; a ref, or an editor carrying
@@ -483,7 +353,7 @@ function editorFor(type, target, { revision, libraryID, ref } = {}) {
 			if (revision !== undefined || libraryID !== undefined || ref !== undefined) {
 				throw new TypeError("An object addressed by ref takes no options");
 			}
-			return new EDITORS[type]({ type, ref: target.ref });
+			return new (editorClass(type))({ type, ref: target.ref });
 		}
 		if (revision !== undefined || libraryID !== undefined) {
 			throw new TypeError("revision and libraryID apply to an existing object, not one being created");
@@ -539,7 +409,7 @@ function existing(type, target, { revision, libraryID } = {}, keyed = true) {
 		assertInteger(libraryID, `${type} libraryID`);
 		state.libraryID = libraryID;
 	}
-	let editor = new EDITORS[type](state);
+	let editor = new (editorClass(type))(state);
 	return revision === undefined ? editor : editor.expect(revision);
 }
 
@@ -551,7 +421,7 @@ function existing(type, target, { revision, libraryID } = {}, keyed = true) {
  */
 function created(type, create, ref) {
 	if (ref === undefined) {
-		ref = `${type}-${++refCounter}`;
+		ref = nextRef(type);
 	}
 	if (typeof ref !== "string" || !ref) {
 		throw new TypeError("ref must be a non-empty string");
@@ -561,99 +431,33 @@ function created(type, create, ref) {
 	if (params.parent !== undefined) {
 		params.parent = toIDRef(params.parent, "parent");
 	}
-	return new EDITORS[type]({ type, ref, create: clonePlain(params) });
-}
-
-// Editors of one object collapse into one entry, in the order first seen; an editor that only addresses a
-// ref sits where the editor creating that ref is, its operations after the creator's own
-function mergeEditors(editors) {
-	let byAddress = new Map();
-	let merged = [];
-	let refOnly = [];
-	let place = (editor) => {
-		let address = editor._address();
-		let index = byAddress.get(address);
-		if (index === undefined) {
-			byAddress.set(address, merged.length);
-			merged.push(editor);
-		}
-		else {
-			merged[index] = merged[index]._merge(editor);
-		}
-	};
-	for (let editor of editors) {
-		if (!(editor instanceof ObjectChanges)) {
-			throw new TypeError("A change set is made of editors from ChangeSet.item(), collection(), ...");
-		}
-		if (editor.ref !== undefined && !editor.isNew) {
-			refOnly.push(editor);
-		}
-		else {
-			place(editor);
-		}
-	}
-	// A ref nothing creates stays a lone entry, which the store rejects with the reason
-	refOnly.forEach(place);
-	return merged;
+	return new (editorClass(type))({ type, ref, create: clonePlain(params) });
 }
 
 /**
- * The changes to commit together, one editor per object, applied in order. Immutable: `with` and
- * `inLibrary` return new sets
+ * The changes to commit together; `libraryID` is where bare keys resolve when no editor says otherwise
  */
-class DataChangeSet {
-	#editors;
-
-	#libraryID;
-
-	/**
-	 * @param {ObjectChanges[]} [editors]
-	 * @param {number} [libraryID] - The library bare keys resolve in when no editor says otherwise
-	 */
-	constructor(editors = [], libraryID = undefined) {
-		if (libraryID !== undefined) {
-			assertInteger(libraryID, "libraryID");
+class DataChangeSet extends ChangeSet {
+	constructor(editors = [], defaults = {}) {
+		if (defaults.libraryID !== undefined) {
+			assertInteger(defaults.libraryID, "libraryID");
 		}
-		this.#editors = Object.freeze(mergeEditors(editors));
-		this.#libraryID = libraryID;
+		super(editors, defaults);
 	}
 
-	static empty() {
-		return new DataChangeSet();
-	}
-
-	/**
-	 * @param {...ObjectChanges} editors
-	 * @returns {DataChangeSet}
-	 */
-	static of(...editors) {
-		return new DataChangeSet(editors);
-	}
-
-	/**
-	 * Rebuild a change set from its JSON
-	 * @param {{ libraryID?: number, changes: object[] }} json
-	 * @returns {DataChangeSet}
-	 */
-	static from(json) {
-		let editors = (json?.changes || []).map((entry) => {
-			let editor;
-			if (entry.create !== undefined) {
-				editor = created(entry.type, entry.create, entry.ref);
-			}
-			else if (entry.ref !== undefined) {
-				editor = new EDITORS[entry.type]({ type: entry.type, ref: entry.ref });
-			}
-			else {
-				editor = existing(entry.type, entry.id ?? { key: entry.key, libraryID: entry.libraryID },
-					{ revision: entry.revision }, KEYED.includes(entry.type));
-			}
-			for (let { op, ...params } of entry.ops || []) {
-				editor = editor._push(op, params);
-			}
-			return editor;
-		});
-		return new DataChangeSet(editors, json?.libraryID);
+	static _editorFromJSON(entry) {
+		let editor;
+		if (entry.create !== undefined) {
+			editor = created(entry.type, entry.create, entry.ref);
+		}
+		else if (entry.ref !== undefined) {
+			editor = new (editorClass(entry.type))({ type: entry.type, ref: entry.ref });
+		}
+		else {
+			editor = existing(entry.type, entry.id ?? { key: entry.key, libraryID: entry.libraryID },
+				{ revision: entry.revision }, KEYED.includes(entry.type));
+		}
+		return this._replay(editor, entry.ops);
 	}
 
 	/**
@@ -700,24 +504,8 @@ class DataChangeSet {
 		return editorFor("library", library, options);
 	}
 
-	get size() {
-		return this.#editors.length;
-	}
-
-	get editors() {
-		return this.#editors.slice();
-	}
-
 	get libraryID() {
-		return this.#libraryID;
-	}
-
-	/**
-	 * @param {...ObjectChanges} editors
-	 * @returns {DataChangeSet} A new set with these editors after the current ones
-	 */
-	with(...editors) {
-		return new DataChangeSet([...this.#editors, ...editors], this.#libraryID);
+		return this._defaults.libraryID;
 	}
 
 	/**
@@ -725,22 +513,14 @@ class DataChangeSet {
 	 * @returns {DataChangeSet} A new set whose bare keys resolve in this library
 	 */
 	inLibrary(libraryID) {
-		return new DataChangeSet(this.#editors, libraryID);
-	}
-
-	toJSON() {
-		let json = {};
-		if (this.#libraryID !== undefined) {
-			json.libraryID = this.#libraryID;
-		}
-		json.changes = this.#editors.map(editor => editor.toJSON());
-		return json;
+		assertInteger(libraryID, "libraryID");
+		return this._withDefaults({ libraryID });
 	}
 }
 
 /**
  * What names another object in an operation: an ID, a key, { key, libraryID }, { ref } or an editor
- * @typedef {number | string | { key: string, libraryID?: number } | { ref: string } | ObjectChanges} IDRefInput
+ * @typedef {number | string | { key: string, libraryID?: number } | { ref: string } | DataObjectChanges} IDRefInput
  *
  *
  * @typedef {object} EditorOptions
@@ -749,7 +529,7 @@ class DataChangeSet {
  * @property {string} [ref] - Created objects: how later entries address it; generated if omitted
  */
 
-DataChangeSet.ObjectChanges = ObjectChanges;
+DataChangeSet.DataObjectChanges = DataObjectChanges;
 DataChangeSet.ItemChanges = ItemChanges;
 DataChangeSet.CollectionChanges = CollectionChanges;
 DataChangeSet.SearchChanges = SearchChanges;

@@ -27,8 +27,8 @@
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
-import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
+import { exportFilePath } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
@@ -358,103 +358,31 @@ function setupFilePicker(scope) {
 	});
 }
 
+const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
+
 /**
- * Inject plugin-only helpers onto the sandbox's `Zotero.File` mirror.
- *
+ * Load a change set builder into the sandbox, so a draft is a plain object of the plugin's compartment
+ * until commit hands its JSON to chrome
  * @param {Object} scope - The sandbox scope
+ * @param {string} url - The store's builder script, evaluated after the shared base
+ * @param {Object} [globals] - Free variables the scripts read, put on the holder first
+ * @returns {Object} The holder the scripts defined their classes on
  */
-function setupFile(scope) {
-	let pluginID = scope.PLUGIN_ID;
-	// Force-create the lazy File mirror so we can attach to it
-	let fileMirror = Cu.waiveXrays(scope).Zotero.File;
-	if (!fileMirror) return;
-
-	Cu.exportFunction(
-		(fn) => {
-			let wrappedFn = ScopeVariables.fromScope(fn, pluginID);
-			return ScopeUtils.ensurePromiseVarInScope(
-				PluginFileAccess.withSession(pluginID, wrappedFn), scope, {}
-			);
-		},
-		fileMirror,
-		{ defineAs: "withAccessSession" }
-	);
-
-	Cu.exportFunction(
-		(path, mode) => {
-			return ScopeUtils.ensurePromiseVarInScope(
-				PluginFileAccess.check(pluginID, path, mode), scope, {}
-			);
-		},
-		fileMirror,
-		{ defineAs: "requestFileAccess" }
-	);
-
-	Cu.exportFunction(
-		() => PluginFileAccess.getDir(pluginID),
-		fileMirror,
-		{ defineAs: "getPluginDir" }
-	);
-
-	// Return a plugin-scoped subdir of Zotero's temp dir, creating it on
-	// demand and adding a session grant. Without an active session, the
-	// grant is dropped -- but the plugin can still call this inside
-	// withAccessSession to get a usable temp area.
-	Cu.exportFunction(
-		() => {
-			let zoteroTmp = Zotero.getTempDirectory().path;
-			let pluginTmp = PathUtils.join(zoteroTmp, "plugin-" + PluginUUID.getByID(pluginID));
-			Zotero.File.createDirectoryIfMissing(pluginTmp);
-			PluginFileAccess.addSessionGrant(pluginID, pluginTmp, "write");
-			return pluginTmp;
-		},
-		fileMirror,
-		{ defineAs: "getTempDirectory" }
-	);
-
-	function requireUrlAllowed(uriStr, method) {
-		if (typeof uriStr !== "string" || !/^https?:\/\//i.test(uriStr)) {
-			throw new Error(`Zotero.File.${method}: only http(s) URIs are supported`);
-		}
-		if (!PluginProtocol.canAccessURI(uriStr, pluginID)) {
-			throw new Error(`Zotero.File.${method}: URI not allowed by host_permissions`);
-		}
+function loadChangeSet(scope, url, globals = {}) {
+	let holder = Cu.createObjectIn(scope);
+	Object.assign(holder, globals);
+	for (let script of [CHANGE_SET_BASE_URL, url]) {
+		Services.scriptloader.loadSubScript(script, holder);
 	}
+	return holder;
+}
 
-	Cu.exportFunction(
-		(url, options) => {
-			requireUrlAllowed(url, "getContentsFromURLAsync");
-			return ScopeUtils.ensurePromiseVarInScope(
-				Zotero.File.getContentsFromURLAsync(url, options),
-				scope, {}
-			);
-		},
-		fileMirror,
-		{ defineAs: "getContentsFromURLAsync" }
-	);
-
-	if (scope.PERMISSIONS.includes("fileSystemWrite")) {
-		Cu.exportFunction(
-			(uri, path) => {
-				let uriStr = (uri && typeof uri === "object" && uri.spec) || uri;
-				requireUrlAllowed(uriStr, "download");
-				return ScopeUtils.ensurePromiseVarInScope(
-					(async () => {
-						await PluginFileAccess.check(pluginID, path, "write");
-						return Zotero.File.download(uriStr, path);
-					})(),
-					scope, {}
-				);
-			},
-			fileMirror,
-			{ defineAs: "download" }
-		);
-	}
+function defineOnMirror(mirror, name, value) {
+	Object.defineProperty(mirror, name, { value, enumerable: true, configurable: false, writable: false });
 }
 
 /**
- * Give the sandbox its own copy of the change set builder as Zotero.DataStore.ChangeSet, so a draft is a
- * plain object of the plugin's compartment until commit hands its JSON to chrome
+ * Zotero.DataStore.ChangeSet, the sandbox's own copy of the data builder
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -462,14 +390,34 @@ function setupDataStore(scope) {
 	// Force-create the lazy DataStore mirror so we can attach to it
 	let mirror = Cu.waiveXrays(scope).Zotero.DataStore;
 	if (!mirror) return;
-	let holder = Cu.createObjectIn(scope);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/plugins/changeSet.js", holder);
-	Object.defineProperty(mirror, "ChangeSet", {
-		value: holder.DataChangeSet,
-		enumerable: true,
-		configurable: false,
-		writable: false,
-	});
+	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/changeSet.js");
+	defineOnMirror(mirror, "ChangeSet", holder.DataChangeSet);
 }
 
-export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupDataStore };
+/**
+ * Zotero.FileStore.ChangeSet and path, the sandbox's own copy of the file builder, plus withSession, the
+ * grant session that lets picker and prompt grants hold across a burst of calls
+ *
+ * @param {Object} scope - The sandbox scope
+ */
+function setupFileStore(scope) {
+	let pluginID = scope.PLUGIN_ID;
+	let mirror = Cu.waiveXrays(scope).Zotero.FileStore;
+	if (!mirror) return;
+	let path = exportFilePath(scope);
+	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/fileChangeSet.js", { FilePath: path });
+	defineOnMirror(mirror, "ChangeSet", holder.FileChangeSet);
+	defineOnMirror(mirror, "path", path);
+	Cu.exportFunction(
+		(fn) => {
+			let wrappedFn = ScopeVariables.fromScope(fn, pluginID);
+			return ScopeUtils.ensurePromiseVarInScope(
+				PluginFileAccess.withSession(pluginID, wrappedFn), scope, {}
+			);
+		},
+		mirror,
+		{ defineAs: "withSession" }
+	);
+}
+
+export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };
