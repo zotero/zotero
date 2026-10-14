@@ -4004,6 +4004,46 @@ describe("Plugin Sandbox", function () {
 			assert.isFunction(pane.onLoad, "onLoad should be kept (wrapped for the sandbox)");
 		});
 
+		it("should register under the caller's own pluginID, not a spoofed one", async function () {
+			loadPrefPaneTestScope();
+			// The unprivileged plugin claims another plugin's ID; the framework must inject its real one
+			let paneID = await evalInScope(
+				`Zotero.PreferencePanes.register({ pluginID: "other-plugin@zotero.org", label: "x", `
+				+ `image: "chrome://zotero/skin/20/universal/cog.svg", src: "prefs.html" })`
+			);
+			let pane = Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID);
+			assert.equal(pane.pluginID, ADDON_ID, "pane is owned by the real caller, not the spoofed ID");
+			assert.isTrue(pane.embedded, "and is still treated as unprivileged");
+		});
+
+		it("should refuse unregistering a pane owned by another plugin", async function () {
+			// A different, loaded, privileged plugin owns the pane
+			const OWNER_ID = "pane-owner@zotero.org";
+			PluginSandbox.loadScope(createMockPlugin({
+				id: OWNER_ID, name: "Owner", syncGUID: "{00000000-0000-0000-0000-00000000000c}", permissions: ["*"],
+			}));
+			try {
+				let ownerPane = await Zotero.PreferencePanes.register({
+					pluginID: OWNER_ID, label: "owned", image: "chrome://zotero/skin/20/universal/cog.svg",
+					src: PathUtils.toFileURI(PathUtils.join(tmpDir, "prefs.html")),
+				});
+				loadPrefPaneTestScope();
+				await evalInScope(`Zotero.PreferencePanes.unregister(${JSON.stringify(ownerPane)})`);
+				assert.isTrue(
+					Zotero.PreferencePanes.pluginPanes.some(p => p.id === ownerPane),
+					"the attacker's unregister is refused"
+				);
+				Zotero.PreferencePanes.unregister(ownerPane, OWNER_ID);
+				assert.isFalse(
+					Zotero.PreferencePanes.pluginPanes.some(p => p.id === ownerPane),
+					"the owner can still unregister it"
+				);
+			}
+			finally {
+				PluginSandbox.unloadScope(OWNER_ID);
+			}
+		});
+
 		it("should reject src outside the plugin or non-HTML src for an unprivileged plugin", async function () {
 			loadPrefPaneTestScope();
 			let e = await getPromiseError(registerTestPane({ src: "https://example.com/prefs.html" }));

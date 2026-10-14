@@ -260,9 +260,14 @@
 		 * Called automatically on plugin shutdown.
 		 *
 		 * @param {string} id - ID of the pane to unregister, as returned by `Zotero.PreferencePanes.register()`
+		 * @param {string} [callerPluginID] - Calling plugin's ID, injected for unprivileged callers
 		 */
-		unregister: function (id) {
+		unregister: function (id, callerPluginID) {
 			let pane = this.pluginPanes.find(p => p.id === id);
+			if (callerPluginID && pane && pane.pluginID !== callerPluginID) {
+				Zotero.warn(`Plugin '${callerPluginID}' cannot unregister pane '${id}' owned by another plugin`);
+				return;
+			}
 			if (pane) {
 				for (let resourceID of pane.l10nResourceIDs || []) {
 					Zotero.WindowResourceManager.unregisterResource(resourceID);
@@ -296,4 +301,11 @@
 			this._observerAdded = true;
 		}
 	};
+
+	lazy.ScopeVariables.setCustomParser(Zotero.PreferencePanes.register, ({ pluginID, args }) => {
+		lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+	});
+	lazy.ScopeVariables.setCustomParser(Zotero.PreferencePanes.unregister, ({ pluginID, args }) => {
+		args[1] = pluginID;
+	});
 }
