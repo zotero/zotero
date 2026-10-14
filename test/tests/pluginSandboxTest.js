@@ -4664,17 +4664,33 @@ describe("Plugin Sandbox", function () {
 					+ "</head><body><div id='test-div'>Styled</div>"
 					+ '<script src="script.js"></script></body></html>';
 				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "resources.html"), resourceHtml);
-				// Page that echoes plugin messages over window.zoteroHost, for
-				// page-messenger tests (external script to satisfy the page CSP)
+				// Page that echoes plugin messages and relays zoteroHost.api calls,
+				// for page-messenger tests (external script to satisfy the page CSP)
 				await IOUtils.writeUTF8(
 					PathUtils.join(tmpDir, "echo.js"),
-					"zoteroHost.addMessageListener(function (data) {\n"
+					"function reportAPI(promise) {\n"
+					+ "  promise.then(\n"
+					+ "    function (result) {\n"
+					+ "      zoteroHost.sendMessage({ type: 'api-result', result: result === undefined ? null : result });\n"
+					+ "    },\n"
+					+ "    function (e) {\n"
+					+ "      zoteroHost.sendMessage({ type: 'api-error', message: String(e && e.message || e) });\n"
+					+ "    }\n"
+					+ "  );\n"
+					+ "}\n"
+					+ "zoteroHost.addMessageListener(function (data) {\n"
 					+ "  if (!data) return;\n"
 					+ "  if (data.type === 'ping') {\n"
 					+ "    zoteroHost.sendMessage({ type: 'pong', value: data.value });\n"
 					+ "  }\n"
 					+ "  else if (data.type === 'request-close') {\n"
-					+ "    zoteroHost.sendMessage({ type: 'close' });\n"
+					+ "    zoteroHost.api.close();\n"
+					+ "  }\n"
+					+ "  else if (data.type === 'call-api') {\n"
+					+ "    reportAPI(zoteroHost.api[data.name](data.params));\n"
+					+ "  }\n"
+					+ "  else if (data.type === 'call-api-bad') {\n"
+					+ "    reportAPI(zoteroHost.api.echoBack('not-an-object'));\n"
 					+ "  }\n"
 					+ "});\n"
 				);
@@ -4819,7 +4835,7 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
-			it("should close the window when the page posts a { type: 'close' } host message", async function () {
+			it("should close the window when the page calls the close host API", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
 				await evalInScope("openWindow('echo.html').then(function (win) { _win = win; })");
 				let browsers = getPluginWindowBrowsers();
@@ -4831,6 +4847,53 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(chromeWin.closed, "the wrapper window should close");
 				assert.isFalse(evalInScope("_win.page.isAlive()"),
 					"the page messenger should be dead");
+			});
+
+			it("should dispatch zoteroHost.api calls to host handlers with object params", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let pending = [];
+				scope._reportAPI = (json) => {
+					pending.shift()?.(JSON.parse(json));
+				};
+				await evalInScope(`
+					openWindow('echo.html').then(function (win) {
+						_win = win;
+						win.page.addMessageListener(function (data) {
+							if (data && (data.type == 'api-result' || data.type == 'api-error')) {
+								_reportAPI(JSON.stringify(data));
+							}
+						});
+					});
+				`);
+				let sendToPage = (data) => {
+					let report = new Promise(resolve => pending.push(resolve));
+					scope._toPage = JSON.stringify(data);
+					evalInScope("_win.page.sendMessage(JSON.parse(_toPage))");
+					return report;
+				};
+				try {
+					// Extend this window's host API chrome-side for a round-trip check
+					let browsers = getPluginWindowBrowsers();
+					let actor = browsers[browsers.length - 1].browsingContext
+						.currentWindowGlobal.getActor("ZoteroEmbeddedPluginPage");
+					actor.setHostAPI({
+						echoBack: params => ({ doubled: params.value * 2 }),
+					});
+
+					let result = await sendToPage({ type: "call-api", name: "echoBack", params: { value: 21 } });
+					assert.equal(result.type, "api-result", "declared API should resolve");
+					assert.equal(result.result.doubled, 42, "params and result should round-trip");
+
+					let unknown = await sendToPage({ type: "call-api", name: "nope", params: {} });
+					assert.equal(unknown.type, "api-error", "undeclared API should reject");
+
+					let badParams = await sendToPage({ type: "call-api-bad" });
+					assert.equal(badParams.type, "api-error", "non-object params should reject");
+					assert.include(badParams.message, "plain object");
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
 			});
 
 			it("should fit the window to the page content with fitContent", async function () {
@@ -5128,6 +5191,11 @@ describe("Plugin Sandbox", function () {
 			await IOUtils.writeUTF8(
 				PathUtils.join(tmpDir, "pane-script.js"),
 				"document.getElementById('embedded-pane-marker').setAttribute('data-script-ran', 'true');\n"
+				+ "zoteroHost.addMessageListener(function (data) {\n"
+				+ "  if (data && data.type === 'ping') {\n"
+				+ "    zoteroHost.sendMessage({ type: 'pong', value: data.value });\n"
+				+ "  }\n"
+				+ "});\n"
 			);
 			await IOUtils.writeUTF8(
 				PathUtils.join(tmpDir, "prefs.html"),
@@ -5163,7 +5231,7 @@ describe("Plugin Sandbox", function () {
 			assert.lengthOf(pane.scripts, 0, "scripts should be dropped");
 			assert.lengthOf(pane.stylesheets, 0, "stylesheets should be dropped");
 			assert.lengthOf(pane.l10nResourceIDs, 0, "l10nFiles should be dropped");
-			assert.isNull(pane.onLoad, "onLoad should be dropped");
+			assert.isFunction(pane.onLoad, "onLoad should be kept (wrapped for the sandbox)");
 		});
 
 		it("should reject src outside the plugin or non-HTML src for an unprivileged plugin", async function () {
@@ -5344,7 +5412,45 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
-		it("should let the pane page trigger navigation by posting a message", async function () {
+		it("should call onLoad with the pane page's messenger", async function () {
+			loadPrefPaneTestScope();
+			let loadedPromise = new Promise((resolve) => {
+				scope._resolveLoaded = resolve;
+			});
+			let pongPromise = new Promise((resolve) => {
+				scope._resolvePong = resolve;
+			});
+			await evalInScope(`
+				Zotero.PreferencePanes.register({
+					pluginID: '${ADDON_ID}',
+					id: 'test-embedded-onload',
+					label: 'Hooked Pane',
+					image: 'chrome://zotero/skin/20/universal/cog.svg',
+					src: 'prefs.html',
+					onLoad: function ({ paneID, page }) {
+						page.addMessageListener(function (data) {
+							if (data && data.type == 'pong') {
+								_resolvePong(data.value);
+							}
+						});
+						page.sendMessage({ type: 'ping', value: 5 });
+						_resolveLoaded(paneID + ':' + page.isAlive());
+					},
+				});
+			`);
+			let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: "test-embedded-onload" });
+			try {
+				await win.Zotero_Preferences.waitForFirstPaneLoad();
+				assert.equal(await loadedPromise, "test-embedded-onload:true",
+					"onLoad should receive the pane ID and a live page messenger");
+				assert.equal(await pongPromise, 5, "the pane page should echo over zoteroHost");
+			}
+			finally {
+				win.close();
+			}
+		});
+
+		it("should let the pane page navigate via the zoteroHost.api host API", async function () {
 			loadPrefPaneTestScope();
 			let paneID = await registerTestPane({ id: "test-embedded-main" });
 			let subpaneID = await registerTestPane({ id: "test-embedded-subpane", parent: "test-embedded-main" });
@@ -5352,20 +5458,20 @@ describe("Plugin Sandbox", function () {
 			try {
 				await win.Zotero_Preferences.waitForFirstPaneLoad();
 				let browser = win.document.querySelector(".pane-container.embedded browser");
-				// The page talks to chrome through the injected zoteroHost messenger;
-				// drive it here the way the pane page would (send a navigation request)
+				// Drive the injected host API here the way the pane page would
 				let cwin = browser.contentWindow;
 				for (let i = 0; i < 100 && !cwin.wrappedJSObject.zoteroHost; i++) {
 					await Zotero.Promise.delay(20);
 				}
 				assert.ok(cwin.wrappedJSObject.zoteroHost, "pane page should get the injected zoteroHost messenger");
-				let navigate = id => cwin.wrappedJSObject.zoteroHost.sendMessage(
-					Cu.cloneInto({ type: "navigate", paneID: id }, cwin)
+				let navigate = id => cwin.wrappedJSObject.zoteroHost.api.navigate(
+					Cu.cloneInto({ paneID: id }, cwin)
 				);
 
-				// A pane from another plugin is ignored (no navigation)
-				navigate("zotero-prefpane-general");
-				await Zotero.Promise.delay(100);
+				// A pane from another plugin rejects and doesn't navigate
+				let error = await new Promise(resolve => navigate("zotero-prefpane-general")
+					.then(() => resolve(null), e => resolve(e)));
+				assert.ok(error, "cross-plugin navigation should reject");
 				assert.equal(win.Zotero_Preferences.navigation.value, paneID,
 					"should not navigate to another plugin's pane");
 
