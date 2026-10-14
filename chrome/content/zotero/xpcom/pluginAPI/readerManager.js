@@ -67,8 +67,7 @@
 	/**
 	 * @typedef ReaderContext
 	 * @type {object}
-	 * @property {number} [itemID] - The itemID of the reader's attachment. Load it
-	 * with `Zotero.Items.get()`
+	 * @property {number} [itemID] - The itemID of the reader's attachment
 	 * @property {string} [tabID] - The reader tab ID, or undefined for a reader in
 	 * a separate window
 	 * @property {string} [type] - The reader type: "pdf", "epub", or "snapshot"

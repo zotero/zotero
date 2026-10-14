@@ -92,9 +92,7 @@
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
 	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
 	 * @property {number[]} itemIDs - The IDs of the items the button acts on: the selected
-	 * items for a library tab, or the tab's own item otherwise. Load them with
-	 * `Zotero.Items.get()`. A tab's reader can be resolved with
-	 * `Zotero.Reader.getByTabID(tabID)`
+	 * items for a library tab, or the tab's own item otherwise
 	 */
 
 

@@ -64,9 +64,17 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
+	 * @typedef {object} ItemTreeColumnContext
+	 * @property {number} itemID - The row's item
+	 * @property {SyncItemGetter} getItem - A cell answers synchronously, so this is how a column reads data
+	 */
+
+	/**
 	 * @typedef {function} ItemTreeColumnDataProvider
-	 * @param {Zotero.Item} item - The item to get data from
+	 * @param {Zotero.Item | ItemTreeColumnContext} item - An `ItemTreeColumnContext` for unprivileged
+	 * 		plugins. The live item privileged plugins get is @deprecated
 	 * @param {string} dataKey - The dataKey of the column
+	 * @param {ItemTreeColumnContext} context - The same context, passed to every plugin
 	 * @returns {string} - The data to display in the column
 	 */
 
@@ -232,10 +240,25 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			}
 
 			if (option.dataProvider) {
-				option.dataProvider = lazy.ScopeVariables.fromScope(
-					option.dataProvider,
-					option.pluginID
-				);
+				let provider = lazy.ScopeVariables.fromScope(option.dataProvider, option.pluginID);
+				// hasPermissions() is false without a scope, so privileged is checked separately
+				let canReadData = !unprivileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
+				let pluginID = option.pluginID;
+				// A cell answers synchronously, so `getItem` replaces the live item, and rides along as the
+				// third argument since a privileged plugin's first stays the live item
+				provider = ((wrapped, item, dataKey) => {
+					let context = {
+						itemID: item.id,
+						getItem: canReadData ? Zotero.DataStore.itemGetter(item.id, pluginID) : () => null,
+					};
+					try {
+						return wrapped(unprivileged ? context : item, dataKey, context);
+					}
+					finally {
+						context.getItem.expire?.();
+					}
+				}).bind(null, provider);
+				option.dataProvider = provider;
 			}
 			return option;
 		}
@@ -371,7 +394,8 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		},
 
 		/**
-		 * Refresh the columns in the item tree
+		 * Refresh the columns in the item tree, re-running every `dataProvider`. A column shows a value
+		 * `dataProvider` can't compute synchronously by caching the async result and then refreshing
 		 * @returns {void}
 		 */
 		refreshColumns() {
@@ -423,7 +447,13 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		getCustomCellData(item, dataKey) {
 			const option = this._columnManager._optionsCache[dataKey];
 			if (option && option.dataProvider) {
-				return option.dataProvider(item, dataKey);
+				// A throwing provider must not take the tree down with it
+				try {
+					return option.dataProvider(item, dataKey);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			return "";
 		},

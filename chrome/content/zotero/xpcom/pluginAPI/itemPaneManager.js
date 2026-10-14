@@ -68,8 +68,10 @@
 	 */
 
 	/**
+	 * What every hook on a rendered section gets, on top of SectionBasicHookArgs
 	 * @typedef {Object} SectionUIHookArgs
-	 * @property {Zotero.Item} item - Current item.
+	 * @property {number} [itemID] - Current item's ID.
+	 * @property {Zotero.Item} [item] - @deprecated Privileged plugins only; use `itemID` instead.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the section is in edit mode.
 	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
@@ -80,67 +82,27 @@
 	 */
 
 	/**
-	 * @typedef {Object} SectionHookArgs
-	 * @property {string} paneID - Registered pane id.
-	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {boolean} editable - Whether the section is in edit mode.
-	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
-	 * @property {SetEnabled} setEnabled - Set pane enabled state.
-	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
-	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
-	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
+	 * @typedef {SectionBasicHookArgs & SectionUIHookArgs} SectionAsyncHookArgs
 	 */
 
 	/**
-	 * @typedef {Object} SectionInitHookArgs
-	 * @property {string} paneID - Registered pane id.
-	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {boolean} editable - Whether the section is in edit mode.
-	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
-	 * @property {SetEnabled} setEnabled - Set pane enabled state.
-	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
-	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
-	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
-	 * @property {SectionRefresh} refresh - Refresh the section.
-	 * A `refresh` is exposed to plugins to allows plugins to refresh the section when necessary,
-	 * e.g. item modify notifier callback. Note that calling `refresh` during initialization
-	 * have no effect.
+	 * `getItem` rides along because the pane reads these hooks back before it returns
+	 * @typedef {SectionAsyncHookArgs & { getItem?: SyncItemGetter }} SectionHookArgs
 	 */
 
 	/**
-	 * @typedef {Object} SectionToggleHookArgs
-	 * @property {string} paneID - Registered pane id.
-	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {boolean} editable - Whether the section is in edit mode.
-	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
-	 * @property {SetEnabled} setEnabled - Set pane enabled state.
-	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
-	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
-	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
-	 * @property {boolean} open - New section open state.
-	 * @property {Event} [event] - @deprecated Privileged plugins only; use `open` instead.
+	 * `refresh` has no effect during initialization
+	 * @typedef {SectionAsyncHookArgs & { refresh: SectionRefresh }} SectionInitHookArgs
 	 */
 
 	/**
-	 * @typedef {Object} SectionButtonHookArgs
-	 * @property {string} paneID - Registered pane id.
-	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {boolean} editable - Whether the section is in edit mode.
-	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
-	 * @property {SetEnabled} setEnabled - Set pane enabled state.
-	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
-	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
-	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
-	 * @property {string} buttonType - Type of the clicked button.
-	 * @property {Event} [event] - @deprecated Privileged plugins only; use `buttonType` instead.
+	 * `event` is @deprecated: privileged plugins only, use `open`
+	 * @typedef {SectionAsyncHookArgs & { open: boolean, event?: Event }} SectionToggleHookArgs
+	 */
+
+	/**
+	 * `event` is @deprecated: privileged plugins only, use `buttonType`
+	 * @typedef {SectionAsyncHookArgs & { buttonType: string, event?: Event }} SectionButtonHookArgs
 	 */
 
 	/**
@@ -168,7 +130,7 @@
 
 	/**
 	 * @callback SectionAsyncRenderHook
-	 * @param {SectionHookArgs} props - Hook arguments for asynchronous rendering.
+	 * @param {SectionAsyncHookArgs} props - Hook arguments for asynchronous rendering.
 	 * @returns {void | Promise<void>}
 	 */
 
@@ -319,20 +281,36 @@
 
 		_hookNames = ['onInit', 'onDestroy', 'onItemChange', 'onRender', 'onAsyncRender', 'onToggle'];
 
-		// The deprecated `event` prop (a chrome DOM event, kept for old privileged
-		// plugins) must never cross into unprivileged sandboxes
-		_wrapHook(hook, pluginID) {
+		// The pane reads these back before it returns, so they cannot await a query
+		_syncHookNames = ['onItemChange', 'onRender'];
+
+		// Sync hooks also get `getItem`; privileged plugins keep the deprecated live `item` and `event`
+		_wrapHook(hook, pluginID, { sync = false } = {}) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
 			let scope = lazy.PluginSandbox.getScope(pluginID);
-			if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
-				return wrapped;
-			}
+			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			// hasPermissions() is false without a scope, so privileged is checked separately
+			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 			return (props) => {
-				if (props && props.event !== undefined) {
-					props = { ...props };
-					delete props.event;
+				if (props) {
+					let { event, item, ...rest } = props;
+					if (sync && "itemID" in props) {
+						rest.getItem = canReadData
+							? Zotero.DataStore.itemGetter(props.itemID, pluginID)
+							: () => null;
+					}
+					if (privileged) {
+						if ("item" in props) rest.item = item;
+						if ("event" in props) rest.event = event;
+					}
+					props = rest;
 				}
-				return wrapped(props);
+				try {
+					return wrapped(props);
+				}
+				finally {
+					props?.getItem?.expire?.();
+				}
 			};
 		}
 
@@ -341,7 +319,8 @@
 
 			for (let hookName of this._hookNames) {
 				if (option[hookName]) {
-					option[hookName] = this._wrapHook(option[hookName], option.pluginID);
+					option[hookName] = this._wrapHook(option[hookName], option.pluginID,
+						{ sync: this._syncHookNames.includes(hookName) });
 				}
 			}
 
@@ -417,36 +396,37 @@
 	 */
 
 	/**
-	 * @typedef {Object} InfoRowGetDataHookArgs
+	 * What every info row hook gets
+	 * @typedef {Object} InfoRowHookArgs
 	 * @property {string} rowID - Row ID.
-	 * @property {Zotero.Item} item - Current item.
+	 * @property {number} [itemID] - Current item's ID.
+	 * @property {Zotero.Item} [item] - @deprecated Privileged plugins only; use `itemID` instead.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the row is in edit mode.
 	 */
 
 	/**
-	 * @typedef {Object} InfoRowSetDataHookArgs
-	 * @property {string} rowID - Row ID.
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {string} editable - Whether the row is in edit mode.
-	 * @property {string} value - New value.
+	 * `getItem` rides along because the pane reads these hooks back before it renders
+	 * @typedef {InfoRowHookArgs & { getItem?: SyncItemGetter }} InfoRowSyncHookArgs
 	 */
 
 	/**
-	 * @typedef {Object} InfoRowItemChangeHookArgs
-	 * @property {string} rowID - Row ID.
-	 * @property {Zotero.Item} item - Current item.
-	 * @property {string} tabType - Current tab type.
-	 * @property {boolean} editable - Whether the row is in edit mode.
-	 * @property {SetInfoRowEnabled} setEnabled - Set row enabled state.
-	 * @property {SetInfoRowEditable} setEditable - Set row editable state.
+	 * @typedef {InfoRowSyncHookArgs} InfoRowGetDataHookArgs
+	 */
+
+	/**
+	 * @typedef {InfoRowHookArgs & { value: string }} InfoRowSetDataHookArgs
+	 */
+
+	/**
+	 * @typedef {InfoRowSyncHookArgs & { setEnabled: SetInfoRowEnabled, setEditable: SetInfoRowEditable }} InfoRowItemChangeHookArgs
 	 */
 
 	/**
 	 * @typedef {function} InfoRowGetDataHook
 	 * @param {InfoRowGetDataHookArgs} props - Hook arguments for getting data.
-	 * @returns {string} - Row data.
+	 * @returns {string} - Row data. For a value `getItem` cannot answer, return a cached one, start the
+	 * 		async work, and call `Zotero.ItemPaneManager.refreshInfoRow(rowID)` when it resolves
 	 */
 
 	/**
@@ -533,17 +513,44 @@
 		_convert(option) {
 			option = super._convert(option);
 
-			if (option.onGetData) {
-				option.onGetData = lazy.ScopeVariables.fromScope(option.onGetData, option.pluginID);
-			}
-			if (option.onSetData) {
-				option.onSetData = lazy.ScopeVariables.fromScope(option.onSetData, option.pluginID);
-			}
-			if (option.onItemChange) {
-				option.onItemChange = lazy.ScopeVariables.fromScope(option.onItemChange, option.pluginID);
+			for (let hookName of ["onGetData", "onSetData", "onItemChange"]) {
+				if (option[hookName]) {
+					// onSetData only writes, so it commits a change set like any async caller
+					option[hookName] = this._wrapHook(option[hookName], option.pluginID,
+						{ sync: hookName !== "onSetData" });
+				}
 			}
 
 			return option;
+		}
+
+		// Sync hooks also get `getItem`, since the row answers before it renders; privileged plugins keep `item`
+		_wrapHook(hook, pluginID, { sync = false } = {}) {
+			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
+			let scope = lazy.PluginSandbox.getScope(pluginID);
+			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			// hasPermissions() is false without a scope, so privileged is checked separately
+			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
+			return (props) => {
+				if (props && "itemID" in props) {
+					let { item, ...rest } = props;
+					if (sync) {
+						rest.getItem = canReadData
+							? Zotero.DataStore.itemGetter(props.itemID, pluginID)
+							: () => null;
+					}
+					if (privileged) {
+						rest.item = item;
+					}
+					props = rest;
+				}
+				try {
+					return wrapped(props);
+				}
+				finally {
+					props?.getItem?.expire?.();
+				}
+			};
 		}
 
 		refresh(rowID) {
@@ -760,7 +767,8 @@
 		},
 
 		/**
-		 * Refresh a custom item pane info section row.
+		 * Refresh a custom item pane info section row, re-running its hooks. A row shows a value
+		 * `onGetData` can't compute synchronously by caching the async result and then refreshing
 		 * @param {string} rowID - Row ID to refresh. This is the value returned by `registerInfoRow`.
 		 * @returns {void}
 		 */
