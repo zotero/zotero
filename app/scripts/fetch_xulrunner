@@ -127,7 +127,9 @@ ZOTERO_PLUGIN_PERMISSIONS='"*",
 	  "serverEndpoint",
 	  "reader",
 	  "preferencePane",
-	  "pluginInterop"'
+	  "pluginInterop",
+	  "window",
+	  "tab"'
 
 # Custom manifest permission lists (array of strings, passed through to addon.installPermissions)
 ZOTERO_CUSTOM_PERMISSION_LISTS=(pref_permissions interop_permissions)

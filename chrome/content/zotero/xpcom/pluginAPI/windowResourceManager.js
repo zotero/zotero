@@ -27,7 +27,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 	});
 
@@ -52,7 +52,7 @@
 	 */
 
 
-	class WindowResourceManagerInternal extends lazy.PluginAPIBase {
+	class WindowResourceManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
 			super();
 			this.config = {

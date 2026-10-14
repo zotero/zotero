@@ -64,142 +64,52 @@
  */
 
 
+/**
+ * @typedef {object} ControllerAPIConfig
+ * @property {string} apiName - Log prefix and error namespace
+ * @property {Record<string, ControllerRequestDef>} [queries] - Read-only requests, defined on set
+ * @property {Record<string, ControllerRequestDef>} [commands] - Requests with side effects, defined on set
+ *
+ *
+ * @typedef {object} ControllerRequestContext
+ * @property {"query" | "command"} kind
+ * @property {string} name - The request name the handler was invoked as
+ * @property {string | undefined} pluginID - Caller plugin ID; undefined for chrome callers
+ * @property {boolean} privileged - Whether the caller bypasses permission checks
+ *
+ *
+ * @typedef {object} ControllerRequestDef
+ * @property {string | string[]} [permissions] - Permissions the caller must hold on top of the
+ *     one that exposed the API method
+ * @property {Record<string, PluginAPIOptDefValue>} [params]
+ *     - Type definition for the params object; unknown keys are rejected
+ * @property {(params: object, context: ControllerRequestContext) => (object | Promise<object>)} handler
+ *     - Called with the controller as `this`; must return a JSON-serializable object
+ */
+
+
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
 	Zotero: "chrome://zotero/content/zotero.mjs",
+	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+	VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 });
 
 
+/**
+ * Shared plumbing for both plugin API types: config, option validation, and logging
+ */
 class PluginAPIBase {
-	_optionsCache = {};
-
-	_lastUpdateID = "";
-
-	/**
-	 * @type {PluginAPIConfig}
-	 */
 	_config = {
 		apiName: "PluginAPIBase",
-		mainKeyName: "id",
-		pluginIDKeyName: "pluginID",
-		notifyType: "unknown",
-		notifyAction: "refresh",
-		optionTypeDefinition: {},
 	};
-
-	get updateID() {
-		return this._lastUpdateID;
-	}
-
-	get options() {
-		return Object.values(this._optionsCache).map(opt => Object.assign({}, opt));
-	}
-
-	get data() {
-		return {
-			updateID: this.updateID,
-			options: this.options,
-		};
-	}
 
 	/**
 	 * Set the configuration
-	 * @param {PluginAPIConfig} config - The configuration to set
+	 * @param {PluginAPIConfig | ControllerAPIConfig} config - The configuration to set
 	 */
 	set config(config) {
 		Object.assign(this._config, config);
-	}
-
-	/**
-	 * Register an option. Must be valid with a unique mainKey defined by _config#mainKeyName
-	 * @param {object} option - The option to register
-	 * @returns {string | false} - The mainKey of the registered option, or false if the option is invalid
-	 */
-	register(option) {
-		let mainKey = this._add(option);
-		if (!mainKey) {
-			return false;
-		}
-		this._addPluginShutdownObserver();
-		this._refresh();
-		return mainKey;
-	}
-
-	/**
-	 * Unregister an option by mainKey
-	 * @param {string} mainKey - The mainKey of the option to unregister
-	 * @param {string} [callerPluginID] - Calling plugin's ID, injected for unprivileged callers
-	 * @returns {boolean} - True if the option was successfully unregistered
-	 */
-	unregister(mainKey, callerPluginID) {
-		let option = this._optionsCache[mainKey];
-		if (callerPluginID && option
-				&& this._getOptionPluginID(option) !== callerPluginID) {
-			this._log(`Plugin '${callerPluginID}' cannot unregister '${mainKey}' owned by another plugin`, "warn");
-			return false;
-		}
-		const success = this._remove(mainKey);
-		if (!success) {
-			return false;
-		}
-		this._refresh();
-		return true;
-	}
-
-	/**
-	 * Internal implementation of registering an option, can be overridden by subclasses
-	 * @param {object} option - The option to add
-	 * @returns {string | false} - The mainKey of the added option, or false if the option is invalid
-	 */
-	_add(option) {
-		option = this._validate(option);
-		if (option === false) {
-			return false;
-		}
-
-		option = this._convert(option);
-
-		let mainKey = this._getOptionMainKey(option);
-		this._optionsCache[mainKey] = option;
-		return mainKey;
-	}
-
-	/**
-	 * Internal implementation of unregistering an option, can be overridden by subclasses
-	 * @param {object} mainKey - The mainKey of the option to remove
-	 * @returns {boolean} - True if the option was successfully removed
-	 */
-	_remove(mainKey) {
-		if (!this._optionsCache[mainKey]) {
-			this._log(`Can't remove unknown option '${mainKey}'`, "warn");
-			return false;
-		}
-		delete this._optionsCache[mainKey];
-		return true;
-	}
-
-	/**
-	 * Internal implementation of validating an option, can be overridden by subclasses
-	 * @param {object} option
-	 * @returns {object | false} - The option if it is valid, or false if it is invalid
-	 */
-	_validate(option) {
-		let mainKey = this._namespacedMainKey(option);
-
-		if (this._optionsCache[mainKey]) {
-			this._log(`'${this._config.mainKeyName}' must be unique, got ${mainKey}`, "warn");
-			return false;
-		}
-
-		let validateResult = this._validateObject(option, this._config.optionTypeDefinition);
-
-		if (!validateResult.valid) {
-			return false;
-		}
-
-		option = validateResult.obj;
-		option[this._config.mainKeyName] = mainKey;
-		return option;
 	}
 
 	/**
@@ -316,6 +226,140 @@ class PluginAPIBase {
 		};
 	}
 
+	_log(message, logType = "debug") {
+		lazy.Zotero[logType](`${this._config.apiName}: ${message}`);
+	}
+}
+
+
+/**
+ * Registration-style API: plugins register option objects that Zotero renders and
+ * unregister them, with per-plugin cleanup on shutdown
+ */
+class ManagerAPIBase extends PluginAPIBase {
+	_optionsCache = {};
+
+	_lastUpdateID = "";
+
+	/**
+	 * @type {PluginAPIConfig}
+	 */
+	_config = {
+		apiName: "ManagerAPIBase",
+		mainKeyName: "id",
+		pluginIDKeyName: "pluginID",
+		notifyType: "unknown",
+		notifyAction: "refresh",
+		optionTypeDefinition: {},
+	};
+
+	get updateID() {
+		return this._lastUpdateID;
+	}
+
+	get options() {
+		return Object.values(this._optionsCache).map(opt => Object.assign({}, opt));
+	}
+
+	get data() {
+		return {
+			updateID: this.updateID,
+			options: this.options,
+		};
+	}
+
+	/**
+	 * Register an option. Must be valid with a unique mainKey defined by _config#mainKeyName
+	 * @param {object} option - The option to register
+	 * @returns {string | false} - The mainKey of the registered option, or false if the option is invalid
+	 */
+	register(option) {
+		let mainKey = this._add(option);
+		if (!mainKey) {
+			return false;
+		}
+		this._addPluginShutdownObserver();
+		this._refresh();
+		return mainKey;
+	}
+
+	/**
+	 * Unregister an option by mainKey
+	 * @param {string} mainKey - The mainKey of the option to unregister
+	 * @param {string} [callerPluginID] - Calling plugin's ID, injected for unprivileged callers
+	 * @returns {boolean} - True if the option was successfully unregistered
+	 */
+	unregister(mainKey, callerPluginID) {
+		let option = this._optionsCache[mainKey];
+		if (callerPluginID && option
+				&& this._getOptionPluginID(option) !== callerPluginID) {
+			this._log(`Plugin '${callerPluginID}' cannot unregister '${mainKey}' owned by another plugin`, "warn");
+			return false;
+		}
+		const success = this._remove(mainKey);
+		if (!success) {
+			return false;
+		}
+		this._refresh();
+		return true;
+	}
+
+	/**
+	 * Internal implementation of registering an option, can be overridden by subclasses
+	 * @param {object} option - The option to add
+	 * @returns {string | false} - The mainKey of the added option, or false if the option is invalid
+	 */
+	_add(option) {
+		option = this._validate(option);
+		if (option === false) {
+			return false;
+		}
+
+		option = this._convert(option);
+
+		let mainKey = this._getOptionMainKey(option);
+		this._optionsCache[mainKey] = option;
+		return mainKey;
+	}
+
+	/**
+	 * Internal implementation of unregistering an option, can be overridden by subclasses
+	 * @param {object} mainKey - The mainKey of the option to remove
+	 * @returns {boolean} - True if the option was successfully removed
+	 */
+	_remove(mainKey) {
+		if (!this._optionsCache[mainKey]) {
+			this._log(`Can't remove unknown option '${mainKey}'`, "warn");
+			return false;
+		}
+		delete this._optionsCache[mainKey];
+		return true;
+	}
+
+	/**
+	 * Internal implementation of validating an option, can be overridden by subclasses
+	 * @param {object} option
+	 * @returns {object | false} - The option if it is valid, or false if it is invalid
+	 */
+	_validate(option) {
+		let mainKey = this._namespacedMainKey(option);
+
+		if (this._optionsCache[mainKey]) {
+			this._log(`'${this._config.mainKeyName}' must be unique, got ${mainKey}`, "warn");
+			return false;
+		}
+
+		let validateResult = this._validateObject(option, this._config.optionTypeDefinition);
+
+		if (!validateResult.valid) {
+			return false;
+		}
+
+		option = validateResult.obj;
+		option[this._config.mainKeyName] = mainKey;
+		return option;
+	}
+
 	/**
 	 * Make sure the mainKey is namespaced with the pluginID
 	 * @param {object} option
@@ -395,10 +439,6 @@ class PluginAPIBase {
 		this._observerAdded = true;
 	}
 
-	_log(message, logType = "debug") {
-		lazy.Zotero[logType](`${this._config.apiName}: ${message}`);
-	}
-
 	_getOptionPluginID(option) {
 		return option[this._config.pluginIDKeyName];
 	}
@@ -412,4 +452,208 @@ class PluginAPIBase {
 	}
 }
 
-export { PluginAPIBase };
+
+/**
+ * Controller-style API: plugins drive Zotero through named query/command requests whose
+ * params and results are plain objects, so both sides cross the sandbox as data
+ */
+class ControllerAPIBase extends PluginAPIBase {
+	_config = {
+		apiName: "ControllerAPIBase",
+	};
+
+	/**
+	 * Rejection names; an unprivileged caller sees them as the "<code>: <message>"
+	 * prefix of the re-created Error
+	 */
+	static errorCodes = Object.freeze({
+		UNKNOWN_REQUEST: "UnknownRequest",
+		PERMISSION_DENIED: "PermissionDenied",
+		INVALID_PARAMS: "InvalidParams",
+		INVALID_RESULT: "InvalidResult",
+		NOT_FOUND: "NotFound",
+		NOT_ALLOWED: "NotAllowed",
+		NOT_IMPLEMENTED: "NotImplemented",
+	});
+
+	/**
+	 * @type {Map<string, ControllerRequestDef>}
+	 */
+	_queries = new Map();
+
+	/**
+	 * @type {Map<string, ControllerRequestDef>}
+	 */
+	_commands = new Map();
+
+	/**
+	 * Requests under `queries` and `commands` are defined as the config is set
+	 * @param {ControllerAPIConfig} config
+	 */
+	set config(config) {
+		let { queries = {}, commands = {}, ...rest } = config;
+		Object.assign(this._config, rest);
+		for (let [name, def] of Object.entries(queries)) {
+			this._define(this._queries, name, def);
+		}
+		for (let [name, def] of Object.entries(commands)) {
+			this._define(this._commands, name, def);
+		}
+	}
+
+	/**
+	 * Run a read-only request
+	 * @param {string} name
+	 * @param {object} [params]
+	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
+	 * @returns {Promise<object>}
+	 */
+	query(name, params = {}, callerPluginID) {
+		return this._invoke(this._queries, "query", name, params, callerPluginID);
+	}
+
+	/**
+	 * Run a request with side effects
+	 * @param {string} name
+	 * @param {object} [params]
+	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
+	 * @returns {Promise<object>}
+	 */
+	command(name, params = {}, callerPluginID) {
+		return this._invoke(this._commands, "command", name, params, callerPluginID);
+	}
+
+	/**
+	 * @returns {{ queries: string[], commands: string[] }}
+	 */
+	get requestNames() {
+		return {
+			queries: Array.from(this._queries.keys()),
+			commands: Array.from(this._commands.keys()),
+		};
+	}
+
+	_define(registry, name, def) {
+		if (registry.has(name)) {
+			throw new Error(`${this._config.apiName}: request '${name}' is already defined`);
+		}
+		if (typeof def.handler !== "function") {
+			throw new Error(`${this._config.apiName}: request '${name}' has no handler`);
+		}
+		registry.set(name, Object.assign({ permissions: [], params: {} }, def));
+	}
+
+	async _invoke(registry, kind, name, params, callerPluginID) {
+		let def = registry.get(name);
+		if (!def) {
+			this._throw(ControllerAPIBase.errorCodes.UNKNOWN_REQUEST, `Unknown ${kind} '${name}'`);
+		}
+
+		let context = this._getContext(callerPluginID);
+		if (!context.privileged
+				&& !lazy.VarCheck.hasPermissions(context.scope, def.permissions)) {
+			this._throw(ControllerAPIBase.errorCodes.PERMISSION_DENIED,
+				`${kind} '${name}' requires permission ${[].concat(def.permissions).join(", ")}`);
+		}
+
+		params = this._toPlainParams(name, params);
+		let validated = this._validateParams(params, def.params);
+		if (!validated.valid) {
+			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS, `Invalid params for ${kind} '${name}'`);
+		}
+
+		let result = await def.handler.call(this, validated.obj, {
+			kind,
+			name,
+			pluginID: context.pluginID,
+			privileged: context.privileged,
+		});
+		return this._toPlainResult(name, result);
+	}
+
+	_getContext(callerPluginID) {
+		let scope = callerPluginID ? lazy.PluginSandbox.getScope(callerPluginID) : null;
+		return {
+			pluginID: callerPluginID,
+			scope,
+			privileged: lazy.VarCheck.isPrivilegedScope(scope),
+		};
+	}
+
+	/**
+	 * Detach params from the caller's compartment; JSON drops functions and getters
+	 */
+	_toPlainParams(name, params) {
+		if (params === undefined || params === null) {
+			return {};
+		}
+		if (!lazy.VarCheck.isObject(params)) {
+			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS, `Params for '${name}' must be an object`);
+		}
+		try {
+			return JSON.parse(JSON.stringify(params));
+		}
+		catch (e) {
+			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS,
+				`Params for '${name}' must be JSON-serializable: ${e.message}`);
+		}
+		return {};
+	}
+
+	/**
+	 * Handlers must hand back data only, so a leaked object is a bug rather than a hole
+	 */
+	_toPlainResult(name, result) {
+		if (result === undefined) {
+			return {};
+		}
+		if (!lazy.VarCheck.isObject(result)) {
+			this._throw(ControllerAPIBase.errorCodes.INVALID_RESULT, `Result of '${name}' must be an object`);
+		}
+		try {
+			return JSON.parse(JSON.stringify(result));
+		}
+		catch (e) {
+			this._throw(ControllerAPIBase.errorCodes.INVALID_RESULT,
+				`Result of '${name}' must be JSON-serializable: ${e.message}`);
+		}
+		return {};
+	}
+
+	/**
+	 * Unknown keys are rejected before the shared validator runs
+	 */
+	_validateParams(params, typeDef) {
+		for (let key of Object.keys(params)) {
+			if (!(key in typeDef)) {
+				this._log(`Unknown param '${key}'`, "warn");
+				return { valid: false };
+			}
+		}
+		return this._validateObject(params, typeDef);
+	}
+
+	/**
+	 * Handler stub for catalog entries that are not implemented yet
+	 */
+	_notImplemented(_params, { name }) {
+		this._throw(ControllerAPIBase.errorCodes.NOT_IMPLEMENTED, `'${name}' is not implemented yet`);
+	}
+
+	/**
+	 * @param {string} code - One of errorCodes, set as the error's name
+	 * @param {string} message
+	 * @returns {Error}
+	 */
+	static createError(code, message) {
+		let e = new Error(message);
+		e.name = code;
+		return e;
+	}
+
+	_throw(code, message) {
+		throw ControllerAPIBase.createError(code, message);
+	}
+}
+
+export { PluginAPIBase, ManagerAPIBase, ControllerAPIBase };
