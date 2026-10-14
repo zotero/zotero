@@ -484,6 +484,27 @@ describe("Plugin API", function () {
 			Zotero_Tabs.closeAll();
 		});
 
+		it("should warn about a deprecated option only when it is given", function () {
+			let log = sinon.spy(Zotero.ItemTreeManager._columnManager, "_log");
+			let column = dataKey => ({
+				pluginID: "zotero@zotero.org",
+				dataKey,
+				label: "Deprecation Test",
+				dataProvider: () => "",
+			});
+			let keys = [];
+			try {
+				keys.push(Zotero.ItemTreeManager.registerColumn(column("api-test-current")));
+				assert.isFalse(log.calledWithMatch(/deprecated/), "no warning for options left out");
+				keys.push(Zotero.ItemTreeManager.registerColumn({ ...column("api-test-legacy"), defaultIn: ["main"] }));
+				assert.isTrue(log.calledWithMatch(/'defaultIn' property is deprecated/));
+			}
+			finally {
+				log.restore();
+				keys.forEach(key => Zotero.ItemTreeManager.unregisterColumn(key));
+			}
+		});
+
 		it("should render custom column and call dataProvider hook", async function () {
 			let item = new Zotero.Item('book');
 			await item.saveTx();
