@@ -1395,9 +1395,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		beforeEach(function () {
-			// `network` is included so the URL-based helpers (which require
-			// it to enforce host_permissions via a sandbox XHR) get exposed.
-			loadTestScope(["default", "fileSystemRead", "fileSystemWrite", "network"]);
+			loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
 		});
 
 		let fileMethods = [
@@ -1995,7 +1993,7 @@ describe("Plugin Sandbox", function () {
 		describe("getContentsFromURLAsync", function () {
 			beforeEach(function () {
 				loadTestScope(
-					["default", "fileSystemRead", "network"],
+					["default", "fileSystemRead"],
 					["*://127.0.0.1/*"]
 				);
 			});
@@ -2015,14 +2013,6 @@ describe("Plugin Sandbox", function () {
 				})()`);
 				assert.isTrue(denied);
 			});
-
-			it("is not exposed without the network permission", function () {
-				loadTestScope(["default", "fileSystemRead"]);
-				assert.equal(
-					evalInScope("typeof Zotero.File.getContentsFromURLAsync"),
-					"undefined"
-				);
-			});
 		});
 
 		describe("download", function () {
@@ -2038,7 +2028,7 @@ describe("Plugin Sandbox", function () {
 
 			beforeEach(function () {
 				loadTestScope(
-					["default", "fileSystemRead", "fileSystemWrite", "network"],
+					["default", "fileSystemRead", "fileSystemWrite"],
 					["*://127.0.0.1/*"]
 				);
 			});
@@ -2097,13 +2087,8 @@ describe("Plugin Sandbox", function () {
 				assert.isFalse(await IOUtils.exists(target));
 			});
 
-			it("is not exposed without the network permission", function () {
-				loadTestScope(["default", "fileSystemRead", "fileSystemWrite"]);
-				assert.equal(evalInScope("typeof Zotero.File.download"), "undefined");
-			});
-
 			it("is not exposed without the fileSystemWrite permission", function () {
-				loadTestScope(["default", "fileSystemRead", "network"]);
+				loadTestScope(["default", "fileSystemRead"]);
 				assert.equal(evalInScope("typeof Zotero.File.download"), "undefined");
 			});
 		});
@@ -2112,7 +2097,7 @@ describe("Plugin Sandbox", function () {
 
 	describe("Zotero.HTTP", function () {
 		beforeEach(function () {
-			loadTestScope(["default", "network"], ["*://127.0.0.1/*"]);
+			loadTestScope(["default"], ["*://127.0.0.1/*"]);
 		});
 
 		it("should make a GET request and return status and response text", async function () {
@@ -2256,7 +2241,7 @@ describe("Plugin Sandbox", function () {
 				// Unload existing scope (created by parent beforeEach with 127.0.0.1 origins)
 				// and recreate with empty origins to test CORS enforcement
 				PluginSandbox.unloadScope(ADDON_ID);
-				loadTestScope(["default", "network"], []);
+				loadTestScope(["default"], []);
 
 				let url = registerServerEndpoint("GET", function () {
 					return [200, "text/plain", "should not reach here"];
@@ -3845,10 +3830,10 @@ describe("Plugin Sandbox", function () {
 				"File.putContentsAsync should not be exposed without fileSystemWrite");
 		});
 
-		it("should not expose network APIs with only default permission", function () {
+		it("should expose network APIs with only default permission", function () {
 			loadTestScope(["default"]);
-			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'undefined'"),
-				"HTTP should not be exposed without network permission");
+			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'object'"),
+				"HTTP should be exposed to every scope, bounded by host_permissions");
 		});
 
 		it("should not expose preferences APIs with only default permission", function () {
@@ -3921,8 +3906,6 @@ describe("Plugin Sandbox", function () {
 				"Libraries should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.File.getContentsAsync === 'undefined'"),
 				"File read methods should not be exposed with only data permission");
-			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'undefined'"),
-				"HTTP should not be exposed with only data permission");
 		});
 
 		it("should expose fileSystem APIs but not data with fileSystem permission", function () {
@@ -3934,13 +3917,13 @@ describe("Plugin Sandbox", function () {
 		});
 
 		it("should merge multiple permissions correctly", function () {
-			loadTestScope(["default", "dataRead", "dataWrite", "network", "preferences"], [], ["test."]);
+			loadTestScope(["default", "dataRead", "dataWrite", "preferences"], [], ["test."]);
 			assert.isTrue(evalInScope("typeof Zotero.Items === 'object'"),
 				"Items should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.ItemFields === 'object'"),
 				"ItemFields should be exposed with data permission");
 			assert.isTrue(evalInScope("typeof Zotero.HTTP === 'object'"),
-				"HTTP should be exposed with network permission");
+				"HTTP should be exposed to every scope");
 			assert.isTrue(evalInScope("typeof Zotero.Prefs === 'object'"),
 				"Prefs should be exposed with preferences permission");
 			assert.isTrue(evalInScope("typeof Zotero.Translators === 'object'"),
