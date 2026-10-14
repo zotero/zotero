@@ -4397,6 +4397,57 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
+			it("should expose its own windows to Zotero.WindowController but not other plugins'", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
+				let windowID = evalInScope("_win.windowID");
+				// A second unprivileged plugin with the same permission
+				const OTHER_ID = "other-sandbox-plugin@zotero.org";
+				PluginSandbox.loadScope(createMockPlugin({
+					id: OTHER_ID,
+					name: "Other Sandbox Plugin",
+					syncGUID: "{00000000-0000-0000-0000-000000000003}",
+					permissions: ["default", "window"],
+					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
+				}));
+				let otherScope = PluginSandbox.getScope(OTHER_ID);
+				try {
+					let { windows } = await evalInScope(
+						'Zotero.WindowController.query("windows", { type: "pluginWindow" })'
+					);
+					windows = Array.from(windows);
+					assert.include(windows.map(w => w.windowID), windowID, "the owner should list its window");
+					assert.isTrue(windows.every(w => w.type === "pluginWindow" && w.pluginID === ADDON_ID),
+						"the owner should list only its own windows");
+					let state = await evalInScope(
+						`Zotero.WindowController.query("getWindowState", { windowID: ${windowID} })`
+					);
+					assert.isNumber(state.width);
+
+					({ windows } = await Cu.evalInSandbox(
+						'Zotero.WindowController.query("windows", { type: "pluginWindow" })', otherScope
+					));
+					assert.notInclude(Array.from(windows).map(w => w.windowID), windowID,
+						"another plugin should not list the window");
+					let e = await getPromiseError(Cu.evalInSandbox(
+						`Zotero.WindowController.query("getWindowState", { windowID: ${windowID} })`, otherScope
+					));
+					assert.match(String(e.message), /No window with ID/);
+					e = await getPromiseError(Cu.evalInSandbox(
+						`Zotero.WindowController.command("focusWindow", { windowID: ${windowID} })`, otherScope
+					));
+					assert.match(String(e.message), /No window with ID/);
+					assert.throws(
+						() => Cu.evalInSandbox(`openWindow('test.html', '', { parentWindowID: ${windowID} })`, otherScope),
+						/No window with ID/
+					);
+				}
+				finally {
+					PluginSandbox.unloadScope(OTHER_ID);
+					evalInScope("_win.close()");
+				}
+			});
+
 			it("should accept a plugin-held window as a FilePicker parent", async function () {
 				loadTestScopeWithURI(["default", "window", "fileSystemRead"]);
 				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");

@@ -31,8 +31,8 @@ window.PluginWindow = {
 	 *
 	 * @param {string} [name] - Name for this kind of window, unique within the plugin; the <name> in
 	 *     "pluginWindow/<name>/menubar/{file,edit,view,window,help}" and "pluginWindow/<name>/context"
-	 * @param {string} [pluginID] - Plugin ID owning this window. When set,
-	 *     the window will close automatically on plugin shutdown.
+	 * @param {string} [pluginID] - Plugin ID owning this window. When set, the window closes
+	 *     on plugin shutdown and Zotero.WindowController lists it as the plugin's own
 	 */
 	init(name, pluginID) {
 		let browser = document.getElementById("plugin-browser");
@@ -61,6 +61,8 @@ window.PluginWindow = {
 		}
 
 		if (pluginID) {
+			// Read by plugins/window.mjs to keep other plugins from seeing this window
+			document.documentElement.setAttribute("data-plugin-id", pluginID);
 			this._setupPluginShutdownClose(pluginID);
 		}
 	},

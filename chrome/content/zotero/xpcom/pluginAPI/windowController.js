@@ -29,10 +29,7 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		WINDOW_TYPES: "chrome://zotero/content/xpcom/pluginAPI/utils.mjs",
-		getWindow: "chrome://zotero/content/xpcom/pluginAPI/utils.mjs",
-		getWindowID: "chrome://zotero/content/xpcom/pluginAPI/utils.mjs",
-		getWindowState: "chrome://zotero/content/xpcom/pluginAPI/utils.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	// Main window panes that can be toggled
@@ -45,6 +42,7 @@
 	 * @property {string} title
 	 * @property {boolean} focused
 	 * @property {number} [itemID] - The reader or note item for readerWindow and noteWindow
+	 * @property {string} [pluginID] - The owning plugin for pluginWindow
 	 */
 
 
@@ -83,15 +81,17 @@
 							type: {
 								type: "string",
 								optional: true,
-								checkHook: value => value === undefined || value in lazy.WINDOW_TYPES
-									|| `Param 'type' must be one of ${Object.keys(lazy.WINDOW_TYPES).join(", ")}, got ${value}`,
+								checkHook: value => value === undefined || value in lazy.WindowUtils.WINDOW_TYPES
+									|| `Param 'type' must be one of ${Object.keys(lazy.WindowUtils.WINDOW_TYPES).join(", ")}, got ${value}`,
 							},
 						},
-						handler: ({ type }) => this._queryWindows(type),
+						handler: ({ type, pluginID }) => this._queryWindows(type, pluginID),
 					},
 					getWindowState: {
 						params: { windowID: "number" },
-						handler: ({ windowID }) => lazy.getWindowState(lazy.getWindow(windowID)),
+						handler: ({ windowID, pluginID }) => lazy.WindowUtils.getWindowState(
+							lazy.WindowUtils.getWindow(windowID, undefined, pluginID)
+						),
 					},
 					getPaneState: {
 						params: {
@@ -102,15 +102,15 @@
 									|| `Param 'pane' must be one of ${PANES.join(", ")}, got ${value}`,
 							},
 						},
-						handler: ({ windowID, pane }) => this._getPaneState(
-							lazy.getWindow(windowID, "mainWindow"), pane
+						handler: ({ windowID, pane, pluginID }) => this._getPaneState(
+							lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID), pane
 						),
 					},
 				},
 				commands: {
 					focusWindow: {
 						params: { windowID: "number" },
-						handler: ({ windowID }) => this._focusWindow(windowID),
+						handler: ({ windowID, pluginID }) => this._focusWindow(windowID, pluginID),
 					},
 					togglePane: {
 						params: {
@@ -121,7 +121,7 @@
 									|| `Param 'pane' must be one of ${PANES.join(", ")}, got ${value}`,
 							},
 						},
-						handler: ({ windowID, pane }) => this._togglePane(windowID, pane),
+						handler: ({ windowID, pane, pluginID }) => this._togglePane(windowID, pane, pluginID),
 					},
 				},
 			};
@@ -129,14 +129,16 @@
 
 		/**
 		 * @param {WindowType} [type]
+		 * @param {string} [pluginID] - The calling plugin, which sees only its own plugin windows
 		 * @returns {WindowControllerQueryResults["windows"]}
 		 */
-		_queryWindows(type) {
-			let types = type ? [type] : Object.keys(lazy.WINDOW_TYPES);
+		_queryWindows(type, pluginID) {
+			let types = type ? [type] : Object.keys(lazy.WindowUtils.WINDOW_TYPES);
 			let windows = [];
 			for (let windowType of types) {
-				for (let win of Services.wm.getEnumerator(lazy.WINDOW_TYPES[windowType])) {
-					if (win.closed) {
+				for (let win of Services.wm.getEnumerator(lazy.WindowUtils.WINDOW_TYPES[windowType])) {
+					if (Cu.isDeadWrapper(win) || win.closed
+							|| (pluginID && !lazy.WindowUtils.canAccessWindow(win, pluginID))) {
 						continue;
 					}
 					windows.push(this._windowInfo(win, windowType));
@@ -152,11 +154,14 @@
 		 */
 		_windowInfo(win, type) {
 			let info = {
-				windowID: lazy.getWindowID(win),
+				windowID: lazy.WindowUtils.getWindowID(win),
 				type,
 				title: win.document.title,
 				focused: Services.focus.activeWindow === win,
 			};
+			if (type === "pluginWindow") {
+				info.pluginID = lazy.WindowUtils.getPluginWindowOwner(win);
+			}
 			// TODO: itemID for readerWindow (win.reader.itemID) and noteWindow
 			return info;
 		}
@@ -164,19 +169,21 @@
 		/**
 		 * Raise the window within Zotero and give it focus
 		 * @param {number} windowID
+		 * @param {string} [pluginID] - The calling plugin, which reaches only its own plugin windows
 		 */
-		_focusWindow(windowID) {
-			lazy.getWindow(windowID).focus();
+		_focusWindow(windowID, pluginID) {
+			lazy.WindowUtils.getWindow(windowID, undefined, pluginID).focus();
 		}
 
 		/**
 		 * Toggle a pane of a main window; the same paths the View menu and toolbar use
 		 * @param {number} windowID
 		 * @param {"item" | "tagSelector" | "context"} pane
+		 * @param {string} [pluginID] - The calling plugin
 		 * @returns {Promise<WindowControllerCommandResults["togglePane"]>}
 		 */
-		async _togglePane(windowID, pane) {
-			let win = lazy.getWindow(windowID, "mainWindow");
+		async _togglePane(windowID, pane, pluginID) {
+			let win = lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID);
 			switch (pane) {
 				case "item":
 					win.ZoteroPane.toggleItemPane();
@@ -225,7 +232,7 @@
 	 * @memberof Zotero
 	 */
 	Zotero.WindowController = {
-		windowTypes: Object.freeze(Object.keys(lazy.WINDOW_TYPES)),
+		windowTypes: Object.freeze(Object.keys(lazy.WindowUtils.WINDOW_TYPES)),
 
 		errorCodes: lazy.ControllerAPIBase.errorCodes,
 
