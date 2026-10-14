@@ -312,7 +312,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	Object.assign(scope, extraGlobals);
 
-	if (permissions.includes("openWindow")) {
+	if (permissions.includes("window")) {
 		setupOpenWindow(scope);
 	}
 
