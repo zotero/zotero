@@ -185,7 +185,7 @@
 								</toolbarbutton>
 								
 								<spacer flex="1"/>
-								<toolbar-buttons id="zotero-tb-custom-buttons" target="main/library/toolbar"/>
+								<library-toolbar-buttons id="zotero-tb-custom-buttons" target="main/library/toolbar"/>
 								<quick-search-textbox id="zotero-tb-search" timeout="250"
 										onkeydown="this.closest('library-view').handleSearchKeypress(this, event)"
 										oncommand="this.closest('library-view').search()"/>
