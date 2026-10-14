@@ -444,6 +444,17 @@ describe("Zotero.DataStore", function () {
 			assert.isTrue(Zotero.Searches.get(search.id).deleted);
 		});
 
+		it("should refuse an operation named after an Object.prototype member", async function () {
+			let item = await createDataObject('item', { title: 'Kept' });
+			for (let op of ["toString", "constructor", "__proto__", "hasOwnProperty"]) {
+				let error = await requestError(plugin.run((itemID, op) => Zotero.DataStore.commit({
+					type: "item", id: itemID, ops: [{ op, field: "title", value: "x" }],
+				}), item.id, op), codes.INVALID_PARAMS);
+				assert.include(error.message, "op must be one of", op);
+			}
+			assert.equal(item.getField('title'), 'Kept');
+		});
+
 		it("should refuse an operation after a terminal one", async function () {
 			let item = await createDataObject('item');
 			await requestError(plugin.run((itemID) => {
