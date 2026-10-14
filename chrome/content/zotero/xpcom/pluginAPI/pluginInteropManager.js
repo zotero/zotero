@@ -30,59 +30,16 @@
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
-
-	// Statuses getCommand() returns in place of a command, in the order a lookup meets
-	// them; strings so the value is legible in a log, as in RequestAPIBase.errorCodes
-	const CommandStatus = Object.freeze({
-		OK: "OK",
-		NOT_FOUND: "NotFound",
-		VERSION_TOO_LOW: "VersionTooLow",
-		VERSION_TOO_HIGH: "VersionTooHigh",
-		PERMISSION_DENIED: "PermissionDenied",
-	});
-
-	/**
-	 * Build a rejection reason that lives in the caller's compartment
-	 */
-	function rejectionForCaller(err, callerScope) {
-		let message;
-		try {
-			message = String((err && err.message) || err || "Command failed");
-		}
-		catch {
-			message = "Command failed";
-		}
-		try {
-			return new callerScope.Error(message);
-		}
-		catch {
-			return Cu.cloneInto({ message }, callerScope);
-		}
-	}
 
 	/**
 	 * @typedef {object} PluginInteropRegistrationOptions
-	 * @property {string} pluginID - The plugin ID of the command provider
-	 * @property {string} commandName - A unique name for this command (unique per plugin)
-	 * @property {string} commandVersion - Semantic version of the command (e.g., "1.0.0")
-	 * @property {function} command - The command function.
-	 *   Receives a single argument `{ callerPluginID, data }` where `data` is the
-	 *   value passed by the caller. Must only accept and return transferable types:
-	 *   primitives (string, number, boolean, null, undefined),
-	 *   plain objects, and arrays of these types.
-	 *
-	 * @typedef {object} PluginInteropGetOptions
-	 * @property {string} [callerPluginID] - The calling plugin's ID (required unless checkOnly is true)
-	 * @property {string} targetPluginID - The command provider's plugin ID
-	 * @property {string} commandName - The name of the command
-	 * @property {string} [minVersion] - Minimum acceptable command version (inclusive)
-	 * @property {string} [maxVersion] - Maximum acceptable command version (inclusive)
-	 * @property {boolean} [checkOnly] - If true, only check availability without creating a wrapper
+	 * @property {string} pluginID - The command provider; injected for a sandbox caller
+	 * @property {string} commandName - Unique per plugin
+	 * @property {string} [commandVersion] - Semantic version; the plugin's own unless given
+	 * @property {function({ callerPluginID: string, data: * }): *} command - May return a promise; only
+	 *   primitives, plain objects and arrays cross in either direction
 	 */
-
 
 	class PluginInteropManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
@@ -96,14 +53,24 @@
 				optionTypeDefinition: {
 					commandName: "string",
 					pluginID: "string",
-					commandVersion: "string",
+					commandVersion: { type: "string", optional: true },
 					command: {
 						type: "function",
-						// Disable try-catch wrapper for error propagation to caller
+						// The controller reports what the command throws, so no catch-all wrapper
 						unsafeFunction: true,
 					},
 				},
 			};
+		}
+
+		// The base makes commandName the namespaced key; the name as registered is what a consumer sees
+		_validate(option) {
+			let name = option.commandName;
+			option = super._validate(option);
+			if (option) {
+				option.name = name;
+			}
+			return option;
 		}
 
 		_convert(option) {
@@ -121,194 +88,58 @@
 		}
 
 		/**
-		 * Get a command registered by plugin.
-		 *
-		 * Returns a callable function that handles cross-compartment
-		 * value transfer automatically.
-		 *
-		 * @param {PluginInteropGetOptions} options
-		 * @returns {function|null} - The callable command, or null
+		 * @param {string} pluginID
+		 * @returns {{ commandName: string, commandVersion: string }[]} The provider's commands
 		 */
-		getCommand({ callerPluginID, targetPluginID, commandName, minVersion, maxVersion, checkOnly } = {}) {
-			if (!targetPluginID || !commandName) {
-				this._log("getCommand requires targetPluginID and commandName", "warn");
-				return CommandStatus.NOT_FOUND;
-			}
-
-			let mainKey = this._namespacedMainKey({ pluginID: targetPluginID, commandName });
-			let option = this._optionsCache[mainKey];
-			if (!option) {
-				return CommandStatus.NOT_FOUND;
-			}
-
-			// Version compatibility check
-			let version = option.commandVersion;
-			if (minVersion && Zotero.Utilities.semverCompare(version, minVersion) < 0) {
-				this._log(
-					`Command '${commandName}' version ${version} is below minimum required ${minVersion}`,
-					"warn"
-				);
-				return CommandStatus.VERSION_TOO_LOW;
-			}
-			if (maxVersion && Zotero.Utilities.semverCompare(version, maxVersion) > 0) {
-				this._log(
-					`Command '${commandName}' version ${version} exceeds maximum accepted ${maxVersion}`,
-					"warn"
-				);
-				return CommandStatus.VERSION_TOO_HIGH;
-			}
-
-			if (callerPluginID && !lazy.PluginSandbox.isPrivileged(callerPluginID)) {
-				let callerScope = lazy.PluginSandbox.getScope(callerPluginID);
-				if (!lazy.VarCheck.checkScopePermission(callerScope, "INTEROP_PERMISSIONS", targetPluginID)) {
-					this._log(
-						`Plugin '${callerPluginID}' is not allowed to access commands from '${targetPluginID}'. Declare in interop_permissions to access.`,
-						"warn"
-					);
-					return CommandStatus.PERMISSION_DENIED;
-				}
-			}
-
-			if (checkOnly) {
-				return CommandStatus.OK;
-			}
-
-			return this._createCallerCommand(option, callerPluginID);
+		commandsOf(pluginID) {
+			return Object.values(this._optionsCache)
+				.filter(option => option.pluginID === pluginID)
+				.map(({ name, commandVersion }) => ({ commandName: name, commandVersion }));
 		}
 
 		/**
-		 * Create a wrapped command function for a consumer plugin.
-		 * The returned function accepts a single `data` argument, which is passed
-		 * to the registered command along with `{ callerPluginID }`.
-		 *
-		 * @param {object} option - The stored registration option
-		 * @param {string} callerPluginID - The consumer plugin ID
-		 * @returns {function}
+		 * @param {string} pluginID
+		 * @param {string} commandName
+		 * @returns {object | null} The registration
 		 */
-		_createCallerCommand(option, callerPluginID) {
-			let mainKey = this._getOptionMainKey(option);
-			let callerScope = lazy.PluginSandbox.getScope(callerPluginID);
-			let providerScope = lazy.PluginSandbox.getScope(option.pluginID);
-			let commandName = option.commandName;
-			// If caller scopes is missing, we assume it is privileged and cross-compartment handling is not needed
-			let isSameCompartment = lazy.VarCheck.isSameCompartment(callerScope, providerScope);
-
-			let wrapper = (data) => {
-				// Check if the command is still registered before calling, in case it was unregistered since getCommand() was called
-				if (!this._optionsCache[mainKey]) {
-					throw new Error(`Command '${commandName}' from plugin '${option.pluginID}' is no longer available`);
-				}
-				let arg = { callerPluginID, data };
-				if (!isSameCompartment) {
-					arg = Cu.cloneInto(arg, providerScope);
-				}
-				let result = option.command(arg);
-				// Also handles caller scope missing (privileged caller)
-				if (isSameCompartment) {
-					return result;
-				}
-				if (lazy.VarCheck.isPromise(result)) {
-					return new callerScope.Promise((resolve, reject) => {
-						result.then(
-							(v) => {
-								try {
-									resolve(Cu.cloneInto(v, callerScope));
-								}
-								catch (cloneErr) {
-									reject(rejectionForCaller(cloneErr, callerScope));
-								}
-							},
-							e => reject(rejectionForCaller(e, callerScope))
-						);
-					});
-				}
-				return Cu.cloneInto(result, callerScope);
-			};
-			return wrapper;
+		lookUp(pluginID, commandName) {
+			return this._optionsCache[this._namespacedMainKey({ pluginID, commandName })] || null;
 		}
 	}
 
-
 	/**
-	 * Registry for cross-plugin commands.
-	 *
-	 * Allows plugins to register named commands that other plugins can discover
-	 * and call. Command functions must accept and return only basic transferable
-	 * types (primitives, plain objects, and arrays of these types).
-	 *
-	 * Registered commands are automatically cleaned up when the provider plugin shuts down.
-	 *
+	 * The provider side of cross-plugin commands: named, versioned functions another plugin reaches through
+	 * Zotero.PluginInteropController; dropped when the provider shuts down
 	 * @memberof Zotero
 	 *
 	 * @example
-	 * // Provider plugin registers a command
 	 * Zotero.PluginInteropManager.register({
-	 *     pluginID: "provider-plugin@example.com",
 	 *     commandName: "greet",
 	 *     commandVersion: "1.2.0",
 	 *     command({ callerPluginID, data }) { return "Hello, " + data.name; },
 	 * });
-	 *
-	 * // Consumer plugin calls the command
-	 * let greet = Zotero.PluginInteropManager.getCommand({
-	 *     callerPluginID: "consumer-plugin@example.com",
-	 *     targetPluginID: "provider-plugin@example.com",
-	 *     commandName: "greet",
-	 *     minVersion: "1.0.0",
-	 * });
-	 * if (typeof greet === "function") {
-	 *     let greeting = greet({ name: "World" }); // "Hello, World"
-	 * }
-	 * else if (greet === Zotero.PluginInteropManager.statusCodes.NOT_FOUND) {
-	 *     // Command not registered
-	 * }
 	 */
 	Zotero.PluginInteropManager = {
-		statusCodes: CommandStatus,
-
 		_registry: new PluginInteropManagerInternal(),
 
 		/**
-		 * Register a command for other plugins to use.
-		 *
 		 * @param {PluginInteropRegistrationOptions} options
-		 * @returns {string|false} - The registration key, or false if validation failed
+		 * @returns {string|false} The registration key, or false if validation failed
 		 */
 		register(options) {
 			return this._registry.register(options);
 		},
 
 		/**
-		 * Unregister a previously registered command.
-		 *
 		 * @param {string} registrationKey - The key returned by register()
 		 * @returns {boolean}
 		 */
 		unregister(registrationKey, _callerPluginID) {
 			return this._registry.unregister(registrationKey, _callerPluginID);
 		},
-
-		/**
-		 * Get a registered command from another plugin.
-		 * Pass `checkOnly: true` to verify availability without creating a wrapper
-		 *
-		 * @param {PluginInteropGetOptions} options
-		 * @returns {function|CommandStatus} - The callable command, or one of `statusCodes`
-		 * when it can't be called, or `statusCodes.OK` in `checkOnly`.
-		 */
-		getCommand(options) {
-			return this._registry.getCommand(options);
-		},
 	};
 
-	// Inject the real caller plugin ID into getCommand options,
-	// preventing unprivileged plugins from spoofing their identity.
-	lazy.ScopeVariables.setCustomParser(
-		Zotero.PluginInteropManager.getCommand,
-		({ pluginID, args }) => {
-			lazy.ScopeVariables.assignTrustedArg(args, 0, "callerPluginID", pluginID);
-		}
-	);
+	// A sandbox caller's own ID replaces whatever it passed
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.PluginInteropManager.register,
 		({ pluginID, args }) => {

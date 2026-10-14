@@ -130,9 +130,9 @@ function uninstall() {}
 			try {
 				// Another plugin, declaring the installed one, calls the command its startup registered
 				plugin.load(["default", "pluginInterop"], { interopPermissions: [ID] });
-				let echo = await plugin.run((targetPluginID) => {
-					let exec = Zotero.PluginInteropManager.getCommand({ targetPluginID, commandName: "exec" });
-					return typeof exec === "function" ? exec({ code: "1+1" }) : "getCommand answered " + exec;
+				let echo = await plugin.run(async (targetPluginID) => {
+					let response = await Zotero.PluginInteropController.command("call", { targetPluginID, commandName: "exec", data: { code: "1+1" } });
+					return response.success ? response.result.value : "call answered " + response.error.code;
 				}, ID);
 				assert.deepEqual(echo, { echo: "1+1" });
 			}
