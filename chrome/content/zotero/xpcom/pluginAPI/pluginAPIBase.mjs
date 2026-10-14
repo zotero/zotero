@@ -65,6 +65,14 @@
 
 
 /**
+ * What every query/command resolves with; a plugin branches on it instead of catching
+ * @template T
+ * @typedef {object} ControllerResponse
+ * @property {boolean} success
+ * @property {T | {}} result - Empty when the request failed
+ * @property {{ code: string, message: string }} [error] - Only when the request failed
+ *
+ *
  * @typedef {object} ControllerAPIConfig
  * @property {string} apiName - Log prefix and error namespace
  * @property {Record<string, ControllerRequestDef>} [queries] - Read-only requests, defined on set
@@ -118,7 +126,7 @@ class PluginAPIBase {
 	 * @param {object} obj - The object to validate
 	 * @param {object} typeDef - The type definition to validate against
 	 * @param {string} path - The path to the object in the type definition
-	 * @returns {{obj?: object, valid: boolean}} - The validated object if valid and the validation flag
+	 * @returns {{obj?: object, valid: boolean, reason?: string}} - The validated object if valid, else why not
 	 */
 	_validateObject(obj, typeDef, path = "") {
 		obj = Object.assign({}, obj);
@@ -218,6 +226,7 @@ class PluginAPIBase {
 			this._log(String(e), "warn");
 			return {
 				valid: false,
+				reason: e.message,
 			};
 		}
 
@@ -455,8 +464,21 @@ class ManagerAPIBase extends PluginAPIBase {
 
 
 /**
+ * A request failure with its response code (one of ControllerAPIBase.errorCodes);
+ * anything else a handler throws is a bug
+ */
+class ControllerError extends Error {
+	constructor(code, message) {
+		super(message);
+		this.name = "ControllerError";
+		this.code = code;
+	}
+}
+
+
+/**
  * Controller-style API: plugins drive Zotero through named query/command requests whose
- * params and results are plain objects, so both sides cross the sandbox as data
+ * params and results cross the sandbox as data, and every request resolves with a ControllerResponse
  */
 class ControllerAPIBase extends PluginAPIBase {
 	_config = {
@@ -464,17 +486,23 @@ class ControllerAPIBase extends PluginAPIBase {
 	};
 
 	/**
-	 * Rejection names; an unprivileged caller sees them as the "<code>: <message>"
-	 * prefix of the re-created Error
+	 * Codes a ControllerError carries, in the order a request meets them; the last two are Zotero bugs
 	 */
 	static errorCodes = Object.freeze({
+		// No query or command of that name
 		UNKNOWN_REQUEST: "UnknownRequest",
+		// The plugin lacks a manifest permission the request declares
 		PERMISSION_DENIED: "PermissionDenied",
+		// The call is malformed: a param fails its schema or a handler's own check
 		INVALID_PARAMS: "InvalidParams",
-		INVALID_RESULT: "InvalidResult",
+		// A certain target necessary for the request does not exist, is not the requested type, or is invisible to the caller
 		NOT_FOUND: "NotFound",
+		// The caller may make the request, but Zotero forbids this action
 		NOT_ALLOWED: "NotAllowed",
-		NOT_IMPLEMENTED: "NotImplemented",
+		// A handler returned something that is not JSON data
+		INVALID_RESULT: "InvalidResult",
+		// A handler threw anything but a ControllerError; logged
+		INTERNAL_ERROR: "InternalError",
 	});
 
 	/**
@@ -507,7 +535,7 @@ class ControllerAPIBase extends PluginAPIBase {
 	 * @param {string} name
 	 * @param {object} [params]
 	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
-	 * @returns {Promise<object>}
+	 * @returns {Promise<ControllerResponse>}
 	 */
 	query(name, params = {}, callerPluginID) {
 		return this._invoke(this._queries, "query", name, params, callerPluginID);
@@ -518,7 +546,7 @@ class ControllerAPIBase extends PluginAPIBase {
 	 * @param {string} name
 	 * @param {object} [params]
 	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
-	 * @returns {Promise<object>}
+	 * @returns {Promise<ControllerResponse>}
 	 */
 	command(name, params = {}, callerPluginID) {
 		return this._invoke(this._commands, "command", name, params, callerPluginID);
@@ -544,7 +572,31 @@ class ControllerAPIBase extends PluginAPIBase {
 		registry.set(name, Object.assign({ permissions: [], params: {} }, def));
 	}
 
+	/**
+	 * A failure is a response, not a rejection, so callers branch instead of catching
+	 */
 	async _invoke(registry, kind, name, params, callerPluginID) {
+		try {
+			let result = await this._run(registry, kind, name, params, callerPluginID);
+			return { success: true, result };
+		}
+		catch (e) {
+			return { success: false, result: {}, error: this._toResponseError(e) };
+		}
+	}
+
+	/**
+	 * Anything but a ControllerError is a bug, logged and reported as InternalError
+	 */
+	_toResponseError(e) {
+		if (e instanceof ControllerError) {
+			return { code: e.code, message: e.message };
+		}
+		lazy.Zotero.logError(e);
+		return { code: ControllerAPIBase.errorCodes.INTERNAL_ERROR, message: String(e?.message ?? e) };
+	}
+
+	async _run(registry, kind, name, params, callerPluginID) {
 		let def = registry.get(name);
 		if (!def) {
 			this._throw(ControllerAPIBase.errorCodes.UNKNOWN_REQUEST, `Unknown ${kind} '${name}'`);
@@ -560,7 +612,8 @@ class ControllerAPIBase extends PluginAPIBase {
 		params = this._toPlainParams(name, params);
 		let validated = this._validateParams(params, def.params);
 		if (!validated.valid) {
-			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS, `Invalid params for ${kind} '${name}'`);
+			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS,
+				`Invalid params for ${kind} '${name}': ${validated.reason}`);
 		}
 
 		// An unprivileged caller's params carry its pluginID (a reserved key), as manager options do
@@ -631,33 +684,19 @@ class ControllerAPIBase extends PluginAPIBase {
 		for (let key of Object.keys(params)) {
 			if (!(key in typeDef)) {
 				this._log(`Unknown param '${key}'`, "warn");
-				return { valid: false };
+				return { valid: false, reason: `Unknown param '${key}'` };
 			}
 		}
 		return this._validateObject(params, typeDef);
 	}
 
 	/**
-	 * Handler stub for catalog entries that are not implemented yet
-	 */
-	_notImplemented(_params, { name }) {
-		this._throw(ControllerAPIBase.errorCodes.NOT_IMPLEMENTED, `'${name}' is not implemented yet`);
-	}
-
-	/**
-	 * @param {string} code - One of errorCodes, set as the error's name
+	 * @param {string} code - One of errorCodes
 	 * @param {string} message
-	 * @returns {Error}
 	 */
-	static createError(code, message) {
-		let e = new Error(message);
-		e.name = code;
-		return e;
-	}
-
 	_throw(code, message) {
-		throw ControllerAPIBase.createError(code, message);
+		throw new ControllerError(code, message);
 	}
 }
 
-export { PluginAPIBase, ManagerAPIBase, ControllerAPIBase };
+export { PluginAPIBase, ManagerAPIBase, ControllerAPIBase, ControllerError };
