@@ -33,7 +33,6 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
@@ -203,7 +202,6 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			// Unprivileged plugins can't build free-form markup or DOM.
 			// htmlLabel and renderCell content is an SVG URL shown as
 			// an image (see resolveSVGImageURL)
-			let scope = lazy.PluginSandbox.getScope(option.pluginID);
 			let unprivileged = !lazy.PluginSandbox.isPrivileged(option.pluginID);
 			if (unprivileged && option.htmlLabel !== undefined) {
 				let imageURL = resolveSVGImageURL(option.pluginID, option.htmlLabel);
@@ -241,15 +239,13 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 			if (option.dataProvider) {
 				let provider = lazy.ScopeVariables.fromScope(option.dataProvider, option.pluginID);
-				// hasPermissions() is false without a scope, so privileged is checked separately
-				let canReadData = !unprivileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 				let pluginID = option.pluginID;
 				// A cell answers synchronously, so `getItem` replaces the live item, and rides along as the
 				// third argument since a privileged plugin's first stays the live item
 				provider = ((wrapped, item, dataKey) => {
 					let context = {
 						itemID: item.id,
-						getItem: canReadData ? Zotero.DataStore.itemGetter(item.id, pluginID) : () => null,
+						getItem: Zotero.DataStore.itemGetter(item.id, pluginID),
 					};
 					try {
 						return wrapped(unprivileged ? context : item, dataKey, context);
