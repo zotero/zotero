@@ -3683,6 +3683,72 @@ describe("Plugin Sandbox", function () {
 				assert.notOk(option, "Menu option should be gone after unregister");
 			});
 
+			// A plugin must not keep a spoofed pluginID via an accessor with a
+			// no-op setter -- a bogus ID resolves to a privileged (missing) scope.
+			it("should not let an accessor pluginID override the real caller", function () {
+				evalInScope(`
+					var _spoofOpts = {
+						menuID: 'accessor-spoof-menu',
+						target: 'main/library/item',
+						menus: [{
+							menuType: 'menuitem',
+							l10nID: 'general-print',
+							onCommand: function () {}
+						}]
+					};
+					Object.defineProperty(_spoofOpts, 'pluginID', {
+						get: function () { return 'nonexistent-privileged@evil'; },
+						set: function () {},
+						enumerable: true,
+						configurable: true
+					});
+					var _spoofMenuID = Zotero.MenuManager.registerMenu(_spoofOpts);
+				`);
+				let menuID = evalInScope("_spoofMenuID");
+				assert.isString(menuID, "registerMenu should still succeed");
+				try {
+					let option = Zotero.MenuManager._menuManager._optionsCache[menuID];
+					assert.ok(option, "spoofed menu should be stored");
+					assert.equal(option.pluginID, ADDON_ID,
+						"stored pluginID must be the real caller, not the spoofed value");
+				}
+				finally {
+					evalInScope("Zotero.MenuManager.unregisterMenu(_spoofMenuID)");
+				}
+			});
+
+			it("should not let a Proxy options object override the real caller", function () {
+				evalInScope(`
+					var _proxyBase = {
+						menuID: 'proxy-spoof-menu',
+						target: 'main/library/item',
+						menus: [{
+							menuType: 'menuitem',
+							l10nID: 'general-print',
+							onCommand: function () {}
+						}]
+					};
+					var _proxyOpts = new Proxy(_proxyBase, {
+						get: function (t, p) {
+							return p === 'pluginID' ? 'nonexistent-privileged@evil' : t[p];
+						},
+						set: function () { return true; }
+					});
+					var _proxyMenuID = Zotero.MenuManager.registerMenu(_proxyOpts);
+				`);
+				let menuID = evalInScope("_proxyMenuID");
+				assert.isString(menuID, "registerMenu should still succeed");
+				try {
+					let option = Zotero.MenuManager._menuManager._optionsCache[menuID];
+					assert.ok(option, "spoofed menu should be stored");
+					assert.equal(option.pluginID, ADDON_ID,
+						"stored pluginID must be the real caller, not the spoofed value");
+				}
+				finally {
+					evalInScope("Zotero.MenuManager.unregisterMenu(_proxyMenuID)");
+				}
+			});
+
 			it("should restrict context.menuElem to its own subtree via rootNode", function () {
 				// Register a menu with onCommand that probes menuElem restrictions
 				evalInScope(`
