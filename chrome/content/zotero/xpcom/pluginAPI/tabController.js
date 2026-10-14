@@ -29,7 +29,7 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		getMainWindow: "chrome://zotero/content/xpcom/pluginAPI/utils.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	const LIBRARY_TAB_ID = "zotero-pane";
@@ -101,7 +101,7 @@
 				queries: {
 					tabs: {
 						params: { windowID: "number" },
-						handler: ({ windowID }) => this._queryTabs(lazy.getMainWindow(windowID)),
+						handler: ({ windowID }) => this._queryTabs(lazy.WindowUtils.getMainWindow(windowID)),
 					},
 				},
 				commands: {
@@ -110,14 +110,14 @@
 							windowID: "number",
 							tabID: "string",
 						},
-						handler: ({ windowID, tabID }) => this._selectTab(lazy.getMainWindow(windowID), tabID),
+						handler: ({ windowID, tabID }) => this._selectTab(lazy.WindowUtils.getMainWindow(windowID), tabID),
 					},
 					closeTabs: {
 						params: {
 							windowID: "number",
 							tabIDs: { type: "array", children: "string" },
 						},
-						handler: ({ windowID, tabIDs }) => this._closeTabs(lazy.getMainWindow(windowID), tabIDs),
+						handler: ({ windowID, tabIDs }) => this._closeTabs(lazy.WindowUtils.getMainWindow(windowID), tabIDs),
 					},
 					moveTab: {
 						params: {
@@ -125,7 +125,7 @@
 							tabID: "string",
 							index: "number",
 						},
-						handler: ({ windowID, tabID, index }) => this._moveTab(lazy.getMainWindow(windowID), tabID, index),
+						handler: ({ windowID, tabID, index }) => this._moveTab(lazy.WindowUtils.getMainWindow(windowID), tabID, index),
 					},
 					selectItems: {
 						params: {
@@ -135,7 +135,7 @@
 							noTabSwitch: { type: "boolean", optional: true },
 						},
 						handler: ({ windowID, itemIDs, inLibraryRoot, noTabSwitch }) => this._selectItems(
-							lazy.getMainWindow(windowID), itemIDs, { inLibraryRoot, noTabSwitch }
+							lazy.WindowUtils.getMainWindow(windowID), itemIDs, { inLibraryRoot, noTabSwitch }
 						),
 					},
 					selectCollectionsOrLibraries: {
@@ -153,7 +153,7 @@
 							},
 						},
 						handler: ({ windowID, type, ids }) => this._selectCollectionsOrLibraries(
-							lazy.getMainWindow(windowID), type, ids
+							lazy.WindowUtils.getMainWindow(windowID), type, ids
 						),
 					},
 				},
