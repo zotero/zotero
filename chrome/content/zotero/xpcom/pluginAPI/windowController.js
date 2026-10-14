@@ -36,8 +36,9 @@
 		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
-	// Main window panes that can be toggled
-	const PANES = ["item", "tagSelector", "context"];
+	// sidebar: also collections pane in library tab
+	// context: also item pane in library tab
+	const MAINWINDOW_PANES = ["sidebar", "context"];
 
 	/**
 	 * @typedef {object} WindowInfo
@@ -67,7 +68,7 @@
 	 * @typedef {object} WindowControllerQueryParams
 	 * @property {{ type?: WindowType }} windows
 	 * @property {{ windowID: number }} getWindowState
-	 * @property {{ windowID: number, pane: "item" | "tagSelector" | "context" }} getPaneState
+	 * @property {{ windowID: number, pane: "sidebar" | "context" }} getPaneState
 	 *
 	 *
 	 * @typedef {object} WindowControllerQueryResults
@@ -79,7 +80,7 @@
 	 * @typedef {object} WindowControllerCommandParams
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number }} closeWindow
-	 * @property {{ windowID: number, pane: "item" | "tagSelector" | "context" }} togglePane
+	 * @property {{ windowID: number, pane: "sidebar" | "context", open?: boolean }} togglePane
 	 * @property {{ type: "reader" | "note" | "preferencePane", itemID?: number, location?: object }} openWindow
 	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, fitContent?: boolean, parentWindowID?: number }} openPluginWindow
 	 *
@@ -120,8 +121,8 @@
 							windowID: "number",
 							pane: {
 								type: "string",
-								checkHook: value => PANES.includes(value)
-									|| `Param 'pane' must be one of ${PANES.join(", ")}, got ${value}`,
+								checkHook: value => MAINWINDOW_PANES.includes(value)
+									|| `Param 'pane' must be one of ${MAINWINDOW_PANES.join(", ")}, got ${value}`,
 							},
 						},
 						handler: ({ windowID, pane, pluginID }) => this._getPaneState(
@@ -143,11 +144,12 @@
 							windowID: "number",
 							pane: {
 								type: "string",
-								checkHook: value => PANES.includes(value)
-									|| `Param 'pane' must be one of ${PANES.join(", ")}, got ${value}`,
+								checkHook: value => MAINWINDOW_PANES.includes(value)
+									|| `Param 'pane' must be one of ${MAINWINDOW_PANES.join(", ")}, got ${value}`,
 							},
+							open: { type: "boolean", optional: true },
 						},
-						handler: ({ windowID, pane, pluginID }) => this._togglePane(windowID, pane, pluginID),
+						handler: ({ windowID, pane, open, pluginID }) => this._togglePane(windowID, pane, open, pluginID),
 					},
 					openWindow: {
 						params: {
@@ -251,21 +253,44 @@
 		/**
 		 * Toggle a pane of a main window; the same paths the View menu and toolbar use
 		 * @param {number} windowID
-		 * @param {"item" | "tagSelector" | "context"} pane
+		 * @param {"sidebar" | "context"} pane
+		 * @param {boolean} [open] - The state to put the pane in; omitted, it flips
 		 * @param {string} [pluginID] - The calling plugin
 		 * @returns {Promise<WindowControllerCommandResults["togglePane"]>}
 		 */
-		async _togglePane(windowID, pane, pluginID) {
+		async _togglePane(windowID, pane, open, pluginID) {
 			let win = lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID);
+			let { tabContentType } = win.Zotero_Tabs.parseTabType();
+			let state = this._getPaneState(win, pane);
+			if (open === state.open) {
+				return state;
+			}
 			switch (pane) {
-				case "item":
-					win.ZoteroPane.toggleItemPane();
-					break;
-				case "tagSelector":
-					await win.ZoteroPane.toggleTagSelector();
+				case "sidebar":
+					if (tabContentType === "library") {
+						let collectionsPane = win.document.getElementById("zotero-collections-pane");
+						let collapsed = collectionsPane.hasAttribute("collapsed");
+						win.document.getElementById("zotero-collections-splitter")
+							.setAttribute("state", collapsed ? "open" : "collapsed");
+						collectionsPane.toggleAttribute("collapsed", !collapsed);
+						win.ZoteroPane.updateLayoutConstraints();
+					}
+					else {
+						let nextOpen = !win.Zotero_Tabs.getSidebarState(tabContentType).open;
+						win.Zotero_Tabs.updateSidebarLayout({ width: nextOpen });
+						let instance = tabContentType === "reader"
+							? Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID)
+							: Zotero.Notes;
+						instance?.toggleSidebar(nextOpen);
+					}
 					break;
 				case "context":
-					win.ZoteroContextPane.togglePane();
+					if (tabContentType === "library") {
+						win.ZoteroPane.toggleItemPane();
+					}
+					else {
+						win.ZoteroContextPane.togglePane();
+					}
 					break;
 			}
 			return this._getPaneState(win, pane);
@@ -420,25 +445,25 @@
 
 		/**
 		 * @param {Window} win - A main window
-		 * @param {"item" | "tagSelector" | "context"} pane
+		 * @param {"sidebar" | "context"} pane
 		 * @returns {{ open: boolean }}
 		 */
 		_getPaneState(win, pane) {
+			let { tabContentType } = win.Zotero_Tabs.parseTabType();
 			let state = {};
 			switch (pane) {
-				case "item":
+				case "sidebar":
 				{
-					state.open = !win.ZoteroPane.itemPane.collapsed;
-					break;
-				}
-				case "tagSelector":
-				{
-					state.open = !win.document.getElementById("zotero-tag-selector-container").hasAttribute("collapsed");
+					state.open = tabContentType === "library"
+						? !win.document.getElementById("zotero-collections-pane").hasAttribute("collapsed")
+						: win.Zotero_Tabs.getSidebarState(tabContentType).open;
 					break;
 				}
 				case "context":
 				{
-					state.open = !win.ZoteroContextPane.collapsed;
+					state.open = tabContentType === "library"
+						? !win.ZoteroPane.itemPane.collapsed
+						: !win.ZoteroContextPane.collapsed;
 					break;
 				}
 			}
