@@ -136,16 +136,16 @@ class FileChanges extends PathChanges {
 	}
 
 	/**
-	 * @param {string} dest
-	 * @param {{ overwrite?: boolean }} [options] - An existing destination is refused unless true
+	 * @param {string} dest - The copy's path; a directory there takes the copy under the file's own name
+	 * @param {{ overwrite?: boolean }} [options] - An existing file where the copy lands is refused unless true
 	 */
 	copyFile(dest, { overwrite } = {}) {
 		return this._push("copyFile", withBoolean({ dest: assertPath(dest, "dest") }, "overwrite", overwrite));
 	}
 
 	/**
-	 * @param {string} dest
-	 * @param {{ overwrite?: boolean }} [options] - An existing destination is refused unless true
+	 * @param {string} dest - The new path; a directory there takes the file under its own name
+	 * @param {{ overwrite?: boolean }} [options] - An existing file where it lands is refused unless true
 	 */
 	rename(dest, { overwrite } = {}) {
 		return this._push("rename", withBoolean({ dest: assertPath(dest, "dest") }, "overwrite", overwrite));
@@ -170,7 +170,7 @@ class DirectoryChanges extends PathChanges {
 	}
 
 	/**
-	 * @param {string} dest - Must not exist
+	 * @param {string} dest - The new path, which must not exist
 	 */
 	rename(dest) {
 		return this._push("rename", { dest: assertPath(dest, "dest") });
@@ -178,16 +178,17 @@ class DirectoryChanges extends PathChanges {
 
 	/**
 	 * Copy the tree
-	 * @param {string} dest
-	 * @param {{ overwrite?: boolean }} [options] - An existing destination is replaced only with true
+	 * @param {string} dest - The copy's path
+	 * @param {{ overwrite?: boolean }} [options] - An existing destination is replaced as a whole with true,
+	 *     and refused without
 	 */
 	cp(dest, { overwrite } = {}) {
 		return this._push("cp", withBoolean({ dest: assertPath(dest, "dest") }, "overwrite", overwrite));
 	}
 
 	/**
-	 * @param {{ recursive?: boolean, force?: boolean }} [options] - `recursive` is required for a directory,
-	 *     as in Node; an absent directory is no error with `force`
+	 * @param {{ recursive?: boolean, force?: boolean }} [options] - `recursive` is needed for a directory with
+	 *     anything in it; an absent directory is no error with `force`
 	 */
 	rm({ recursive, force } = {}) {
 		return this._push("rm", withBoolean(withBoolean({}, "recursive", recursive), "force", force));
@@ -233,7 +234,7 @@ function editorFor(type, target, { revision } = {}) {
 }
 
 /**
- * The file operations to commit together, one editor per path, applied in order until one fails
+ * The file operations to commit together, applied in order until one fails; consecutive editors of a path merge
  */
 class FileChangeSet extends ChangeSet {
 	static _editorFromJSON(entry) {

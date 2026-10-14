@@ -79,7 +79,9 @@ describe("Zotero.FileStore", function () {
 			let path = under("guarded.txt");
 			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("v1", { overwrite: false, flush: true })));
 			assert.equal(await FileIO.readUTF8(path), "v1");
-			await failing(Zotero.FileStore.commit(FS.file(path).writeFile("v2", { overwrite: false })), codes.INVALID_PARAMS);
+			// The OS refuses it, as the write applies
+			await failing(Zotero.FileStore.commit(FS.file(path).writeFile("v2", { overwrite: false })), codes.NOT_ALLOWED);
+			assert.equal(await FileIO.readUTF8(path), "v1");
 
 			let snapshot = await ok(Zotero.FileStore.query("stat", { path }));
 			await FileIO.writeUTF8(path, "changed behind the store's back");
@@ -149,11 +151,12 @@ describe("Zotero.FileStore", function () {
 			let copy = under("copied.txt");
 			await FileIO.writeUTF8(dest, "in the way");
 			await ok(Zotero.FileStore.commit(FS.file(src).writeFile("payload")));
-			await failing(Zotero.FileStore.commit(FS.file(src).rename(dest)), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.file(src).rename(dest)), codes.NOT_ALLOWED);
 			assert.isTrue(await FileIO.exists(src));
-			// Onto itself, even with overwrite
+			// Onto itself, even with overwrite, and into its own directory, which lands on itself
 			await failing(Zotero.FileStore.commit(FS.file(src).copyFile(src, { overwrite: true })), codes.INVALID_PARAMS);
 			await failing(Zotero.FileStore.commit(FS.file(src).rename(src, { overwrite: true })), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.file(src).copyFile(root, { overwrite: true })), codes.INVALID_PARAMS);
 			assert.equal(await FileIO.readUTF8(src), "payload");
 
 			// Later operations and the result follow the rename
@@ -163,6 +166,31 @@ describe("Zotero.FileStore", function () {
 			assert.isFalse(await FileIO.exists(src));
 			assert.equal(await FileIO.readUTF8(dest), "payload");
 			assert.equal(await FileIO.readUTF8(copy), "payload");
+		});
+
+		// As cp and mv have it
+		it("should put a file in a directory found where it is copied or moved", async function () {
+			let src = under("into-src.txt");
+			let folder = under("into-folder");
+			let landed = Zotero.FileStore.path.join(folder, "into-src.txt");
+			await FileIO.makeDirectory(folder);
+			await ok(Zotero.FileStore.commit(FS.file(src).writeFile("into")));
+			await ok(Zotero.FileStore.commit(FS.file(src).copyFile(folder)));
+			assert.equal(await FileIO.readUTF8(landed), "into");
+			// The copy now there is an existing file like any other
+			await failing(Zotero.FileStore.commit(FS.file(src).copyFile(folder)), codes.NOT_ALLOWED);
+
+			// Later operations and the result follow the file to where it landed
+			let result = await ok(Zotero.FileStore.commit(FS.file(src).rename(folder, { overwrite: true }).appendFile("!")));
+			assert.equal(result.objects[0].path, Zotero.File.normalizeToUnix(landed));
+			assert.equal(await FileIO.readUTF8(landed), "into!");
+			assert.isFalse(await FileIO.exists(src));
+
+			// A directory under the file's name inside is not taken for the file
+			let other = under("into-other.txt");
+			await ok(Zotero.FileStore.commit(FS.file(other).writeFile("o")));
+			await FileIO.makeDirectory(Zotero.FileStore.path.join(folder, "into-other.txt"));
+			await failing(Zotero.FileStore.commit(FS.file(other).copyFile(folder)), codes.NOT_ALLOWED);
 		});
 
 		it("should tell a file from its other spellings", async function () {
@@ -226,8 +254,13 @@ describe("Zotero.FileStore", function () {
 			let result = await ok(Zotero.FileStore.commit(FS.file(path).rm()));
 			assert.isTrue(result.objects[0].erased);
 			assert.isFalse(await FileIO.exists(path));
-			await failing(Zotero.FileStore.commit(FS.file(path).rm()), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.file(path).rm()), codes.NOT_FOUND);
 			await ok(Zotero.FileStore.commit(FS.file(path).rm({ force: true })));
+			// A file's rm leaves a directory alone, where IOUtils would remove an empty one
+			let dir = under("not-a-file");
+			await FileIO.makeDirectory(dir);
+			await failing(Zotero.FileStore.commit(FS.file(dir).rm()), codes.NOT_FOUND);
+			assert.isTrue(await FileIO.exists(dir));
 			let exists = await ok(Zotero.FileStore.query("exists", { path }));
 			assert.isFalse(exists.exists);
 		});
@@ -253,7 +286,8 @@ describe("Zotero.FileStore", function () {
 
 			// An existing destination is refused, or replaced as a whole with overwrite
 			await FileIO.writeUTF8(Zotero.FileStore.path.join(copied, "extra.txt"), "stale");
-			await failing(Zotero.FileStore.commit(FS.directory(moved).cp(copied)), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.directory(moved).cp(copied)), codes.NOT_ALLOWED);
+			assert.isFalse(await FileIO.exists(Zotero.FileStore.path.join(copied, "moved")), "IOUtils would copy into it");
 			await ok(Zotero.FileStore.commit(FS.directory(moved).cp(copied, { overwrite: true })));
 			assert.isFalse(await FileIO.exists(Zotero.FileStore.path.join(copied, "extra.txt")));
 			assert.equal(await FileIO.readUTF8(Zotero.FileStore.path.join(copied, "a.txt")), "a");
@@ -264,7 +298,12 @@ describe("Zotero.FileStore", function () {
 			await failing(Zotero.FileStore.commit(FS.directory(moved).rename(`${moved}/`)), codes.INVALID_PARAMS);
 			assert.isFalse(await FileIO.exists(Zotero.FileStore.path.join(moved, "inner")));
 
-			await failing(Zotero.FileStore.commit(FS.directory(moved).rm()), codes.INVALID_PARAMS);
+			// Without recursive, the OS refuses a directory with anything in it, and an empty one goes
+			await failing(Zotero.FileStore.commit(FS.directory(moved).rm()), codes.NOT_ALLOWED);
+			let empty = under("tree/empty");
+			await FileIO.makeDirectory(empty);
+			await ok(Zotero.FileStore.commit(FS.directory(empty).rm()));
+			assert.isFalse(await FileIO.exists(empty));
 			await ok(Zotero.FileStore.commit(FS.directory(moved).rm({ recursive: true })));
 			await ok(Zotero.FileStore.commit(FS.directory(Zotero.FileStore.path.join(copied, "sub")).rm({ recursive: true })));
 			assert.isFalse(await FileIO.exists(moved));
@@ -273,7 +312,7 @@ describe("Zotero.FileStore", function () {
 		it("should refuse an existing directory to makeDir without recursive", async function () {
 			let dir = under("exists");
 			await ok(Zotero.FileStore.commit(FS.directory(dir).makeDir()));
-			await failing(Zotero.FileStore.commit(FS.directory(dir).makeDir()), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.commit(FS.directory(dir).makeDir()), codes.NOT_ALLOWED);
 			await ok(Zotero.FileStore.commit(FS.directory(dir).makeDir({ recursive: true })));
 		});
 	});
@@ -290,7 +329,7 @@ describe("Zotero.FileStore", function () {
 			let sha512 = await ok(Zotero.FileStore.query("digest", { path, algorithm: "sha512" }));
 			assert.lengthOf(sha512.digest, 128);
 			await failing(Zotero.FileStore.query("digest", { path, algorithm: "md5" }), codes.INVALID_PARAMS);
-			await failing(Zotero.FileStore.query("digest", { path: root }), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.query("digest", { path: root }), codes.NOT_FOUND);
 		});
 
 		it("should report NotFound for a missing path and for the wrong kind", async function () {
@@ -298,8 +337,10 @@ describe("Zotero.FileStore", function () {
 			await ok(Zotero.FileStore.commit(FS.directory(dir).makeDir()));
 			await failing(Zotero.FileStore.query("readFile", { path: under("nope.txt") }), codes.NOT_FOUND);
 			await failing(Zotero.FileStore.query("stat", { path: under("nope.txt") }), codes.NOT_FOUND);
+			// The other kind is NotFound for a query as for a commit
 			await failing(Zotero.FileStore.commit(FS.file(dir).writeFile("x")), codes.NOT_FOUND);
-			await failing(Zotero.FileStore.query("readDir", { path: under("plain.txt") }), codes.INVALID_PARAMS);
+			await failing(Zotero.FileStore.query("readFile", { path: dir }), codes.NOT_FOUND);
+			await failing(Zotero.FileStore.query("readDir", { path: under("plain.txt") }), codes.NOT_FOUND);
 			// An OS refusal is NotAllowed with the platform's reason, not a bug of ours; Windows says NotFound instead
 			await failing(Zotero.FileStore.query("stat", { path: under("z".repeat(300)) }),
 				Zotero.isWin ? codes.NOT_FOUND : codes.NOT_ALLOWED);
@@ -323,19 +364,21 @@ describe("Zotero.FileStore", function () {
 		it("should apply in order and say what a failed set left behind", async function () {
 			let first = under("ordered-1.txt");
 			let second = under("ordered-2.txt");
-			// A precondition fails while resolving, so nothing is applied
+			// What the request alone decides is refused before anything is written
 			let error = await failing(Zotero.FileStore.commit(FS.of(
 				FS.file(first).writeFile("first"),
-				FS.file(under("missing.txt")).rm()
+				FS.file(second).writeFile("%%%", { encoding: "base64" })
 			)), codes.INVALID_PARAMS);
 			assert.isUndefined(error.data && error.data.applied);
 			assert.isFalse(await FileIO.exists(first));
 
-			// A failure while applying, after an earlier entry: the report says so
+			// What the file system decides fails as it applies, after the entries before it: the report says so
 			error = await failing(Zotero.FileStore.commit(FS.of(
 				FS.file(first).writeFile("first"),
 				FS.directory(under("no-such-dir/child")).makeDir()
 			)), codes.NOT_FOUND);
+			// The OS's refusal is located like the store's own
+			assert.match(error.message, /^changes\[1\]\.ops\[0\] \(directory\.makeDir\): /);
 			assert.lengthOf(error.data.applied, 1);
 			assert.equal(error.data.applied[0].id, Zotero.File.normalizeToUnix(first));
 			assert.equal(error.data.failed.index, 1);
@@ -344,7 +387,7 @@ describe("Zotero.FileStore", function () {
 			assert.isFalse(await FileIO.exists(second));
 		});
 
-		// Checks run in operation order, so a later operation of an entry may rely on an earlier one
+		// Operations apply in order, so a later operation of an entry may rely on an earlier one
 		it("should let a write precede a rename in one entry", async function () {
 			let written = under("write-then-move.txt");
 			let moved = under("write-then-move-done.txt");
@@ -354,13 +397,63 @@ describe("Zotero.FileStore", function () {
 			assert.equal(await FileIO.readUTF8(moved), "payload");
 		});
 
+		// Merged into the first editor, the copy ran before the second write and b ended up "B"
+		it("should keep a path edited again after another in its place", async function () {
+			let a = under("again-a.txt");
+			let b = under("again-b.txt");
+			let set = FS.of(FS.file(a).writeFile("A"), FS.file(b).writeFile("B"), FS.file(a).copyFile(b, { overwrite: true }));
+			assert.equal(set.size, 3);
+			let { objects } = await ok(Zotero.FileStore.commit(set));
+			assert.lengthOf(objects, 3);
+			assert.equal(await FileIO.readUTF8(b), "A");
+
+			// Without overwrite, the destination an earlier entry wrote refuses the copy as it applies
+			let c = under("again-c.txt");
+			let d = under("again-d.txt");
+			let error = await failing(Zotero.FileStore.commit(
+				FS.of(FS.file(c).writeFile("c"), FS.file(d).writeFile("d"), FS.file(c).copyFile(d))
+			), codes.NOT_ALLOWED);
+			assert.include(error.message, "again-d.txt");
+			assert.lengthOf(error.data.applied, 2);
+			assert.equal(error.data.failed.index, 2);
+			assert.equal(await FileIO.readUTF8(d), "d");
+		});
+
+		// Each operation meets the paths as the entries before it left them
+		it("should let a later entry use a path an earlier one creates", async function () {
+			let src = under("later-src.txt");
+			let other = under("later-other.txt");
+			let copy = under("later-copy.txt");
+			await ok(Zotero.FileStore.commit(FS.of(
+				FS.file(src).writeFile("abc"),
+				FS.file(other).writeFile("x"),
+				FS.file(src).copyFile(copy),
+				FS.file(other).rm(),
+				FS.file(copy).truncate(1)
+			)));
+			assert.equal(await FileIO.readUTF8(copy), "a");
+			assert.isFalse(await FileIO.exists(other));
+		});
+
+		it("should remove a path and write it again later in the set", async function () {
+			let path = under("rewritten.txt");
+			await ok(Zotero.FileStore.commit(FS.file(path).writeFile("old")));
+			await ok(Zotero.FileStore.commit(FS.of(
+				FS.file(path).rm(),
+				FS.file(under("rewritten-between.txt")).writeFile("x"),
+				FS.file(path).writeFile("new")
+			)));
+			assert.equal(await FileIO.readUTF8(path), "new");
+		});
+
 		it("should validate a set without writing", async function () {
 			let path = under("validated.txt");
 			let result = await ok(Zotero.FileStore.query("validate", {
-				changes: FS.of(FS.file(path).writeFile("x"), FS.file(path).rename(under("plain.txt"))).toJSON(),
+				changes: FS.of(FS.file(path).writeFile("x"), FS.file(path).rename(path)).toJSON(),
 			}));
 			assert.lengthOf(result.issues, 1);
 			assert.equal(result.issues[0].code, codes.INVALID_PARAMS);
+			assert.include(result.issues[0].message, "is the source itself");
 			assert.isFalse(await FileIO.exists(path));
 		});
 
