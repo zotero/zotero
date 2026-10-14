@@ -654,6 +654,10 @@
 				return;
 			}
 			let doc = container.ownerDocument;
+			// A closed reader's document outlives its window
+			if (!doc.defaultView) {
+				return;
+			}
 			let toolbarElem = doc.querySelector(".toolbar");
 			if (!toolbarElem) {
 				return;
