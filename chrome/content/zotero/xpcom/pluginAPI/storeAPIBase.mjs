@@ -447,7 +447,8 @@ class StoreAPIBase extends RequestAPIBase {
 				if (!isObject(op) || typeof op.op !== "string") {
 					this._throw(INVALID_PARAMS, `${opAt} must be an object with an 'op' name`);
 				}
-				let opDef = def.operations[op.op];
+				// A plain-object catalog, so a prototype member's name must not pass for an operation
+				let opDef = Object.hasOwn(def.operations, op.op) ? def.operations[op.op] : undefined;
 				if (!opDef) {
 					this._throw(INVALID_PARAMS, `${opAt}.op must be one of ${Object.keys(def.operations).join(", ")} for ${entry.type}, got ${op.op}`);
 				}
