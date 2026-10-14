@@ -43,24 +43,28 @@ const ID_REF_FORMS = "an ID, a key, { key, libraryID } or { ref }";
 
 /**
  * The param-schema fragments Zotero.DataStore's catalogs are built from; all of them assume library
- * data, so another store writes its own rather than reusing these
+ * data, so another store writes its own rather than reusing these. An ID-ref fragment carries the
+ * `objectType` it names, which the store checks a `{ ref }` against before anything is loaded
  */
 const DataParams = {
-	idRef: (optional = false) => ({
+	idRef: (objectType, optional = false) => ({
 		type: "any",
+		objectType,
 		optional,
 		checkHook: value => (optional && value === undefined) || isIDRef(value) || `must be ${ID_REF_FORMS}`,
 	}),
 
-	nullableIDRef: {
+	nullableIDRef: objectType => ({
 		type: "any",
+		objectType,
 		checkHook: value => value === null || isIDRef(value) || `must be ${ID_REF_FORMS} or null`,
-	},
+	}),
 
-	idRefList: {
+	idRefList: objectType => ({
 		type: "array",
+		objectType,
 		checkHook: value => value.every(isIDRef) || `every entry must be ${ID_REF_FORMS}`,
-	},
+	}),
 
 	// A single object is addressed by its ID, or by libraryID and key
 	address: idName => ({

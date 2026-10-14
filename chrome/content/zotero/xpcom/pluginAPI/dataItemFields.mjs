@@ -27,18 +27,19 @@
  * What setField accepts on an item, beyond the item fields Zotero.ItemFields knows
  */
 const DataItemFields = {
-	// API JSON keys setField takes besides item fields, mapped to item properties as fromJSON does
+	// API JSON keys setField takes besides item fields, mapped to item properties as fromJSON does; `create`:
+	// the kind's create block carries it, set in this order (core saves no annotation row without them)
 	PROPERTIES: {
 		contentType: { prop: "attachmentContentType", kind: "attachment" },
 		charset: { prop: "attachmentCharset", kind: "attachment" },
-		annotationType: { prop: "annotationType", kind: "annotation" },
+		annotationType: { prop: "annotationType", kind: "annotation", create: true },
 		annotationAuthorName: { prop: "annotationAuthorName", kind: "annotation" },
 		annotationText: { prop: "annotationText", kind: "annotation" },
 		annotationComment: { prop: "annotationComment", kind: "annotation" },
 		annotationColor: { prop: "annotationColor", kind: "annotation" },
 		annotationPageLabel: { prop: "annotationPageLabel", kind: "annotation" },
-		annotationSortIndex: { prop: "annotationSortIndex", kind: "annotation" },
-		annotationPosition: { prop: "annotationPosition", kind: "annotation", json: true },
+		annotationSortIndex: { prop: "annotationSortIndex", kind: "annotation", create: true },
+		annotationPosition: { prop: "annotationPosition", kind: "annotation", json: true, create: true },
 	},
 
 	// API JSON keys setField refuses, with what to use instead
@@ -69,17 +70,26 @@ const DataItemFields = {
 	},
 
 	/**
-	 * A reason setField cannot set this field on this item, or nothing
+	 * @param {"attachment" | "annotation"} [kind] - Every kind's when omitted
+	 * @returns {string[]} The properties a create block carries, in the order they are set
+	 */
+	createFields(kind) {
+		return Object.entries(DataItemFields.PROPERTIES)
+			.filter(([, property]) => property.create && (!kind || property.kind === kind))
+			.map(([field]) => field);
+	},
+
+	/**
+	 * A reason setField cannot set this field on this item, or nothing. Only item fields and the properties
+	 * above pass: core's setField takes identifiers and primary fields too (libraryID, key, synced)
 	 */
 	check(item, field, value) {
 		if (Object.hasOwn(DataItemFields.REJECTED, field)) {
 			return `'${field}' is set with ${DataItemFields.REJECTED[field]}`;
 		}
 		let property = DataItemFields._property(field);
+		// Core refuses an attachment property on another kind itself, but takes an annotation one anywhere
 		if (property) {
-			if (property.kind === "attachment" && !item.isAttachment()) {
-				return `'${field}' applies to attachments only`;
-			}
 			if (property.kind === "annotation" && !item.isAnnotation()) {
 				return `'${field}' applies to annotations only`;
 			}

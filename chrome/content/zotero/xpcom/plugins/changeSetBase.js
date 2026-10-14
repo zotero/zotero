@@ -223,17 +223,17 @@ class ChangesBase {
 	}
 }
 
-// Editors of one object collapse into one entry, in the order first seen; an editor that only addresses a
-// ref sits where the editor creating that ref is, its operations after the creator's own
+// Consecutive editors of one object collapse into one entry, so the set keeps the order it was given in; an
+// editor of a ref joins the entry creating it wherever that is, its operations after the creator's own, since
+// created objects apply first
 function mergeEditors(editors) {
-	let byAddress = new Map();
+	let byRef = new Map();
 	let merged = [];
 	let refOnly = [];
-	let place = (editor) => {
-		let address = editor._address();
-		let index = byAddress.get(address);
+	let placeRef = (editor) => {
+		let index = byRef.get(editor.ref);
 		if (index === undefined) {
-			byAddress.set(address, merged.length);
+			byRef.set(editor.ref, merged.length);
 			merged.push(editor);
 		}
 		else {
@@ -244,21 +244,28 @@ function mergeEditors(editors) {
 		if (!(editor instanceof ChangesBase)) {
 			throw new TypeError("A change set is made of editors from the set's factories");
 		}
+		let last = merged.at(-1);
 		if (editor.ref !== undefined && !editor.isNew) {
 			refOnly.push(editor);
 		}
+		else if (editor.ref !== undefined) {
+			placeRef(editor);
+		}
+		else if (last && last._address() === editor._address()) {
+			merged[merged.length - 1] = last._merge(editor);
+		}
 		else {
-			place(editor);
+			merged.push(editor);
 		}
 	}
 	// A ref nothing creates stays a lone entry, which the store rejects with the reason
-	refOnly.forEach(place);
+	refOnly.forEach(placeRef);
 	return merged;
 }
 
 /**
- * The changes to commit together, one editor per object, applied in order. Immutable: `with` and the
- * defaults setters return new sets. A subclass adds the per-type factories and `_editorFromJSON`
+ * The changes to commit together, in the order given, consecutive editors of one object merged. Immutable:
+ * `with` and the defaults setters return new sets. A subclass adds the per-type factories and `_editorFromJSON`
  */
 class ChangeSet {
 	_editors;

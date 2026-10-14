@@ -36,8 +36,8 @@ const DataAddress = {
 	objectAddress(objects) {
 		let keyToID = objects && ((libraryID, key) => objects.getIDFromLibraryAndKey(libraryID, key) || null);
 		let forms = keyToID
-			? "an ID, a key, { key, libraryID } or the { ref } of an object created earlier in the change set"
-			: "an ID or the { ref } of an object created earlier in the change set";
+			? "an ID, a key, { key, libraryID } or the { ref } of an object the change set creates"
+			: "an ID or the { ref } of an object the change set creates";
 
 		function libraryFor(given, fallbacks) {
 			return Number.isInteger(given) ? given : fallbacks.find(Number.isInteger);
