@@ -35,6 +35,7 @@ const SchemaKey = Object.freeze({
 const IMPLIED_PERMISSIONS = {
 	dataWrite: ["dataRead"],
 	fileSystemWrite: ["fileSystemRead"],
+	tab: ["window"],
 	ui: [
 		"itemTree",
 		"itemPane",
@@ -46,6 +47,8 @@ const IMPLIED_PERMISSIONS = {
 		"preferencePane",
 		"userPrompt",
 		"openWindow",
+		"window",
+		"tab",
 	],
 };
 
@@ -412,6 +415,27 @@ const PERMISSION_SCHEMAS = {
 	},
 	openWindow: {
 		// Set up directly by setupOpenWindow() in globals.mjs
+	},
+	window: {
+		Zotero: {
+			WindowController: {
+				query: "CustomParserCallable",
+				command: "CustomParserCallable",
+				windowTypes: true,
+				errorCodes: true,
+			},
+		},
+	},
+	tab: {
+		Zotero: {
+			TabController: {
+				query: "CustomParserCallable",
+				command: "CustomParserCallable",
+				tabTypes: true,
+				libraryTabID: true,
+				errorCodes: true,
+			},
+		},
 	},
 };
 
