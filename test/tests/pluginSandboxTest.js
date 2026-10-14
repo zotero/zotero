@@ -5552,5 +5552,23 @@ describe("Plugin Sandbox", function () {
 			assert.equal(result.selectedTabID, "zotero-pane");
 			assert.equal(Array.from(result.tabs)[0].type, "library");
 		});
+
+		it("should open and close a note tab from the sandbox", async function () {
+			loadTestScope(["default", "tab"]);
+			let note = await createDataObject("item", { itemType: "note" });
+			let windowID = pluginWin.browsingContext.id;
+			let { tabID } = await evalInScope(
+				`Zotero.TabController.command("openTab", { windowID: ${windowID}, type: "note", itemID: ${note.id} })`
+			);
+			try {
+				assert.equal(pluginWin.Zotero_Tabs.selectedID, tabID);
+				assert.equal(pluginWin.Zotero_Tabs.getTabInfo(tabID).type, "note");
+			}
+			finally {
+				await evalInScope(
+					`Zotero.TabController.command("closeTabs", { windowID: ${windowID}, tabIDs: [${JSON.stringify(tabID)}] })`
+				);
+			}
+		});
 	});
 });

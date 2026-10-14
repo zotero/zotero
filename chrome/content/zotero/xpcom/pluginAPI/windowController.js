@@ -63,11 +63,13 @@
 	 * @typedef {object} WindowControllerCommandParams
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number, pane: "item" | "tagSelector" | "context" }} togglePane
+	 * @property {{ type: "reader" | "note", itemID: number, location?: object }} openWindow
 	 *
 	 *
 	 * @typedef {object} WindowControllerCommandResults
 	 * @property {{}} focusWindow
 	 * @property {{ open: boolean }} togglePane
+	 * @property {{ windowID: number }} openWindow
 	 */
 
 	class WindowControllerInternal extends lazy.ControllerAPIBase {
@@ -122,6 +124,18 @@
 							},
 						},
 						handler: ({ windowID, pane, pluginID }) => this._togglePane(windowID, pane, pluginID),
+					},
+					openWindow: {
+						params: {
+							type: {
+								type: "string",
+								checkHook: value => lazy.WindowUtils.OPENABLE_TYPES.includes(value)
+									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_TYPES.join(", ")}, got ${value}`,
+							},
+							itemID: "number",
+							location: { type: "object", optional: true },
+						},
+						handler: ({ type, itemID, location }) => this._openWindow(type, itemID, location),
 					},
 				},
 			};
@@ -196,6 +210,25 @@
 					break;
 			}
 			return this._getPaneState(win, pane);
+		}
+
+		/**
+		 * Open an item in its own window; an existing window for the item is focused instead
+		 * @param {"reader" | "note"} type
+		 * @param {number} itemID
+		 * @param {object} [location]
+		 * @returns {Promise<WindowControllerCommandResults["openWindow"]>}
+		 */
+		async _openWindow(type, itemID, location) {
+			lazy.WindowUtils.getOpenableItem(itemID, type);
+			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
+			let { instance, win } = await opener.open(itemID, location, { openInWindow: true });
+			// Resolve once the content has loaded; a new window is listed under its type only then
+			await instance._initPromise;
+			if (!win || win.closed) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `No window opened for item ${itemID}`);
+			}
+			return { windowID: lazy.WindowUtils.getWindowID(win) };
 		}
 
 		/**

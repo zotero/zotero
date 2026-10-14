@@ -1112,7 +1112,7 @@ describe("Plugin API", function () {
 			};
 
 			let pdfAttachment = await importFileAttachment('test.pdf');
-			let reader = await Zotero.Reader.open(pdfAttachment.id, undefined, {
+			let { instance: reader } = await Zotero.Reader.open(pdfAttachment.id, undefined, {
 				openInWindow: true,
 			});
 			await reader._initPromise;
@@ -2009,7 +2009,7 @@ describe("Plugin API", function () {
 			assert.isString(mainOnlyID);
 
 			let pdfAttachment = await importFileAttachment("test.pdf");
-			let reader = await Zotero.Reader.open(pdfAttachment.id, undefined, {
+			let { instance: reader } = await Zotero.Reader.open(pdfAttachment.id, undefined, {
 				openInWindow: true,
 			});
 			await reader._initPromise;
@@ -3782,6 +3782,44 @@ describe("Plugin API", function () {
 				);
 				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_FOUND);
 			});
+
+			it("should open a note and a reader in their own windows and reuse an existing one", async function () {
+				let note = await createDataObject("item", { itemType: "note" });
+				let attachment = await importFileAttachment("test.pdf");
+				let opened = [];
+				try {
+					let { windowID } = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
+					let noteWin = getWindow(windowID, "noteWindow");
+					opened.push(noteWin);
+					assert.equal(noteWin.name, "zotero-note-" + note.id);
+					let again = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
+					assert.equal(again.windowID, windowID, "an existing note window should be reused");
+
+					({ windowID } = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id }));
+					let readerWin = getWindow(windowID, "readerWindow");
+					opened.push(readerWin);
+					assert.equal(readerWin.reader.itemID, attachment.id);
+					let { windows } = await Zotero.WindowController.query("windows", { type: "readerWindow" });
+					assert.isTrue(windows.some(w => w.windowID === windowID), "the reader window should be listed");
+					again = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id });
+					assert.equal(again.windowID, windowID, "an existing reader window should be reused");
+
+					let errorCodes = Zotero.WindowController.errorCodes;
+					let e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "note", itemID: -1 }));
+					assert.equal(e.name, errorCodes.NOT_FOUND);
+					e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "reader", itemID: note.id }));
+					assert.equal(e.name, errorCodes.INVALID_PARAMS);
+					e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "library", itemID: note.id }));
+					assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				}
+				finally {
+					for (let w of opened) {
+						if (!w.closed) {
+							w.close();
+						}
+					}
+				}
+			});
 		});
 
 		describe("Zotero.TabController", function () {
@@ -3814,9 +3852,9 @@ describe("Plugin API", function () {
 			it("should hold the tab and library-selection requests, not the window ones", function () {
 				let { queries, commands } = Zotero.TabController._tabController.requestNames;
 				assert.sameMembers(queries, ["tabs"]);
-				assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries"]);
+				assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
 				let windowCommands = Zotero.WindowController._windowController.requestNames.commands;
-				assert.sameMembers(windowCommands, ["focusWindow", "togglePane"]);
+				assert.sameMembers(windowCommands, ["focusWindow", "togglePane", "openWindow"]);
 			});
 
 			it("should require a window ID on every request", async function () {
@@ -3847,9 +3885,8 @@ describe("Plugin API", function () {
 			it("should list, select, move and close note tabs", async function () {
 				let note1 = await createDataObject("item", { itemType: "note" });
 				let note2 = await createDataObject("item", { itemType: "note" });
-				let editor = await Zotero.Notes.open(note1.id);
-				await Zotero.Notes.open(note2.id, null, { openInBackground: true });
-				let tab2ID = win.Zotero_Tabs.getTabIDByItemID(note2.id);
+				let { instance: editor } = await Zotero.Notes.open(note1.id);
+				let { tabID: tab2ID } = await Zotero.Notes.open(note2.id, null, { openInBackground: true });
 
 				let tabs = await waitForTabState(editor.tabID, "loaded");
 				let { selectedTabID } = await Zotero.TabController.query("tabs", { windowID });
@@ -3882,7 +3919,7 @@ describe("Plugin API", function () {
 
 			it("should report a reader tab's subtype", async function () {
 				let attachment = await importFileAttachment("test.pdf");
-				let reader = await Zotero.Reader.open(attachment.id);
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
 				await reader._initPromise;
 				let tabs = await waitForTabState(reader.tabID, "loaded");
 				let tab = tabs.find(t => t.tabID === reader.tabID);
@@ -3896,7 +3933,7 @@ describe("Plugin API", function () {
 				let item1 = await createDataObject("item");
 				let item2 = await createDataObject("item");
 				let note = await createDataObject("item", { itemType: "note" });
-				let editor = await Zotero.Notes.open(note.id);
+				let { instance: editor } = await Zotero.Notes.open(note.id);
 				assert.equal(win.Zotero_Tabs.selectedID, editor.tabID);
 
 				let result = await Zotero.TabController.command("selectItems", { windowID, itemIDs: [item1.id, item2.id] });
@@ -3973,6 +4010,62 @@ describe("Plugin API", function () {
 				assert.equal(e.name, errorCodes.NOT_FOUND);
 				e = await getPromiseError(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [] }));
 				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+			});
+
+			it("should open notes and readers in tabs, reusing a tab unless duplicates are allowed", async function () {
+				let note = await createDataObject("item", { itemType: "note" });
+				let { tabID } = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
+				assert.equal(win.Zotero_Tabs.selectedID, tabID);
+				let tabs = await waitForTabState(tabID, "loaded");
+				let tab = tabs.find(t => t.tabID === tabID);
+				assert.equal(tab.type, "note");
+				assert.deepEqual(tab.itemIDs, [note.id]);
+
+				// The same item selects the existing tab
+				await Zotero.TabController.command("selectTab", { windowID, tabID: libraryTabID });
+				let again = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
+				assert.equal(again.tabID, tabID);
+				assert.equal(win.Zotero_Tabs.selectedID, tabID);
+
+				// A background duplicate is a new, unselected tab at the requested index, left unloaded
+				let dup = await Zotero.TabController.command("openTab", {
+					windowID, type: "note", itemID: note.id, background: true, allowDuplicate: true, index: 1,
+				});
+				assert.notEqual(dup.tabID, tabID);
+				assert.equal(win.Zotero_Tabs.selectedID, tabID);
+				({ tabs } = await Zotero.TabController.query("tabs", { windowID }));
+				let dupTab = tabs.find(t => t.tabID === dup.tabID);
+				assert.equal(dupTab.index, 1);
+				assert.equal(dupTab.state, "unloaded");
+
+				// An existing unloaded tab for the item is loaded and reused
+				let attachment = await importFileAttachment("test.pdf");
+				let { id: unloadedID } = win.Zotero_Tabs.add({ type: "reader-unloaded", title: "PDF", data: { itemID: attachment.id } });
+				({ tabID } = await Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: attachment.id }));
+				assert.equal(tabID, unloadedID);
+				tabs = await waitForTabState(tabID, "loaded");
+				tab = tabs.find(t => t.tabID === tabID);
+				assert.equal(tab.type, "reader");
+				assert.equal(tab.subType, "pdf");
+				assert.isTrue(tab.selected);
+			});
+
+			it("should reject opening a missing item, an item of the wrong kind, or a bad index", async function () {
+				let errorCodes = Zotero.TabController.errorCodes;
+				let item = await createDataObject("item");
+				let note = await createDataObject("item", { itemType: "note" });
+				let e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: -1 }));
+				assert.equal(e.name, errorCodes.NOT_FOUND);
+				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: item.id }));
+				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: item.id }));
+				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "library", itemID: note.id }));
+				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id, index: 0 }));
+				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID: -1, type: "note", itemID: note.id }));
+				assert.equal(e.name, errorCodes.NOT_FOUND);
 			});
 		});
 	});

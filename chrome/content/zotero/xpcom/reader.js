@@ -1966,7 +1966,7 @@ class ReaderTab extends ReaderInstance {
 		this._showContextPaneToggle = true;
 		this._readAloudPlaying = false;
 		this._pointerDownWindow = null;
-		this._window = Services.wm.getMostRecentWindow('navigator:browser');
+		this._window = options.mainWindow || Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
 		// If an unloaded tab for this item already exists, load the reader in it.
@@ -2946,10 +2946,16 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback } = {}) {
+	/**
+	 * Open an item in a reader tab or window, reusing an existing one unless duplicates are allowed
+	 * @returns {Promise<{ instance: ReaderInstance, tabID: string | null, win: Window }>} The tab is null
+	 *     in a window, where win is the reader window
+	 */
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback, mainWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = Zotero.getMainWindow();
+		// mainWindow: the main window to open a tab in; defaults to the most recent one
+		let win = mainWindow || Zotero.getMainWindow();
 
 		await library.waitForDataLoad('item');
 
@@ -2969,8 +2975,9 @@ class Reader {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return undefined;
+					// Selecting the unloaded tab runs its load hook, which resolves with the reader it opened
+					reader = await win.Zotero_Tabs.select(existingTabID, false, { location });
+					return { instance: reader, tabID: existingTabID, win };
 				}
 			}
 		}
@@ -3016,6 +3023,7 @@ class Reader {
 				index: tabIndex,
 				tabID,
 				background: openInBackground,
+				mainWindow: win,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				contextPaneOpen: !win.ZoteroContextPane.collapsed,
@@ -3042,7 +3050,10 @@ class Reader {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
-		return reader;
+		if (openInWindow) {
+			return { instance: reader, tabID: null, win: reader._window };
+		}
+		return { instance: reader, tabID: reader.tabID, win };
 	}
 
 	async openPreview(itemID, iframe) {

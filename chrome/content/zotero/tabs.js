@@ -99,25 +99,29 @@ var Zotero_Tabs = new function () {
 	this.tabHooks = {
 		load: {
 			reader: async (tab, tabIndex, options) => {
-				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+				let { instance: reader } = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
 					allowDuplicate: true,
 					secondViewState: tab.data.secondViewState,
-					preventJumpback: true
+					preventJumpback: true,
+					mainWindow: window
 				});
 				await reader._initPromise;
+				return reader;
 			},
 			note: async (tab, tabIndex, options) => {
-				let editorInstance = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+				let { instance: editorInstance } = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
 					allowDuplicate: true,
-					preventJumpback: true
+					preventJumpback: true,
+					mainWindow: window
 				});
 				await editorInstance._initPromise;
+				return editorInstance;
 			}
 		},
 		focusFirst: {
@@ -180,24 +184,24 @@ var Zotero_Tabs = new function () {
 			reader: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID, secondViewState } = tab.data;
-				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
+				await Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState, mainWindow: window });
 			},
 			note: async (tab, _tabIndex) => {
 				Zotero_Tabs.close(tab.id);
 				let { itemID } = tab.data;
-				await Zotero.Notes.open(itemID, null, { openInWindow: true });
+				await Zotero.Notes.open(itemID, null, { openInWindow: true, mainWindow: window });
 			}
 		},
 		duplicate: {
 			reader: async (tab, tabIndex) => {
 				if (tab.data.itemID) {
 					let { secondViewState } = tab.data;
-					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState });
+					await Zotero.Reader.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, secondViewState, mainWindow: window });
 				}
 			},
 			note: async (tab, tabIndex) => {
 				if (tab.data.itemID) {
-					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true });
+					await Zotero.Notes.open(tab.data.itemID, null, { tabIndex: tabIndex + 1, allowDuplicate: true, mainWindow: window });
 				}
 			}
 		},
@@ -209,7 +213,8 @@ var Zotero_Tabs = new function () {
 						{
 							tabIndex,
 							openInBackground: true,
-							allowDuplicate: true
+							allowDuplicate: true,
+							mainWindow: window
 						}
 					);
 					return true;
@@ -223,7 +228,8 @@ var Zotero_Tabs = new function () {
 						{
 							tabIndex,
 							openInBackground: true,
-							allowDuplicate: true
+							allowDuplicate: true,
+							mainWindow: window
 						}
 					);
 					return true;
@@ -853,7 +859,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 * @param {Object} options - Additional options for selecting the tab. Passed to tab hooks
 	 * @param {Boolean} options.keepTabFocused
-	 * @return {Promise}
+	 * @return {Promise | undefined} When the tab had to load, resolves with the instance its load hook opened
 	 */
 	this.select = function (id, reopening, options = {}) {
 		let { tab, tabIndex } = this._getTab(id);
@@ -887,7 +893,7 @@ var Zotero_Tabs = new function () {
 				let refocusHook = this._getHook(tabContentType, 'refocus');
 				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
 			}
-			return;
+			return undefined;
 		}
 		let selectedTab;
 		if (this._selectedID) {
@@ -926,15 +932,17 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 
+		let loading;
 		if (tabState === 'unloaded') {
 			tab.type = `${tabContentType}-loading`;
 			// Make sure the loading message is displayed first.
 			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
 			let loadHook = this._getHook(tabContentType, 'load');
-			loadHook(tab, tabIndex, options).then(() => {
+			loading = loadHook(tab, tabIndex, options).then((instance) => {
 				ZoteroContextPane.showLoadingMessage(false);
 				this.markAsLoaded(tab.id);
+				return instance;
 			});
 		}
 		// Notify previously selected tab content about selection change
@@ -981,6 +989,8 @@ var Zotero_Tabs = new function () {
 
 		// Notify tab content about selection change
 		currentTabContent?.onTabSelectionChanged(true);
+
+		return loading;
 	};
 	
 	this.canUnload = function (id) {
