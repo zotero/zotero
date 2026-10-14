@@ -5620,6 +5620,25 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
+		it("should open the preferences on a pane from the sandbox", async function () {
+			loadTestScope(["default", "window"]);
+			const PANE = "zotero-prefpane-general";
+			let { result: { windowID } } = await evalInScope(
+				`Zotero.WindowController.command("openWindow", { type: "preferencePane", location: { pane: "${PANE}" } })`
+			);
+			let { WindowUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/window.mjs");
+			let prefsWin = WindowUtils.getWindow(windowID, "preferencePane");
+			try {
+				for (let attempt = 0; attempt < 100 && prefsWin.Zotero_Preferences?.navigation?.value !== PANE; attempt++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.equal(prefsWin.Zotero_Preferences.navigation.value, PANE);
+			}
+			finally {
+				prefsWin.close();
+			}
+		});
+
 		it("should open and close a note tab from the sandbox", async function () {
 			loadTestScope(["default", "tab"]);
 			let note = await createDataObject("item", { itemType: "note" });
