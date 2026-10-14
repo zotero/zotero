@@ -9,6 +9,8 @@ describe("Plugin hook payloads", function () {
 		win = await loadZoteroPane();
 		item = await createDataObject("item", { itemType: "book", title: "Callback Test" });
 		otherItem = await createDataObject("item", { itemType: "book", title: "Callback Other" });
+		// Registering a row renders it for the selected item, so keep that the item the hooks are called with
+		await win.ZoteroPane.selectItem(item.id);
 	});
 
 	after(async function () {
