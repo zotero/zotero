@@ -31,7 +31,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { loadPluginPageInBrowser, stopAutoResize } from "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs";
-import { getWindow, getWindowID, getWindowState } from "chrome://zotero/content/xpcom/pluginAPI/utils.mjs";
+import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -152,7 +152,7 @@ function setupOpenWindow(scope) {
 			let parent = null;
 			if (parentWindowID !== undefined && parentWindowID !== null) {
 				try {
-					parent = getWindow(parentWindowID);
+					parent = WindowUtils.getWindow(parentWindowID, undefined, pluginID);
 				}
 				catch (e) {
 					throw new scope.Error(`openWindow: ${e.message}`);
@@ -186,7 +186,7 @@ function setupOpenWindow(scope) {
 									win.close();
 								},
 								moveTo: ({ x, y }) => win.moveTo(x, y),
-								getState: () => getWindowState(win),
+								getState: () => WindowUtils.getWindowState(win),
 							},
 						});
 						if (!messenger) {
@@ -235,11 +235,11 @@ function setupOpenWindow(scope) {
 						resolve(ScopeVariables.toScope({
 							page: messenger,
 							window: browser.contentWindow,
-							windowID: getWindowID(win),
+							windowID: WindowUtils.getWindowID(win),
 							close: () => !win.closed && win.close(),
 							focus: () => !win.closed && win.focus(),
 							moveTo: (x, y) => win.moveTo(x, y),
-							getState: () => getWindowState(win),
+							getState: () => WindowUtils.getWindowState(win),
 						}, pluginID));
 					}
 					catch (e) {
