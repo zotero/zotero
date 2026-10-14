@@ -35,7 +35,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
-import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupClipboard, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -319,6 +319,10 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	if (permissions.includes("preferences")) {
 		setupPreferences(scope);
+	}
+
+	if (permissions.includes("clipboardRead")) {
+		setupClipboard(scope);
 	}
 
 	// fileSystemWrite implies fileSystemRead

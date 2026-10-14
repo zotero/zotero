@@ -33,6 +33,10 @@
 		DataAddress: "chrome://zotero/content/xpcom/pluginAPI/dataAddress.mjs",
 		DataSnapshots: "chrome://zotero/content/xpcom/pluginAPI/dataSnapshots.mjs",
 		DataItemFields: "chrome://zotero/content/xpcom/pluginAPI/dataItemFields.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
+		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
+		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
 	});
 
 	const CHANGE_SET_URLS = [
@@ -64,7 +68,8 @@
 	 * @property {{ notes?: number[], attachments?: number[], annotations?: number[] }} [children]
 	 *     - Regular items list notes and attachments, file attachments their annotations
 	 * @property {{ read: boolean, guid: string }} [feedItem] - Items of a feed library
-	 * @property {object} data - Built on first read, so a per-row hook that never reads it pays nothing
+	 * @property {object} data - Built on first read, so a per-row hook that never reads it pays nothing; a
+	 *     linked-file attachment's `path` is as stored, so ask the `file` query for what the file store takes
 	 *
 	 *
 	 * @typedef {object} CollectionSnapshot
@@ -142,6 +147,7 @@
 	 * @property {{ libraryID: number }} findDuplicates
 	 * @property {{ itemIDs: number[] }} topLevelItems
 	 * @property {{ itemID: number }} fulltext
+	 * @property {{ itemID: number }} file
 	 * @property {{ changes: StoreChangeSet }} validate
 	 *
 	 *
@@ -158,6 +164,7 @@
 	 * @property {{ collectionIDs: number[] }} findCollections
 	 * @property {{ searchIDs: number[] }} findSearches
 	 * @property {{ tags: TagInfo[] }} tags
+	 * @property {{ path: string | null, exists: boolean }} file - Null for a linked URL or a path Zotero cannot resolve
 	 * @property {{ itemTypes: ItemTypeSchema[], searchConditions?: SearchConditionSchema[] }} schema
 	 * @property {{ sets: number[][] }} findDuplicates - Each set is the IDs of items that look like one work
 	 * @property {{ itemIDs: number[] }} topLevelItems - The items themselves or, for child items, their parents
@@ -462,6 +469,10 @@
 					fulltext: {
 						params: { itemID: "number" },
 						handler: ({ itemID }) => this._getFulltext(itemID),
+					},
+					file: {
+						params: { itemID: "number" },
+						handler: ({ itemID }, { caller }) => this._getFile(itemID, caller),
 					},
 				},
 				objectTypes: {
@@ -1041,6 +1052,32 @@
 				indexedPages: pages?.indexedPages ?? null,
 				totalPages: pages?.total ?? null,
 			};
+		}
+
+		/**
+		 * The attachment's file as the file store addresses it; asking is the grant, to read, or to write with
+		 * dataWrite, until the plugin unloads
+		 * @param {number} itemID - An attachment
+		 * @returns {Promise<DataStoreQueryResults["file"]>}
+		 */
+		async _getFile(itemID, caller) {
+			let item = await Zotero.Items.getAsync(itemID);
+			if (!item) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `No item with ID ${itemID}`);
+			}
+			if (!item.isAttachment()) {
+				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `Item ${itemID} is not an attachment`);
+			}
+			let native = item.getFilePath();
+			if (!native) {
+				return { path: null, exists: false };
+			}
+			let path = lazy.PathIdentity.canonicalize(native);
+			if (caller.pluginID) {
+				let mode = lazy.VarCheck.hasPermissions(caller.scope, "dataWrite") ? "write" : "read";
+				lazy.PluginFileAccess.grantAttachment(caller.pluginID, path, mode);
+			}
+			return { path, exists: await lazy.FileIO.exists(path) };
 		}
 
 		/**

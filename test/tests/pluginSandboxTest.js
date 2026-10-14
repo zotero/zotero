@@ -470,6 +470,96 @@ describe("Plugin Sandbox", function () {
 			assert.equal(await FileIO.readUTF8(target), "temp");
 		});
 
+		it("should hand out picker and clipboard paths in the canonical spelling", async function () {
+			loadTestScope(["default", "fileSystemRead", "clipboardRead"]);
+			let { VarCheck } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+			let native = PathUtils.join(outsideDir, "Picked.txt");
+			let canonical = PluginFileAccess.canonicalize(native);
+			let picked = [native, PathUtils.join(outsideDir, "Other.txt")];
+			let next = 0;
+			evalInScope("var _pk = new FilePicker();");
+			let picker = VarCheck.getOriginalOrSelf(scope._pk);
+			picker._fp = {
+				file: { path: native },
+				files: { hasMoreElements: () => next < picked.length, getNext: () => ({ QueryInterface() {}, path: picked[next++] }) },
+				displayDirectory: null,
+			};
+			assert.equal(evalInScope("_pk.file"), canonical);
+			assert.deepEqual(Array.from(evalInScope("_pk.files")), picked.map(p => PluginFileAccess.canonicalize(p)));
+			evalInScope(`_pk.displayDirectory = ${JSON.stringify(PluginFileAccess.canonicalize(outsideDir))}`);
+			assert.equal(picker._fp.displayDirectory.path, outsideDir);
+			assert.equal(evalInScope("_pk.displayDirectory"), PluginFileAccess.canonicalize(outsideDir));
+			let clipboard = sinon.stub(Zotero.Utilities.Internal, "getClipboard").returns(native);
+			try {
+				assert.equal(evalInScope('Zotero.Utilities.Internal.getClipboard("application/x-moz-file", "path")'), canonical);
+				assert.equal(evalInScope('Zotero.Utilities.Internal.getClipboard("application/x-moz-file", "string")'), native);
+			}
+			finally {
+				clipboard.restore();
+			}
+		});
+
+		// Storage sits in the forbidden data directory, so a missing grant fails at once rather than prompting
+		it("should reach an attachment's file through the data store, read with dataRead and write with dataWrite", async function () {
+			let attachment = await importFileAttachment("test.txt");
+			try {
+				loadTestScope(["default", "dataRead", "fileSystemRead", "fileSystemWrite"]);
+				let file = await evalInScope(`Zotero.DataStore.query("file", { itemID: ${attachment.id} })`);
+				assert.isTrue(file.success, file.error && file.error.message);
+				assert.isTrue(file.result.exists);
+				assert.equal(file.result.path, PluginFileAccess.canonicalize(await attachment.getFilePathAsync()));
+				let read = await readFile(file.result.path);
+				assert.isTrue(read.success, read.error && read.error.message);
+				assert.equal(read.result.data, await FileIO.readUTF8(file.result.path));
+				let write = await writeFile(file.result.path, "changed");
+				assert.isFalse(write.success);
+				assert.equal(write.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
+
+				loadTestScope(["default", "dataWrite", "fileSystemRead", "fileSystemWrite"]);
+				file = await evalInScope(`Zotero.DataStore.query("file", { itemID: ${attachment.id} })`);
+				write = await writeFile(file.result.path, "changed");
+				assert.isTrue(write.success, write.error && write.error.message);
+				assert.equal(await FileIO.readUTF8(file.result.path), "changed");
+			}
+			finally {
+				await attachment.eraseTx();
+			}
+		});
+
+		// A deny on the directory answers a prompt at once, so a missing grant fails instead of waiting
+		it("should resolve a linked file stored relative to the base directory", async function () {
+			let base = await getTempDirectory();
+			let target = PathUtils.join(base, "linked-" + Zotero.Utilities.randomString() + ".txt");
+			await FileIO.writeUTF8(target, "linked");
+			let prefs = { baseAttachmentPath: Zotero.Prefs.get("baseAttachmentPath"), saveRelativeAttachmentPath: Zotero.Prefs.get("saveRelativeAttachmentPath") };
+			Zotero.Prefs.set("baseAttachmentPath", base);
+			Zotero.Prefs.set("saveRelativeAttachmentPath", true);
+			let attachment = await Zotero.Attachments.linkFromFile({ file: target });
+			Zotero.Prefs.set(PREF_PREFIX + PLUGIN_UUID, JSON.stringify([[PluginFileAccess.canonicalize(base), { mode: "deny" }]]), true);
+			try {
+				assert.isTrue(attachment.attachmentPath.startsWith("attachments:"));
+				loadTestScope(["default", "dataRead", "fileSystemRead"]);
+				let item = await evalInScope(`Zotero.DataStore.query("item", { itemID: ${attachment.id} })`);
+				assert.isTrue(item.result.data.path.startsWith("attachments:"));
+				let file = await evalInScope(`Zotero.DataStore.query("file", { itemID: ${attachment.id} })`);
+				assert.equal(file.result.path, PluginFileAccess.canonicalize(target));
+				let read = await readFile(file.result.path);
+				assert.isTrue(read.success, read.error && read.error.message);
+				assert.equal(read.result.data, "linked");
+			}
+			finally {
+				await attachment.eraseTx();
+				for (let [pref, value] of Object.entries(prefs)) {
+					if (value === undefined) {
+						Zotero.Prefs.clear(pref);
+					}
+					else {
+						Zotero.Prefs.set(pref, value);
+					}
+				}
+			}
+		});
+
 		// Where a path leads is simulated, so a link out of plugin-data needs no link on this file system
 		it("should judge a path by where it really leads, not by how it is spelled", async function () {
 			let spelledInside = inDataDir("looks-inside");
@@ -3407,12 +3497,13 @@ describe("Plugin Sandbox", function () {
 					assert.strictEqual(initSpy.lastCall.args[0], chromeWin.browsingContext,
 						"the plugin's own window should be the parent");
 
-					// Anything else -- no parent, an unknown ID, a window that isn't the plugin's -- gets the main window
-					let fallback = Zotero.getMainWindow().browsingContext;
+					// Anything else -- no parent, an unknown ID, a window that isn't the plugin's -- gets the platform's
+					// fallback: the hidden window on macOS, the main window elsewhere
+					let fallback = (Zotero.isMac ? Services.appShell.hiddenDOMWindow : Zotero.getMainWindow()).browsingContext;
 					for (let [name, parent] of [["_fp2", "null"], ["_fp3", "-1"], ["_fp4", String(mainWin.browsingContext.id)]]) {
 						makePicker(name);
 						evalInScope(`${name}.init(${parent}, "Other parent", ${name}.modeOpen)`);
-						assert.strictEqual(initSpy.lastCall.args[0], fallback, `${parent} should parent to the main window`);
+						assert.strictEqual(initSpy.lastCall.args[0], fallback, `${parent} should parent to the fallback window`);
 					}
 				}
 				finally {
