@@ -27,11 +27,13 @@
 {
 	const CUSTOM_BUTTON_CLASS = "zotero-custom-button";
 
-	// Only expand collapsed buttons when this much free space would remain,
-	// to avoid oscillation between collapsing and expanding
+	// Free space to keep when expanding collapsed buttons, to avoid oscillation
 	const EXPAND_BUFFER = 24;
 
-	class ToolbarButtons extends XULElementBase {
+	/**
+	 * Base class for the toolbar containers of Zotero.ButtonManager buttons.
+	 */
+	class ToolbarButtonsBase extends XULElementBase {
 		_notifierID = null;
 
 		_resizeObserver = null;
@@ -50,12 +52,14 @@
 			return target;
 		}
 
+		get _notifyTypes() {
+			return ["custom-button"];
+		}
+
 		init() {
-			this._notifierID = Zotero.Notifier.registerObserver(this, ["custom-button"], "toolbarButtons");
-			this._resizeObserver = new ResizeObserver(() => this._updateOverflow());
-			for (let spacer of this._getSpacers()) {
-				this._resizeObserver.observe(spacer);
-			}
+			this._notifierID = Zotero.Notifier.registerObserver(this, this._notifyTypes, "toolbarButtons");
+			this._resizeObserver = new ResizeObserver(() => this._onSpacerResize());
+			this._observeSpacers();
 			this.render();
 		}
 
@@ -76,7 +80,7 @@
 		}
 
 		render() {
-			this._options = Zotero.ButtonManager.getButtonOptions(this.target, { tabType: "library" });
+			this._options = this._getOptions();
 			this.replaceChildren();
 			for (let option of this._options) {
 				this.append(this._buildButton(option));
@@ -88,20 +92,36 @@
 			this._updateOverflow();
 		}
 
-		_getSpacers() {
-			if (!this.parentElement) {
-				return [];
-			}
-			return Array.from(this.parentElement.querySelectorAll(":scope > spacer"));
+		_getOptions() {
+			return Zotero.ButtonManager.getButtonOptions(this.target);
 		}
 
+		/**
+		 * Get the elements whose combined width is the toolbar's free space
+		 * @abstract
+		 * @returns {Element[]}
+		 */
+		_getSpacers() {
+			throw new Error("ToolbarButtonsBase subclass must implement _getSpacers()");
+		}
+
+		/**
+		 * Get the context object passed to button hooks
+		 * @abstract
+		 * @returns {object}
+		 */
 		_getContext() {
-			return {
-				tabType: "library",
-				tabSubType: undefined,
-				tabID: "zotero-pane",
-				items: this.documentGlobal.ZoteroPane.getSelectedItems(),
-			};
+			throw new Error("ToolbarButtonsBase subclass must implement _getContext()");
+		}
+
+		_observeSpacers() {
+			for (let spacer of this._getSpacers()) {
+				this._resizeObserver.observe(spacer);
+			}
+		}
+
+		_onSpacerResize() {
+			this._updateOverflow();
 		}
 
 		_buildButton(option) {
@@ -166,8 +186,7 @@
 		}
 
 		/**
-		 * Collapse buttons that don't fit into the overflow dropdown, or expand
-		 * them again when there's enough space.
+		 * Collapse buttons that don't fit into the overflow dropdown, or expand them when there's space
 		 */
 		_updateOverflow() {
 			if (!this.initialized) {
@@ -186,30 +205,123 @@
 			let slack = () => spacers.reduce(
 				(sum, spacer) => sum + spacer.getBoundingClientRect().width, 0);
 
-			// Collapse buttons until the toolbar is no longer full
+			// Collapse until the toolbar is no longer full. One at a time: freed
+			// space can be absorbed by the surroundings (e.g. squeezed tabs)
 			while (this._visibleCount > 0 && slack() < 1) {
 				this._visibleCount--;
 				buttons[this._visibleCount].hidden = true;
 				overflowButton.hidden = false;
 			}
 
-			// Expand collapsed buttons while there's comfortably enough space
-			while (this._visibleCount < buttons.length && slack() >= EXPAND_BUFFER) {
+			// Expand while a button (measured via the same-sized overflow button)
+			// plus the buffer fits. The last one swaps with the overflow button
+			let buttonWidth = () => overflowButton.getBoundingClientRect().width;
+			while (this._visibleCount < buttons.length
+					&& slack() >= EXPAND_BUFFER
+						+ (this._visibleCount < buttons.length - 1 ? buttonWidth() : 0)) {
 				buttons[this._visibleCount].hidden = false;
 				this._visibleCount++;
-				if (this._visibleCount === buttons.length) {
-					overflowButton.hidden = true;
-				}
-				if (slack() < EXPAND_BUFFER) {
-					// Not enough room for this one -- put it back
-					this._visibleCount--;
-					buttons[this._visibleCount].hidden = true;
-					overflowButton.hidden = false;
-					break;
-				}
+			}
+			if (this._visibleCount === buttons.length) {
+				overflowButton.hidden = true;
 			}
 		}
 	}
 
-	customElements.define("toolbar-buttons", ToolbarButtons);
+	/**
+	 * Custom buttons in the main window items toolbar, before the search box.
+	 * Free space is measured via the <spacer> siblings in the toolbar
+	 */
+	class LibraryToolbarButtons extends ToolbarButtonsBase {
+		_getSpacers() {
+			if (!this.parentElement) {
+				return [];
+			}
+			return Array.from(this.parentElement.querySelectorAll(":scope > spacer"));
+		}
+
+		_getContext() {
+			return {
+				tabType: "library",
+				tabSubType: undefined,
+				tabID: "zotero-pane",
+				itemIDs: this.documentGlobal.ZoteroPane.getSelectedItems(true),
+			};
+		}
+	}
+
+	/**
+	 * Custom buttons in the title bar, shown for every tab.
+	 * Free space is measured via the flex spacer in the tab bar (tabBar.jsx)
+	 */
+	class TitlebarButtons extends ToolbarButtonsBase {
+		_tabBar = null;
+
+		async init() {
+			this._tabBar = this.ownerDocument.getElementById("tab-bar-container");
+			this._tabBar?.addEventListener("mouseleave", this._handleTabBarMouseLeave);
+			let i = 0;
+			while (i < 50 && this.initialized && this._tabBar && !this._getSpacers().length) {
+				await Zotero.Promise.delay(100);
+				i++;
+			}
+			// Disconnected while waiting
+			if (!this.initialized) {
+				return;
+			}
+			super.init();
+		}
+
+		destroy() {
+			super.destroy();
+			this._tabBar?.removeEventListener("mouseleave", this._handleTabBarMouseLeave);
+			this._tabBar = null;
+		}
+
+		_handleTabBarMouseLeave = () => {
+			this._updateOverflow();
+		};
+
+		_getTabInfo() {
+			let Zotero_Tabs = this.documentGlobal.Zotero_Tabs;
+			let info = Zotero_Tabs.getTabInfo();
+			let { tabContentType } = Zotero_Tabs.parseTabType(info.type);
+			return Object.assign(info, { tabContentType });
+		}
+
+		_getContext() {
+			let { id, subType, data, tabContentType } = this._getTabInfo();
+			let context = {
+				tabType: tabContentType,
+				tabSubType: subType,
+				tabID: id,
+			};
+			if (tabContentType === "library") {
+				context.itemIDs = this.documentGlobal.ZoteroPane.getSelectedItems(true);
+			}
+			else {
+				context.itemIDs = data?.itemID ? [data.itemID] : [];
+			}
+			return context;
+		}
+
+		_getSpacers() {
+			if (!this._tabBar) {
+				return [];
+			}
+			return Array.from(this._tabBar.querySelectorAll(".tabs-wrapper > .tabs > .flex-spacer"));
+		}
+
+		_onSpacerResize() {
+			// Tab widths are locked while the pointer is over the tab bar (see
+			// tabBar.jsx) -- defer the update to the mouseleave handler
+			if (this._tabBar?.matches(":hover")) {
+				return;
+			}
+			this._updateOverflow();
+		}
+	}
+
+	customElements.define("library-toolbar-buttons", LibraryToolbarButtons);
+	customElements.define("titlebar-buttons", TitlebarButtons);
 }

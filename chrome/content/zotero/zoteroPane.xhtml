@@ -889,6 +889,7 @@
 	<hbox id="zotero-title-bar">
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" />
 		<hbox id="zotero-tabs-toolbar" class="zotero-toolbar" align="center">
+			<titlebar-buttons id="zotero-titlebar-custom-buttons" target="main/titlebar"/>
 			<toolbarbutton id="zotero-tb-tabs-menu" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-tabs-menu" type="panel"
 				oncommand="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showTabsMenu(undefined, this)"/>
 			<div xmlns="http://www.w3.org/1999/xhtml" class="zotero-tb-separator"></div>
@@ -1340,7 +1341,7 @@
 												</toolbarbutton>
 												
 												<spacer flex="1"/>
-												<toolbar-buttons id="zotero-tb-custom-buttons" target="main/library/toolbar"/>
+												<library-toolbar-buttons id="zotero-tb-custom-buttons" target="main/library/toolbar"/>
 												<quick-search-textbox id="zotero-tb-search" timeout="250"
 														onkeydown="ZoteroPane_Local.handleSearchKeypress(this, event)"
 														oncommand="ZoteroPane_Local.search()"/>

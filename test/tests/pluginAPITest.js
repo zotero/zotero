@@ -1279,7 +1279,7 @@ describe("Plugin API", function () {
 			assert.equal(context.buttonElem, button);
 			assert.equal(context.tabType, "library");
 			assert.equal(context.tabID, "zotero-pane");
-			assert.isArray(context.items);
+			assert.isArray(context.itemIDs);
 
 			await unregisterButton(buttonID);
 			assert.notExists(
@@ -1438,7 +1438,8 @@ describe("Plugin API", function () {
 			let context = await getCache("onCommand");
 			assert.equal(context.tabType, "reader");
 			assert.equal(context.tabSubType, "pdf");
-			assert.equal(context.reader, reader);
+			assert.equal(context.tabID, tabID);
+			assert.deepEqual(context.itemIDs, [pdfAttachment.id]);
 
 			// Register another button while the reader is open
 			let buttonID2 = await registerButton({
@@ -1569,6 +1570,132 @@ describe("Plugin API", function () {
 			assert.equal(compute(112, 2), 2);
 			// Expand when there's enough space
 			assert.equal(compute(108 + 24, 2), 3);
+		});
+
+		it("should render buttons in the title bar", async function () {
+			initCache("onCommand");
+			let buttonID = await registerButton({
+				buttonID: "tabs-toolbar-test",
+				target: "main/titlebar",
+			});
+
+			let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+			let button = elem.querySelector(`.zotero-custom-button.${CSS.escape(buttonID)}`);
+			assert.exists(button, "Button should be rendered in the title bar");
+			assert.isFalse(button.hidden, "Button should be visible");
+			assert.equal(elem.nextElementSibling.id, "zotero-tb-tabs-menu",
+				"Buttons should be rendered before the tabs menu button");
+
+			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
+			let context = await getCache("onCommand");
+			assert.equal(context.buttonElem, button);
+			assert.equal(context.tabType, "library");
+			assert.equal(context.tabID, "zotero-pane");
+			assert.isArray(context.itemIDs);
+
+			await unregisterButton(buttonID);
+			assert.notExists(
+				elem.querySelector(`.${CSS.escape(buttonID)}`),
+				"Button should be removed after unregistering"
+			);
+		});
+
+		it("should collapse title bar buttons when the tab bar lacks space", async function () {
+			// Make sure the window is wide enough to show all buttons
+			let originalWidth = win.outerWidth;
+			if (originalWidth < 1200) {
+				win.resizeTo(1200, win.outerHeight);
+				await waitForCallback(() => win.outerWidth >= 1150, 50, 3).catch(() => {});
+			}
+
+			let buttonIDs = [];
+			for (let i = 0; i < 3; i++) {
+				buttonIDs.push(await registerButton({
+					buttonID: `tabs-overflow-test-${i}`,
+					target: "main/titlebar",
+				}));
+			}
+
+			let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+			elem._updateOverflow();
+			let initialCount = elem._visibleCount;
+			assert.isAbove(initialCount, 0, "Some buttons should be visible initially");
+
+			// Consume the tab bar's free space to force a collapse. The resize
+			// observer path is skipped while the pointer might be over the tab
+			// bar, so run the overflow update manually
+			let dummy = doc.createXULElement("box");
+			dummy.style.minWidth = "10000px";
+			dummy.style.flexShrink = "0";
+			elem.parentElement.appendChild(dummy);
+			try {
+				elem._updateOverflow();
+				assert.equal(elem._visibleCount, 0, "All buttons should be collapsed");
+				let overflowButton = elem.querySelector(".zotero-custom-button-overflow");
+				assert.isFalse(overflowButton.hidden, "Overflow button should be visible");
+
+				let popup = overflowButton.querySelector("menupopup");
+				await simulateMenuOpen(popup);
+				let overflowItems = popup.querySelectorAll(".zotero-custom-button-overflow-item");
+				assert.equal(overflowItems.length, 3, "All buttons should be in the overflow menu");
+				await simulateMenuClosed(popup);
+			}
+			finally {
+				dummy.remove();
+			}
+
+			// Buttons should expand again when the space is restored
+			elem._updateOverflow();
+			assert.equal(elem._visibleCount, initialCount,
+				"Buttons should expand again after the space is restored");
+
+			for (let buttonID of buttonIDs) {
+				await unregisterButton(buttonID);
+			}
+			if (originalWidth < 1200) {
+				win.resizeTo(originalWidth, win.outerHeight);
+			}
+		});
+
+		it("should support keyboard navigation in the title bar", async function () {
+			// Make sure the window is wide enough to show all buttons
+			let originalWidth = win.outerWidth;
+			if (originalWidth < 1200) {
+				win.resizeTo(1200, win.outerHeight);
+				await waitForCallback(() => win.outerWidth >= 1150, 50, 3).catch(() => {});
+			}
+			let buttonIDs = [];
+			for (let i = 0; i < 2; i++) {
+				buttonIDs.push(await registerButton({
+					buttonID: `tabs-keynav-test-${i}`,
+					target: "main/titlebar",
+				}));
+			}
+			let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+			elem._updateOverflow();
+			let buttons = elem.querySelectorAll(".zotero-custom-button");
+			let tabsMenu = doc.getElementById("zotero-tb-tabs-menu");
+			let pressKey = (target, key) => {
+				target.focus();
+				target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+			};
+
+			// Arrow through the custom buttons into the tabs menu button and back
+			pressKey(buttons[0], Zotero.arrowNextKey);
+			assert.equal(doc.activeElement, buttons[1]);
+			pressKey(buttons[1], Zotero.arrowNextKey);
+			assert.equal(doc.activeElement, tabsMenu);
+			pressKey(tabsMenu, Zotero.arrowPreviousKey);
+			assert.equal(doc.activeElement, buttons[1]);
+			pressKey(buttons[1], Zotero.arrowPreviousKey);
+			assert.equal(doc.activeElement, buttons[0]);
+
+			for (let buttonID of buttonIDs) {
+				await unregisterButton(buttonID);
+			}
+			if (originalWidth < 1200) {
+				win.resizeTo(originalWidth, win.outerHeight);
+			}
 		});
 
 		describe("unprivileged plugin restrictions", function () {
