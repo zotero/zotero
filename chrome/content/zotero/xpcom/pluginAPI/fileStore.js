@@ -729,7 +729,8 @@
 		/**
 		 * Apply a change set in order; the error says which entries were applied when one fails. Each entry's
 		 * revision and snapshot are the path as that entry left it, so a later entry on the path has the latest
-		 * @param {FileChangeSet | StoreChangeSet} changes
+		 * @param {FileChangeSet | StoreChangeSet | Array<PathChanges | ObjectHandle>} changes - A set, or its
+		 *     editors as ChangeSet.of takes them
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving path's new stat
 		 * @param {string} [_callerPluginID]
 		 * @returns {Promise<APIResponse<StoreCommitResult>>}

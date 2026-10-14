@@ -500,6 +500,16 @@ describe("Zotero.FileStore", function () {
 			assert.include(result.issues[0].message, "is the source itself");
 			assert.isFalse(await FileIO.exists(path));
 		});
+
+		it("should take an array of editors as the set ChangeSet.of makes of them, bytes kept", async function () {
+			let path = under("array.bin");
+			let { objects } = await requestResult(commit(path => [
+				FS.file(path).writeFile(new Uint8Array([1, 2])),
+				FS.file(path).appendFile(new Uint8Array([3])),
+			], path));
+			assert.lengthOf(objects, 1, "editors of one path merge into one entry");
+			assert.deepEqual(Array.from(await IOUtils.read(path)), [1, 2, 3]);
+		});
 	});
 
 	describe("builder", function () {

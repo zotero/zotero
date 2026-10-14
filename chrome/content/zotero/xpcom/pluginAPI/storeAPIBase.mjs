@@ -261,13 +261,32 @@ class StoreAPIBase extends RequestAPIBase {
 
 	/**
 	 * Apply a change set
-	 * @param {StoreChangeSet | { toPlain: () => StoreChangeSet }} changes - A change set builder or its JSON
+	 * @param {StoreChangeSet | { toPlain: () => StoreChangeSet } | Array<object>} changes - A change set builder,
+	 *     its JSON, or the editors ChangeSet.of takes
 	 * @param {{ snapshots?: boolean }} [options]
 	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
 	 * @returns {Promise<APIResponse<StoreCommitResult>>}
 	 */
 	commit(changes, options = {}, callerPluginID) {
 		return this._respond(() => this._commit(changes, options, callerPluginID), callerPluginID, "commit");
+	}
+
+	/**
+	 * Editors given as an array become the set ChangeSet.of makes of them; only the caller's own builder can
+	 * merge them, as they are instances of its classes
+	 */
+	_toPlainParams(name, params, context) {
+		if ((name === "commit" || name === "validate") && Array.isArray(params?.changes)) {
+			let Zotero = context.scope ? Cu.waiveXrays(context.scope).Zotero : lazy.Zotero;
+			let { ChangeSet } = Zotero[this._config.apiName];
+			try {
+				params = { ...Cu.waiveXrays(params), changes: ChangeSet.of(...params.changes) };
+			}
+			catch (e) {
+				this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `Invalid change set: ${e?.message ?? e}`);
+			}
+		}
+		return super._toPlainParams(name, params, context);
 	}
 
 	_defineObjectType(type, def) {
@@ -296,7 +315,7 @@ class StoreAPIBase extends RequestAPIBase {
 	async _commit(changes, options, callerPluginID) {
 		let context = this._getContext(callerPluginID);
 		// A builder serializes through its toPlain, bytes kept
-		let params = this._toPlainParams("commit", { changes, options });
+		let params = this._toPlainParams("commit", { changes, options }, context);
 		let validatedOptions = this._validateParams(params.options || {}, StoreAPIBase.COMMIT_OPTIONS);
 		if (!validatedOptions.valid) {
 			this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `Invalid commit options: ${validatedOptions.reason}`);
