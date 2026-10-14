@@ -84,8 +84,8 @@ const PERMISSION_SCHEMAS = {
 				capitalizeName: true,
 				randomString: true,
 				Internal: {
+					// md5 and sha1 hash strings; md5Async hashes a file by path, which is the file store's digest
 					md5: true,
-					md5Async: true,
 					sha1: true,
 					decodeUTF8: true,
 					byteLength: true,
