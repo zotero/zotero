@@ -193,6 +193,7 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
 		let browser = ownerDoc.createXULElement("browser");
 		browser.setAttribute("type", "content");
 		browser.setAttribute("disableglobalhistory", "true");
+		browser.setAttribute("autocompletepopup", "PopupAutoComplete");
 		if (className) {
 			browser.classList.add(className);
 		}
