@@ -27,6 +27,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
@@ -126,12 +127,12 @@
 		 * For unprivileged plugins, `src` must be a full HTML page within the
 		 * plugin, and it's shown in an embedded content browser isolated from the
 		 * preferences window. The page loads its own scripts, styles, and
-		 * localization, and `scripts`/`stylesheets`/`l10nFiles`/`onLoad` are
-		 * ignored. The browser is single-page: links to web pages open in the
-		 * system browser, and all other navigation is blocked. For multi-page
-		 * settings, register additional panes (e.g. subpanes via `parent`) and
-		 * call `Zotero_Preferences.navigateToPane(paneID)` from the page, which
-		 * can only target panes registered by the same plugin.
+		 * localization, and `scripts`/`stylesheets`/`l10nFiles` are ignored.
+		 * The browser is single-page: links to web pages open in the system
+		 * browser, and all other navigation is blocked. For multi-page settings,
+		 * register additional panes (e.g. subpanes via `parent`) and call
+		 * `zoteroHost.api.navigate({ paneID })` from the page, which can only
+		 * target panes registered by the same plugin.
 		 *
 		 * The pane will be unregistered automatically when the registering plugin
 		 * shuts down.
@@ -153,9 +154,9 @@
 		 * @param {string[]} [options.l10nFiles] Array of Fluent (.ftl) file paths to load for localization.
 		 * 		Registered once via `Zotero.WindowResourceManager` and applied to every preferences window.
 		 * 		@deprecated Privileged plugins only; use `<link rel="localization">` in the page at `src` instead.
-		 * @param {Function} [options.onLoad] Called after the pane content is loaded and inserted into the document.
-		 * 		Receives `{ doc, body }` where `doc` is the preferences document and `body` is the pane container element.
-		 * 		@deprecated Privileged plugins only; run scripts from the page at `src` instead.
+		 * @param {Function} [options.onLoad] Called after the pane content is loaded. Unprivileged
+		 * 		plugins receive `{ paneID, page }` (`page` is the pane page's messenger); privileged
+		 * 		plugins receive `{ doc, body }` (deprecated -- run scripts from the page at `src` instead)
 		 * @param {string} [options.helpURL] If provided, a help button will be displayed under the pane
 		 * 		and the provided URL will open when it is clicked
 		 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
@@ -193,9 +194,6 @@
 			let embedded = !!scope && !lazy.VarCheck.isPrivilegedScope(scope);
 			if (embedded) {
 				let dropped = ['scripts', 'stylesheets', 'l10nFiles'].filter(key => options[key].length);
-				if (typeof options.onLoad === 'function') {
-					dropped.push('onLoad');
-				}
 				if (dropped.length) {
 					Zotero.warn(
 						`Plugin ${options.pluginID}: ${dropped.map(o => `'${o}'`).join(', ')} only available for privileged plugins. `
@@ -204,7 +202,6 @@
 					options.scripts = [];
 					options.stylesheets = [];
 					options.l10nFiles = [];
-					delete options.onLoad;
 				}
 			}
 
@@ -219,8 +216,12 @@
 				src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
 			}
 
-			// onLoad is dropped above for unprivileged plugins, so no sandbox wrapping is needed
+			// For unprivileged plugins, onLoad is a sandbox hook: wrap it so its
+			// `{ paneID, page }` payload is marshalled into the plugin scope
 			let onLoad = typeof options.onLoad === 'function' ? options.onLoad : null;
+			if (onLoad && embedded) {
+				onLoad = lazy.ScopeVariables.fromScope(onLoad, options.pluginID);
+			}
 
 			let addPaneOptions = {
 				id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,

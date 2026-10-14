@@ -57,31 +57,31 @@ const PluginPageChannel = {
 	},
 
 	/**
+	 * Bind the host-API handlers for a loaded page. Always called for embedded
+	 * pages (with no API for most) so page calls made mid-load settle.
+	 * @param {Element} element - The iframe or browser hosting the page
+	 * @param {Object} [hostAPI] - Name -> handler; each handler receives the
+	 * page's single JSON-object argument and may return a clonable result
+	 */
+	setHostAPI(element, hostAPI) {
+		_getActor(element)?.setHostAPI(hostAPI);
+	},
+
+	/**
 	 * Create a channel for one embedded page (call once the page has loaded, so
 	 * the actor is bound to the plugin's own document).
 	 * @param {object} options
 	 * @param {Element} options.element - The iframe or browser hosting the page
 	 * @param {string} options.pluginID - The owning plugin's ID
-	 * @param {Function} [options.onHostMessage] - Chrome-side handler for the raw
-	 * message payload, for pages the plugin sandbox doesn't hook (e.g. a pref pane)
 	 * @returns {{ messenger: object, dispose: function }} - `messenger` is the
 	 * plain object handed to the plugin; `dispose` tears the channel down
 	 */
-	create({ element, pluginID, onHostMessage = null }) {
+	create({ element, pluginID }) {
 		let listeners = new Map();
 		let disposed = false;
 
-		// Deliver a page message to the chrome side: raw onHostMessage first, then
-		// the plugin's sandbox-marshalled listeners
+		// Deliver a page message to the plugin's sandbox-marshalled listeners
 		let deliver = (data) => {
-			if (onHostMessage) {
-				try {
-					onHostMessage(data);
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-			}
 			for (let wrapped of listeners.values()) {
 				try {
 					wrapped(data);
