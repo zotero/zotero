@@ -587,6 +587,13 @@ const ZoteroStandalone = new function () {
 			tabType,
 			tabSubType,
 			getContext: () => ({
+				get itemIDs() {
+					if (tabType === 'library') {
+						return ZoteroPane.getSelectedItems(true);
+					}
+					return data?.itemID ? [data.itemID] : [];
+				},
+				// @deprecated Privileged plugins only
 				get items() {
 					if (tabType === 'library') {
 						return ZoteroPane.getSelectedItems();

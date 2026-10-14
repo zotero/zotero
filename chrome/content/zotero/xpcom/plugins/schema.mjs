@@ -51,44 +51,6 @@ const IMPLIED_PERMISSIONS = {
 	],
 };
 
-const DATA_OBJECT_SCHEMA = {
-	[SchemaKey.WILDCARD]: true,
-	[SchemaKey.RECURSIVE]: true,
-
-	// DataObject
-	save: { [SchemaKey.REQUIRE]: "dataWrite" },
-	saveTx: { [SchemaKey.REQUIRE]: "dataWrite" },
-	erase: { [SchemaKey.REQUIRE]: "dataWrite" },
-	eraseTx: { [SchemaKey.REQUIRE]: "dataWrite" },
-	trash: { [SchemaKey.REQUIRE]: "dataWrite" },
-	trashTx: { [SchemaKey.REQUIRE]: "dataWrite" },
-	moveToLibrary: { [SchemaKey.REQUIRE]: "dataWrite" },
-	setAttachmentLastPageIndex: { [SchemaKey.REQUIRE]: "dataWrite" },
-	setAttachmentLastReadAloudPosition: { [SchemaKey.REQUIRE]: "dataWrite" },
-	addLinkedItem: { [SchemaKey.REQUIRE]: "dataWrite" },
-	addLinkedCollection: { [SchemaKey.REQUIRE]: "dataWrite" },
-	// Collection
-	addItem: { [SchemaKey.REQUIRE]: "dataWrite" },
-	addItems: { [SchemaKey.REQUIRE]: "dataWrite" },
-	removeItem: { [SchemaKey.REQUIRE]: "dataWrite" },
-	removeItems: { [SchemaKey.REQUIRE]: "dataWrite" },
-	// Search
-	addCondition: { [SchemaKey.REQUIRE]: "dataWrite" },
-	removeCondition: { [SchemaKey.REQUIRE]: "dataWrite" },
-	// Feed
-	updateFeed: { [SchemaKey.REQUIRE]: "dataWrite" },
-	clearExpiredItems: { [SchemaKey.REQUIRE]: "dataWrite" },
-	storeSyncedSettings: { [SchemaKey.REQUIRE]: "dataWrite" },
-
-	// File access
-	deleteAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
-	renameAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
-	relinkAttachmentFile: { [SchemaKey.REQUIRE]: ["dataWrite", "fileSystemWrite"] },
-
-	ObjectsClass: false,
-	ContainerObjectsClass: false,
-};
-
 const PERMISSION_SCHEMAS = {
 	// Zotero.HTTP is set up for every scope by setupHTTP() in globals.mjs, using the
 	// sandbox's XMLHttpRequest so requests stay bounded by host_permissions.
@@ -153,65 +115,13 @@ const PERMISSION_SCHEMAS = {
 
 	dataRead: {
 		Zotero: {
-			Items: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getAsync: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getByLibraryAndKey: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				keepTopLevel: { [SchemaKey.HANDLER]: "FromScopeCallable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			},
-			Libraries: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				userLibraryID: true,
-				getName: true,
-				getType: true,
-				getLastSyncTime: true,
-				getVersion: true,
-				hasTrash: true,
-				isEditable: true,
-				isFilesEditable: true,
-				isGroupLibrary: true,
-				exists: true,
-			},
-			Collections: {
-				getByLibrary: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getByParent: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getCollectionsContainingItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			},
-			Groups: {
-				get: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getAll: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getByLibraryID: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-				getGroupIDFromLibraryID: true,
-				getLibraryIDFromGroupID: true,
-				exists: true,
-			},
-			Tags: {
-				getName: true,
-				getID: true,
-				getAll: true,
-				getAllWithin: true,
-				getColor: true,
-				getColorByPosition: true,
-				getColors: true,
-			},
-			ItemFields: {
-				getAll: true,
-				getID: true,
-				isValidForType: true,
-				getName: true,
-				getLocalizedString: true,
-			},
-			ItemTypes: {
-				getID: true,
-				getLocalizedString: true,
-			},
-			CreatorTypes: {
-				getLocalizedString: true,
-			},
-			Fulltext: {
-				getPages: true,
+			// Library data is read as snapshots and changed through change sets; live data objects never
+			// cross. ChangeSet is added per sandbox by setupDataStore() in globals.mjs
+			DataStore: {
+				query: "CustomParserCallable",
+				errorCodes: true,
+				objectTypes: true,
+				operationNames: true,
 			},
 			Notifier: {
 				registerObserver: "FromScopeCallable",
@@ -220,37 +130,18 @@ const PERMISSION_SCHEMAS = {
 			Translators: {
 				getAll: true,
 			},
-			Item: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			Collection: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			Search: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			Duplicates: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			Feed: { [SchemaKey.HANDLER]: "Constructor", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
 		},
 	},
 	dataWrite: {
 		Zotero: {
-			Items: {
-				trash: true,
-				trashTx: true,
+			DataStore: {
+				commit: "CustomParserCallable",
 			},
-			Collections: {
-				registerChildCollection: true,
-				unregisterChildCollection: true,
-				registerChildItem: true,
-				unregisterChildItem: true,
-			},
-			Tags: {
-				rename: true,
-				removeFromLibrary: true,
-				setColor: true,
-			},
+			// Handlers still receive core items, which the boundary drops
 			Translate: {
 				Import: "Constructor",
 				Search: "Constructor",
 				Web: "Constructor",
-			},
-			DB: {
-				executeTransaction: true,
 			},
 		},
 	},
@@ -433,4 +324,4 @@ const PERMISSION_SCHEMAS = {
 	},
 };
 
-export { SchemaKey, DATA_OBJECT_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS };
+export { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS };
