@@ -88,7 +88,7 @@
 		// Content windows that already have EMBEDDED_SEARCH_SHEET loaded
 		_searchSheetWindows: new WeakSet(),
 
-		init: function () {
+		init: async function () {
 			Zotero.WindowResourceManager.applyAllToWindow(window, "preferencePane");
 			this.navigation = document.getElementById('prefs-navigation');
 			this.content = document.getElementById('prefs-content');
@@ -116,28 +116,26 @@
 					.forEach(pane => this._addPane(pane));
 			}
 
+			// The starting pane: the opener's, the #cite hash, the last one shown, else General
+			let paneID;
+			let options = {};
 			if (window.arguments) {
-				var io = window.arguments[0];
+				let io = window.arguments[0];
 				io = io.wrappedJSObject || io;
-
-				if (io.pane) {
-					this.navigateToPane(io.pane, {
-						scrollTo: io.scrollTo,
-						action: io.action,
-					});
-				}
+				paneID = io.pane;
+				options = { scrollTo: io.scrollTo, action: io.action };
 			}
-			else if (document.location.hash == "#cite") {
-				this.navigation.value = 'zotero-prefpane-cite';
+			// #cite opens zotero-prefpane-cite, and so on for any pane
+			else if (document.location.hash) {
+				paneID = 'zotero-prefpane-' + document.location.hash.slice(1);
 			}
-
-			if (!this.navigation.value) {
-				this.navigation.value = Zotero.Prefs.get('lastSelectedPrefPane');
-				// If no last selected pane or ID is invalid, select General
-				if (!this.navigation.value) {
-					this.navigation.value = 'zotero-prefpane-general';
-				}
+			if (!paneID) {
+				paneID = Zotero.Prefs.get('lastSelectedPrefPane');
 			}
+			if (!this.panes.has(paneID)) {
+				paneID = 'zotero-prefpane-general';
+			}
+			await this.navigateToPane(paneID, options);
 		},
 		
 		onUnload: function () {

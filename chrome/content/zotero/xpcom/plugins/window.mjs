@@ -46,6 +46,9 @@ const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
 // What a tab or window opens from an item
 const OPENABLE_TYPES = Object.freeze(["reader", "note"]);
 
+// What a window opens on top of those: the preferences, on a pane
+const OPENABLE_WINDOW_TYPES = Object.freeze([...OPENABLE_TYPES, "preferencePane"]);
+
 /**
  * Stable per-window handle used as the plugin-facing window ID
  * @param {Window} win
@@ -168,6 +171,7 @@ function getWindowState(win) {
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
 	OPENABLE_TYPES,
+	OPENABLE_WINDOW_TYPES,
 	getWindowID,
 	getWindow,
 	getMainWindow,
