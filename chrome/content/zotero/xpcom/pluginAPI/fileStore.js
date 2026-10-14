@@ -502,7 +502,7 @@
 
 		/**
 		 * The gate, for a sandbox caller; chrome and privileged callers bypass it
-		 * @param {ControllerCaller | StoreCommitContext} caller
+		 * @param {RequestCaller | StoreCommitContext} caller
 		 * @param {string} path - Canonical
 		 * @param {"read" | "write"} mode
 		 */
@@ -687,7 +687,7 @@
 		 * @param {N} name
 		 * @param {FileStoreQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<FileStoreQueryResults[N]>>}
+		 * @returns {Promise<APIResponse<FileStoreQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.FileStore._fileStore.query(name, params, _callerPluginID);
@@ -699,7 +699,7 @@
 		 * @param {FileChangeSet | StoreChangeSet} changes
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving path's new stat
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<StoreCommitResult>>}
+		 * @returns {Promise<APIResponse<StoreCommitResult>>}
 		 */
 		commit(changes, options, _callerPluginID) {
 			return Zotero.FileStore._fileStore.commit(changes, options, _callerPluginID);

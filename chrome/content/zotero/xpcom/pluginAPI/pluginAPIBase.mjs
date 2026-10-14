@@ -81,7 +81,7 @@ class PluginAPIBase {
 
 	/**
 	 * Set the configuration
-	 * @param {PluginAPIConfig | ControllerAPIConfig} config - The configuration to set
+	 * @param {PluginAPIConfig | RequestAPIConfig} config - The configuration to set
 	 */
 	set config(config) {
 		Object.assign(this._config, config);

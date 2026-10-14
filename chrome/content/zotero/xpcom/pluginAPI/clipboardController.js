@@ -141,7 +141,7 @@
 		 * @param {N} name
 		 * @param {ClipboardControllerQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<ClipboardControllerQueryResults[N]>>}
+		 * @returns {Promise<APIResponse<ClipboardControllerQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.ClipboardController._clipboardController.query(name, params, _callerPluginID);
@@ -153,7 +153,7 @@
 		 * @param {N} name
 		 * @param {ClipboardControllerCommandParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<ClipboardControllerCommandResults[N]>>}
+		 * @returns {Promise<APIResponse<ClipboardControllerCommandResults[N]>>}
 		 */
 		command(name, params, _callerPluginID) {
 			return Zotero.ClipboardController._clipboardController.command(name, params, _callerPluginID);
