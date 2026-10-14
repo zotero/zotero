@@ -334,7 +334,7 @@
 			// Create
 			let currentPaneIDs = currentPaneElements.map(elem => elem.dataset.pane);
 			for (let section of targetPanes) {
-				let { paneID, pluginID, header, sidenav, bodyXHTML,
+				let { paneID, pluginID, header, sidenav, bodyXHTML, src,
 					onInit, onDestroy, onItemChange, onRender, onAsyncRender, onToggle,
 					sectionButtons } = section;
 				if (currentPaneIDs.includes(paneID)) continue;
@@ -343,6 +343,7 @@
 				elem.pluginID = pluginID;
 				elem.paneID = paneID;
 				elem.bodyXHTML = bodyXHTML;
+				elem.src = src;
 				elem.registerSectionIcon({ icon: header.icon, darkIcon: header.darkIcon });
 				elem.registerHook({ type: "init", callback: onInit });
 				elem.registerHook({ type: "destroy", callback: onDestroy });

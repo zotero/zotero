@@ -3445,84 +3445,136 @@ describe("Plugin Sandbox", function () {
 				await item.eraseTx();
 			});
 
-			it("should restrict section body to its own subtree via rootNode", function () {
-				// Register a section with onRender that probes body restrictions
-				evalInScope(`
-					var _sectionResults = {};
-					var _sectionID = Zotero.ItemPaneManager.registerSection({
-						paneID: 'sandbox-restrict-section',
-						pluginID: '${ADDON_ID}',
-						header: { l10nID: 'general-print', icon: 'chrome://zotero/skin/16/universal/empty.png' },
-						sidenav: { l10nID: 'general-print', icon: 'chrome://zotero/skin/20/universal/empty.png' },
-						onRender: function({ body, doc }) {
-							_sectionResults.hasBody = !!body;
-							_sectionResults.bodyTag = body.tagName;
-							// parentNode is outside rootNode subtree -- should be null
-							_sectionResults.parentNode = body.parentNode;
-							// documentGlobal is blocked
-							try {
-								body.documentGlobal;
-								_sectionResults.documentGlobal = 'accessible';
-							} catch(e) {
-								_sectionResults.documentGlobal = 'blocked';
-							}
-							// ownerDocument returns a safe document
-							_sectionResults.hasDocument = typeof body.ownerDocument === 'object';
-							// child within subtree should be accessible
-							var child = doc.createElement('span');
-							body.appendChild(child);
-							_sectionResults.childCount = body.childElementCount;
-							_sectionResults.childTag = body.firstElementChild
-								? body.firstElementChild.tagName : null;
-						}
+			describe("embedded sections", function () {
+				var tmpDir;
+
+				before(async function () {
+					tmpDir = await getTempDirectory();
+					await IOUtils.writeUTF8(
+						PathUtils.join(tmpDir, "section-script.js"),
+						"document.getElementById('section-marker').setAttribute('data-script-ran', 'true');\n"
+					);
+					await IOUtils.writeUTF8(
+						PathUtils.join(tmpDir, "section.html"),
+						"<!DOCTYPE html><html><head><title>Section</title></head><body>"
+						+ "<div id='section-marker'>Embedded section body</div>"
+						+ '<script src="section-script.js"></script></body></html>'
+					);
+				});
+
+				// The section page has to live inside the plugin, so replace the
+				// scope from the outer beforeEach with one rooted at tmpDir
+				function loadSectionTestScope(permissions = ["default", "dataRead", "itemPane"]) {
+					try {
+						PluginSandbox.unloadScope(ADDON_ID);
+					}
+					catch {}
+					mockAddon = createMockPlugin({
+						id: ADDON_ID,
+						name: "Test Sandbox Plugin",
+						syncGUID: SYNC_GUID,
+						permissions,
+						resourceURI: PathUtils.toFileURI(tmpDir) + "/",
 					});
-				`);
-				let paneID = evalInScope("_sectionID");
-				assert.isString(paneID);
-				let option = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID];
-				let onRender = option.onRender;
-
-				// Build DOM: container > body (body is the rootNode)
-				let container = pluginWin.document.createElement('div');
-				let body = pluginWin.document.createElement('div');
-				container.appendChild(body);
-				pluginWin.document.documentElement.appendChild(container);
-
-				let item = new Zotero.Item('book');
-
-				try {
-					// Invoke the wrapped onRender with mock section args
-					onRender({
-						paneID,
-						doc: pluginWin.document,
-						body,
-						item,
-						tabType: 'library',
-						editable: false,
-						setL10nArgs: () => {},
-						setEnabled: () => {},
-						setSectionSummary: () => {},
-						setSectionButtonStatus: () => {},
-					});
-
-					assert.isTrue(evalInScope("_sectionResults.hasBody"),
-						"body should be accessible");
-					assert.equal(evalInScope("_sectionResults.bodyTag"), "div");
-					assert.isNull(evalInScope("_sectionResults.parentNode"),
-						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_sectionResults.documentGlobal"), "accessible",
-						"documentGlobal should be accessible");
-					assert.isTrue(evalInScope("_sectionResults.hasDocument"),
-						"ownerDocument should be a safe document");
-					assert.equal(evalInScope("_sectionResults.childCount"), 1,
-						"children within subtree should be accessible");
-					assert.equal(evalInScope("_sectionResults.childTag"), "span",
-						"child element tag should be correct");
+					PluginSandbox.loadScope(mockAddon);
+					scope = PluginSandbox.getScope(ADDON_ID);
 				}
-				finally {
-					container.remove();
+
+				function registerTestSection(options = {}) {
+					return Zotero.ItemPaneManager.registerSection({
+						paneID: "sandbox-embedded-section",
+						pluginID: ADDON_ID,
+						// Must not resolve to a message with a value, or Fluent
+						// would replace the section's children with it
+						header: { l10nID: "example-item-pane-header", icon: "chrome://zotero/skin/16/universal/empty.png" },
+						sidenav: { l10nID: "example-item-pane-header", icon: "chrome://zotero/skin/20/universal/empty.png" },
+						onRender: () => {},
+						src: "section.html",
+						...options,
+					});
+				}
+
+				it("should drop bodyXHTML and require a page within the plugin as src", function () {
+					loadSectionTestScope();
+					assert.isFalse(registerTestSection({ src: undefined, bodyXHTML: "<div>nope</div>" }),
+						"registration without src should be rejected");
+					assert.isFalse(registerTestSection({ src: "https://example.com/section.html" }),
+						"external src should be rejected");
+					assert.isFalse(registerTestSection({ src: "chrome://zotero/content/zoteroPane.xhtml" }),
+						"chrome src should be rejected");
+					assert.isFalse(registerTestSection({ src: "section.xhtml" }),
+						"non-.html src should be rejected");
+
+					let paneID = registerTestSection({ bodyXHTML: "<div>dropped</div>" });
+					assert.isString(paneID, "valid src should register");
+					let option = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID];
+					assert.isUndefined(option.bodyXHTML, "bodyXHTML should be dropped");
+					assert.equal(option.src, Zotero.Plugins.getBaseURI(ADDON_ID) + "section.html");
+					Zotero.ItemPaneManager.unregisterSection(paneID);
+				});
+
+				it("should let a privileged plugin use src too, keeping bodyXHTML", function () {
+					loadSectionTestScope(["*"]);
+					let paneID = registerTestSection({ bodyXHTML: "<html:div>fallback</html:div>" });
+					assert.isString(paneID, "privileged registration with src should succeed");
+					let option = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID];
+					assert.equal(option.src, Zotero.Plugins.getBaseURI(ADDON_ID) + "section.html");
+					assert.equal(option.bodyXHTML, "<html:div>fallback</html:div>",
+						"bodyXHTML should not be dropped for privileged plugins");
+					Zotero.ItemPaneManager.unregisterSection(paneID);
+
+					assert.isFalse(registerTestSection({ src: "https://example.com/section.html" }),
+						"external src should be rejected for privileged plugins too");
+				});
+
+				it("should show the section page in an embedded browser and give hooks the page document", async function () {
+					loadSectionTestScope();
+					evalInScope(`
+						var _sectionID = Zotero.ItemPaneManager.registerSection({
+							paneID: 'sandbox-embedded-section',
+							pluginID: '${ADDON_ID}',
+							header: { l10nID: 'example-item-pane-header', icon: 'chrome://zotero/skin/16/universal/empty.png' },
+							sidenav: { l10nID: 'example-item-pane-header', icon: 'chrome://zotero/skin/20/universal/empty.png' },
+							src: 'section.html',
+							onRender: function ({ doc, body, item }) {
+								// The page is the plugin's own document -- scripted directly
+								doc.getElementById('section-marker').textContent = 'rendered-' + item.id;
+								body.dataset.renderLocation = doc.location.href;
+							},
+						});
+					`);
+					let paneID = evalInScope("_sectionID");
+					assert.isString(paneID);
+
+					let item = await createDataObject('item');
+					await pluginWin.ZoteroPane.selectItem(item.id);
+
+					let itemDetails = pluginWin.ZoteroPane.itemPane._itemDetails;
+					let getSection = () => itemDetails.getPanes().find(elem => elem.dataset.pane === paneID);
+					await waitForCallback(() => getSection(), 50, 5);
+					await waitForScrollToPane(itemDetails, paneID);
+
+					let section = getSection();
+					let browser = section.querySelector("browser.plugin-section-browser");
+					assert.ok(browser, "section body should contain a content browser");
+					assert.isNull(section.querySelector("#section-marker"),
+						"page markup should not be inserted into the chrome document");
+
+					// Wait for the page to load and the render hook to run against it
+					let marker;
+					await waitForCallback(() => {
+						marker = browser.contentDocument?.getElementById("section-marker");
+						return marker && marker.textContent === "rendered-" + item.id;
+					}, 50, 5);
+					assert.equal(browser.contentDocument.body.dataset.renderLocation,
+						Zotero.Plugins.getBaseURI(ADDON_ID) + "section.html",
+						"hooks should receive the page document");
+					assert.equal(marker.getAttribute("data-script-ran"), "true",
+						"page scripts should run inside the embedded page");
+
 					evalInScope("Zotero.ItemPaneManager.unregisterSection(_sectionID)");
-				}
+					await Zotero.Items.erase(item.id);
+				});
 			});
 		});
 
@@ -4905,68 +4957,6 @@ describe("Plugin Sandbox", function () {
 				});
 			});
 
-			describe("createFrame with ItemPaneManager", function () {
-				var registeredID;
-
-				afterEach(async function () {
-					if (registeredID) {
-						Zotero.ItemPaneManager.unregisterSection(registeredID);
-						registeredID = null;
-					}
-				});
-
-				it("should embed a frame in a custom item pane section via createFrame", async function () {
-					loadTestScopeWithURI(["default", "itemPane"]);
-
-					// Set up a promise on the scope that the onLoad callback will resolve
-					let frameLoadPromise = new Promise((resolve) => {
-						scope._resolveFrameLoad = resolve;
-					});
-
-					// Register a custom section from the plugin scope.
-					// The onRender hook uses doc.createFrame() to embed plugin HTML.
-					// The onLoad callback resolves a promise with the contentWindow.
-					registeredID = evalInScope(`
-						Zotero.ItemPaneManager.registerSection({
-							paneID: "test-createframe-section",
-							pluginID: "${ADDON_ID}",
-							header: {
-								l10nID: "zotero-item-pane-header-title",
-								icon: "chrome://zotero/skin/16/universal/note.svg",
-							},
-							sidenav: {
-								l10nID: "zotero-item-pane-header-title",
-								icon: "chrome://zotero/skin/20/universal/note.svg",
-							},
-							onRender: function({ doc, body }) {
-								if (body.querySelector && body.querySelector('browser')) return;
-								let frame = doc.createFrame("test.html", {
-									onLoad: function(win) {
-										_resolveFrameLoad(win);
-									},
-								});
-								body.appendChild(frame);
-							},
-						});
-					`);
-
-					assert.ok(registeredID, "Section should be registered");
-
-					// Create an item to trigger the item pane render
-					let item = await createDataObject('item');
-
-					// Wait for the frame's onLoad callback to fire
-					let contentWin = await frameLoadPromise;
-					assert.ok(contentWin, "onLoad should receive a contentWindow");
-					assert.equal(contentWin.document.title, "Test");
-					assert.equal(
-						contentWin.document.getElementById("test-div").textContent,
-						"Hello"
-					);
-
-					await Zotero.Items.erase(item.id);
-				});
-			});
 		});
 	});
 
