@@ -244,6 +244,8 @@ class ObjectHandle {
 	constructor(editor, store) {
 		this._editor = editor;
 		this._store = store;
+		// snapshot() and save() take turns in call order, each over the editor as it is when its turn comes
+		this._queue = Promise.resolve();
 	}
 
 	/**
@@ -262,34 +264,62 @@ class ObjectHandle {
 	}
 
 	/**
-	 * Read the object; its revision is expected from then on, so a save that follows fails with Conflict if the
-	 * object moved on in between, as for an editor built from a snapshot
+	 * Read the object and expect its revision from then on, so a save that follows fails with Conflict if the
+	 * object moved on in between; operations pushed meanwhile stay pending
 	 * @returns {Promise<object>}
 	 */
-	async snapshot() {
-		let editor = this._editor;
-		if (editor.ref !== undefined) {
-			throw new Error(`${editor._describe()} is not saved yet, so it has no snapshot`);
-		}
-		let snapshot = await this._request("query", "snapshot", { type: editor.type, ...editor._addressJSON() });
-		if (snapshot.revision !== undefined) {
-			this._editor = editor._derive({ revision: snapshot.revision });
-		}
-		return snapshot;
+	snapshot() {
+		return this._enqueue(async () => {
+			let editor = this._requireLive();
+			if (editor.ref !== undefined) {
+				throw new Error(`${editor._describe()} is not saved yet, so it has no snapshot`);
+			}
+			let snapshot = await this._request("query", "snapshot", { type: editor.type, ...editor._addressJSON() });
+			if (snapshot.revision !== undefined) {
+				this._editor = this._editor._derive({ revision: snapshot.revision });
+			}
+			return snapshot;
+		});
 	}
 
 	/**
-	 * Commit the object's operations. The handle then addresses the saved object with nothing pending, so a
-	 * second save applies only what was added since; an erased object's handle takes no more operations
+	 * Commit the handle's operations; afterwards it addresses the saved object with only what was pushed
+	 * meanwhile pending, and after a terminal operation it takes no more operations and saves no more
 	 * @param {object} [options] - The store's commit options
 	 * @returns {Promise<object>} The result's one object: ID, revision and, with `snapshots`, the snapshot
 	 */
-	async save(options) {
-		let { objects: [object] } = await this._request("commit", this._editor, options);
-		if (!object.erased) {
-			this._editor = this._store.ChangeSet[object.type](object);
+	save(options) {
+		return this._enqueue(async () => {
+			let editor = this._requireLive();
+			let { objects: [object] } = await this._request("commit", editor, options);
+			// Pushed while the commit ran, so not in it; nothing can follow a terminal operation
+			let added = this._editor.ops.slice(editor.ops.length);
+			if (object.erased) {
+				this._editor = editor._derive({ ops: undefined });
+				return object;
+			}
+			let saved = this._store.ChangeSet[object.type](object);
+			for (let { op, ...params } of added) {
+				saved = saved._push(op, params);
+			}
+			this._editor = saved;
+			return object;
+		});
+	}
+
+	// The editor as it is now; a terminal editor with nothing pending is one an earlier save ended
+	_requireLive() {
+		let editor = this._editor;
+		if (editor.isTerminal && !editor.ops.length) {
+			throw new Error(`${editor._describe()} is gone after ${editor._state.terminal}`);
 		}
-		return object;
+		return editor;
+	}
+
+	_enqueue(fn) {
+		let turn = this._queue.then(fn);
+		this._queue = turn.catch(() => {});
+		return turn;
 	}
 
 	async _request(method, ...args) {
