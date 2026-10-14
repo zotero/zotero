@@ -40,12 +40,13 @@
 
 	const FKEY_RE = /^F([1-9]|1[0-2])$/;
 
-	const ShortcutRejectReasons = {
-		NONE: 0,
-		INVALID: 1,
-		RESERVED: 2,
-		REGISTERED: 3,
-	};
+	// Why a combo can't be registered, as strings so the value is legible in a log
+	const ShortcutRejectReasons = Object.freeze({
+		NONE: "None",
+		INVALID: "Invalid",
+		RESERVED: "Reserved",
+		REGISTERED: "Registered",
+	});
 
 
 	/**
@@ -140,7 +141,7 @@
 		 * @param {string} key
 		 * @param {string[]} modifiers
 		 * @param {string} target
-		 * @returns {number}
+		 * @returns {string}
 		 */
 		checkShortcut(key, modifiers, target) {
 			if (!VALID_TARGETS.includes(target)) {
@@ -284,7 +285,7 @@
 		 * @param {string} options.key
 		 * @param {string[]} options.modifiers
 		 * @param {string} options.target
-		 * @returns {number} - See `ShortcutRejectReasons`
+		 * @returns {string} - One of `rejectReasons`
 		 */
 		checkShortcut({ key, modifiers, target }) {
 			return this._shortcutManager.checkShortcut(key, modifiers, target);
