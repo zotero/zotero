@@ -34,13 +34,14 @@
 		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
-	// Statuses getCommand() returns in place of a command, in the order a lookup meets them
+	// Statuses getCommand() returns in place of a command, in the order a lookup meets
+	// them; strings so the value is legible in a log, as in ControllerAPIBase.errorCodes
 	const CommandStatus = Object.freeze({
-		OK: 0,
-		NOT_FOUND: 1,
-		VERSION_TOO_LOW: 2,
-		VERSION_TOO_HIGH: 3,
-		PERMISSION_DENIED: 4,
+		OK: "OK",
+		NOT_FOUND: "NotFound",
+		VERSION_TOO_LOW: "VersionTooLow",
+		VERSION_TOO_HIGH: "VersionTooHigh",
+		PERMISSION_DENIED: "PermissionDenied",
 	});
 
 	/**
