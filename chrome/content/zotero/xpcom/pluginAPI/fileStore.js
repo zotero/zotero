@@ -134,6 +134,8 @@
 		// The OS refused for a reason in the message: a name too long, a full disk, a directory not empty
 		OperationError: lazy.StoreAPIBase.errorCodes.NOT_ALLOWED,
 		QuotaExceededError: lazy.StoreAPIBase.errorCodes.NOT_ALLOWED,
+		// A path of the other kind: a directory read as a file, a file where a directory should go
+		InvalidAccessError: lazy.StoreAPIBase.errorCodes.NOT_ALLOWED,
 	};
 
 	/**
@@ -329,16 +331,74 @@
 		}
 
 		/**
-		 * Checks run in operation order against the path's state before the entry, so an operation that
-		 * creates the path marks it pending for the checks after it: a write may precede a rename
+		 * What the file system holds is judged as each operation applies, after the entries before it, not
+		 * predicted: every operation first refuses a path of the other kind, which IOUtils would take anyway
+		 * (an empty directory removed as a file), and the OS refuses the rest with the codes IO_ERROR_CODES maps
 		 */
-		_creates(target) {
-			target.pending = true;
-			return undefined;
+		_kindChecked(operations) {
+			return Object.fromEntries(Object.entries(operations).map(([name, op]) => [name, {
+				...op,
+				apply: async (target, params, ctx) => {
+					await this._requireKind(target);
+					return op.apply(target, params, ctx);
+				},
+			}]));
+		}
+
+		async _requireKind(target) {
+			let stat = await this._io(() => statPath(target.path));
+			if (stat && kindOf(stat) !== target.type) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${target.path} is a ${kindOf(stat)}, not a ${target.type}`);
+			}
+		}
+
+		/**
+		 * Where a copy or move of the target to dest lands: a file goes in a directory found there under its own
+		 * name, as cp and mv have it; anything else lands at dest itself
+		 * @param {string} dest - Canonical
+		 */
+		async _landing(target, dest) {
+			if (target.type === "file") {
+				let stat = await this._io(() => statPath(dest));
+				if (stat && kindOf(stat) === "directory") {
+					return lazy.FilePath.join(dest, lazy.FilePath.basename(target.path));
+				}
+			}
+			return dest;
+		}
+
+		/**
+		 * Where a copy or move lands, settled as it applies. A directory there takes a file; for a directory it is
+		 * refused unless `overwrite` replaces it where the operation allows, since IOUtils would put the tree
+		 * inside. An existing file is the OS's to refuse without `overwrite`
+		 * @param {{ overwrite?: boolean, replaces?: boolean, recase?: boolean }} rules - `replaces`: `overwrite`
+		 *     may replace a directory; `recase`: the landing may be the source under another spelling
+		 * @returns {Promise<string>} The canonical landing path
+		 */
+		async _destination(target, rawDest, { overwrite, replaces = false, recase = false }) {
+			let { INVALID_PARAMS, NOT_ALLOWED } = lazy.StoreAPIBase.errorCodes;
+			let dest = await this._landing(target, this._canonical(rawDest, "dest"));
+			// The check refused this already, unless an earlier entry changed where the file lands
+			if (this._sameFile(target.path, dest)) {
+				if (!(recase && differsOnlyByCase(target.path, dest))) {
+					this._throw(INVALID_PARAMS, `${dest} is the source itself`);
+				}
+				return dest;
+			}
+			let stat = await this._io(() => statPath(dest));
+			if (!stat) {
+				return dest;
+			}
+			if (kindOf(stat) !== target.type) {
+				this._throw(NOT_ALLOWED, `${dest} is a ${kindOf(stat)}`);
+			}
+			if (target.type === "directory" && !(replaces && overwrite)) {
+				this._throw(NOT_ALLOWED, `${dest} exists${replaces ? "; pass overwrite: true to replace it" : ""}`);
+			}
+			return dest;
 		}
 
 		_fileType() {
-			let requireFile = target => !(target.exists || target.pending) && `${target.path} does not exist`;
 			return {
 				transactional: false,
 				address: this._pathAddress(),
@@ -346,13 +406,11 @@
 				revision: target => target.revision,
 				describe: target => ({ id: target.path, path: target.path }),
 				snapshot: target => (target.stat ? pathStat(target.path, target.stat) : null),
-				operations: {
+				operations: this._kindChecked({
 					writeFile: {
 						params: { data: DATA_PARAM, encoding: ENCODING_PARAM, overwrite: BOOLEAN_PARAM, flush: BOOLEAN_PARAM },
-						check: (target, params) => checkContent(params)
-							|| (params.overwrite === false && target.exists && `${target.path} exists`)
-							|| this._creates(target),
-						// The create mode makes the refusal the OS's too, closing the gap between check and apply
+						check: (_target, params) => checkContent(params),
+						// Under overwrite: false, the create mode leaves an existing file to the OS to refuse
 						apply: (target, { data, encoding, overwrite, flush }) => this._update(target,
 							() => lazy.FileIO.write(target.path, decode(data, encoding), {
 								tmpPath: tmpPathFor(target.path),
@@ -362,15 +420,15 @@
 					},
 					appendFile: {
 						params: { data: DATA_PARAM, encoding: ENCODING_PARAM, flush: BOOLEAN_PARAM },
-						check: (target, params) => checkContent(params) || this._creates(target),
+						check: (_target, params) => checkContent(params),
 						apply: (target, { data, encoding, flush }) => this._update(target,
 							() => lazy.FileIO.write(target.path, decode(data, encoding), { mode: "appendOrCreate", flush: !!flush })),
 					},
 					truncate: {
 						params: { length: COUNT_PARAM },
-						check: requireFile,
 						// IOUtils has no truncate: the kept prefix is read back and written, zero-padded as Node does
 						apply: async (target, { length = 0 }) => {
+							await this._requireStat(target.path);
 							let kept = length ? await this._io(() => lazy.FileIO.read(target.path, { maxBytes: length })) : new Uint8Array(0);
 							let bytes = new Uint8Array(length);
 							bytes.set(kept.subarray(0, length));
@@ -379,30 +437,28 @@
 					},
 					copyFile: {
 						params: { dest: lazy.Params.nonEmptyString, overwrite: BOOLEAN_PARAM },
-						check: async (target, { dest, overwrite }, ctx) => requireFile(target)
-							|| this._checkDestination(target.path, dest, { type: "file", overwrite }, ctx),
-						apply: (target, { dest, overwrite }) => this._io(
-							() => lazy.FileIO.copy(target.path, this._canonical(dest), { noOverwrite: !overwrite })),
+						check: (target, { dest }, ctx) => this._checkDestination(target, dest, {}, ctx),
+						apply: async (target, { dest, overwrite }) => {
+							dest = await this._destination(target, dest, { overwrite });
+							await this._io(() => lazy.FileIO.copy(target.path, dest, { noOverwrite: !overwrite }));
+						},
 					},
 					rename: {
 						params: { dest: lazy.Params.nonEmptyString, overwrite: BOOLEAN_PARAM },
-						check: async (target, { dest, overwrite }, ctx) => requireFile(target)
-							|| this._checkDestination(target.path, dest, { type: "file", overwrite, recase: true }, ctx),
-						apply: (target, { dest, overwrite }) => this._move(target, dest, !!overwrite),
+						check: (target, { dest }, ctx) => this._checkDestination(target, dest, { recase: true }, ctx),
+						apply: (target, { dest, overwrite }) => this._move(target, dest, { overwrite, recase: true }),
 					},
 					rm: {
 						terminal: true,
 						params: { force: BOOLEAN_PARAM },
-						check: (target, { force }) => !force && requireFile(target),
 						apply: (target, { force }) => this._io(
-							() => lazy.FileIO.remove(target.path, { ignoreAbsent: true, retryReadonly: !!force })),
+							() => lazy.FileIO.remove(target.path, { ignoreAbsent: !!force, retryReadonly: !!force })),
 					},
-				},
+				}),
 			};
 		}
 
 		_directoryType() {
-			let requireDirectory = target => !(target.exists || target.pending) && `${target.path} does not exist`;
 			return {
 				transactional: false,
 				address: this._pathAddress(),
@@ -410,44 +466,33 @@
 				revision: target => target.revision,
 				describe: target => ({ id: target.path, path: target.path }),
 				snapshot: target => (target.stat ? pathStat(target.path, target.stat) : null),
-				operations: {
+				operations: this._kindChecked({
 					makeDir: {
 						params: { recursive: BOOLEAN_PARAM },
-						check: (target, { recursive }) => (target.exists && !recursive && `${target.path} exists`)
-							|| this._creates(target),
-						apply: async (target, { recursive }) => {
-							if (target.exists) {
-								return;
-							}
-							await this._update(target, () => lazy.FileIO.makeDirectory(target.path,
-								{ createAncestors: !!recursive, ignoreExisting: !!recursive }));
-						},
+						apply: (target, { recursive }) => this._update(target, () => lazy.FileIO.makeDirectory(target.path,
+							{ createAncestors: !!recursive, ignoreExisting: !!recursive })),
 					},
 					rename: {
 						params: { dest: lazy.Params.nonEmptyString },
-						check: async (target, { dest }, ctx) => requireDirectory(target)
-							|| this._checkDestination(target.path, dest, { type: "directory" }, ctx),
-						apply: (target, { dest }) => this._move(target, dest, false),
+						check: (target, { dest }, ctx) => this._checkDestination(target, dest, {}, ctx),
+						apply: (target, { dest }) => this._move(target, dest, {}),
 					},
 					cp: {
 						params: { dest: lazy.Params.nonEmptyString, overwrite: BOOLEAN_PARAM },
-						check: async (target, { dest, overwrite }, ctx) => requireDirectory(target)
-							|| this._checkDestination(target.path, dest, { type: "directory", overwrite }, ctx),
-						apply: (target, { dest, overwrite }) => this._copyTree(target.path, this._canonical(dest), !!overwrite),
+						check: (target, { dest }, ctx) => this._checkDestination(target, dest, {}, ctx),
+						apply: async (target, { dest, overwrite }) => {
+							dest = await this._destination(target, dest, { overwrite, replaces: true });
+							await this._copyTree(target.path, dest, !!overwrite);
+						},
 					},
 					rm: {
 						terminal: true,
 						params: { recursive: BOOLEAN_PARAM, force: BOOLEAN_PARAM },
-						check: (target, { recursive, force }) => {
-							if (!target.exists) {
-								return !force && `${target.path} does not exist`;
-							}
-							return !recursive && `${target.path} is a directory; pass recursive: true`;
-						},
-						apply: (target, { force }) => this._io(
-							() => lazy.FileIO.remove(target.path, { recursive: true, ignoreAbsent: true, retryReadonly: !!force })),
+						// Without recursive, IOUtils removes an empty directory and the OS refuses one with anything in it
+						apply: (target, { recursive, force }) => this._io(() => lazy.FileIO.remove(target.path,
+							{ recursive: !!recursive, ignoreAbsent: !!force, retryReadonly: !!force })),
 					},
-				},
+				}),
 			};
 		}
 
@@ -545,8 +590,9 @@
 		}
 
 		/**
-		 * The target an entry edits: the path's current state, or an absent path a later operation may create.
-		 * A commit (ctx given) runs the gate for writing here, so every prompt precedes every write
+		 * The target an entry edits: the path's state before the commit, for its revision; its kind is checked as
+		 * each operation applies. A commit (ctx given) runs the gate for writing here, so every prompt precedes
+		 * every write
 		 * @param {"file" | "directory"} type
 		 * @param {string} path - Canonical
 		 * @param {StoreCommitContext} [ctx]
@@ -556,19 +602,19 @@
 				await this._checkAccess(ctx, path, "write");
 			}
 			let stat = await this._io(() => statPath(path));
-			if (stat && kindOf(stat) !== type) {
-				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${path} is a ${kindOf(stat)}, not a ${type}`);
-			}
-			return { path, stat, exists: !!stat, revision: revisionOf(stat) };
+			return { type, path, stat, revision: revisionOf(stat) };
 		}
 
 		/**
-		 * A reason an operation's destination cannot be used, or nothing; runs the gate for it
-		 * @param {{ type: string, overwrite?: boolean, recase?: boolean }} rules - `recase` lets the destination be
-		 *     the source under another spelling, which a rename on a case-insensitive file system may apply
+		 * A reason a destination cannot be used, or nothing: the source itself under another spelling, or inside
+		 * it; runs the gate for it. Both are judged where it lands, so a file put in its own directory is the
+		 * source, and a link already sitting at the landing goes through the gate
+		 * @param {{ recase?: boolean }} rules - `recase` lets the destination be the source under another spelling,
+		 *     which a rename on a case-insensitive file system may apply
 		 */
-		async _checkDestination(src, rawDest, { type, overwrite, recase }, ctx) {
-			let dest = this._canonical(rawDest, "dest");
+		async _checkDestination(target, rawDest, { recase }, ctx) {
+			let src = target.path;
+			let dest = await this._landing(target, this._canonical(rawDest, "dest"));
 			await this._checkAccess(ctx, dest, "write");
 			// Real paths, so another spelling or a link cannot make a file its own destination
 			let realSrc = this._realPath(src);
@@ -576,17 +622,7 @@
 			if (lazy.PathIdentity.same(realSrc, realDest)) {
 				return (recase && differsOnlyByCase(src, dest)) ? undefined : `${dest} is the source itself`;
 			}
-			if (lazy.PathIdentity.contains(realSrc, realDest)) {
-				return `${dest} is inside ${src}`;
-			}
-			let stat = await this._io(() => statPath(dest));
-			if (!stat) {
-				return undefined;
-			}
-			if (kindOf(stat) !== type) {
-				return `${dest} is a ${kindOf(stat)}`;
-			}
-			return !overwrite && `${dest} exists`;
+			return lazy.PathIdentity.contains(realSrc, realDest) ? `${dest} is inside ${src}` : undefined;
 		}
 
 		/**
@@ -599,12 +635,11 @@
 
 		async _refresh(target) {
 			target.stat = await this._io(() => statPath(target.path));
-			target.exists = !!target.stat;
 			target.revision = revisionOf(target.stat);
 		}
 
-		async _move(target, rawDest, overwrite) {
-			let dest = this._canonical(rawDest, "dest");
+		async _move(target, rawDest, { overwrite, recase: mayRecase }) {
+			let dest = await this._destination(target, rawDest, { overwrite, recase: mayRecase });
 			// Recasing a name is a move onto the same file, which noOverwrite would refuse
 			let recase = !overwrite && differsOnlyByCase(target.path, dest) && this._sameFile(target.path, dest);
 			await this._io(() => lazy.FileIO.move(target.path, dest, { noOverwrite: !(overwrite || recase) }));
@@ -625,7 +660,7 @@
 		async _requireFile(path) {
 			let stat = await this._requireStat(path);
 			if (kindOf(stat) !== "file") {
-				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${path} is a ${kindOf(stat)}`);
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${path} is a ${kindOf(stat)}, not a file`);
 			}
 			return stat;
 		}
@@ -642,7 +677,7 @@
 			let path = await this._readable(rawPath, caller);
 			let stat = await this._requireStat(path);
 			if (kindOf(stat) !== "directory") {
-				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${path} is not a directory`);
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${path} is a ${kindOf(stat)}, not a directory`);
 			}
 			let children = await this._io(() => lazy.FileIO.getChildren(path));
 			let names = children.map(child => lazy.FilePath.basename(child));
@@ -690,7 +725,8 @@
 		},
 
 		/**
-		 * Apply a change set in order; the error says which entries were applied when one fails
+		 * Apply a change set in order; the error says which entries were applied when one fails. Each entry's
+		 * revision and snapshot are the path as that entry left it, so a later entry on the path has the latest
 		 * @param {FileChangeSet | StoreChangeSet} changes
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving path's new stat
 		 * @param {string} [_callerPluginID]
