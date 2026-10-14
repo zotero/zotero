@@ -40,7 +40,7 @@ $toolbar-padding-inline: 8px;
 		height: 28px;
 		padding: 0px 4px 0px 4px;
 
-		&[type="menu"] {
+		&[type="menu"][wantdropmarker] {
 			min-width: 0;
 			width: 40px;
 		}
