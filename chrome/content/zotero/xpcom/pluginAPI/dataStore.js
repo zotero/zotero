@@ -34,6 +34,7 @@
 		DataSnapshots: "chrome://zotero/content/xpcom/pluginAPI/dataSnapshots.mjs",
 		DataItemFields: "chrome://zotero/content/xpcom/pluginAPI/dataItemFields.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
@@ -366,6 +367,9 @@
 	 * @returns {SyncItemGetter & { expire: function }} `expire` is chrome-only; it does not cross the boundary
 	 */
 	function itemGetter(ownItemID, pluginID) {
+		// Without dataRead a hook keeps its IDs and reads nothing
+		let canRead = lazy.PluginSandbox.isPrivileged(pluginID)
+			|| lazy.VarCheck.hasPermissions(lazy.PluginSandbox.getScope(pluginID), "dataRead");
 		let live = true;
 		let warned = false;
 		let getItem = (itemID) => {
@@ -377,6 +381,9 @@
 						+ `later, query Zotero.DataStore and refresh the column or row`);
 				}
 				throw new Error("getItem() is no longer valid");
+			}
+			if (!canRead) {
+				return null;
 			}
 			let target = cachedItem(itemID === undefined ? ownItemID : itemID);
 			return target ? lazy.ScopeVariables.toScope(lazy.DataSnapshots.item(target), pluginID) : null;
