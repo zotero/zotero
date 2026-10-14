@@ -3823,6 +3823,8 @@ describe("Plugin API", function () {
 					let noteWin = getWindow(windowID, "noteWindow");
 					opened.push(noteWin);
 					assert.equal(noteWin.name, "zotero-note-" + note.id);
+					let { result: { windows: noteWindows } } = await Zotero.WindowController.query("windows", { type: "noteWindow" });
+					assert.equal(noteWindows.find(w => w.windowID === windowID).itemID, note.id);
 					let { result: again } = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
 					assert.equal(again.windowID, windowID, "an existing note window should be reused");
 
@@ -3832,6 +3834,7 @@ describe("Plugin API", function () {
 					assert.equal(readerWin.reader.itemID, attachment.id);
 					let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "readerWindow" });
 					assert.isTrue(windows.some(w => w.windowID === windowID), "the reader window should be listed");
+					assert.equal(windows.find(w => w.windowID === windowID).itemID, attachment.id);
 					({ result: again } = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id }));
 					assert.equal(again.windowID, windowID, "an existing reader window should be reused");
 
@@ -3853,6 +3856,38 @@ describe("Plugin API", function () {
 							w.close();
 						}
 					}
+				}
+			});
+
+			it("should open the preferences on a pane, reusing an open window", async function () {
+				const PANE = "zotero-prefpane-advanced";
+				let errorCodes = Zotero.WindowController.errorCodes;
+				// The command does not wait for the pane to show
+				async function waitForPane(prefsWin, pane) {
+					for (let attempt = 0; attempt < 100 && prefsWin.Zotero_Preferences?.navigation?.value !== pane; attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.equal(prefsWin.Zotero_Preferences.navigation.value, pane);
+				}
+				let { result: { windowID } } = await Zotero.WindowController.command("openWindow", {
+					type: "preferencePane", location: { pane: PANE },
+				});
+				let prefsWin = getWindow(windowID, "preferencePane");
+				try {
+					await waitForPane(prefsWin, PANE);
+					let again = await Zotero.WindowController.command("openWindow", {
+						type: "preferencePane", location: { pane: "zotero-prefpane-general" },
+					});
+					assert.equal(again.result.windowID, windowID, "an open preferences window should be reused");
+					await waitForPane(prefsWin, "zotero-prefpane-general");
+					let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "preferencePane" });
+					assert.isTrue(windows.some(w => w.windowID === windowID), "the preferences window should be listed");
+
+					assert.equal(await failureCode(Zotero.WindowController.command("openWindow", { type: "preferencePane", location: { pane: "nope" } })), errorCodes.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("openWindow", { type: "note" })), errorCodes.INVALID_PARAMS);
+				}
+				finally {
+					prefsWin.close();
 				}
 			});
 		});
