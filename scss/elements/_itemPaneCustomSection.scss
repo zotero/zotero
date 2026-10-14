@@ -12,7 +12,7 @@ item-pane-custom-section {
 		margin: 0;
 	}
 
-	// Embedded plugin section browsers are sized to their page's root height
+	// Embedded plugin section browsers are sized by their page (zoteroHost.api.resize)
 	.plugin-section-browser {
 		display: block;
 		width: 100%;
@@ -35,8 +35,8 @@ item-pane-custom-section {
 				display: flex;
 				flex-direction: column;
 
-				// Embedded page browsers stretch past their page-expressed
-				// height, which acts as the flex basis
+				// Embedded page browsers stretch past the height their page
+				// set, which acts as the flex basis
 				> .plugin-section-browser {
 					flex: 1 1 auto;
 					min-height: 0;

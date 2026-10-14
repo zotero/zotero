@@ -34,39 +34,47 @@ const SANDBOXED_TOPLEVEL_NAVIGATION_USER_ACTIVATION = 0x20000;
 // navigation guard here; the entry is GC'd with the browser
 const navigationGuards = new WeakMap();
 
-// Drive auto-resize through the ZoteroEmbeddedPluginPage actor: a child in the
-// page's process observes the content and messages chrome, which sizes the host.
-function startAutoResize(element, axes = {}) {
-	let height = !!axes.height;
-	let width = !!axes.width;
-	if (!height && !width) {
-		return;
+// A host grows no further than this many screens on either axis, whatever its page asks
+const MAX_SCREENS = 4;
+
+/**
+ * Size a host element as its page asks
+ *
+ * @param {Element} element - The host `<browser>` or `<iframe>`
+ * @param {{ height?: boolean, width?: boolean }} axes - Axes the page may set
+ * @param {{ height?: number, width?: number }} params - CSS px; hosts carry no border or padding,
+ * 		so this is the page's viewport size
+ * @returns {{ height?: number, width?: number }} The sizes applied
+ */
+export function resizeHost(element, axes, params = {}) {
+	let win = element.ownerDocument.defaultView;
+	let sizes = {};
+	for (let axis of ["height", "width"]) {
+		if (!(axis in params)) {
+			continue;
+		}
+		if (!axes?.[axis]) {
+			throw new Error(`The ${axis} can't be set here`);
+		}
+		let value = params[axis];
+		if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+			throw new Error(`Param '${axis}' must be a non-negative number`);
+		}
+		let screenSize = axis === "height" ? win.screen.availHeight : win.screen.availWidth;
+		sizes[axis] = Math.min(value, screenSize * MAX_SCREENS);
 	}
-	let global = element.browsingContext?.currentWindowGlobal;
-	if (!global) {
-		return;
+	for (let [axis, value] of Object.entries(sizes)) {
+		element.style[axis] = value + "px";
 	}
-	try {
-		global.getActor("ZoteroEmbeddedPluginPage")
-			.sendAsyncMessage("startAutoResize", { height, width, content: !!axes.content });
-	}
-	catch (e) {
-		Zotero.debug("Embedded plugin page: resize actor unavailable. " + e);
-	}
+	return sizes;
 }
 
-// Stop the actor-driven auto-resize; the host keeps its last applied size
-export function stopAutoResize(element) {
-	let global = element.browsingContext?.currentWindowGlobal;
-	if (!global) {
-		return;
+// The page's host API with `resize` for the axes the host allows; a host's own `resize` stands
+function withResizeAPI(hostAPI, element, axes) {
+	if (!axes?.height && !axes?.width) {
+		return hostAPI;
 	}
-	try {
-		global.getActor("ZoteroEmbeddedPluginPage").sendAsyncMessage("stopAutoResize", {});
-	}
-	catch (e) {
-		Zotero.debug("Embedded plugin page: resize actor unavailable. " + e);
-	}
+	return { resize: params => resizeHost(element, axes, params), ...hostAPI };
 }
 
 /**
@@ -150,9 +158,8 @@ function setupContentL10n(browser) {
  * @param {number} [options.height] - Explicit height in px (iframe host)
  * @param {Function} [options.append] - Inserts the host element; defaults to
  * 		`container.append(el)`
- * @param {{height?: boolean, width?: boolean, content?: boolean}} [options.autoResize] - Axes on
- * 		which the host follows the page's root size (each axis defaults false);
- * 		`content` reports the full document scroll size, for a self-fitting host
+ * @param {{ height?: boolean, width?: boolean }} [options.resize] - Axes the page may size the
+ * 		host on, as `zoteroHost.api.resize({ height?, width? })`; see `resizeHost`
  * @param {boolean} [options.channel=false] - Create a `PluginPageChannel` for
  * 		the page; leave false for a static page that needs no messaging
  * @param {string} [options.pluginID] - Owning plugin ID (for the channel)
@@ -166,7 +173,7 @@ function setupContentL10n(browser) {
  * 		Resolves once the page loads; the host is inserted synchronously (before the
  * 		first await) so a non-awaiting caller still gets `element`
  */
-export async function loadEmbeddedPluginPage(container, src, { className, onWindowCreated, width, height, append, autoResize = {}, channel = false, pluginID, hostAPI, tracePath } = {}) {
+export async function loadEmbeddedPluginPage(container, src, { className, onWindowCreated, width, height, append, resize, channel = false, pluginID, hostAPI, tracePath } = {}) {
 	let ownerDoc = Cu.unwaiveXrays(container.ownerDocument || container);
 	let insert = append || (el => container.append(el));
 
@@ -185,7 +192,7 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
 		}
 		// Wire the load synchronously, then insert -- the load starts on insertion
 		let loaded = loadPluginPageInIframe(iframe, src, {
-			autoResize, channel, pluginID, hostAPI, tracePath,
+			resize, channel, pluginID, hostAPI, tracePath,
 		});
 		insert(iframe);
 		let { messenger, dispose } = await loaded;
@@ -201,7 +208,7 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
 		}
 		insert(browser);
 		let { messenger, dispose } = await loadPluginPageInBrowser(browser, src, {
-			onWindowCreated, autoResize, channel, pluginID, hostAPI, tracePath,
+			onWindowCreated, resize, channel, pluginID, hostAPI, tracePath,
 		});
 		return { element: browser, messenger, dispose };
 	}
@@ -213,12 +220,12 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
  *
  * @param {Element} iframe - An `<iframe>` in a content-principal document
  * @param {string} src - Absolute URL of a page within the plugin
- * @param {Object} [options] - `autoResize`, `channel`, `pluginID`,
+ * @param {Object} [options] - `resize`, `channel`, `pluginID`,
  * 		`hostAPI`, `tracePath`, as in `loadEmbeddedPluginPage`
  * @returns {Promise<{ messenger: object, dispose: function }>} Resolves once
  * 		the page loads; `messenger` is null without a channel
  */
-export async function loadPluginPageInIframe(iframe, src, { autoResize = {}, channel = false, pluginID, hostAPI, tracePath } = {}) {
+export async function loadPluginPageInIframe(iframe, src, { resize, channel = false, pluginID, hostAPI, tracePath } = {}) {
 	let deferred = Zotero.Promise.defer();
 	let onLoad = () => {
 		iframe.removeEventListener("load", onLoad);
@@ -228,11 +235,10 @@ export async function loadPluginPageInIframe(iframe, src, { autoResize = {}, cha
 	iframe.setAttribute("src", src);
 	await deferred.promise;
 	// Bound once the page loads, so the actor pair is the loaded doc's
-	PluginPageChannel.setHostAPI(iframe, hostAPI);
+	PluginPageChannel.setHostAPI(iframe, withResizeAPI(hostAPI, iframe, resize));
 	let { messenger, dispose } = channel
 		? PluginPageChannel.create({ element: iframe, pluginID, tracePath })
 		: PluginPageChannel.empty();
-	startAutoResize(iframe, autoResize);
 	return { messenger, dispose };
 }
 
@@ -242,12 +248,12 @@ export async function loadPluginPageInIframe(iframe, src, { autoResize = {}, cha
  *
  * @param {XULElement} browser - A connected, non-remote `<browser type="content">`
  * @param {string} src - Absolute URL of a page within the plugin
- * @param {Object} [options] - `onWindowCreated`, `autoResize`, `channel`,
+ * @param {Object} [options] - `onWindowCreated`, `resize`, `channel`,
  * 		`pluginID`, `hostAPI`, `tracePath`, as in `loadEmbeddedPluginPage`
  * @returns {Promise<{ messenger: object, dispose: function }>} Resolves once
  * 		the page loads; `messenger` is null without a channel or on load failure
  */
-export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, autoResize = {}, channel = false, pluginID, hostAPI, tracePath } = {}) {
+export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, resize, channel = false, pluginID, hostAPI, tracePath } = {}) {
 	let deferred = Zotero.Promise.defer();
 	// Block popups from the embedded page and top navigation from frames nested
 	// inside it; self-navigation is unaffected and handled by the guard below
@@ -319,8 +325,7 @@ export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, a
 		? PluginPageChannel.create({ element: browser, pluginID, tracePath })
 		: PluginPageChannel.empty();
 	if (ok) {
-		PluginPageChannel.setHostAPI(browser, hostAPI);
-		startAutoResize(browser, autoResize);
+		PluginPageChannel.setHostAPI(browser, withResizeAPI(hostAPI, browser, resize));
 	}
 	return { messenger, dispose };
 }
