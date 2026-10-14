@@ -79,7 +79,7 @@
 	 * "reader/epub", and "reader/snapshot" limit the button to specific reader
 	 * types. By default, the button is always shown. Ignored for other targets.
 	 * @property {function} [onCommand] - Function to run when the button is clicked.
-	 * Called with the event and a `ButtonContext`. Mutually exclusive with `menus`
+	 * Called with a `ButtonContext`. Mutually exclusive with `menus`
 	 * @property {MenuData[]} [menus] - Menu items for a dropdown button. When provided,
 	 * clicking the button opens a dropdown menu with these items. The menu data is managed
 	 * by `Zotero.MenuManager` and supports the same options as custom menus.
@@ -89,7 +89,6 @@
 	/**
 	 * @typedef ButtonContext
 	 * @type {object}
-	 * @property {Element} buttonElem - The button (or overflow menu item) element
 	 * @property {string} tabType - The tab content type, e.g. "library" or "reader"
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
 	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
@@ -193,11 +192,7 @@
 		_convert(option) {
 			option = super._convert(option);
 			if (option.onCommand) {
-				option.onCommand = lazy.ScopeVariables.fromScope(
-					option.onCommand,
-					option.pluginID,
-					{ rootNode: (event, context) => context?.buttonElem }
-				);
+				option.onCommand = lazy.ScopeVariables.fromScope(option.onCommand, option.pluginID);
 			}
 			return option;
 		}
@@ -275,27 +270,6 @@
 		}
 
 		/**
-		 * Create the context object passed to button hooks
-		 * @param {Element} buttonElem - The button (or overflow menu item) element
-		 * @param {function} [getContext] - The function to get additional context variables
-		 * @returns {object}
-		 */
-		wrapButtonContext(buttonElem, getContext) {
-			let buttonElemRef = new WeakRef(buttonElem);
-			let defaultContext = {
-				get buttonElem() {
-					return buttonElemRef.deref();
-				},
-			};
-			let context = {};
-			Object.defineProperties(context, Object.getOwnPropertyDescriptors(defaultContext));
-			if (getContext) {
-				Object.defineProperties(context, Object.getOwnPropertyDescriptors(getContext()));
-			}
-			return context;
-		}
-
-		/**
 		 * Update the overflow popup with menu items for the collapsed buttons.
 		 * Buttons with a dropdown menu become submenus, click buttons become menu items.
 		 * @param {XULPopupElement} popupElem - The overflow menu popup
@@ -329,8 +303,8 @@
 				else {
 					elem = doc.createXULElement("menuitem");
 					elem.classList.add("menuitem-iconic");
-					elem.addEventListener("command", (event) => {
-						option.onCommand(event, this.wrapButtonContext(elem, getContext));
+					elem.addEventListener("command", () => {
+						option.onCommand(getContext ? getContext() : {});
 					});
 				}
 				elem.classList.add(OVERFLOW_ITEM_CLASS, CUSTOM_MENU_CLASS, mainKey);
@@ -502,11 +476,8 @@
 					});
 				}
 				else {
-					button.addEventListener("click", (event) => {
-						option.onCommand(
-							event,
-							this._manager.wrapButtonContext(button, () => this._getContext(reader))
-						);
+					button.addEventListener("click", () => {
+						option.onCommand(this._getContext(reader));
 					});
 				}
 				container.append(button);
@@ -835,10 +806,6 @@
 
 		updateOverflowPopup(popupElem, options, args) {
 			this._buttonManager.updateOverflowPopup(popupElem, options, args);
-		},
-
-		wrapButtonContext(buttonElem, getContext) {
-			return this._buttonManager.wrapButtonContext(buttonElem, getContext);
 		},
 	};
 

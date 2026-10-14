@@ -1197,7 +1197,7 @@ describe("Plugin API", function () {
 			target: "main/library/toolbar",
 			l10nID: "menu-print",
 			icon: "chrome://zotero/skin/16/universal/plus.svg",
-			onCommand: (event, context) => {
+			onCommand: (context) => {
 				updateCache("onCommand", context);
 			},
 		};
@@ -1281,7 +1281,7 @@ describe("Plugin API", function () {
 
 			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
 			let context = await getCache("onCommand");
-			assert.equal(context.buttonElem, button);
+			assert.notProperty(context, "buttonElem");
 			assert.equal(context.tabType, "library");
 			assert.equal(context.tabID, "zotero-pane");
 			assert.isArray(context.itemIDs);
@@ -1422,7 +1422,7 @@ describe("Plugin API", function () {
 				buttonID: "reader-test",
 				target: "reader/toolbar",
 				icon: "chrome://zotero/skin/16/universal/plus.svg",
-				onCommand: (event, context) => {
+				onCommand: (context) => {
 					updateCache("onCommand", context);
 				},
 			});
@@ -1593,7 +1593,7 @@ describe("Plugin API", function () {
 
 			button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
 			let context = await getCache("onCommand");
-			assert.equal(context.buttonElem, button);
+			assert.notProperty(context, "buttonElem");
 			assert.equal(context.tabType, "library");
 			assert.equal(context.tabID, "zotero-pane");
 			assert.isArray(context.itemIDs);
@@ -1741,6 +1741,36 @@ describe("Plugin API", function () {
 					PluginSandbox.unloadScope(UNPRIV_ID);
 				}
 				catch {}
+			});
+
+			it("passes a single context arg without buttonElem to onCommand", async function () {
+				let received;
+				let notifyPromise = waitForNotifierEvent("refresh", "custom-button");
+				let buttonID = Zotero.ButtonManager.registerButton({
+					buttonID: "unpriv-context",
+					pluginID: UNPRIV_ID,
+					target: "main/library/toolbar",
+					l10nID: "menu-print",
+					icon: ownURL("icon.svg"),
+					onCommand: (...args) => {
+						received = args;
+					},
+				});
+				assert.isString(buttonID);
+				await notifyPromise;
+
+				let button = getToolbarButtonsElem()
+					.querySelector(`.zotero-custom-button.${CSS.escape(buttonID)}`);
+				assert.exists(button);
+				button.dispatchEvent(new MouseEvent("command", { bubbles: true }));
+
+				assert.lengthOf(received, 1, "onCommand should get a single context arg");
+				assert.notProperty(received[0], "buttonElem");
+				assert.property(received[0], "itemIDs");
+
+				let unregNotifyPromise = waitForNotifierEvent("refresh", "custom-button");
+				assert.isTrue(Zotero.ButtonManager.unregisterButton(buttonID, UNPRIV_ID));
+				await unregNotifyPromise;
 			});
 
 			it("rejects buttons with disallowed icon URLs", function () {
