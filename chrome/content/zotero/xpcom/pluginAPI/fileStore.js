@@ -413,11 +413,20 @@
 					rm: {
 						terminal: true,
 						params: { force: BOOLEAN_PARAM },
+						check: (target, _params, ctx) => this._refuseAttachmentRemoval(target.path, ctx),
 						apply: (target, { force }) => this._io(
 							() => lazy.FileIO.remove(target.path, { ignoreAbsent: !!force, retryReadonly: !!force })),
 					},
 				}),
 			};
+		}
+
+		// The data store grants an attachment's file to edit; removing it would break or lose the attachment
+		_refuseAttachmentRemoval(path, ctx) {
+			if (ctx.pluginID && !ctx.privileged && lazy.PluginFileAccess.hasAttachmentGrant(ctx.pluginID, path)) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED,
+					`${path} is an attachment's file; remove the attachment through Zotero.DataStore instead`);
+			}
 		}
 
 		_directoryType() {

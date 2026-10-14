@@ -178,6 +178,24 @@ describe("Zotero.DataStore", function () {
 			}, item.key), codes.INVALID_PARAMS);
 		});
 
+		// An ID alone is absolute; a libraryID given with it has to agree, or the wrong library's object gets edited
+		it("should refuse an ID with a libraryID it is not in", async function () {
+			let group = await createGroup({ editable: true });
+			let item = await createDataObject('item', { title: 'Mine' });
+			try {
+				let error = await requestError(commit((itemID, groupLibraryID) => CS.item({ id: itemID, libraryID: groupLibraryID })
+					.setField("title", "Edited through the wrong library"), item.id, group.libraryID), codes.NOT_FOUND);
+				assert.include(error.message, `no item with ID ${item.id} in library ${group.libraryID}`);
+				assert.equal(item.getField('title'), 'Mine');
+				await requestError(query("item", { itemID: item.id, libraryID: group.libraryID }), codes.NOT_FOUND);
+				let snapshot = await requestResult(query("item", { itemID: item.id, libraryID }));
+				assert.equal(snapshot.id, item.id);
+			}
+			finally {
+				await group.eraseTx();
+			}
+		});
+
 		it("should report NotFound for a key that names nothing", async function () {
 			await requestError(commit(() => CS.item("ZZZZ9999", { libraryID }).setField("title", "x")), codes.NOT_FOUND);
 		});
