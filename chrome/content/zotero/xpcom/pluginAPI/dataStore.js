@@ -34,18 +34,12 @@
 		DataSnapshots: "chrome://zotero/content/xpcom/pluginAPI/dataSnapshots.mjs",
 		DataItemFields: "chrome://zotero/content/xpcom/pluginAPI/dataItemFields.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
 	});
-
-	const CHANGE_SET_URLS = [
-		"chrome://zotero/content/xpcom/plugins/changeSetBase.js",
-		"chrome://zotero/content/xpcom/plugins/dataChangeSet.js",
-	];
-
-	const OBJECT_TYPES = ["item", "collection", "search", "library"];
 
 	/**
 	 * What a hook that cannot await `query` passes: no argument reads its own item, an itemID any item in
@@ -266,8 +260,6 @@
 		[Zotero.Fulltext.INDEX_STATE_QUEUED]: "queued",
 	};
 
-	const FEED_SETTINGS = ["url", "refreshInterval", "cleanupReadAfter", "cleanupUnreadAfter"];
-
 	// The core classes behind the keyed object types
 	const OBJECTS = {
 		item: Zotero.Items,
@@ -325,17 +317,6 @@
 			conditions: conditions.map(condition => ({ ...condition, value: condition.value ?? "" })),
 			deleted: search.deleted,
 		});
-	}
-
-	/**
-	 * The change set builder class, from the scripts the sandboxes load too
-	 */
-	function loadChangeSetClass() {
-		let holder = {};
-		for (let url of CHANGE_SET_URLS) {
-			Services.scriptloader.loadSubScript(url, holder);
-		}
-		return holder.DataChangeSet;
 	}
 
 	/**
@@ -813,7 +794,7 @@
 								params: lazy.DataParams.feedSettings,
 								check: feedOnly("have feed settings"),
 								apply: (library, settings) => {
-									for (let setting of FEED_SETTINGS) {
+									for (let setting of Object.keys(lazy.DataParams.feedSettings)) {
 										if (settings[setting] !== undefined) {
 											library[setting] = settings[setting];
 										}
@@ -1149,12 +1130,10 @@
 	 * @memberof Zotero
 	 */
 	Zotero.DataStore = {
-		objectTypes: Object.freeze(OBJECT_TYPES),
-
 		errorCodes: lazy.StoreAPIBase.errorCodes,
 
 		// The builder; every dataRead sandbox gets its own copy under the same name
-		ChangeSet: loadChangeSetClass(),
+		ChangeSet: lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/dataChangeSet.js").DataChangeSet,
 
 		_dataStore: new DataStoreInternal(),
 
@@ -1173,6 +1152,13 @@
 		 * @returns {SyncItemGetter}
 		 */
 		itemGetter,
+
+		/**
+		 * @returns {string[]} The object types a change set can address
+		 */
+		get objectTypes() {
+			return this._dataStore.objectTypes;
+		},
 
 		/**
 		 * @returns {Record<string, string[]>} Operation names by object type
