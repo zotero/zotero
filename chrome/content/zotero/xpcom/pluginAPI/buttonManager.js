@@ -31,6 +31,7 @@
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	const ICON_KEYS = ["icon", "darkIcon", "menuIcon", "darkMenuIcon"];
@@ -73,9 +74,9 @@
 	 * is collapsed into the overflow menu. If not provided, `icon` is rendered at 16x16
 	 * @property {string} [darkMenuIcon] - The dark-mode variant of `menuIcon`
 	 * @property {string[]} [enableForTabTypes] - The tab types for which the button
-	 * should be shown. Only applies to reader/toolbar, where "reader/pdf",
-	 * "reader/epub", and "reader/snapshot" limit the button to specific reader
-	 * types. By default, the button is always shown. Ignored for other targets.
+	 * should be shown. Only applies to reader/toolbar, where "reader" or "reader/*"
+	 * shows it for every reader type and "reader/pdf", "reader/epub", and "reader/snapshot"
+	 * limit it to that type. By default, the button is always shown. Ignored for other targets.
 	 * @property {function} [onCommand] - Function to run when the button is clicked.
 	 * Called with a `ButtonContext`. Mutually exclusive with `menus`
 	 * @property {MenuData[]} [menus] - Menu items for a dropdown button. When provided,
@@ -254,13 +255,7 @@
 			if (!option.enableForTabTypes) {
 				return true;
 			}
-			return option.enableForTabTypes.some((type) => {
-				let [_tabType, _tabSubType] = type.split("/");
-				if (_tabType !== tabType) {
-					return false;
-				}
-				return !_tabSubType || _tabSubType === "*" || _tabSubType === tabSubType;
-			});
+			return lazy.WindowUtils.matchesTabType(option.enableForTabTypes, tabType, tabSubType);
 		}
 
 		/**
