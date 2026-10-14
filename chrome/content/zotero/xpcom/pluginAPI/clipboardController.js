@@ -72,7 +72,7 @@
 				queries: {
 					flavors: {
 						permissions: "clipboardRead",
-						params: { flavors: { type: "array", optional: true } },
+						params: { flavors: { type: "array", optional: true, children: "string" } },
 						handler: ({ flavors = KNOWN_FLAVORS }) => ({ flavors: flavors.filter(flavor => this._has(flavor)) }),
 					},
 					read: {

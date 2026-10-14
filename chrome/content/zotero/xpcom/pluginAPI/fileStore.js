@@ -645,17 +645,12 @@
 				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${path} is not a directory`);
 			}
 			let children = await this._io(() => lazy.FileIO.getChildren(path));
-			let entries = [];
-			for (let child of children) {
-				let name = lazy.FilePath.basename(child);
-				if (!withFileTypes) {
-					entries.push(name);
-					continue;
-				}
-				let childStat = await this._io(() => statPath(child));
-				entries.push({ name, type: childStat ? kindOf(childStat) : "other" });
+			let names = children.map(child => lazy.FilePath.basename(child));
+			if (!withFileTypes) {
+				return { entries: names };
 			}
-			return { entries };
+			let stats = await this._io(() => Promise.all(children.map(statPath)));
+			return { entries: names.map((name, i) => ({ name, type: stats[i] ? kindOf(stats[i]) : "other" })) };
 		}
 	}
 
