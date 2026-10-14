@@ -749,7 +749,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			await Zotero.Proxies.init();
 			
 			// Initialize keyboard shortcuts
-			Zotero.Keys.init();
+			Zotero.Shortcuts.init();
 			
 			Zotero.Date.init();
 			Zotero.LocateManager.init();
@@ -2160,82 +2160,6 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 	};
 }).call(Zotero);
-
-
-/*
- * Handles keyboard shortcut initialization from preferences, optionally
- * overriding existing global shortcuts
- *
- * Actions are configured in ZoteroPane.handleKeyPress()
- */
-Zotero.Keys = new function () {
-	this.init = init;
-	this.windowInit = windowInit;
-	this.getCommand = getCommand;
-	
-	var _keys = {};
-	
-	
-	/*
-	 * Called by Zotero.init()
-	 */
-	function init() {
-		var cmds = Zotero.Prefs.rootBranch.getChildList(ZOTERO_CONFIG.PREF_BRANCH + 'keys', {}, {});
-		
-		// Get the key=>command mappings from the prefs
-		for (let cmd of cmds) {
-			cmd = cmd.replace(/^extensions\.zotero\.keys\./, '');
-			// Remove old pref
-			if (cmd == 'overrideGlobal') {
-				Zotero.Prefs.clear('keys.overrideGlobal');
-				continue;
-			}
-			_keys[this.getKeyForCommand(cmd)] = cmd;
-		}
-	}
-	
-	
-	/*
-	 * Called by ZoteroPane.onLoad()
-	 */
-	function windowInit(document) {
-		var globalKeys = [
-			{
-				name: 'saveToZotero',
-				defaultKey: 'S'
-			}
-		];
-		
-		globalKeys.forEach(function (x) {
-			let keyElem = document.getElementById('key_' + x.name);
-			if (keyElem) {
-				let prefKey = this.getKeyForCommand(x.name);
-				// Only override the default with the pref if the <key> hasn't
-				// been manually changed and the pref has been
-				if (keyElem.getAttribute('key') == x.defaultKey
-						&& keyElem.getAttribute('modifiers') == 'accel shift'
-						&& prefKey != x.defaultKey) {
-					keyElem.setAttribute('key', prefKey);
-				}
-			}
-		}.bind(this));
-	}
-	
-	
-	function getCommand(key) {
-		key = key.toUpperCase();
-		return _keys[key] ? _keys[key] : false;
-	}
-	
-	
-	this.getKeyForCommand = function (cmd) {
-		try {
-			var key = Zotero.Prefs.get('keys.' + cmd);
-		}
-		catch (e) {}
-		return key !== undefined ? key.toUpperCase() : false;
-	}
-}
 
 
 /**

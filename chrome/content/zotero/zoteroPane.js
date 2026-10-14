@@ -84,6 +84,8 @@ var ZoteroPane = new function () {
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
 		// Keydown handling that captures events. E.g. tab navigation
 		document.addEventListener('keydown', ZoteroPane.captureKeyDown, true);
+		// Bubble-phase dispatch of registered shortcuts (e.g. from plugins)
+		Zotero.Shortcuts.applyToWindow(window, "mainWindow");
 		// focusout, unlike blur, bubbles up to document level
 		// so handleBlur gets triggered when any field, not just the document, looses focus
 		document.addEventListener('focusout', ZoteroPane.handleBlur);
@@ -643,9 +645,7 @@ var ZoteroPane = new function () {
 		ZoteroPane.progressWindow = new Zotero.ProgressWindow({ window });
 		
 		ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-		
-		Zotero.Keys.windowInit(document);
-		
+
 		if (Zotero.restoreFromServer) {
 			Zotero.restoreFromServer = false;
 			
@@ -852,6 +852,8 @@ var ZoteroPane = new function () {
 		}
 		
 		this.uninitContainers();
+		
+		Zotero.Shortcuts.removeFromWindow(window);
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 		
@@ -1363,120 +1365,102 @@ var ZoteroPane = new function () {
 				return;
 			}
 		}
-		
-		var command = Zotero.Keys.getCommand(event.key);
-		if (!command) {
-			return;
-		}
-
-		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
-		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
-			return;
-		}
-		
+	}
+	
+	
+	// Run a pref-driven shortcut command, dispatched by Zotero.Shortcuts from the
+	// registrations made in Zotero.Shortcuts.init(). Returns false to decline,
+	// letting the keystroke propagate
+	this.handleShortcutCommand = function (command, event) {
 		Zotero.debug('Keyboard shortcut: ' + command);
 		
-		// Errors don't seem to make it out otherwise
-		try {
-			switch (command) {
-				case 'library':
-					document.getElementById(ZoteroPane.collectionsView.id).focus();
-					break;
-				case 'quicksearch':
-					document.getElementById('zotero-tb-search-textbox').select();
-					break;
-				case 'newItem':
-					(async function () {
-						// Default to most recent item type from here or the New Type menu,
-						// or fall back to 'book'
-						var mru = Zotero.Prefs.get('newItemTypeMRU');
-						var type = mru ? mru.split(',')[0] : 'book';
-						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
-						let itemBox = document.getElementById('zotero-editpane-info-box');
-						// Ensure itemBox is opened
-						itemBox.open = true;
-						var menu = itemBox.itemTypeMenu;
-						// If the new item's type is changed immediately, update the MRU
-						var handleTypeChange = function () {
-							this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.getAttribute('value')));
-							itemBox.removeHandler('itemtypechange', handleTypeChange);
-						}.bind(this);
-						// Don't update the MRU on subsequent opens of the item type menu
-						var removeTypeChangeHandler = function () {
-							itemBox.removeHandler('itemtypechange', handleTypeChange);
-							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
-						};
-						itemBox.addHandler('itemtypechange', handleTypeChange);
-						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
-						
-						Services.focus.setFocus(menu, Services.focus.FLAG_SHOWRING);
-						itemBox.itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
-					}.bind(this)());
-					break;
-				case 'newNote':
-					// If a regular item is selected, use that as the parent.
-					// If a child item is selected, use its parent as the parent.
-					// Otherwise create a standalone note.
-					var parentKey = false;
-					var items = ZoteroPane_Local.getSelectedItems();
-					if (items.length == 1) {
-						if (items[0].isRegularItem()) {
-							parentKey = items[0].key;
-						}
-						else {
-							parentKey = items[0].parentItemKey;
-						}
+		switch (command) {
+			case 'library':
+				document.getElementById(this.collectionsView.id).focus();
+				break;
+			case 'quicksearch':
+				document.getElementById('zotero-tb-search-textbox').select();
+				break;
+			case 'newItem':
+				(async function () {
+					// Default to most recent item type from here or the New Type menu,
+					// or fall back to 'book'
+					var mru = Zotero.Prefs.get('newItemTypeMRU');
+					var type = mru ? mru.split(',')[0] : 'book';
+					await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
+					let itemBox = document.getElementById('zotero-editpane-info-box');
+					// Ensure itemBox is opened
+					itemBox.open = true;
+					var menu = itemBox.itemTypeMenu;
+					// If the new item's type is changed immediately, update the MRU
+					var handleTypeChange = function () {
+						this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.getAttribute('value')));
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+					}.bind(this);
+					// Don't update the MRU on subsequent opens of the item type menu
+					var removeTypeChangeHandler = function () {
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+					};
+					itemBox.addHandler('itemtypechange', handleTypeChange);
+					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
+					
+					Services.focus.setFocus(menu, Services.focus.FLAG_SHOWRING);
+					itemBox.itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+				}.bind(this)());
+				break;
+			case 'newNote':
+				// If a regular item is selected, use that as the parent.
+				// If a child item is selected, use its parent as the parent.
+				// Otherwise create a standalone note.
+				var parentKey = false;
+				var items = ZoteroPane_Local.getSelectedItems();
+				if (items.length == 1) {
+					if (items[0].isRegularItem()) {
+						parentKey = items[0].key;
 					}
-					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(event.altKey, parentKey);
-					break;
-				case 'sync':
-					Zotero.Sync.Runner.sync();
-					break;
-				case 'saveToZotero':
-					var collectionTreeRows = this.getCollectionTreeRows();
-					if (collectionTreeRows[0].isFeedsOrFeed()) {
-						this.itemPane.translateSelectedItems();
-					} else {
-						Zotero.debug(command + ' does not do anything in non-feed views')
+					else {
+						parentKey = items[0].parentItemKey;
 					}
-					break;
-				case 'toggleAllRead':
-					var collectionTreeRows = this.getCollectionTreeRows();
-					if (collectionTreeRows[0].isFeed()) {
-						this.markFeedRead();
-					}
-					break;
-				case 'toggleRead': {
-					// Toggle read/unread
-					let rows = this.getCollectionTreeRows();
-					if (!rows.some(row => row.isFeedsOrFeed())) return;
-					this.toggleSelectedItemsRead();
-					if (itemReadTimeout) {
-						clearTimeout(itemReadTimeout);
-						itemReadTimeout = null;
-					}
-					break;
 				}
-				
-				// Handled by <key>s in standalone.js, pointing to <command>s in zoteroPane.xul,
-				// which are enabled or disabled by this.updateQuickCopyCommands(), called by
-				// this.itemSelected()
-				case 'copySelectedItemCitationsToClipboard':
-				case 'copySelectedItemsToClipboard':
-					return;
-				
-				default:
-					throw new Error('Command "' + command + '" not found in ZoteroPane_Local.handleKeyPress()');
+				// Use key that's not the modifier as the popup toggle
+				ZoteroPane_Local.newNote(event.altKey, parentKey);
+				break;
+			case 'sync':
+				Zotero.Sync.Runner.sync();
+				break;
+			case 'saveToZotero':
+				var collectionTreeRows = this.getCollectionTreeRows();
+				if (collectionTreeRows[0].isFeedsOrFeed()) {
+					this.itemPane.translateSelectedItems();
+				} else {
+					Zotero.debug(command + ' does not do anything in non-feed views')
+				}
+				break;
+			case 'toggleAllRead':
+				var collectionTreeRows = this.getCollectionTreeRows();
+				if (collectionTreeRows[0].isFeed()) {
+					this.markFeedRead();
+				}
+				break;
+			case 'toggleRead': {
+				// Toggle read/unread
+				let rows = this.getCollectionTreeRows();
+				if (!rows.some(row => row.isFeedsOrFeed())) return false;
+				this.toggleSelectedItemsRead();
+				if (itemReadTimeout) {
+					clearTimeout(itemReadTimeout);
+					itemReadTimeout = null;
+				}
+				break;
 			}
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
+			
+			default:
+				throw new Error('Command "' + command + '" not found in ZoteroPane.handleShortcutCommand()');
 		}
 		
-		event.preventDefault();
-	}
+		return true;
+	};
 	
 	
 	/*

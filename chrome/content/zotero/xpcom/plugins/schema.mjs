@@ -40,6 +40,7 @@ const IMPLIED_PERMISSIONS = {
 		"itemPane",
 		"menu",
 		"button",
+		"shortcut",
 		"windowResource",
 		"reader",
 		"preferencePane",
@@ -352,6 +353,16 @@ const PERMISSION_SCHEMAS = {
 			ButtonManager: {
 				registerButton: "CustomParserCallable",
 				unregisterButton: "CustomParserCallable",
+			},
+		},
+	},
+	shortcut: {
+		Zotero: {
+			ShortcutManager: {
+				registerShortcut: "CustomParserCallable",
+				unregisterShortcut: "CustomParserCallable",
+				checkShortcut: "FromScopeCallable",
+				rejectReasons: true,
 			},
 		},
 	},
