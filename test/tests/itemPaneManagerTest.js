@@ -285,6 +285,29 @@ describe("Zotero.ItemPaneManager", function () {
 			assert.equal(option.src, Zotero.Plugins.getBaseURI(plugin.id) + "section.html");
 		});
 
+		it("should resolve icons relative to the plugin root", function () {
+			loadSectionPlugin();
+			let register = (icon, buttonIcon) => plugin.run((icon, buttonIcon) => Zotero.ItemPaneManager.registerSection({
+				paneID: "sandbox-icon-section",
+				header: { l10nID: "example-item-pane-header", icon, darkIcon: "/icons/header-dark.svg" },
+				sidenav: { l10nID: "example-item-pane-header", icon: "chrome://zotero/skin/20/universal/empty.png" },
+				sectionButtons: [{ type: "test", icon: buttonIcon, onClick: () => {} }],
+				onRender: () => {},
+				src: "section.html",
+			}), icon, buttonIcon);
+			assert.isFalse(register("https://evil.example.com/x.svg", "icons/button.svg"), "an undeclared remote header icon");
+			assert.isFalse(register("icons/header.svg", "https://evil.example.com/x.svg"), "an undeclared remote button icon");
+
+			let paneID = register("icons/header.svg", "icons/button.svg");
+			assert.isString(paneID);
+			let base = Zotero.Plugins.getBaseURI(plugin.id);
+			let option = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID];
+			assert.equal(option.header.icon, base + "icons/header.svg");
+			assert.equal(option.header.darkIcon, base + "icons/header-dark.svg");
+			assert.equal(option.sidenav.icon, "chrome://zotero/skin/20/universal/empty.png", "absolute URLs are kept");
+			assert.equal(option.sectionButtons[0].icon, base + "icons/button.svg");
+		});
+
 		it("should let a privileged plugin use src too, keeping bodyXHTML", function () {
 			loadSectionPlugin(["*"]);
 			let register = src => plugin.run(src => Zotero.ItemPaneManager.registerSection({

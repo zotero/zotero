@@ -30,8 +30,6 @@
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
-		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
@@ -63,7 +61,7 @@
 	 * a `.tooltiptext` attribute (used as the button tooltip) and a `.label` attribute
 	 * (used when the button is collapsed into the overflow menu).
 	 * The FTL file should be registered with `Zotero.WindowResourceManager` for the target window
-	 * @property {string} [icon] - The icon URL for the button
+	 * @property {string} [icon] - The icon URL for the button, optionally relative to the plugin root
 	 * - It is recommended to use an SVG icon with a size of 20x20.
 	 * When the button is collapsed into the overflow menu, the icon is rendered at 16x16.
 	 * Use `fill="context-fill"` in the SVG for automatic hover and dark mode support
@@ -164,16 +162,8 @@
 				return false;
 			}
 
-			if (!lazy.PluginSandbox.isPrivileged(option.pluginID)) {
-				for (let key of ICON_KEYS) {
-					if (!option[key]) continue;
-					let resolved = lazy.PluginProtocol.resolveImageURL(option.pluginID, option[key]);
-					if (resolved === null) {
-						this._log(`Invalid button: '${key}' is not an allowed resource URL`, "warn");
-						return false;
-					}
-					option[key] = resolved;
-				}
+			if (!this._resolveImageURLs(option, ICON_KEYS, option.pluginID)) {
+				return false;
 			}
 			return option;
 		}
@@ -572,7 +562,7 @@
 				canLoad = false;
 			}
 			if (canLoad) {
-				// The URLs are validated at registration (resolveImageURL)
+				// The URLs are validated at registration (_resolveImageURLs)
 				icon.style.setProperty(prop, `url("${url}")`);
 				return;
 			}
