@@ -29,7 +29,7 @@ import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpco
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { FilePath, PathIdentity } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
-import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PluginPrefs } from "chrome://zotero/content/xpcom/plugins/prefs.mjs";
 import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
@@ -124,43 +124,6 @@ const PREFS_METHODS = {
 	clear: ["key", "global"],
 };
 
-const FORBIDDEN_PREF_PREFIXES = [
-	"extensions.zotero.pluginFileAccess.",
-	"extensions.zotero.pluginNames.",
-	"extensions.zotero.dataDir",
-	"extensions.update.",
-	"extensions.blocklist.",
-	"security.",
-	"network.",
-	"services.",
-	"signon.",
-	"app.update.",
-	"datareporting.",
-	"toolkit.telemetry.",
-	"privacy.",
-	"devtools.",
-];
-
-const EXACT_MATCH_ONLY_PREF_PREFIXES = [
-	"extensions.zotero.sync.",
-];
-
-function isAllowedPrefPrefix(prefix) {
-	for (let p of FORBIDDEN_PREF_PREFIXES) {
-		if (prefix.startsWith(p) || p.startsWith(prefix)) {
-			return false;
-		}
-	}
-	if (prefix.endsWith(".")) {
-		for (let p of EXACT_MATCH_ONLY_PREF_PREFIXES) {
-			if (prefix.startsWith(p) || p.startsWith(prefix)) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
 /**
  * Set up Zotero.Prefs on the plugin scope with access control.
  *
@@ -176,40 +139,7 @@ function isAllowedPrefPrefix(prefix) {
  */
 function setupPreferences(scope) {
 	let pluginID = scope.PLUGIN_ID;
-	let prefPrefixes = scope.PREF_PERMISSIONS;
-
-	// Plugin's own namespace
-	let ownPrefix = `extensions.${PluginUUID.getByID(pluginID)}.`;
-	let declaredPrefixes = Array.from(prefPrefixes || []).filter(
-		p => typeof p === "string" && p.length > 0
-	);
-	declaredPrefixes = declaredPrefixes.filter((p) => {
-		if (!isAllowedPrefPrefix(p)) {
-			Zotero.warn(
-				`Plugin ${pluginID}: ignoring reserved pref in pref_permission "${p}"`
-			);
-			return false;
-		}
-		return true;
-	});
-	let allPrefixes = [ownPrefix, ...declaredPrefixes];
-
-	// Require a trailing "." for prefix matches so "extensions.zo" can't
-	// silently cover all of "extensions.zotero.*".
-	function prefixMatches(prefix, pref) {
-		if (pref === prefix) return true;
-		if (prefix.endsWith(".") && pref.startsWith(prefix)) return true;
-		return false;
-	}
-
-	function checkPrefPermission(pref) {
-		if (allPrefixes.some(prefix => prefixMatches(prefix, pref))) {
-			return;
-		}
-		throw new Error(
-			`Permission denied: cannot access preference "${pref}". Declare it in "pref_permissions".`
-		);
-	}
+	let access = PluginPrefs.access(pluginID, scope.PREF_PERMISSIONS);
 
 	let Prefs = Cu.createObjectIn(scope);
 
@@ -221,14 +151,7 @@ function setupPreferences(scope) {
 		Prefs[method] = ScopeUtils.ensureCallableInScope(
 			Zotero.Prefs[method], Zotero.Prefs, scope, {
 				argParser: (args) => {
-					// Auto-prefix with ownPrefix (plugin's namespace)
-					if (!args[globalIndex]) {
-						args[keyIndex] = ownPrefix + args[keyIndex];
-					}
-					// Use as-is, gated by pref_permissions
-					else {
-						checkPrefPermission(args[keyIndex]);
-					}
+					args[keyIndex] = access.resolve(args[keyIndex], args[globalIndex]);
 					// Always call with global=true
 					args[globalIndex] = true;
 					return args;
@@ -242,20 +165,7 @@ function setupPreferences(scope) {
 	Prefs.resetBranch = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.resetBranch, Zotero.Prefs, scope, {
 			argParser: (args) => {
-				let branch = args[1];
-				if (!branch) {
-					throw new Error(
-						'Permission denied: cannot reset entire preference branch.'
-					);
-				}
-				checkPrefPermission(branch);
-				if (EXACT_MATCH_ONLY_PREF_PREFIXES.some(
-					p => p.startsWith(branch) || branch.startsWith(p)
-				)) {
-					throw new Error(
-						`Permission denied: cannot reset reserved branch "${branch}".`
-					);
-				}
+				access.checkReset(args[1]);
 				return args;
 			},
 			trace: { pluginID, path: "Zotero.Prefs.resetBranch" },
@@ -267,12 +177,7 @@ function setupPreferences(scope) {
 	Prefs.registerObserver = ScopeUtils.ensureCallableInScope(
 		Zotero.Prefs.registerObserver, Zotero.Prefs, scope, {
 			argParser: (args) => {
-				if (!args[2]) {
-					args[0] = ownPrefix + args[0];
-				}
-				else {
-					checkPrefPermission(args[0]);
-				}
+				args[0] = access.resolve(args[0], args[2]);
 				args[1] = ScopeVariables.fromScope(args[1], pluginID, { trace: registerObserverTrace });
 				args[2] = true;
 				return args;
