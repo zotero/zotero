@@ -27,33 +27,22 @@
 var policies = new Map(); // pluginID -> WebExtensionPolicy
 
 /**
- * Register a plugin with the moz-extension:// protocol.
- * Creates a WebExtensionPolicy that maps moz-extension://{hostname}/
- * to the plugin's root directory.
- *
- * Requires the pref `extensions.webextensions.remote` to be `false`
- * (set in defaults/preferences/zotero.js) so the parent process is
- * treated as the extension process and moz-extension:// content can
- * load in non-remote browser elements.
- *
- * @param {string} pluginID -- The addon's ID
- * @param {nsIURI} rootURI -- The addon's root directory URI
- * @param {string} pluginUUID -- The addon's UUID (no curly braces; the
- *   caller is responsible for stripping them from `syncUUID`)
+ * Register a plugin with the moz-extension:// protocol (needs pref
+ * `extensions.webextensions.remote` = false so content loads non-remote).
+ * @param {string} pluginID
+ * @param {nsIURI} rootURI - The addon's root directory URI
+ * @param {string} pluginUUID - UUID (no braces) used as the moz-extension host
+ * @param {string[]} [origins] - Extra allowed origins (host_permissions)
+ * @param {string} [contentSecurityPolicy] - Extension-page CSP
  * @returns {string} The moz-extension:// base URI for this plugin
  */
 function register(pluginID, rootURI, pluginUUID, origins = [], contentSecurityPolicy = null) {
-	// Always recreate with fresh origins and re-activate,
-	// since origins may have changed or the policy may have
-	// been deactivated externally (e.g. by AddonManager on disable)
+	// Recreate with fresh origins and re-activate: origins may have changed,
+	// or AddonManager may have deactivated the policy on disable
 	unregister(pluginID);
 
-	// Firefox's extension startup registers a temporary WebExtensionPolicy
-	// before the manifest is parsed, with no webAccessibleResources:
-	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#4080-4090
-	// Since Zotero plugins skip the full WebExtension lifecycle, this
-	// temporary policy is never replaced. Deactivate it so we can register
-	// our own with webAccessibleResources.
+	// Firefox pre-registers a temporary policy with no webAccessibleResources that
+	// Zotero never replaces; deactivate it first. https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#4080-4090
 	let existing = WebExtensionPolicy.getByID(pluginID);
 	if (existing) {
 		existing.active = false;
@@ -70,7 +59,7 @@ function register(pluginID, rootURI, pluginUUID, origins = [], contentSecurityPo
 		manifestVersion: 3,
 		extensionPageCSP: contentSecurityPolicy || undefined,
 		localizeCallback: str => str,
-		allowedOrigins: new MatchPatternSet(origins, { restrictSchemes: false }),
+		allowedOrigins: new MatchPatternSet([...origins, `moz-extension://${hostname}/*`], { restrictSchemes: false }),
 		// Resources are only accessible to chrome/resource and the plugin itself.
 		webAccessibleResources: [
 			{
@@ -116,21 +105,17 @@ function getBaseURI(pluginID) {
 
 /**
  * Check whether a plugin's host_permissions cover the given URI string.
- * Wraps the plugin's WebExtensionPolicy.canAccessURI() so callers that
- * want to validate an outbound URL upfront (instead of letting the
- * sandbox principal block it at request time) have a single entry point.
  *
+ * @param {string} value - URI to test; must be a parseable URI string
  * @param {string} pluginID
- * @param {string} uriStr -- URI to test; must be a parseable URI string
- * @returns {boolean} true if the plugin is registered and its
- *   host_permissions allow the URI; false otherwise
+ * @returns {boolean}
  */
-function canAccessURI(pluginID, uriStr) {
+function canAccessURI(value, pluginID) {
 	let policy = policies.get(pluginID);
 	if (!policy) return false;
 	let nsURI;
 	try {
-		nsURI = Services.io.newURI(uriStr);
+		nsURI = Services.io.newURI(value);
 	}
 	catch {
 		return false;
@@ -138,6 +123,43 @@ function canAccessURI(pluginID, uriStr) {
 	return policy.canAccessURI(nsURI);
 }
 
-const PluginProtocol = { register, unregister, getBaseURI, canAccessURI };
+const LOCAL_RESOURCE_SCHEMES = new Set(["chrome", "resource", "data", "blob"]);
+
+/**
+ * Check whether a plugin can load an image from the given URI string:
+ * local schemes (chrome/resource/data/blob) plus its declared origins.
+ * @param {string} value - URI to test; relative values resolve against the plugin root
+ * @param {string} pluginID
+ * @returns {boolean}
+ */
+function canLoadImageURI(value, pluginID) {
+	let raw = (value === null || value === undefined) ? "" : String(value);
+	if (!raw.trim()) {
+		return true;
+	}
+	let uri;
+	try {
+		// Relative values resolve against the plugin's own moz-extension root
+		let baseSpec = getBaseURI(pluginID);
+		let base = baseSpec ? Services.io.newURI(baseSpec) : null;
+		uri = Services.io.newURI(raw, null, base);
+	}
+	catch {
+		return false;
+	}
+	let scheme = uri.scheme.toLowerCase();
+	if (LOCAL_RESOURCE_SCHEMES.has(scheme)) {
+		return true;
+	}
+	return canAccessURI(uri.spec, pluginID);
+}
+
+const PluginProtocol = {
+	register,
+	unregister,
+	getBaseURI,
+	canAccessURI,
+	canLoadImageURI,
+};
 
 export { PluginProtocol };

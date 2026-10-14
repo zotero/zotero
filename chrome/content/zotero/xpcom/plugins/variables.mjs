@@ -28,23 +28,7 @@ import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrom
 import { SchemaKey, DATA_OBJECT_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
-import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
-
-const CALLBACK_WRAPPERS_KEY = "__zoteroCallbackWrappers__";
-
-const BLOCKED_WINDOW_PROPS = new Set([
-	"window",
-	"global",
-	"globalThis",
-	"top",
-	"parent",
-	"frames",
-	"frameElement",
-	"self",
-	"opener",
-	"content",
-]);
 
 const ScopeVariables = {
 
@@ -52,18 +36,15 @@ const ScopeVariables = {
 	 * Wrap a single value with a safe object based on its type.
 	 * This method intelligently wraps different types:
 	 * - Functions: ensureCallableInScope to allow calling across scopes
-	 * - Events: createSafeEvent to allow safe event handling
-	 * - Window/Document/DOM nodes: createSafeWindowObject to allow safe DOM access
+	 * - Events and privileged Window/Document/DOM nodes: blocked (undefined)
 	 * - Plain objects: recursively wrap properties to allow access to nested properties
 	 * - Other objects: createAllowlistMirrorObject to allow access to safe properties and methods
 	 * - Primitives: returned as-is
 	 * @param {any} value - The value to wrap
 	 * @param {string} pluginID - The plugin ID for scope restrictions
-	 * @param {Object} [options] - Options for wrapping
-	 * @param {Element} [options.rootNode] - Optional root node to restrict DOM access.
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
-	toScope(value, pluginID, { rootNode = null, _seen = null } = {}) {
+	toScope(value, pluginID, { _seen = null } = {}) {
 		if (!pluginID) {
 			return value;
 		}
@@ -86,24 +67,17 @@ const ScopeVariables = {
 			return ScopeUtils.ensureCallableInScope(value, undefined, scope);
 		}
 
-		if (value instanceof Event) {
-			return WindowScopeVariables.createSafeEvent(
-				value,
-				pluginID,
-				{ rootNode: rootNode || null }
-			);
+		// Event.isInstance matches across compartments, unlike instanceof
+		if (Event.isInstance(value)) {
+			return undefined;
 		}
 		if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
 			// The plugin's own pages are same-origin with its sandbox and can
-			// be scripted directly, no facade needed
-			if (WindowScopeVariables.isPluginOwnContent(value, pluginID)) {
+			// be scripted directly; privileged chrome DOM never crosses
+			if (VarCheck.isPluginOwnContent(value, pluginID)) {
 				return value;
 			}
-			return WindowScopeVariables.createSafeWindowObject(
-				value,
-				pluginID,
-				{ rootNode: rootNode || null }
-			);
+			return undefined;
 		}
 
 		if (VarCheck.isDataObject(value)) {
@@ -120,7 +94,7 @@ const ScopeVariables = {
 				cloneFunctions: true,
 			});
 			_seen.set(value, arr);
-			arr.push(...value.map(v => ScopeVariables.toScope(v, pluginID, { rootNode, _seen })));
+			arr.push(...value.map(v => ScopeVariables.toScope(v, pluginID, { _seen })));
 			return arr;
 		}
 
@@ -135,7 +109,7 @@ const ScopeVariables = {
 					let hasCached = false;
 					Cu.exportFunction(() => {
 						if (!hasCached) {
-							cached = ScopeVariables.toScope(value[key], pluginID, { rootNode, _seen });
+							cached = ScopeVariables.toScope(value[key], pluginID, { _seen });
 							hasCached = true;
 						}
 						return cached;
@@ -171,7 +145,6 @@ const ScopeVariables = {
 	 * - Functions:
 	 *   1. All arguments are wrapped using `toScope` before passing to the plugin function
 	 *   2. The plugin function is called with wrapped arguments
-	 *   3. The return value is optionally unwrapped if `unwrapReturn` is true
 	 *
 	 * - Plain objects:
 	 *   1. Function properties are recursively wrapped using `fromScope`
@@ -180,12 +153,9 @@ const ScopeVariables = {
 	 * @param {any} value - The value from plugin scope to wrap
 	 * @param {string} pluginID - The plugin ID for scope restrictions
 	 * @param {Object} [options] - Options for wrapping
-	 * @param {Element|Function} [options.rootNode=null] - Optional root node to restrict DOM access.
-	 *   Can be an Element or a function that takes the arguments and returns an Element.
-	 * @param {boolean} [options.unwrapReturn=false] - Whether to unwrap DOM nodes in return value
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, pluginID, { rootNode = null, unwrapReturn = false, trace = null, _seen = null } = {}) {
+	fromScope(value, pluginID, { trace = null, _seen = null } = {}) {
 		if (!pluginID) {
 			return value;
 		}
@@ -199,7 +169,7 @@ const ScopeVariables = {
 			return value;
 		}
 
-		// Unwrap instance facades and DOM node wrappers back to their originals
+		// Unwrap instance facades back to their originals
 		if (VarCheck.hasOriginalRef(value)) {
 			return VarCheck.getOriginalRef(value);
 		}
@@ -209,19 +179,12 @@ const ScopeVariables = {
 			let hookPath = trace ? `${trace.path}:${funcName}` : funcName;
 			let wrapper = function (...args) {
 				let t = PluginTrace.start();
-				// Determine the actual rootNode - can be a function that extracts it from args
-				let actualRootNode = typeof rootNode === "function" ? rootNode(...args) : rootNode;
-
 				// Wrap all arguments before passing to plugin function
-				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID, { rootNode: actualRootNode }));
+				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID));
 
 				let result = Reflect.apply(value, this, wrappedArgs);
 
 				PluginTrace.end(t, pluginID, "hook", hookPath);
-
-				if (unwrapReturn) {
-					return VarCheck.getOriginalOrSelf(result);
-				}
 
 				return result;
 			};
@@ -239,26 +202,30 @@ const ScopeVariables = {
 		if (!_seen) _seen = new Map();
 		if (_seen.has(value)) return _seen.get(value);
 
-		// Recursively unwrap array elements
+		// Recursively unwrap array elements. Register in _seen before
+		// recursing so self-referential values can't recurse forever
 		if (Array.isArray(value)) {
-			let arr = Array.from(value).map(v => ScopeVariables.fromScope(v, pluginID, { rootNode, unwrapReturn, trace, _seen }));
+			let arr = [];
 			_seen.set(value, arr);
+			for (let v of Array.from(value)) {
+				arr.push(ScopeVariables.fromScope(v, pluginID, { trace, _seen }));
+			}
 			return arr;
 		}
 
 		if (VarCheck.isPlainObject(value)) {
-			let hasFunction = false;
+			let hasWrapped = false;
 			let wrapped = {};
+			_seen.set(value, wrapped);
 			for (let key of Object.keys(value)) {
 				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, pluginID, { rootNode, unwrapReturn, trace, _seen });
+				let wrappedVal = ScopeVariables.fromScope(val, pluginID, { trace, _seen });
 				if (wrappedVal !== val) {
-					hasFunction = true;
+					hasWrapped = true;
 				}
 				wrapped[key] = wrappedVal;
 			}
-			if (hasFunction) {
-				_seen.set(value, wrapped);
+			if (hasWrapped) {
 				return wrapped;
 			}
 		}
@@ -496,8 +463,6 @@ const ScopeVariables = {
 											instanceSchema: handler[SchemaKey.SCHEMA] || null,
 											trace,
 										});
-									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, pluginID, { trace });
 									case "FileAccessCallable":
 										return ScopeVariables.createFileAccessCallable(value, actualObj, pluginID, handler[SchemaKey.SCHEMA], { trace });
 									case "CustomParserCallable":
@@ -509,8 +474,6 @@ const ScopeVariables = {
 							// If the schema value for this prop is a string, we need to call custom handling function
 							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
 								switch (schemaNode[prop]) {
-									case "WindowScopeCallable":
-										return WindowScopeVariables.createSafeWindowCallable(value, actualObj, pluginID, { trace });
 									case "FromScopeCallable":
 										return ScopeVariables.createFromScopeCallable(value, actualObj, pluginID, { trace });
 									case "CustomParserCallable":
@@ -538,10 +501,10 @@ const ScopeVariables = {
 						}
 
 						if (VarCheck.isObjectLike(value)) {
-							// Intercept Window/DOM objects to prevent
+							// Block Window/DOM objects to prevent
 							// privilege escalation through nested properties
 							if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
-								return WindowScopeVariables.createSafeWindowObject(value, pluginID);
+								return undefined;
 							}
 
 							let nextSchemaNode = VarCheck.nextSchema(schemaNode, prop);
@@ -605,1353 +568,6 @@ const ScopeVariables = {
 	},
 };
 
-const WindowScopeVariables = {
-
-	/**
-	 * Wrap a function from the host scope to be called in the sandbox scope,
-	 * with DOM arguments unwrapped before passing to the actual function,
-	 * and DOM return values wrapped before returning to the sandbox.
-	 * This is to allow sandbox code to call DOM methods with wrapped DOM nodes and receive wrapped DOM nodes,
-	 * while the actual function runs in the privileged host scope with access to real DOM nodes.
-	 */
-	createSafeWindowCallable(func, thisArg, pluginID, { rootNode, argValidator, trace } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-		return ScopeUtils.ensureCallableInScope(
-			func,
-			thisArg,
-			scope,
-			{
-				argParser(args) {
-					if (typeof argValidator === "function" && !argValidator(args)) {
-						return null;
-					}
-					return WindowScopeVariables.unwrapDOMArguments(args, pluginID, { rootNode });
-				},
-				returnParser: value => WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode }),
-				// unwrapDOMArguments already produces args suitable for native methods:
-				// DOM nodes unwrapped to their real compartment, callbacks as chrome
-				// functions. Re-scoping would double-wrap callbacks, breaking event listeners.
-				skipArgRescoping: true,
-				trace,
-			}
-		);
-	},
-
-	/**
-	 * Wrap a DOM node or Window object within the given root subtree
-	 */
-	createSafeWindowObject(node, pluginID, { rootNode } = {}) {
-		if (VarCheck.isWindowObject(node)) {
-			return WindowScopeVariables.createSafeWindow(node, pluginID, { rootNode });
-		}
-
-		if (!VarCheck.isDOMNode(node)) {
-			return node;
-		}
-
-		let root = WindowScopeVariables.resolveRoot(rootNode);
-
-		if (VarCheck.isDocumentObject(node)) {
-			return WindowScopeVariables.createSafeDocument(node, pluginID, { rootNode });
-		}
-
-		if (root === null) {
-			// No access
-			return null;
-		}
-		if (rootNode?.deref && !root) {
-			VarCheck.throwPropError("access", "root element", "object has been garbage collected");
-		}
-
-		// Check if node is within root subtree
-		if (!VarCheck.isElementWithinSubtree(node, root)) {
-			return null;
-		}
-
-		return WindowScopeVariables.createSafeHTMLElement(node, pluginID, { rootNode });
-	},
-
-	/**
-	 * Wrap an array-like list of DOM nodes or Window objects within the given root subtree
-	 */
-	createSafeWindowObjectOrList(nodes, pluginID, { rootNode } = {}) {
-		// Check for Window/DOM objects before the array-like check,
-		// because Window has a numeric `length` property (frame count)
-		// that causes isArrayLike to return true, bypassing the wrapper.
-		if (VarCheck.isWindowObject(nodes) || VarCheck.isDOMNode(nodes)) {
-			return WindowScopeVariables.createSafeWindowObject(nodes, pluginID, { rootNode });
-		}
-
-		if (nodes instanceof NodeList) {
-			let items = Array.from(nodes)
-				.map(item => WindowScopeVariables.createSafeWindowObject(item, pluginID, { rootNode }))
-				.filter(item => item !== null);
-
-			let nodeList = new NodeList();
-			for (let i = 0; i < items.length; i++) {
-				nodeList[i] = items[i];
-			}
-			nodeList.length = items.length;
-			return ScopeVariables.createAllowlistMirrorObject(nodeList, true, pluginID, { frozen: false });
-		}
-
-		if (VarCheck.isArrayLike(nodes)) {
-			let items = Array.from(nodes);
-			if (items.length === 0 || !items.some(item => VarCheck.isDOMNode(item) || VarCheck.isWindowObject(item))) {
-				return nodes;
-			}
-			// Since it's a return from DOM method, we can assume it's safe to do the filtering
-			return items.map(item => WindowScopeVariables.createSafeWindowObject(item, pluginID, { rootNode })).filter(item => item !== null);
-		}
-		
-		return WindowScopeVariables.createSafeWindowObject(nodes, pluginID, { rootNode });
-	},
-
-	/**
-	 * Wrap a Window object that only exposes allowed properties and methods based on the schema
-	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
-	 */
-	createSafeWindow(win, pluginID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return win;
-		}
-
-		// This should be executed after the scope is fully initialized with permissions, so we can get the correct schema based on permissions
-		let permissions = scope.PERMISSIONS;
-		let schema;
-		if (win.location.href === "chrome://zotero/content/zoteroPane.xhtml") {
-			schema = VarCheck.getMainWindowSchema(permissions);
-		}
-		else {
-			schema = VarCheck.getWindowSchema(permissions);
-		}
-		let wrapper = ScopeVariables.createAllowlistMirrorObject(win, schema, pluginID, { cache: false, pathPrefix: "window" });
-
-		// addEventListener / removeEventListener need the callback-wrapping
-		// logic from createSafeWindowCallable so that event handlers receive
-		// safe Event wrappers and the correct handler identity is preserved
-		// for removal.  They are added manually (like `document`) rather than
-		// through the schema so that `rootNode` is forwarded.
-		for (let method of ["addEventListener", "removeEventListener"]) {
-			Object.defineProperty(wrapper, method, {
-				value: WindowScopeVariables.createSafeWindowCallable(
-					win[method], win, pluginID, { rootNode }
-				),
-				enumerable: true,
-				configurable: false,
-				writable: false,
-			});
-		}
-
-		// Expose read-only size/position properties
-		for (let prop of [
-			"innerWidth",
-			"innerHeight",
-			"outerWidth",
-			"outerHeight",
-			"scrollX",
-			"scrollY",
-			"screenX",
-			"screenY",
-			"devicePixelRatio",
-			"screen",
-			"closed",
-		]) {
-			let holder = Cu.createObjectIn(scope);
-			Cu.exportFunction(() => win[prop], holder, { defineAs: "g" });
-			Object.defineProperty(wrapper, prop, {
-				get: holder.g,
-				enumerable: true,
-				configurable: false,
-			});
-		}
-
-		Object.defineProperties(wrapper, {
-			document: {
-				get() {
-					return WindowScopeVariables.createSafeDocument(win.document, pluginID, { rootNode });
-				},
-				enumerable: true,
-				configurable: false,
-			},
-		});
-		return wrapper;
-	},
-
-	_safeDocumentCache: new WeakMap(),
-
-	/**
-	 * Wrap a Document object that only exposes allowed properties and methods based on the schema
-	 * If the `rootNode` is not provided, the wrapper will be created without access to any DOM.
-	 */
-	createSafeDocument(doc, pluginID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return doc;
-		}
-
-		let root = WindowScopeVariables.resolveRoot(rootNode) || null;
-		let cacheable = !(rootNode?.deref && !root) && !(root && Cu.isDeadWrapper(root));
-		let perScope;
-		if (cacheable) {
-			let perDoc = WindowScopeVariables._safeDocumentCache.get(doc);
-			if (!perDoc) {
-				perDoc = new WeakMap();
-				WindowScopeVariables._safeDocumentCache.set(doc, perDoc);
-			}
-			perScope = perDoc.get(scope);
-			if (!perScope) {
-				perScope = { noRoot: null, byRoot: new WeakMap() };
-				perDoc.set(scope, perScope);
-			}
-			let cached = root ? perScope.byRoot.get(root) : perScope.noRoot;
-			if (cached && !Cu.isDeadWrapper(cached)) {
-				return cached;
-			}
-		}
-
-		let docRef = new WeakRef(doc);
-
-		let wrapper = Cu.createObjectIn(scope);
-
-		["createElement", "createXULElement", "createElementNS"].forEach((method) => {
-			if (typeof doc[method] === "function") {
-				Cu.exportFunction(
-					(...args) => {
-						let tagName = method === "createElementNS" ? args[1] : args[0];
-
-						if (typeof tagName !== "string") {
-							throw new Error("tagName must be a string");
-						}
-
-						let localName = tagName;
-						// Handle qualified names (e.g., "html:iframe")
-						if (method === "createElementNS") {
-							localName = tagName.includes(":") ? tagName.split(":").pop() : tagName;
-						}
-
-						if (WindowScopeVariables.UNSAFE_TAGS.has(localName.toLowerCase())) {
-							VarCheck.throwPropError("create", tagName, "tag is not allowed");
-						}
-
-						let actualDoc = docRef.deref();
-						if (!actualDoc) {
-							VarCheck.throwPropError("access", "document", "object has been garbage collected");
-						}
-						let newElement = actualDoc[method](...args);
-						return WindowScopeVariables.createSafeHTMLElement(newElement, pluginID, { rootNode });
-					},
-					wrapper,
-					{ defineAs: method }
-				);
-			}
-		});
-
-		if (typeof doc.createDocumentFragment === "function") {
-			Cu.exportFunction(
-				() => {
-					let actualDoc = docRef.deref();
-					if (!actualDoc) {
-						VarCheck.throwPropError("access", "document", "object has been garbage collected");
-					}
-					let fragment = actualDoc.createDocumentFragment();
-					return WindowScopeVariables.createSafeHTMLElement(fragment, pluginID, { rootNode });
-				},
-				wrapper,
-				{ defineAs: "createDocumentFragment" }
-			);
-		}
-
-		// addEventListener / removeEventListener need the callback-wrapping
-		// logic from createSafeWindowCallable so that event handlers receive
-		// safe Event wrappers and the correct handler identity is preserved
-		// for removal.
-		for (let method of ["addEventListener", "removeEventListener"]) {
-			Object.defineProperty(wrapper, method, {
-				value: WindowScopeVariables.createSafeWindowCallable(
-					doc[method], doc, pluginID, { rootNode }
-				),
-				enumerable: true,
-				configurable: false,
-				writable: false,
-			});
-		}
-
-		// DOM query methods -- results are filtered to the rootNode subtree
-		[
-			"getElementById",
-			"getElementsByClassName",
-			"getElementsByName",
-			"getElementsByTagName",
-			"getElementsByTagNameNS",
-			"querySelector",
-			"querySelectorAll",
-		].forEach((method) => {
-			if (typeof doc[method] !== "function") return;
-			Cu.exportFunction(
-				(...args) => {
-					let actualDoc = docRef.deref();
-					if (!actualDoc) {
-						VarCheck.throwPropError("access", "document", "object has been garbage collected");
-					}
-					let result = actualDoc[method](...args);
-					return WindowScopeVariables.createSafeWindowObjectOrList(result, pluginID, { rootNode });
-				},
-				wrapper,
-				{ defineAs: method }
-			);
-		});
-
-		if (doc.l10n) {
-			wrapper.l10n = ScopeVariables.createAllowlistMirrorObject(
-				doc.l10n, { addResourceIds: true, removeResourceIds: true }, pluginID
-			);
-		}
-
-		Object.preventExtensions(wrapper);
-		if (cacheable) {
-			if (root) {
-				perScope.byRoot.set(root, wrapper);
-			}
-			else {
-				perScope.noRoot = wrapper;
-			}
-		}
-		return wrapper;
-	},
-
-	/**
-	 * Set up l10n on a content document inside a <browser> element.
-	 * Creates a DOMLocalization, connects it to the document root,
-	 * auto-detects <link rel="localization"> tags, and sets document.l10n.
-	 *
-	 * @param {XULElement} browser - The <browser> element containing the content
-	 * @returns {Promise} Resolves when initial translation is complete
-	 */
-	setupContentL10n(browser) {
-		let contentDoc = browser.contentDocument;
-		let contentWin = browser.contentWindow;
-		let l10n = new contentWin.DOMLocalization([], false);
-		l10n.connectRoot(contentDoc.documentElement);
-
-		// Collect initial <link rel="localization"> resource IDs
-		let links = contentDoc.querySelectorAll('link[rel="localization"]');
-		if (links.length) {
-			l10n.addResourceIds(
-				Array.from(links).map(link => link.getAttribute('href'))
-			);
-		}
-
-		// Observe <link rel="localization"> additions/removals to mirror
-		// the DocumentL10n behavior that chrome documents get natively.
-		let observer = new contentWin.MutationObserver((mutations) => {
-			let addIds = [];
-			let removeIds = [];
-			for (let mutation of mutations) {
-				for (let node of mutation.addedNodes) {
-					if (node.nodeName === "LINK"
-						&& node.getAttribute("rel") === "localization"
-						&& node.getAttribute("href")) {
-						addIds.push(node.getAttribute("href"));
-					}
-				}
-				for (let node of mutation.removedNodes) {
-					if (node.nodeName === "LINK"
-						&& node.getAttribute("rel") === "localization"
-						&& node.getAttribute("href")) {
-						removeIds.push(node.getAttribute("href"));
-					}
-				}
-			}
-			if (removeIds.length) {
-				l10n.removeResourceIds(removeIds);
-			}
-			if (addIds.length) {
-				l10n.addResourceIds(addIds);
-			}
-			if (addIds.length || removeIds.length) {
-				l10n.translateRoots();
-			}
-		});
-		observer.observe(contentDoc.documentElement, {
-			childList: true,
-			subtree: true,
-		});
-
-		// Clean up when the content window is closed
-		contentWin.addEventListener("unload", () => {
-			observer.disconnect();
-			l10n.disconnectRoot(contentDoc.documentElement);
-		}, { once: true });
-
-		Cu.waiveXrays(contentDoc).l10n = l10n;
-		return l10n.translateRoots();
-	},
-
-	createSafeEvent(event, pluginID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return event;
-		}
-
-		// If no rootNode is provided, use currentTarget as the root so that
-		// target and currentTarget are accessible to the plugin.
-		if (rootNode === null || rootNode === undefined) {
-			rootNode = event.currentTarget;
-		}
-
-		let DOMProps = new Set(["target", "currentTarget", "relatedTarget"]);
-
-		// WeakRef so the wrapper doesn't pin the event (which references the DOM).
-		let eventRef = new WeakRef(event);
-		function derefOrThrow(op, prop) {
-			let e = eventRef.deref();
-			if (!e) {
-				VarCheck.throwPropError(op, prop, "object has been garbage collected");
-			}
-			return e;
-		}
-		// Defer the prototype-chain key walk until the wrapper is actually used
-		let allowed = null;
-		function getAllowed(op, prop) {
-			if (!allowed) {
-				allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(derefOrThrow(op, prop)));
-			}
-			return allowed;
-		}
-		let origRef = () => eventRef.deref();
-
-		let traps = Cu.createObjectIn(scope);
-
-		Cu.exportFunction((_facade, prop) => {
-			if (prop === ORIGINAL_REF_KEY) return origRef;
-			if (!getAllowed("access", prop).has(prop)) return undefined;
-			let ev = derefOrThrow("access", prop);
-			if (DOMProps.has(prop)) {
-				let node = Reflect.get(ev, prop);
-				return node ? WindowScopeVariables.createSafeWindowObject(node, pluginID, { rootNode }) : undefined;
-			}
-			if (prop === "composedPath") {
-				let fn = Reflect.get(ev, prop);
-				return typeof fn === "function"
-					? WindowScopeVariables.createSafeWindowCallable(fn, ev, pluginID, { rootNode })
-					: undefined;
-			}
-			let value = Reflect.get(ev, prop);
-			if (typeof value === "function") {
-				return ScopeUtils.ensureCallableInScope(value, ev, scope, { mutable: true });
-			}
-			if (VarCheck.isObjectLike(value)) {
-				if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
-					return WindowScopeVariables.createSafeWindowObject(value, pluginID);
-				}
-				return ScopeVariables.createAllowlistMirrorObject(value, true, pluginID, { frozen: false });
-			}
-			return value;
-		}, traps, { defineAs: "get" });
-
-		Cu.exportFunction((_facade, prop, value) => {
-			if (DOMProps.has(prop) || prop === "composedPath" || !getAllowed("set", prop).has(prop)) {
-				return false;
-			}
-			Reflect.set(derefOrThrow("set", prop), prop, value);
-			return true;
-		}, traps, { defineAs: "set" });
-
-		Cu.exportFunction((_facade, prop) => {
-			return prop === ORIGINAL_REF_KEY || getAllowed("access", prop).has(prop);
-		}, traps, { defineAs: "has" });
-
-		Cu.exportFunction(() => {
-			let keys = Array.from(getAllowed("access", "event"));
-			keys.push(ORIGINAL_REF_KEY);
-			return Cu.cloneInto(keys, scope);
-		}, traps, { defineAs: "ownKeys" });
-
-		Cu.exportFunction((_facade, prop) => {
-			if (prop === ORIGINAL_REF_KEY) {
-				let d = Cu.createObjectIn(scope);
-				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
-				return d;
-			}
-			if (!getAllowed("access", prop).has(prop)) return undefined;
-			let d = Cu.createObjectIn(scope);
-			d.enumerable = true;
-			d.configurable = true;
-			d.writable = !(DOMProps.has(prop) || prop === "composedPath");
-			d.value = undefined;
-			return d;
-		}, traps, { defineAs: "getOwnPropertyDescriptor" });
-
-		Cu.exportFunction((_facade, prop) => {
-			return !(getAllowed("access", prop).has(prop) || prop === ORIGINAL_REF_KEY);
-		}, traps, { defineAs: "deleteProperty" });
-
-		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
-
-		return ScopeUtils.buildInstanceProxy(scope, traps);
-	},
-
-	createSafeHTMLElement(elem, pluginID, { rootNode } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return elem;
-		}
-
-		if (!VarCheck.isObjectLike(elem)) {
-			return elem;
-		}
-
-		// Refuse to wrap a connected element outside its rootNode subtree.
-		if (rootNode) {
-			let root = WindowScopeVariables.resolveRoot(rootNode);
-			if (root && elem.isConnected && !VarCheck.isElementWithinSubtree(elem, root)) {
-				return null;
-			}
-		}
-
-		// Strong ref to the element as unwrapDOMNode may run later.
-		// Sandbox should not hold long-term references to DOM nodes anyway.
-		let getActual = () => elem;
-
-		// Own + prototype chain, excluding Object.prototype.
-		// Deferred until first use -- hooks often receive elements they never touch
-		let allowed = null;
-		function getAllowed() {
-			if (!allowed) {
-				allowed = new Set(VarCheck.getAllKeysIncludingPrototypes(getActual()));
-			}
-			return allowed;
-		}
-
-		// For fromScope unwrapping callable by chrome via Cu.waiveXrays.
-		let origRef = () => getActual();
-
-		let traps = Cu.createObjectIn(scope);
-
-		Cu.exportFunction((_facade, prop) => {
-			if (prop === ORIGINAL_REF_KEY) return origRef;
-			if (!getAllowed().has(prop)) return undefined;
-			if (prop === "ownerDocument") {
-				return WindowScopeVariables.createSafeDocument(getActual().ownerDocument, pluginID, { rootNode });
-			}
-			if (prop === "documentGlobal" || prop === "defaultView") {
-				let win = Reflect.get(getActual(), prop);
-				if (!win) return null;
-				return WindowScopeVariables.createSafeWindow(win, pluginID, { rootNode });
-			}
-			if (BLOCKED_WINDOW_PROPS.has(prop)) {
-				VarCheck.throwPropError("access", prop);
-			}
-
-			let actual = getActual();
-			let value = Reflect.get(actual, prop);
-
-			// Access to global window objects is not allowed
-			if (VarCheck.isWindowObject(value)) {
-				VarCheck.throwPropError("access", prop);
-			}
-
-			// Wrap the function to wrap DOM results
-			if (typeof value === "function") {
-				// Block setAttribute/setAttributeNS from setting on* event handlers
-				if (prop === "setAttribute" || prop === "setAttributeNS") {
-					let nameArgIndex = prop === "setAttributeNS" ? 1 : 0;
-					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
-						rootNode,
-						argValidator(args) {
-							let attrName = String(args[nameArgIndex] || "");
-							if (/^on/i.test(attrName)) {
-								Zotero.warn(`Setting ${attrName} attribute is not allowed for unprivileged plugins. Use addEventListener() instead.`);
-								return false;
-							}
-							// Restrict URL/style attributes to declared resources.
-							if (WindowScopeVariables.attrAssignmentDisallowed(actual, attrName, args[nameArgIndex + 1], pluginID)) {
-								Zotero.warn(`Setting ${attrName}="${args[nameArgIndex + 1]}" is not allowed: it references an undeclared resource.`);
-								return false;
-							}
-							return true;
-						},
-					});
-				}
-				// Methods that mutate the element's parent (sibling insertion,
-				// self-removal). When actual IS the rootNode, its parent is
-				// outside the plugin's subtree.
-				if (WindowScopeVariables.PARENT_MUTATING_METHODS.has(prop)) {
-					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
-						rootNode,
-						argValidator() {
-							let r = WindowScopeVariables.resolveRoot(rootNode);
-							if (r && actual === r) {
-								Zotero.warn(`${prop}() on a rootNode element is not allowed.`);
-								return false;
-							}
-							return true;
-						},
-					});
-				}
-				if (prop === "insertAdjacentHTML") {
-					let holderFn = Cu.createObjectIn(scope);
-					Cu.exportFunction(
-						(position, html) => {
-							let pos = String(position || "").toLowerCase();
-							if (!["beforebegin", "afterbegin", "beforeend", "afterend"].includes(pos)) {
-								throw new Error(`insertAdjacentHTML: invalid position "${position}"`);
-							}
-							// beforebegin/afterend write to the parent; refuse if
-							// actual is the rootNode (parent is out of subtree).
-							if (pos === "beforebegin" || pos === "afterend") {
-								let r = WindowScopeVariables.resolveRoot(rootNode);
-								if (r && actual === r) {
-									Zotero.warn(`insertAdjacentHTML '${pos}' on a rootNode element is not allowed.`);
-									return;
-								}
-							}
-							let { fragment } = WindowScopeVariables.parseSanitizedFragment(
-								String(html ?? ""), actual.ownerDocument, pluginID
-							);
-							switch (pos) {
-								case "beforebegin":
-									if (actual.parentNode) actual.parentNode.insertBefore(fragment, actual);
-									break;
-								case "afterbegin":
-									actual.insertBefore(fragment, actual.firstChild);
-									break;
-								case "beforeend":
-									actual.appendChild(fragment);
-									break;
-								case "afterend":
-									if (actual.parentNode) {
-										actual.parentNode.insertBefore(fragment, actual.nextSibling);
-									}
-									break;
-							}
-							WindowScopeVariables.activateWhenConnected(actual, pluginID);
-						},
-						holderFn,
-						{ defineAs: "f" }
-					);
-					return holderFn.f;
-				}
-				if (prop === "setHTMLUnsafe" || prop === "setHTML") {
-					let holderFn = Cu.createObjectIn(scope);
-					Cu.exportFunction(
-						(html) => {
-							let { fragment } = WindowScopeVariables.parseSanitizedFragment(
-								String(html ?? ""), actual.ownerDocument, pluginID
-							);
-							while (actual.firstChild) actual.removeChild(actual.firstChild);
-							actual.appendChild(fragment);
-							WindowScopeVariables.activateWhenConnected(actual, pluginID);
-						},
-						holderFn,
-						{ defineAs: "f" }
-					);
-					return holderFn.f;
-				}
-				// A <style>'s text is CSS -- guard methods that insert raw text.
-				if (WindowScopeVariables.STYLE_TEXT_METHODS.has(prop)
-						&& String(actual.localName || "").toLowerCase() === "style") {
-					// insertAdjacentText's text is the 2nd arg; the rest are variadic.
-					let textOnlyAt = prop === "insertAdjacentText" ? 1 : null;
-					return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, {
-						rootNode,
-						argValidator(args) {
-							let base = WindowScopeVariables.nodeBaseURI(actual);
-							let toCheck = textOnlyAt === null ? args : [args[textOnlyAt]];
-							for (let a of toCheck) {
-								if (typeof a === "string"
-										&& WindowScopeVariables.cssTextHasDisallowedURL(a, pluginID, base)) {
-									Zotero.warn("Inserting CSS into <style> that references an undeclared resource is not allowed.");
-									return false;
-								}
-							}
-							return true;
-						},
-					});
-				}
-				return WindowScopeVariables.createSafeWindowCallable(value, actual, pluginID, { rootNode });
-			}
-
-			let wrapped = WindowScopeVariables.createSafeWindowObjectOrList(value, pluginID, { rootNode });
-			if (wrapped !== value) {
-				return wrapped;
-			}
-
-			if (VarCheck.isObjectLike(value)) {
-				// Guard inline-style writes so they can't pull in undeclared url()/@import.
-				if (prop === "style") {
-					return WindowScopeVariables.createSafeStyleDeclaration(
-						value, pluginID, WindowScopeVariables.nodeBaseURI(actual), scope
-					);
-				}
-				// DOMStringMap (dataset) has arbitrary string keys unknown at wrap
-				// time, so forward get/set/delete to it through the proxy factory
-				if (prop === "dataset") {
-					let dsTraps = Cu.createObjectIn(scope);
-					Cu.exportFunction(
-						(_t, key) => (typeof key === "symbol" ? undefined : value[String(key)]),
-						dsTraps, { defineAs: "get" }
-					);
-					Cu.exportFunction(
-						(_t, key, v) => {
-							if (typeof key !== "symbol") {
-								value[String(key)] = String(v);
-							}
-							return true;
-						},
-						dsTraps, { defineAs: "set" }
-					);
-					Cu.exportFunction(
-						(_t, key) => {
-							if (typeof key !== "symbol") {
-								delete value[String(key)];
-							}
-							return true;
-						},
-						dsTraps, { defineAs: "deleteProperty" }
-					);
-					return ScopeUtils.buildInstanceProxy(scope, dsTraps);
-				}
-				return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true });
-			}
-
-			return value;
-		}, traps, { defineAs: "get" });
-
-		Cu.exportFunction((_facade, prop, value) => {
-			let actual = getActual();
-			if (prop === "ownerDocument") {
-				VarCheck.throwPropError("set", prop);
-			}
-			if (BLOCKED_WINDOW_PROPS.has(prop)) {
-				VarCheck.throwPropError("set", prop);
-			}
-			if (/^on/i.test(prop)) {
-				Zotero.warn(`Setting ${prop} directly is not allowed for unprivileged plugins. Use addEventListener() instead.`);
-				return true;
-			}
-			if (prop === "outerHTML") {
-				VarCheck.throwPropError("set", prop);
-			}
-			// A <style>'s text is CSS -- block undeclared url()/@import in it.
-			if ((prop === "innerHTML" || prop === "textContent"
-					|| prop === "innerText" || prop === "text")
-					&& String(actual.localName || "").toLowerCase() === "style"
-					&& WindowScopeVariables.cssTextHasDisallowedURL(value, pluginID, WindowScopeVariables.nodeBaseURI(actual))) {
-				Zotero.warn(`Setting <style> ${prop} is not allowed: it references an undeclared resource.`);
-				return true;
-			}
-			// Sanitize HTML strings to strip unsafe tags and on* event handlers.
-			if (prop === "innerHTML") {
-				let doc = actual.ownerDocument;
-				let { fragment, useXML } = WindowScopeVariables.parseSanitizedFragment(value, doc, pluginID);
-				if (useXML) {
-					// Directly replace children to preserve namespace information.
-					// Re-serializing to string and setting innerHTML would re-parse
-					// through the HTML parser, stripping namespace metadata.
-					while (actual.firstChild) actual.removeChild(actual.firstChild);
-					actual.appendChild(fragment);
-				}
-				else {
-					let tmp = doc.createElement("div");
-					tmp.appendChild(fragment);
-					Reflect.set(actual, prop, tmp.innerHTML);
-				}
-				WindowScopeVariables.activateWhenConnected(actual, pluginID);
-				return true;
-			}
-			if (!getAllowed().has(prop)) {
-				VarCheck.throwPropError("set", prop);
-			}
-			// Restrict URL/style properties to declared resources.
-			if (typeof prop === "string"
-					&& WindowScopeVariables.attrAssignmentDisallowed(actual, prop, value, pluginID)) {
-				VarCheck.throwPropError("set", prop, "references an undeclared resource");
-			}
-			Reflect.set(actual, prop, VarCheck.getOriginalOrSelf(value));
-			return true;
-		}, traps, { defineAs: "set" });
-
-		Cu.exportFunction((_facade, prop) => {
-			return prop === ORIGINAL_REF_KEY || getAllowed().has(prop);
-		}, traps, { defineAs: "has" });
-
-		Cu.exportFunction(() => {
-			let keys = Array.from(getAllowed());
-			keys.push(ORIGINAL_REF_KEY);
-			return Cu.cloneInto(keys, scope);
-		}, traps, { defineAs: "ownKeys" });
-
-		Cu.exportFunction((_facade, prop) => {
-			if (prop === ORIGINAL_REF_KEY) {
-				let d = Cu.createObjectIn(scope);
-				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
-				return d;
-			}
-			if (!getAllowed().has(prop)) return undefined;
-			let d = Cu.createObjectIn(scope);
-			d.enumerable = true; d.configurable = true; d.writable = true; d.value = undefined;
-			return d;
-		}, traps, { defineAs: "getOwnPropertyDescriptor" });
-
-		Cu.exportFunction((_facade, prop) => {
-			return !(getAllowed().has(prop) || prop === ORIGINAL_REF_KEY);
-		}, traps, { defineAs: "deleteProperty" });
-
-		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
-
-		return ScopeUtils.buildInstanceProxy(scope, traps);
-	},
-
-
-	/**
-	 * Convert the arguments before passing to actual DOM methods e.g., `appendChild` or `addEventListener`
-	 * - For DOM nodes, unwrap to actual nodes.
-	 * - For array-like arguments, unwrap each item if they are wrapped DOM nodes (assume no nested arrays or functions in arrays)
-	 * - For callback functions, wrap them to wrap DOM nodes and Events in their arguments and return values. For example:
-	 *   - When calling `addEventListener` from the sandbox with callback `fn_{sandbox}`
-	 *   - We return a wrapped callback `fn_{host}^{wrapped}` to the host scope, and store the reference on `fn_{sandbox}`
-	 *   - The wrapped callback `fn_{host}^{wrapped}` is the actual function passed to `addEventListener`
-	 *   - When calling `removeEventListener` from the sandbox with the original callback `fn_{sandbox}`
-	 *   - This function detects that `fn_{sandbox}` has a wrapped reference stored, and returns `fn_{host}^{wrapped}` to the host scope
-	 *   - Thus, the correct function reference is passed to `removeEventListener`
-	 */
-	unwrapDOMArguments(args, pluginID, { rootNode } = {}) {
-		return args.map((arg) => {
-			if (VarCheck.hasOriginalRef(arg)) {
-				return VarCheck.getOriginalRef(arg);
-			}
-			if (typeof arg === "function") {
-				// Key wrappers by (callback, rootNode) -- a single callback
-				// registered on two elements with different rootNodes must
-				// produce two wrappers so each handler sees its own subtree.
-				let rootKey = WindowScopeVariables.resolveRoot(rootNode) ?? null;
-				let waived = Cu.waiveXrays(arg);
-				let wrappersByRoot = waived[CALLBACK_WRAPPERS_KEY];
-				if (wrappersByRoot && wrappersByRoot.has(rootKey)) {
-					return wrappersByRoot.get(rootKey);
-				}
-				if (!wrappersByRoot) {
-					wrappersByRoot = new Map();
-					try {
-						Object.defineProperty(waived, CALLBACK_WRAPPERS_KEY, {
-							value: wrappersByRoot,
-							enumerable: false,
-							configurable: false,
-							writable: false,
-						});
-					}
-					catch {
-						// Frozen sandbox-side function -- fall back to one-shot.
-						wrappersByRoot = null;
-					}
-				}
-
-				let wrappedCallback = function (...callbackArgs) {
-					// Wrap DOM nodes and Events in callback arguments
-					let wrappedArgs = callbackArgs.map((cbArg) => {
-						if (VarCheck.isDOMNode(cbArg)) {
-							return WindowScopeVariables.createSafeWindowObject(cbArg, pluginID, { rootNode });
-						}
-						// Wrap Event objects and their related properties
-						if (cbArg && typeof cbArg === "object" && typeof cbArg.type === "string") {
-							// It's likely an Event - create a safe version
-							return WindowScopeVariables.createSafeEvent(cbArg, pluginID, { rootNode });
-						}
-						return cbArg;
-					});
-					// Call the original function with wrapped arguments.
-					// Use Reflect.apply to avoid cross-compartment issues with the args array.
-					let scope = PluginSandbox.getScope(pluginID);
-					let scopeArgs = Cu.cloneInto([], scope);
-					for (let a of wrappedArgs) scopeArgs.push(a);
-					let result = arg.apply(this, scopeArgs);
-					return (result);
-				};
-
-				if (wrappersByRoot) {
-					wrappersByRoot.set(rootKey, wrappedCallback);
-				}
-
-				return wrappedCallback;
-			}
-			if (VarCheck.isArrayLike(arg)) {
-				let items = Array.from(arg);
-				return items.map(item => VarCheck.getOriginalOrSelf(item));
-			}
-			return arg;
-		});
-	},
-
-	resolveRoot(rootNode) {
-		return rootNode?.deref ? rootNode.deref() : rootNode;
-	},
-
-
-	UNSAFE_TAGS: new Set([
-		"script",
-		"browser",
-		"iframe",
-		"frame",
-		"object",
-		"embed",
-		"meta",
-		// <base> can rewrite the document base URI and defeat our origin checks.
-		"base",
-	]),
-
-	PARENT_MUTATING_METHODS: new Set(["before", "after", "replaceWith", "remove"]),
-
-	URL_ATTRS: new Set([
-		"href",
-		"src",
-		"action",
-		"formaction",
-		"data",
-		"poster",
-		"background",
-		"ping",
-	]),
-
-	// Attributes fetched as a subresource with no user interaction; restricted
-	// to declared resources. (`data` is for the blocked <object> tag.)
-	SILENT_URL_ATTRS: new Set(["src", "poster", "background", "data"]),
-
-	// Multi-URL attributes, origin-checked per URL.
-	URL_LIST_ATTRS: new Set(["srcset", "imagesrcset"]),
-
-	// Elements where href is navigation, not a silent load: scheme check only.
-	NAV_HREF_TAGS: new Set(["a", "area"]),
-
-	// Schemes that never reach an undeclared remote origin.
-	LOCAL_RESOURCE_SCHEMES: new Set(["chrome", "resource", "data", "blob"]),
-
-	// Text-inserting methods; a <style>'s inserted text is CSS.
-	STYLE_TEXT_METHODS: new Set(["append", "prepend", "replaceChildren", "insertAdjacentText"]),
-
-	// Elements carrying a URL/srcset/style attribute (any namespace for xlink:href).
-	SANITIZE_URL_SELECTOR: "[*|href],[*|src],[*|action],[*|formaction],[*|data],[*|poster],[*|background],[*|ping],[*|srcset],[*|imagesrcset],[style]",
-
-	UNSAFE_URL_SCHEMES: /^javascript:/i,
-
-	UNSAFE_DATA_MIMES: new Set([
-		"text/html",
-		"application/xhtml+xml",
-		"text/xml",
-		"application/xml",
-	]),
-
-	isUnsafeURLValue(value) {
-		let raw = (value === null || value === undefined) ? "" : value;
-		// Strip all ASCII whitespace/control chars (the parser drops tab/newline
-		// anywhere and trims leading C0/space before reading the scheme).
-		let s = String(raw).replace(/[\u0000-\u0020]+/g, "");
-		if (this.UNSAFE_URL_SCHEMES.test(s)) {
-			return true;
-		}
-		if (/^data:/i.test(s)) {
-			let mime = s.slice(5).split(/[,;]/, 1)[0].toLowerCase();
-			return this.UNSAFE_DATA_MIMES.has(mime);
-		}
-		return false;
-	},
-
-	urlAttrLocalName(name) {
-		let n = String(name || "");
-		return (n.includes(":") ? n.split(":").pop() : n).toLowerCase();
-	},
-
-	nodeBaseURI(node) {
-		try {
-			let doc = node && node.ownerDocument;
-			return doc ? doc.documentURI : null;
-		}
-		catch {
-			return null;
-		}
-	},
-
-	// Resolve a possibly-relative URL against a base (ASCII whitespace stripped
-	// first). Returns an nsIURI, or null if empty/unparseable.
-	resolveResourceURI(value, baseURISpec) {
-		let raw = (value === null || value === undefined) ? "" : String(value);
-		let s = raw.replace(/[\u0000-\u0020]+/g, "");
-		if (s === "") return null;
-		try {
-			let base = baseURISpec ? Services.io.newURI(baseURISpec) : null;
-			return Services.io.newURI(s, null, base);
-		}
-		catch {
-			return null;
-		}
-	},
-
-	// Whether a window/node belongs to a page from the plugin's own origin,
-	// which its sandbox holds the content principal for
-	isPluginOwnContent(value, pluginID) {
-		let doc = VarCheck.isWindowObject(value) ? value.document : (value.ownerDocument || value);
-		return doc?.nodePrincipal?.addonPolicy?.id === pluginID;
-	},
-
-	// Whether a URL points at an *undeclared* resource -- enforces an origin
-	// allowlist (chrome:/resource:/data:/blob:, own moz-extension, host_permissions).
-	isDisallowedResourceURL(value, pluginID, baseURISpec) {
-		// javascript: and data:html/xml are unsafe regardless of origin.
-		if (WindowScopeVariables.isUnsafeURLValue(value)) {
-			return true;
-		}
-		let raw = (value === null || value === undefined) ? "" : String(value);
-		if (raw.replace(/[\u0000-\u0020]+/g, "") === "") {
-			// Empty value triggers no load.
-			return false;
-		}
-		let uri = WindowScopeVariables.resolveResourceURI(value, baseURISpec);
-		if (!uri) {
-			// Non-empty but unparseable -- reject to be safe.
-			return true;
-		}
-		let scheme = uri.scheme.toLowerCase();
-		if (WindowScopeVariables.LOCAL_RESOURCE_SCHEMES.has(scheme)) {
-			return false;
-		}
-		if (scheme === "moz-extension") {
-			let base = PluginProtocol.getBaseURI(pluginID);
-			return !(base && uri.spec.startsWith(base));
-		}
-		// Any other (remote) scheme is allowed only if the plugin declared it.
-		return !PluginProtocol.canAccessURI(pluginID, uri.spec);
-	},
-
-	// Whether a srcset value has a disallowed URL: checks every token that
-	// isn't a bare descriptor (e.g. "2x", "640w").
-	srcsetHasDisallowedURL(value, pluginID, baseURISpec) {
-		let str = (value === null || value === undefined) ? "" : String(value);
-		for (let chunk of str.split(",")) {
-			for (let tok of chunk.trim().split(/\s+/)) {
-				if (!tok || /^[0-9.]+[xw]$/i.test(tok)) continue;
-				if (WindowScopeVariables.isDisallowedResourceURL(tok, pluginID, baseURISpec)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	},
-
-	// Decode CSS escapes so a url() scheme can't hide behind them
-	// (e.g. url(htt\70s://evil)).
-	decodeCSSEscapes(str) {
-		return String(str).replace(/\\([0-9a-fA-F]{1,6}\s?|[\s\S])/g, (_m, esc) => {
-			if (/^[0-9a-fA-F]/.test(esc)) {
-				let code = parseInt(esc, 16);
-				if (!code || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF)) {
-					return "�";
-				}
-				try {
-					return String.fromCodePoint(code);
-				}
-				catch {
-					return "�";
-				}
-			}
-			// An escaped newline collapses to nothing; any other char is literal.
-			return esc === "\n" ? "" : esc;
-		});
-	},
-
-	// Whether a CSS text (inline style or <style> content) has a disallowed
-	// url()/@import. Comments stripped and escapes decoded to defeat obfuscation.
-	cssTextHasDisallowedURL(cssText, pluginID, baseURISpec) {
-		let css = WindowScopeVariables.decodeCSSEscapes(cssText === null || cssText === undefined ? "" : cssText)
-			.replace(/\/\*[\s\S]*?\*\//g, " ");
-		let m;
-		let urlRe = /url\(\s*(['"]?)([^'")]*)\1\s*\)/gi;
-		while ((m = urlRe.exec(css))) {
-			if (WindowScopeVariables.isDisallowedResourceURL(m[2], pluginID, baseURISpec)) {
-				return true;
-			}
-		}
-		let importRe = /@import\s+(?:url\(\s*(['"]?)([^'")]*)\1\s*\)|(['"])([^'"]*)\3)/gi;
-		while ((m = importRe.exec(css))) {
-			let target = m[2] !== undefined ? m[2] : m[4];
-			if (target !== undefined
-					&& WindowScopeVariables.isDisallowedResourceURL(target, pluginID, baseURISpec)) {
-				return true;
-			}
-		}
-		return false;
-	},
-
-	// Whether an attribute/property assignment must be blocked: scheme check for
-	// all URL attrs plus an origin allowlist for silent-load ones (not <a> href).
-	attrAssignmentDisallowed(elem, attrName, value, pluginID) {
-		let localName = WindowScopeVariables.urlAttrLocalName(attrName);
-		if (WindowScopeVariables.URL_ATTRS.has(localName)
-				&& WindowScopeVariables.isUnsafeURLValue(value)) {
-			return true;
-		}
-		let base = WindowScopeVariables.nodeBaseURI(elem);
-		if (WindowScopeVariables.SILENT_URL_ATTRS.has(localName)) {
-			return WindowScopeVariables.isDisallowedResourceURL(value, pluginID, base);
-		}
-		if (WindowScopeVariables.URL_LIST_ATTRS.has(localName)) {
-			return WindowScopeVariables.srcsetHasDisallowedURL(value, pluginID, base);
-		}
-		if (localName === "href"
-				&& !WindowScopeVariables.NAV_HREF_TAGS.has(String((elem && elem.localName) || "").toLowerCase())) {
-			return WindowScopeVariables.isDisallowedResourceURL(value, pluginID, base);
-		}
-		if (localName === "style") {
-			return WindowScopeVariables.cssTextHasDisallowedURL(value, pluginID, base);
-		}
-		return false;
-	},
-
-	// Guard an element's CSSStyleDeclaration: writes that pull in an undeclared
-	// url()/@import are refused; ordinary style writes pass through.
-	createSafeStyleDeclaration(styleRef, pluginID, baseURISpec, scope) {
-		let stTraps = Cu.createObjectIn(scope);
-		Cu.exportFunction((_t, key) => {
-			if (typeof key === "symbol") return undefined;
-			let k = String(key);
-			let v;
-			try {
-				v = styleRef[k];
-			}
-			catch {
-				return undefined;
-			}
-			if (typeof v === "function") {
-				let holder = Cu.createObjectIn(scope);
-				Cu.exportFunction((...args) => {
-					// setProperty(name, value, priority): value may carry url().
-					if (k === "setProperty"
-							&& WindowScopeVariables.cssTextHasDisallowedURL(args[1], pluginID, baseURISpec)) {
-						Zotero.warn(`style.setProperty(${args[0]}, ...) is not allowed: it references an undeclared resource.`);
-						return undefined;
-					}
-					let r = styleRef[k](...args);
-					return (r !== null && typeof r === "object") ? undefined : r;
-				}, holder, { defineAs: "f" });
-				return holder.f;
-			}
-			// CSS values are strings; never hand a chrome object to the sandbox.
-			return (v !== null && typeof v === "object") ? undefined : v;
-		}, stTraps, { defineAs: "get" });
-		Cu.exportFunction((_t, key, v) => {
-			if (typeof key === "symbol") return true;
-			let k = String(key);
-			if (WindowScopeVariables.cssTextHasDisallowedURL(v, pluginID, baseURISpec)) {
-				Zotero.warn(`Setting style.${k} is not allowed: it references an undeclared resource.`);
-				return true;
-			}
-			try {
-				styleRef[k] = v;
-			}
-			catch {}
-			return true;
-		}, stTraps, { defineAs: "set" });
-		Cu.exportFunction((_t, key) => {
-			if (typeof key === "symbol") return false;
-			try {
-				return String(key) in styleRef;
-			}
-			catch {
-				return false;
-			}
-		}, stTraps, { defineAs: "has" });
-		return ScopeUtils.buildInstanceProxy(scope, stTraps);
-	},
-
-	// Pre-compiled CSS selector for all known on* event-handler attributes from
-	// Firefox nsGkAtomList.h. Used by sanitizeFragment to avoid querying
-	// every element in the tree.
-	// Generated with:
-	//   curl -s 'https://searchfox.org/firefox-esr140/raw/__GENERATED__/xpcom/ds/nsGkAtomList.h' \
-	//     | awk -F'"' '/^GK_ATOM\(on[a-z]/ {print $2}' | grep -v '^only$' | sort -u \
-	//     | awk '{printf "%s,", "*["$1"]"}' | sed 's/,$//'
-	ON_EVENT_ATTRS_SELECTOR: "*[onabort],*[onactivate],*[onactivated],*[onaddsourcebuffer],*[onaddtrack],*[onafterprint],*[onafterscriptexecute],*[onanimationcancel],*[onanimationend],*[onanimationiteration],*[onanimationstart],*[onaudioend],*[onaudioprocess],*[onaudiostart],*[onauxclick],*[onbeforecopy],*[onbeforecut],*[onbeforeinput],*[onbeforematch],*[onbeforepaste],*[onbeforeprint],*[onbeforescriptexecute],*[onbeforetoggle],*[onbeforeunload],*[onbegin],*[onbeginEvent],*[onblocked],*[onblur],*[onboundary],*[onboundschange],*[onbroadcast],*[onbufferedamountlow],*[oncached],*[oncancel],*[oncanplay],*[oncanplaythrough],*[onchange],*[onchargingchange],*[onchargingtimechange],*[onchecking],*[onclick],*[onclose],*[oncommand],*[oncommandupdate],*[oncomplete],*[oncompositionend],*[oncompositionstart],*[oncompositionupdate],*[onconnect],*[onconnectionavailable],*[oncontentvisibilityautostatechange],*[oncontextlost],*[oncontextmenu],*[oncontextrestored],*[oncontrollerchange],*[oncookiechange],*[oncopy],*[oncuechange],*[oncurrententrychange],*[oncut],*[ondata],*[ondataavailable],*[ondblclick],*[ondeactivated],*[ondequeue],*[ondevicechange],*[ondevicelight],*[ondevicemotion],*[ondeviceorientation],*[ondeviceorientationabsolute],*[ondischargingtimechange],*[ondispose],*[ondownloading],*[ondrag],*[ondragdrop],*[ondragend],*[ondragenter],*[ondragexit],*[ondragleave],*[ondragover],*[ondragstart],*[ondrain],*[ondrop],*[ondurationchange],*[onemptied],*[onencrypted],*[onend],*[onendEvent],*[onended],*[onenter],*[onerror],*[onexit],*[onfetch],*[onfinish],*[onfocus],*[onfocusin],*[onfocusout],*[onformdata],*[onfullscreenchange],*[onfullscreenerror],*[ongamepadaxismove],*[ongamepadbuttondown],*[ongamepadbuttonup],*[ongamepadconnected],*[ongamepaddisconnected],*[ongatheringstatechange],*[onget],*[ongotpointercapture],*[onhashchange],*[oninput],*[oninputsourceschange],*[oninstall],*[oninvalid],*[onkeydown],*[onkeypress],*[onkeystatuseschange],*[onkeyup],*[onlanguagechange],*[onlevelchange],*[onload],*[onloadeddata],*[onloadedmetadata],*[onloadend],*[onloading],*[onloadingdone],*[onloadingerror],*[onloadstart],*[onlostpointercapture],*[onmark],*[onmerchantvalidation],*[onmessage],*[onmessageerror],*[onmetadatachange],*[onmidimessage],*[onmousedown],*[onmouseenter],*[onmouseleave],*[onmouselongtap],*[onmousemove],*[onmouseout],*[onmouseover],*[onmouseup],*[onmousewheel],*[onmozaccesskeynotfound],*[onmozfullscreenchange],*[onmozfullscreenerror],*[onmozorientationchange],*[onmozpointerlockchange],*[onmozpointerlockerror],*[onmozshowdropdown],*[onmozshowdropdown-sourcetouch],*[onmozvisualresize],*[onmozvisualscroll],*[onmute],*[onnavigate],*[onnavigateerror],*[onnavigatesuccess],*[onnomatch],*[onnotificationclick],*[onnotificationclose],*[onnoupdate],*[onobsolete],*[onoffline],*[ononline],*[onopen],*[onorientationchange],*[onoverflow],*[onpagehide],*[onpageshow],*[onpaste],*[onpause],*[onpayerdetailchange],*[onpaymentmethodchange],*[onphoto],*[onplay],*[onplaybackstatechange],*[onplaying],*[onpointercancel],*[onpointerdown],*[onpointerenter],*[onpointerleave],*[onpointerlockchange],*[onpointerlockerror],*[onpointermove],*[onpointerout],*[onpointerover],*[onpointerrawupdate],*[onpointerup],*[onpopstate],*[onpopuphidden],*[onpopuphiding],*[onpopuppositioned],*[onpopupshowing],*[onpopupshown],*[onpositionstatechange],*[onprintPreviewUpdate],*[onprioritychange],*[onprocessorerror],*[onprogress],*[onpush],*[onpushsubscriptionchange],*[onratechange],*[onreadystatechange],*[onrejectionhandled],*[onrelease],*[onremove],*[onremovesourcebuffer],*[onremovetrack],*[onrepeat],*[onrepeatEvent],*[onrequestprogress],*[onreset],*[onresize],*[onresourcetimingbufferfull],*[onresponseprogress],*[onresult],*[onresume],*[onrtctransform],*[onscroll],*[onscrollend],*[onsecuritypolicyviolation],*[onseeked],*[onseeking],*[onselect],*[onselectend],*[onselectionchange],*[onselectstart],*[onset],*[onshippingaddresschange],*[onshippingoptionchange],*[onshow],*[onslotchange],*[onsoundend],*[onsoundstart],*[onsourceclose],*[onsourceended],*[onsourceopen],*[onspeechend],*[onspeechstart],*[onsqueeze],*[onsqueezeend],*[onsqueezestart],*[onstalled],*[onstart],*[onstatechange],*[onstop],*[onstorage],*[onsubmit],*[onsuccess],*[onsupportedkeyschange],*[onsuspend],*[onsystemstatusbarclick],*[onterminate],*[ontext],*[ontextInput],*[ontimeout],*[ontimeupdate],*[ontoggle],*[ontonechange],*[ontouchcancel],*[ontouchend],*[ontouchmove],*[ontouchstart],*[ontransitioncancel],*[ontransitionend],*[ontransitionrun],*[ontransitionstart],*[ontypechange],*[onuncapturederror],*[onunderflow],*[onunhandledrejection],*[onunload],*[onunmute],*[onupdate],*[onupdateend],*[onupdatefound],*[onupdateready],*[onupdatestart],*[onupgradeneeded],*[onuserproximity],*[onversionchange],*[onvisibilitychange],*[onvoiceschanged],*[onvolumechange],*[onvrdisplayactivate],*[onvrdisplayconnect],*[onvrdisplaydeactivate],*[onvrdisplaydisconnect],*[onvrdisplaypresentchange],*[onwaiting],*[onwaitingforkey],*[onwarning],*[onwebkitAnimationEnd],*[onwebkitAnimationIteration],*[onwebkitAnimationStart],*[onwebkitTransitionEnd],*[onwebkitanimationend],*[onwebkitanimationiteration],*[onwebkitanimationstart],*[onwebkittransitionend],*[onwheel],*[onzoom]",
-
-	/**
-	 * Sanitize a parsed DOM fragment by removing unsafe elements and
-	 * stripping inline event-handler attributes (on*).
-	 * Operates on an already-parsed DocumentFragment (from
-	 * MozXULElement.parseXULToFragment or DOMParser).
-	 *
-	 * Only sanitizes unprivileged plugins. If pluginID is provided and
-	 * the plugin is privileged, the fragment is returned unchanged.
-	 *
-	 * @param {DocumentFragment} fragment - The fragment to sanitize in place
-	 * @param {string} [pluginID] - Plugin ID to check privilege level
-	 * @returns {DocumentFragment} The same fragment, sanitized
-	 */
-	sanitizeFragment(fragment, pluginID) {
-		if (!pluginID) return fragment;
-		let scope = PluginSandbox.getScope(pluginID);
-		if (!scope || VarCheck.isPrivilegedScope(scope)) return fragment;
-
-		// Remove unsafe elements via querySelectorAll (faster than tree walking)
-		let unsafeSelector = Array.from(this.UNSAFE_TAGS).join(",");
-		for (let node of fragment.querySelectorAll(unsafeSelector)) {
-			node.remove();
-		}
-
-		// Convert on* attributes to data-sandbox-on-* for post-insertion activation.
-		// Use the pre-compiled ON_EVENT_ATTRS_SELECTOR to visit only elements that
-		// actually carry one of the known event-handler attributes, avoiding a full
-		// tree walk over every node.
-		for (let node of fragment.querySelectorAll(this.ON_EVENT_ATTRS_SELECTOR)) {
-			for (let attr of Array.from(node.attributes)) {
-				if (/^on/i.test(attr.localName)) {
-					let eventName = attr.localName.slice(2);
-					node.removeAttribute(attr.name);
-					if (pluginID) {
-						node.setAttribute(`data-sandbox-on-${eventName}`, attr.value);
-						node.classList.add("_sandbox-has-handlers");
-					}
-				}
-			}
-		}
-
-		// Restrict URL/srcset/style attributes to declared resources. The
-		// selector visits only elements that carry one.
-		for (let node of fragment.querySelectorAll(this.SANITIZE_URL_SELECTOR)) {
-			for (let attr of Array.from(node.attributes)) {
-				let localName = attr.localName.toLowerCase();
-				if (!this.URL_ATTRS.has(localName)
-						&& !this.URL_LIST_ATTRS.has(localName)
-						&& localName !== "style") {
-					continue;
-				}
-				if (this.attrAssignmentDisallowed(node, attr.localName, attr.value, pluginID)) {
-					node.removeAttributeNode(attr);
-				}
-			}
-		}
-
-		// Drop <style> blocks that pull in undeclared url()/@import resources.
-		for (let styleEl of fragment.querySelectorAll("style")) {
-			if (this.cssTextHasDisallowedURL(styleEl.textContent, pluginID, this.nodeBaseURI(styleEl))) {
-				styleEl.remove();
-			}
-		}
-
-		return fragment;
-	},
-
-	/**
-	 * Parse an HTML/XHTML string into a sanitized DocumentFragment.
-	 * Tries XML first to preserve namespaces, falls back to HTML.
-	 *
-	 * @param {string} html
-	 * @param {Document} doc
-	 * @param {string} pluginID
-	 * @returns {{ fragment: DocumentFragment, useXML: boolean }}
-	 */
-	parseSanitizedFragment(html, doc, pluginID) {
-		if (typeof html !== "string") {
-			VarCheck.throwPropError("set", "innerHTML", "value must be a string");
-		}
-		let parser = new doc.defaultView.DOMParser();
-		let fragment = doc.createDocumentFragment();
-		let useXML = false;
-		let xmlParsed = parser.parseFromSafeString(
-			`<div xmlns="http://www.w3.org/1999/xhtml"
-				 xmlns:html="http://www.w3.org/1999/xhtml"
-				 xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-			${html}
-			</div>`,
-			"application/xml"
-		);
-		if (xmlParsed.documentElement.localName !== "parsererror") {
-			useXML = true;
-			for (let child of Array.from(xmlParsed.documentElement.childNodes)) {
-				fragment.appendChild(doc.importNode(child, true));
-			}
-		}
-		else {
-			let htmlParsed = parser.parseFromSafeString(`<div>${html}</div>`, "text/html");
-			for (let child of Array.from(htmlParsed.querySelector("div").childNodes)) {
-				fragment.appendChild(doc.importNode(child, true));
-			}
-		}
-		WindowScopeVariables.sanitizeFragment(fragment, pluginID);
-		return { fragment, useXML };
-	},
-
-	/**
-	 * Activate inline event handlers that were converted to data-sandbox-on-*
-	 * attributes by sanitizeFragment. Must be called after the element is
-	 * inserted into the document (after importNode).
-	 *
-	 * @param {Element} root - The root element to walk
-	 * @param {string} pluginID - Plugin ID for sandbox scope lookup
-	 */
-	activateInlineHandlers(root, pluginID) {
-		if (!pluginID) return;
-		let scope = PluginSandbox.getScope(pluginID);
-		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
-
-		// Only process elements marked by sanitizeFragment
-		for (let node of root.querySelectorAll("._sandbox-has-handlers")) {
-			node.classList.remove("_sandbox-has-handlers");
-			for (let attr of Array.from(node.attributes)) {
-				let match = attr.localName.match(/^data-sandbox-on-(.+)$/);
-				if (!match) continue;
-				let eventName = match[1];
-				let handlerCode = attr.value;
-				node.removeAttribute(attr.name);
-
-				let fn = Cu.evalInSandbox(
-					`(function(event) { ${handlerCode} })`,
-					scope
-				);
-				let rootNode = new WeakRef(node);
-				node.addEventListener(eventName, function (realEvent) {
-					let wrappedThis = WindowScopeVariables.createSafeHTMLElement(
-						this, pluginID, { rootNode }
-					);
-					let wrappedEvent = WindowScopeVariables.createSafeEvent(
-						realEvent, pluginID, { rootNode }
-					);
-					fn.call(wrappedThis, wrappedEvent);
-				});
-			}
-		}
-	},
-
-	/**
-	 * Call activateInlineHandlers once elem is connected to the DOM.
-	 * If already connected, activates immediately; otherwise sets up a
-	 * one-shot MutationObserver on the document to detect insertion.
-	 *
-	 * @param {Element} elem
-	 * @param {string} pluginID
-	 */
-	activateWhenConnected(elem, pluginID) {
-		if (!pluginID) return;
-		let scope = PluginSandbox.getScope(pluginID);
-		if (!scope || VarCheck.isPrivilegedScope(scope)) return;
-
-		if (elem.isConnected) {
-			WindowScopeVariables.activateInlineHandlers(elem, pluginID);
-			return;
-		}
-		let doc = elem.ownerDocument;
-		let observer = new doc.defaultView.MutationObserver(() => {
-			if (elem.isConnected) {
-				observer.disconnect();
-				WindowScopeVariables.activateInlineHandlers(elem, pluginID);
-			}
-		});
-		observer.observe(doc.documentElement || doc, { childList: true, subtree: true });
-	},
-};
-
 const DataScopeVariables = {
 
 	/**
@@ -1971,4 +587,4 @@ const DataScopeVariables = {
 	}
 };
 
-export { ScopeVariables, WindowScopeVariables, DataScopeVariables };
+export { ScopeVariables, DataScopeVariables };

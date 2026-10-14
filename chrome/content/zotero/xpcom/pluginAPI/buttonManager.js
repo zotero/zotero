@@ -29,7 +29,6 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
@@ -177,10 +176,9 @@
 
 			let scope = lazy.PluginSandbox.getScope(option.pluginID);
 			if (scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
-				let base = lazy.PluginProtocol.getBaseURI(option.pluginID);
 				for (let key of ICON_KEYS) {
-					if (option[key] && lazy.WindowScopeVariables
-							.isDisallowedResourceURL(option[key], option.pluginID, base)) {
+					if (option[key] && !lazy.PluginProtocol
+							.canLoadImageURI(option[key], option.pluginID)) {
 						this._log(`Invalid button: '${key}' is not an allowed resource URL`, "warn");
 						return false;
 					}
@@ -589,7 +587,7 @@
 				canLoad = false;
 			}
 			if (canLoad) {
-				// The URLs are validated at registration (isDisallowedResourceURL)
+				// The URLs are validated at registration (canLoadImageURI)
 				icon.style.setProperty(prop, `url("${url}")`);
 				return;
 			}

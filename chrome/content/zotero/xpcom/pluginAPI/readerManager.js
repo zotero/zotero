@@ -29,7 +29,6 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		WindowScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
@@ -117,8 +116,7 @@
 		if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
 			return true;
 		}
-		let base = lazy.PluginProtocol.getBaseURI(pluginID);
-		return !lazy.WindowScopeVariables.isDisallowedResourceURL(url, pluginID, base);
+		return lazy.PluginProtocol.canLoadImageURI(url, pluginID);
 	}
 
 
