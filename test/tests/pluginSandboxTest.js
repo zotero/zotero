@@ -4017,19 +4017,19 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("openPluginWindow command", function () {
-		// Tests keep the old positional call shape through this adapter onto the command
+		// Tests keep the old positional call shape through this adapter onto the command,
+		// which unwraps the response and throws a failure as "<code>: <message>"
 		const OPEN_WINDOW_SHIM = "var openWindow = (url, features, options) => Zotero.WindowController"
-			+ ".command('openPluginWindow', Object.assign({ url, features }, options || {}));";
+			+ ".command('openPluginWindow', Object.assign({ url, features }, options || {}))"
+			+ ".then(r => { if (!r.success) throw new Error(r.error.code + ': ' + r.error.message); return r.result; });";
 
 		// Cleanup through the controller; a window that is already gone is fine
 		async function closeWin(name = "_win", inScope = scope) {
-			try {
-				await Cu.evalInSandbox(`Zotero.WindowController.command("closeWindow", { windowID: ${name}.windowID })`, inScope);
-			}
-			catch (e) {
-				if (!String(e?.message).includes("NotFound")) {
-					throw e;
-				}
+			let { success, error } = await Cu.evalInSandbox(
+				`Zotero.WindowController.command("closeWindow", { windowID: ${name}.windowID })`, inScope
+			);
+			if (!success && error.code !== "NotFound") {
+				throw new Error(`${error.code}: ${error.message}`);
 			}
 		}
 
@@ -4048,10 +4048,11 @@ describe("Plugin Sandbox", function () {
 				"script.js",
 			];
 			for (let url of badURLs) {
-				let e = await getPromiseError(evalInScope(
+				let { success, error } = await evalInScope(
 					`Zotero.WindowController.command("openPluginWindow", { url: ${JSON.stringify(url)} })`
-				));
-				assert.include(String(e?.message), "InvalidParams", `${url} should be rejected`);
+				);
+				assert.isFalse(success, `${url} should be rejected`);
+				assert.equal(error.code, "InvalidParams");
 			}
 		});
 
@@ -4059,10 +4060,11 @@ describe("Plugin Sandbox", function () {
 			loadTestScope(["default", "window"]);
 			let bad = ['"width=300,height=200"', '["centerscreen"]', '{ width: "300" }', '{ centerscreen: null }'];
 			for (let features of bad) {
-				let e = await getPromiseError(evalInScope(
+				let { success, error } = await evalInScope(
 					`Zotero.WindowController.command("openPluginWindow", { url: "test.html", features: ${features} })`
-				));
-				assert.include(String(e?.message), "InvalidParams", `${features} should be rejected`);
+				);
+				assert.isFalse(success, `${features} should be rejected`);
+				assert.equal(error.code, "InvalidParams");
 			}
 		});
 
@@ -4265,12 +4267,24 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
+			it("should fail with NotFound when the page does not load", async function () {
+				loadTestScopeWithURI(["default", "window"]);
+				let { success, result, error } = await evalInScope(
+					'Zotero.WindowController.command("openPluginWindow", { url: "missing.html" })'
+				);
+				if (success) {
+					await evalInScope(`Zotero.WindowController.command("closeWindow", { windowID: ${result.windowID} })`);
+				}
+				assert.isFalse(success, "a missing page should not open a window");
+				assert.equal(error.code, "NotFound");
+			});
+
 			it("should take its params as one object and resolve with a live handle", async function () {
 				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope(`
 					Zotero.WindowController.command("openPluginWindow", {
 						url: "test.html", features: { width: 300, height: 200 }, notitle: true,
-					}).then(function (win) { _win = win; });
+					}).then(function (r) { _win = r.result; });
 				`);
 				try {
 					assert.isTrue(evalInScope("typeof _win.page.isAlive === 'function' && _win.page.isAlive()"));
@@ -4352,10 +4366,10 @@ describe("Plugin Sandbox", function () {
 				let windowID = chromeWin.browsingContext.id;
 				try {
 					assert.equal(evalInScope("_win.windowID"), windowID, "the handle should carry the controller window ID");
-					let state = await evalInScope('Zotero.WindowController.query("getWindowState", { windowID: _win.windowID })');
+					let { result: state } = await evalInScope('Zotero.WindowController.query("getWindowState", { windowID: _win.windowID })');
 					assert.deepEqual(
 						JSON.parse(JSON.stringify(state)),
-						await Zotero.WindowController.query("getWindowState", { windowID }),
+						(await Zotero.WindowController.query("getWindowState", { windowID })).result,
 						"the sandbox and chrome should agree on the state"
 					);
 					assert.deepEqual([state.width, state.height], [chromeWin.outerWidth, chromeWin.outerHeight]);
@@ -4368,14 +4382,10 @@ describe("Plugin Sandbox", function () {
 					assert.isTrue(chromeWin.closed, "closeWindow should close the wrapper");
 					assert.isFalse(evalInScope("_win.page.isAlive()"), "the page channel should be down after the close");
 					// A closed window is gone for the controller too
-					let e = await getPromiseError(
-						evalInScope('Zotero.WindowController.query("getWindowState", { windowID: _win.windowID })')
-					);
-					assert.match(String(e.message), /No window with ID/);
-					e = await getPromiseError(
-						evalInScope('Zotero.WindowController.command("closeWindow", { windowID: _win.windowID })')
-					);
-					assert.match(String(e.message), /No window with ID/);
+					let { error } = await evalInScope('Zotero.WindowController.query("getWindowState", { windowID: _win.windowID })');
+					assert.match(error.message, /No window with ID/);
+					({ error } = await evalInScope('Zotero.WindowController.command("closeWindow", { windowID: _win.windowID })'));
+					assert.match(error.message, /No window with ID/);
 				}
 				finally {
 					await closeWin();
@@ -4436,32 +4446,32 @@ describe("Plugin Sandbox", function () {
 				let otherScope = PluginSandbox.getScope(OTHER_ID);
 				Cu.evalInSandbox(OPEN_WINDOW_SHIM, otherScope);
 				try {
-					let { windows } = await evalInScope(
+					let { result: { windows } } = await evalInScope(
 						'Zotero.WindowController.query("windows", { type: "pluginWindow" })'
 					);
 					windows = Array.from(windows);
 					assert.include(windows.map(w => w.windowID), windowID, "the owner should list its window");
 					assert.isTrue(windows.every(w => w.type === "pluginWindow" && w.pluginID === ADDON_ID),
 						"the owner should list only its own windows");
-					let state = await evalInScope(
+					let { result: state } = await evalInScope(
 						`Zotero.WindowController.query("getWindowState", { windowID: ${windowID} })`
 					);
 					assert.isNumber(state.width);
 
-					({ windows } = await Cu.evalInSandbox(
+					({ result: { windows } } = await Cu.evalInSandbox(
 						'Zotero.WindowController.query("windows", { type: "pluginWindow" })', otherScope
 					));
 					assert.notInclude(Array.from(windows).map(w => w.windowID), windowID,
 						"another plugin should not list the window");
-					let e = await getPromiseError(Cu.evalInSandbox(
+					let { error } = await Cu.evalInSandbox(
 						`Zotero.WindowController.query("getWindowState", { windowID: ${windowID} })`, otherScope
-					));
-					assert.match(String(e.message), /No window with ID/);
-					e = await getPromiseError(Cu.evalInSandbox(
+					);
+					assert.match(error.message, /No window with ID/);
+					({ error } = await Cu.evalInSandbox(
 						`Zotero.WindowController.command("focusWindow", { windowID: ${windowID} })`, otherScope
 					));
-					assert.match(String(e.message), /No window with ID/);
-					e = await getPromiseError(
+					assert.match(error.message, /No window with ID/);
+					let e = await getPromiseError(
 						Cu.evalInSandbox(`openWindow('test.html', {}, { parentWindowID: ${windowID} })`, otherScope)
 					);
 					assert.match(String(e.message), /No window with ID/);
@@ -4579,7 +4589,7 @@ describe("Plugin Sandbox", function () {
 					assert.equal(result.type, "api-result");
 					assert.deepEqual(
 						result.result,
-						await Zotero.WindowController.query("getWindowState", { windowID: chromeWin.browsingContext.id })
+						(await Zotero.WindowController.query("getWindowState", { windowID: chromeWin.browsingContext.id })).result
 					);
 				}
 				finally {
@@ -5543,14 +5553,17 @@ describe("Plugin Sandbox", function () {
 		it("should resolve a query to a plain sandbox object", async function () {
 			loadTestScope(["default", "window"]);
 			let isPlain = await evalInScope(`(async () => {
-				let result = await Zotero.WindowController.query("windows", { type: "mainWindow" });
-				return Object.getPrototypeOf(result) === Object.prototype
+				let response = await Zotero.WindowController.query("windows", { type: "mainWindow" });
+				let { result } = response;
+				return Object.getPrototypeOf(response) === Object.prototype
+					&& response.success === true && !("error" in response)
+					&& Object.getPrototypeOf(result) === Object.prototype
 					&& Array.isArray(result.windows)
 					&& result.windows.every(w => typeof w.windowID === "number" && w.type === "mainWindow");
 			})()`);
 			assert.isTrue(isPlain);
 
-			let { windows } = await evalInScope('Zotero.WindowController.query("windows", { type: "mainWindow" })');
+			let { result: { windows } } = await evalInScope('Zotero.WindowController.query("windows", { type: "mainWindow" })');
 			assert.include(Array.from(windows).map(w => w.windowID), pluginWin.browsingContext.id);
 		});
 
@@ -5558,7 +5571,7 @@ describe("Plugin Sandbox", function () {
 			loadTestScope(["default", "window"]);
 			let stub = sinon.stub(pluginWin, "focus");
 			try {
-				let result = await evalInScope(
+				let { result } = await evalInScope(
 					`Zotero.WindowController.command("focusWindow", { windowID: ${pluginWin.browsingContext.id} })`
 				);
 				assert.isTrue(stub.calledOnce);
@@ -5569,18 +5582,21 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
-		it("should reject with the error code in the message", async function () {
+		it("should resolve a failure with its code and message instead of rejecting", async function () {
 			loadTestScope(["default", "window"]);
-			let e = await getPromiseError(evalInScope('Zotero.WindowController.query("nope")'));
-			assert.ok(e);
-			assert.include(String(e.message), "UnknownRequest");
+			let response = await evalInScope('Zotero.WindowController.query("nope")');
+			assert.deepEqual(JSON.parse(JSON.stringify(response)), {
+				success: false,
+				result: {},
+				error: { code: "UnknownRequest", message: "Unknown query 'nope'" },
+			});
 		});
 
 		it("should resolve a tab query to plain data", async function () {
 			loadTestScope(["default", "tab"]);
 			// The tab permission implies window, so the scope can look up its own window ID
-			let result = await evalInScope(`(async () => {
-				let { windows } = await Zotero.WindowController.query("windows", { type: "mainWindow" });
+			let { result } = await evalInScope(`(async () => {
+				let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "mainWindow" });
 				return Zotero.TabController.query("tabs", { windowID: windows[0].windowID });
 			})()`);
 			assert.equal(result.selectedTabID, "zotero-pane");
@@ -5590,7 +5606,7 @@ describe("Plugin Sandbox", function () {
 		it("should open and close a note window from the sandbox", async function () {
 			loadTestScope(["default", "window"]);
 			let note = await createDataObject("item", { itemType: "note" });
-			let { windowID } = await evalInScope(
+			let { result: { windowID } } = await evalInScope(
 				`Zotero.WindowController.command("openWindow", { type: "note", itemID: ${note.id} })`
 			);
 			let { WindowUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/window.mjs");
@@ -5615,7 +5631,7 @@ describe("Plugin Sandbox", function () {
 			loadTestScope(["default", "tab"]);
 			let note = await createDataObject("item", { itemType: "note" });
 			let windowID = pluginWin.browsingContext.id;
-			let { tabID } = await evalInScope(
+			let { result: { tabID } } = await evalInScope(
 				`Zotero.TabController.command("openTab", { windowID: ${windowID}, type: "note", itemID: ${note.id} })`
 			);
 			try {

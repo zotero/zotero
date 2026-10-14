@@ -278,7 +278,7 @@
 			// Resolve once the content has loaded; a new window is listed under its type only then
 			await instance._initPromise;
 			if (!win || win.closed) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `No window opened for item ${itemID}`);
+				throw new Error(`No window opened for item ${itemID}`);
 			}
 			return { windowID: lazy.WindowUtils.getWindowID(win) };
 		}
@@ -327,7 +327,7 @@
 					},
 				});
 				if (!messenger) {
-					throw new Error(`Failed to load ${url}`);
+					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `Failed to load ${url}`);
 				}
 				win.addEventListener("unload", dispose, { once: true });
 				browser.addEventListener("contextmenu", (event) => {
@@ -345,12 +345,11 @@
 					windowID: lazy.WindowUtils.getWindowID(win),
 				}, pluginID);
 			}
+			// The wrapper is already open; drop it and let the failure reach the caller's response
 			catch (e) {
-				Zotero.logError(e);
-				try {
+				if (win && !Cu.isDeadWrapper(win)) {
 					win.close();
 				}
-				catch {}
 				throw e;
 			}
 		}
@@ -426,7 +425,7 @@
 		 * @param {N} name
 		 * @param {WindowControllerQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<WindowControllerQueryResults[N]>}
+		 * @returns {Promise<ControllerResponse<WindowControllerQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.WindowController._windowController.query(name, params, _callerPluginID);
@@ -438,7 +437,7 @@
 		 * @param {N} name
 		 * @param {WindowControllerCommandParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<WindowControllerCommandResults[N]>}
+		 * @returns {Promise<ControllerResponse<WindowControllerCommandResults[N]>>}
 		 */
 		command(name, params, _callerPluginID) {
 			return Zotero.WindowController._windowController.command(name, params, _callerPluginID);
