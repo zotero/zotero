@@ -143,6 +143,9 @@ const xpcomFilesLocal = [
 	'server/server_localAPI',
 	'server/saveSession',
 	'session',
+	'shortcuts',
+	// Depends on Zotero.Shortcuts for registration and dispatch
+	'pluginAPI/shortcutManager',
 	'streamer',
 	'style',
 	'sync',

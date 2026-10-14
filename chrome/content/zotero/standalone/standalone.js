@@ -95,25 +95,15 @@ const ZoteroStandalone = new function () {
 			return Zotero.initializationPromise;
 		})
 		.then(async function () {
-			document.getElementById('key_copyCitation')
-				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemCitationsToClipboard'));
-			document.getElementById('key_copyBibliography')
-				.setAttribute('key', Zotero.Keys.getKeyForCommand('copySelectedItemsToClipboard'));
-			document.getElementById('key_showTabsMenu')
-				.setAttribute('key', Zotero.Keys.getKeyForCommand('showTabsMenu'));
+			ZoteroStandalone.DebugOutput.init();
+			
+			Zotero.hideZoteroPaneOverlays();
+			// Sets the display <key> attrs via Zotero.Shortcuts.applyToWindow()
+			ZoteroPane.init();
 			// Force menu to update with shortcut key at startup -- as of fx128, this is necessary
 			// to get the shortcut to reliably appear for the menu item without switching tabs
 			document.getElementById('show-tabs-menu').hidden = true;
 			document.getElementById('show-tabs-menu').hidden = false;
-			
-			if (Zotero.isMac) {
-				document.getElementById('menu_openHelp').setAttribute('key', 'key_openHelpMac');
-			}
-			
-			ZoteroStandalone.DebugOutput.init();
-			
-			Zotero.hideZoteroPaneOverlays();
-			ZoteroPane.init();
 			ZoteroPane.makeVisible();
 			
 			// Don't ask before handing http and https URIs

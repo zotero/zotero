@@ -157,29 +157,10 @@
 			command="cmd_quitApplication"
 			modifiers="accel"
 			internal="true"/>
-		<key id="key_import"
-				key="&importCmd.key;"
-				command="cmd_zotero_import"
-				modifiers="accel shift"/>
-		<key id="key_importFromClipboard"
-				key="&importCmd.key;"
-				command="cmd_zotero_importFromClipboard"
-				modifiers="accel shift alt"/>
-		<key id="key_copyCitation"
-				command="cmd_zotero_copyCitation"
-				modifiers="accel shift"/>
-		<key id="key_copyBibliography"
-				command="cmd_zotero_copyBibliography"
-				modifiers="accel shift"/>
-		<key id="key_advancedSearch"
-				command="cmd_zotero_advancedSearch"
-				key="&findCmd.key;"
-				modifiers="accel,shift"/>
+		<!-- Registry-dispatched shortcuts (Zotero.Shortcuts) create their display-only
+		     <key> elements dynamically on window attach -->
 		<key id="key_back"/>
 		<key id="key_forward"/>
-		<key id="key_showTabsMenu"
-				command="cmd_zotero_showTabsMenu"
-				modifiers="accel"/>
 	</keyset>
 
 	<keyset id="editMenuKeys">
@@ -799,6 +780,8 @@
 							label="&helpMenu.label;"
 							accesskey="&helpMenu.accesskey;">
 						<menupopup id="menu_HelpPopup" onpopupshowing="ZoteroStandalone.onHelpMenuOpen(event)">
+							<!-- key= is set on mac in platformKeys.js; a static reference
+							     would compute a bogus Ctrl+? accelerator on other platforms -->
 							<menuitem id="menu_openHelp"
 									  oncommand="ZoteroStandalone.openHelp();"
 									  label="&productHelp.label;"
