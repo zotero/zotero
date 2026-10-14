@@ -340,6 +340,18 @@ describe("Zotero.DataStore", function () {
 	describe("commit semantics", function () {
 		// The schema hides commit from a plugin without dataWrite, so no sandbox reaches this: the store's own gate
 		// is what stops a call made on such a plugin's behalf
+		// The schema hides query from a plugin without dataRead; the store's own gate covers calls made on its behalf
+		it("should refuse a query on behalf of a plugin without dataRead", async function () {
+			plugin.load(["default"]);
+			let item = await createDataObject('item');
+			let error = await requestError(Zotero.DataStore.query("item", { itemID: item.id }, plugin.id), codes.PERMISSION_DENIED);
+			assert.include(error.message, "requires permission dataRead");
+			await requestError(Zotero.DataStore.query("file", { itemID: item.id }, plugin.id), codes.PERMISSION_DENIED);
+			// dataWrite implies dataRead
+			plugin.load(["default", "dataWrite"]);
+			await requestResult(Zotero.DataStore.query("item", { itemID: item.id }, plugin.id));
+		});
+
 		it("should refuse a commit on behalf of a plugin without dataWrite", async function () {
 			plugin.load(["default", "dataRead"]);
 			let item = await createDataObject('item', { title: 'Read only' });
