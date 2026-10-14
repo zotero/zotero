@@ -3662,7 +3662,7 @@ describe("Plugin API", function () {
 				assert.deepEqual(await api.command("noop"), { success: true, result: {} });
 			});
 
-			it("should fail a result that is not JSON-serializable", async function () {
+			it("should fail a result that is not plain data", async function () {
 				assert.equal(await failureCode(api.query("leaky")), ControllerErrorCode.INVALID_RESULT);
 			});
 

@@ -97,9 +97,9 @@
  * @property {Record<string, PluginAPIOptDefValue>} [params]
  *     - Type definition for the params object; unknown keys are rejected
  * @property {boolean} [scopedResult] - The handler already made its result safe for the caller's
- *     scope (see ScopeVariables.toScope); pass it through instead of the JSON round trip
+ *     scope (see ScopeVariables.toScope); pass it through instead of the plain-data copy
  * @property {(params: object, context: ControllerRequestContext) => (object | Promise<object>)} handler
- *     - Called with the controller as `this`; must return a JSON-serializable object. For an
+ *     - Called with the controller as `this`; must return plain data (JSON, plus bytes). For an
  *     unprivileged caller, `params.pluginID` (a reserved key) is the calling plugin
  */
 
@@ -232,6 +232,76 @@ ChromeUtils.defineESModuleGetters(lazy, {
 	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 	VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 });
+
+
+function isBytes(value) {
+	return ArrayBuffer.isView(value) || Cu.getClassName(value, true) === "ArrayBuffer";
+}
+
+// The bytes of any view, or a whole buffer, copied into this compartment as a Uint8Array
+function copyBytes(value) {
+	if (Cu.getClassName(value, true) === "Uint8Array") {
+		return new Uint8Array(value);
+	}
+	let view = ArrayBuffer.isView(value)
+		? new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+		: new Uint8Array(value);
+	return new Uint8Array(view);
+}
+
+/**
+ * A detached copy of plain data: what JSON keeps, rebuilt here, plus bytes as a Uint8Array; a BigInt or a
+ * cycle throws. An object serializes through `toPlain()`, else `toJSON()`, once, as JSON.stringify does
+ */
+function toPlainData(value, ancestors = new Set(), serialized = false) {
+	switch (typeof value) {
+		case "string":
+		case "boolean":
+			return value;
+		case "number":
+			return Number.isFinite(value) ? value : null;
+		case "bigint":
+			throw new TypeError("a BigInt is not plain data");
+		case "object":
+			break;
+		default:
+			return undefined;
+	}
+	if (value === null) {
+		return null;
+	}
+	value = Cu.waiveXrays(value);
+	if (!serialized) {
+		if (typeof value.toPlain === "function") {
+			return toPlainData(value.toPlain(), ancestors, true);
+		}
+		if (typeof value.toJSON === "function") {
+			return toPlainData(value.toJSON(), ancestors, true);
+		}
+	}
+	if (isBytes(value)) {
+		return copyBytes(value);
+	}
+	if (ancestors.has(value)) {
+		throw new TypeError("cyclic value");
+	}
+	ancestors.add(value);
+	let plain;
+	if (Array.isArray(value)) {
+		plain = Array.from(value, entry => toPlainData(entry, ancestors) ?? null);
+	}
+	else {
+		plain = {};
+		for (let key of Object.keys(value)) {
+			let entry = toPlainData(value[key], ancestors);
+			if (entry !== undefined) {
+				Object.defineProperty(plain, key, { value: entry, enumerable: true, writable: true, configurable: true });
+			}
+		}
+	}
+	ancestors.delete(value);
+	return plain;
+}
 
 
 /**
@@ -783,7 +853,7 @@ class ControllerAPIBase extends PluginAPIBase {
 	}
 
 	/**
-	 * Detach params from the caller's compartment; JSON drops functions and getters
+	 * Detach params from the caller's compartment; functions and getters are read once or dropped
 	 */
 	_toPlainParams(name, params) {
 		if (params === undefined || params === null) {
@@ -793,11 +863,11 @@ class ControllerAPIBase extends PluginAPIBase {
 			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS, `Params for '${name}' must be an object`);
 		}
 		try {
-			return JSON.parse(JSON.stringify(params));
+			return toPlainData(params);
 		}
 		catch (e) {
 			this._throw(ControllerAPIBase.errorCodes.INVALID_PARAMS,
-				`Params for '${name}' must be JSON-serializable: ${e.message}`);
+				`Params for '${name}' must be plain data: ${e.message}`);
 		}
 		return {};
 	}
@@ -813,11 +883,11 @@ class ControllerAPIBase extends PluginAPIBase {
 			this._throw(ControllerAPIBase.errorCodes.INVALID_RESULT, `Result of '${name}' must be an object`);
 		}
 		try {
-			return JSON.parse(JSON.stringify(result));
+			return toPlainData(result);
 		}
 		catch (e) {
 			this._throw(ControllerAPIBase.errorCodes.INVALID_RESULT,
-				`Result of '${name}' must be JSON-serializable: ${e.message}`);
+				`Result of '${name}' must be plain data: ${e.message}`);
 		}
 		return {};
 	}
@@ -910,7 +980,7 @@ class StoreAPIBase extends ControllerAPIBase {
 
 	/**
 	 * Apply a change set
-	 * @param {StoreChangeSet | { toJSON: () => StoreChangeSet }} changes - A change set builder or its JSON
+	 * @param {StoreChangeSet | { toPlain: () => StoreChangeSet }} changes - A change set builder or its JSON
 	 * @param {{ snapshots?: boolean }} [options]
 	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
 	 * @returns {Promise<ControllerResponse<StoreCommitResult>>}
@@ -944,7 +1014,7 @@ class StoreAPIBase extends ControllerAPIBase {
 
 	async _commit(changes, options, callerPluginID) {
 		let context = this._getContext(callerPluginID);
-		// JSON.stringify serializes a builder through its toJSON
+		// A builder serializes through its toPlain, bytes kept
 		let params = this._toPlainParams("commit", { changes, options });
 		let validatedOptions = this._validateParams(params.options || {}, StoreAPIBase.COMMIT_OPTIONS);
 		if (!validatedOptions.valid) {
@@ -1116,8 +1186,13 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * @returns {Error} The same error
 	 */
 	_withProgress(e, entries, applied, failed) {
-		if (!applied.length || !(e instanceof ControllerError)) {
+		if (!applied.length) {
 			return e;
+		}
+		// A platform failure is still a bug to log, but the caller needs the progress more than the stack
+		if (!(e instanceof ControllerError)) {
+			lazy.Zotero.logError(e);
+			e = new ControllerError(ControllerAPIBase.errorCodes.INTERNAL_ERROR, String(e?.message ?? e));
 		}
 		let locate = entry => ({ index: entry.index, type: entry.type, id: entry.id, ref: entry.ref });
 		let done = new Set(applied);
