@@ -168,6 +168,21 @@ function getWindowState(win) {
 	};
 }
 
+/**
+ * Whether a tab matches an `enableForTabTypes` list: "reader" and "reader/*" take every reader type,
+ * "reader/pdf" only that one
+ * @param {string[]} tabTypes types to match against
+ * @param {string} tabType current tab type
+ * @param {string} [tabSubType] current tab subtype
+ * @returns {boolean}
+ */
+function matchesTabType(tabTypes, tabType, tabSubType) {
+	return tabTypes.some((type) => {
+		let [entryType, entrySubType] = type.split("/");
+		return entryType === tabType && (!entrySubType || entrySubType === "*" || entrySubType === tabSubType);
+	});
+}
+
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
 	OPENABLE_TYPES,
@@ -179,6 +194,7 @@ const WindowUtils = Object.freeze({
 	getPluginWindowOwner,
 	canAccessWindow,
 	getOpenableItem,
+	matchesTabType,
 });
 
 export { WindowUtils };
