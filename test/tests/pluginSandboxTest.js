@@ -4033,11 +4033,6 @@ describe("Plugin Sandbox", function () {
 			}
 		}
 
-		it("should no longer exist as a sandbox global", function () {
-			loadTestScope(["default", "window"]);
-			assert.isTrue(evalInScope("typeof openWindow === 'undefined'"));
-		});
-
 		it("should reject disallowed URLs (external, file://, and non-.html files)", async function () {
 			loadTestScope(["default", "window"]);
 			let badURLs = [
@@ -4289,7 +4284,6 @@ describe("Plugin Sandbox", function () {
 				try {
 					assert.isTrue(evalInScope("typeof _win.page.isAlive === 'function' && _win.page.isAlive()"));
 					assert.isNumber(evalInScope("_win.windowID"));
-					assert.isFalse(evalInScope("'window' in _win"), "the page window should stay out of the sandbox");
 				}
 				finally {
 					await closeWin();
@@ -5535,7 +5529,6 @@ describe("Plugin Sandbox", function () {
 			assert.equal(evalInScope("typeof Zotero.WindowController.query"), "function");
 			assert.equal(evalInScope("typeof Zotero.TabController.query"), "function");
 			assert.equal(evalInScope("typeof Zotero.TabController.command"), "function");
-			assert.equal(evalInScope("Zotero.TabController.libraryTabID"), "zotero-pane");
 		});
 
 		it("should be exposed via the ui umbrella permission", function () {

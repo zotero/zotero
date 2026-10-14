@@ -400,8 +400,6 @@
 	Zotero.TabController = {
 		tabTypes: Object.freeze(TAB_TYPES),
 
-		libraryTabID: LIBRARY_TAB_ID,
-
 		errorCodes: lazy.ControllerAPIBase.errorCodes,
 
 		_tabController: new TabControllerInternal(),
