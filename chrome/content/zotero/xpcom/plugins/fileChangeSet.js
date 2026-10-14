@@ -30,7 +30,7 @@
 var FileChangeSet = (() => {
 "use strict";
 
-const { ChangesBase, ChangeSet, bytesView } = ChangeSetBase;
+const { ChangesBase, ChangeSet, ObjectHandle, bytesView } = ChangeSetBase;
 const path = FilePath;
 
 const ENCODINGS = ["utf8", "utf-8", "base64"];
@@ -209,10 +209,13 @@ function editorClass(type) {
 
 /**
  * @param {string} type
- * @param {string | object} target - A path, or a stat snapshot whose revision is then expected
+ * @param {string | object} target - A path, a stat snapshot whose revision is then expected, or a handle
  * @param {{ revision?: string }} [options]
  */
 function editorFor(type, target, { revision } = {}) {
+	if (target instanceof ObjectHandle) {
+		target = target.editor;
+	}
 	let state = { type };
 	if (typeof target === "string") {
 		state.path = assertPath(target, "path");
