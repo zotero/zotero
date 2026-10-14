@@ -1428,11 +1428,14 @@ describe("Zotero.Embeddings", function () {
 			};
 			// What the server has for an attachment: rows with their vectors
 			// encoded, made from the file as this client has it unless said
-			// otherwise, at a version
-			var arrival = (attachment, vectors, contentHash = 'sdt-test-hash', version = 1) => ({
+			// otherwise, at a version, cut by a current chunker unless said
+			// otherwise
+			var arrival = (attachment, vectors, contentHash = 'sdt-test-hash', version = 1,
+				extractor = 'pdf/3/1/' + Zotero.Embeddings.MIN_CHUNKER_VERSION) => ({
 				key: attachment.key,
 				version,
 				contentHash,
+				extractor,
 				chunks: vectors.length,
 				rows: vectors.map((vector, chunkIndex) => ({
 					chunkIndex,
@@ -1589,6 +1592,41 @@ describe("Zotero.Embeddings", function () {
 				let from = client.getEmbedding.callCount;
 				await fetch();
 				assert.isFalse(askedFor(attachment.key, from));
+			});
+
+			it("should record what the server's rows were cut with and leave an outdated cut to the server", async function () {
+				this.timeout(60000);
+				let item = await createDataObject('item', { title: 'Parent of attachment cut by an old chunker' });
+				let attachment = await importPDFAttachment(item);
+				let { Sources, Store } = Zotero.Embeddings.Indexing;
+				let extractorOf = async () => (await Store.getIndexStates([attachment.id]))
+					.get(attachment.id)?.extractor;
+				// Rows cut by a chunker below the floor
+				let outdated = 'pdf/3/1/' + (Zotero.Embeddings.MIN_CHUNKER_VERSION - 1);
+				let awaiting = await Sources.countAwaitingServer();
+				let finished = await Sources.countFinishedAttachments();
+				serve({ [attachment.key]: arrival(attachment, [axis(1), axis(0)], 'sdt-test-hash', 1, outdated) });
+				await fetch();
+				assert.equal(await extractorOf(), outdated);
+				assert.deepEqual(await stored(attachment.id), { chunks: 2, embedded: 2 });
+
+				// Outdated, but the server's to cut over whenever it does: a run
+				// leaves the rows as they are, and they count as finished rather
+				// than stale or awaited
+				await run();
+				assert.equal(await extractorOf(), outdated);
+				assert.equal(await rowCount(attachment.id), 2);
+				assert.equal(await Sources.countAwaitingServer(), awaiting - 1);
+				assert.equal(await Sources.countFinishedAttachments(), finished + 1);
+
+				// Served anew by a current chunker, the rows are taken and
+				// nothing awaits
+				let current = 'pdf/3/1/' + Zotero.Embeddings.MIN_CHUNKER_VERSION;
+				serve({ [attachment.key]: arrival(attachment, [axis(1), axis(0)], 'sdt-test-hash', 2, current) });
+				await fetch();
+				assert.equal(await extractorOf(), current);
+				assert.equal(await versionOf(attachment.id), 2);
+				assert.isFalse(Sources.isOutdatedExtractor(await extractorOf()));
 			});
 
 			it("should embed here an attachment whose rows can't be read, and take the others'", async function () {
@@ -3502,10 +3540,11 @@ describe("Zotero.Embeddings", function () {
 
 		it("should tell an outdated extractor identity from a current one and from none", function () {
 			let { Sources } = Zotero.Embeddings.Indexing;
-			assert.isTrue(Sources.isOutdatedExtractor('pdf/3/1/0'));
-			assert.isFalse(Sources.isOutdatedExtractor('pdf/3/1/1'));
-			assert.isFalse(Sources.isOutdatedExtractor('epub/2/1/7'));
-			// Rows not cut here carry no identity, and no chunker outdates them
+			let floor = Zotero.Embeddings.MIN_CHUNKER_VERSION;
+			assert.isTrue(Sources.isOutdatedExtractor('pdf/3/1/' + (floor - 1)));
+			assert.isFalse(Sources.isOutdatedExtractor('pdf/3/1/' + floor));
+			assert.isFalse(Sources.isOutdatedExtractor('epub/2/1/' + (floor + 6)));
+			// Rows with no identity, no chunker outdates
 			assert.isFalse(Sources.isOutdatedExtractor(null));
 		});
 

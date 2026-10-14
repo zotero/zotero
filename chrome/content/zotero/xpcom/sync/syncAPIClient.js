@@ -589,9 +589,11 @@ Zotero.Sync.APIClient.prototype = {
 	 *
 	 * @param {String} model - Zotero.Embeddings.getModelVersion()
 	 * @param {String} itemKey
-	 * @return {Promise<Object|false>} - { version, dtype, contentHash, chunks,
-	 *     rows: [{ chunkIndex, embedding, anchor }] }, each embedding base64
-	 *     of the model's raw output in the encoding `dtype` names; or false
+	 * @return {Promise<Object|false>} - { version, dtype, contentHash,
+	 *     extractor, chunks, rows: [{ chunkIndex, embedding, anchor }] },
+	 *     each embedding base64 of the model's raw output in the encoding
+	 *     `dtype` names, `extractor` the identity of what cut the chunks; or
+	 *     false
 	 */
 	getEmbedding: async function (libraryType, libraryTypeID, model, itemKey) {
 		var params = {
@@ -610,6 +612,7 @@ Zotero.Sync.APIClient.prototype = {
 			version: parseInt(this._getLastModifiedVersion(xmlhttp)),
 			dtype: json.dtype || null,
 			contentHash: json.contentHash,
+			extractor: json.extractor || null,
 			chunks: json.chunks,
 			rows: json.rows || []
 		};

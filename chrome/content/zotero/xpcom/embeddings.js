@@ -302,10 +302,10 @@ Zotero.Embeddings = new function () {
 			+ ")"
 		);
 		// One row per item the index knows about: what its rows were made
-		// from -- the content's hash and, for an attachment with a file here,
-		// the file's key and the extractor that cut it -- the stamp it was
-		// last seen at, and its standing with the server: the version its
-		// rows are from, or a refusal
+		// from -- the content's hash, the extractor that cut it, wherever
+		// that was, and for an attachment with a file here the file's key --
+		// the stamp it was last seen at, and its standing with the server:
+		// the version its rows are from, or a refusal
 		await Zotero.DB.queryAsync(
 			"CREATE TABLE embeddings.itemIndexState (\n"
 			+ "    itemID INTEGER PRIMARY KEY,\n"
@@ -1429,13 +1429,16 @@ Zotero.Embeddings.Indexing = new function () {
 	 *     each embedding as Zotero.Embeddings.prepare() leaves it
 	 * @param {Integer} [arrival.version] - The server's version the rows
 	 *     are from, when they're the server's
+	 * @param {String} [arrival.extractor] - The identity of what cut the
+	 *     chunks, as Sources.getExtractor() gives it
 	 * @return {Promise<Boolean>} - Whether they were taken
 	 */
-	this.addChunks = async function (itemID, { modelVersion, contentHash, chunks, rows, version = null }) {
+	this.addChunks = async function (itemID, { modelVersion, contentHash, chunks, rows, version = null, extractor = null }) {
 		let { Store, Sources } = Zotero.Embeddings.Indexing;
 		if (!Zotero.Embeddings.isEnabled()
 				|| modelVersion !== Zotero.Embeddings.getModelVersion()
-				|| !chunks || rows.length !== chunks) {
+				|| !chunks || rows.length !== chunks
+				|| (extractor !== null && typeof extractor != 'string')) {
 			return false;
 		}
 		if (!_areRowsWellFormed(rows, chunks)) {
@@ -1470,7 +1473,7 @@ Zotero.Embeddings.Indexing = new function () {
 			// Recorded under the file's key when there's a file; without one
 			// the rows still score, and cutting the attachment adopts them
 			// once it arrives
-			await Store.setSource(itemID, { sourceKey, contentHash, syncVersion: version });
+			await Store.setSource(itemID, { sourceKey, contentHash, extractor, syncVersion: version });
 			await Store.clearSyncState(itemID);
 		});
 		return true;
@@ -1893,6 +1896,7 @@ Zotero.Embeddings.Indexing = new function () {
 			await Store.setSource(item.id, {
 				sourceKey,
 				contentHash: record.contentHash,
+				extractor: record.extractor,
 				syncVersion: record.syncVersion
 			});
 		}
@@ -2309,8 +2313,8 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	};
 
 	// Whether rows cut by the given extractor identity are due to be cut
-	// again: their chunker is older than the oldest kept. Rows not cut
-	// here, with no identity, never are.
+	// again: their chunker is older than the oldest kept. Rows with no
+	// identity never are.
 	//
 	// @param {String|null} extractor - e.g. 'pdf/3/1/1'
 	// @return {Boolean}
@@ -2438,15 +2442,18 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	//
 	// @return {Promise<Object[]>} - [{ item, record, rows, stale,
 	//     clientDateModified }]: the item, its state row or null, its row
-	//     count, whether an outdated chunker cut its rows, and the stamp
-	//     seen
+	//     count, whether an outdated extractor cut its rows here, and the
+	//     stamp seen
 	this.getOutstandingAttachments = async function (afterID, limit) {
 		// An eligible attachment is outstanding with nothing recorded, no
-		// file key, rows cut by an outdated chunker, or a save since the
-		// index last looked at it (or in the last few seconds)
+		// file key, rows cut here by an outdated extractor, or a save since
+		// the index last looked at it (or in the last few seconds). Rows the
+		// server cut are its to cut over, however outdated.
 		let outdated = await this.getOutdatedExtractors();
 		let outstanding = "(S.itemID IS NULL OR S.sourceKey IS NULL "
-			+ (outdated.length ? "OR S.extractor IN (" + outdated.map(() => '?').join(',') + ") " : "")
+			+ (outdated.length
+				? "OR (S.syncVersion IS NULL AND S.extractor IN (" + outdated.map(() => '?').join(',') + ")) "
+				: "")
 			+ "OR S.clientDateModified IS NOT I.clientDateModified OR I.clientDateModified>=?)";
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT I.itemID, I.clientDateModified, S.itemID AS stateID, S.sourceKey, "
@@ -2482,7 +2489,7 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 					clientDateModified: row.stamp
 				},
 			rows: row.rowCount,
-			stale: outdated.includes(row.extractor)
+			stale: row.syncVersion === null && outdated.includes(row.extractor)
 		}));
 	};
 
@@ -2498,13 +2505,13 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	};
 
 	// How many attachments with a file here have every chunk embedded,
-	// whoever embedded it, by a chunker that's still current
+	// whoever embedded it, less those an outdated extractor cut here
 	this.countFinishedAttachments = async function () {
 		let outdated = await this.getOutdatedExtractors();
 		return Zotero.DB.valueQueryAsync(
 			"SELECT COUNT(*) FROM embeddings.itemIndexState WHERE sourceKey IS NOT NULL"
 				+ (outdated.length
-					? " AND (extractor IS NULL OR extractor NOT IN ("
+					? " AND (syncVersion IS NOT NULL OR extractor IS NULL OR extractor NOT IN ("
 						+ outdated.map(() => '?').join(',') + "))"
 					: ""),
 			outdated
@@ -2622,10 +2629,9 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		}
 	};
 
-	// How many attachments are the server's to embed and have no rows yet,
-	// or only rows an outdated chunker cut here. Those are outstanding by
-	// definition, so this pages through the outstanding attachments, as
-	// countWithoutFiles() does.
+	// How many attachments are the server's to embed and have no rows yet.
+	// Those are outstanding by definition, so this pages through the
+	// outstanding attachments, as countWithoutFiles() does.
 	this.countAwaitingServer = async function () {
 		let awaiting = 0;
 		let afterID = 0;
@@ -2635,8 +2641,8 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			if (!page.length) {
 				return awaiting;
 			}
-			for (let { item, record, rows, stale } of page) {
-				if ((!rows || stale) && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
+			for (let { item, record, rows } of page) {
+				if (!rows && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
 					awaiting++;
 				}
 			}
@@ -4482,6 +4488,7 @@ Zotero.Embeddings.Sync = new function () {
 					{
 						modelVersion: model,
 						contentHash: answer.contentHash,
+						extractor: answer.extractor,
 						chunks: answer.chunks,
 						version: answer.version,
 						rows
