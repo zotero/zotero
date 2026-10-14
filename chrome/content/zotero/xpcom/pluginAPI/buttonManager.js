@@ -346,7 +346,7 @@
 
 		static OVERFLOW_ICON_URL = "chrome://zotero/skin/16/universal/chevron-12-double.svg";
 
-		static DROPMARKER_ICON_URL = "chrome://zotero/skin/8/universal/chevron-8.svg";
+		static DROPMARKER_ICON_URL = "chrome://zotero/skin/8/universal/chevron-6.svg";
 
 		static BUTTON_GAP = 4;
 
@@ -358,6 +358,7 @@
 			this._manager = manager;
 			this._readerData = new WeakMap();
 			this._styledDocs = new WeakSet();
+			this._iconDataURIs = new Map();
 			this._initialized = false;
 		}
 
@@ -584,10 +585,51 @@
 			icon.className = ReaderToolbarRenderer.ICON_CLASS;
 			icon.style.width = `${size}px`;
 			icon.style.height = `${size}px`;
-			// The URLs are validated at registration (isDisallowedResourceURL)
-			icon.style.setProperty("--custom-button-icon-light", `url("${lightURL}")`);
-			icon.style.setProperty("--custom-button-icon-dark", `url("${darkURL || lightURL}")`);
+			this._setIconURL(icon, "--custom-button-icon-light", lightURL);
+			this._setIconURL(icon, "--custom-button-icon-dark", darkURL || lightURL);
 			return icon;
+		}
+
+		_setIconURL(icon, prop, url) {
+			let doc = icon.ownerDocument;
+			let canLoad = true;
+			try {
+				Services.scriptSecurityManager.checkLoadURIStrWithPrincipal(
+					doc.nodePrincipal, url, Ci.nsIScriptSecurityManager.ALLOW_CHROME);
+			}
+			catch {
+				canLoad = false;
+			}
+			if (canLoad) {
+				// The URLs are validated at registration (isDisallowedResourceURL)
+				icon.style.setProperty(prop, `url("${url}")`);
+				return;
+			}
+			this._getIconDataURI(url)
+				.then(dataURI => icon.style.setProperty(prop, `url("${dataURI}")`))
+				.catch(e => Zotero.logError(e));
+		}
+
+		_getIconDataURI(url) {
+			let promise = this._iconDataURIs.get(url);
+			if (!promise) {
+				promise = new Promise((resolve, reject) => {
+					let xhr = new XMLHttpRequest();
+					xhr.open("GET", url);
+					xhr.responseType = "blob";
+					xhr.onload = () => {
+						let reader = new FileReader();
+						reader.onloadend = () => resolve(reader.result);
+						reader.onerror = () => reject(new Error(`FileReader error for ${url}`));
+						reader.readAsDataURL(xhr.response);
+					};
+					xhr.onerror = () => reject(new Error(`Failed to load icon ${url}`));
+					xhr.send();
+				});
+				promise.catch(() => this._iconDataURIs.delete(url));
+				this._iconDataURIs.set(url, promise);
+			}
+			return promise;
 		}
 
 		_setButtonIcon(button, option) {
