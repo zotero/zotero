@@ -1348,7 +1348,9 @@ var Zotero_Tabs = new function () {
 		let info = Object.assign({}, tab);
 		if (info.type) {
 			// Parsed content type without the state suffix (e.g. "reader" instead of "reader-loading")
-			info.type = this.parseTabType(info.type).tabContentType;
+			let { tabContentType, tabState } = this.parseTabType(info.type);
+			info.type = tabContentType;
+			info.state = tabState || 'loaded';
 		}
 		if (info.type !== 'library') {
 			let item = Zotero.Items.get(info.data?.itemID);
