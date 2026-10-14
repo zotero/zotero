@@ -61,7 +61,7 @@ const DataSnapshots = {
 
 	/**
 	 * Read part of a snapshot from an item a synchronous hook caught mid-load: an unloaded data type
-	 * reads as null and the load is started, so the next refresh finds it
+	 * reads as null and the load of what is missing is started, so the next refresh finds it
 	 */
 	whenLoaded(item, read) {
 		try {
@@ -71,7 +71,7 @@ const DataSnapshots = {
 			if (!(e instanceof Zotero.Exception.UnloadedDataException)) {
 				throw e;
 			}
-			item.loadAllData().catch(err => Zotero.logError(err));
+			Zotero.Items.loadDataTypes([item]).catch(err => Zotero.logError(err));
 			return null;
 		}
 	},
