@@ -107,13 +107,13 @@
 	 */
 
 
-	// Shared safety check: an unprivileged plugin's icon must be a declared
-	// resource (data:image/svg or its own moz-extension/chrome/resource URL).
-	function iconAllowed(pluginID, url) {
+	// An unprivileged plugin's icon must be a declared resource (data:image/svg or its
+	// own moz-extension/chrome/resource URL); returns the absolute URL, or null if not allowed
+	function resolveIcon(pluginID, url) {
 		if (lazy.PluginSandbox.isPrivileged(pluginID)) {
-			return true;
+			return url;
 		}
-		return lazy.PluginProtocol.canLoadImageURI(url, pluginID);
+		return lazy.PluginProtocol.resolveImageURL(pluginID, url);
 	}
 
 
@@ -196,9 +196,13 @@
 			if (!option) {
 				return false;
 			}
-			if (option.icon !== undefined && !iconAllowed(option.pluginID, option.icon)) {
-				this._log(`Invalid context menu item: 'icon' is not an allowed resource URL`, "warn");
-				return false;
+			if (option.icon !== undefined) {
+				let icon = resolveIcon(option.pluginID, option.icon);
+				if (icon === null) {
+					this._log(`Invalid context menu item: 'icon' is not an allowed resource URL`, "warn");
+					return false;
+				}
+				option.icon = icon;
 			}
 			return option;
 		}

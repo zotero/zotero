@@ -166,11 +166,13 @@
 
 			if (!lazy.PluginSandbox.isPrivileged(option.pluginID)) {
 				for (let key of ICON_KEYS) {
-					if (option[key] && !lazy.PluginProtocol
-							.canLoadImageURI(option[key], option.pluginID)) {
+					if (!option[key]) continue;
+					let resolved = lazy.PluginProtocol.resolveImageURL(option.pluginID, option[key]);
+					if (resolved === null) {
 						this._log(`Invalid button: '${key}' is not an allowed resource URL`, "warn");
 						return false;
 					}
+					option[key] = resolved;
 				}
 			}
 			return option;
@@ -570,7 +572,7 @@
 				canLoad = false;
 			}
 			if (canLoad) {
-				// The URLs are validated at registration (canLoadImageURI)
+				// The URLs are validated at registration (resolveImageURL)
 				icon.style.setProperty(prop, `url("${url}")`);
 				return;
 			}
