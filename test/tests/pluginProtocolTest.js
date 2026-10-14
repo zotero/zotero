@@ -48,25 +48,27 @@ describe("PluginProtocol", function () {
 	});
 
 	describe("image-URI origin allowlist", function () {
-		it("canLoadImageURI enforces the declared-resource allowlist", function () {
+		it("resolveImageURL enforces the declared-resource allowlist and resolves relative URLs", function () {
 			plugin.load(["default"], { origins: ["https://declared.example.com/*"] });
-			let check = url => PluginProtocol.canLoadImageURI(url, plugin.id);
-			assert.isTrue(check("chrome://zotero/skin/x.png"), "chrome: allowed");
-			assert.isTrue(check("resource://gre/x.png"), "resource: allowed");
-			assert.isTrue(check("data:image/png;base64,iVBORw0KGgo="), "data:image allowed");
-			assert.isTrue(check("https://declared.example.com/pic.png"), "declared host_permissions origin allowed");
-			assert.isTrue(check("foo/bar.png"), "relative URL resolves to the plugin root and is allowed");
-			assert.isTrue(check(""), "empty value triggers no load");
-			assert.isFalse(check("https://evil.example.com/x.png"), "undeclared remote origin blocked");
-			assert.isFalse(check("https://other.example.com/x.png"), "other undeclared origin blocked");
-			assert.isFalse(check("javascript:alert(1)"), "javascript: blocked (not a declared origin)");
+			let resolve = url => PluginProtocol.resolveImageURL(plugin.id, url);
+			let own = WebExtensionPolicy.getByID(plugin.id).getURL("icon.png");
+			assert.equal(resolve("chrome://zotero/skin/x.png"), "chrome://zotero/skin/x.png", "chrome: allowed");
+			assert.equal(resolve("resource://gre/x.png"), "resource://gre/x.png", "resource: allowed");
+			assert.equal(resolve("data:image/png;base64,iVBORw0KGgo="), "data:image/png;base64,iVBORw0KGgo=", "data:image allowed");
+			assert.equal(resolve("https://declared.example.com/pic.png"), "https://declared.example.com/pic.png",
+				"declared host_permissions origin allowed");
+			assert.equal(resolve("icon.png"), own, "relative URL resolves to the plugin root");
+			assert.equal(resolve("/icon.png"), own, "root-relative URL resolves to the plugin root");
+			assert.strictEqual(resolve(""), "", "empty value triggers no load");
+			assert.isNull(resolve("https://evil.example.com/x.png"), "undeclared remote origin blocked");
+			assert.isNull(resolve("https://other.example.com/x.png"), "other undeclared origin blocked");
+			assert.isNull(resolve("javascript:alert(1)"), "javascript: blocked (not a declared origin)");
 			// data: is allowed as a local scheme; text/html is inert rendered as an image
-			assert.isTrue(check("data:text/html,<b>x</b>"), "data:text/html allowed (inert as an image)");
+			assert.isNotNull(resolve("data:text/html,<b>x</b>"), "data:text/html allowed (inert as an image)");
 			// Own moz-extension origin is in allowedOrigins (via register), so
 			// canAccessURI permits it; another plugin's origin is blocked.
-			let own = WebExtensionPolicy.getByID(plugin.id).getURL("icon.png");
-			assert.isTrue(check(own), "own moz-extension resource allowed");
-			assert.isFalse(check("moz-extension://00000000-0000-0000-0000-000000000000/x.png"),
+			assert.equal(resolve(own), own, "own moz-extension resource allowed");
+			assert.isNull(resolve("moz-extension://00000000-0000-0000-0000-000000000000/x.png"),
 				"another plugin's moz-extension resource blocked");
 		});
 	});
