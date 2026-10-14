@@ -31,7 +31,6 @@
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
-		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		loadEmbeddedPluginPage: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 	});
 
@@ -99,22 +98,12 @@
 	 * "viewContextMenu", "annotationContextMenu", "thumbnailContextMenu", "selectorContextMenu"
 	 * @property {string} label - The menu item label
 	 * @property {string} [icon] - The icon URL, a data:image/svg+xml URI or a
-	 * plugin resource URL
+	 * plugin resource URL, optionally relative to the plugin root
 	 * @property {function} onCommand - Called with a `ReaderContext` when the item
 	 * is clicked
 	 * @property {function} [onShowing] - Called with a `ReaderContext` before the menu
 	 * shows; return `false` to hide the item, or `{ label, disabled }` to override them
 	 */
-
-
-	// An unprivileged plugin's icon must be a declared resource (data:image/svg or its
-	// own moz-extension/chrome/resource URL); returns the absolute URL, or null if not allowed
-	function resolveIcon(pluginID, url) {
-		if (lazy.PluginSandbox.isPrivileged(pluginID)) {
-			return url;
-		}
-		return lazy.PluginProtocol.resolveImageURL(pluginID, url);
-	}
 
 
 	class ReaderSectionManagerInternal extends lazy.ManagerAPIBase {
@@ -196,13 +185,8 @@
 			if (!option) {
 				return false;
 			}
-			if (option.icon !== undefined) {
-				let icon = resolveIcon(option.pluginID, option.icon);
-				if (icon === null) {
-					this._log(`Invalid context menu item: 'icon' is not an allowed resource URL`, "warn");
-					return false;
-				}
-				option.icon = icon;
+			if (!this._resolveImageURLs(option, ["icon"], option.pluginID)) {
+				return false;
 			}
 			return option;
 		}

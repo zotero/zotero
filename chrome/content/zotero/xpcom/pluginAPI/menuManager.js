@@ -84,6 +84,8 @@
 
 	const CUSTOM_MENU_CLASS = "zotero-custom-menu-item";
 
+	const ICON_KEYS = ["icon", "darkIcon"];
+
 	/**
 	 * @namespace Zotero
 	 */
@@ -102,7 +104,7 @@
 	 * @property {string} menuType - The type of the menu item
 	 * @property {string} [l10nID] - The l10n ID for the menu item
 	 * @property {string} [l10nArgs] - Arguments for the l10n ID. Support for object type is deprecated.
-	 * @property {string} [icon] - The icon for the menu item
+	 * @property {string} [icon] - The icon URL for the menu item, optionally relative to the plugin root
 	 * - For menu icons, it is recommended to use an SVG icon with a size of 16x16.
 	 * Use `fill="context-fill"` in the SVG to use the default icon color
 	 * for automatic hover and dark mode support.
@@ -272,6 +274,15 @@
 					delete descriptors.items;
 					delete descriptors.collectionTreeRows;
 					context = Object.defineProperties({}, descriptors);
+					// Runtime icons resolve like registered ones
+					if (typeof source.setIcon === "function") {
+						context.setIcon = (icon, darkIcon) => {
+							let icons = { icon, darkIcon };
+							if (this._resolveImageURLs(icons, ICON_KEYS, pluginID)) {
+								source.setIcon(icons.icon, icons.darkIcon);
+							}
+						};
+					}
 				}
 				return wrapped(context);
 			};
@@ -324,7 +335,7 @@
 
 			// Validate nested menus recursively
 			for (let i = 0; i < option.menus.length; i++) {
-				let result = this._validateMenuData(option.menus[i], `menus[${i}]`);
+				let result = this._validateMenuData(option.menus[i], option.pluginID, `menus[${i}]`);
 				if (!result.valid) {
 					return false;
 				}
@@ -338,13 +349,14 @@
 		/**
 		 * Validate the menu data recursively
 		 * @param {MenuData} menuData - The menu data to validate
+		 * @param {string} pluginID - The ID of the plugin registering the menu
 		 * @param {string} [path] - The path to the menu data
 		 * @returns {{obj: MenuData | undefined, valid: boolean}} - The validated menu data and whether it is valid
 		 */
-		_validateMenuData(menuData, path = "") {
+		_validateMenuData(menuData, pluginID, path = "") {
 			// Validate the menu data itself
 			let selfResult = this._validateObject(menuData, this._menusTypeDefinition, path);
-			if (!selfResult.valid) {
+			if (!selfResult.valid || !this._resolveImageURLs(selfResult.obj, ICON_KEYS, pluginID)) {
 				return {
 					valid: false,
 				};
@@ -369,7 +381,7 @@
 				};
 			}
 			for (let i = 0; i < menuData.menus.length; i++) {
-				let menuResult = this._validateMenuData(menuData.menus[i], `${path}.menus[${i}]`);
+				let menuResult = this._validateMenuData(menuData.menus[i], pluginID, `${path}.menus[${i}]`);
 				if (!menuResult.valid) {
 					return {
 						valid: false,

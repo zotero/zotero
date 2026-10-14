@@ -309,6 +309,47 @@ describe("Zotero.MenuManager", function () {
 		popup.hidePopup();
 	});
 
+	it("should resolve icons relative to the plugin root, at registration and from setIcon", async function () {
+		let register = icon => plugin.run(icon => Zotero.MenuManager.registerMenu({
+			menuID: "icon-test",
+			target: "main/menubar/file",
+			menus: [{
+				menuType: "submenu",
+				l10nID: "test-menu-icon",
+				icon: "icons/menu.svg",
+				darkIcon: "/icons/menu-dark.svg",
+				menus: [{ menuType: "menuitem", l10nID: "menu-print", icon }],
+			}, {
+				menuType: "menuitem",
+				l10nID: "test-menu-set-icon",
+				onShowing: (context) => {
+					context.setIcon("icons/set.svg");
+					// Ignored, so the icon above stays
+					context.setIcon("https://evil.example.com/x.svg");
+					report("onShowing");
+				},
+			}],
+		}), icon);
+		assert.isFalse(register("https://evil.example.com/x.svg"), "an undeclared remote origin in a submenu");
+
+		log.expect("onShowing");
+		let menuID = register("icons/child.svg");
+		assert.isString(menuID);
+		let base = Zotero.Plugins.getBaseURI(plugin.id);
+		let [submenu] = Zotero.MenuManager._menuManager._optionsCache[menuID].menus;
+		assert.equal(submenu.icon, base + "icons/menu.svg");
+		assert.equal(submenu.darkIcon, base + "icons/menu-dark.svg");
+		assert.equal(submenu.menus[0].icon, base + "icons/child.svg");
+
+		let popup = doc.querySelector("#menu_FilePopup");
+		await simulateMenuOpen(popup);
+		await log.get("onShowing");
+		let elem = menuItem(popup, "test-menu-set-icon");
+		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-light"), `url(${base}icons/set.svg)`);
+		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-dark"), `url(${base}icons/set.svg)`);
+		await simulateMenuClosed(popup);
+	});
+
 	it("should store a menu's hooks wrapped for the sandbox", function () {
 		let menuID = plugin.run(() => Zotero.MenuManager.registerMenu({
 			menuID: "sandbox-menu",
