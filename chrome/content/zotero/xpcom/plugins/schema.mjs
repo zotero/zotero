@@ -237,8 +237,11 @@ const PERMISSION_SCHEMAS = {
 			PluginInteropManager: {
 				register: "CustomParserCallable",
 				unregister: "CustomParserCallable",
-				getCommand: "CustomParserCallable",
-				statusCodes: true,
+			},
+			PluginInteropController: {
+				query: "CustomParserCallable",
+				command: "CustomParserCallable",
+				errorCodes: true,
 			},
 		},
 	},
