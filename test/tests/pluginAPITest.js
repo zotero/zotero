@@ -3663,6 +3663,11 @@ describe("Plugin API", function () {
 				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
 			});
 
+			it("should refuse to open a plugin window for a chrome caller", async function () {
+				let e = await getPromiseError(Zotero.WindowController.command("openPluginWindow", { url: "page.html" }));
+				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_ALLOWED);
+			});
+
 			it("should list plugin windows with their owner and hide them from other plugins", async function () {
 				const OWNER = "window-owner@zotero.org";
 				let pluginWin = Services.ww.openWindow(
@@ -3696,13 +3701,24 @@ describe("Plugin API", function () {
 					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
 					e = await getPromiseError(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID));
 					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+
+					// closeWindow follows the same ownership rule
+					e = await getPromiseError(Zotero.WindowController.command("closeWindow", { windowID }, UNPRIV_ID));
+					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					await Zotero.WindowController.command("closeWindow", { windowID });
+					for (let attempt = 0; attempt < 100 && !pluginWin.closed; attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.isTrue(pluginWin.closed, "chrome may close any plugin window");
 				}
 				finally {
 					try {
 						PluginSandbox.unloadScope(UNPRIV_ID);
 					}
 					catch {}
-					pluginWin.close();
+					if (!pluginWin.closed) {
+						pluginWin.close();
+					}
 				}
 			});
 
@@ -3804,6 +3820,13 @@ describe("Plugin API", function () {
 					again = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id });
 					assert.equal(again.windowID, windowID, "an existing reader window should be reused");
 
+					// closeWindow reaches any window type
+					await Zotero.WindowController.command("closeWindow", { windowID });
+					for (let attempt = 0; attempt < 100 && !readerWin.closed; attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.isTrue(readerWin.closed, "closeWindow should close a reader window");
+
 					let errorCodes = Zotero.WindowController.errorCodes;
 					let e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "note", itemID: -1 }));
 					assert.equal(e.name, errorCodes.NOT_FOUND);
@@ -3854,7 +3877,7 @@ describe("Plugin API", function () {
 				assert.sameMembers(queries, ["tabs"]);
 				assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
 				let windowCommands = Zotero.WindowController._windowController.requestNames.commands;
-				assert.sameMembers(windowCommands, ["focusWindow", "togglePane", "openWindow"]);
+				assert.sameMembers(windowCommands, ["focusWindow", "closeWindow", "togglePane", "openWindow", "openPluginWindow"]);
 			});
 
 			it("should require a window ID on every request", async function () {
