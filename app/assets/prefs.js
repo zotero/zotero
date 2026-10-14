@@ -101,6 +101,10 @@ pref("datareporting.policy.dataSubmissionEnabled", false);
 pref("toolkit.crashreporter.enabled", false);
 pref("extensions.remoteSettings.disabled", true);
 
+// Override "available" from firefox.js -- Relay's RemoteSettings lookups fail
+// here and break form-history/datalist autocomplete on plugin pages
+pref("signon.firefoxRelay.feature", "disabled");
+
 pref("extensions.update.url", "");
 
 // Don't try to load the "Get Add-ons" tab on first load of Add-ons window

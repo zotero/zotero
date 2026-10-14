@@ -74,6 +74,17 @@
 
 	<popupset>
 		<tooltip id="html-tooltip" page="true"/>
+		<panel
+			is="autocomplete-richlistbox-popup"
+			type="autocomplete-richlistbox"
+			id="PopupAutoComplete"
+			role="group"
+			noautofocus="true"
+			hidden="true"
+			overflowpadding="4"
+			norolluponanchor="true"
+			nomaxresults="true"
+		/>
 		<menupopup id="pluginContentContextMenu"
 				onpopupshowing="goUpdateGlobalEditMenuItems(true)">
 			<menuitem data-l10n-id="text-action-undo" command="cmd_undo"/>
@@ -120,6 +131,7 @@
 				 flex="1"
 				 disableglobalhistory="true"
 				 transparent="transparent"
+				 autocompletepopup="PopupAutoComplete"
 				 context="pluginContentContextMenu"/>
 	</vbox>
 </window>
