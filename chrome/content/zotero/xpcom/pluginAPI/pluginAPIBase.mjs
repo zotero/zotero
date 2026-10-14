@@ -47,7 +47,7 @@
  * @property {PluginAPIOptDefType} [type] - The type of the value
  * @property {boolean} [optional] - Whether the value is optional, default false
  * @property {PluginAPIOptDefCheckHook} [checkHook]
- *  - A function to check the value, returning true if it is valid
+ *  - A function to check the value, returning true if it is valid; not called for an optional value left out
  * @property {PluginAPIOptDefConfig | PluginAPIOptDefType} [children]
  *  - The type definition of the children of the object. The children can be
  * an object or an array of objects with the same structure; for an array, a type
@@ -141,7 +141,7 @@ class PluginAPIBase {
 					throw new Error(`Option ${fullPath} must be ${requiredType}, got ${typeof val}`);
 				}
 				
-				if (requirement.checkHook) {
+				if (requirement.checkHook && gotType !== "undefined") {
 					let result = requirement.checkHook(val);
 					if (result !== true) {
 						throw new Error(`Option ${fullPath} failed check: ${result}`);
