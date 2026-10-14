@@ -26,7 +26,7 @@
 
 import { ControllerAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs";
 
-const { NOT_FOUND } = ControllerAPIBase.errorCodes;
+const { NOT_FOUND, INVALID_PARAMS } = ControllerAPIBase.errorCodes;
 
 /**
  * Plugin-facing window type -> chrome windowtype; keep in sync with shortcut and window-resource APIs
@@ -42,6 +42,9 @@ const WINDOW_TYPES = Object.freeze({
 
 // Set on a plugin window's root element by PluginWindow.init()
 const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
+
+// What a tab or window opens from an item
+const OPENABLE_TYPES = Object.freeze(["reader", "note"]);
 
 /**
  * Stable per-window handle used as the plugin-facing window ID
@@ -104,6 +107,25 @@ function getMainWindow(windowID) {
 }
 
 /**
+ * @param {number} itemID
+ * @param {"reader" | "note"} type
+ * @returns {Zotero.Item} A readable attachment for reader, a note for note; NotFound or InvalidParams otherwise
+ */
+function getOpenableItem(itemID, type) {
+	let item = Zotero.Items.get(itemID);
+	if (!item) {
+		throw ControllerAPIBase.createError(NOT_FOUND, `No item with ID ${itemID}`);
+	}
+	let openable = type === "reader"
+		? item.isFileAttachment() && !!item.attachmentReaderType
+		: item.isNote();
+	if (!openable) {
+		throw ControllerAPIBase.createError(INVALID_PARAMS, `Item ${itemID} cannot be opened as ${type}`);
+	}
+	return item;
+}
+
+/**
  * @typedef {"normal" | "minimized" | "maximized" | "fullscreen"} SizeMode - The XUL sizemode values
  */
 
@@ -145,12 +167,14 @@ function getWindowState(win) {
 
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
+	OPENABLE_TYPES,
 	getWindowID,
 	getWindow,
 	getMainWindow,
 	getWindowState,
 	getPluginWindowOwner,
 	canAccessWindow,
+	getOpenableItem,
 });
 
 export { WindowUtils };

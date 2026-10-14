@@ -29,7 +29,7 @@ describe("Note Editor", function () {
 		item.setNote('<p>Test note</p>');
 		await item.saveTx();
 
-		let editorInstance = await Zotero.Notes.open(item.id, null, options);
+		let { instance: editorInstance } = await Zotero.Notes.open(item.id, null, options);
 		await editorInstance._initPromise;
 		return editorInstance;
 	}

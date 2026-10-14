@@ -108,7 +108,7 @@ var Zotero_Tabs = new function () {
 				// keeps its own
 				let { primaryViewState } = tab.data;
 				delete tab.data.primaryViewState;
-				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+				let { instance: reader } = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
@@ -119,9 +119,10 @@ var Zotero_Tabs = new function () {
 					window
 				});
 				await reader._initPromise;
+				return reader;
 			},
 			note: async (tab, tabIndex, options) => {
-				let editorInstance = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+				let { instance: editorInstance } = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
@@ -130,6 +131,7 @@ var Zotero_Tabs = new function () {
 					window
 				});
 				await editorInstance._initPromise;
+				return editorInstance;
 			},
 			library: async (tab, _tabIndex, options) => {
 				let container = this.getTabContent(tab.id);
@@ -1496,7 +1498,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 * @param {Object} options - Additional options for selecting the tab. Passed to tab hooks
 	 * @param {Boolean} options.keepTabFocused
-	 * @return {Promise}
+	 * @return {Promise | undefined} When the tab had to load, resolves with the instance its load hook opened
 	 */
 	this.select = function (id, reopening, options = {}) {
 		let { tab, tabIndex } = this._getTab(id);
@@ -1530,7 +1532,7 @@ var Zotero_Tabs = new function () {
 				let refocusHook = this._getHook(tabContentType, 'refocus');
 				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
 			}
-			return;
+			return undefined;
 		}
 		let selectedTab;
 		if (this._selectedID) {
@@ -1569,15 +1571,17 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 
+		let loading;
 		if (tabState === 'unloaded') {
 			tab.type = `${tabContentType}-loading`;
 			// Make sure the loading message is displayed first.
 			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
 			let loadHook = this._getHook(tabContentType, 'load');
-			tab.loadPromise = loadHook(tab, tabIndex, options).then(() => {
+			loading = tab.loadPromise = loadHook(tab, tabIndex, options).then((instance) => {
 				ZoteroContextPane.showLoadingMessage(false);
 				this.markAsLoaded(tab.id);
+				return instance;
 			});
 		}
 		// Notify previously selected tab content about selection change
@@ -1629,6 +1633,8 @@ var Zotero_Tabs = new function () {
 
 		// Notify tab content about selection change
 		currentTabContent?.onTabSelectionChanged(true);
+
+		return loading;
 	};
 	
 	this.canUnload = function (id) {
