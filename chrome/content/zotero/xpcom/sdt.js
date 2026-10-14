@@ -292,6 +292,17 @@ Zotero.SDT = new function () {
 			+ '/' + _getModule().CHUNKER_VERSION;
 	}
 
+	/**
+	 * The version of the chunker that cuts text here, structured or plain.
+	 * Null when the module isn't available.
+	 *
+	 * @returns {Number|null}
+	 */
+	this.getChunkerVersion = function () {
+		let module = _getModule();
+		return module ? module.CHUNKER_VERSION : null;
+	};
+
 	// A chunk from the worker with only the first of its positions, the one
 	// the reader opens at
 	function _withFirstPosition({ positions, ...chunk }) {

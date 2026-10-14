@@ -78,9 +78,17 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
-	// The oldest chunker whose cut still stands: raise it to reindex what an
-	// older one cut, gradually. Never above the chunker the worker ships.
+	// How the text of items, notes and annotations is assembled for
+	// embedding, by kind: bump one when its assembly changes, so what was
+	// embedded under the old one is embedded anew
+	this.ITEM_TEXT_VERSIONS = { item: 1, note: 1, annotation: 1 };
+	// The oldest chunker, and per kind of item the oldest extractor -- the
+	// document worker's for attachments, the text assembly above for the
+	// rest -- whose cut still stands: raise one to reindex what an older
+	// one cut, gradually. Never above what the worker ships or the
+	// assembly's current version.
 	this.MIN_CHUNKER_VERSION = 1;
+	this.MIN_PROCESSOR_VERSIONS = { pdf: 3, epub: 1, snapshot: 1, item: 1, note: 1, annotation: 1 };
 
 	const TASK_NAME = 'feature-extraction';
 	// Identifies our engine to the inference runtime, and the model files it
@@ -1689,39 +1697,42 @@ Zotero.Embeddings.Indexing = new function () {
 		let changed = await Zotero.Embeddings.Indexing.Sources.getChangedItems();
 		for (let i = 0; i < changed.length && !_shouldStop(); i += ITEM_SLICE_SIZE) {
 			await _embedItems(new Map(changed.slice(i, i + ITEM_SLICE_SIZE)
-				.map(row => [row.itemID, row.clientDateModified])));
+				.map(row => [row.itemID, { clientDateModified: row.clientDateModified, stale: row.stale }])));
 		}
 	}
 
 	// Embed the given items, notes and annotations whose text differs from
-	// what their rows were made from, replacing an item's rows as a unit once
-	// every chunk is in; one whose text is gone loses its rows. Each is
-	// stamped as seen, so the next run passes it over until it's saved again.
-	// The text is read from the tables, so no item is loaded.
+	// what their rows were made from, or whose rows an outdated extractor
+	// cut, replacing an item's rows as a unit once every chunk is in; one
+	// whose text is gone loses its rows. Each is stamped as seen, so the
+	// next run passes it over until it's saved again. The text is read from
+	// the tables, so no item is loaded.
 	//
-	// @param {Map} stamps - itemID -> the item's clientDateModified as
-	//     seen when it was found changed
-	async function _embedItems(stamps) {
+	// @param {Map} found - itemID -> { clientDateModified, stale }: the
+	//     stamp seen when the item was found changed, and whether its rows
+	//     are outdated
+	async function _embedItems(found) {
 		let { Store, Sources } = Zotero.Embeddings.Indexing;
 		// Deleted since they were found: their rows went with the delete
 		// notifier, and they get no stamp
-		let itemIDs = [...stamps.keys()].filter(itemID => Zotero.Items.exists(itemID));
+		let itemIDs = [...found.keys()].filter(itemID => Zotero.Items.exists(itemID));
 		let texts = await Sources.getItemTexts(itemIDs);
 		let storedHashes = await Store.getStoredHashes(itemIDs);
 		let entries = [];
 		let toDelete = [];
 		let seen = [];
 		for (let itemID of itemIDs) {
-			let text = texts.get(itemID);
-			let contentHash = text ? Zotero.Utilities.Internal.md5(text) : null;
-			if (text && storedHashes.get(itemID) !== contentHash) {
-				entries.push({ itemID, text, contentHash });
+			let { clientDateModified, stale } = found.get(itemID);
+			let source = texts.get(itemID);
+			let contentHash = source ? Zotero.Utilities.Internal.md5(source.text) : null;
+			if (source && (storedHashes.get(itemID) !== contentHash || stale)) {
+				entries.push({ itemID, text: source.text, extractor: source.extractor, contentHash, clientDateModified });
 				continue;
 			}
-			if (!text && storedHashes.has(itemID)) {
+			if (!source && storedHashes.has(itemID)) {
 				toDelete.push(itemID);
 			}
-			seen.push({ itemID, clientDateModified: stamps.get(itemID) });
+			seen.push({ itemID, clientDateModified });
 		}
 		if (toDelete.length) {
 			await Store.deleteItems(toDelete);
@@ -1762,7 +1773,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 			});
 			await Zotero.DB.executeTransaction(async function () {
-				for (let { itemID, vectors: itemVectors, contentHash } of completed) {
+				for (let { itemID, vectors: itemVectors, contentHash, extractor, clientDateModified } of completed) {
 					// The item may have been deleted while the batch was
 					// embedding -- don't write its vectors back after the
 					// delete notifier removed them
@@ -1776,7 +1787,8 @@ Zotero.Embeddings.Indexing = new function () {
 					}
 					await Zotero.Embeddings.Indexing.Store.setSource(itemID, {
 						contentHash,
-						clientDateModified: stamps.get(itemID)
+						extractor,
+						clientDateModified
 					});
 				}
 			});
@@ -1988,8 +2000,10 @@ Zotero.Embeddings.Indexing = new function () {
 			}
 			// Ones the server declined are this client's
 			let declined = own.filter(payload => payload.record?.syncDeclined).length;
+			let stale = own.filter(payload => payload.stale).length;
 			Zotero.debug(`Embeddings: page of ${_count(own.length, 'attachment')} to index here`
-				+ (declined ? `, ${declined} of them declined by the server` : ''));
+				+ (declined ? `, ${declined} of them declined by the server` : '')
+				+ (stale ? `, ${stale} of them cut by an outdated extractor` : ''));
 			if (!started) {
 				started = true;
 				Progress.setEmbedWork({});
@@ -2014,7 +2028,7 @@ Zotero.Embeddings.Indexing = new function () {
 	//
 	// @return {Promise<Object[]>} - The units, none when the attachment has
 	//     no file or can't be cut right now
-	async function _chunkAttachment({ item, clientDateModified }) {
+	async function _chunkAttachment({ item, record, stale, clientDateModified }) {
 		let { Sources } = Zotero.Embeddings.Indexing;
 		let sourceKey = await Sources.getAttachmentSourceKey(item);
 		if (!sourceKey) {
@@ -2036,7 +2050,8 @@ Zotero.Embeddings.Indexing = new function () {
 			vectors: new Array(chunks.length),
 			remaining: chunks.length
 		};
-		Zotero.debug(`Embeddings: ${item.libraryKey} cuts into ${chunks.length} chunks`);
+		Zotero.debug(`Embeddings: ${item.libraryKey} cuts into ${chunks.length} chunks`
+			+ (stale ? ` -- cut again, ${record.extractor} is outdated` : ''));
 		if (!entry.remaining) {
 			await _storeAttachments([entry]);
 			return [];
@@ -2312,15 +2327,48 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		return Zotero.SDT.getProcessorVersion(item);
 	};
 
+	// The identity of the text assembly and chunker that would cut an item,
+	// note or annotation here, in the form the attachments' take, with
+	// nothing where the pack schema goes. Null when the chunker isn't
+	// available.
+	//
+	// @param {String} kind - 'item', 'note' or 'annotation'
+	// @return {String|null} - e.g. 'note/1/0/1'
+	this.getItemExtractor = function (kind) {
+		let chunker = Zotero.SDT.getChunkerVersion();
+		return chunker === null
+			? null
+			: `${kind}/${Zotero.Embeddings.ITEM_TEXT_VERSIONS[kind]}/0/${chunker}`;
+	};
+
+	// Every identity getItemExtractor() gives right now
+	//
+	// @return {String[]}
+	this.getItemExtractors = function () {
+		return Object.keys(Zotero.Embeddings.ITEM_TEXT_VERSIONS)
+			.map(kind => this.getItemExtractor(kind))
+			.filter(extractor => extractor !== null);
+	};
+
 	// Whether rows cut by the given extractor identity are due to be cut
-	// again: their chunker is older than the oldest kept. Rows with no
-	// identity never are.
+	// again: its chunker, or the extractor for its type, is older than the
+	// oldest kept. Rows with no identity, or one not in the form
+	// type/extractor/schema/chunker, never are.
 	//
 	// @param {String|null} extractor - e.g. 'pdf/3/1/1'
 	// @return {Boolean}
 	this.isOutdatedExtractor = function (extractor) {
-		let version = parseInt(extractor?.split('/').at(-1));
-		return !Number.isNaN(version) && version < Zotero.Embeddings.MIN_CHUNKER_VERSION;
+		let parts = extractor?.split('/') || [];
+		if (parts.length !== 4) {
+			return false;
+		}
+		let [type, processor, , chunker] = parts;
+		if (!/^\d+$/.test(processor) || !/^\d+$/.test(chunker)) {
+			return false;
+		}
+		let floor = Zotero.Embeddings.MIN_PROCESSOR_VERSIONS[type];
+		return (floor !== undefined && parseInt(processor) < floor)
+			|| parseInt(chunker) < Zotero.Embeddings.MIN_CHUNKER_VERSION;
 	};
 
 	// The outdated identities among those the stored rows were cut by
@@ -2401,26 +2449,34 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	}
 
 	// Items, notes and annotations saved since the index last looked at them,
-	// or never looked at, library by library, most recently saved first. Each
-	// comes with the stamp seen, which is what the look records.
+	// never looked at, or with rows an outdated extractor cut, library by
+	// library, most recently saved first. Each comes with the stamp seen,
+	// which is what the look records, and whether its rows are outdated.
 	//
-	// @return {Promise<Object[]>} - [{ itemID, clientDateModified }]
+	// @return {Promise<Object[]>} - [{ itemID, clientDateModified, stale }]
 	this.getChangedItems = async function () {
 		let byLibrary = new Map();
+		let outdated = await this.getOutdatedExtractors();
 		let rows = await Zotero.DB.queryAsync(
-			"SELECT I.libraryID, I.itemID, I.clientDateModified FROM items I "
+			"SELECT I.libraryID, I.itemID, I.clientDateModified, S.extractor FROM items I "
 				+ "LEFT JOIN embeddings.itemIndexState S USING (itemID) "
 				+ "WHERE I.itemTypeID!=? "
 				+ "AND (S.itemID IS NULL OR S.clientDateModified IS NOT I.clientDateModified "
-					+ "OR I.clientDateModified>=?) "
+					+ "OR I.clientDateModified>=? "
+					+ (outdated.length ? "OR S.extractor IN (" + outdated.map(() => '?').join(',') + ") " : "")
+					+ ") "
 				+ "ORDER BY I.clientDateModified DESC, I.itemID",
-			[Zotero.ItemTypes.getID('attachment'), _recentSaveCutoff()]
+			[Zotero.ItemTypes.getID('attachment'), _recentSaveCutoff(), ...outdated]
 		);
 		for (let row of rows) {
 			if (!byLibrary.has(row.libraryID)) {
 				byLibrary.set(row.libraryID, []);
 			}
-			byLibrary.get(row.libraryID).push({ itemID: row.itemID, clientDateModified: row.clientDateModified });
+			byLibrary.get(row.libraryID).push({
+				itemID: row.itemID,
+				clientDateModified: row.clientDateModified,
+				stale: outdated.includes(row.extractor)
+			});
 		}
 		return this.getIndexableLibraries().flatMap(library => byLibrary.get(library.libraryID) || []);
 	};
@@ -2504,6 +2560,23 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		);
 	};
 
+	// Indexed items, notes and annotations, an item's chunks counting as one
+	// item, less those an outdated extractor cut
+	this.countIndexedItems = async function () {
+		let outdated = await this.getOutdatedExtractors();
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(DISTINCT E.itemID) FROM embeddings.itemEmbeddings E "
+				+ "JOIN items I USING (itemID) "
+				+ "LEFT JOIN embeddings.itemIndexState S USING (itemID) "
+				+ "WHERE I.itemTypeID!=?"
+				+ (outdated.length
+					? " AND (S.extractor IS NULL OR S.extractor NOT IN ("
+						+ outdated.map(() => '?').join(',') + "))"
+					: ""),
+			[Zotero.ItemTypes.getID('attachment'), ...outdated]
+		);
+	};
+
 	// How many attachments with a file here have every chunk embedded,
 	// whoever embedded it, less those an outdated extractor cut here
 	this.countFinishedAttachments = async function () {
@@ -2531,18 +2604,20 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			|| item.isSnapshotAttachment();
 	};
 
-	// The text embedded for each item, null when it has too little to index
-	// by the eligibility tests: a regular item's title and abstract, a note's
-	// plain text, an annotation's passage with its comment. Read from the
-	// tables, so no item is loaded; the ids go into one IN list.
+	// The text embedded for each item, with the identity of what assembles
+	// and cuts it, or null when it has too little to index by the
+	// eligibility tests: a regular item's title and abstract, a note's plain
+	// text, an annotation's passage with its comment. Read from the tables,
+	// so no item is loaded; the ids go into one IN list.
 	//
 	// @param {Integer[]} itemIDs - Items, notes and annotations
-	// @return {Promise<Map>}
+	// @return {Promise<Map>} - itemID -> { text, extractor } or null
 	this.getItemTexts = async function (itemIDs) {
 		let texts = new Map(itemIDs.map(itemID => [itemID, null]));
 		if (!itemIDs.length) {
 			return texts;
 		}
+		let entry = (kind, text) => ({ text, extractor: this.getItemExtractor(kind) });
 		let ids = itemIDs.map(() => '?').join(',');
 		// The title field is one of several, by item type (title, caseName,
 		// subject, nameOfAct); the abstract is one field
@@ -2563,14 +2638,14 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			if (!_hasEmbeddableText(title, 2) && !_hasEmbeddableText(abstract, 2)) {
 				continue;
 			}
-			texts.set(itemID, title && abstract ? `${title}\n\n${abstract}` : title || abstract);
+			texts.set(itemID, entry('item', title && abstract ? `${title}\n\n${abstract}` : title || abstract));
 		}
 		rows = await Zotero.DB.queryAsync(
 			"SELECT itemID, note FROM itemNotes WHERE itemID IN (" + ids + ")", itemIDs);
 		for (let row of rows) {
 			let text = _htmlToText(row.note, true);
 			if (_hasEmbeddableText(text)) {
-				texts.set(row.itemID, text);
+				texts.set(row.itemID, entry('note', text));
 			}
 		}
 		rows = await Zotero.DB.queryAsync(
@@ -2581,7 +2656,8 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			}
 			let text = _htmlToText(row.text);
 			let comment = _htmlToText(row.comment);
-			texts.set(row.itemID, text && comment ? `${text}\n\n${comment}` : text || comment || null);
+			let joined = text && comment ? `${text}\n\n${comment}` : text || comment || null;
+			texts.set(row.itemID, joined ? entry('annotation', joined) : null);
 		}
 		return texts;
 	};
@@ -2975,14 +3051,13 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	// what's stored, so a run cut short by a stop or an error still says
 	// where it got to
 	this.endRun = async function () {
-		let Store = Zotero.Embeddings.Indexing.Store;
 		_phase = 'idle';
 		_download = null;
 		_sweep = { done: 0, total: 0 };
 		_embedWork = null;
 		try {
 			await _readCounts();
-			_items = { done: await Store.getIndexedItemCount(), total: _items.total };
+			_items = { done: await Zotero.Embeddings.Indexing.Sources.countIndexedItems(), total: _items.total };
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -2995,7 +3070,6 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	// chunk shape each cost an index scan, so they're recomputed less
 	// often; the eligible count comes from the last full refresh.
 	this.tick = async function () {
-		let Store = Zotero.Embeddings.Indexing.Store;
 		let now = Date.now();
 		if (now - _lastEmit < EMIT_INTERVAL) {
 			return;
@@ -3005,7 +3079,7 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 			await _readCounts();
 			if (now - _lastCountRefresh >= COUNT_REFRESH_INTERVAL) {
 				_lastCountRefresh = now;
-				_items = { done: await Store.getIndexedItemCount(), total: _items.total };
+				_items = { done: await Zotero.Embeddings.Indexing.Sources.countIndexedItems(), total: _items.total };
 				await Zotero.Embeddings.Diagnostics.refreshChunkShape();
 			}
 		}
@@ -3019,7 +3093,7 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	// the expensive refresh, for the pane opening and a run's ends; a run
 	// in progress ticks instead.
 	this.refresh = async function () {
-		let { Store, Sources } = Zotero.Embeddings.Indexing;
+		let { Sources } = Zotero.Embeddings.Indexing;
 		// Don't create and attach the embeddings database just to report
 		// a disabled state (e.g. when the Advanced preferences pane opens)
 		if (!Zotero.Embeddings.isEnabled()) {
@@ -3028,7 +3102,7 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 		}
 		await Zotero.Embeddings.initDB();
 		let items = await Sources.getEligibleItemIDs();
-		_items = { done: await Store.getIndexedItemCount(), total: items.length };
+		_items = { done: await Sources.countIndexedItems(), total: items.length };
 		// An attachment that's never been cut and has no file to cut can't
 		// be indexed at all, so it isn't work left to do -- counting it
 		// would leave the total forever out of reach
@@ -3098,16 +3172,6 @@ Zotero.Embeddings.Indexing.Store = new function () {
 			}
 		}
 		return hashes;
-	};
-
-	// Indexed items, notes and annotations; an item's chunks count as one
-	// item
-	this.getIndexedItemCount = async function () {
-		return Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(DISTINCT itemID) FROM embeddings.itemEmbeddings "
-				+ "JOIN items USING (itemID) WHERE itemTypeID!=?",
-			Zotero.ItemTypes.getID('attachment')
-		);
 	};
 
 	// Index state

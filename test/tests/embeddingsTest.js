@@ -3540,22 +3540,142 @@ describe("Zotero.Embeddings", function () {
 
 		it("should tell an outdated extractor identity from a current one and from none", function () {
 			let { Sources } = Zotero.Embeddings.Indexing;
-			let floor = Zotero.Embeddings.MIN_CHUNKER_VERSION;
-			assert.isTrue(Sources.isOutdatedExtractor('pdf/3/1/' + (floor - 1)));
-			assert.isFalse(Sources.isOutdatedExtractor('pdf/3/1/' + floor));
-			assert.isFalse(Sources.isOutdatedExtractor('epub/2/1/' + (floor + 6)));
-			// Rows with no identity, no chunker outdates
+			let chunker = Zotero.Embeddings.MIN_CHUNKER_VERSION;
+			let pdf = Zotero.Embeddings.MIN_PROCESSOR_VERSIONS.pdf;
+			let identity = (type, processor, cut) => `${type}/${processor}/1/${cut}`;
+			// An older chunker
+			assert.isTrue(Sources.isOutdatedExtractor(identity('pdf', pdf, chunker - 1)));
+			assert.isFalse(Sources.isOutdatedExtractor(identity('pdf', pdf, chunker)));
+			assert.isFalse(Sources.isOutdatedExtractor(identity('pdf', pdf, chunker + 6)));
+			// An older extractor of the type, judged by the type's own floor
+			assert.isTrue(Sources.isOutdatedExtractor(identity('pdf', pdf - 1, chunker)));
+			assert.isFalse(Sources.isOutdatedExtractor(identity('pdf', pdf + 1, chunker)));
+			assert.isFalse(Sources.isOutdatedExtractor(identity('unknown', 0, chunker)));
+			// An older assembly of an item's text, the same way
+			let note = Zotero.Embeddings.MIN_PROCESSOR_VERSIONS.note;
+			assert.isTrue(Sources.isOutdatedExtractor(`note/${note - 1}/0/${chunker}`));
+			assert.isFalse(Sources.isOutdatedExtractor(`note/${note}/0/${chunker}`));
+			// Rows with no identity, or one in another form, nothing outdates
 			assert.isFalse(Sources.isOutdatedExtractor(null));
+			assert.isFalse(Sources.isOutdatedExtractor('pdf/3/1'));
+			assert.isFalse(Sources.isOutdatedExtractor('pdf/x/1/0'));
+			assert.isFalse(Sources.isOutdatedExtractor('pdf/0/1/x'));
 		});
 
-		it("should keep the chunker floor at or below the chunker the worker ships", async function () {
+		it("should keep every floor at or below what cuts here now", async function () {
 			// A floor above it would outdate every cut as it's stored, and
 			// the index would never settle
 			let { Sources } = Zotero.Embeddings.Indexing;
-			let extractors = await Zotero.SDT.getProcessorVersions();
-			assert.isNotEmpty(extractors);
+			let extractors = [...await Zotero.SDT.getProcessorVersions(), ...Sources.getItemExtractors()];
+			assert.isAtLeast(extractors.length, 4);
 			for (let extractor of extractors) {
 				assert.isFalse(Sources.isOutdatedExtractor(extractor), extractor);
+			}
+		});
+
+		it("should record what an item, a note and an annotation were cut with", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of identified children' });
+			let note = new Zotero.Item('note');
+			note.parentID = item.id;
+			note.setNote('<p>A note with several words about owls.</p>');
+			await note.saveTx();
+			let attachment = await importPDFAttachment(item);
+			let annotation = await createAnnotation('highlight', attachment,
+				{ comment: 'A comment on the passage' });
+
+			let vector = new Float32Array(4).fill(0.5);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => vector)),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves()
+			];
+			let { Sources, Store } = Zotero.Embeddings.Indexing;
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+				let records = await Store.getIndexStates([item.id, note.id, annotation.id]);
+				for (let [kind, id] of [['item', item.id], ['note', note.id], ['annotation', annotation.id]]) {
+					let extractor = Sources.getItemExtractor(kind);
+					assert.match(extractor, new RegExp(`^${kind}/\\d+/0/\\d+$`));
+					assert.equal(records.get(id).extractor, extractor);
+				}
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should embed anew a note cut before its floor, keeping its rows until then", async function () {
+			this.timeout(60000);
+			let item = await createDataObject('item', { title: 'Parent of outdated note' });
+			let note = new Zotero.Item('note');
+			note.parentID = item.id;
+			note.setNote('<p>Herons wade the shallows at dawn, hunting by sight.</p>');
+			await note.saveTx();
+
+			let vector = new Float32Array(4).fill(0.5);
+			let failHerons = false;
+			let embedStub = sinon.stub(Zotero.Embeddings, 'embedPassages')
+				.callsFake(async (texts) => {
+					if (failHerons && texts.some(text => text.includes('Herons'))) {
+						throw new Error('Embedding failed');
+					}
+					return texts.map(() => vector);
+				});
+			let stubs = [
+				embedStub,
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves()
+			];
+			let { Sources, Store } = Zotero.Embeddings.Indexing;
+			let embeddedHerons = () => embedStub.args
+				.filter(([texts]) => texts.some(text => text.includes('Herons'))).length;
+			let rows = () => Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", note.id);
+			let extractorOf = async () => (await Store.getIndexStates([note.id])).get(note.id).extractor;
+			try {
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(embeddedHerons(), 1);
+				let extractor = await extractorOf();
+				let stored = await rows();
+				assert.isAbove(stored, 0);
+				let indexed = await Sources.countIndexedItems();
+
+				// Marked as assembled by text version 0, below the floor:
+				// work to do, though its rows still score
+				let outdated = extractor.replace(/^note\/\d+/, 'note/0');
+				assert.isTrue(Sources.isOutdatedExtractor(outdated));
+				await Zotero.DB.queryAsync(
+					"UPDATE embeddings.itemIndexState SET extractor=? WHERE itemID=?",
+					[outdated, note.id]
+				);
+				assert.equal(await Sources.countIndexedItems(), indexed - 1);
+				// The rows stand while the new embedding fails
+				failHerons = true;
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(embeddedHerons(), 2);
+				assert.equal(await extractorOf(), outdated);
+				assert.equal(await rows(), stored);
+
+				// Replaced as a unit once it succeeds, the text unchanged
+				failHerons = false;
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(embeddedHerons(), 3);
+				assert.equal(await extractorOf(), extractor);
+				assert.equal(await rows(), stored);
+				assert.equal(await Sources.countIndexedItems(), indexed);
+
+				// Current, so left alone
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(embeddedHerons(), 3);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
 			}
 		});
 
