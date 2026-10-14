@@ -53,16 +53,12 @@ function register(pluginID, rootURI, pluginUUID, origins = [], contentSecurityPo
 	// https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#4080-4090
 	// Since Zotero plugins skip the full WebExtension lifecycle, this
 	// temporary policy is never replaced. Deactivate it so we can register
-	// our own with webAccessibleResources (needed for URI_LOADABLE_BY_ANYONE).
+	// our own with webAccessibleResources.
 	let existing = WebExtensionPolicy.getByID(pluginID);
-	let hostname;
 	if (existing) {
-		hostname = existing.mozExtensionHostname;
 		existing.active = false;
 	}
-	else {
-		hostname = pluginUUID;
-	}
+	let hostname = pluginUUID;
 
 	let baseURL = rootURI.spec;
 
