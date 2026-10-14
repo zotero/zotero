@@ -51,7 +51,7 @@ const DataParams = {
 		type: "any",
 		objectType,
 		optional,
-		checkHook: value => (optional && value === undefined) || isIDRef(value) || `must be ${ID_REF_FORMS}`,
+		checkHook: value => isIDRef(value) || `must be ${ID_REF_FORMS}`,
 	}),
 
 	nullableIDRef: objectType => ({
