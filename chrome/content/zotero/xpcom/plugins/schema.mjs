@@ -272,8 +272,8 @@ const PERMISSION_SCHEMAS = {
 	preferencePane: {
 		Zotero: {
 			PreferencePanes: {
-				register: true,
-				unregister: true,
+				register: "CustomParserCallable",
+				unregister: "CustomParserCallable",
 			}
 		},
 	},
