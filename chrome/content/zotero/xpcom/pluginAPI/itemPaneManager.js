@@ -34,6 +34,8 @@
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
+	const ICON_KEYS = ["icon", "darkIcon"];
+
 
 	/**
 	 * @namespace Zotero
@@ -42,7 +44,7 @@
 
 	/**
 	 * @typedef {Object} SectionIcon
-	 * @property {string} icon - Icon URI.
+	 * @property {string} icon - Icon URI, optionally relative to the plugin root.
 	 * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`.
 	 */
 
@@ -55,7 +57,7 @@
 	/**
 	 * @typedef {Object} SectionButton
 	 * @property {string} type - Button type, must be valid DOMString and without ",".
-	 * @property {string} icon - Icon URI.
+	 * @property {string} icon - Icon URI, optionally relative to the plugin root.
 	 * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`.
 	 * @property {string} [l10nID] - data-l10n-id for localization of button tooltiptext.
 	 * @property {SectionButtonHook} onClick - Button click callback.
@@ -374,7 +376,16 @@
 				option.src = src;
 			}
 
-			return super._validate(option);
+			option = super._validate(option);
+			if (!option) {
+				return false;
+			}
+			for (let icons of [option.header, option.sidenav, ...(option.sectionButtons ?? [])]) {
+				if (!this._resolveImageURLs(icons, ICON_KEYS, option.pluginID)) {
+					return false;
+				}
+			}
+			return option;
 		}
 	}
 
