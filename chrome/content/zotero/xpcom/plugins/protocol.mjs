@@ -126,16 +126,16 @@ function canAccessURI(value, pluginID) {
 const LOCAL_RESOURCE_SCHEMES = new Set(["chrome", "resource", "data", "blob"]);
 
 /**
- * Check whether a plugin can load an image from the given URI string:
- * local schemes (chrome/resource/data/blob) plus its declared origins.
- * @param {string} value - URI to test; relative values resolve against the plugin root
+ * Resolve an image URL a plugin may load: local schemes (chrome/resource/data/blob)
+ * plus its declared origins. Relative values resolve against the plugin root.
  * @param {string} pluginID
- * @returns {boolean}
+ * @param {string} value
+ * @returns {string | null} The absolute URL ("" for an empty value, which loads nothing), or null if not allowed
  */
-function canLoadImageURI(value, pluginID) {
+function resolveImageURL(pluginID, value) {
 	let raw = (value === null || value === undefined) ? "" : String(value);
 	if (!raw.trim()) {
-		return true;
+		return "";
 	}
 	let uri;
 	try {
@@ -145,13 +145,13 @@ function canLoadImageURI(value, pluginID) {
 		uri = Services.io.newURI(raw, null, base);
 	}
 	catch {
-		return false;
+		return null;
 	}
-	let scheme = uri.scheme.toLowerCase();
-	if (LOCAL_RESOURCE_SCHEMES.has(scheme)) {
-		return true;
+	if (LOCAL_RESOURCE_SCHEMES.has(uri.scheme.toLowerCase())
+			|| canAccessURI(uri.spec, pluginID)) {
+		return uri.spec;
 	}
-	return canAccessURI(uri.spec, pluginID);
+	return null;
 }
 
 /**
@@ -197,7 +197,7 @@ const PluginProtocol = {
 	unregister,
 	getBaseURI,
 	canAccessURI,
-	canLoadImageURI,
+	resolveImageURL,
 	resolveFile,
 	resolvePage,
 };
