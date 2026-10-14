@@ -3794,6 +3794,160 @@ describe("Plugin Sandbox", function () {
 			});
 		});
 
+		describe("ShortcutManager", function () {
+			beforeEach(function () {
+				loadTestScope(["default", "shortcut"]);
+			});
+
+			function dispatchKey(key) {
+				let event = new pluginWin.KeyboardEvent("keydown", {
+					key,
+					metaKey: Zotero.isMac,
+					ctrlKey: !Zotero.isMac,
+					altKey: true,
+					bubbles: true,
+					cancelable: true,
+				});
+				pluginWin.document.getElementById("zotero-pane").dispatchEvent(event);
+				return event;
+			}
+
+			it("should register a shortcut from sandbox and fire its onCommand", function () {
+				evalInScope(`
+					var _firedContext = null;
+					var _shortcutID = Zotero.ShortcutManager.registerShortcut({
+						shortcutID: 'sandbox-shortcut',
+						pluginID: '${ADDON_ID}',
+						key: 'U',
+						modifiers: ['accel', 'alt'],
+						target: 'mainWindow',
+						onCommand: function (context) {
+							_firedContext = context;
+						}
+					});
+				`);
+				let shortcutID = evalInScope("_shortcutID");
+				assert.isString(shortcutID, "registerShortcut should return a string shortcutID");
+
+				let option = Zotero.ShortcutManager._shortcutManager._optionsCache[shortcutID];
+				assert.ok(option, "Shortcut option should be in cache");
+				assert.isFunction(option.onCommand, "onCommand should be a function");
+
+				try {
+					let event = dispatchKey("u");
+					assert.isTrue(event.defaultPrevented, "a matching keydown should be consumed");
+					assert.equal(evalInScope("_firedContext && _firedContext.tabType"), "library");
+					assert.equal(evalInScope("_firedContext.tabID"), "zotero-pane");
+				}
+				finally {
+					assert.isTrue(evalInScope("Zotero.ShortcutManager.unregisterShortcut(_shortcutID)"));
+				}
+				let event = dispatchKey("u");
+				assert.isFalse(event.defaultPrevented, "the combo should be free after unregistering");
+			});
+
+			it("should not let an accessor pluginID override the real caller", function () {
+				evalInScope(`
+					var _spoofOpts = {
+						shortcutID: 'accessor-spoof-shortcut',
+						key: 'U',
+						modifiers: ['accel', 'alt'],
+						target: 'mainWindow',
+						onCommand: function () {}
+					};
+					Object.defineProperty(_spoofOpts, 'pluginID', {
+						get: function () { return 'nonexistent-privileged@evil'; },
+						set: function () {},
+						enumerable: true,
+						configurable: true
+					});
+					var _spoofShortcutID = Zotero.ShortcutManager.registerShortcut(_spoofOpts);
+				`);
+				let shortcutID = evalInScope("_spoofShortcutID");
+				assert.isString(shortcutID, "registerShortcut should still succeed");
+				try {
+					let option = Zotero.ShortcutManager._shortcutManager._optionsCache[shortcutID];
+					assert.ok(option, "spoofed shortcut should be stored");
+					assert.equal(option.pluginID, ADDON_ID,
+						"stored pluginID must be the real caller, not the spoofed value");
+				}
+				finally {
+					evalInScope("Zotero.ShortcutManager.unregisterShortcut(_spoofShortcutID)");
+				}
+			});
+
+			it("should not let a Proxy options object override the real caller", function () {
+				evalInScope(`
+					var _proxyBase = {
+						shortcutID: 'proxy-spoof-shortcut',
+						key: 'U',
+						modifiers: ['accel', 'alt'],
+						target: 'mainWindow',
+						onCommand: function () {}
+					};
+					var _proxyOpts = new Proxy(_proxyBase, {
+						get: function (t, p) {
+							return p === 'pluginID' ? 'nonexistent-privileged@evil' : t[p];
+						},
+						set: function () { return true; }
+					});
+					var _proxyShortcutID = Zotero.ShortcutManager.registerShortcut(_proxyOpts);
+				`);
+				let shortcutID = evalInScope("_proxyShortcutID");
+				assert.isString(shortcutID, "registerShortcut should still succeed");
+				try {
+					let option = Zotero.ShortcutManager._shortcutManager._optionsCache[shortcutID];
+					assert.ok(option, "spoofed shortcut should be stored");
+					assert.equal(option.pluginID, ADDON_ID,
+						"stored pluginID must be the real caller, not the spoofed value");
+				}
+				finally {
+					evalInScope("Zotero.ShortcutManager.unregisterShortcut(_proxyShortcutID)");
+				}
+			});
+
+			it("should not unregister another plugin's shortcut", function () {
+				let shortcutID = Zotero.ShortcutManager.registerShortcut({
+					shortcutID: "other-plugin-shortcut",
+					pluginID: "other@zotero.org",
+					key: "U",
+					modifiers: ["accel", "alt"],
+					target: "mainWindow",
+					onCommand: () => {},
+				});
+				assert.isString(shortcutID);
+				try {
+					// Pass the CSS-escaped key in via the scope to avoid escaping issues
+					scope._otherShortcutID = shortcutID;
+					assert.isFalse(evalInScope("Zotero.ShortcutManager.unregisterShortcut(_otherShortcutID)"));
+				}
+				finally {
+					Zotero.ShortcutManager.unregisterShortcut(shortcutID);
+				}
+			});
+
+			it("should reject combos reserved by Zotero from sandbox", function () {
+				assert.isFalse(evalInScope(`Zotero.ShortcutManager.registerShortcut({
+					shortcutID: 'reserved-shortcut',
+					pluginID: '${ADDON_ID}',
+					key: 'W',
+					modifiers: ['accel'],
+					target: 'mainWindow',
+					onCommand: function () {}
+				})`));
+			});
+
+			it("should not be exposed without the shortcut permission", function () {
+				loadTestScope(["default"]);
+				assert.equal(evalInScope("typeof Zotero.ShortcutManager"), "undefined");
+			});
+
+			it("should be exposed via the ui umbrella permission", function () {
+				loadTestScope(["default", "ui"]);
+				assert.equal(evalInScope("typeof Zotero.ShortcutManager.registerShortcut"), "function");
+			});
+		});
+
 		// All three managers pass plugin callbacks a facaded item. Without
 		// dataWrite, that facade must expose read methods (getField) but strip
 		// write methods (save/saveTx/eraseTx), across every manager entry point.

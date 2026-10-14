@@ -1791,6 +1791,382 @@ describe("Plugin API", function () {
 		});
 	});
 
+	describe("Shortcut manager", function () {
+		let defaultOption = {
+			shortcutID: "default-test",
+			pluginID: "zotero@zotero.org",
+			key: "Y",
+			modifiers: ["accel", "alt"],
+			target: "mainWindow",
+			onCommand: (context) => {
+				updateCache("onCommand", context);
+			},
+		};
+
+		function registerShortcut(option = {}) {
+			return Zotero.ShortcutManager.registerShortcut(
+				Object.assign({}, defaultOption, option)
+			);
+		}
+
+		function dispatchKey(key, { accel = false, alt = false, shift = false } = {}) {
+			let event = new win.KeyboardEvent("keydown", {
+				key,
+				metaKey: Zotero.isMac && accel,
+				ctrlKey: !Zotero.isMac && accel,
+				altKey: alt,
+				shiftKey: shift,
+				bubbles: true,
+				cancelable: true,
+			});
+			doc.getElementById("zotero-pane").dispatchEvent(event);
+			return event;
+		}
+
+		before(function () {
+			Zotero_Tabs.select("zotero-pane");
+		});
+
+		beforeEach(function () {
+			resetCaches();
+		});
+
+		afterEach(function () {
+			Zotero_Tabs.select("zotero-pane");
+			Zotero_Tabs.closeAll();
+		});
+
+		it("should reject invalid combos", function () {
+			// No accel/alt modifier
+			assert.isFalse(registerShortcut({ modifiers: ["shift"] }));
+			// Unknown modifier
+			assert.isFalse(registerShortcut({ modifiers: ["accel", "ctrl"] }));
+			// Navigation key
+			assert.isFalse(registerShortcut({ key: "Enter", modifiers: ["accel", "alt"] }));
+			// Missing onCommand
+			assert.isFalse(registerShortcut({ onCommand: undefined }));
+		});
+
+		it("should reject combos reserved by Zotero", function () {
+			// Static list (close tab)
+			assert.isFalse(registerShortcut({ key: "W", modifiers: ["accel"] }));
+			// A built-in registration's combo (quicksearch, accel+shift+K) is not
+			// reserved -- sharing it fires alongside the built-in instead
+			let sharedID = registerShortcut({ key: "K", modifiers: ["accel", "shift"] });
+			assert.isString(sharedID);
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(sharedID));
+			// Built-ins with display-only <key> elements are plain registrations too --
+			// shareable, not reserved (advanced search)
+			let advancedSearchID = registerShortcut({
+				shortcutID: "shared-key-element-test",
+				key: "F",
+				modifiers: ["accel", "shift"],
+			});
+			assert.isString(advancedSearchID);
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(advancedSearchID));
+		});
+
+		it("should fire every shortcut sharing a combo", async function () {
+			initCache("onCommand");
+			let secondCalled = false;
+			let firstID = registerShortcut();
+			let secondID = registerShortcut({
+				shortcutID: "duplicate-test",
+				onCommand: () => {
+					secondCalled = true;
+				},
+			});
+			assert.isString(secondID);
+
+			let event = dispatchKey("y", { accel: true, alt: true });
+			await getCache("onCommand");
+			assert.isTrue(secondCalled);
+			assert.isTrue(event.defaultPrevented);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(firstID));
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(secondID));
+		});
+
+		it("should consume the event unless every handler declines", function () {
+			let calls = [];
+			let firstID = registerShortcut({
+				onCommand: () => {
+					calls.push("first");
+					return false;
+				},
+			});
+
+			// With every handler declining, the event propagates
+			let event = dispatchKey("y", { accel: true, alt: true });
+			assert.deepEqual(calls, ["first"]);
+			assert.isFalse(event.defaultPrevented);
+
+			// One handling registration is enough to consume it
+			let secondID = registerShortcut({
+				shortcutID: "decline-test",
+				onCommand: () => {
+					calls.push("second");
+				},
+			});
+			event = dispatchKey("y", { accel: true, alt: true });
+			assert.deepEqual(calls, ["first", "first", "second"]);
+			assert.isTrue(event.defaultPrevented);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(firstID));
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(secondID));
+		});
+
+		it("should call onCommand with tab context and consume the event", async function () {
+			initCache("onCommand");
+			let shortcutID = registerShortcut();
+
+			let event = dispatchKey("y", { accel: true, alt: true });
+			let context = await getCache("onCommand");
+			assert.equal(context.tabType, "library");
+			assert.equal(context.tabID, "zotero-pane");
+			assert.isArray(context.itemIDs);
+			assert.isArray(context.collectionIDs);
+			assert.isTrue(event.defaultPrevented);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+			let newEvent = dispatchKey("y", { accel: true, alt: true });
+			assert.isFalse(newEvent.defaultPrevented);
+		});
+
+		it("should not fire when the event default is already prevented", function () {
+			let called = false;
+			let shortcutID = registerShortcut({
+				onCommand: () => {
+					called = true;
+				},
+			});
+
+			let pane = doc.getElementById("zotero-pane");
+			pane.addEventListener("keydown", event => event.preventDefault(), { once: true });
+			dispatchKey("y", { accel: true, alt: true });
+			assert.isFalse(called);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+		});
+
+		it("should scope reserved combos to their window target", function () {
+			// Tab jumping is reserved in the main window only
+			assert.isFalse(registerShortcut({ key: "1", modifiers: ["accel"] }));
+			let shortcutID = registerShortcut({
+				key: "1",
+				modifiers: ["accel"],
+				target: "readerWindow",
+			});
+			assert.isString(shortcutID);
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+		});
+
+		it("should report combo conflicts via checkShortcut", function () {
+			let manager = Zotero.ShortcutManager;
+			let reasons = manager.rejectReasons;
+			let check = (key, modifiers, target = "mainWindow") => manager.checkShortcut({ key, modifiers, target });
+			assert.equal(check("Y", ["accel", "alt"]), reasons.NONE);
+			assert.equal(check("Enter", ["accel"]), reasons.INVALID);
+			assert.equal(check("Y", ["accel"], "main"), reasons.INVALID);
+			// Target is required
+			assert.equal(manager.checkShortcut({ key: "Y", modifiers: ["accel", "alt"] }), reasons.INVALID);
+			// Static reserved (close tab)
+			assert.equal(check("W", ["accel"]), reasons.RESERVED);
+			// Built-in registration (quicksearch)
+			assert.equal(check("K", ["accel", "shift"]), reasons.REGISTERED);
+			// Reservation is target-scoped: tab jumping is main-window-only
+			assert.equal(check("1", ["accel"]), reasons.RESERVED);
+			assert.equal(
+				manager.checkShortcut({ key: "1", modifiers: ["accel"], target: "readerWindow" }),
+				reasons.NONE
+			);
+		});
+
+		it("should reject an invalid or missing target", function () {
+			assert.isFalse(registerShortcut({ target: "main" }));
+			assert.isFalse(registerShortcut({ target: ["mainWindow"] }));
+			assert.isFalse(registerShortcut({ target: undefined }));
+		});
+
+		it("should fire in a reader window with the readerWindow target", async function () {
+			initCache("onCommand");
+			let shortcutID = registerShortcut({
+				target: "readerWindow",
+			});
+			assert.isString(shortcutID);
+			// The same combo can be registered separately per target
+			let mainSideID = registerShortcut({ shortcutID: "main-side-test" });
+			assert.isString(mainSideID);
+			let mainOnlyCalled = false;
+			let mainOnlyID = registerShortcut({
+				shortcutID: "main-only-test",
+				key: "E",
+				modifiers: ["accel", "alt"],
+				onCommand: () => {
+					mainOnlyCalled = true;
+				},
+			});
+			assert.isString(mainOnlyID);
+
+			let pdfAttachment = await importFileAttachment("test.pdf");
+			let reader = await Zotero.Reader.open(pdfAttachment.id, undefined, {
+				openInWindow: true,
+			});
+			await reader._initPromise;
+			let readerWin = reader._window;
+
+			function dispatchInReaderWin(key) {
+				let event = new readerWin.KeyboardEvent("keydown", {
+					key,
+					metaKey: Zotero.isMac,
+					ctrlKey: !Zotero.isMac,
+					altKey: true,
+					bubbles: true,
+					cancelable: true,
+				});
+				readerWin.document.documentElement.dispatchEvent(event);
+				return event;
+			}
+
+			let event = dispatchInReaderWin("y");
+			let context = await getCache("onCommand");
+			assert.isTrue(event.defaultPrevented);
+			assert.equal(context.tabType, "reader");
+			assert.equal(context.tabSubType, "pdf");
+			assert.isUndefined(context.tabID);
+			assert.deepEqual(context.itemIDs, [pdfAttachment.id]);
+
+			// A mainWindow-only shortcut passes through in the reader window
+			let mainOnlyEvent = dispatchInReaderWin("e");
+			assert.isFalse(mainOnlyCalled);
+			assert.isFalse(mainOnlyEvent.defaultPrevented);
+
+			reader.close();
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(mainSideID));
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(mainOnlyID));
+		});
+
+		it("should unregister shortcuts on plugin shutdown", async function () {
+			let pluginID = "test-plugin@zotero.org";
+			let called = false;
+			let shortcutID = Zotero.ShortcutManager.registerShortcut(
+				Object.assign({}, defaultOption, {
+					pluginID,
+					onCommand: () => {
+						called = true;
+					},
+				})
+			);
+			assert.isString(shortcutID);
+			assert.isTrue(Zotero.Shortcuts.isRegistered("accel+alt+Y", ["mainWindow"]));
+
+			await Zotero.ShortcutManager._shortcutManager._unregisterByPluginID(pluginID);
+
+			assert.isFalse(Zotero.Shortcuts.isRegistered("accel+alt+Y", ["mainWindow"]));
+			let event = dispatchKey("y", { accel: true, alt: true });
+			assert.isFalse(called);
+			assert.isFalse(event.defaultPrevented);
+		});
+
+		it("should support the literal control modifier", function () {
+			let called = false;
+			let shortcutID = registerShortcut({
+				key: "J",
+				modifiers: ["control"],
+				onCommand: () => {
+					called = true;
+				},
+			});
+			assert.isString(shortcutID);
+
+			// ctrlKey maps to control on mac and to accel (folded) elsewhere, so the
+			// same physical Ctrl+J fires on every platform
+			let event = new win.KeyboardEvent("keydown", {
+				key: "j",
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true,
+			});
+			doc.getElementById("zotero-pane").dispatchEvent(event);
+			assert.isTrue(called);
+			assert.isTrue(event.defaultPrevented);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+		});
+
+		it("should match letters by the layout-aware keyCode when event.key diverges", function () {
+			let count = 0;
+			let shortcutID = registerShortcut({
+				onCommand: () => {
+					count++;
+				},
+			});
+
+			function dispatchWithKeyCode(key) {
+				let event = new win.KeyboardEvent("keydown", {
+					key,
+					keyCode: 89, // Y
+					metaKey: Zotero.isMac,
+					ctrlKey: !Zotero.isMac,
+					altKey: true,
+					bubbles: true,
+					cancelable: true,
+				});
+				doc.getElementById("zotero-pane").dispatchEvent(event);
+				return event;
+			}
+
+			// mac Option composes event.key (alt+Y gives "¥" on a US layout), but
+			// Gecko's keyCode still holds the layout's unshifted Latin letter
+			let event = dispatchWithKeyCode("¥");
+			assert.equal(count, 1);
+			assert.isTrue(event.defaultPrevented);
+
+			// Non-Latin layouts produce non-ASCII event.key; Gecko latinizes keyCode
+			// (here: the Cyrillic character on the Y key of a Russian layout)
+			event = dispatchWithKeyCode("н");
+			assert.equal(count, 2);
+			assert.isTrue(event.defaultPrevented);
+
+			// Both candidate interpretations fire, consistent with combo sharing
+			let composedCalled = false;
+			let composedID = registerShortcut({
+				shortcutID: "composed-test",
+				key: "¥",
+				onCommand: () => {
+					composedCalled = true;
+				},
+			});
+			dispatchWithKeyCode("¥");
+			assert.equal(count, 3);
+			assert.isTrue(composedCalled);
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(composedID));
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+		});
+
+		it("should match digit combos by physical key", async function () {
+			initCache("onCommand");
+			let shortcutID = registerShortcut({ key: "5", modifiers: ["accel", "alt"] });
+
+			let event = new win.KeyboardEvent("keydown", {
+				key: "∞",
+				code: "Digit5",
+				metaKey: Zotero.isMac,
+				ctrlKey: !Zotero.isMac,
+				altKey: true,
+				bubbles: true,
+				cancelable: true,
+			});
+			doc.getElementById("zotero-pane").dispatchEvent(event);
+			await getCache("onCommand");
+			assert.isTrue(event.defaultPrevented);
+
+			assert.isTrue(Zotero.ShortcutManager.unregisterShortcut(shortcutID));
+		});
+	});
+
 	describe("Reader manager", function () {
 		var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 		// A pluginID with no loaded sandbox scope is treated as privileged, so
