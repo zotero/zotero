@@ -318,7 +318,7 @@ class ObjectHandle {
 
 	_enqueue(fn) {
 		let turn = this._queue.then(fn);
-		this._queue = turn.catch(() => {});
+		this._queue = turn.then(() => undefined, () => undefined);
 		return turn;
 	}
 
