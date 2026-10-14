@@ -39,6 +39,7 @@ const IMPLIED_PERMISSIONS = {
 		"itemTree",
 		"itemPane",
 		"menu",
+		"button",
 		"windowResource",
 		"reader",
 		"preferencePane",
@@ -343,6 +344,14 @@ const PERMISSION_SCHEMAS = {
 			MenuManager: {
 				registerMenu: "CustomParserCallable",
 				unregisterMenu: "CustomParserCallable",
+			},
+		},
+	},
+	button: {
+		Zotero: {
+			ButtonManager: {
+				registerButton: "CustomParserCallable",
+				unregisterButton: "CustomParserCallable",
 			},
 		},
 	},
