@@ -100,6 +100,22 @@ describe("Zotero.DataStore", function () {
 			assert.equal(library.id, libraryID);
 			await requestError(query("library", { libraryID, key: "ZZZZ9999" }), codes.INVALID_PARAMS);
 		});
+
+		// The base's own query: any type, addressed as a change set entry addresses it
+		it("should read any type through the snapshot query by its entry address", async function () {
+			let item = await createDataObject('item', { title: 'Snapshot query' });
+			let collection = await createDataObject('collection');
+			let byID = await requestResult(query("snapshot", { type: "item", id: item.id }));
+			let byKey = await requestResult(query("snapshot", { type: "collection", key: collection.key, libraryID }));
+			let library = await requestResult(query("snapshot", { type: "library", id: libraryID }));
+			assert.equal(byID.data.title, 'Snapshot query');
+			assert.equal(byKey.id, collection.id);
+			assert.equal(library.id, libraryID);
+			await requestError(query("snapshot", { type: "nothing", id: 1 }), codes.INVALID_PARAMS);
+			await requestError(query("snapshot", { type: "item", path: "/x" }), codes.INVALID_PARAMS);
+			await requestError(query("snapshot", { type: "item", key: item.key }), codes.INVALID_PARAMS);
+			await requestError(query("snapshot", { type: "item", id: -1 }), codes.NOT_FOUND);
+		});
 	});
 
 	describe("snapshots", function () {
@@ -272,6 +288,34 @@ describe("Zotero.DataStore", function () {
 			await requestError(plugin.run(() => Zotero.DataStore.commit({
 				type: "item", ref: "a", create: { libraryID, itemType: "book" }, revision: 1, ops: [],
 			})), codes.INVALID_PARAMS);
+		});
+
+		it("should place a created object in its parent's library when libraryID is omitted", async function () {
+			let parent = await createDataObject('item');
+			let folder = await createDataObject('collection');
+			let { objects } = await requestResult(commit((parentID, folderID) => {
+				let article = CS.item({ libraryID, itemType: "journalArticle" });
+				return CS.of(
+					CS.item({ itemType: "note", parent: parentID }).setNote("<p>Placed</p>"),
+					CS.collection({ name: "Placed", parent: folderID }),
+					article,
+					CS.item({ itemType: "attachment", linkMode: "linked_url", parent: article }).setField("url", "https://example.org/")
+				);
+			}, parent.id, folder.id));
+			for (let object of objects) {
+				assert.equal(object.libraryID, libraryID);
+			}
+			assert.equal(Zotero.Items.get(objects[0].id).parentID, parent.id);
+			assert.equal(Zotero.Collections.get(objects[1].id).parentID, folder.id);
+			assert.equal(Zotero.Items.get(objects[3].id).parentID, objects[2].id);
+		});
+
+		it("should place a created object in the set's library, and refuse one with no library anywhere", async function () {
+			let { objects } = await requestResult(commit(() => CS.of(CS.item({ itemType: "book" }).setField("title", "In set")).inLibrary(libraryID)));
+			assert.equal(Zotero.Items.get(objects[0].id).libraryID, libraryID);
+			let error = await requestError(commit(() => CS.item({ itemType: "book" })), codes.INVALID_PARAMS);
+			assert.include(error.message, "needs a libraryID, a parent or the change set's libraryID");
+			await requestError(commit(() => CS.item({ itemType: "note", parent: -1 })), codes.NOT_FOUND);
 		});
 	});
 
@@ -573,6 +617,134 @@ describe("Zotero.DataStore", function () {
 				changes: CS.item(itemID).setField("title", "Fine").toJSON(),
 			}), item.id));
 			assert.lengthOf(result.issues, 0);
+		});
+	});
+
+	describe("handles", function () {
+		// The traditional form: Zotero.DataStore.Handle.item(target) is CS.item(target) held in place
+		it("should offer a Handle class with a factory per object type and every operation", function () {
+			let built = plugin.run(() => {
+				let built = {};
+				for (let [type, operations] of Object.entries(Zotero.DataStore.operationNames)) {
+					// Destructurable, as the parallel to CS.item
+					let { [type]: factory } = Zotero.DataStore.Handle;
+					let handle = factory(1);
+					built[type] = {
+						missing: operations.filter(op => typeof handle[op] !== "function"),
+						id: handle.id,
+						type: handle.type,
+						isHandle: handle instanceof Zotero.DataStore.Handle,
+						isEditor: handle.editor instanceof CS[type](1).constructor,
+					};
+				}
+				return built;
+			});
+			for (let type of Zotero.DataStore.objectTypes) {
+				assert.isEmpty(built[type].missing, `${type} operations`);
+				assert.equal(built[type].id, 1);
+				assert.equal(built[type].type, type);
+				assert.isTrue(built[type].isHandle);
+				assert.isTrue(built[type].isEditor);
+			}
+		});
+
+		it("should change an object in place and save it, then apply only what was added since", async function () {
+			let item = await createDataObject('item', { title: 'Handled' });
+			let saved = await plugin.run(async (itemID) => {
+				let handle = Zotero.DataStore.Handle.item(itemID);
+				handle.setField("title", "Handled, edited");
+				if (itemID) {
+					handle.addTag("first");
+				}
+				let first = await handle.save();
+				handle.addTag("second");
+				let second = await handle.save();
+				return { first, second, pending: handle.ops.length };
+			}, item.id);
+			assert.equal(saved.first.id, item.id);
+			assert.notEqual(saved.second.revision, saved.first.revision);
+			assert.equal(saved.pending, 0);
+			let live = Zotero.Items.get(item.id);
+			assert.equal(live.getField('title'), 'Handled, edited');
+			assert.sameMembers(live.getTags().map(t => t.tag), ['first', 'second']);
+		});
+
+		it("should turn a created object's handle into the saved object's", async function () {
+			let parent = await createDataObject('item');
+			let { first, second } = await plugin.run(async (parentID) => {
+				let note = Zotero.DataStore.Handle.item({ itemType: "note", parent: parentID }).setNote("<p>one</p>");
+				let first = await note.save();
+				note.setNote("<p>two</p>");
+				let second = await note.save({ snapshots: true });
+				return { first, second };
+			}, parent.id);
+			assert.isString(first.ref);
+			assert.equal(second.id, first.id);
+			assert.notProperty(second, "ref");
+			assert.equal(second.snapshot.data.note, "<p>two</p>");
+			assert.equal(Zotero.Items.get(first.id).parentID, parent.id);
+		});
+
+		it("should read a snapshot, then fail to save with Conflict once the object moved on", async function () {
+			let item = await createDataObject('item', { title: 'Before' });
+			let snapshot = await plugin.run(async (itemID) => {
+				globalThis.handle = Zotero.DataStore.Handle.item(itemID);
+				return globalThis.handle.snapshot();
+			}, item.id);
+			assert.equal(snapshot.data.title, 'Before');
+			assert.equal(plugin.eval("handle.revision"), snapshot.revision);
+			item.setField('title', 'Moved on');
+			await item.saveTx();
+			let failed = await plugin.run(() => globalThis.handle.setField("title", "Stale").save()
+				.then(() => "saved", e => ({ code: e.code, conflicts: e.data.conflicts.length, isError: e instanceof Error })));
+			assert.equal(failed.code, codes.CONFLICT);
+			assert.equal(failed.conflicts, 1);
+			assert.isTrue(failed.isError);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Moved on');
+			// A fresh read takes the new revision, and the pending operation saves
+			let saved = await plugin.run(async () => {
+				await globalThis.handle.snapshot();
+				return globalThis.handle.save();
+			});
+			assert.isNumber(saved.revision);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Stale');
+		});
+
+		it("should stand for its editor in a change set and as a reference", async function () {
+			let collection = await createDataObject('collection');
+			let { objects } = await requestResult(plugin.run((collectionID) => {
+				let item = Zotero.DataStore.Handle.item({ libraryID, itemType: "book" });
+				item.setField("title", "Via handle");
+				let folder = Zotero.DataStore.Handle.collection(collectionID);
+				folder.addItems([item]);
+				return Zotero.DataStore.commit(CS.of(item, folder));
+			}, collection.id));
+			assert.lengthOf(objects, 2);
+			assert.include(Zotero.Collections.get(collection.id).getChildItems(true), objects[0].id);
+			assert.equal(Zotero.Items.get(objects[0].id).getField('title'), 'Via handle');
+		});
+
+		it("should throw the store's error from snapshot and save, and refuse save without dataWrite", async function () {
+			let errors = await plugin.run(async () => ({
+				missing: await Zotero.DataStore.Handle.item(-1).snapshot().catch(e => e.code),
+				saveMissing: await Zotero.DataStore.Handle.item(-1).setField("title", "x").save()
+					.catch(e => e.code),
+				created: await Zotero.DataStore.Handle.item({ libraryID, itemType: "book" }).snapshot().catch(e => e.message),
+			}));
+			assert.equal(errors.missing, codes.NOT_FOUND);
+			assert.equal(errors.saveMissing, codes.NOT_FOUND);
+			assert.match(errors.created, /not saved yet/);
+
+			plugin.load(["default", "dataRead"]);
+			let item = await createDataObject('item', { title: 'Read only' });
+			let denied = await plugin.run(async (itemID) => {
+				let handle = Zotero.DataStore.Handle.item(itemID);
+				let snapshot = await handle.snapshot();
+				return { title: snapshot.data.title, code: await handle.setField("title", "x").save().catch(e => e.code) };
+			}, item.id);
+			assert.equal(denied.title, 'Read only');
+			assert.equal(denied.code, codes.PERMISSION_DENIED);
+			assert.equal(item.getField('title'), 'Read only');
 		});
 	});
 

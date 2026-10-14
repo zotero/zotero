@@ -527,6 +527,15 @@
 			return path;
 		}
 
+		// A read goes through the gate for reading first, as every query does; the base then takes the path a
+		// commit entry would, which gates nothing without a commit context
+		async _readSnapshot(type, entry, caller) {
+			if (this._objectTypes.has(type) && typeof entry.path === "string") {
+				entry = { ...entry, path: await this._readable(entry.path, caller) };
+			}
+			return super._readSnapshot(type, entry, caller);
+		}
+
 		/**
 		 * Run an IOUtils call, mapping the failures that have a response code
 		 */
@@ -651,6 +660,11 @@
 		}
 	}
 
+	// The builder scripts, in chrome; every fileSystemRead sandbox gets its own copy under the same names
+	let builder = lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/fileChangeSet.js", {
+		globals: { FilePath: lazy.FilePath },
+	});
+
 	/**
 	 * Snapshot reads and change set commits for the file system, gated by the plugin's file access. Requests
 	 * take and return plain data; a change set is built locally with ChangeSet and applied by commit in order
@@ -660,10 +674,7 @@
 	Zotero.FileStore = {
 		errorCodes: lazy.StoreAPIBase.errorCodes,
 
-		// The builder; every fileSystemRead sandbox gets its own copy under the same name
-		ChangeSet: lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/fileChangeSet.js", {
-			globals: { FilePath: lazy.FilePath },
-		}).FileChangeSet,
+		ChangeSet: builder.FileChangeSet,
 
 		_fileStore: new FileStoreInternal(),
 
@@ -707,6 +718,8 @@
 	};
 
 	Zotero.FileStore.path = lazy.FilePath;
+	// The traditional form, parallel to ChangeSet and as every sandbox gets it: Zotero.FileStore.Handle.file(path)
+	Zotero.FileStore.Handle = builder.ChangeSetBase.handleClass(Zotero.FileStore, builder.FileChangeSet);
 
 	let injectCaller = ({ pluginID, args }) => {
 		args[2] = pluginID;

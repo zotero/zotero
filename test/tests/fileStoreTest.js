@@ -355,6 +355,19 @@ describe("Zotero.FileStore", function () {
 			await requestError(query("digest", { path: root }), codes.NOT_FOUND);
 		});
 
+		it("should read a path through the snapshot query, as stat does", async function () {
+			let path = under("snapshot-query.txt");
+			await FileIO.writeUTF8(path, "snap");
+			let snapshot = await requestResult(query("snapshot", { type: "file", path }));
+			let stat = await requestResult(query("stat", { path }));
+			for (let field of ["type", "path", "size", "revision"]) {
+				assert.equal(snapshot[field], stat[field], field);
+			}
+			await requestError(query("snapshot", { type: "file", path: under("nope.txt") }), codes.NOT_FOUND);
+			await requestError(query("snapshot", { type: "file", id: 1 }), codes.INVALID_PARAMS);
+			await requestError(query("snapshot", { type: "file", path: "relative.txt" }), codes.INVALID_PARAMS);
+		});
+
 		it("should report NotFound for a missing path and for the wrong kind", async function () {
 			let dir = under("kinds");
 			await requestResult(commit(dir => FS.directory(dir).makeDir(), dir));
@@ -528,6 +541,127 @@ describe("Zotero.FileStore", function () {
 		it("should refuse a revision on nothing and a bad encoding", function () {
 			assert.throws(() => plugin.run(path => FS.file(path).writeFile("x", { encoding: "latin1" }), under("x")), /encoding/);
 			assert.throws(() => plugin.run(path => FS.file(path).expect(""), under("x")), /revision/);
+		});
+	});
+
+	describe("handles", function () {
+		// The traditional form: Zotero.FileStore.Handle.file(path) is FS.file(path) held in place
+		it("should offer a Handle class with a factory per object type and every operation", function () {
+			let built = plugin.run((path) => {
+				let built = {};
+				for (let [type, operations] of Object.entries(Zotero.FileStore.operationNames)) {
+					let handle = Zotero.FileStore.Handle[type](path);
+					built[type] = {
+						missing: operations.filter(op => typeof handle[op] !== "function"),
+						path: handle.path,
+						isHandle: handle instanceof Zotero.FileStore.Handle,
+						isEditor: handle.editor instanceof FS[type](path).constructor,
+					};
+				}
+				return built;
+			}, under("coverage"));
+			for (let type of Zotero.FileStore.objectTypes) {
+				assert.isEmpty(built[type].missing, `${type} operations`);
+				assert.equal(built[type].path, Zotero.File.normalizeToUnix(under("coverage")));
+				assert.isTrue(built[type].isHandle);
+				assert.isTrue(built[type].isEditor);
+			}
+		});
+
+		it("should write through a handle, then apply only what was added since", async function () {
+			let path = under("handle.txt");
+			let saved = await plugin.run(async (path) => {
+				let file = Zotero.FileStore.Handle.file(path);
+				file.writeFile("v1");
+				let first = await file.save();
+				file.appendFile(", v2");
+				let second = await file.save({ snapshots: true });
+				return { first, second, pending: file.ops.length, path: file.path };
+			}, path);
+			assert.equal(saved.first.type, "file");
+			assert.equal(saved.first.path, Zotero.File.normalizeToUnix(path));
+			assert.equal(saved.second.snapshot.size, 6);
+			assert.notEqual(saved.second.revision, saved.first.revision);
+			assert.equal(saved.pending, 0);
+			assert.equal(saved.path, saved.first.path);
+			assert.equal(await FileIO.readUTF8(path), "v1, v2");
+		});
+
+		it("should read a stat snapshot, then fail to save with Conflict once the file changed", async function () {
+			let path = under("handle-guarded.txt");
+			await FileIO.writeUTF8(path, "v1");
+			let stat = await plugin.run(async (path) => {
+				globalThis.file = Zotero.FileStore.Handle.file(path);
+				return globalThis.file.snapshot();
+			}, path);
+			assert.equal(stat.type, "file");
+			assert.equal(stat.size, 2);
+			assert.equal(plugin.eval("file.revision"), stat.revision);
+			await FileIO.writeUTF8(path, "changed behind the store's back");
+			let code = await plugin.run(() => globalThis.file.writeFile("too late").save().then(() => "saved", e => e.code));
+			assert.equal(code, codes.CONFLICT);
+			assert.equal(await FileIO.readUTF8(path), "changed behind the store's back");
+			// A fresh read takes the new revision, and the pending write goes through
+			await plugin.run(async () => {
+				await globalThis.file.snapshot();
+				await globalThis.file.save();
+			});
+			assert.equal(await FileIO.readUTF8(path), "too late");
+		});
+
+		it("should make and remove a directory, and take no operation after rm", async function () {
+			let dir = under("handle-dir");
+			let out = await plugin.run(async (dir) => {
+				let directory = Zotero.FileStore.Handle.directory(dir);
+				await directory.makeDir({ recursive: true }).save();
+				let made = await directory.snapshot();
+				let removed = await directory.rm({ recursive: true }).save();
+				let after;
+				try {
+					directory.makeDir();
+					after = "allowed";
+				}
+				catch (e) {
+					after = e.message;
+				}
+				return { made: made.type, removed, after };
+			}, dir);
+			assert.equal(out.made, "directory");
+			assert.isTrue(out.removed.erased);
+			assert.match(out.after, /No operation can follow rm/);
+			assert.isFalse(await IOUtils.exists(dir));
+		});
+
+		it("should throw the store's error, gate the read, and refuse save without fileSystemWrite", async function () {
+			let missing = under("handle-missing.txt");
+			// The data directory is always refused, so no prompt is involved
+			let forbidden = PathUtils.join(Zotero.DataDirectory.dir, "zotero.sqlite");
+			let seen = await plugin.run(async (missing, forbidden) => ({
+				snapshot: await Zotero.FileStore.Handle.file(missing).snapshot().catch(e => e.code),
+				save: await Zotero.FileStore.Handle.file(missing).rm().save()
+					.catch(e => e.code),
+				forbidden: await Zotero.FileStore.Handle.file(forbidden).snapshot().catch(e => e.code),
+			}), missing, forbidden);
+			assert.equal(seen.snapshot, codes.NOT_FOUND);
+			assert.equal(seen.save, codes.NOT_FOUND);
+			assert.equal(seen.forbidden, codes.PERMISSION_DENIED);
+
+			load(["default", "fileSystemRead"]);
+			let path = under("handle-read-only.txt");
+			await FileIO.writeUTF8(path, "read only");
+			let readOnly = await plugin.run(async (path) => {
+				let file = Zotero.FileStore.Handle.file(path);
+				let stat = await file.snapshot();
+				return {
+					size: stat.size,
+					code: await file.writeFile("x").save().catch(e => e.code),
+					directory: typeof Zotero.FileStore.Handle.directory,
+				};
+			}, path);
+			assert.equal(readOnly.size, 9);
+			assert.equal(readOnly.code, codes.PERMISSION_DENIED);
+			assert.equal(readOnly.directory, "function");
+			assert.equal(await FileIO.readUTF8(path), "read only");
 		});
 	});
 
@@ -851,9 +985,10 @@ describe("Zotero.FileStore", function () {
 			assert.deepEqual(plugin.run(() => [
 				typeof Zotero.FileStore.query,
 				typeof Zotero.FileStore.ChangeSet,
+				typeof Zotero.FileStore.Handle,
 				typeof Zotero.FileStore.withSession,
 				typeof Zotero.FileStore.commit,
-			]), ["function", "function", "function", "undefined"]);
+			]), ["function", "function", "function", "function", "undefined"]);
 			plugin.load(["default"]);
 			assert.equal(plugin.eval("typeof Zotero.FileStore"), "undefined");
 			// The pure helpers stay in the default schema

@@ -24,7 +24,8 @@
 */
 
 // The generic half of a change set builder, a dependency-free script that loadSubScript evaluates in
-// chrome and in each sandbox before a store's own builder script, which extends the two classes
+// chrome and in each sandbox before a store's own builder script, which extends the two classes; also the
+// object handle, the traditional form over an editor, which every store gets as is
 // eslint-disable-next-line no-unused-vars
 var ChangeSetBase = (() => {
 "use strict";
@@ -223,6 +224,160 @@ class ChangesBase {
 	}
 }
 
+/**
+ * The store's failure as an exception: the response error's code, message and data
+ */
+function storeError({ code, message, data }) {
+	let error = new Error(message);
+	error.code = code;
+	if (data !== undefined) {
+		error.data = data;
+	}
+	return error;
+}
+
+/**
+ * The traditional form over an editor, one object at a time: its operations change the handle in place and return
+ * it, `snapshot()` reads the object, `save()` commits it. Both return the store's result and throw its error
+ */
+class ObjectHandle {
+	constructor(editor, store) {
+		this._editor = editor;
+		this._store = store;
+	}
+
+	/**
+	 * The immutable editor the handle stands for right now, which a change set takes in its place
+	 */
+	get editor() {
+		return this._editor;
+	}
+
+	toPlain() {
+		return this._editor.toPlain();
+	}
+
+	toJSON() {
+		return this._editor.toJSON();
+	}
+
+	/**
+	 * Read the object; its revision is expected from then on, so a save that follows fails with Conflict if the
+	 * object moved on in between, as for an editor built from a snapshot
+	 * @returns {Promise<object>}
+	 */
+	async snapshot() {
+		let editor = this._editor;
+		if (editor.ref !== undefined) {
+			throw new Error(`${editor._describe()} is not saved yet, so it has no snapshot`);
+		}
+		let snapshot = await this._request("query", "snapshot", { type: editor.type, ...editor._addressJSON() });
+		if (snapshot.revision !== undefined) {
+			this._editor = editor._derive({ revision: snapshot.revision });
+		}
+		return snapshot;
+	}
+
+	/**
+	 * Commit the object's operations. The handle then addresses the saved object with nothing pending, so a
+	 * second save applies only what was added since; an erased object's handle takes no more operations
+	 * @param {object} [options] - The store's commit options
+	 * @returns {Promise<object>} The result's one object: ID, revision and, with `snapshots`, the snapshot
+	 */
+	async save(options) {
+		let { objects: [object] } = await this._request("commit", this._editor, options);
+		if (!object.erased) {
+			this._editor = this._store.ChangeSet[object.type](object);
+		}
+		return object;
+	}
+
+	async _request(method, ...args) {
+		let store = this._store;
+		if (typeof store[method] !== "function") {
+			throw storeError({ code: store.errorCodes.PERMISSION_DENIED, message: `${method} is not available to this plugin` });
+		}
+		let response = await store[method](...args);
+		if (!response.success) {
+			throw storeError(response.error);
+		}
+		return response.result;
+	}
+}
+
+// One handle class per store and editor class: the editor's methods, each replacing the handle's editor with
+// what they return, and its getters, forwarded
+let handleClasses = new WeakMap();
+
+function handleClassFor(StoreHandle, EditorClass) {
+	let byEditor = handleClasses.get(StoreHandle);
+	if (!byEditor) {
+		byEditor = new Map();
+		handleClasses.set(StoreHandle, byEditor);
+	}
+	let Handle = byEditor.get(EditorClass);
+	if (Handle) {
+		return Handle;
+	}
+	Handle = class extends StoreHandle {};
+	for (let proto = EditorClass.prototype; proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
+		for (let [name, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(proto))) {
+			if (name === "constructor" || name.startsWith("_") || name in StoreHandle.prototype
+					|| Object.hasOwn(Handle.prototype, name)) {
+				continue;
+			}
+			if (typeof descriptor.value === "function") {
+				Object.defineProperty(Handle.prototype, name, {
+					value(...args) {
+						this._editor = this._editor[name](...args);
+						return this;
+					},
+					writable: true,
+					configurable: true,
+				});
+			}
+			else if (descriptor.get) {
+				Object.defineProperty(Handle.prototype, name, {
+					get() {
+						return this._editor[name];
+					},
+					configurable: true,
+				});
+			}
+		}
+	}
+	byEditor.set(EditorClass, Handle);
+	return Handle;
+}
+
+/**
+ * A store's Handle class, parallel to its ChangeSet: one static factory per object type, named by it, over the
+ * builder's factory of that name, and every handle the store hands out is an instance
+ * @param {object} store - The store, or a sandbox's mirror of it
+ * @param {typeof ChangeSet} ChangeSetClass - The store's builder, as the same caller has it
+ * @returns {typeof ObjectHandle}
+ */
+function handleClass(store, ChangeSetClass) {
+	let Handle = class extends ObjectHandle {};
+	// A sandbox's mirror hands the list over as an array-like with getters, not an Array
+	for (let type of Array.from(store.objectTypes)) {
+		if (typeof ChangeSetClass[type] !== "function") {
+			throw new Error(`${ChangeSetClass.name} has no factory for object type '${type}'`);
+		}
+		// A closure, so the factories can be destructured off the class
+		Object.defineProperty(Handle, type, {
+			value: (target, options) => {
+				let editor = ChangeSetClass[type](target, options);
+				return new (handleClassFor(Handle, editor.constructor))(editor, store);
+			},
+			enumerable: true,
+			configurable: true,
+			writable: true,
+		});
+	}
+	return Handle;
+}
+
 // Consecutive editors of one object collapse into one entry, so the set keeps the order it was given in; an
 // editor of a ref joins the entry creating it wherever that is, its operations after the creator's own, since
 // created objects apply first
@@ -241,6 +396,10 @@ function mergeEditors(editors) {
 		}
 	};
 	for (let editor of editors) {
+		// A handle stands for its editor as it is now; what it does later is not in the set
+		if (editor instanceof ObjectHandle) {
+			editor = editor.editor;
+		}
 		if (!(editor instanceof ChangesBase)) {
 			throw new TypeError("A change set is made of editors from the set's factories");
 		}
@@ -363,5 +522,5 @@ function nextRef(type) {
 	return `${type}-${++refCounter}`;
 }
 
-return { ChangesBase, ChangeSet, bytesView, clonePlain, nextRef };
+return { ChangesBase, ChangeSet, ObjectHandle, bytesView, clonePlain, nextRef, handleClass };
 })();

@@ -384,7 +384,8 @@ function defineOnMirror(mirror, name, value) {
 }
 
 /**
- * Zotero.DataStore.ChangeSet, the sandbox's own copy of the data builder
+ * Zotero.DataStore.ChangeSet, the sandbox's own copy of the data builder, and Zotero.DataStore.Handle, the
+ * classical form over it: Handle.<type>(target) changes in place, with snapshot() and save()
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -394,6 +395,7 @@ function setupDataStore(scope) {
 	if (!mirror) return;
 	let holder = ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/dataChangeSet.js", { scope });
 	defineOnMirror(mirror, "ChangeSet", holder.DataChangeSet);
+	defineOnMirror(mirror, "Handle", holder.ChangeSetBase.handleClass(mirror, holder.DataChangeSet));
 }
 
 // The path helpers as functions of the sandbox, each failure arriving there as its own TypeError
@@ -414,8 +416,8 @@ function exportFilePath(scope) {
 }
 
 /**
- * Zotero.FileStore.ChangeSet and path, the sandbox's own copy of the file builder, plus withSession, the
- * grant session that lets picker and prompt grants hold across a burst of calls
+ * Zotero.FileStore.ChangeSet and path, the sandbox's own copy of the file builder, Handle, the traditional form
+ * over it, plus withSession, the grant session that lets picker and prompt grants hold across a burst of calls
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -430,6 +432,7 @@ function setupFileStore(scope) {
 	});
 	defineOnMirror(mirror, "ChangeSet", holder.FileChangeSet);
 	defineOnMirror(mirror, "path", path);
+	defineOnMirror(mirror, "Handle", holder.ChangeSetBase.handleClass(mirror, holder.FileChangeSet));
 	let withSessionTrace = { pluginID, path: "Zotero.FileStore.withSession" };
 	defineOnMirror(mirror, "withSession", ScopeUtils.ensureCallableInScope(
 		fn => PluginFileAccess.withSession(pluginID, fn),
