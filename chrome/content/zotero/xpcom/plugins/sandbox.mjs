@@ -312,9 +312,8 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	Object.assign(scope, extraGlobals);
 
-	if (permissions.includes("network")) {
-		setupHTTP(scope);
-	}
+	// The sandbox principal bounds requests to host_permissions
+	setupHTTP(scope);
 
 	if (permissions.includes("preferences")) {
 		setupPreferences(scope);
