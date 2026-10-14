@@ -77,8 +77,7 @@ async function loadScope(addon, globalVars = {}) {
 		scope = loadUnprivilegedScope(addon, uuid, globalVars);
 	}
 	
-	// The plugin's directory exists before any of its code runs
-	await ready;
+	// A plugin's own files come through its moz-extension policy, which the loader does not count as trusted
 	try {
 		let uri = PluginProtocol.getBaseURI(addon.id) + 'bootstrap.js';
 		Services.scriptloader.loadSubScriptWithOptions(
@@ -86,8 +85,6 @@ async function loadScope(addon, globalVars = {}) {
 			{
 				target: scope,
 				ignoreCache: true,
-				// Plugins are loaded from jar:file: URIs, which the script loader
-				// otherwise refuses (Mozilla bug 1974213)
 				allowUnsafeURL: true
 			}
 		);
@@ -95,6 +92,8 @@ async function loadScope(addon, globalVars = {}) {
 	catch (e) {
 		Zotero.logError(e);
 	}
+	// The plugin's directory exists before its startup hook runs
+	await ready;
 }
 
 function unloadScope(id) {
@@ -280,7 +279,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 			if (!uri.startsWith(baseURI)) {
 				throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
 			}
-			return Services.scriptloader.loadSubScript(uri, scope);
+			return Services.scriptloader.loadSubScriptWithOptions(uri, { target: scope, allowUnsafeURL: true });
 		},
 		isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 	};
