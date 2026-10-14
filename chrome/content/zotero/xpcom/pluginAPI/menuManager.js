@@ -30,6 +30,7 @@
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	const VALID_TARGETS = [
@@ -107,8 +108,8 @@
 	 * @property {string} [darkIcon] - The dark icon for the menu item
 	 * - If not provided, the light icon will be used for both light and dark mode.
 	 * @property {string[]} [enableForTabTypes] - The type of tab for which the menu item should be enabled.
-	 * Available types are "library", "reader/*", "reader/pdf", "reader/epub", "reader/snapshot",
-	 * but other types are allowed as well for custom tab types.
+	 * Available types are "library", "reader" or "reader/*" for every reader type, and "reader/pdf",
+	 * "reader/epub", "reader/snapshot", but other types are allowed as well for custom tab types.
 	 * By default, the menu item is always enabled.
 	 * Only for main window menubar menus and reader window menubar menus
 	 * @property {MenuHook} [onShowing] - Function to run when the menu is about to be shown
@@ -576,7 +577,7 @@
 				}
 			}
 
-			this._updateMenuClasses(menuElem, menuData, targetType, { tabType, tabSubType });
+			this._updateMenuVisibility(menuElem, menuData, targetType, { tabType, tabSubType });
 
 			this._updateMenuEvents(menuElem, popupElem, menuData, targetType, {
 				event,
@@ -588,7 +589,8 @@
 		}
 
 		/**
-		 * Update the menu element classes
+		 * Show a main or reader window menubar item only in the tabs it is enabled for; the popup reuses the
+		 * element, so this runs on every showing
 		 * @param {XULElement} menuElem - The menu element to update
 		 * @param {MenuData} menuData - The menu data to update the element
 		 * @param {string} targetType - The target type of the menu
@@ -598,60 +600,12 @@
 		 * for main window menubar menus and reader window menubar menus
 		 * @returns {void}
 		 */
-		_updateMenuClasses(menuElem, menuData, targetType, args) {
+		_updateMenuVisibility(menuElem, menuData, targetType, args) {
 			let { tabType, tabSubType } = args;
-			// Update dynamic classes of the menu item
-			let cachedDynamicClasses = new Set();
-
-			// Init the menu based on the content type for main window tabs and reader window
 			if ((targetType.startsWith("main/menubar") || targetType.startsWith("reader/menubar"))
 					&& menuData.enableForTabTypes) {
-				// argument tabType and tabSubType are not empty
-				let shouldHide = true;
-				for (let type of menuData.enableForTabTypes) {
-					let [_tabType, _tabSubType] = type.split("/");
-
-					// Only show the menu item if the tab type matches
-					cachedDynamicClasses.add(`menu-type-${_tabType}`);
-
-					if (_tabSubType) {
-						if (_tabType === "reader" && _tabSubType === "*") {
-							// Show the menu item for all reader types
-							cachedDynamicClasses.add("pdf");
-							cachedDynamicClasses.add("epub");
-							cachedDynamicClasses.add("snapshot");
-						}
-						else {
-							// Only show the menu item if the tab subtype (reader type) matches
-							cachedDynamicClasses.add(_tabSubType);
-						}
-					}
-
-					if (shouldHide
-							&& tabType === _tabType
-							&& (_tabSubType === "*" || tabSubType === _tabSubType)) {
-						shouldHide = false;
-					}
-				}
-				if (shouldHide) {
-					menuElem.hidden = true;
-				}
+				menuElem.hidden = !lazy.WindowUtils.matchesTabType(menuData.enableForTabTypes, tabType, tabSubType);
 			}
-
-			// Remove previous dynamic classes
-			if (menuElem.dataset.dynamicClasses) {
-				let previousDynamicClasses = menuElem.dataset.dynamicClasses.split(",");
-				for (let dynamicClass of previousDynamicClasses) {
-					if (dynamicClass && !cachedDynamicClasses.has(dynamicClass)) {
-						menuElem.classList.remove(dynamicClass);
-					}
-				}
-			}
-			// Add new dynamic classes
-			for (let dynamicClass of cachedDynamicClasses) {
-				menuElem.classList.add(dynamicClass);
-			}
-			menuElem.dataset.dynamicClasses = Array.from(cachedDynamicClasses).join(",");
 		}
 
 		/**
