@@ -3821,7 +3821,8 @@ describe("Plugin API", function () {
 			it("should toggle a main window's panes and report the new state", async function () {
 				let controller = Zotero.WindowController._windowController;
 				let windowID = win.browsingContext.id;
-				for (let pane of ["item", "tagSelector", "context"]) {
+				Zotero_Tabs.select("zotero-pane");
+				for (let pane of ["sidebar", "context"]) {
 					let { open: before } = controller._getPaneState(win, pane);
 					let { result: { open } } = await Zotero.WindowController.command("togglePane", { windowID, pane });
 					assert.equal(open, !before, `${pane} toggled`);
@@ -3834,18 +3835,109 @@ describe("Plugin API", function () {
 			it("should report a pane's state", async function () {
 				let controller = Zotero.WindowController._windowController;
 				let windowID = win.browsingContext.id;
-				for (let pane of ["item", "tagSelector", "context"]) {
+				Zotero_Tabs.select("zotero-pane");
+				for (let pane of ["sidebar", "context"]) {
 					let { result: state } = await Zotero.WindowController.query("getPaneState", { windowID, pane });
 					assert.isBoolean(state.open, pane);
 					assert.deepEqual(state, controller._getPaneState(win, pane), pane);
 				}
-				assert.equal(await failureCode(Zotero.WindowController.query("getPaneState", { windowID: -1, pane: "item" })), Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.query("getPaneState", { windowID: -1, pane: "context" })), Zotero.WindowController.errorCodes.NOT_FOUND);
+			});
+
+			it("should put a pane in the given state when open is passed", async function () {
+				let windowID = win.browsingContext.id;
+				Zotero_Tabs.select("zotero-pane");
+				for (let pane of ["sidebar", "context"]) {
+					let { result: initial } = await Zotero.WindowController.query("getPaneState", { windowID, pane });
+					let set = open => Zotero.WindowController.command("togglePane", { windowID, pane, open });
+
+					let { result } = await set(true);
+					assert.isTrue(result.open, `${pane} opened`);
+					// Asking for the state it's already in leaves it alone
+					({ result } = await set(true));
+					assert.isTrue(result.open, `${pane} still open`);
+					({ result } = await set(false));
+					assert.isFalse(result.open, `${pane} closed`);
+					({ result } = await set(false));
+					assert.isFalse(result.open, `${pane} still closed`);
+
+					await set(initial.open);
+				}
+			});
+
+			it("should toggle the item pane in a library tab and the context pane in other tabs", async function () {
+				let windowID = win.browsingContext.id;
+				let toggle = () => Zotero.WindowController.command("togglePane", { windowID, pane: "context" });
+
+				// Library tab: the right-hand pane is ZoteroPane's own item pane
+				Zotero_Tabs.select("zotero-pane");
+				let itemPaneOpen = !ZoteroPane.itemPane.collapsed;
+				let contextPaneOpen = !ZoteroContextPane.collapsed;
+				let { result } = await toggle();
+				assert.equal(result.open, !itemPaneOpen, "item pane toggled in the library tab");
+				assert.equal(!ZoteroPane.itemPane.collapsed, !itemPaneOpen);
+				assert.equal(!ZoteroContextPane.collapsed, contextPaneOpen, "context pane untouched in the library tab");
+				await toggle();
+
+				// Reader tab: the right-hand pane is the shared context pane
+				let attachment = await importFileAttachment("test.pdf");
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				try {
+					itemPaneOpen = !ZoteroPane.itemPane.collapsed;
+					contextPaneOpen = !ZoteroContextPane.collapsed;
+					({ result } = await toggle());
+					assert.equal(result.open, !contextPaneOpen, "context pane toggled in a reader tab");
+					assert.equal(!ZoteroContextPane.collapsed, !contextPaneOpen);
+					assert.equal(!ZoteroPane.itemPane.collapsed, itemPaneOpen, "item pane untouched in a reader tab");
+					await toggle();
+				}
+				finally {
+					Zotero_Tabs.close(reader.tabID);
+					Zotero_Tabs.select("zotero-pane");
+				}
+			});
+
+			it("should toggle the collections pane in a library tab and the reader's sidebar in a reader tab", async function () {
+				let windowID = win.browsingContext.id;
+				let toggle = () => Zotero.WindowController.command("togglePane", { windowID, pane: "sidebar" });
+				let collectionsPane = doc.getElementById("zotero-collections-pane");
+				let collectionsPaneOpen = () => !collectionsPane.hasAttribute("collapsed");
+
+				// Library tab: the left pane is the collections pane
+				Zotero_Tabs.select("zotero-pane");
+				let open = collectionsPaneOpen();
+				let { result } = await toggle();
+				assert.equal(result.open, !open, "collections pane toggled");
+				assert.equal(collectionsPaneOpen(), !open);
+				await toggle();
+				assert.equal(collectionsPaneOpen(), open, "collections pane restored");
+
+				// Reader tab: the left pane is the reader's own sidebar, whose open
+				// state Zotero_Tabs keeps per tab type
+				let attachment = await importFileAttachment("test.pdf");
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				try {
+					open = Zotero_Tabs.getSidebarState("reader").open;
+					let libraryPaneOpen = collectionsPaneOpen();
+					({ result } = await toggle());
+					assert.equal(result.open, !open, "reader sidebar toggled");
+					assert.equal(Zotero_Tabs.getSidebarState("reader").open, !open);
+					assert.equal(collectionsPaneOpen(), libraryPaneOpen, "collections pane untouched");
+					({ result } = await toggle());
+					assert.equal(result.open, open, "reader sidebar restored");
+				}
+				finally {
+					Zotero_Tabs.close(reader.tabID);
+					Zotero_Tabs.select("zotero-pane");
+				}
 			});
 
 			it("should fail toggling an unknown pane or a pane of an unknown window", async function () {
 				let windowID = win.browsingContext.id;
 				assert.equal(await failureCode(Zotero.WindowController.command("togglePane", { windowID, pane: "nope" })), Zotero.WindowController.errorCodes.INVALID_PARAMS);
-				assert.equal(await failureCode(Zotero.WindowController.command("togglePane", { windowID: -1, pane: "item" })), Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.command("togglePane", { windowID: -1, pane: "context" })), Zotero.WindowController.errorCodes.NOT_FOUND);
 			});
 
 			it("should open a note and a reader in their own windows and reuse an existing one", async function () {
