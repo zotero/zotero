@@ -262,6 +262,37 @@ describe("Zotero.DataStore", function () {
 			assert.equal(Zotero.Items.get(objects[0].id).parentID, objects[1].id);
 		});
 
+		it("should take an array of editors and handles as the set ChangeSet.of makes of them", async function () {
+			let collection = await createDataObject('collection');
+			let existing = await createDataObject('item');
+			let [committed, validated, twice, plain] = await plugin.run(async (collectionID, existingID) => {
+				let parent = CS.item({ libraryID, itemType: "book" }).setField("title", "Array parent");
+				let child = CS.item({ libraryID, itemType: "note", parent }).setNote("<p>Array child</p>");
+				let handle = Zotero.DataStore.Handle.item(existingID).setField("title", "Array handle");
+				// Addresses the parent by its ref, so it only commits merged into the entry creating it
+				let changes = [child, CS.item(parent).addToCollection(collectionID), parent, handle];
+				let duplicate = CS.item({ libraryID, itemType: "book" }, { ref: parent.ref });
+				return [
+					await Zotero.DataStore.commit(changes),
+					await Zotero.DataStore.query("validate", { changes }),
+					await Zotero.DataStore.commit([parent, duplicate]),
+					// JSON entries take the { changes } form
+					await Zotero.DataStore.commit([{ type: "item", id: existingID, ops: [] }]),
+				];
+			}, collection.id, existing.id);
+			let { objects } = await requestResult(committed);
+			assert.lengthOf(objects, 3);
+			let [childItem, parentItem] = objects.map(object => Zotero.Items.get(object.id));
+			assert.equal(childItem.parentID, parentItem.id);
+			assert.equal(parentItem.getField("title"), "Array parent");
+			assert.include(Zotero.Collections.get(collection.id).getChildItems(true), parentItem.id);
+			assert.equal(Zotero.Items.get(existing.id).getField("title"), "Array handle");
+			assert.isEmpty((await requestResult(validated)).issues);
+			let error = await requestError(twice, codes.INVALID_PARAMS);
+			assert.match(error.message, /created twice/);
+			await requestError(plain, codes.INVALID_PARAMS);
+		});
+
 		it("should refuse created objects that each need the other created first", async function () {
 			let [committed, validated] = await plugin.run(async () => {
 				let item = CS.item({ libraryID, itemType: "book" }, { ref: "i" });

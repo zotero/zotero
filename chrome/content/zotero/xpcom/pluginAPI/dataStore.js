@@ -1416,7 +1416,8 @@
 		/**
 		 * Apply a change set in one transaction; nothing is applied unless the whole set passes. Library entries and
 		 * those creating or relinking attachment files run after it, in order, and its error says how far they got
-		 * @param {DataChangeSet | StoreChangeSet} changes
+		 * @param {DataChangeSet | StoreChangeSet | Array<DataObjectChanges | ObjectHandle>} changes - A set, or its
+		 *     editors as ChangeSet.of takes them
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving object's new snapshot
 		 * @param {string} [_callerPluginID]
 		 * @returns {Promise<APIResponse<StoreCommitResult>>}
