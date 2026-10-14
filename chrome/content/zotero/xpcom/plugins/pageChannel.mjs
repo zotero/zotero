@@ -73,12 +73,14 @@ const PluginPageChannel = {
 	 * @param {object} options
 	 * @param {Element} options.element - The iframe or browser hosting the page
 	 * @param {string} options.pluginID - The owning plugin's ID
+	 * @param {string} [options.tracePath] - The API path the plugin reaches the messenger by, for tracing
 	 * @returns {{ messenger: object, dispose: function }} - `messenger` is the
 	 * plain object handed to the plugin; `dispose` tears the channel down
 	 */
-	create({ element, pluginID }) {
+	create({ element, pluginID, tracePath = "PluginPage" }) {
 		let listeners = new Map();
 		let disposed = false;
+		let listenerTrace = { pluginID, path: `${tracePath}.addMessageListener` };
 
 		// Deliver a page message to the plugin's sandbox-marshalled listeners
 		let deliver = (data) => {
@@ -127,7 +129,7 @@ const PluginPageChannel = {
 				return;
 			}
 			// Wrap so message payloads are marshalled into the plugin scope
-			listeners.set(fn, lazy.ScopeVariables.fromScope(fn, pluginID));
+			listeners.set(fn, lazy.ScopeVariables.fromScope(fn, pluginID, { trace: listenerTrace }));
 		};
 
 		let removeMessageListener = (fn) => {

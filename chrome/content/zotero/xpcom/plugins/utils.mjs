@@ -515,16 +515,24 @@ const ScopeUtils = {
 		// an object, `new` uses that object instead of the auto-created `this`.
 		let wrapped = function (...args) {
 			let t = trace && PluginTrace.start();
-			args = args.map(arg => Cu.waiveXrays(arg));
-			let instance = Reflect.construct(Constructor, args);
-			if (typeof returnParser === "function") {
-				instance = returnParser(instance);
+			let failure;
+			try {
+				args = args.map(arg => Cu.waiveXrays(arg));
+				let instance = Reflect.construct(Constructor, args);
+				if (typeof returnParser === "function") {
+					instance = returnParser(instance);
+				}
+				// Use strong reference for constructor-created objects since the
+				// plugin owns the instance and it must not be GC'd prematurely
+				return ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true, instanceSchema });
 			}
-			// Use strong reference for constructor-created objects since the
-			// plugin owns the instance and it must not be GC'd prematurely
-			let result = ScopeUtils.ensurePromiseVarInScope(instance, scope, { mutable, strong: true, instanceSchema });
-			PluginTrace.end(t, trace?.pluginID, "construct", trace?.path);
-			return result;
+			catch (e) {
+				failure = e;
+				throw e;
+			}
+			finally {
+				PluginTrace.end(t, trace?.pluginID, "construct", trace?.path, failure);
+			}
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -543,27 +551,35 @@ const ScopeUtils = {
 
 		let wrapped = (...args) => {
 			let t = trace && PluginTrace.start();
-			args = args.map(arg => Cu.waiveXrays(arg));
-			if (typeof argParser === "function") {
-				args = argParser(args);
-				// argParser returning null signals the call should be blocked
-				if (args === null) return undefined;
+			let failure;
+			try {
+				args = args.map(arg => Cu.waiveXrays(arg));
+				if (typeof argParser === "function") {
+					args = argParser(args);
+					// argParser returning null signals the call should be blocked
+					if (args === null) return undefined;
+				}
+				let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
+				if (thisArgRef && !actualThisArg) {
+					VarCheck.throwPropError("access", "this", "object has been garbage collected");
+				}
+				// Make sure the args are in the same scope if the thisArg is not in the current compartment
+				if (!skipArgRescoping && actualThisArg && !VarCheck.isInChrome(actualThisArg)) {
+					args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(actualThisArg), { mutable });
+				}
+				let res = func.apply(actualThisArg, args);
+				if (typeof returnParser === "function") {
+					res = returnParser(res);
+				}
+				return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema });
 			}
-			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
-			if (thisArgRef && !actualThisArg) {
-				VarCheck.throwPropError("access", "this", "object has been garbage collected");
+			catch (e) {
+				failure = e;
+				throw e;
 			}
-			// Make sure the args are in the same scope if the thisArg is not in the current compartment
-			if (!skipArgRescoping && actualThisArg && !VarCheck.isInChrome(actualThisArg)) {
-				args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(actualThisArg), { mutable });
+			finally {
+				PluginTrace.end(t, trace?.pluginID, "call", trace?.path, failure);
 			}
-			let res = func.apply(actualThisArg, args);
-			if (typeof returnParser === "function") {
-				res = returnParser(res);
-			}
-			let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema });
-			PluginTrace.end(t, trace?.pluginID, "call", trace?.path);
-			return result;
 		};
 
 		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
@@ -888,14 +904,22 @@ const ScopeUtils = {
 			let holder = Cu.createObjectIn(scope);
 			Cu.exportFunction((...args) => {
 				let t = PluginTrace.start();
-				let obj = derefOrThrow("access", name);
-				if (!VarCheck.isInChrome(obj)) {
-					args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(obj), { mutable });
+				let failure;
+				try {
+					let obj = derefOrThrow("access", name);
+					if (!VarCheck.isInChrome(obj)) {
+						args = ScopeUtils.ensurePromiseVarInScope(args, Cu.getGlobalForObject(obj), { mutable });
+					}
+					let res = method.apply(obj, args);
+					return ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
 				}
-				let res = method.apply(obj, args);
-				let result = ScopeUtils.ensurePromiseVarInScope(res, scope, { mutable, instanceSchema: nestedSchema });
-				PluginTrace.end(t, pluginID, "call", `${instanceName}.${name}`);
-				return result;
+				catch (e) {
+					failure = e;
+					throw e;
+				}
+				finally {
+					if (t) PluginTrace.end(t, pluginID, "call", `${instanceName}.${name}`, failure);
+				}
 			}, holder, { defineAs: "f" });
 			methodCache.set(name, { method, wrapped: holder.f });
 			return holder.f;
@@ -913,7 +937,7 @@ const ScopeUtils = {
 			if (!category) return undefined;
 			if (category === "method") return methodWrapper(prop);
 			let inst = derefOrThrow("access", prop);
-			PluginTrace.record(pluginID, "get", `${instanceName}.${prop}`);
+			if (PluginTrace.enabled) PluginTrace.record(pluginID, "get", `${instanceName}.${prop}`);
 			return ScopeUtils.ensurePromiseVarInScope(Reflect.get(inst, prop), scope, { mutable, instanceSchema: nestedSchema });
 		}, traps, { defineAs: "get" });
 
@@ -923,7 +947,7 @@ const ScopeUtils = {
 			// value props, methods and unknown names are read-only.
 			if (category === "own" || (category === "getter" && mutable)) {
 				let inst = derefOrThrow("set", prop);
-				PluginTrace.record(pluginID, "set", `${instanceName}.${prop}`);
+				if (PluginTrace.enabled) PluginTrace.record(pluginID, "set", `${instanceName}.${prop}`);
 				Reflect.set(inst, prop, value);
 				return true;
 			}

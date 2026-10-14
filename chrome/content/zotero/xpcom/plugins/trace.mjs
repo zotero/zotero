@@ -28,13 +28,19 @@
  * Debug tracing for plugin sandbox API access.
  *
  * Automatically active when Zotero debug logging is enabled.
- * Emits one Zotero.debug line (level 5) per API access.
- * Logs can be filtered by "[PluginTrace]".
+ * Emits one Zotero.debug line (level 5) per API access; a controller or store request adds one
+ * naming the request, timed to its response.
+ * Logs can be filtered by "[PluginTrace]". Callers build a per-access path only once tracing is
+ * known to be on (a nonzero start() or `enabled`), so tracing off costs nothing.
  *
  * Trace types: "get", "set", "call", "construct", "hook"
  */
 
 const PluginTrace = {
+
+	get enabled() {
+		return Zotero.Debug.enabled;
+	},
 
 	/**
 	 * Begin a timed trace. Returns a timestamp when debug logging
@@ -43,7 +49,7 @@ const PluginTrace = {
 	 * @returns {number}
 	 */
 	start() {
-		return Zotero.Debug.enabled ? Date.now() : 0;
+		return PluginTrace.enabled ? ChromeUtils.now() : 0;
 	},
 
 	/**
@@ -53,23 +59,32 @@ const PluginTrace = {
 	 * @param {string} pluginID
 	 * @param {"call"|"construct"|"hook"} type
 	 * @param {string} path - Dotted API path
+	 * @param {*} [failure] - What the access threw, or the code its response failed with
 	 */
-	end(startTime, pluginID, type, path) {
+	end(startTime, pluginID, type, path, failure = undefined) {
 		if (!startTime) return;
-		let duration = Date.now() - startTime;
-		Zotero.debug(`[PluginTrace] [${type}] ${path} (${Math.round(duration * 100) / 100}ms) [${pluginID}]`, 5);
+		let duration = Math.round((ChromeUtils.now() - startTime) * 100) / 100;
+		let outcome = failure === undefined ? "" : ` failed: ${PluginTrace._describeFailure(failure)}`;
+		Zotero.debug(`[PluginTrace] [${type}] ${path} (${duration}ms) [${pluginID}]${outcome}`, 5);
+	},
+
+	// A code or name locates the failure; its message has a log line of its own
+	_describeFailure(failure) {
+		if (failure !== null && typeof failure === "object") {
+			return (typeof failure.code === "string" && failure.code) || failure.name || "Error";
+		}
+		return String(failure);
 	},
 
 	/**
-	 * Record an untimed API access (get/set). Guards on
-	 * Zotero.Debug.enabled internally.
+	 * Record an untimed API access (get/set). Guards on `enabled` internally.
 	 *
 	 * @param {string} pluginID
 	 * @param {"get"|"set"} type
 	 * @param {string} path - Dotted API path
 	 */
 	record(pluginID, type, path) {
-		if (!Zotero.Debug.enabled) return;
+		if (!PluginTrace.enabled) return;
 		Zotero.debug(`[PluginTrace] [${type}] ${path} [${pluginID}]`, 5);
 	},
 };

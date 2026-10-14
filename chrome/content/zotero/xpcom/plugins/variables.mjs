@@ -41,9 +41,11 @@ const ScopeVariables = {
 	 * - Primitives: returned as-is
 	 * @param {any} value - The value to wrap
 	 * @param {string} pluginID - The plugin ID for scope restrictions
+	 * @param {Object} [options]
+	 * @param {string} [options.path] - The API path the value is reached by, so calls into it are traced
 	 * @returns {any} The wrapped value safe for use in the plugin scope
 	 */
-	toScope(value, pluginID, { _seen = null } = {}) {
+	toScope(value, pluginID, { path = null, _seen = null } = {}) {
 		if (!pluginID) {
 			return value;
 		}
@@ -63,7 +65,7 @@ const ScopeVariables = {
 		}
 
 		if (typeof value === "function") {
-			return ScopeUtils.ensureCallableInScope(value, undefined, scope);
+			return ScopeUtils.ensureCallableInScope(value, undefined, scope, { trace: path ? { pluginID, path } : null });
 		}
 
 		// Event.isInstance matches across compartments, unlike instanceof
@@ -95,7 +97,7 @@ const ScopeVariables = {
 				cloneFunctions: true,
 			});
 			_seen.set(value, arr);
-			arr.push(...value.map(v => ScopeVariables.toScope(v, pluginID, { _seen })));
+			arr.push(...value.map((v, i) => ScopeVariables.toScope(v, pluginID, { path: path && `${path}[${i}]`, _seen })));
 			return arr;
 		}
 
@@ -110,7 +112,7 @@ const ScopeVariables = {
 					let hasCached = false;
 					Cu.exportFunction(() => {
 						if (!hasCached) {
-							cached = ScopeVariables.toScope(value[key], pluginID, { _seen });
+							cached = ScopeVariables.toScope(value[key], pluginID, { path: path && `${path}.${key}`, _seen });
 							hasCached = true;
 						}
 						return cached;
@@ -131,11 +133,12 @@ const ScopeVariables = {
 			return wrapped;
 		}
 
+		// Traced under the given path, else the class name, as the facades of returned instances are
 		return ScopeVariables.createAllowlistMirrorObject(
 			value,
 			true,
 			pluginID,
-			{ frozen: false }
+			{ frozen: false, pathPrefix: path || value.constructor?.name || "Object" }
 		);
 	},
 
@@ -178,16 +181,30 @@ const ScopeVariables = {
 		if (typeof value === "function") {
 			let funcName = value.name || "anonymous";
 			let hookPath = trace ? `${trace.path}:${funcName}` : funcName;
+			let unloaded = false;
 			let wrapper = function (...args) {
+				// A hook the plugin left behind falls silent once its sandbox is nuked, instead of throwing
+				if (Cu.isDeadWrapper(value)) {
+					if (!unloaded) {
+						unloaded = true;
+						Zotero.debug(`Plugin ${pluginID}: hook ${hookPath} called after unload; ignored`);
+					}
+					return undefined;
+				}
 				let t = PluginTrace.start();
-				// Wrap all arguments before passing to plugin function
-				let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID));
-
-				let result = Reflect.apply(value, this, wrappedArgs);
-
-				PluginTrace.end(t, pluginID, "hook", hookPath);
-
-				return result;
+				let failure;
+				try {
+					// Arguments cross into the plugin scope, traced under the hook's path
+					let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID, { path: hookPath }));
+					return Reflect.apply(value, this, wrappedArgs);
+				}
+				catch (e) {
+					failure = e;
+					throw e;
+				}
+				finally {
+					PluginTrace.end(t, pluginID, "hook", hookPath, failure);
+				}
 			};
 			// Store the original function ref on the wrapper so callers can
 			// match wrapped handlers back to their originals (e.g. for unregister)
@@ -288,20 +305,6 @@ const ScopeVariables = {
 	},
 
 	/**
-	 * Wrap a host function so that when called from the plugin scope,
-	 * any function arguments or object arguments with function properties
-	 * are wrapped using `fromScope` before passing to the actual function.
-	 * This allows the host to safely consume plugin-provided functions.
-	 */
-	createFromScopeCallable(func, thisArg, pluginID, { trace } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
-			argParser: args => args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace })),
-			trace,
-		});
-	},
-
-	/**
 	 * Create a mirrored object in scope based on the allowlist schema
 	 * This is to bypass Gecko cross-compartment with different security principles for the designated
 	 * attributes and methods on the target object, so that the scope with a lower privilege can access
@@ -377,6 +380,33 @@ const ScopeVariables = {
 				let callableOrigin;
 				let callableWrapped;
 
+				// The callable a schema entry asks for: a handler by name, in the string or the object form,
+				// else the plain call wrapper
+				let wrapCallable = (value, actualObj) => {
+					let entry = typeof schemaNode === "object" ? schemaNode[prop] : undefined;
+					let handler = VarCheck.isObject(entry) ? entry[SchemaKey.HANDLER] : entry;
+					let instanceSchema = (VarCheck.isObject(entry) && entry[SchemaKey.SCHEMA]) || null;
+					switch (typeof handler === "string" ? handler : undefined) {
+						case undefined:
+							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
+						case "Callable":
+							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, instanceSchema, trace });
+						case "Constructor":
+							return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true, instanceSchema, trace });
+						case "FromScopeCallable":
+							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
+								argParser: args => args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace })),
+								instanceSchema,
+								trace,
+							});
+						case "CustomParserCallable":
+							return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
+						default:
+							VarCheck.throwPropError("access", prop, "unknown schema handler");
+					}
+					return undefined;
+				};
+
 				let holder = Cu.createObjectIn(scope);
 				Cu.exportFunction(
 					() => {
@@ -387,59 +417,22 @@ const ScopeVariables = {
 						let value = Reflect.get(actualObj, prop);
 
 						if (typeof value === "function") {
-							// If the schema value is in the form of { [SchemaKey.HANDLER]: "HandlerType", [SchemaKey.SCHEMA]: subSchema }, use the specified handler for this function
-							if (typeof schemaNode === "object" && VarCheck.isObject(schemaNode[prop]) && schemaNode[prop][SchemaKey.HANDLER]) {
-								let handler = schemaNode[prop];
-								switch (handler[SchemaKey.HANDLER]) {
-									case "Callable":
-										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
-											mutable, instanceSchema: handler[SchemaKey.SCHEMA] || null,
-											trace,
-										});
-									case "Constructor":
-										return ScopeUtils.ensureConstructableInScope(value, scope, {
-											mutable: true, instanceSchema: handler[SchemaKey.SCHEMA] || null,
-											trace,
-										});
-									case "FromScopeCallable":
-										return ScopeUtils.ensureCallableInScope(value, actualObj, scope, {
-											argParser: args => args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace })),
-											instanceSchema: handler[SchemaKey.SCHEMA] || null,
-											trace,
-										});
-									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
-									default:
-										VarCheck.throwPropError("access", prop, "unknown schema handler");
-								}
-							}
-							// If the schema value for this prop is a string, we need to call custom handling function
-							if (typeof schemaNode === "object" && typeof schemaNode[prop] === "string") {
-								switch (schemaNode[prop]) {
-									case "FromScopeCallable":
-										return ScopeVariables.createFromScopeCallable(value, actualObj, pluginID, { trace });
-									case "CustomParserCallable":
-										return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
-									case "Constructor":
-										return ScopeUtils.ensureConstructableInScope(value, scope, { mutable: true, trace });
-									default:
-										VarCheck.throwPropError("access", prop, "unknown schema handler");
-								}
-							}
-							// If the schema is an object, treat the function as a namespace
-							// with sub-properties (e.g. Zotero.Translate has .Search, .Web)
+							// A schema object with no handler names the function's sub-properties, a namespace
+							// such as Zotero.Translate with .Search and .Web
 							let nextSchema = VarCheck.nextSchema(schemaNode, prop);
-							if (nextSchema && typeof nextSchema === "object") {
+							if (nextSchema && typeof nextSchema === "object" && !nextSchema[SchemaKey.HANDLER]) {
 								return wrapAllowlist(value, nextSchema, { pathPrefix: propPath });
 							}
-							if (cache) {
-								if (value !== callableOrigin) {
-									callableOrigin = value;
-									callableWrapped = ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
-								}
+							// One wrapper per function, so identity holds and a hot path allocates nothing
+							if (cache && value === callableOrigin) {
 								return callableWrapped;
 							}
-							return ScopeUtils.ensureCallableInScope(value, actualObj, scope, { mutable, trace });
+							let wrapped = wrapCallable(value, actualObj);
+							if (cache) {
+								callableOrigin = value;
+								callableWrapped = wrapped;
+							}
+							return wrapped;
 						}
 
 						if (VarCheck.isObjectLike(value)) {

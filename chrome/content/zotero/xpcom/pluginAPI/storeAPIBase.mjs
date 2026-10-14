@@ -226,7 +226,7 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * @returns {Promise<ControllerResponse<StoreCommitResult>>}
 	 */
 	commit(changes, options = {}, callerPluginID) {
-		return this._respond(() => this._commit(changes, options, callerPluginID));
+		return this._respond(() => this._commit(changes, options, callerPluginID), callerPluginID, "commit");
 	}
 
 	_defineObjectType(type, def) {
@@ -434,7 +434,13 @@ class StoreAPIBase extends ControllerAPIBase {
 			lazy.Zotero.logError(e);
 			e = new ControllerError(ControllerAPIBase.errorCodes.INTERNAL_ERROR, String(e?.message ?? e));
 		}
-		let locate = entry => ({ index: entry.index, type: entry.type, id: entry.id, ref: entry.ref });
+		// The target's own ID, since an operation such as a rename may have moved the object
+		let locate = entry => ({
+			index: entry.index,
+			type: entry.type,
+			id: entry.target ? entry.def.describe(entry.target).id : entry.id,
+			ref: entry.ref,
+		});
 		let done = new Set(applied);
 		e.data = Object.assign({
 			applied: applied.map(locate),
