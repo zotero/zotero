@@ -379,24 +379,6 @@ function setupFilePicker(scope) {
 	});
 }
 
-/**
- * Zotero.Utilities.Internal.getClipboard for the sandbox: the core reader, its "path" answer in the canonical
- * spelling the file store takes
- * @param {Object} scope - The sandbox scope
- */
-function setupClipboard(scope) {
-	let pluginID = scope.PLUGIN_ID;
-	let mirror = Cu.waiveXrays(scope).Zotero.Utilities?.Internal;
-	if (!mirror) return;
-	let getClipboard = (mimeType, dataType) => {
-		let result = Zotero.Utilities.Internal.getClipboard(mimeType, dataType);
-		return dataType === "path" && typeof result === "string" ? PathIdentity.canonicalize(result) : result;
-	};
-	defineOnMirror(mirror, "getClipboard", ScopeUtils.ensureCallableInScope(getClipboard, null, scope, {
-		trace: { pluginID, path: "Zotero.Utilities.Internal.getClipboard" },
-	}));
-}
-
 const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
 
 /**
@@ -476,4 +458,4 @@ function setupFileStore(scope) {
 	);
 }
 
-export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupClipboard, setupDataStore, setupFileStore };
+export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };
