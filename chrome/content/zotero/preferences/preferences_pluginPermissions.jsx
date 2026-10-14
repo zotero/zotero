@@ -213,7 +213,6 @@ Zotero_Preferences.PluginPermissions = {
 			"preferences-plugin-permissions-col-permissions",
 			"preferences-plugin-permissions-col-prefs",
 			"preferences-plugin-permissions-col-data",
-			"preferences-plugin-permissions-col-db",
 			"preferences-plugin-permissions-edit-row",
 			"preferences-plugin-permissions-legacy-badge",
 		].map(async key => [key, await document.l10n.formatValue(key) || key])));
@@ -275,9 +274,7 @@ Zotero_Preferences.PluginPermissions = {
 		let addIfOrphan = uuid => !byUUID.has(uuid) && orphans.add(uuid);
 		for (let { uuid } of PluginNames.list()) addIfOrphan(uuid);
 		for (let uuid of PluginFileAccess.listFileAccessUUIDs()) addIfOrphan(uuid);
-		for (let dir of ["plugin-data", "plugin-db"]) {
-			for (let uuid of await this._listSubdirs(dir)) addIfOrphan(uuid);
-		}
+		for (let uuid of await this._listSubdirs("plugin-data")) addIfOrphan(uuid);
 		for (let uuid of orphans) {
 			byUUID.set(uuid, {
 				name: PluginNames.get(uuid) || uuid,
@@ -292,18 +289,14 @@ Zotero_Preferences.PluginPermissions = {
 
 		let sizeByUUID = new Map(await Promise.all(
 			[...byUUID].map(async ([uuid, info]) => {
-				if (info.legacy) return [uuid, { dataSize: 0, dbSize: 0 }];
-				let [dataSize, dbSize] = await Promise.all([
-					PluginFileAccess.getDataDirSizeByUUID(uuid),
-					PluginFileAccess.getDbDirSizeByUUID(uuid),
-				]);
-				return [uuid, { dataSize, dbSize }];
+				if (info.legacy) return [uuid, 0];
+				return [uuid, await PluginFileAccess.getDataDirSizeByUUID(uuid)];
 			})
 		));
 
 		let rows = [];
 		for (let [uuid, info] of byUUID) {
-			let { dataSize, dbSize } = sizeByUUID.get(uuid);
+			let dataSize = sizeByUUID.get(uuid);
 			let permissionsText;
 			if (info.legacy || !info.pluginID) permissionsText = "—";
 			else permissionsText = String(info.permissions?.length ?? 0);
@@ -330,7 +323,6 @@ Zotero_Preferences.PluginPermissions = {
 				permissionsText,
 				prefsText,
 				dataText: info.legacy ? "—" : formatSize(dataSize),
-				dbText: info.legacy ? "—" : formatSize(dbSize),
 				edit: {
 					legacy: info.legacy,
 					legacyLabel,
@@ -404,13 +396,6 @@ Zotero_Preferences.PluginPermissions = {
 			{
 				dataKey: "dataText",
 				label: this._labels["preferences-plugin-permissions-col-data"],
-				fixedWidth: true,
-				width: 70,
-				renderCell: renderSizeCell,
-			},
-			{
-				dataKey: "dbText",
-				label: this._labels["preferences-plugin-permissions-col-db"],
 				fixedWidth: true,
 				width: 70,
 				renderCell: renderSizeCell,
@@ -522,13 +507,6 @@ Zotero_Preferences.PluginPermissions = {
 			dirID: "plugin-permissions-edit-data-dir",
 			emptyID: "plugin-permissions-edit-data-empty",
 			actionsID: "plugin-permissions-edit-data-actions",
-		});
-		await this._refreshDirSection({
-			dir: PluginFileAccess.getDbDirByUUID(uuid),
-			size: () => PluginFileAccess.getDbDirSizeByUUID(uuid),
-			dirID: "plugin-permissions-edit-db-dir",
-			emptyID: "plugin-permissions-edit-db-empty",
-			actionsID: "plugin-permissions-edit-db-actions",
 		});
 		await this._renderEditGrants();
 		await this._renderEditPrefs();
@@ -925,20 +903,6 @@ Zotero_Preferences.PluginPermissions = {
 		await this.refresh();
 	},
 
-	deleteEditDb: async function () {
-		if (!this._editTarget) return;
-		let confirmed = await confirmPrompt({
-			titleKey: "preferences-plugin-permissions-delete-db-confirm-title",
-			bodyKey: "preferences-plugin-permissions-delete-db-confirm-body",
-			actionKey: "preferences-plugin-permissions-delete-db-confirm-action",
-			args: { name: this._editTarget.name },
-		});
-		if (!confirmed) return;
-		await PluginFileAccess.deleteDbDirByUUID(this._editTarget.uuid);
-		await this._refreshEditPane();
-		await this.refresh();
-	},
-
 	addEditGrant: async function (type = 'file') {
 		if (!this._editTarget) return;
 		let path = await this._pickPath(type);
@@ -1020,7 +984,6 @@ Zotero_Preferences.PluginPermissions = {
 		// would just leave an empty list behind.
 		PluginFileAccess.clearFileAccess(uuid);
 		await PluginFileAccess.deleteDataDirByUUID(uuid);
-		await PluginFileAccess.deleteDbDirByUUID(uuid);
 		let prefBranch = Services.prefs.getBranch(`extensions.${uuid}.`);
 		for (let key of prefBranch.getChildList("")) {
 			try {
