@@ -1172,7 +1172,7 @@
 		 * @param {N} name
 		 * @param {DataStoreQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<DataStoreQueryResults[N]>>}
+		 * @returns {Promise<APIResponse<DataStoreQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.DataStore._dataStore.query(name, params, _callerPluginID);
@@ -1183,7 +1183,7 @@
 		 * @param {DataChangeSet | StoreChangeSet} changes
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving object's new snapshot
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<StoreCommitResult>>}
+		 * @returns {Promise<APIResponse<StoreCommitResult>>}
 		 */
 		commit(changes, options, _callerPluginID) {
 			return Zotero.DataStore._dataStore.commit(changes, options, _callerPluginID);
