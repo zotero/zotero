@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
@@ -130,16 +131,7 @@
 
 	class MenuManagerInternal extends lazy.ManagerAPIBase {
 		_menusTypeDefinition = {
-			menuType: {
-				type: "string",
-				optional: false,
-				checkHook: (value) => {
-					if (!VALID_MENU_TYPES.includes(value)) {
-						return `Option 'type' must be one of ${VALID_MENU_TYPES.join(", ")}, got ${value}`;
-					}
-					return true;
-				}
-			},
+			menuType: lazy.Params.oneOf(VALID_MENU_TYPES),
 			l10nID: {
 				type: "string",
 				optional: true,
@@ -147,7 +139,7 @@
 			l10nArgs: {
 				// TODO: remove support for object type in the future.
 				checkHook: (value) => {
-					if (typeof value === "undefined" || typeof value === "string") {
+					if (typeof value === "string") {
 						return true;
 					}
 					if (typeof value === "object") {
@@ -254,7 +246,7 @@
 			};
 		}
 
-		_hookNames = ['onShowing', 'onShown', 'onHiding', 'onHidden', 'onCommand'];
+		_hookNames = this._functionOptionNames(this._menusTypeDefinition);
 
 		_convert(option) {
 			option = super._convert(option);

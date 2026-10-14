@@ -144,11 +144,7 @@
 					selectCollectionsOrLibraries: {
 						params: {
 							windowID: "number",
-							type: {
-								type: "string",
-								checkHook: value => ROW_TYPES.includes(value)
-									|| `Param 'type' must be one of ${ROW_TYPES.join(", ")}, got ${value}`,
-							},
+							type: lazy.Params.oneOf(ROW_TYPES),
 							ids: {
 								type: "array",
 								checkHook: value => (value.length ? lazy.Params.intList.checkHook(value) : "Param 'ids' must not be empty"),
@@ -161,11 +157,7 @@
 					openTab: {
 						params: {
 							windowID: "number",
-							type: {
-								type: "string",
-								checkHook: value => lazy.WindowUtils.OPENABLE_TYPES.includes(value)
-									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_TYPES.join(", ")}, got ${value}`,
-							},
+							type: lazy.Params.oneOf(lazy.WindowUtils.OPENABLE_TYPES),
 							itemID: "number",
 							index: { type: "number", optional: true },
 							background: { type: "boolean", optional: true },

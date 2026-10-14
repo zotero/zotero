@@ -476,9 +476,8 @@
 								parent: lazy.DataParams.idRef("item", true),
 								linkMode: { type: "string", optional: true },
 								...Object.fromEntries(lazy.DataItemFields.createFields().map(field => [field, {
-									type: "any",
+									...lazy.Params.scalarOrObject,
 									optional: true,
-									checkHook: value => value === undefined || lazy.Params.scalarOrObject.checkHook(value),
 								}])),
 							},
 							handler: async (params, ctx) => {
