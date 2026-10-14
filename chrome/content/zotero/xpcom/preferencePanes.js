@@ -29,7 +29,7 @@
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
 	/**
@@ -207,7 +207,7 @@
 
 			let src;
 			if (embedded) {
-				src = lazy.resolvePluginPage(options.pluginID, options.src);
+				src = lazy.PluginProtocol.resolvePage(options.pluginID, options.src);
 				if (!src) {
 					throw new Error(`Plugin ${options.pluginID}: pane src must be an .html page within the plugin`);
 				}

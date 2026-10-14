@@ -32,7 +32,7 @@ import {
 import { VarCheck, ScopeUtils } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
-import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
+import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
 import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";

@@ -27,6 +27,7 @@
 import { setTimeout, clearTimeout, requestIdleCallback } from "resource://gre/modules/Timer.sys.mjs";
 import { FileUtils } from "resource://gre/modules/FileUtils.sys.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { PathIdentity } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
 
 const FILE_ACCESS_PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 
@@ -62,61 +63,21 @@ function getPluginDataDir() {
 	return PathUtils.join(Zotero.DataDirectory.dir, "plugin-data");
 }
 
-// Windows compares paths without regard to case, and nsIFile.normalize keeps the case as given there
-function foldCase(path) {
-	return Zotero.isWin ? path.toLowerCase() : path;
-}
-
-function samePath(a, b) {
-	return foldCase(a) === foldCase(b);
-}
-
-function containsPath(dir, path) {
-	return Zotero.File.directoryContains(foldCase(dir), foldCase(path));
-}
-
 function isPersistBlocked(canonicalPath) {
 	let real = PluginFileAccess._realPath(canonicalPath);
 	for (let p of persistBlockedPaths) {
-		if (containsPath(real, PluginFileAccess._realPath(p))) return true;
+		if (PathIdentity.contains(real, PluginFileAccess._realPath(p))) return true;
 	}
 	return false;
 }
 
-/**
- * Resolve symlinks in a path to the real target
- */
-function resolveRealPath(rawPath) {
-	let canonical = rawPath;
-	try {
-		canonical = Zotero.File.normalizeToUnix(rawPath);
-		let f = Zotero.File.pathToFile(Zotero.isWin ? canonical.replace(/\//g, "\\") : canonical);
-		let leaves = [];
-		while (f && !f.exists()) {
-			leaves.unshift(f.leafName);
-			f = f.parent;
-		}
-		if (f) {
-			f.normalize();
-			for (let leaf of leaves) {
-				f.append(leaf);
-			}
-			return Zotero.File.normalizeToUnix(f.path);
-		}
-	}
-	catch (e) {
-		Zotero.logError(e);
-	}
-	return canonical;
-}
-
 function isForbidden(realPath) {
-	if (containsPath(PluginFileAccess._realPath(PathUtils.profileDir), realPath)) {
+	if (PathIdentity.contains(PluginFileAccess._realPath(PathUtils.profileDir), realPath)) {
 		return true;
 	}
-	if (containsPath(PluginFileAccess._realPath(Zotero.DataDirectory.dir), realPath)) {
+	if (PathIdentity.contains(PluginFileAccess._realPath(Zotero.DataDirectory.dir), realPath)) {
 		let pluginDataDir = PluginFileAccess._realPath(getPluginDataDir());
-		if (pluginDataDir && containsPath(pluginDataDir, realPath)) {
+		if (pluginDataDir && PathIdentity.contains(pluginDataDir, realPath)) {
 			return false;
 		}
 		return true;
@@ -201,20 +162,6 @@ async function _getDirSize(path) {
 	}
 }
 
-function canonicalize(rawPath) {
-	if (typeof rawPath !== "string" || !rawPath) {
-		throw new Error("File path must be a non-empty string");
-	}
-	let path = rawPath;
-	if (path.startsWith("file:")) {
-		path = Services.io.newURI(path).QueryInterface(Ci.nsIFileURL).file.path;
-	}
-	if (!PathUtils.isAbsolute(path)) {
-		throw new Error(`File path must be absolute: ${rawPath}`);
-	}
-	return Zotero.File.normalizeToUnix(path);
-}
-
 
 class GrantLayer {
 	static VALID_MODES = ["read", "write", "deny"];
@@ -231,7 +178,7 @@ class GrantLayer {
 			}
 		}
 		if (skipPathCheck) return true;
-		return samePath(stronger.path, weaker.path) || containsPath(stronger.path, weaker.path);
+		return PathIdentity.same(stronger.path, weaker.path) || PathIdentity.contains(stronger.path, weaker.path);
 	}
 
 	/**
@@ -518,11 +465,11 @@ class FileAccessState {
 	}
 
 	getDir() {
-		return canonicalize(PathUtils.join(getPluginDataDir(), this.uuid));
+		return PathIdentity.canonicalize(PathUtils.join(getPluginDataDir(), this.uuid));
 	}
 
 	_tempDirPath() {
-		return canonicalize(PathUtils.join(Zotero.getTempDirectory().path, `plugin-${this.uuid}`));
+		return PathIdentity.canonicalize(PathUtils.join(Zotero.getTempDirectory().path, `plugin-${this.uuid}`));
 	}
 
 	/**
@@ -546,7 +493,7 @@ class FileAccessState {
 		if (mode !== "read" && mode !== "write") {
 			throw new Error(`Invalid file access mode: ${mode}`);
 		}
-		let path = canonicalize(rawPath);
+		let path = PathIdentity.canonicalize(rawPath);
 		let realPath = PluginFileAccess._realPath(path);
 
 		if (isForbidden(realPath)) {
@@ -646,7 +593,7 @@ class FileAccessState {
 		if (!this.activeSession) return;
 		let path;
 		try {
-			path = PluginFileAccess._realPath(canonicalize(rawPath));
+			path = PluginFileAccess._realPath(PathIdentity.canonicalize(rawPath));
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -675,7 +622,7 @@ class FileAccessState {
 	_getDecision(realPath, mode) {
 		for (let own of [this.getDir(), this._tempDirPath()]) {
 			let real = PluginFileAccess._realPath(own);
-			if (real && containsPath(real, realPath)) {
+			if (real && PathIdentity.contains(real, realPath)) {
 				return "allow";
 			}
 		}
@@ -761,7 +708,7 @@ const PluginFileAccess = {
 	_states: new Map(),
 
 	// Every real-path lookup of the gate goes through here, so a test can say where a path leads
-	_realPath: resolveRealPath,
+	_realPath: PathIdentity.realPath,
 
 	register(pluginID) {
 		this._states.set(pluginID, new FileAccessState(pluginID));
@@ -808,7 +755,7 @@ const PluginFileAccess = {
 	 * The canonical form of an absolute native path or file: URL, which every grant and check uses
 	 * @throws {Error} For a relative path
 	 */
-	canonicalize,
+	canonicalize: PathIdentity.canonicalize,
 
 	addSessionGrant(pluginID, rawPath, mode) {
 		let state = this._states.get(pluginID);
@@ -834,7 +781,7 @@ const PluginFileAccess = {
 	},
 
 	getDataDirByUUID(uuid) {
-		return canonicalize(PathUtils.join(getPluginDataDir(), uuid));
+		return PathIdentity.canonicalize(PathUtils.join(getPluginDataDir(), uuid));
 	},
 
 	async getDataDirSizeByUUID(uuid) {
@@ -866,4 +813,4 @@ const PluginFileAccess = {
 	},
 };
 
-export { PluginFileAccess, PersistedGrantLayer, resolveRealPath, samePath, containsPath };
+export { PluginFileAccess, PersistedGrantLayer };

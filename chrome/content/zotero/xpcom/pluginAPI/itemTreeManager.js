@@ -30,11 +30,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginFile: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
 	/**
@@ -54,7 +54,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		if (parsed?.protocol === "data:") {
 			return /^image\/svg\+xml[;,]/i.test(parsed.pathname) ? url : null;
 		}
-		return lazy.resolvePluginFile(pluginID, url, [".svg"]);
+		return lazy.PluginProtocol.resolveFile(pluginID, url, [".svg"]);
 	}
 
 
