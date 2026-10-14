@@ -113,9 +113,6 @@ const PERMISSION_SCHEMAS = {
 			uiReadyPromise: true,
 			unlockPromise: true,
 			startupSyncPromise: true,
-			// Window access (also available via onMainWindowLoad hook)
-			getMainWindow: "WindowScopeCallable",
-			getMainWindows: "WindowScopeCallable",
 			// Utilities
 			Utilities: {
 				cleanDOI: true,
@@ -422,90 +419,6 @@ const PERMISSION_SCHEMAS = {
 	},
 };
 
-const WINDOW_SCHEMAS = {
-	default: {
-		alert: true,
-		confirm: true,
-		prompt: true,
-		getComputedStyle: true,
-		matchMedia: true,
-		MozXULElement: {
-			insertFTLIfNeeded: true,
-		}
-		// `document` is dynamically created by WindowScopeVariables.createSafeDocument and thus not included here
-	}
-};
-
-const MAIN_WINDOW_SCHEMAS = {
-	default: {},
-	mainWindow: {
-		Zotero_Tabs: {
-			// Read-only state
-			selectedID: true,
-			selectedType: true,
-			selectedIndex: true,
-			numTabs: true,
-			// Query methods
-			getTabIDByItemID: true,
-			getTabInfo: true,
-			hasContextPane: true,
-			hasNoteContext: true,
-			parseTabType: true,
-			// Tab navigation
-			select: true,
-			selectPrev: true,
-			selectNext: true,
-			selectLast: true,
-			// Tab management
-			close: true,
-			rename: true,
-		},
-		ZoteroContextPane: {
-			// Read-only state
-			collapsed: true,
-			// Context pane inner
-			context: {
-				mode: true,
-			},
-			// Actions
-			togglePane: true,
-			focus: true,
-		},
-		ZoteroPane: {
-			loaded: true,
-			getSortField: true,
-			getSortDirection: true,
-			toggleItemPane: true,
-			toggleTagSelector: true,
-			clearQuicksearch: true,
-		},
-	},
-	"mainWindow,dataRead": {
-		ZoteroPane: {
-			getSelectedLibraryIDs: true,
-			getSelectedCollections: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			getSelectedSavedSearches: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			getSelectedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			getSortedItems: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			canEdit: true,
-			canEditLibrary: true,
-			canEditFiles: true,
-			selectItem: true,
-			selectItems: true,
-			setVirtual: true,
-		},
-	},
-	"mainWindow,dataWrite": {
-		ZoteroPane: {
-			// newItem resolves to an Item
-			newItem: { [SchemaKey.HANDLER]: "Callable", [SchemaKey.SCHEMA]: DATA_OBJECT_SCHEMA },
-			newCollection: true,
-			newNote: true,
-			newChildNote: true,
-		},
-	},
-};
-
 /**
  * Allowlist schema for DBConnection instances created by plugins.
  */
@@ -527,4 +440,4 @@ const PLUGIN_DB_SCHEMA = {
 	path: true,
 };
 
-export { SchemaKey, DATA_OBJECT_SCHEMA, PLUGIN_DB_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS };
+export { SchemaKey, DATA_OBJECT_SCHEMA, PLUGIN_DB_SCHEMA, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS };
