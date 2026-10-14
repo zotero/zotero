@@ -1,3 +1,13 @@
+// -moz-window-dragging is chrome-only CSS (fx153+) that author sheets can't use,
+// so pages mark window drag areas with data attributes, mapped by this user sheet
+const WINDOW_DRAG_SHEET = "data:text/css," + encodeURIComponent(
+	"[window-dragging] { -moz-window-dragging: drag; }"
+	+ "[window-dragging] :is(button, a, input, select, textarea,"
+	+ " [contenteditable]:not([contenteditable='false' i]))"
+	+ " { -moz-window-dragging: no-drag; }"
+	+ "[window-no-drag] { -moz-window-dragging: no-drag; }"
+);
+
 // Per-page actor running in an embedded plugin page's own process (see
 // embeddedPage.mjs): injects window.zoteroHost messaging and drives auto-resize.
 export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
@@ -16,6 +26,7 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 	handleEvent(event) {
 		if (event.type === "DOMDocElementInserted") {
 			this._injectMessaging();
+			this._loadWindowDragSheet();
 		}
 	}
 	
@@ -57,6 +68,18 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 		Cu.waiveXrays(host).api = this._buildHostAPIProxy(win);
 	}
 	
+	// The user-origin sheet may use the chrome-only property; whether dragging
+	// actually happens stays gated by the host docShell's windowDraggingAllowed
+	_loadWindowDragSheet() {
+		try {
+			let winUtils = this.contentWindow?.windowUtils;
+			winUtils?.loadSheetUsingURIString(WINDOW_DRAG_SHEET, winUtils.USER_SHEET);
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+
 	// zoteroHost.api.<name>(params) as a page-compartment Proxy so any name is
 	// callable synchronously; chrome validates the name and runs the handler
 	_buildHostAPIProxy(win) {
