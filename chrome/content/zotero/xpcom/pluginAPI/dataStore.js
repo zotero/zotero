@@ -35,7 +35,10 @@
 		DataItemFields: "chrome://zotero/content/xpcom/pluginAPI/dataItemFields.mjs",
 	});
 
-	const CHANGE_SET_URL = "chrome://zotero/content/xpcom/plugins/changeSet.js";
+	const CHANGE_SET_URLS = [
+		"chrome://zotero/content/xpcom/plugins/changeSetBase.js",
+		"chrome://zotero/content/xpcom/plugins/changeSet.js",
+	];
 
 	const OBJECT_TYPES = ["item", "collection", "search", "library"];
 
@@ -310,12 +313,14 @@
 	}
 
 	/**
-	 * The change set builder class, from the script the sandboxes load too
+	 * The change set builder class, from the scripts the sandboxes load too
 	 */
 	function loadChangeSetClass() {
-		let target = {};
-		Services.scriptloader.loadSubScript(CHANGE_SET_URL, target);
-		return target.DataChangeSet;
+		let holder = {};
+		for (let url of CHANGE_SET_URLS) {
+			Services.scriptloader.loadSubScript(url, holder);
+		}
+		return holder.DataChangeSet;
 	}
 
 	/**

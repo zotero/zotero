@@ -28,7 +28,6 @@ import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrom
 import { SchemaKey } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
-import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 
 const ScopeVariables = {
 
@@ -303,63 +302,6 @@ const ScopeVariables = {
 	},
 
 	/**
-	 * Wrap a host function so that designated path arguments are
-	 * checked against the plugin's file-access grants before invocation.
-	 * `pathSpec` is `{ read?: number[], write?: number[] }` listing the
-	 * argument indices that are path strings.
-	 *
-	 * The wrapper always returns a Promise (it awaits the permission
-	 * check, which may prompt the user).
-	 */
-	createFileAccessCallable(func, thisArg, pluginID, pathSpec, { trace } = {}) {
-		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)
-				|| !pathSpec
-				|| (!pathSpec.read?.length && !pathSpec.write?.length)) {
-			return ScopeUtils.ensureCallableInScope(func, thisArg, scope, { trace });
-		}
-
-		let holder = Cu.createObjectIn(scope);
-		let thisArgRef = VarCheck.isObjectLike(thisArg) ? new WeakRef(thisArg) : null;
-
-		let wrapped = (...args) => {
-			let t = trace && PluginTrace.start();
-			args = args.map(arg => Cu.waiveXrays(arg));
-			let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
-			if (thisArgRef && !actualThisArg) {
-				VarCheck.throwPropError("access", "this", "object has been garbage collected");
-			}
-
-			let work = (async () => {
-				for (let i of (pathSpec.read || [])) {
-					if (args[i] !== null && args[i] !== undefined) {
-						await PluginFileAccess.check(pluginID, args[i], "read");
-					}
-				}
-				for (let i of (pathSpec.write || [])) {
-					if (args[i] !== null && args[i] !== undefined) {
-						await PluginFileAccess.check(pluginID, args[i], "write");
-					}
-				}
-				// Wrap plugin-provided callbacks/objects so chrome can call
-				// them (no-op for strings/primitives).
-				let callArgs = args.map(arg => ScopeVariables.fromScope(arg, pluginID, { trace }));
-				if (actualThisArg && !VarCheck.isInChrome(actualThisArg)) {
-					callArgs = ScopeUtils.ensurePromiseVarInScope(callArgs, Cu.getGlobalForObject(actualThisArg), {});
-				}
-				return func.apply(actualThisArg, callArgs);
-			})();
-
-			let result = ScopeUtils.ensurePromiseVarInScope(work, scope, {});
-			PluginTrace.end(t, trace?.pluginID, "call", trace?.path);
-			return result;
-		};
-
-		Cu.exportFunction(wrapped, holder, { defineAs: "f" });
-		return holder.f;
-	},
-
-	/**
 	 * Create a mirrored object in scope based on the allowlist schema
 	 * This is to bypass Gecko cross-compartment with different security principles for the designated
 	 * attributes and methods on the target object, so that the scope with a lower privilege can access
@@ -465,8 +407,6 @@ const ScopeVariables = {
 											instanceSchema: handler[SchemaKey.SCHEMA] || null,
 											trace,
 										});
-									case "FileAccessCallable":
-										return ScopeVariables.createFileAccessCallable(value, actualObj, pluginID, handler[SchemaKey.SCHEMA], { trace });
 									case "CustomParserCallable":
 										return ScopeVariables.createCustomParserCallable(value, actualObj, pluginID, { trace });
 									default:
