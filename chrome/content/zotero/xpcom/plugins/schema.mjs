@@ -124,21 +124,12 @@ const PERMISSION_SCHEMAS = {
 				registerObserver: "FromScopeCallable",
 				unregisterObserver: true,
 			},
-			Translators: {
-				getAll: true,
-			},
 		},
 	},
 	dataWrite: {
 		Zotero: {
 			DataStore: {
 				commit: "CustomParserCallable",
-			},
-			// Handlers still receive core items, which the boundary drops
-			Translate: {
-				Import: "Constructor",
-				Search: "Constructor",
-				Web: "Constructor",
 			},
 		},
 	},
