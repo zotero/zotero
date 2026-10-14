@@ -546,6 +546,33 @@ describe("Zotero.DataStore", function () {
 			assert.equal(objects[0].revision, item.clientVersion);
 		});
 
+		// A created feed is saved after the store transaction; one core refuses at save was never persisted, so
+		// the discard that follows a failed deferred create must leave the feed it collided with alone
+		it("should leave an existing feed alone when a feed for the same URL is refused", async function () {
+			let feed = await createFeed();
+			try {
+				let error = await requestError(commit(url => CS.library({ libraryType: "feed", name: "Duplicate", url }), feed.url));
+				assert.include(error.message, "already exists");
+				assert.isTrue(Zotero.Libraries.exists(feed.libraryID));
+				assert.equal(Zotero.Feeds.get(feed.libraryID).name, feed.name);
+				assert.lengthOf(Zotero.Feeds.getAll().filter(f => f.url === feed.url), 1);
+			}
+			finally {
+				await feed.eraseTx();
+			}
+		});
+
+		// Core stores whatever string it is given in the synced tag colors setting
+		it("should set a tag color only as a hex color", async function () {
+			let tag = 'colored-' + Zotero.Utilities.randomString();
+			let error = await requestError(commit((tag) => CS.library(libraryID).setTagColor(tag, "red"), tag), codes.INVALID_PARAMS);
+			assert.include(error.message, "hex color");
+			await requestResult(commit((tag) => CS.library(libraryID).setTagColor(tag, "#FF6666"), tag));
+			assert.equal(Zotero.Tags.getColor(libraryID, tag).color, "#FF6666");
+			await requestResult(commit((tag) => CS.library(libraryID).setTagColor(tag, null), tag));
+			assert.isFalse(Zotero.Tags.getColor(libraryID, tag));
+		});
+
 		it("should refuse to rename an unknown tag before applying anything", async function () {
 			let item = await createDataObject('item', { title: 'Untouched' });
 			let error = await requestError(commit((itemID, unknown) => CS.of(
@@ -811,6 +838,28 @@ describe("Zotero.DataStore", function () {
 			let attachment = Zotero.Items.get(objects[0].id);
 			assert.equal(attachment.getField("title"), "Straight to the trash");
 			assert.isTrue(attachment.deleted);
+		});
+
+		// Core imports the file in its own transaction, so a failure later in the entry has nothing to roll back
+		it("should remove an imported attachment whose own entry fails after the import", async function () {
+			let parent = await createDataObject('item');
+			let source = await writeTemp("Imported, then dropped");
+			let storage = Zotero.getStorageDirectory().path;
+			let dirs = (await IOUtils.getChildren(storage)).length;
+			let error = await requestError(commit((file, parentID) => CS.item({ itemType: "attachment", linkMode: "imported_file", file, parent: parentID })
+				.setField("nosuchfield", "x"), source, parent.id), codes.INVALID_PARAMS);
+			assert.include(error.message, "unknown field 'nosuchfield'");
+			assert.isUndefined(error.data && error.data.applied);
+			assert.isEmpty(parent.getAttachments());
+			assert.lengthOf(await IOUtils.getChildren(storage), dirs, "the imported copy goes with the item");
+			assert.isTrue(await FileIO.exists(source), "the plugin's own copy stays");
+			// A later entry's failure keeps it, as for any applied entry
+			error = await requestError(commit((file, parentID) => CS.of(
+				CS.item({ itemType: "attachment", linkMode: "imported_file", file, parent: parentID }),
+				CS.library(libraryID).renameTag('no-such-tag-' + Math.random(), "x")
+			), source, parent.id), codes.INVALID_PARAMS);
+			assert.isUndefined(error.data && error.data.applied);
+			assert.isEmpty(parent.getAttachments(), "the rename fails its check before anything applies");
 		});
 
 		it("should relink a stored attachment to a copy of a file the plugin wrote", async function () {
