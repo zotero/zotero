@@ -694,28 +694,23 @@ async function executeTransactionWithForcedRollback(fn, options) {
 }
 
 /**
- * Build a mock AddonManager addon for plugin sandbox/API tests.
- *
- * Mirrors the shape PluginSandbox/PluginFileAccess read off a real addon:
- * id, name, version, syncGUID, installPermissions, and getResourceURI().
- *
+ * An AddonManager addon with only what PluginSandbox reads off one, so a test loads a plugin without an XPI
  * @param {Object} [options]
- * @param {String} options.id - Addon ID (e.g. "test@zotero.org")
- * @param {String} [options.name] - Display name
- * @param {String} [options.version] - Version string
- * @param {String} [options.syncGUID] - AddonManager sync identifier
- * @param {String[]} [options.permissions] - Granted permissions
- * @param {String[]} [options.origins] - Granted host_permissions origins
- * @param {String[]} [options.prefPermissions] - Declared pref_permissions prefixes
- * @param {String[]} [options.interopPermissions] - Declared interop_permissions
- * @param {String} [options.resourceURI] - URI returned by getResourceURI()
- * @return {Object} A mock addon
+ * @param {String} options.id
+ * @param {String} [options.name]
+ * @param {String} [options.version]
+ * @param {String[]} [options.permissions]
+ * @param {String[]} [options.origins] - host_permissions
+ * @param {String[]} [options.prefPermissions] - pref_permissions prefixes
+ * @param {String[]} [options.interopPermissions] - interop_permissions
+ * @param {String} [options.contentSecurityPolicy] - content_security_policy
+ * @param {String} [options.resourceURI] - The plugin's root
+ * @return {Object}
  */
 function createMockPlugin({
 	id,
 	name = "Test Plugin",
 	version = "1.0.0",
-	syncGUID,
 	permissions = ["default"],
 	origins = [],
 	prefPermissions = [],
@@ -727,7 +722,6 @@ function createMockPlugin({
 		id,
 		name,
 		version,
-		syncGUID,
 		installPermissions: {
 			permissions,
 			origins,

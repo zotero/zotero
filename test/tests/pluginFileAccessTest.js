@@ -1,5 +1,5 @@
 describe("Plugin File Access", function () {
-	var { PluginFileAccess } = ChromeUtils.importESModule(
+	var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/fileAccess.mjs"
 	);
 	var { PluginUUID } = ChromeUtils.importESModule(
@@ -78,9 +78,7 @@ describe("Plugin File Access", function () {
 		Zotero.Prefs.set(PREF_PREFIX + pluginUUID, JSON.stringify(entries), true);
 	}
 
-	// Open the prompt by triggering a check, returning both the prompt window
-	// and a handle to the in-flight session promise so the caller can await it
-	// after dismissing the prompt.
+	// Open the prompt through a check in a session; the caller awaits the session after dismissing the prompt
 	function triggerPrompt(path, mode = "read") {
 		let promptPromise = waitForWindow(PROMPT_URL);
 		let sessionPromise = PluginFileAccess.withSession(PLUGIN_ID, async () => {
@@ -332,6 +330,55 @@ describe("Plugin File Access", function () {
 	});
 
 
+	describe("Path identity", function () {
+		it("compares paths without regard to case where the default file system ignores it", function () {
+			let was = { isWin: Zotero.isWin, isMac: Zotero.isMac };
+			try {
+				Zotero.isWin = false;
+				Zotero.isMac = false;
+				assert.isFalse(PathIdentity.same("/A/b", "/a/b"));
+				assert.isFalse(PathIdentity.contains("/A", "/a/b"));
+				assert.isFalse(PersistedGrantLayer.subsumes({ path: "/A", mode: "read" }, { path: "/a/b", mode: "read" }));
+				Zotero.isMac = true;
+				assert.isTrue(PathIdentity.same("/A/b", "/a/b"));
+				assert.isTrue(PathIdentity.contains("/Users/X", "/users/x/doc.txt"));
+				Zotero.isWin = true;
+				assert.isTrue(PathIdentity.same("C:/A/b", "c:/a/B"));
+				assert.isTrue(PathIdentity.contains("C:/Users/X", "c:/users/x/doc.txt"));
+				assert.isFalse(PathIdentity.contains("C:/Users/X", "c:/users/xy/doc.txt"));
+				assert.isTrue(PersistedGrantLayer.subsumes({ path: "C:/Users/X", mode: "write" }, { path: "c:/users/x/doc.txt", mode: "read" }));
+			}
+			finally {
+				Object.assign(Zotero, was);
+			}
+		});
+
+		it("sees through a junction on Windows", async function () {
+			if (!Zotero.isWin) {
+				this.skip();
+			}
+			// A junction needs no privilege, which is what makes it the escape to catch
+			let base = await getTempDirectory();
+			let target = PathUtils.join(base, "target");
+			let junction = PathUtils.join(base, "junction");
+			await IOUtils.makeDirectory(target);
+			// Subprocess does not search PATH here
+			let cmd = Services.env.get("COMSPEC") || "C:\\Windows\\System32\\cmd.exe";
+			let made = await Zotero.Utilities.Internal.subprocess(cmd, ["/c", "mklink", "/J", junction, target]);
+			try {
+				assert.isTrue(await IOUtils.exists(junction), `mklink via ${cmd} said: ${made}`);
+				// Windows stores the target's long name in the junction, so the resolved path is compared by
+				// shape: a short-name spelling of the temp dir would not match it letter for letter
+				let throughJunction = PathIdentity.realPath(PathIdentity.canonicalize(PathUtils.join(junction, "inside.txt")));
+				assert.notInclude(throughJunction, "/junction/", "the junction should be seen through");
+				assert.isTrue(throughJunction.endsWith("/target/inside.txt"), throughJunction);
+			}
+			finally {
+				await Zotero.Utilities.Internal.subprocess(cmd, ["/c", "rmdir", junction]);
+			}
+		});
+	});
+
 	describe("Prompt UI", function () {
 		it("renders the title, headline, checkbox, and action buttons", async function () {
 			let path = PathUtils.join(tempDir, "ui-shape.txt");
@@ -484,9 +531,7 @@ describe("Plugin File Access", function () {
 		});
 
 		it("collapses the prompt when nothing can be persisted", async function () {
-			// Root path: neither the file nor any parent can be persisted, so the
-			// Remember checkbox and the split Allow (with its parent option) are
-			// hidden, leaving only the plain Allow button.
+			// Neither a root nor any parent of it can be persisted, so only the plain Allow button shows
 			let path = Zotero.isWin ? "C:\\" : "/";
 			let { promptPromise, sessionPromise } = triggerPrompt(path);
 			let win = await promptPromise;
@@ -500,9 +545,7 @@ describe("Plugin File Access", function () {
 		});
 
 		it("dropdown disappears when Remember is checked and parent isn't persistable", async function () {
-			// /etc/X: file persistable, parent /etc not. With Remember unchecked
-			// the dropdown shows ("Allow once for /etc"); checking Remember
-			// hides the dropdown because the parent option can't be persisted.
+			// /etc/X can be persisted but /etc cannot, so checking Remember drops the parent option
 			let parent = Zotero.isWin ? "C:\\Windows" : "/etc";
 			let path = PathUtils.join(parent, "dyn-dropdown.txt");
 			let { promptPromise, sessionPromise } = triggerPrompt(path);
@@ -709,15 +752,8 @@ describe("Plugin File Access", function () {
 
 
 	describe("Prompt keyboard shortcuts", function () {
-		// Run the handler directly with a synthetic event. dispatchEvent on a
-		// chrome window doesn't reliably reach window-level listeners for
-		// some keys (Mozilla intercepts e.g. Escape before they bubble out),
-		// and `window.close()` from inside the listener doesn't always fire
-		// onclose synchronously in the test environment.
-		//
-		// To isolate "the handler does the right thing" from "the close path
-		// works in tests", we spy on `win.close` and observe what the handler
-		// does instead of waiting for the close → cancel chain.
+		// Calls the handler directly with win.close spied: a dispatched key doesn't reliably reach window
+		// listeners (Escape is intercepted), and a close() from one doesn't always fire onclose in tests
 		function setup(win) {
 			let calls = { close: 0 };
 			let originalClose = win.close.bind(win);
@@ -820,6 +856,143 @@ describe("Plugin File Access", function () {
 			restore();
 			win.PluginFileAccessPrompt._choose("deny", "file");
 			await sessionPromise;
+		});
+	});
+
+	describe("FilePicker", function () {
+		var plugin = usePluginSandbox();
+		var { VarCheck } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+
+		var pickedFile;
+		var pickedDir;
+
+		before(async function () {
+			let scratch = await getTempDirectory();
+			pickedDir = PathUtils.join(scratch, "picked-dir-" + Zotero.Utilities.randomString());
+			await FileIO.makeDirectory(pickedDir);
+			pickedFile = PathUtils.join(pickedDir, "picked.txt");
+			await FileIO.writeUTF8(pickedFile, "picked content");
+		});
+
+		after(async function () {
+			await FileIO.remove(pickedDir, { recursive: true, ignoreAbsent: true });
+		});
+
+		beforeEach(function () {
+			plugin.load(["default", "fileSystemRead", "fileSystemWrite"]);
+		});
+
+		// The plugin's own picker as `picker`, over a fake native dialog the user answers with these paths
+		function createPicker(paths, result = 0) {
+			plugin.eval("var picker = new FilePicker();");
+			VarCheck.getOriginalOrSelf(plugin.scope.picker)._fp = {
+				init() {},
+				open: callback => callback(result),
+				file: { path: paths[0] },
+				displayDirectory: null,
+				// A fresh enumerator on each read, as the native picker gives
+				get files() {
+					let next = 0;
+					return { hasMoreElements: () => next < paths.length, getNext: () => ({ QueryInterface() {}, path: paths[next++] }) };
+				},
+			};
+		}
+
+		// Pick in the given mode inside a session, then read each path the picker hands back
+		function pickAndRead(mode) {
+			return plugin.run(mode => Zotero.FileStore.withSession(async () => {
+				picker.init(null, "Pick", picker[mode]);
+				await picker.show();
+				let paths = mode === "modeOpenMultiple" ? picker.files : [picker.file];
+				let reads = [];
+				for (let path of paths) {
+					reads.push(await Zotero.FileStore.query("readFile", { path, encoding: "utf8" }));
+				}
+				return reads;
+			}), mode);
+		}
+
+		it("does not expose FilePicker without fileSystemRead", function () {
+			plugin.load(["default"]);
+			assert.equal(plugin.eval("typeof FilePicker"), "undefined");
+		});
+
+		it("hands out paths in the canonical spelling and takes a display directory in it", function () {
+			let picked = [PathUtils.join(pickedDir, "Picked.txt"), PathUtils.join(pickedDir, "Other.txt")];
+			createPicker(picked);
+			assert.equal(plugin.eval("picker.file"), PluginFileAccess.canonicalize(picked[0]));
+			assert.deepEqual(plugin.run(() => picker.files), picked.map(p => PluginFileAccess.canonicalize(p)));
+			plugin.run((dir) => {
+				picker.displayDirectory = dir;
+			}, PluginFileAccess.canonicalize(pickedDir));
+			assert.equal(VarCheck.getOriginalOrSelf(plugin.scope.picker)._fp.displayDirectory.path, pickedDir);
+			assert.equal(plugin.eval("picker.displayDirectory"), PluginFileAccess.canonicalize(pickedDir));
+		});
+
+		it("grants read on a file picked to open", async function () {
+			createPicker([pickedFile]);
+			let [read] = await pickAndRead("modeOpen");
+			assert.equal((await requestResult(read)).data, "picked content");
+		});
+
+		it("grants read on each file picked to open together", async function () {
+			let extra = PathUtils.join(pickedDir, "extra.txt");
+			await FileIO.writeUTF8(extra, "extra content");
+			try {
+				createPicker([pickedFile, extra]);
+				let reads = await pickAndRead("modeOpenMultiple");
+				assert.deepEqual(reads.map(read => read.result.data), ["picked content", "extra content"]);
+			}
+			finally {
+				await FileIO.remove(extra, { ignoreAbsent: true });
+			}
+		});
+
+		it("grants write on the destination picked to save", async function () {
+			let target = PathUtils.join(pickedDir, "saved-" + Zotero.Utilities.randomString() + ".txt");
+			createPicker([target]);
+			try {
+				await requestResult(plugin.run(() => Zotero.FileStore.withSession(async () => {
+					picker.init(null, "Save", picker.modeSave);
+					await picker.show();
+					return Zotero.FileStore.commit(Zotero.FileStore.ChangeSet.file(picker.file).writeFile("saved"));
+				})));
+				assert.equal(await FileIO.readUTF8(target), "saved");
+			}
+			finally {
+				await FileIO.remove(target, { ignoreAbsent: true });
+			}
+		});
+
+		it("grants write on everything inside a picked folder", async function () {
+			createPicker([pickedDir]);
+			let inner = PathUtils.join(pickedDir, "inside-" + Zotero.Utilities.randomString() + ".txt");
+			try {
+				let read = await plugin.run(name => Zotero.FileStore.withSession(async () => {
+					picker.init(null, "Folder", picker.modeGetFolder);
+					await picker.show();
+					let path = Zotero.FileStore.path.join(picker.file, name);
+					await Zotero.FileStore.commit(Zotero.FileStore.ChangeSet.file(path).writeFile("in folder"));
+					return Zotero.FileStore.query("readFile", { path, encoding: "utf8" });
+				}), PathUtils.filename(inner));
+				assert.equal((await requestResult(read)).data, "in folder");
+			}
+			finally {
+				await FileIO.remove(inner, { ignoreAbsent: true });
+			}
+		});
+
+		it("ends the grant with the session", async function () {
+			createPicker([pickedFile]);
+			await pickAndRead("modeOpen");
+			await requestError(plugin.run(path => Zotero.FileStore.query("readFile", { path, encoding: "utf8" }), pickedFile),
+				Zotero.FileStore.errorCodes.PERMISSION_DENIED);
+		});
+
+		it("grants nothing when the picker is cancelled", async function () {
+			createPicker([pickedFile], 1);
+			let [read] = await pickAndRead("modeOpen");
+			await requestError(read, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
 		});
 	});
 });
