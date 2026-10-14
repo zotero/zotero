@@ -4424,6 +4424,48 @@ describe("Plugin Sandbox", function () {
 		var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
 		const INSTALL_ID = "csp-install-test@zotero.org";
 
+		// The loader counts a plugin's moz-extension URL as untrusted, so the load must say so explicitly
+		it("should run bootstrap.js from an installed XPI so startup can register a command", async function () {
+			let { FileUtils } = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+			const ID = "xpi-startup-test@zotero.org";
+			let dir = await getTempDirectory();
+			await FileIO.writeUTF8(PathUtils.join(dir, "manifest.json"), JSON.stringify({
+				manifest_version: 2,
+				name: "XPI Startup Test",
+				version: "1.0." + Date.now(),
+				applications: { zotero: { id: ID, update_url: "https://example.invalid/none.json", strict_max_version: "9999.*" } },
+				permissions: ["pluginInterop"],
+			}));
+			await FileIO.writeUTF8(PathUtils.join(dir, "bootstrap.js"), `
+function startup({ id }) {
+	Zotero.PluginInteropManager.register({
+		pluginID: id, commandName: "exec", commandVersion: "1.0.0",
+		command({ data }) { return { echo: data && data.code }; },
+	});
+}
+function shutdown() {}
+function install() {}
+function uninstall() {}
+`);
+			let xpiPath = PathUtils.join(dir, "plugin.xpi");
+			let zw = Cc["@mozilla.org/zipwriter;1"].createInstance(Ci.nsIZipWriter);
+			zw.open(new FileUtils.File(xpiPath), 0x02 | 0x08 | 0x20);
+			for (let name of ["manifest.json", "bootstrap.js"]) {
+				zw.addEntryFile(name, Ci.nsIZipWriter.COMPRESSION_DEFAULT, new FileUtils.File(PathUtils.join(dir, name)), false);
+			}
+			zw.close();
+			let addon = await AddonManager.installTemporaryAddon(new FileUtils.File(xpiPath));
+			try {
+				let exec = Zotero.PluginInteropManager.getCommand({ callerPluginID: "harness@zotero.org", targetPluginID: ID, commandName: "exec" });
+				assert.equal(typeof exec, "function", "startup should have registered exec; got " + String(exec));
+				assert.equal((await exec({ code: "1+1" })).echo, "1+1");
+			}
+			finally {
+				await addon.uninstall();
+				await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
+			}
+		});
+
 		it("passes the manifest content_security_policy through to installPermissions and the policy", async function () {
 			let dir = await getTempDirectory();
 			await FileIO.writeUTF8(
