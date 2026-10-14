@@ -267,7 +267,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				return false;
 			}
 
-			return super._validate(option);
+			option = super._validate(option);
+			if (!option || !this._resolveImageURLs(option, ["iconPath"], option.pluginID)) {
+				return false;
+			}
+			return option;
 		}
 
 		refresh() {
@@ -304,7 +308,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 * @param {boolean} [option.noPadding] - Set to true for columns with padding disabled in stylesheet
 		 * @param {number} [option.minWidth] - Override the default [20px] column min-width for resizing
 		 * @param {React.Component} [option.iconLabel] - Set an Icon label instead of a text-based one
-		 * @param {string} [option.iconPath] - Set an Icon path, overrides {iconLabel}
+		 * @param {string} [option.iconPath] - Set an Icon path, optionally relative to the plugin root, overrides {iconLabel}
 		 * @param {string | React.Component} [option.htmlLabel] - Set an HTML label,
 		 * 		overrides {iconLabel} and {label}. Can be a HTML string or a React component for
 		 * 		privileged plugins; unprivileged plugins must pass a `data:image/svg+xml` URL or
