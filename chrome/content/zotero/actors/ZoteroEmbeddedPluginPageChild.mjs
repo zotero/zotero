@@ -50,10 +50,38 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 			return;
 		}
 		this._injected = true;
-		let api = Cu.createObjectIn(win, { defineAs: "zoteroHost" });
-		Cu.exportFunction(data => this.sendAsyncMessage("fromPage", data), api, { defineAs: "sendMessage" });
-		Cu.exportFunction(fn => this._pageListeners.add(fn), api, { defineAs: "addMessageListener" });
-		Cu.exportFunction(fn => this._pageListeners.delete(fn), api, { defineAs: "removeMessageListener" });
+		let host = Cu.createObjectIn(win, { defineAs: "zoteroHost" });
+		Cu.exportFunction(data => this.sendAsyncMessage("fromPage", data), host, { defineAs: "sendMessage" });
+		Cu.exportFunction(fn => this._pageListeners.add(fn), host, { defineAs: "addMessageListener" });
+		Cu.exportFunction(fn => this._pageListeners.delete(fn), host, { defineAs: "removeMessageListener" });
+		Cu.waiveXrays(host).api = this._buildHostAPIProxy(win);
+	}
+	
+	// zoteroHost.api.<name>(params) as a page-compartment Proxy so any name is
+	// callable synchronously; chrome validates the name and runs the handler
+	_buildHostAPIProxy(win) {
+		let cache = new Map();
+		let traps = Cu.createObjectIn(win);
+		Cu.exportFunction((_target, name) => {
+			// Symbols and `then` must stay undefined, or the proxy looks thenable
+			if (typeof name !== "string" || name === "then") {
+				return undefined;
+			}
+			if (!cache.has(name)) {
+				cache.set(name, Cu.exportFunction(params => this._callHost(win, name, params), win));
+			}
+			return cache.get(name);
+		}, traps, { defineAs: "get" });
+		return new win.Proxy(Cu.createObjectIn(win), traps);
+	}
+	
+	// Host APIs take a single JSON-object argument and resolve with a clonable result
+	_callHost(win, name, params) {
+		return new win.Promise((resolve, reject) => {
+			this.sendQuery("hostCall", { name, params })
+				.then(result => resolve(result === undefined ? undefined : Cu.cloneInto(result, win)))
+				.catch(e => reject(new win.Error(`${name}: ${e?.message || e}`)));
+		});
 	}
 	
 	_deliverToPage(data) {
