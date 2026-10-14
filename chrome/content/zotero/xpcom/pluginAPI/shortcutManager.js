@@ -76,8 +76,7 @@
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
 	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
 	 * @property {number[]} itemIDs - The IDs of the items the shortcut acts on: the
-	 * selected items for a library tab, or the tab's own item otherwise. Load them
-	 * with `Zotero.Items.get()`
+	 * selected items for a library tab, or the tab's own item otherwise
 	 * @property {number[]} [collectionIDs] - mainWindow's library tab only: the IDs of the
 	 * collections selected in the collections tree
 	 */

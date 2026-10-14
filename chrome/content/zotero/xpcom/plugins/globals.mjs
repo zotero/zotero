@@ -452,4 +452,24 @@ function setupFile(scope) {
 	}
 }
 
-export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupFile };
+/**
+ * Give the sandbox its own copy of the change set builder as Zotero.DataStore.ChangeSet, so a draft is a
+ * plain object of the plugin's compartment until commit hands its JSON to chrome
+ *
+ * @param {Object} scope - The sandbox scope
+ */
+function setupDataStore(scope) {
+	// Force-create the lazy DataStore mirror so we can attach to it
+	let mirror = Cu.waiveXrays(scope).Zotero.DataStore;
+	if (!mirror) return;
+	let holder = Cu.createObjectIn(scope);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/plugins/changeSet.js", holder);
+	Object.defineProperty(mirror, "ChangeSet", {
+		value: holder.DataChangeSet,
+		enumerable: true,
+		configurable: false,
+		writable: false,
+	});
+}
+
+export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupFile, setupDataStore };

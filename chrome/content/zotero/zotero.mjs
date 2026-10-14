@@ -123,6 +123,7 @@ const xpcomFilesLocal = [
 	'pluginAPI/pluginInteropManager',
 	'pluginAPI/windowController',
 	'pluginAPI/tabController',
+	'pluginAPI/dataStore',
 	'sdt',
 	'reader',
 	// Depend on Zotero.Reader for reader rendering

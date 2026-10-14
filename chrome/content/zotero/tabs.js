@@ -2065,6 +2065,13 @@ var Zotero_Tabs = new function () {
 						tabType: type,
 						tabSubType: subType,
 						tabID: id,
+						get itemIDs() {
+							if (type === 'library') {
+								return ZoteroPane.getSelectedItems(true);
+							}
+							return data?.itemID ? [data.itemID] : [];
+						},
+						// @deprecated Privileged plugins only
 						get items() {
 							if (type === 'library') {
 								return ZoteroPane.getSelectedItems();
