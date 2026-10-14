@@ -28,7 +28,7 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
+		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	/**

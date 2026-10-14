@@ -3517,6 +3517,13 @@ describe("Plugin Sandbox", function () {
 					await IOUtils.writeUTF8(
 						PathUtils.join(tmpDir, "section-script.js"),
 						"document.getElementById('section-marker').setAttribute('data-script-ran', 'true');\n"
+						// Page-side messaging: the injected zoteroHost messenger renders
+						// from whatever the plugin sends -- no token, no postMessage
+						+ "zoteroHost.addMessageListener(function (data) {\n"
+						+ "  if (data && 'marker' in data) {\n"
+						+ "    document.getElementById('section-marker').textContent = data.marker;\n"
+						+ "  }\n"
+						+ "});\n"
 					);
 					await IOUtils.writeUTF8(
 						PathUtils.join(tmpDir, "section.html"),
@@ -3591,7 +3598,7 @@ describe("Plugin Sandbox", function () {
 						"external src should be rejected for privileged plugins too");
 				});
 
-				it("should show the section page in an embedded browser and give hooks the page document", async function () {
+				it("should show the section page in an embedded browser and drive it with the page messenger", async function () {
 					loadSectionTestScope();
 					evalInScope(`
 						var _sectionID = Zotero.ItemPaneManager.registerSection({
@@ -3600,10 +3607,9 @@ describe("Plugin Sandbox", function () {
 							header: { l10nID: 'example-item-pane-header', icon: 'chrome://zotero/skin/16/universal/empty.png' },
 							sidenav: { l10nID: 'example-item-pane-header', icon: 'chrome://zotero/skin/20/universal/empty.png' },
 							src: 'section.html',
-							onRender: function ({ doc, body, item }) {
-								// The page is the plugin's own document -- scripted directly
-								doc.getElementById('section-marker').textContent = 'rendered-' + item.id;
-								body.dataset.renderLocation = doc.location.href;
+							onRender: function ({ page, item }) {
+								// No DOM handoff -- render the page by messaging it
+								page.sendMessage({ marker: 'rendered-' + item.id });
 							},
 						});
 					`);
@@ -3624,15 +3630,12 @@ describe("Plugin Sandbox", function () {
 					assert.isNull(section.querySelector("#section-marker"),
 						"page markup should not be inserted into the chrome document");
 
-					// Wait for the page to load and the render hook to run against it
+					// Wait for the page to render from the message the plugin sent it
 					let marker;
 					await waitForCallback(() => {
 						marker = browser.contentDocument?.getElementById("section-marker");
 						return marker && marker.textContent === "rendered-" + item.id;
 					}, 50, 5);
-					assert.equal(browser.contentDocument.body.dataset.renderLocation,
-						Zotero.Plugins.getBaseURI(ADDON_ID) + "section.html",
-						"hooks should receive the page document");
 					assert.equal(marker.getAttribute("data-script-ran"), "true",
 						"page scripts should run inside the embedded page");
 
@@ -3832,35 +3835,70 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
-		describe("Reader", function () {
-			it("should register and unregister an event listener", function () {
-				evalInScope(`
-					var _readerHandler = function(event) {};
-					Zotero.Reader.registerEventListener('renderToolbar', _readerHandler, '${ADDON_ID}');
-				`);
-
-				// Verify listener was added
-				let listeners = Zotero.Reader._registeredListeners.filter(
-					l => l.pluginID === ADDON_ID && l.type === 'renderToolbar'
-				);
-				assert.equal(listeners.length, 1, "Should have one registered listener");
-
-				// Unregister from sandbox
-				evalInScope("Zotero.Reader.unregisterEventListener('renderToolbar', _readerHandler)");
-
-				listeners = Zotero.Reader._registeredListeners.filter(
-					l => l.pluginID === ADDON_ID && l.type === 'renderToolbar'
-				);
-				assert.equal(listeners.length, 0, "Listener should be removed after unregister");
+		describe("ReaderManager", function () {
+			afterEach(function () {
+				for (let option of Zotero.ReaderManager._sectionManager.options) {
+					Zotero.ReaderManager.unregisterSection(option.sectionID);
+				}
+				for (let option of Zotero.ReaderManager._contextMenuManager.options) {
+					Zotero.ReaderManager.unregisterContextMenuItem(option.menuItemID);
+				}
 			});
 
-			it("should not expose unlisted Reader methods", function () {
-				assert.isTrue(evalInScope("typeof Zotero.Reader.open === 'undefined'"),
-					"open should not be exposed");
-				assert.isTrue(evalInScope("typeof Zotero.Reader._registeredListeners === 'undefined'"),
-					"_registeredListeners should not be exposed");
-				assert.isTrue(evalInScope("typeof Zotero.Reader._dispatchEvent === 'undefined'"),
-					"_dispatchEvent should not be exposed");
+			it("should register and unregister a section from the sandbox", function () {
+				// src resolves against the plugin's own moz-extension root
+				evalInScope(`
+					var _secID = Zotero.ReaderManager.registerSection({
+						sectionID: 'sandbox-sec',
+						target: 'textSelectionPopup',
+						src: 'popup.html',
+					});
+				`);
+				let secID = evalInScope("_secID");
+				assert.isString(secID);
+				assert.lengthOf(
+					Zotero.ReaderManager._sectionManager.options.filter(o => o.pluginID === ADDON_ID), 1
+				);
+
+				evalInScope("Zotero.ReaderManager.unregisterSection(_secID)");
+				assert.lengthOf(
+					Zotero.ReaderManager._sectionManager.options.filter(o => o.pluginID === ADDON_ID), 0
+				);
+			});
+
+			it("should register and unregister a context-menu item from the sandbox", function () {
+				evalInScope(`
+					var _miID = Zotero.ReaderManager.registerContextMenuItem({
+						menuItemID: 'sandbox-item',
+						target: 'annotationContextMenu',
+						label: 'Sandbox item',
+						onCommand: function () {},
+					});
+				`);
+				let miID = evalInScope("_miID");
+				assert.isString(miID);
+				assert.lengthOf(
+					Zotero.ReaderManager._contextMenuManager.options.filter(o => o.pluginID === ADDON_ID), 1
+				);
+
+				evalInScope("Zotero.ReaderManager.unregisterContextMenuItem(_miID)");
+				assert.lengthOf(
+					Zotero.ReaderManager._contextMenuManager.options.filter(o => o.pluginID === ADDON_ID), 0
+				);
+			});
+
+			it("should not expose the raw Zotero.Reader API to unprivileged plugins", function () {
+				// The direct reader-DOM event API is privileged-only now
+				assert.isTrue(evalInScope("typeof Zotero.Reader === 'undefined'"),
+					"Zotero.Reader should not be exposed");
+			});
+
+			it("should not expose ReaderManager internals", function () {
+				assert.isTrue(evalInScope("typeof Zotero.ReaderManager.registerSection === 'function'"));
+				assert.isTrue(evalInScope("typeof Zotero.ReaderManager._sectionManager === 'undefined'"),
+					"_sectionManager should not be exposed");
+				assert.isTrue(evalInScope("typeof Zotero.ReaderManager._handleEvent === 'undefined'"),
+					"_handleEvent should not be exposed");
 			});
 		});
 	});
@@ -5116,7 +5154,7 @@ describe("Plugin Sandbox", function () {
 					"pane markup should not be inserted into the preferences document");
 				let browser = container.querySelector("browser.plugin-pane-browser");
 				assert.ok(browser, "pane should contain a content browser");
-				assert.equal(browser.currentURI.spec, Zotero.Plugins.getBaseURI(ADDON_ID) + "prefs.html");
+				assert.equal(browser.currentURI.specIgnoringRef, Zotero.Plugins.getBaseURI(ADDON_ID) + "prefs.html");
 				let marker = browser.contentDocument.getElementById("embedded-pane-marker");
 				assert.ok(marker, "plugin page should be loaded in the browser");
 				for (let i = 0; i < 100 && !marker.getAttribute("data-script-ran"); i++) {
@@ -5145,14 +5183,14 @@ describe("Plugin Sandbox", function () {
 				}
 				assert.isTrue(stub.calledWith("https://example.com/"),
 					"web URL should open in the system browser");
-				assert.equal(browser.currentURI.spec, src, "browser should stay on the plugin page");
+				assert.equal(browser.currentURI.specIgnoringRef, src, "browser should stay on the plugin page");
 
 				// The pane is single-page -- other pages within the plugin are blocked too
 				browser.contentWindow.location.href = Zotero.Plugins.getBaseURI(ADDON_ID) + "other.html";
 				for (let i = 0; i < 15; i++) {
 					await Zotero.Promise.delay(20);
 				}
-				assert.equal(browser.currentURI.spec, src,
+				assert.equal(browser.currentURI.specIgnoringRef, src,
 					"browser should not navigate to other plugin pages");
 				assert.isTrue(stub.calledOnce, "non-web navigation should not open the system browser");
 			}
@@ -5270,7 +5308,7 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
-		it("should let the pane page navigate between the plugin's own panes", async function () {
+		it("should let the pane page trigger navigation by posting a message", async function () {
 			loadPrefPaneTestScope();
 			let paneID = await registerTestPane({ id: "test-embedded-main" });
 			let subpaneID = await registerTestPane({ id: "test-embedded-subpane", parent: "test-embedded-main" });
@@ -5278,13 +5316,25 @@ describe("Plugin Sandbox", function () {
 			try {
 				await win.Zotero_Preferences.waitForFirstPaneLoad();
 				let browser = win.document.querySelector(".pane-container.embedded browser");
-				let api = browser.contentWindow.wrappedJSObject.Zotero_Preferences;
-				assert.isDefined(api, "pane page should get a Zotero_Preferences facade");
+				// The page talks to chrome through the injected zoteroHost messenger;
+				// drive it here the way the pane page would (send a navigation request)
+				let cwin = browser.contentWindow;
+				for (let i = 0; i < 100 && !cwin.wrappedJSObject.zoteroHost; i++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.ok(cwin.wrappedJSObject.zoteroHost, "pane page should get the injected zoteroHost messenger");
+				let navigate = id => cwin.wrappedJSObject.zoteroHost.sendMessage(
+					Cu.cloneInto({ type: "navigate", paneID: id }, cwin)
+				);
 
-				// Only panes registered by the same plugin can be targeted
-				assert.throws(() => api.navigateToPane("zotero-prefpane-general"));
+				// A pane from another plugin is ignored (no navigation)
+				navigate("zotero-prefpane-general");
+				await Zotero.Promise.delay(100);
+				assert.equal(win.Zotero_Preferences.navigation.value, paneID,
+					"should not navigate to another plugin's pane");
 
-				api.navigateToPane(subpaneID);
+				// The plugin's own subpane navigates
+				navigate(subpaneID);
 				// The subpane loads asynchronously after the select
 				let backButton = win.document.getElementById("prefs-subpane-back-button");
 				let containers = [];
