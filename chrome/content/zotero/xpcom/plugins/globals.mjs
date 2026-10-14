@@ -421,36 +421,34 @@ function setupFile(scope) {
 		}
 	}
 
-	if (scope.PERMISSIONS.includes("network")) {
+	Cu.exportFunction(
+		(url, options) => {
+			requireUrlAllowed(url, "getContentsFromURLAsync");
+			return ScopeUtils.ensurePromiseVarInScope(
+				Zotero.File.getContentsFromURLAsync(url, options),
+				scope, {}
+			);
+		},
+		fileMirror,
+		{ defineAs: "getContentsFromURLAsync" }
+	);
+
+	if (scope.PERMISSIONS.includes("fileSystemWrite")) {
 		Cu.exportFunction(
-			(url, options) => {
-				requireUrlAllowed(url, "getContentsFromURLAsync");
+			(uri, path) => {
+				let uriStr = (uri && typeof uri === "object" && uri.spec) || uri;
+				requireUrlAllowed(uriStr, "download");
 				return ScopeUtils.ensurePromiseVarInScope(
-					Zotero.File.getContentsFromURLAsync(url, options),
+					(async () => {
+						await PluginFileAccess.check(pluginID, path, "write");
+						return Zotero.File.download(uriStr, path);
+					})(),
 					scope, {}
 				);
 			},
 			fileMirror,
-			{ defineAs: "getContentsFromURLAsync" }
+			{ defineAs: "download" }
 		);
-
-		if (scope.PERMISSIONS.includes("fileSystemWrite")) {
-			Cu.exportFunction(
-				(uri, path) => {
-					let uriStr = (uri && typeof uri === "object" && uri.spec) || uri;
-					requireUrlAllowed(uriStr, "download");
-					return ScopeUtils.ensurePromiseVarInScope(
-						(async () => {
-							await PluginFileAccess.check(pluginID, path, "write");
-							return Zotero.File.download(uriStr, path);
-						})(),
-						scope, {}
-					);
-				},
-				fileMirror,
-				{ defineAs: "download" }
-			);
-		}
 	}
 }
 

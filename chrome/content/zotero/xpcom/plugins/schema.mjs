@@ -90,6 +90,8 @@ const DATA_OBJECT_SCHEMA = {
 };
 
 const PERMISSION_SCHEMAS = {
+	// Zotero.HTTP is set up for every scope by setupHTTP() in globals.mjs, using the
+	// sandbox's XMLHttpRequest so requests stay bounded by host_permissions.
 	default: {
 		Zotero: {
 			// Logging
@@ -303,10 +305,6 @@ const PERMISSION_SCHEMAS = {
 		},
 	},
 	// FilePicker is set up by setupFilePicker() with fileSystemRead or fileSystemWrite
-	network: {
-		// Zotero.HTTP is set up directly by setupHTTP() in globals.mjs
-		// using the sandbox's XMLHttpRequest for principal-based access control.
-	},
 	preferences: {
 		// Zotero.Prefs is set up directly by setupPreferences() in globals.mjs.
 		// By default, plugin can access the prefixed `extensions.<GUID>` branch.
