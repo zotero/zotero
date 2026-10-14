@@ -23,7 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-import { WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginPageChannel } from "chrome://zotero/content/xpcom/plugins/pageChannel.mjs";
 
 // https://searchfox.org/mozilla-central/source/dom/base/nsSandboxFlags.h
@@ -68,6 +67,73 @@ export function stopAutoResize(element) {
 	catch (e) {
 		Zotero.debug("Embedded plugin page: resize actor unavailable. " + e);
 	}
+}
+
+/**
+ * Set up l10n on a content document inside a `<browser>` element: creates a
+ * DOMLocalization from the page's `<link rel="localization">` tags.
+ *
+ * @param {XULElement} browser - The `<browser>` element containing the content
+ * @returns {Promise} Resolves when initial translation is complete
+ */
+function setupContentL10n(browser) {
+	let contentDoc = browser.contentDocument;
+	let contentWin = browser.contentWindow;
+	let l10n = new contentWin.DOMLocalization([], false);
+	l10n.connectRoot(contentDoc.documentElement);
+
+	// Collect initial <link rel="localization"> resource IDs
+	let links = contentDoc.querySelectorAll('link[rel="localization"]');
+	if (links.length) {
+		l10n.addResourceIds(
+			Array.from(links).map(link => link.getAttribute('href'))
+		);
+	}
+
+	// Observe <link rel="localization"> additions/removals to mirror
+	// the DocumentL10n behavior that chrome documents get natively.
+	let observer = new contentWin.MutationObserver((mutations) => {
+		let addIds = [];
+		let removeIds = [];
+		for (let mutation of mutations) {
+			for (let node of mutation.addedNodes) {
+				if (node.nodeName === "LINK"
+					&& node.getAttribute("rel") === "localization"
+					&& node.getAttribute("href")) {
+					addIds.push(node.getAttribute("href"));
+				}
+			}
+			for (let node of mutation.removedNodes) {
+				if (node.nodeName === "LINK"
+					&& node.getAttribute("rel") === "localization"
+					&& node.getAttribute("href")) {
+					removeIds.push(node.getAttribute("href"));
+				}
+			}
+		}
+		if (removeIds.length) {
+			l10n.removeResourceIds(removeIds);
+		}
+		if (addIds.length) {
+			l10n.addResourceIds(addIds);
+		}
+		if (addIds.length || removeIds.length) {
+			l10n.translateRoots();
+		}
+	});
+	observer.observe(contentDoc.documentElement, {
+		childList: true,
+		subtree: true,
+	});
+
+	// Clean up when the content window is closed
+	contentWin.addEventListener("unload", () => {
+		observer.disconnect();
+		l10n.disconnectRoot(contentDoc.documentElement);
+	}, { once: true });
+
+	Cu.waiveXrays(contentDoc).l10n = l10n;
+	return l10n.translateRoots();
 }
 
 /**
@@ -225,7 +291,7 @@ export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, a
 					&& uri.specIgnoringRef === srcNoRef) {
 				if (Components.isSuccessCode(status)) {
 					// Fluent via <link rel="localization"> in the page
-					WindowScopeVariables.setupContentL10n(browser)
+					setupContentL10n(browser)
 						.then(() => deferred.resolve(true));
 				}
 				else {

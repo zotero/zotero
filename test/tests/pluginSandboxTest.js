@@ -2,7 +2,8 @@ describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { PluginFileAccess } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/file.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
-	var { WindowScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
+	var { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
+	var { PluginProtocol } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/protocol.mjs");
 	var { getByID } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/uuid.mjs"
 	).PluginUUID;
@@ -99,20 +100,6 @@ describe("Plugin Sandbox", function () {
 		mockAddon = createMockAddon(permissions, origins, prefPrefixes);
 		PluginSandbox.loadScope(mockAddon);
 		scope = PluginSandbox.getScope(ADDON_ID);
-	}
-
-	// Build a real container > target DOM pair, expose a wrapped (rootNode-scoped)
-	// facade of `target` to the sandbox as `_target`, and return the real nodes
-	// so the caller can assert on them and clean up.
-	function setupSafeDiv() {
-		let container = document.createElement("div");
-		document.documentElement.appendChild(container);
-		let target = document.createElement("div");
-		container.appendChild(target);
-		scope._target = WindowScopeVariables.createSafeHTMLElement(
-			target, ADDON_ID, { rootNode: new WeakRef(container) }
-		);
-		return { container, target };
 	}
 
 	describe("Plugin name persistence", function () {
@@ -4097,395 +4084,19 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
-	describe("Zotero Main Window", function () {
-		var win;
-
-		before(async function () {
-			win = await loadZoteroPane();
-		});
-
-		after(function () {
-			win.close();
-		});
-
-		beforeEach(function () {
-			loadTestScope(["default", "mainWindow", "dataRead"]);
-			// Store the window in a sandbox variable -- returning wrapper objects
-			// across compartments via evalInScope doesn't work, so all assertions
-			// must evaluate entirely inside the sandbox and return primitives.
-			evalInScope("var _win = Zotero.getMainWindow()");
-		});
-
-		describe("getMainWindow / getMainWindows", function () {
-			it("should expose getMainWindow/getMainWindows returning a wrapped window with a safe document", function () {
-				assert.equal(evalInScope("typeof Zotero.getMainWindow"), "function");
-				assert.equal(evalInScope("typeof Zotero.getMainWindows"), "function");
-				assert.isTrue(evalInScope("_win !== null && _win !== undefined"),
-					"getMainWindow() should return a window");
-				assert.equal(evalInScope("typeof _win.alert"), "function");
-				assert.equal(evalInScope("typeof _win.Zotero_Tabs"), "object");
-				assert.equal(evalInScope("typeof _win.document"), "object");
-				assert.equal(evalInScope("typeof _win.document.createElement"), "function");
-				assert.equal(evalInScope("typeof _win.document.createXULElement"), "function");
-				assert.equal(evalInScope("typeof _win.document.createElementNS"), "function");
-			});
-		});
-
-		describe("Window APIs (WINDOW_SCHEMAS)", function () {
-			it("should expose allowed WINDOW_SCHEMAS APIs", function () {
-				assert.isTrue(evalInScope("typeof _win.alert === 'function'"));
-				assert.isTrue(evalInScope("typeof _win.confirm === 'function'"));
-				assert.isTrue(evalInScope("typeof _win.prompt === 'function'"));
-				assert.isTrue(evalInScope("typeof _win.getComputedStyle === 'function'"));
-				assert.isTrue(evalInScope("typeof _win.matchMedia === 'function'"));
-			});
-
-			it("should expose MozXULElement.insertFTLIfNeeded", function () {
-				// MozXULElement is a class with static methods; the schema exposes
-				// sub-properties, so it is wrapped as a namespace object.
-				assert.isTrue(evalInScope("typeof _win.MozXULElement === 'object'"));
-				assert.isTrue(evalInScope("typeof _win.MozXULElement.insertFTLIfNeeded === 'function'"));
-			});
-
-			it("should expose document.l10n.addResourceIds and removeResourceIds", function () {
-				assert.isTrue(evalInScope("typeof _win.document.l10n.addResourceIds === 'function'"));
-				assert.isTrue(evalInScope("typeof _win.document.l10n.removeResourceIds === 'function'"));
-			});
-
-			it("matchMedia should return a usable MediaQueryList", function () {
-				let expected = win.matchMedia('(prefers-color-scheme: dark)').matches;
-				let matches = evalInScope("_win.matchMedia('(prefers-color-scheme: dark)').matches");
-				assert.isBoolean(matches);
-				assert.equal(matches, expected);
-				let media = evalInScope("_win.matchMedia('(prefers-color-scheme: dark)').media");
-				assert.equal(media, '(prefers-color-scheme: dark)');
-			});
-
-			it("should receive events via addEventListener on safe window", function () {
-				evalInScope(`
-					var _winEvtType = null;
-					function _winHandler(e) { _winEvtType = e.type; }
-					_win.addEventListener("test-sandbox-evt", _winHandler);
-				`);
-				win.dispatchEvent(new CustomEvent("test-sandbox-evt"));
-				assert.equal(evalInScope("_winEvtType"), "test-sandbox-evt",
-					"handler should have received the dispatched event");
-			});
-
-			it("should pass a usable Event to addEventListener callback on safe window", function () {
-				evalInScope(`
-					var _winEvt = {};
-					_win.addEventListener("test-sandbox-evt2", function (e) {
-						_winEvt.type = e.type;
-						_winEvt.bubbles = e.bubbles;
-						_winEvt.cancelable = e.cancelable;
-						_winEvt.defaultPrevented = e.defaultPrevented;
-						_winEvt.hasPreventDefault = typeof e.preventDefault === "function";
-						_winEvt.hasStopPropagation = typeof e.stopPropagation === "function";
-						_winEvt.detail = e.detail;
-						e.preventDefault();
-						_winEvt.defaultPreventedAfter = e.defaultPrevented;
-					});
-				`);
-				win.dispatchEvent(new CustomEvent("test-sandbox-evt2", {
-					bubbles: true, cancelable: true, detail: 42,
-				}));
-				assert.equal(evalInScope("_winEvt.type"), "test-sandbox-evt2", "type");
-				assert.isTrue(evalInScope("_winEvt.bubbles"), "bubbles");
-				assert.isTrue(evalInScope("_winEvt.cancelable"), "cancelable");
-				assert.isFalse(evalInScope("_winEvt.defaultPrevented"), "defaultPrevented before");
-				assert.isTrue(evalInScope("_winEvt.hasPreventDefault"), "preventDefault is function");
-				assert.isTrue(evalInScope("_winEvt.hasStopPropagation"), "stopPropagation is function");
-				assert.equal(evalInScope("_winEvt.detail"), 42, "detail from CustomEvent");
-				assert.isTrue(evalInScope("_winEvt.defaultPreventedAfter"), "defaultPrevented after preventDefault()");
-			});
-
-			it("should remove listener via removeEventListener on safe window", function () {
-				evalInScope(`
-					var _winEvtCount = 0;
-					function _winCountHandler(e) { _winEvtCount++; }
-					_win.addEventListener("test-sandbox-rm", _winCountHandler);
-				`);
-				win.dispatchEvent(new CustomEvent("test-sandbox-rm"));
-				assert.equal(evalInScope("_winEvtCount"), 1, "handler should fire once");
-
-				evalInScope("_win.removeEventListener('test-sandbox-rm', _winCountHandler)");
-				win.dispatchEvent(new CustomEvent("test-sandbox-rm"));
-				assert.equal(evalInScope("_winEvtCount"), 1,
-					"handler should not fire after removal");
-			});
-
-			it("should not expose dangerous window globals", function () {
-				assert.isTrue(evalInScope("typeof _win.eval === 'undefined'"),
-					"eval should not be exposed");
-				assert.isTrue(evalInScope("typeof _win.Function === 'undefined'"),
-					"Function should not be exposed");
-				assert.isTrue(evalInScope("typeof _win.Components === 'undefined'"),
-					"Components should not be exposed");
-				assert.isTrue(evalInScope("typeof _win.ChromeUtils === 'undefined'"),
-					"ChromeUtils should not be exposed");
-			});
-
-			it("should not expose privileged window properties", function () {
-				assert.isTrue(evalInScope("typeof _win.Zotero === 'undefined'"),
-					"Zotero should not be exposed via window");
-			});
-		});
-
-		describe("Zotero_Tabs API", function () {
-			it("should expose tab state accessors and navigation methods", function () {
-				assert.equal(evalInScope("_win.Zotero_Tabs.selectedID"), 'zotero-pane');
-				assert.equal(evalInScope("_win.Zotero_Tabs.selectedType"), 'library');
-				assert.equal(evalInScope("_win.Zotero_Tabs.selectedIndex"), 0);
-				assert.isAtLeast(evalInScope("_win.Zotero_Tabs.numTabs"), 1);
-				assert.equal(evalInScope("_win.Zotero_Tabs.getTabInfo('zotero-pane').type"), 'library');
-				assert.equal(evalInScope("_win.Zotero_Tabs.parseTabType('library').tabContentType"), 'library');
-				for (let m of ["selectPrev", "selectNext", "selectLast", "close", "rename"]) {
-					assert.equal(evalInScope(`typeof _win.Zotero_Tabs.${m}`), "function", m);
-				}
-			});
-
-			it("should return correct result from hasContextPane()", function () {
-				assert.isFalse(evalInScope("_win.Zotero_Tabs.hasContextPane('library')"),
-					"library tab should not have context pane");
-				assert.isTrue(evalInScope("_win.Zotero_Tabs.hasContextPane('reader')"),
-					"reader tab should have context pane");
-			});
-
-			it("should select a tab without throwing", function () {
-				evalInScope("_win.Zotero_Tabs.select('zotero-pane')");
-				assert.equal(evalInScope("_win.Zotero_Tabs.selectedID"), 'zotero-pane');
-			});
-
-			it("should not expose unlisted Zotero_Tabs members", function () {
-				let hidden = [
-					// DOM accessors
-					"deck",
-					"tabsMenuPanel",
-					"getTabContent",
-					// lifecycle and session
-					"init",
-					"destroy",
-					"notify",
-					"getState",
-					"restoreState",
-					// internal state and hooks
-					"_tabs",
-					"tabHooks",
-					"focusOptions",
-					"_update",
-					// focus management
-					"refocus",
-					"focusFirst",
-					"moveFocus",
-					// tab loading internals
-					"add",
-					"unload",
-					"markAsLoaded",
-					"closeAll",
-				];
-				for (let m of hidden) {
-					assert.equal(evalInScope(`typeof _win.Zotero_Tabs.${m}`), "undefined", `${m} should not be exposed`);
-				}
-			});
-		});
-
-		describe("ZoteroPane API", function () {
-			it("should return the selected library IDs matching host", function () {
-				let expected = win.ZoteroPane.getSelectedLibraryIDs();
-				assert.isNotEmpty(expected);
-				evalInScope("var _libraryIDs = _win.ZoteroPane.getSelectedLibraryIDs()");
-				assert.equal(evalInScope("_libraryIDs.length"), expected.length);
-				assert.equal(evalInScope("_libraryIDs[0]"), expected[0]);
-			});
-
-			it("should return selected items as IDs and wrapped facades", async function () {
-				let item = new Zotero.Item('book');
-				item.setField('title', 'ZoteroPane Selection Test');
-				await item.saveTx();
-
-				await win.ZoteroPane.selectItem(item.id);
-
-				// As IDs
-				evalInScope("var _selIDs = _win.ZoteroPane.getSelectedItems(true)");
-				assert.equal(evalInScope("_selIDs.length"), 1);
-				assert.equal(evalInScope("_selIDs[0]"), item.id);
-
-				// As wrapped facades
-				evalInScope(`
-					var _selItems = _win.ZoteroPane.getSelectedItems();
-					var _selFirstID = _selItems[0].id;
-					var _selFirstTitle = _selItems[0].getField('title');
-				`);
-				assert.equal(evalInScope("_selFirstID"), item.id);
-				assert.equal(evalInScope("_selFirstTitle"), 'ZoteroPane Selection Test');
-
-				await item.eraseTx();
-			});
-
-			it("should return sort field and direction matching host", function () {
-				let field = evalInScope("_win.ZoteroPane.getSortField()");
-				let direction = evalInScope("_win.ZoteroPane.getSortDirection()");
-				assert.equal(field, win.ZoteroPane.getSortField());
-				assert.equal(direction, win.ZoteroPane.getSortDirection());
-			});
-
-			it("should return sorted items as IDs", function () {
-				let expected = win.ZoteroPane.getSortedItems(true);
-				evalInScope("var _sortedIDs = _win.ZoteroPane.getSortedItems(true)");
-				assert.equal(evalInScope("_sortedIDs.length"), expected.length);
-			});
-
-			it("should return permission checks matching host", function () {
-				assert.equal(
-					evalInScope("_win.ZoteroPane.canEdit()"),
-					win.ZoteroPane.canEdit()
-				);
-				assert.equal(
-					evalInScope("_win.ZoteroPane.canEditLibrary()"),
-					win.ZoteroPane.canEditLibrary()
-				);
-				assert.equal(
-					evalInScope("_win.ZoteroPane.canEditFiles()"),
-					win.ZoteroPane.canEditFiles()
-				);
-			});
-
-			it("should select item(s) by ID via selectItem and selectItems", async function () {
-				let item1 = new Zotero.Item('book');
-				await item1.saveTx();
-				let item2 = new Zotero.Item('book');
-				await item2.saveTx();
-
-				// Single
-				assert.isTrue(await evalInScope(`_win.ZoteroPane.selectItem(${item1.id})`));
-				assert.include(win.ZoteroPane.getSelectedItems(true), item1.id);
-
-				// Multiple
-				assert.isTrue(await evalInScope(`_win.ZoteroPane.selectItems([${item1.id}, ${item2.id}])`));
-				let selectedIDs = win.ZoteroPane.getSelectedItems(true);
-				assert.include(selectedIDs, item1.id);
-				assert.include(selectedIDs, item2.id);
-
-				await item1.eraseTx();
-				await item2.eraseTx();
-			});
-
-			it("should not expose data-accessing methods without dataRead", function () {
-				PluginSandbox.unloadScope(ADDON_ID);
-				loadTestScope(["default", "mainWindow"]);
-				evalInScope("var _winNoData = Zotero.getMainWindow()");
-
-				// UI-only methods should still work
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.loaded !== 'undefined'"),
-					"loaded should be exposed without dataRead");
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.toggleItemPane === 'function'"),
-					"toggleItemPane should be exposed without dataRead");
-
-				// Data-accessing methods should not be available
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedItems === 'undefined'"),
-					"getSelectedItems should not be exposed without dataRead");
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.getSelectedCollections === 'undefined'"),
-					"getSelectedCollections should not be exposed without dataRead");
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.selectItem === 'undefined'"),
-					"selectItem should not be exposed without dataRead");
-				assert.isTrue(evalInScope("typeof _winNoData.ZoteroPane.canEdit === 'undefined'"),
-					"canEdit should not be exposed without dataRead");
-			});
-
-			it("should not expose creation methods without dataWrite", function () {
-				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newItem === 'undefined'"),
-					"newItem should not be exposed without dataWrite");
-				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newCollection === 'undefined'"),
-					"newCollection should not be exposed without dataWrite");
-				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newNote === 'undefined'"),
-					"newNote should not be exposed without dataWrite");
-				assert.isTrue(evalInScope("typeof _win.ZoteroPane.newChildNote === 'undefined'"),
-					"newChildNote should not be exposed without dataWrite");
-			});
-
-			it("should not expose internal, destructive, or DOM members", function () {
-				let hidden = [
-					// internal properties
-					"itemsView",
-					"collectionsView",
-					"document",
-					"init",
-					"destroy",
-					// destructive operations
-					"deleteSelectedItems",
-					"deleteSelectedCollection",
-					"emptyTrash",
-					// event handlers and DOM methods
-					"handleKeyDown",
-					"handleKeyPress",
-					"buildItemContextMenu",
-				];
-				for (let m of hidden) {
-					assert.equal(evalInScope(`typeof _win.ZoteroPane.${m}`), "undefined", `${m} should not be exposed`);
-				}
-			});
-		});
-
-		describe("ZoteroPane creation methods (requires dataWrite)", function () {
-			beforeEach(function () {
-				// Override parent beforeEach with mainWindow + dataWrite permissions
-				PluginSandbox.unloadScope(ADDON_ID);
-				loadTestScope(["default", "mainWindow", "dataRead", "dataWrite"]);
-				evalInScope("var _win2 = Zotero.getMainWindow()");
-			});
-
-			it("should expose creation methods with dataWrite", function () {
-				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newItem === 'function'"),
-					"newItem should be exposed with dataWrite");
-				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newCollection === 'function'"),
-					"newCollection should be exposed with dataWrite");
-				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newNote === 'function'"),
-					"newNote should be exposed with dataWrite");
-				assert.isTrue(evalInScope("typeof _win2.ZoteroPane.newChildNote === 'function'"),
-					"newChildNote should be exposed with dataWrite");
-			});
-
-			it("should create a new collection and return its ID", async function () {
-				let dialogPromise = waitForDialog(
-					null,
-					'accept',
-					'chrome://zotero/content/newCollectionDialog.xhtml'
-				);
-				let collID = await evalInScope("_win2.ZoteroPane.newCollection()");
-				await dialogPromise;
-				assert.isNumber(collID);
-
-				let collection = Zotero.Collections.get(collID);
-				assert.ok(collection);
-
-				await collection.eraseTx();
-			});
-
-			it("should create a new note and return its item ID", async function () {
-				let noteID = await evalInScope("_win2.ZoteroPane.newNote(false, null, 'Test note')");
-				assert.isNumber(noteID);
-
-				let note = Zotero.Items.get(noteID);
-				assert.ok(note);
-				assert.equal(note.itemType, 'note');
-
-				await note.eraseTx();
-			});
-		});
-
-		describe("Document safety", function () {
-			it("should block creating unsafe elements", function () {
-				for (let tag of ["script", "iframe", "browser"]) {
-					assert.throws(() => evalInScope(`_win.document.createElement('${tag}')`),
-						undefined, undefined, `creating <${tag}> should throw`);
-				}
-			});
-
-			it("should allow creating safe elements", function () {
-				assert.isTrue(evalInScope("!!_win.document.createElement('div')"),
-					"createElement('div') should return an element");
-			});
+	describe("Main window access removal", function () {
+		it("should block chrome windows and DOM nodes crossing into the sandbox", function () {
+			loadTestScope(["default"]);
+			let mainWin = Zotero.getMainWindow();
+			scope._hostWin = ScopeVariables.toScope(mainWin, ADDON_ID);
+			scope._hostNode = ScopeVariables.toScope(mainWin.document.documentElement, ADDON_ID);
+			scope._hostEvent = ScopeVariables.toScope(new mainWin.CustomEvent("test"), ADDON_ID);
+			assert.isTrue(evalInScope("typeof _hostWin === 'undefined'"),
+				"a chrome window must not cross into the sandbox");
+			assert.isTrue(evalInScope("typeof _hostNode === 'undefined'"),
+				"a chrome DOM node must not cross into the sandbox");
+			assert.isTrue(evalInScope("typeof _hostEvent === 'undefined'"),
+				"a chrome event must not cross into the sandbox");
 		});
 	});
 
@@ -4667,7 +4278,7 @@ describe("Plugin Sandbox", function () {
 				"ItemTreeManager should not be exposed without itemTree permission");
 		});
 
-		it("should still expose default APIs (logging, platform info, window access, utilities) regardless of permissions", function () {
+		it("should still expose default APIs (logging, platform info, utilities) regardless of permissions", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.debug === 'function'"),
 				"debug should always be exposed");
@@ -4677,10 +4288,6 @@ describe("Plugin Sandbox", function () {
 				"version should always be exposed");
 			assert.isBoolean(evalInScope("Zotero.isMac"),
 				"isMac should always be exposed");
-			assert.isTrue(evalInScope("typeof Zotero.getMainWindow === 'function'"),
-				"getMainWindow should always be exposed");
-			assert.isTrue(evalInScope("typeof Zotero.getMainWindows === 'function'"),
-				"getMainWindows should always be exposed");
 			assert.isTrue(evalInScope("typeof Zotero.Utilities === 'object'"),
 				"Utilities should always be exposed");
 			assert.isTrue(evalInScope("typeof Zotero.Utilities.cleanDOI === 'function'"),
@@ -4945,20 +4552,55 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
-			it("should not hand the sandbox any DOM handle to the opened window", async function () {
+			it("should hand the sandbox the page window", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
 				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
 				try {
 					assert.equal(
 						evalInScope("Object.keys(_win).sort().join(',')"),
-						"close,focus,page",
-						"the handle should expose only page/close/focus"
+						"close,focus,page,window",
+						"the handle should expose only page/window/close/focus"
 					);
 					assert.equal(
 						evalInScope("Object.keys(_win.page).sort().join(',')"),
 						"addMessageListener,isAlive,removeMessageListener,sendMessage",
 						"the messenger should expose only the messaging methods"
 					);
+					// The window is the plugin's own same-origin page, directly
+					// scriptable -- not the privileged pluginWindow.xhtml wrapper
+					assert.isTrue(
+						evalInScope("_win.window.location.href.endsWith('/test.html')"),
+						"the window should be the plugin's own page"
+					);
+					assert.equal(evalInScope("_win.window.document.title"), "Test",
+						"the page window should be directly scriptable");
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should accept a plugin-held window as a FilePicker parent", async function () {
+				loadTestScopeWithURI(["default", "openWindow", "fileSystemRead"]);
+				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
+				try {
+					// init() doesn't show the native dialog, so it's safe to call
+					evalInScope(`
+						var _fp = new FilePicker();
+						_fp.init(_win.window, "Page parent", _fp.modeOpen);
+					`);
+					// Values that aren't a real window fall back to the hidden
+					// window instead of being used
+					evalInScope(`
+						var _fp2 = new FilePicker();
+						_fp2.init(null, "No parent", _fp2.modeOpen);
+						var _fake = {};
+						_fake.window = _fake;
+						var _fp3 = new FilePicker();
+						_fp3.init(_fake, "Fake window parent", _fp3.modeOpen);
+						var _fp4 = new FilePicker();
+						_fp4.init({ __zoteroOriginalRef__: () => _fake, }, "Crafted ref parent", _fp4.modeOpen);
+					`);
 				}
 				finally {
 					evalInScope("_win.close()");
@@ -5302,16 +4944,6 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
-			// Removed API -- plugin pages in chrome documents are hosted by the
-			// managers via loadEmbeddedPluginPage, never by the plugin itself
-			it("should not expose createFrame on safe documents", function () {
-				loadTestScopeWithURI(["default"]);
-				scope._safeDoc = WindowScopeVariables.createSafeDocument(
-					mainWin.document, ADDON_ID, {}
-				);
-				assert.isTrue(evalInScope("typeof _safeDoc.createFrame === 'undefined'"));
-			});
-
 		});
 	});
 
@@ -5651,626 +5283,27 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
-	describe("XHTML sanitization", function () {
-		it("should remove unsafe elements from a fragment", function () {
-			loadTestScope(["default"]);
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:div id="safe">Safe</html:div>'
-				+ '<html:script>alert("xss")</html:script>'
-				+ '<browser src="chrome://zotero/content/zoteroPane.xhtml"/>'
-				+ '<html:iframe src="about:config"></html:iframe>'
-				+ '<html:p>Text</html:p>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-			assert.isNull(frag.querySelector("script"), "<script> should be removed");
-			assert.isNull(frag.querySelector("browser"), "<browser> should be removed");
-			assert.isNull(frag.querySelector("iframe"), "<iframe> should be removed");
-			assert.ok(frag.querySelector('[id="safe"]'), "<div> should remain");
-			assert.ok(frag.querySelector("p"), "<p> should remain");
-		});
-
-		it("should strip on* attributes for unprivileged plugins", function () {
-			loadTestScope(["default"]);
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:p onclick="alert(1)" onmouseover="alert(2)">Click</html:p>'
-				+ '<html:div onload="alert(3)">Div</html:div>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-			let p = frag.querySelector("p");
-			assert.ok(p, "<p> should remain");
-			assert.isFalse(p.hasAttribute("onclick"), "onclick should be stripped");
-			assert.isFalse(p.hasAttribute("onmouseover"), "onmouseover should be stripped");
-			let div = frag.querySelector("div");
-			assert.isFalse(div.hasAttribute("onload"), "onload should be stripped");
-		});
-
-		it("should preserve safe attributes", function () {
-			loadTestScope(["default"]);
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:div id="test" class="my-class" data-value="42">Content</html:div>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-			let div = frag.querySelector("div");
-			assert.equal(div.getAttribute("id"), "test");
-			assert.equal(div.getAttribute("class"), "my-class");
-			assert.equal(div.getAttribute("data-value"), "42");
-		});
-
-		it("should skip sanitization for privileged plugins", function () {
-			loadTestScope(["*"]);
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:script>alert("xss")</html:script>'
-				+ '<html:p onclick="alert(1)">Click</html:p>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-			assert.ok(frag.querySelector("script"), "<script> should remain for privileged plugins");
-			let p = frag.querySelector("p");
-			assert.isTrue(p.hasAttribute("onclick"), "onclick should remain for privileged plugins");
-		});
-
-		it("should sanitize for unprivileged plugins when pluginID is provided", function () {
-			loadTestScope(["default"]);
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:script>alert("xss")</html:script>'
-				+ '<html:p onclick="alert(1)">Click</html:p>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-			assert.isNull(frag.querySelector("script"), "<script> should be removed for unprivileged plugins");
-			let p = frag.querySelector("p");
-			assert.isFalse(p.hasAttribute("onclick"), "onclick should be removed for unprivileged plugins");
-			assert.isTrue(p.hasAttribute("data-sandbox-on-click"), "handler should be stored as data attr");
-		});
-
-		it("should rewire on* handlers to execute in sandbox scope", function () {
-			loadTestScope(["default"]);
-			Cu.evalInSandbox("var handlerCalled = false;", scope);
-
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:button onclick="handlerCalled = true;">Click</html:button>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			container.appendChild(document.importNode(frag, true));
-			WindowScopeVariables.activateInlineHandlers(container, ADDON_ID);
-
-			try {
-				let button = container.querySelector("button");
-				assert.isFalse(button.hasAttribute("onclick"), "onclick attr should be removed");
-				assert.isFalse(button.hasAttribute("data-sandbox-on-click"), "data attr should be removed after activation");
-				button.click();
-				assert.isTrue(Cu.evalInSandbox("handlerCalled", scope), "handler should have set variable in sandbox");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should provide wrapped this and event to rewired handlers", function () {
-			loadTestScope(["default"]);
-			Cu.evalInSandbox("var capturedTagName = null; var capturedEventType = null;", scope);
-
-			let frag = MozXULElement.parseXULToFragment(
-				'<html:button onclick="capturedTagName = this.tagName; capturedEventType = event.type;">Click</html:button>'
-			);
-			WindowScopeVariables.sanitizeFragment(frag, ADDON_ID);
-
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			container.appendChild(document.importNode(frag, true));
-			WindowScopeVariables.activateInlineHandlers(container, ADDON_ID);
-
-			try {
-				container.querySelector("button").click();
-				let tagName = Cu.evalInSandbox("capturedTagName", scope);
-				assert.ok(tagName, "this.tagName should be accessible");
-				assert.isTrue(
-					tagName.toUpperCase().includes("BUTTON"),
-					"this.tagName should contain BUTTON"
-				);
-				assert.equal(
-					Cu.evalInSandbox("capturedEventType", scope),
-					"click",
-					"event.type should be accessible"
-				);
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should block setting on* properties on wrapped elements", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let button = document.createElement("button");
-			container.appendChild(button);
-
-			try {
-				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
-					button, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				scope._btn = wrappedButton;
-				let warnStub = sinon.stub(Zotero, "warn");
-				evalInScope("_btn.onclick = function() {}");
-				assert.isTrue(warnStub.calledOnce, "should warn about on* property");
-				assert.include(warnStub.firstCall.args[0], "addEventListener");
-				assert.isNull(button.onclick, "onclick should not be set on real element");
-				warnStub.restore();
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should block setAttribute for on* attributes on wrapped elements", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let button = document.createElement("button");
-			container.appendChild(button);
-
-			try {
-				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
-					button, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				scope._btn = wrappedButton;
-				let warnStub = sinon.stub(Zotero, "warn");
-				evalInScope('_btn.setAttribute("onclick", "alert(1)")');
-				assert.isTrue(warnStub.calledOnce, "should warn about on* attribute");
-				assert.include(warnStub.firstCall.args[0], "addEventListener");
-				assert.isFalse(button.hasAttribute("onclick"), "onclick attribute should not be set");
-				warnStub.restore();
-
-				// Verify non-on* attributes still work
-				evalInScope('_btn.setAttribute("class", "test-class")');
-				assert.equal(button.getAttribute("class"), "test-class");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should receive events via addEventListener on wrapped elements", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let button = document.createElement("button");
-			container.appendChild(button);
-
-			try {
-				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
-					button, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				scope._btn = wrappedButton;
-				evalInScope(`
-					var _elemEvtType = null;
-					var _elemEvtTarget = null;
-					_btn.addEventListener("click", function (e) {
-						_elemEvtType = e.type;
-						_elemEvtTarget = e.target;
-					});
-				`);
-				button.click();
-				assert.equal(evalInScope("_elemEvtType"), "click",
-					"handler should receive the click event");
-				assert.isTrue(evalInScope("_elemEvtTarget !== null"),
-					"event target should be wrapped, not null");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should pass a usable Event to addEventListener callback on wrapped elements", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let button = document.createElement("button");
-			container.appendChild(button);
-
-			try {
-				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
-					button, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				scope._btn = wrappedButton;
-				evalInScope(`
-					var _elemEvt = {};
-					_btn.addEventListener("click", function (e) {
-						_elemEvt.type = e.type;
-						_elemEvt.bubbles = e.bubbles;
-						_elemEvt.cancelable = e.cancelable;
-						_elemEvt.hasPreventDefault = typeof e.preventDefault === "function";
-						_elemEvt.hasStopPropagation = typeof e.stopPropagation === "function";
-						_elemEvt.targetTagName = e.target ? e.target.tagName : null;
-						_elemEvt.currentTargetTagName = e.currentTarget ? e.currentTarget.tagName : null;
-					});
-				`);
-				button.click();
-				assert.equal(evalInScope("_elemEvt.type"), "click", "type");
-				assert.isTrue(evalInScope("_elemEvt.bubbles"), "bubbles");
-				assert.isTrue(evalInScope("_elemEvt.hasPreventDefault"), "preventDefault is function");
-				assert.isTrue(evalInScope("_elemEvt.hasStopPropagation"), "stopPropagation is function");
-				assert.equal(
-					evalInScope("_elemEvt.targetTagName").toUpperCase(), "BUTTON",
-					"target should be the button"
-				);
-				assert.equal(
-					evalInScope("_elemEvt.currentTargetTagName").toUpperCase(), "BUTTON",
-					"currentTarget should be the button"
-				);
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should remove listener via removeEventListener on wrapped elements", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let button = document.createElement("button");
-			container.appendChild(button);
-
-			try {
-				let wrappedButton = WindowScopeVariables.createSafeHTMLElement(
-					button, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				scope._btn = wrappedButton;
-				evalInScope(`
-					var _elemClickCount = 0;
-					function _elemClickHandler(e) { _elemClickCount++; }
-					_btn.addEventListener("click", _elemClickHandler);
-				`);
-				button.click();
-				assert.equal(evalInScope("_elemClickCount"), 1,
-					"handler should fire once");
-
-				evalInScope("_btn.removeEventListener('click', _elemClickHandler)");
-				button.click();
-				assert.equal(evalInScope("_elemClickCount"), 1,
-					"handler should not fire after removal");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		describe("innerHTML sanitization via wrapped element", function () {
-			it("should parse and set plain HTML content", function () {
-				loadTestScope(["default"]);
-				let { container, target } = setupSafeDiv();
-				try {
-					evalInScope('_target.innerHTML = "<b>bold</b> and <em>italic</em>"');
-					assert.equal(target.querySelector("b").textContent, "bold");
-					assert.equal(target.querySelector("em").textContent, "italic");
-				}
-				finally {
-					container.remove();
-				}
-			});
-
-			it("should preserve xul: and html: namespaces in innerHTML", function () {
-				loadTestScope(["default"]);
-				let { container, target } = setupSafeDiv();
-				try {
-					// XML parse path preserves namespace metadata -- nodes are inserted
-					// directly into the DOM rather than re-serialized through the HTML parser.
-					evalInScope(
-						'_target.innerHTML = \''
-						+ '<xul:label value="xul-label"/>'
-						+ '<html:span class="ns-test">ns-content</html:span>\''
-					);
-					let xulNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-					let htmlNS = "http://www.w3.org/1999/xhtml";
-					let label = target.querySelector("label");
-					assert.ok(label, "xul:label element should exist");
-					assert.equal(label.namespaceURI, xulNS, "label should be in XUL namespace");
-					assert.equal(label.getAttribute("value"), "xul-label", "value attribute should be preserved");
-					let span = target.querySelector("span");
-					assert.ok(span, "html:span element should exist");
-					assert.equal(span.namespaceURI, htmlNS, "span should be in HTML namespace");
-					assert.equal(span.textContent, "ns-content", "text content should be preserved");
-				}
-				finally {
-					container.remove();
-				}
-			});
-
-			it("should strip on* event handlers from innerHTML", function () {
-				loadTestScope(["default"]);
-				let { container, target } = setupSafeDiv();
-				try {
-					evalInScope('_target.innerHTML = \'<span onclick="evil()">click</span>\'');
-					let span = target.querySelector("span");
-					assert.ok(span, "span should be created");
-					assert.isFalse(span.hasAttribute("onclick"), "onclick should be stripped");
-				}
-				finally {
-					container.remove();
-				}
-			});
-
-			it("should strip unsafe tags from innerHTML", function () {
-				loadTestScope(["default"]);
-				let { container, target } = setupSafeDiv();
-				try {
-					evalInScope('_target.innerHTML = \'<script>evil()</script><b>safe</b>\'');
-					assert.isNull(target.querySelector("script"), "script should be stripped");
-					assert.ok(target.querySelector("b"), "safe content should remain");
-				}
-				finally {
-					container.remove();
-				}
-			});
-
-			it("should block javascript:/data:text/html URLs on setAttribute and property set", function () {
-				loadTestScope(["default"]);
-				let container = document.createElement("div");
-				document.documentElement.appendChild(container);
-				let anchor = document.createElement("a");
-				container.appendChild(anchor);
-				scope._a = WindowScopeVariables.createSafeHTMLElement(
-					anchor, ADDON_ID, { rootNode: new WeakRef(container) }
-				);
-				try {
-					// setAttribute with a dangerous scheme is a no-op (blocked by validator)
-					evalInScope('_a.setAttribute("href", "javascript:alert(1)")');
-					assert.isNull(anchor.getAttribute("href"), "javascript: via setAttribute must be blocked");
-					// obfuscation with an embedded control char is still caught
-					evalInScope('_a.setAttribute("href", "java\\tscript:alert(1)")');
-					assert.isNull(anchor.getAttribute("href"), "obfuscated javascript: must be blocked");
-					// data:text/html is active markup -> blocked
-					evalInScope('_a.setAttribute("href", "data:text/html,<b>x</b>")');
-					assert.isNull(anchor.getAttribute("href"), "data:text/html must be blocked");
-					// property set with javascript: throws
-					assert.throws(() => evalInScope('_a.href = "javascript:alert(1)"'),
-						undefined, undefined, "javascript: via property set must throw");
-					assert.isNull(anchor.getAttribute("href"));
-
-					// Safe schemes are allowed (setAttribute and property set)
-					evalInScope('_a.setAttribute("href", "https://example.com/x")');
-					assert.equal(anchor.getAttribute("href"), "https://example.com/x");
-					evalInScope('_a.href = "https://example.com/y"');
-					assert.equal(anchor.getAttribute("href"), "https://example.com/y");
-					// Inline data: images are inert as images -> allowed
-					evalInScope('_a.setAttribute("src", "data:image/png;base64,iVBORw0KGgo=")');
-					assert.ok((anchor.getAttribute("src") || "").startsWith("data:image/png"),
-						"data:image/* must be allowed");
-				}
-				finally {
-					container.remove();
-				}
-			});
-		});
-	});
-
-	describe("chrome-window resource origin allowlist", function () {
-		// Build a container > <tag> pair, expose the rootNode-scoped child as
-		// `sandboxName`, and return the real nodes for assertions/cleanup.
-		function setupSafeEl(tagName, sandboxName) {
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let el = document.createElement(tagName);
-			container.appendChild(el);
-			scope[sandboxName] = WindowScopeVariables.createSafeHTMLElement(
-				el, ADDON_ID, { rootNode: new WeakRef(container) }
-			);
-			return { container, el };
-		}
-
-		it("isDisallowedResourceURL enforces the declared-resource allowlist", function () {
+	describe("image-URI origin allowlist", function () {
+		it("canLoadImageURI enforces the declared-resource allowlist", function () {
 			loadTestScope(["default"], ["https://declared.example.com/*"]);
-			let base = "chrome://zotero/content/zoteroPane.xhtml";
-			let check = url => WindowScopeVariables.isDisallowedResourceURL(url, ADDON_ID, base);
-			assert.isFalse(check("chrome://zotero/skin/x.png"), "chrome: allowed");
-			assert.isFalse(check("resource://gre/x.png"), "resource: allowed");
-			assert.isFalse(check("data:image/png;base64,iVBORw0KGgo="), "data:image allowed");
-			assert.isFalse(check("https://declared.example.com/pic.png"), "declared host_permissions origin allowed");
-			assert.isFalse(check("foo/bar.png"), "relative URL resolves to chrome and is allowed");
-			assert.isFalse(check(""), "empty value triggers no load");
-			assert.isTrue(check("https://evil.example.com/x.png"), "undeclared remote origin blocked");
-			assert.isTrue(check("https://other.example.com/x.png"), "other undeclared origin blocked");
-			assert.isTrue(check("javascript:alert(1)"), "javascript: blocked");
-			assert.isTrue(check("data:text/html,<b>x</b>"), "data:text/html blocked");
-		});
-
-		it("blocks <img src> to an undeclared remote origin, allows local/declared", function () {
-			loadTestScope(["default"]);
-			let { container, el } = setupSafeEl("img", "_img");
+			let check = url => PluginProtocol.canLoadImageURI(url, ADDON_ID);
+			assert.isTrue(check("chrome://zotero/skin/x.png"), "chrome: allowed");
+			assert.isTrue(check("resource://gre/x.png"), "resource: allowed");
+			assert.isTrue(check("data:image/png;base64,iVBORw0KGgo="), "data:image allowed");
+			assert.isTrue(check("https://declared.example.com/pic.png"), "declared host_permissions origin allowed");
+			assert.isTrue(check("foo/bar.png"), "relative URL resolves to the plugin root and is allowed");
+			assert.isTrue(check(""), "empty value triggers no load");
+			assert.isFalse(check("https://evil.example.com/x.png"), "undeclared remote origin blocked");
+			assert.isFalse(check("https://other.example.com/x.png"), "other undeclared origin blocked");
+			assert.isFalse(check("javascript:alert(1)"), "javascript: blocked (not a declared origin)");
+			// data: is allowed as a local scheme; text/html is inert rendered as an image
+			assert.isTrue(check("data:text/html,<b>x</b>"), "data:text/html allowed (inert as an image)");
+			// Own moz-extension origin is in allowedOrigins (via register), so
+			// canAccessURI permits it; another plugin's origin is blocked.
 			let own = WebExtensionPolicy.getByID(ADDON_ID).getURL("icon.png");
-			try {
-				// setAttribute with a remote origin is a no-op (blocked by validator).
-				evalInScope('_img.setAttribute("src", "https://evil.example.com/beacon.png")');
-				assert.isNull(el.getAttribute("src"), "remote src via setAttribute must be blocked");
-				// Property set with a remote origin throws.
-				assert.throws(() => evalInScope('_img.src = "https://evil.example.com/beacon.png"'),
-					undefined, undefined, "remote src via property set must throw");
-				assert.isNull(el.getAttribute("src"), "no remote src should be set");
-
-				// Declared resources are allowed.
-				evalInScope('_img.setAttribute("src", "chrome://zotero/skin/zotero-new-z-16px.png")');
-				assert.ok((el.getAttribute("src") || "").startsWith("chrome://"), "chrome: src must be allowed");
-				evalInScope(`_img.src = ${JSON.stringify(own)}`);
-				assert.equal(el.getAttribute("src"), own, "plugin's own moz-extension resource must be allowed");
-				evalInScope('_img.setAttribute("src", "data:image/png;base64,iVBORw0KGgo=")');
-				assert.ok((el.getAttribute("src") || "").startsWith("data:image/png"), "data:image must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks a remote <img srcset> candidate, allows an all-local one", function () {
-			loadTestScope(["default"]);
-			let { container, el } = setupSafeEl("img", "_img");
-			try {
-				evalInScope('_img.setAttribute("srcset", "https://evil.example.com/x.png 2x, chrome://zotero/skin/a.png 1x")');
-				assert.isNull(el.getAttribute("srcset"), "a srcset with any remote candidate must be blocked");
-				evalInScope('_img.setAttribute("srcset", "chrome://zotero/skin/a.png 1x, chrome://zotero/skin/b.png 2x")');
-				assert.ok(el.getAttribute("srcset"), "an all-chrome srcset must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks remote url() in an inline style attribute, including CSS-escape obfuscation", function () {
-			loadTestScope(["default"]);
-			let { container, el } = setupSafeEl("div", "_div");
-			try {
-				evalInScope('_div.setAttribute("style", "background: url(https://evil.example.com/x.png)")');
-				assert.isNull(el.getAttribute("style"), "remote url() in style attr must be blocked");
-				// "\\70" is the CSS escape for "p" -- htt\70s:// decodes to https://.
-				scope._obf = "background: url(htt\\70s://evil.example.com/x.png)";
-				evalInScope('_div.setAttribute("style", _obf)');
-				assert.isNull(el.getAttribute("style"), "CSS-escape-obfuscated remote url() must be blocked");
-				evalInScope('_div.setAttribute("style", "background: url(chrome://zotero/skin/x.png)")');
-				assert.ok((el.getAttribute("style") || "").includes("chrome://"), "chrome: url() must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks el.style writes that pull in a remote url(), allows ordinary writes", function () {
-			loadTestScope(["default"]);
-			let { container, el } = setupSafeEl("div", "_div");
-			try {
-				evalInScope('_div.style.backgroundImage = "url(https://evil.example.com/x.png)"');
-				assert.equal(el.style.backgroundImage, "", "remote url() via style object must be dropped");
-				evalInScope('_div.style.setProperty("background-image", "url(https://evil.example.com/x.png)")');
-				assert.equal(el.style.backgroundImage, "", "remote url() via setProperty must be dropped");
-				evalInScope('_div.style.color = "red"');
-				assert.equal(el.style.color, "red", "ordinary style writes must still work");
-				evalInScope('_div.style.backgroundImage = "url(chrome://zotero/skin/x.png)"');
-				assert.include(el.style.backgroundImage, "chrome://", "chrome: url() via style object must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("drops a <style> block that @imports a remote sheet from innerHTML", function () {
-			loadTestScope(["default"]);
-			let { container, target } = setupSafeDiv();
-			try {
-				evalInScope('_target.innerHTML = \'<style>@import url(https://evil.example.com/e.css); body{color:red}</style>\'');
-				assert.isNull(target.querySelector("style"), "a <style> with a remote @import must be dropped");
-				evalInScope('_target.innerHTML = \'<style>.x{color:blue}</style>\'');
-				assert.ok(target.querySelector("style"), "a local-only <style> must be kept");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks setting a <style> element's textContent to a remote @import", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let styleEl = document.createElement("style");
-			container.appendChild(styleEl);
-			scope._style = WindowScopeVariables.createSafeHTMLElement(
-				styleEl, ADDON_ID, { rootNode: new WeakRef(container) }
-			);
-			try {
-				evalInScope('_style.textContent = "@import url(https://evil.example.com/e.css)"');
-				assert.equal(styleEl.textContent, "", "remote @import via <style> textContent must be blocked");
-				evalInScope('_style.textContent = ".ok{color:green}"');
-				assert.equal(styleEl.textContent, ".ok{color:green}", "local <style> textContent must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks feeding a <style> a remote @import via append/insertAdjacentText", function () {
-			loadTestScope(["default"]);
-			let container = document.createElement("div");
-			document.documentElement.appendChild(container);
-			let styleEl = document.createElement("style");
-			container.appendChild(styleEl);
-			scope._style = WindowScopeVariables.createSafeHTMLElement(
-				styleEl, ADDON_ID, { rootNode: new WeakRef(container) }
-			);
-			try {
-				evalInScope('_style.append("@import url(https://evil.example.com/e.css)")');
-				assert.equal(styleEl.textContent, "", "append() of remote CSS into <style> must be blocked");
-				evalInScope('_style.insertAdjacentText("beforeend", "@import url(https://evil.example.com/e.css)")');
-				assert.equal(styleEl.textContent, "", "insertAdjacentText of remote CSS into <style> must be blocked");
-				evalInScope('_style.append(".ok{color:green}")');
-				assert.equal(styleEl.textContent, ".ok{color:green}", "local CSS via append() must be allowed");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("blocks a remote stylesheet <link>, but keeps navigational <a href>", function () {
-			loadTestScope(["default"]);
-			let link = setupSafeEl("link", "_link");
-			let anchor = setupSafeEl("a", "_a");
-			try {
-				// <link href> is a silent subresource fetch -> origin-restricted.
-				evalInScope('_link.setAttribute("href", "https://evil.example.com/e.css")');
-				assert.isNull(link.el.getAttribute("href"), "remote <link href> must be blocked");
-				evalInScope('_link.setAttribute("href", "chrome://zotero/skin/x.css")');
-				assert.equal(link.el.getAttribute("href"), "chrome://zotero/skin/x.css", "chrome: <link href> must be allowed");
-				// <a href> is user-initiated navigation, not a silent load -> allowed.
-				evalInScope('_a.setAttribute("href", "https://example.com/page")');
-				assert.equal(anchor.el.getAttribute("href"), "https://example.com/page", "external <a href> navigation must stay allowed");
-			}
-			finally {
-				link.container.remove();
-				anchor.container.remove();
-			}
-		});
-	});
-
-	describe("element.dataset", function () {
-		it("should read and write arbitrary dataset keys", function () {
-			loadTestScope(["default"]);
-			let { container, target } = setupSafeDiv();
-			try {
-				evalInScope('_target.dataset.myKey = "hello";');
-				assert.equal(target.dataset.myKey, "hello", "value written via sandbox should appear on real element");
-				let read = evalInScope("_target.dataset.myKey");
-				assert.equal(read, "hello", "value should be readable back from sandbox");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should support keys that did not exist at wrap time", function () {
-			loadTestScope(["default"]);
-			let { container, target } = setupSafeDiv();
-			try {
-				// target has no data attributes when wrapper is created
-				assert.equal(Object.keys(target.dataset).length, 0, "no keys initially");
-				evalInScope('_target.dataset.brand = "new";');
-				assert.equal(target.dataset.brand, "new", "new key written via sandbox should exist");
-				evalInScope('_target.dataset.second = "also";');
-				assert.equal(target.dataset.second, "also", "second new key should also work");
-			}
-			finally {
-				container.remove();
-			}
-		});
-
-		it("should delete dataset keys", function () {
-			loadTestScope(["default"]);
-			let { container, target } = setupSafeDiv();
-			try {
-				target.dataset.toRemove = "yes";
-				evalInScope("delete _target.dataset.toRemove");
-				assert.isFalse("toRemove" in target.dataset, "key should be deleted from real element");
-			}
-			finally {
-				container.remove();
-			}
+			assert.isTrue(check(own), "own moz-extension resource allowed");
+			assert.isFalse(check("moz-extension://00000000-0000-0000-0000-000000000000/x.png"),
+				"another plugin's moz-extension resource blocked");
 		});
 	});
 
