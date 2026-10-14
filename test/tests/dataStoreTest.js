@@ -27,6 +27,21 @@ describe("Zotero.DataStore", function () {
 		return res.error;
 	}
 
+	describe("builder", function () {
+		// The builder runs apart from the store's config, in chrome and in each sandbox, so only this keeps them in step
+		it("should cover every object type and operation the store defines", function () {
+			let types = Zotero.DataStore._dataStore._objectTypes;
+			for (let [type, operations] of Object.entries(Zotero.DataStore.operationNames)) {
+				let editor = CS[type](1);
+				for (let op of operations) {
+					assert.isFunction(editor[op], `${type}.${op}`);
+				}
+				let terminal = operations.filter(op => types.get(type).operations[op].terminal);
+				assert.sameMembers([...editor.constructor.TERMINAL_OPS], terminal, `${type} terminal operations`);
+			}
+		});
+	});
+
 	describe("addressing", function () {
 		it("should read an item by ID and by libraryID and key", async function () {
 			let item = await createDataObject('item', { title: 'Addressing' });
