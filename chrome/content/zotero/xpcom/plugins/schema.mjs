@@ -375,6 +375,7 @@ const PERMISSION_SCHEMAS = {
 				register: "CustomParserCallable",
 				unregister: "CustomParserCallable",
 				getCommand: "CustomParserCallable",
+				statusCodes: true,
 			},
 		},
 	},

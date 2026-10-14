@@ -2748,7 +2748,7 @@ describe("Plugin API", function () {
 					commandName: "nonexistent",
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.NOT_FOUND);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.NOT_FOUND);
 		});
 
 		it("should return VERSION_TOO_LOW when minVersion exceeds command version", function () {
@@ -2771,7 +2771,7 @@ describe("Plugin API", function () {
 					minVersion: "2.0.0",
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.VERSION_TOO_LOW);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.VERSION_TOO_LOW);
 		});
 
 		it("should return VERSION_TOO_HIGH when maxVersion is below command version", function () {
@@ -2794,7 +2794,7 @@ describe("Plugin API", function () {
 					maxVersion: "2.0.0",
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.VERSION_TOO_HIGH);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.VERSION_TOO_HIGH);
 		});
 
 		it("should return OK for checkOnly when command is available", function () {
@@ -2816,7 +2816,7 @@ describe("Plugin API", function () {
 					checkOnly: true,
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.OK);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.OK);
 		});
 
 		it("should succeed when version is within min/max range", function () {
@@ -2870,7 +2870,7 @@ describe("Plugin API", function () {
 					commandName: "removable",
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.NOT_FOUND);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.NOT_FOUND);
 		});
 
 		it("should throw when calling an unregistered command via stale reference", function () {
@@ -2966,6 +2966,40 @@ describe("Plugin API", function () {
 			assert.throws(() => cmd(), /priv error/);
 		});
 
+		it("should expose status codes to the sandbox", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "versioned",
+					commandVersion: "1.0.0",
+					command() {
+						return "called";
+					},
+				});
+			`);
+
+			// A plugin branches on the same codes the privileged side sees
+			let result = evalInConsumer(`
+				(() => {
+					let codes = Zotero.PluginInteropManager.statusCodes;
+					let lookup = options => Zotero.PluginInteropManager.getCommand(
+						Object.assign({ targetPluginID: "${PROVIDER_ID}" }, options)
+					);
+					return {
+						ok: codes.OK,
+						missingMatches: lookup({ commandName: "nope" }) === codes.NOT_FOUND,
+						tooLowMatches: lookup({ commandName: "versioned", minVersion: "2.0.0" })
+							=== codes.VERSION_TOO_LOW,
+						callable: typeof lookup({ commandName: "versioned" }),
+					};
+				})()
+			`);
+			assert.equal(result.ok, Zotero.PluginInteropManager.statusCodes.OK);
+			assert.isTrue(result.missingMatches);
+			assert.isTrue(result.tooLowMatches);
+			assert.equal(result.callable, "function");
+		});
+
 		it("should return PERMISSION_DENIED when caller lacks interop_permissions", function () {
 			// Reload scopes with consumer having no interop_permissions
 			PluginSandbox.unloadScope(PROVIDER_ID);
@@ -2990,7 +3024,7 @@ describe("Plugin API", function () {
 					commandName: "secret",
 				});
 			`);
-			assert.equal(result, Zotero.PluginInteropManager.PERMISSION_DENIED);
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.PERMISSION_DENIED);
 		});
 
 		it("should prevent unprivileged plugin from spoofing callerPluginID", function () {
