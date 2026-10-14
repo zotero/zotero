@@ -40,6 +40,8 @@ import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFil
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
 var scopes = new Map();
+// Outlives the scope, so calls an unloaded sandbox makes before it is nuked keep its privilege
+var privilegeByID = new Map();
 
 /**
  * Adapted from loadBootstrapScope() in Firefox 60 ESR
@@ -67,8 +69,10 @@ async function loadScope(addon, globalVars = {}) {
 		addon.installPermissions?.content_security_policy
 	);
 
+	let privileged = VarCheck.isPrivilegedPermission(addon);
+	privilegeByID.set(addon.id, privileged);
 	let scope;
-	if (VarCheck.isPrivilegedPermission(addon)) {
+	if (privileged) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
 		scope = loadPrivilegedScope(addon, uuid, globalVars);
 	}
@@ -112,6 +116,11 @@ function unloadScope(id) {
 
 function getScope(id) {
 	return scopes.get(id);
+}
+
+// An ID that never loaded a scope is first-party chrome, e.g. zotero@zotero.org
+function isPrivileged(id) {
+	return privilegeByID.get(id) ?? true;
 }
 
 function defineFrozenIdentity(scope, addon, uuid, privileged, perms) {
@@ -336,6 +345,6 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	return scope;
 }
 
-const PluginSandbox = { loadScope, unloadScope, getScope };
+const PluginSandbox = { loadScope, unloadScope, getScope, isPrivileged };
 
 export { PluginSandbox };

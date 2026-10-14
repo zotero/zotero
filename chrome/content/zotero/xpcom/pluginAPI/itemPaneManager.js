@@ -288,7 +288,7 @@
 		_wrapHook(hook, pluginID, { sync = false } = {}) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
 			let scope = lazy.PluginSandbox.getScope(pluginID);
-			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
 			// hasPermissions() is false without a scope, so privileged is checked separately
 			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 			return (props) => {
@@ -361,8 +361,7 @@
 
 			// Unprivileged plugins can't insert markup into the pane document, so
 			// their section body must be a page in an embedded content browser.
-			let scope = lazy.PluginSandbox.getScope(option.pluginID);
-			if (scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
+			if (!lazy.PluginSandbox.isPrivileged(option.pluginID)) {
 				if (option.bodyXHTML) {
 					this._log("'bodyXHTML' only available for privileged plugins. Provide a page at 'src' instead", "warn");
 					delete option.bodyXHTML;
@@ -528,7 +527,7 @@
 		_wrapHook(hook, pluginID, { sync = false } = {}) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
 			let scope = lazy.PluginSandbox.getScope(pluginID);
-			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
 			// hasPermissions() is false without a scope, so privileged is checked separately
 			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 			return (props) => {

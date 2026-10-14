@@ -246,7 +246,7 @@ const VarCheck = {
 
 	/**
 	 * Check if a scope has a specific permission in a named permission list.
-	 * Privileged scopes always pass. Returns true if allowed, false if denied.
+	 * Privileged scopes always pass and a missing scope never does. Returns true if allowed, false if denied.
 	 *
 	 * @param {object} scope - The sandbox scope
 	 * @param {string} listKey - The scope property holding the permission list (e.g. "INTEROP_PERMISSIONS")
@@ -256,7 +256,10 @@ const VarCheck = {
 	 * @returns {boolean}
 	 */
 	checkScopePermission(scope, listKey, value, { matchMode = undefined } = {}) {
-		if (!scope || this.isPrivilegedScope(scope)) {
+		if (!scope) {
+			return false;
+		}
+		if (this.isPrivilegedScope(scope)) {
 			return true;
 		}
 		let allowed = scope[listKey];

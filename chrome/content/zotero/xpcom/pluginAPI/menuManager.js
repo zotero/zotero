@@ -30,7 +30,6 @@
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	const VALID_TARGETS = [
@@ -266,8 +265,7 @@
 		// @deprecated: the live `items` and `collectionTreeRows`, `menuElem` and the leading DOM event
 		_wrapHook(hook, pluginID) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
-			let scope = lazy.PluginSandbox.getScope(pluginID);
-			let privileged = lazy.VarCheck.isPrivilegedScope(scope);
+			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
 			if (privileged) {
 				return (event, source) => wrapped(event, source);
 			}
