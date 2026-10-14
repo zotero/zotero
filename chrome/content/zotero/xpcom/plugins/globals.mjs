@@ -28,7 +28,7 @@ import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
-import { FilePath } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
+import { FilePath, PathIdentity } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
@@ -298,7 +298,7 @@ function setupPreferences(scope) {
 
 /**
  * Set up the `FilePicker` constructor on the plugin scope. `init` parents only to one of
- * the plugin's own windows, given by window ID; anything else gets the main window.
+ * the plugin's own windows, given by window ID; anything else gets the hidden window on macOS, the main one elsewhere.
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -314,13 +314,30 @@ function setupFilePicker(scope) {
 					win = WindowUtils.getWindow(parentWindowID, "pluginWindow", pluginID);
 				}
 				catch {}
-				// The hidden window exists on macOS only
-				if (!win && !Zotero.isMac) {
-					win = Zotero.getMainWindow() || Services.wm.getMostRecentWindow(null);
-				}
+			}
+			// Anything but the plugin's own window gets the hidden window, which exists on macOS only, else the main one
+			if (!win) {
+				win = Zotero.isMac ? Services.appShell.hiddenDOMWindow : Zotero.getMainWindow() || Services.wm.getMostRecentWindow(null);
 			}
 			this._pluginMode = mode;
 			return super.init(win, title, mode);
+		}
+
+		// Paths cross the boundary in the canonical spelling, both ways
+		get file() {
+			return PathIdentity.canonicalize(super.file);
+		}
+
+		get files() {
+			return super.files.map(file => PathIdentity.canonicalize(file));
+		}
+
+		get displayDirectory() {
+			return PathIdentity.canonicalize(super.displayDirectory);
+		}
+
+		set displayDirectory(path) {
+			super.displayDirectory = PathIdentity.toNative(PathIdentity.canonicalize(path));
 		}
 
 		// After the user picks file(s)/folder, auto-grant access in the current session.
@@ -360,6 +377,24 @@ function setupFilePicker(scope) {
 		mutable: true,
 		trace: { pluginID, path: "FilePicker" },
 	});
+}
+
+/**
+ * Zotero.Utilities.Internal.getClipboard for the sandbox: the core reader, its "path" answer in the canonical
+ * spelling the file store takes
+ * @param {Object} scope - The sandbox scope
+ */
+function setupClipboard(scope) {
+	let pluginID = scope.PLUGIN_ID;
+	let mirror = Cu.waiveXrays(scope).Zotero.Utilities?.Internal;
+	if (!mirror) return;
+	let getClipboard = (mimeType, dataType) => {
+		let result = Zotero.Utilities.Internal.getClipboard(mimeType, dataType);
+		return dataType === "path" && typeof result === "string" ? PathIdentity.canonicalize(result) : result;
+	};
+	defineOnMirror(mirror, "getClipboard", ScopeUtils.ensureCallableInScope(getClipboard, null, scope, {
+		trace: { pluginID, path: "Zotero.Utilities.Internal.getClipboard" },
+	}));
 }
 
 const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
@@ -441,4 +476,4 @@ function setupFileStore(scope) {
 	);
 }
 
-export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };
+export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupClipboard, setupDataStore, setupFileStore };
