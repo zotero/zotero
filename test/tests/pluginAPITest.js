@@ -815,6 +815,23 @@ describe("Plugin API", function () {
 							context.menuElem?.classList.add("test-menu-anyReader");
 						},
 						enableForTabTypes: ["reader/*"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-bareReader");
+						},
+						// Same as "reader/*", as for buttons
+						enableForTabTypes: ["reader"]
+					},
+					{
+						menuType: "menuitem",
+						l10nID: "menu-print",
+						onShowing: (event, context) => {
+							context.menuElem?.classList.add("test-menu-pdfOrAnyReader");
+						},
+						enableForTabTypes: ["reader/pdf", "reader/*"]
 					}
 				]
 			});
@@ -848,7 +865,9 @@ describe("Plugin API", function () {
 				pdf: false,
 				epub: false,
 				snapshot: false,
-				anyReader: false
+				anyReader: false,
+				bareReader: false,
+				pdfOrAnyReader: false
 			});
 			await simulateMenuClosed(popup);
 
@@ -863,7 +882,9 @@ describe("Plugin API", function () {
 				pdf: true,
 				epub: false,
 				snapshot: false,
-				anyReader: true
+				anyReader: true,
+				bareReader: true,
+				pdfOrAnyReader: true
 			});
 			await simulateMenuClosed(popup);
 
@@ -878,7 +899,9 @@ describe("Plugin API", function () {
 				pdf: false,
 				epub: true,
 				snapshot: false,
-				anyReader: true
+				anyReader: true,
+				bareReader: true,
+				pdfOrAnyReader: true
 			});
 			await simulateMenuClosed(popup);
 
@@ -893,7 +916,9 @@ describe("Plugin API", function () {
 				pdf: false,
 				epub: false,
 				snapshot: true,
-				anyReader: true
+				anyReader: true,
+				bareReader: true,
+				pdfOrAnyReader: true
 			});
 			await simulateMenuClosed(popup);
 
