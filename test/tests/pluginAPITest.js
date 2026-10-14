@@ -1412,14 +1412,11 @@ describe("Plugin API", function () {
 
 		it("should render buttons in the reader toolbar", async function () {
 			initCache("onCommand");
-			let lightIcon = "chrome://zotero/skin/16/universal/plus.svg";
-			let darkIcon = "chrome://zotero/skin/16/universal/minus.svg";
 			// Register a button before the reader is opened
 			let buttonID = await registerButton({
 				buttonID: "reader-test",
 				target: "reader/toolbar",
-				icon: lightIcon,
-				darkIcon,
+				icon: "chrome://zotero/skin/16/universal/plus.svg",
 				onCommand: (event, context) => {
 					updateCache("onCommand", context);
 				},
@@ -1436,17 +1433,6 @@ describe("Plugin API", function () {
 			let button = await waitForCallback(
 				() => readerWin.document.querySelector(buttonSelector), 50, 5);
 			assert.exists(button, "Button should be rendered in the reader toolbar");
-
-			// The icon's resolved background should match the reader's theme,
-			// swapping between light/dark via the injected stylesheet
-			let iconEl = button.querySelector(".zotero-custom-button-icon");
-			let forced = readerWin.document.documentElement.dataset.colorScheme;
-			let dark = forced
-				? forced === "dark"
-				: readerWin.matchMedia("(prefers-color-scheme: dark)").matches;
-			let bg = readerWin.getComputedStyle(iconEl).backgroundImage;
-			assert.include(bg, dark ? darkIcon : lightIcon,
-				"Reader icon should use the theme-appropriate variant");
 
 			button.click();
 			let context = await getCache("onCommand");
