@@ -27,13 +27,13 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 		loadPluginPageInBrowser: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		sanitizeWindowFeatures: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		stopAutoResize: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
 	// start: the collections pane in a library tab, the tab's own sidebar otherwise
@@ -358,7 +358,7 @@
 			if (!pluginID) {
 				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, "Only a plugin can open its own window");
 			}
-			let resolved = lazy.resolvePluginPage(pluginID, url);
+			let resolved = lazy.PluginProtocol.resolvePage(pluginID, url);
 			if (!resolved) {
 				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'url' must be an .html page within the plugin: ${url}`);
 			}

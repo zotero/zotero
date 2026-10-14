@@ -1,6 +1,6 @@
 describe("Plugin File Access", function () {
 	var { PluginFileAccess } = ChromeUtils.importESModule(
-		"chrome://zotero/content/xpcom/plugins/file.mjs"
+		"chrome://zotero/content/xpcom/plugins/fileAccess.mjs"
 	);
 	var { PluginUUID } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/uuid.mjs"

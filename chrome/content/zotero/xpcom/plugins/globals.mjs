@@ -27,8 +27,8 @@
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
-import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
-import { exportFilePath } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
+import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
+import { FilePath } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
@@ -390,8 +390,25 @@ function setupDataStore(scope) {
 	// Force-create the lazy DataStore mirror so we can attach to it
 	let mirror = Cu.waiveXrays(scope).Zotero.DataStore;
 	if (!mirror) return;
-	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/changeSet.js");
+	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/dataChangeSet.js");
 	defineOnMirror(mirror, "ChangeSet", holder.DataChangeSet);
+}
+
+// The path helpers as functions of the sandbox, each failure arriving there as its own TypeError
+function exportFilePath(scope) {
+	let mirror = Cu.createObjectIn(scope);
+	Object.defineProperty(mirror, "sep", { value: FilePath.sep, enumerable: true });
+	for (let name of Object.keys(FilePath).filter(key => typeof FilePath[key] === "function")) {
+		Cu.exportFunction((...args) => {
+			try {
+				return FilePath[name](...args);
+			}
+			catch (e) {
+				throw new scope.TypeError(String(e?.message ?? e));
+			}
+		}, mirror, { defineAs: name });
+	}
+	return mirror;
 }
 
 /**

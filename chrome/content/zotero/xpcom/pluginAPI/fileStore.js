@@ -26,13 +26,11 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		StoreAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		StoreAPIBase: "chrome://zotero/content/xpcom/pluginAPI/storeAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/file.mjs",
-		resolveRealPath: "chrome://zotero/content/xpcom/plugins/file.mjs",
-		samePath: "chrome://zotero/content/xpcom/plugins/file.mjs",
-		containsPath: "chrome://zotero/content/xpcom/plugins/file.mjs",
+		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
+		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		FilePath: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 	});
@@ -304,7 +302,7 @@
 		_pathAddress() {
 			let canonical = (value, fail) => {
 				try {
-					return lazy.PluginFileAccess.canonicalize(value);
+					return lazy.PathIdentity.canonicalize(value);
 				}
 				catch (e) {
 					fail.invalid(e.message);
@@ -476,7 +474,7 @@
 		 */
 		_canonical(rawPath, what = "path") {
 			try {
-				return lazy.PluginFileAccess.canonicalize(rawPath);
+				return lazy.PathIdentity.canonicalize(rawPath);
 			}
 			catch (e) {
 				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${what}: ${e.message}`);
@@ -564,10 +562,10 @@
 			// Real paths, so another spelling or a link cannot make a file its own destination
 			let realSrc = this._realPath(src);
 			let realDest = this._realPath(dest);
-			if (lazy.samePath(realSrc, realDest)) {
+			if (lazy.PathIdentity.same(realSrc, realDest)) {
 				return (recase && differsOnlyByCase(src, dest)) ? undefined : `${dest} is the source itself`;
 			}
-			if (lazy.containsPath(realSrc, realDest)) {
+			if (lazy.PathIdentity.contains(realSrc, realDest)) {
 				return `${dest} is inside ${src}`;
 			}
 			let stat = await this._io(() => statPath(dest));
@@ -605,12 +603,12 @@
 
 		// Where a path really leads, for identity questions; a test can answer for another file system
 		_realPath(path) {
-			return lazy.resolveRealPath(path);
+			return lazy.PathIdentity.realPath(path);
 		}
 
 		// Whether two spellings name one file: real paths agree, case folded where the OS ignores it
 		_sameFile(a, b) {
-			return a === b || lazy.samePath(this._realPath(a), this._realPath(b));
+			return a === b || lazy.PathIdentity.same(this._realPath(a), this._realPath(b));
 		}
 
 		async _requireFile(path) {
