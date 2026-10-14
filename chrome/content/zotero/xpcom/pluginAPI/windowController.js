@@ -36,9 +36,9 @@
 		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
-	// sidebar: also collections pane in library tab
-	// context: also item pane in library tab
-	const MAINWINDOW_PANES = ["sidebar", "context"];
+	// start: the collections pane in a library tab, the tab's own sidebar otherwise
+	// end: the item pane in a library tab, the context pane otherwise
+	const MAINWINDOW_PANES = ["start", "end"];
 
 	/**
 	 * @typedef {object} WindowInfo
@@ -62,25 +62,33 @@
 	 * @property {number} windowID - For focusWindow, getWindowState and closeWindow
 	 */
 
+	/**
+	 * A window's panes by name, carrying only the ones that window type has
+	 * @typedef {object} LayoutState
+	 * @property {object} panes
+	 * @property {{ open: boolean }} [panes.start]
+	 * @property {{ open: boolean }} [panes.end]
+	 */
+
 
 	// The request catalog as types for callers; keep in sync with the constructor's definitions
 	/**
 	 * @typedef {object} WindowControllerQueryParams
 	 * @property {{ type?: WindowType }} windows
 	 * @property {{ windowID: number }} getWindowState
-	 * @property {{ windowID: number, pane: "sidebar" | "context" }} getPaneState
+	 * @property {{ windowID: number }} getLayoutState
 	 *
 	 *
 	 * @typedef {object} WindowControllerQueryResults
 	 * @property {{ windows: WindowInfo[] }} windows
 	 * @property {WindowState} getWindowState
-	 * @property {{ open: boolean }} getPaneState
+	 * @property {LayoutState} getLayoutState
 	 *
 	 *
 	 * @typedef {object} WindowControllerCommandParams
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number }} closeWindow
-	 * @property {{ windowID: number, pane: "sidebar" | "context", open?: boolean }} togglePane
+	 * @property {{ windowID: number, pane: "start" | "end", open?: boolean }} togglePane
 	 * @property {{ type: "reader" | "note" | "preferencePane", itemID?: number, location?: object }} openWindow
 	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, fitContent?: boolean, parentWindowID?: number }} openPluginWindow
 	 *
@@ -116,17 +124,10 @@
 							lazy.WindowUtils.getWindow(windowID, undefined, pluginID)
 						),
 					},
-					getPaneState: {
-						params: {
-							windowID: "number",
-							pane: {
-								type: "string",
-								checkHook: value => MAINWINDOW_PANES.includes(value)
-									|| `Param 'pane' must be one of ${MAINWINDOW_PANES.join(", ")}, got ${value}`,
-							},
-						},
-						handler: ({ windowID, pane, pluginID }) => this._getPaneState(
-							lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID), pane
+					getLayoutState: {
+						params: { windowID: "number" },
+						handler: ({ windowID, pluginID }) => this._getLayoutState(
+							lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID)
 						),
 					},
 				},
@@ -253,7 +254,7 @@
 		/**
 		 * Toggle a pane of a main window; the same paths the View menu and toolbar use
 		 * @param {number} windowID
-		 * @param {"sidebar" | "context"} pane
+		 * @param {"start" | "end"} pane
 		 * @param {boolean} [open] - The state to put the pane in; omitted, it flips
 		 * @param {string} [pluginID] - The calling plugin
 		 * @returns {Promise<WindowControllerCommandResults["togglePane"]>}
@@ -266,7 +267,7 @@
 				return state;
 			}
 			switch (pane) {
-				case "sidebar":
+				case "start":
 					if (tabContentType === "library") {
 						let collectionsPane = win.document.getElementById("zotero-collections-pane");
 						let collapsed = collectionsPane.hasAttribute("collapsed");
@@ -284,7 +285,7 @@
 						instance?.toggleSidebar(nextOpen);
 					}
 					break;
-				case "context":
+				case "end":
 					if (tabContentType === "library") {
 						win.ZoteroPane.toggleItemPane();
 					}
@@ -445,21 +446,34 @@
 
 		/**
 		 * @param {Window} win - A main window
-		 * @param {"sidebar" | "context"} pane
+		 * @returns {LayoutState}
+		 */
+		_getLayoutState(win) {
+			let panes = {};
+			for (let pane of MAINWINDOW_PANES) {
+				panes[pane] = this._getPaneState(win, pane);
+			}
+			return { panes };
+		}
+
+		/**
+		 * The state of one pane of the selected tab
+		 * @param {Window} win - A main window
+		 * @param {"start" | "end"} pane
 		 * @returns {{ open: boolean }}
 		 */
 		_getPaneState(win, pane) {
 			let { tabContentType } = win.Zotero_Tabs.parseTabType();
 			let state = {};
 			switch (pane) {
-				case "sidebar":
+				case "start":
 				{
 					state.open = tabContentType === "library"
 						? !win.document.getElementById("zotero-collections-pane").hasAttribute("collapsed")
 						: win.Zotero_Tabs.getSidebarState(tabContentType).open;
 					break;
 				}
-				case "context":
+				case "end":
 				{
 					state.open = tabContentType === "library"
 						? !win.ZoteroPane.itemPane.collapsed
