@@ -24,7 +24,7 @@
 */
 
 
-import { ControllerAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs";
+import { ControllerAPIBase, ControllerError } from "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs";
 
 const { NOT_FOUND, INVALID_PARAMS } = ControllerAPIBase.errorCodes;
 
@@ -90,10 +90,10 @@ function getWindow(windowID, type, callerPluginID) {
 		}
 	}
 	if (!win || (callerPluginID && !canAccessWindow(win, callerPluginID))) {
-		throw ControllerAPIBase.createError(NOT_FOUND, `No window with ID ${windowID}`);
+		throw new ControllerError(NOT_FOUND, `No window with ID ${windowID}`);
 	}
 	if (type && win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
-		throw ControllerAPIBase.createError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
+		throw new ControllerError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
 	}
 	return win;
 }
@@ -114,13 +114,13 @@ function getMainWindow(windowID) {
 function getOpenableItem(itemID, type) {
 	let item = Zotero.Items.get(itemID);
 	if (!item) {
-		throw ControllerAPIBase.createError(NOT_FOUND, `No item with ID ${itemID}`);
+		throw new ControllerError(NOT_FOUND, `No item with ID ${itemID}`);
 	}
 	let openable = type === "reader"
 		? item.isFileAttachment() && !!item.attachmentReaderType
 		: item.isNote();
 	if (!openable) {
-		throw ControllerAPIBase.createError(INVALID_PARAMS, `Item ${itemID} cannot be opened as ${type}`);
+		throw new ControllerError(INVALID_PARAMS, `Item ${itemID} cannot be opened as ${type}`);
 	}
 	return item;
 }
