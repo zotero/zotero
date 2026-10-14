@@ -33,6 +33,7 @@ Zotero.Plugins = new function () {
 		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+		PluginPrefs: "chrome://zotero/content/xpcom/plugins/prefs.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -427,30 +428,21 @@ Zotero.Plugins = new function () {
 	};
 	
 	
-	function setDefaultPrefs(addon) {
-		var branch = Services.prefs.getDefaultBranch("");
-		var obj = {
-			pref(pref, value) {
-				switch (typeof value) {
-					case 'boolean':
-						branch.setBoolPref(pref, value);
-						break;
-					case 'string':
-						branch.setStringPref(pref, value);
-						break;
-					case 'number':
-						branch.setIntPref(pref, value);
-						break;
-					default:
-						Zotero.logError(`Invalid type '${typeof value}' for pref '${pref}'`);
-				}
-			}
-		};
+	/**
+	 * Run a plugin's prefs.js in an empty sandbox, its pref(name, value, global) calls reaching `pref`. A
+	 * privileged plugin names prefs in full; an unprivileged one as it does with Zotero.Prefs, gated alike
+	 */
+	function loadDefaultPrefs(addon, pref) {
+		let resolve = lazy.VarCheck.isPrivilegedPermission(addon)
+			? name => name
+			: lazy.PluginPrefs.access(addon.id, addon.installPermissions?.pref_permissions).resolve;
+		let sandbox = new Cu.Sandbox(null, { sandboxName: `${addon.id} prefs.js`, wantGlobalProperties: [] });
+		Cu.exportFunction((name, value, global) => pref(resolve(name, global), value), sandbox, { defineAs: "pref" });
 		try {
 			Services.scriptloader.loadSubScriptWithOptions(
 				lazy.PluginProtocol.getBaseURI(addon.id) + "prefs.js",
 				{
-					target: obj,
+					target: sandbox,
 					ignoreCache: true,
 					allowUnsafeURL: true
 				}
@@ -461,33 +453,40 @@ Zotero.Plugins = new function () {
 				Zotero.logError(e);
 			}
 		}
+		finally {
+			// Nuking also drops the microtasks the script queued, so nothing of it runs after this
+			Cu.nukeSandbox(sandbox);
+		}
+	}
+
+
+	function setDefaultPrefs(addon) {
+		var branch = Services.prefs.getDefaultBranch("");
+		loadDefaultPrefs(addon, (pref, value) => {
+			switch (typeof value) {
+				case 'boolean':
+					branch.setBoolPref(pref, value);
+					break;
+				case 'string':
+					branch.setStringPref(pref, value);
+					break;
+				case 'number':
+					branch.setIntPref(pref, value);
+					break;
+				default:
+					Zotero.logError(`Invalid type '${typeof value}' for pref '${pref}'`);
+			}
+		});
 	}
 
 
 	function clearDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
-		var obj = {
-			pref(pref, _value) {
-				if (!branch.prefHasUserValue(pref)) {
-					branch.clearUserPref(pref);
-				}
+		loadDefaultPrefs(addon, (pref, _value) => {
+			if (!branch.prefHasUserValue(pref)) {
+				branch.clearUserPref(pref);
 			}
-		};
-		try {
-			Services.scriptloader.loadSubScriptWithOptions(
-				lazy.PluginProtocol.getBaseURI(addon.id) + "prefs.js",
-				{
-					target: obj,
-					ignoreCache: true,
-					allowUnsafeURL: true
-				}
-			);
-		}
-		catch (e) {
-			if (!e.toString().startsWith('Error opening input stream')) {
-				Zotero.logError(e);
-			}
-		}
+		});
 	}
 	
 	
