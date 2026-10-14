@@ -25,7 +25,7 @@
 
 
 import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
-import { SchemaKey, DATA_OBJECT_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { SchemaKey } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
@@ -80,8 +80,10 @@ const ScopeVariables = {
 			return undefined;
 		}
 
+		// Library data reaches plugins as IDs and Zotero.DataStore snapshots, never as live objects
 		if (VarCheck.isDataObject(value)) {
-			return DataScopeVariables.createSafeDataObject(value, pluginID);
+			Zotero.warn(`Plugin ${pluginID}: dropped a live ${value._objectType || "data"} object from a payload; pass IDs`);
+			return undefined;
 		}
 
 		if (!_seen) _seen = new Map();
@@ -568,23 +570,4 @@ const ScopeVariables = {
 	},
 };
 
-const DataScopeVariables = {
-
-	/**
-	 * Wrap a Zotero DataObject or Library instance for safe use in the plugin scope.
-	 */
-	createSafeDataObject(value, pluginID) {
-		let scope = PluginSandbox.getScope(pluginID);
-		if (VarCheck.isPrivilegedScope(scope)) {
-			return value;
-		}
-		// dataWrite implies dataRead
-		let flags = VarCheck.scopeFlags(scope);
-		if (!flags.dataRead) {
-			return undefined;
-		}
-		return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable: true, instanceSchema: DATA_OBJECT_SCHEMA });
-	}
-};
-
-export { ScopeVariables, DataScopeVariables };
+export { ScopeVariables };

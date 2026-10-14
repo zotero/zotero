@@ -267,8 +267,8 @@ const VarCheck = {
 		if (!required) return true;
 		if (!scope) return false;
 		let { permissions, privileged } = this.scopeFlags(scope);
-		if (permissions.size === 0) return false;
 		if (privileged) return true;
+		if (permissions.size === 0) return false;
 		if (typeof required === "string") {
 			return permissions.has(required);
 		}
@@ -709,6 +709,11 @@ const ScopeUtils = {
 			if (VarCheck.isPluginOwnContent(value, scope.PLUGIN_ID)) {
 				return value;
 			}
+			return undefined;
+		}
+
+		// Nor do live data objects; see Zotero.DataStore
+		if (VarCheck.isDataObject(value) && !VarCheck.isPrivilegedScope(scope)) {
 			return undefined;
 		}
 

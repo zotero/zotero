@@ -2131,6 +2131,10 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
 					get items() {
 						return items;
 					},
@@ -2160,6 +2164,10 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
 					get items() {
 						return items;
 					},
@@ -4025,6 +4033,14 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
+					get libraryIDs() {
+						return [...new Set(collectionTreeRows.map(row => row.ref?.libraryID)
+							.filter(id => id !== undefined))];
+					},
+					get collectionIDs() {
+						return collectionTreeRows.filter(row => row.isCollection?.()).map(row => row.ref.id);
+					},
+					// @deprecated Privileged plugins only
 					get collectionTreeRows() {
 						return collectionTreeRows;
 					},
@@ -4587,9 +4603,21 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
+					get libraryIDs() {
+						return [...new Set(collectionTreeRows.map(row => row.ref?.libraryID)
+							.filter(id => id !== undefined))];
+					},
+					get collectionIDs() {
+						return collectionTreeRows.filter(row => row.isCollection?.()).map(row => row.ref.id);
+					},
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
 					get collectionTreeRows() {
 						return collectionTreeRows;
 					},
+					// @deprecated Privileged plugins only
 					get items() {
 						return items;
 					},
