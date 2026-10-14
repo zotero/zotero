@@ -147,19 +147,17 @@ const PERMISSION_SCHEMAS = {
 	},
 	clipboardRead: {
 		Zotero: {
-			Utilities: {
-				// getClipboard is added per sandbox by setupClipboard() in globals.mjs, so a "path" answer is canonical
-				Internal: {},
+			ClipboardController: {
+				query: "CustomParserCallable",
+				errorCodes: true,
 			},
 		},
 	},
 	clipboardWrite: {
 		Zotero: {
-			Utilities: {
-				Internal: {
-					copyTextToClipboard: true,
-					copyToClipboard: true,
-				}
+			ClipboardController: {
+				command: "CustomParserCallable",
+				errorCodes: true,
 			},
 		},
 	},

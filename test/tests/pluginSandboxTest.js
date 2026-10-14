@@ -470,8 +470,8 @@ describe("Plugin Sandbox", function () {
 			assert.equal(await FileIO.readUTF8(target), "temp");
 		});
 
-		it("should hand out picker and clipboard paths in the canonical spelling", async function () {
-			loadTestScope(["default", "fileSystemRead", "clipboardRead"]);
+		it("should hand out picker paths in the canonical spelling", async function () {
+			loadTestScope(["default", "fileSystemRead"]);
 			let { VarCheck } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 			let native = PathUtils.join(outsideDir, "Picked.txt");
 			let canonical = PluginFileAccess.canonicalize(native);
@@ -489,14 +489,6 @@ describe("Plugin Sandbox", function () {
 			evalInScope(`_pk.displayDirectory = ${JSON.stringify(PluginFileAccess.canonicalize(outsideDir))}`);
 			assert.equal(picker._fp.displayDirectory.path, outsideDir);
 			assert.equal(evalInScope("_pk.displayDirectory"), PluginFileAccess.canonicalize(outsideDir));
-			let clipboard = sinon.stub(Zotero.Utilities.Internal, "getClipboard").returns(native);
-			try {
-				assert.equal(evalInScope('Zotero.Utilities.Internal.getClipboard("application/x-moz-file", "path")'), canonical);
-				assert.equal(evalInScope('Zotero.Utilities.Internal.getClipboard("application/x-moz-file", "string")'), native);
-			}
-			finally {
-				clipboard.restore();
-			}
 		});
 
 		// Storage sits in the forbidden data directory, so a missing grant fails at once rather than prompting
@@ -4470,6 +4462,70 @@ describe("Plugin Sandbox", function () {
 			finally {
 				await addon.uninstall();
 				await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
+			}
+		});
+	});
+
+	describe("Clipboard controller", function () {
+		const FILE_FLAVOR = "application/x-moz-file";
+
+		it("should expose query with clipboardRead and command with clipboardWrite only", function () {
+			loadTestScope(["default"]);
+			assert.equal(evalInScope("typeof Zotero.ClipboardController"), "undefined");
+			loadTestScope(["default", "clipboardRead"]);
+			assert.equal(evalInScope("typeof Zotero.ClipboardController.query"), "function");
+			assert.equal(evalInScope("typeof Zotero.ClipboardController.command"), "undefined");
+			loadTestScope(["default", "clipboardWrite"]);
+			assert.equal(evalInScope("typeof Zotero.ClipboardController.command"), "function");
+			assert.equal(evalInScope("typeof Zotero.ClipboardController.query"), "undefined");
+		});
+
+		it("should write text and a file and read them back, a file as its path or bytes", async function () {
+			loadTestScope(["default", "clipboardRead", "clipboardWrite"]);
+			let text = "sandbox clipboard " + Zotero.Utilities.randomString();
+			let written = await evalInScope(`Zotero.ClipboardController.command("write", { data: { "text/plain": ${JSON.stringify(text)} } })`);
+			assert.isTrue(written.success, written.error && written.error.message);
+			let read = await evalInScope('Zotero.ClipboardController.query("read", { flavor: "text/plain" })');
+			assert.equal(read.result.data, text);
+			let flavors = await evalInScope('Zotero.ClipboardController.query("flavors")');
+			assert.include(Array.from(flavors.result.flavors), "text/plain");
+			let notBytes = await evalInScope('Zotero.ClipboardController.query("read", { flavor: "text/plain", as: "bytes" })');
+			assert.equal(notBytes.error.code, Zotero.ClipboardController.errorCodes.INVALID_PARAMS);
+			let file = PluginFileAccess.canonicalize(PathUtils.join(await getTempDirectory(), "on-clipboard-" + Zotero.Utilities.randomString() + ".txt"));
+			await FileIO.writeUTF8(file, "file bytes");
+			let placed = await evalInScope(`Zotero.ClipboardController.command("write", { data: { ${JSON.stringify(FILE_FLAVOR)}: ${JSON.stringify(file)} } })`);
+			assert.isTrue(placed.success, placed.error && placed.error.message);
+			flavors = await evalInScope('Zotero.ClipboardController.query("flavors")');
+			assert.include(Array.from(flavors.result.flavors), FILE_FLAVOR);
+			let path = await evalInScope(`Zotero.ClipboardController.query("read", { flavor: ${JSON.stringify(FILE_FLAVOR)} })`);
+			assert.equal(path.result.data, file);
+			// Read as a plain array in the sandbox, since a typed array is not readable over Xrays
+			let bytes = await evalInScope(`Zotero.ClipboardController.query("read", { flavor: ${JSON.stringify(FILE_FLAVOR)}, as: "bytes" })`
+				+ ".then(r => Array.from(r.result.data))");
+			assert.equal(new TextDecoder().decode(new Uint8Array(Array.from(bytes))), "file bytes");
+			let bad = await evalInScope(`Zotero.ClipboardController.query("read", { flavor: ${JSON.stringify(FILE_FLAVOR)}, as: "base64" })`);
+			assert.equal(bad.error.code, Zotero.ClipboardController.errorCodes.INVALID_PARAMS);
+		});
+
+		// The core reader and writer are stubbed, so no file lands on the clipboard
+		it("should hand a file flavor out as a canonical path and take one back", async function () {
+			loadTestScope(["default", "clipboardRead", "clipboardWrite"]);
+			let native = PathUtils.join(await getTempDirectory(), "OnClipboard.txt");
+			let canonical = PluginFileAccess.canonicalize(native);
+			let reader = sinon.stub(Zotero.Utilities.Internal, "getClipboard").returns(native);
+			let writer = sinon.stub(Zotero.Utilities.Internal, "copyToClipboard");
+			try {
+				let read = await evalInScope(`Zotero.ClipboardController.query("read", { flavor: ${JSON.stringify(FILE_FLAVOR)} })`);
+				assert.equal(read.result.data, canonical);
+				assert.deepEqual(reader.lastCall.args, [FILE_FLAVOR, "path"]);
+				let written = await evalInScope(`Zotero.ClipboardController.command("write", { data: { ${JSON.stringify(FILE_FLAVOR)}: ${JSON.stringify(canonical)}, "text/plain": "x" } })`);
+				assert.isTrue(written.success, written.error && written.error.message);
+				assert.equal(writer.lastCall.args[0][FILE_FLAVOR], native);
+				assert.equal(writer.lastCall.args[0]["text/plain"], "x");
+			}
+			finally {
+				reader.restore();
+				writer.restore();
 			}
 		});
 	});
