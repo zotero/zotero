@@ -550,12 +550,42 @@ describe("Zotero.DataStore", function () {
 		// the discard that follows a failed deferred create must leave the feed it collided with alone
 		it("should leave an existing feed alone when a feed for the same URL is refused", async function () {
 			let feed = await createFeed();
+			let other = await createFeed();
 			try {
-				let error = await requestError(commit(url => CS.library({ libraryType: "feed", name: "Duplicate", url }), feed.url));
+				let error = await requestError(commit(url => CS.library({ libraryType: "feed", name: "Duplicate", url }), feed.url),
+					codes.INVALID_PARAMS);
 				assert.include(error.message, "already exists");
 				assert.isTrue(Zotero.Libraries.exists(feed.libraryID));
 				assert.equal(Zotero.Feeds.get(feed.libraryID).name, feed.name);
 				assert.lengthOf(Zotero.Feeds.getAll().filter(f => f.url === feed.url), 1);
+				// Moving another feed onto the URL is refused before its settings change in memory
+				error = await requestError(commit((libraryID, url) => CS.library(libraryID).setFeed({ url }), other.libraryID, feed.url),
+					codes.INVALID_PARAMS);
+				assert.include(error.message, "already exists");
+				assert.equal(Zotero.Feeds.get(other.libraryID).url, other.url);
+				// Its own URL is not a collision
+				await requestResult(commit((libraryID, url) => CS.library(libraryID).setFeed({ url }), other.libraryID, other.url));
+			}
+			finally {
+				await feed.eraseTx();
+				await other.eraseTx();
+			}
+		});
+
+		// A library entry runs after the store transaction, so a failed save has to be undone in memory by hand
+		it("should drop a feed's unsaved settings when its save fails", async function () {
+			let feed = await createFeed();
+			let save = sinon.stub(Zotero.Feed.prototype, 'saveTx').rejects(new Error("disk full"));
+			try {
+				let error = await requestError(commit(libraryID => CS.library(libraryID).setName("Renamed"), feed.libraryID),
+					codes.INTERNAL_ERROR);
+				assert.include(error.message, "disk full");
+			}
+			finally {
+				save.restore();
+			}
+			try {
+				assert.equal(Zotero.Feeds.get(feed.libraryID).name, feed.name);
 			}
 			finally {
 				await feed.eraseTx();
@@ -571,6 +601,30 @@ describe("Zotero.DataStore", function () {
 			assert.equal(Zotero.Tags.getColor(libraryID, tag).color, "#FF6666");
 			await requestResult(commit((tag) => CS.library(libraryID).setTagColor(tag, null), tag));
 			assert.isFalse(Zotero.Tags.getColor(libraryID, tag));
+		});
+
+		// Core keeps the limit in the tag selector only, so the store has to
+		it("should refuse a color for one more tag than the limit, and still recolor a colored one", async function () {
+			let max = Zotero.Tags.MAX_COLORED_TAGS;
+			let added = [];
+			try {
+				while (Zotero.Tags.getColors(libraryID).size < max) {
+					let tag = 'limit-' + Zotero.Utilities.randomString();
+					await requestResult(commit((tag) => CS.library(libraryID).setTagColor(tag, "#ff6666"), tag));
+					added.push(tag);
+				}
+				let error = await requestError(commit((tag) => CS.library(libraryID).setTagColor(tag, "#ff6666"), 'limit-one-more'),
+					codes.INVALID_PARAMS);
+				assert.include(error.message, `at most ${max} tags`);
+				let colored = [...Zotero.Tags.getColors(libraryID).keys()][0];
+				await requestResult(commit((tag) => CS.library(libraryID).setTagColor(tag, "#009980"), colored));
+				assert.equal(Zotero.Tags.getColor(libraryID, colored).color, "#009980");
+			}
+			finally {
+				for (let tag of added) {
+					await Zotero.Tags.setColor(libraryID, tag, false);
+				}
+			}
 		});
 
 		it("should refuse to rename an unknown tag before applying anything", async function () {
