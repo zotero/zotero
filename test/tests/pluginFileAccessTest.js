@@ -5,6 +5,8 @@ describe("Plugin File Access", function () {
 	var { PluginUUID } = ChromeUtils.importESModule(
 		"chrome://zotero/content/xpcom/plugins/uuid.mjs"
 	);
+	var { PathIdentity } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/filePath.mjs");
+	var { FileIO } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileIO.mjs");
 
 	var PLUGIN_ID = "test-file-access@zotero.org";
 	var PLUGIN_NAME = "Test File Access Plugin";
@@ -20,12 +22,9 @@ describe("Plugin File Access", function () {
 		await Zotero.initializationPromise;
 		pluginUUID = PluginUUID.getByID(PLUGIN_ID);
 		tempDir = await getTempDirectory();
-		// Resolve symlinks (e.g. macOS /var -> /private/var) so test paths are in
-		// the same canonical (real) space the file-access layer stores/compares
-		// grants against (it resolves real paths for case/symlink consistency).
-		let tempDirFile = Zotero.File.pathToFile(tempDir);
-		tempDirFile.normalize();
-		tempDir = tempDirFile.path;
+		// The gate compares real paths (macOS /var -> /private/var), so the test builds its paths there too, in
+		// the native spelling PathUtils.join takes
+		tempDir = PathIdentity.toNative(PluginFileAccess._realPath(PluginFileAccess.canonicalize(tempDir)));
 		// The prompt opens with the main Zotero window as opener; make sure
 		// one exists so `Zotero.getMainWindow()` resolves.
 		mainWin = await loadZoteroPane();
@@ -45,15 +44,15 @@ describe("Plugin File Access", function () {
 		// Remove the per-plugin data dir created during registration.
 		let dir = PathUtils.join(Zotero.DataDirectory.dir, "plugin-data", pluginUUID);
 		try {
-			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+			await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
 		}
 		catch {}
 	});
 
-	beforeEach(function () {
+	beforeEach(async function () {
 		// Wipe any leftover persisted grants from a previous run before register
 		Zotero.Prefs.clear(PREF_PREFIX + pluginUUID, true);
-		PluginFileAccess.register(PLUGIN_ID);
+		await PluginFileAccess.register(PLUGIN_ID);
 	});
 
 	afterEach(async function () {
@@ -96,8 +95,8 @@ describe("Plugin File Access", function () {
 			let dir = PluginFileAccess.getDir(PLUGIN_ID);
 			assert.isString(dir);
 			assert.include(dir, pluginUUID);
-			assert.isTrue(await IOUtils.exists(dir), `expected ${dir} to exist after register`);
-			let stat = await IOUtils.stat(dir);
+			assert.isTrue(await FileIO.exists(dir), `expected ${dir} to exist after register`);
+			let stat = await FileIO.stat(dir);
 			assert.equal(stat.type, "directory");
 		});
 
@@ -115,7 +114,7 @@ describe("Plugin File Access", function () {
 	describe("Plugin data directory", function () {
 		it("auto-allows the plugin's own data dir without a session", async function () {
 			let pluginDir = PluginFileAccess.getDir(PLUGIN_ID);
-			let nested = PathUtils.join(pluginDir, "deep", "nested.json");
+			let nested = Zotero.FileStore.path.join(pluginDir, "deep", "nested.json");
 			await PluginFileAccess.check(PLUGIN_ID, nested, "write");
 		});
 	});
@@ -192,8 +191,9 @@ describe("Plugin File Access", function () {
 		});
 
 		it("listGrants returns the stored grants", function () {
-			let p1 = PathUtils.join(tempDir, "a.txt");
-			let p2 = PathUtils.join(tempDir, "b.txt");
+			// Listed as the gate keeps them: canonical
+			let p1 = PluginFileAccess.canonicalize(PathUtils.join(tempDir, "a.txt"));
+			let p2 = PluginFileAccess.canonicalize(PathUtils.join(tempDir, "b.txt"));
 			setPersistedGrants([
 				{ path: p1, mode: "read" },
 				{ path: p2, mode: "write" },
@@ -204,8 +204,8 @@ describe("Plugin File Access", function () {
 		});
 
 		it("revokeGrant removes a specific path", function () {
-			let p1 = PathUtils.join(tempDir, "a.txt");
-			let p2 = PathUtils.join(tempDir, "b.txt");
+			let p1 = PluginFileAccess.canonicalize(PathUtils.join(tempDir, "a.txt"));
+			let p2 = PluginFileAccess.canonicalize(PathUtils.join(tempDir, "b.txt"));
 			setPersistedGrants([
 				{ path: p1, mode: "read" },
 				{ path: p2, mode: "write" },
@@ -377,7 +377,7 @@ describe("Plugin File Access", function () {
 
 			let grants = PluginFileAccess.listGrants(PLUGIN_ID);
 			assert.isTrue(
-				grants.some(g => g.path === path && g.mode === "read"),
+				grants.some(g => g.path === PluginFileAccess.canonicalize(path) && g.mode === "read"),
 				"expected a persisted read grant"
 			);
 			// Subsequent check (no session) does not prompt
@@ -399,7 +399,7 @@ describe("Plugin File Access", function () {
 			await sessionPromise;
 
 			let grants = PluginFileAccess.listGrants(PLUGIN_ID);
-			let parent = PathUtils.parent(path);
+			let parent = PluginFileAccess.canonicalize(PathUtils.parent(path));
 			assert.isTrue(
 				grants.some(g => g.path === parent && g.mode === "read"),
 				`expected a persisted read grant on parent ${parent}`
@@ -447,7 +447,7 @@ describe("Plugin File Access", function () {
 
 			let grants = PluginFileAccess.listGrants(PLUGIN_ID);
 			assert.isTrue(
-				grants.some(g => g.path === path && g.mode === "deny"),
+				grants.some(g => g.path === PluginFileAccess.canonicalize(path) && g.mode === "deny"),
 				"expected a persisted deny grant"
 			);
 			let e = await getPromiseError(PluginFileAccess.check(PLUGIN_ID, path, "read"));

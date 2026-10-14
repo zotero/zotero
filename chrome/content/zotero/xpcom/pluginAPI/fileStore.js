@@ -31,6 +31,7 @@
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
+		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		FilePath: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 	});
@@ -140,7 +141,7 @@
 	 */
 	async function statPath(path) {
 		try {
-			return await IOUtils.stat(path);
+			return await lazy.FileIO.stat(path);
 		}
 		catch (e) {
 			if (e?.name === "NotFoundError") {
@@ -259,7 +260,7 @@
 						handler: async ({ path, algorithm = "sha256" }, { caller }) => {
 							path = await this._readable(path, caller);
 							await this._requireFile(path);
-							return { algorithm, digest: await this._io(() => IOUtils.computeHexDigest(path, algorithm)) };
+							return { algorithm, digest: await this._io(() => lazy.FileIO.computeHexDigest(path, algorithm)) };
 						},
 					},
 					access: {
@@ -282,9 +283,9 @@
 						},
 					},
 					dirs: {
-						handler: (_params, { caller }) => ({
+						handler: async (_params, { caller }) => ({
 							data: caller.pluginID ? lazy.PluginFileAccess.getDir(caller.pluginID) : null,
-							temp: caller.pluginID ? lazy.PluginFileAccess.getTempDir(caller.pluginID) : null,
+							temp: caller.pluginID ? await lazy.PluginFileAccess.getTempDir(caller.pluginID) : null,
 						}),
 					},
 				},
@@ -353,7 +354,7 @@
 							|| this._creates(target),
 						// The create mode makes the refusal the OS's too, closing the gap between check and apply
 						apply: (target, { data, encoding, overwrite, flush }) => this._update(target,
-							() => IOUtils.write(target.path, decode(data, encoding), {
+							() => lazy.FileIO.write(target.path, decode(data, encoding), {
 								tmpPath: tmpPathFor(target.path),
 								mode: overwrite === false ? "create" : "overwrite",
 								flush: !!flush,
@@ -363,17 +364,17 @@
 						params: { data: DATA_PARAM, encoding: ENCODING_PARAM, flush: BOOLEAN_PARAM },
 						check: (target, params) => checkContent(params) || this._creates(target),
 						apply: (target, { data, encoding, flush }) => this._update(target,
-							() => IOUtils.write(target.path, decode(data, encoding), { mode: "appendOrCreate", flush: !!flush })),
+							() => lazy.FileIO.write(target.path, decode(data, encoding), { mode: "appendOrCreate", flush: !!flush })),
 					},
 					truncate: {
 						params: { length: COUNT_PARAM },
 						check: requireFile,
 						// IOUtils has no truncate: the kept prefix is read back and written, zero-padded as Node does
 						apply: async (target, { length = 0 }) => {
-							let kept = length ? await this._io(() => IOUtils.read(target.path, { maxBytes: length })) : new Uint8Array(0);
+							let kept = length ? await this._io(() => lazy.FileIO.read(target.path, { maxBytes: length })) : new Uint8Array(0);
 							let bytes = new Uint8Array(length);
 							bytes.set(kept.subarray(0, length));
-							await this._update(target, () => IOUtils.write(target.path, bytes, { tmpPath: tmpPathFor(target.path) }));
+							await this._update(target, () => lazy.FileIO.write(target.path, bytes, { tmpPath: tmpPathFor(target.path) }));
 						},
 					},
 					copyFile: {
@@ -381,7 +382,7 @@
 						check: async (target, { dest, overwrite }, ctx) => requireFile(target)
 							|| this._checkDestination(target.path, dest, { type: "file", overwrite }, ctx),
 						apply: (target, { dest, overwrite }) => this._io(
-							() => IOUtils.copy(target.path, this._canonical(dest), { noOverwrite: !overwrite })),
+							() => lazy.FileIO.copy(target.path, this._canonical(dest), { noOverwrite: !overwrite })),
 					},
 					rename: {
 						params: { dest: lazy.Params.nonEmptyString, overwrite: BOOLEAN_PARAM },
@@ -394,7 +395,7 @@
 						params: { force: BOOLEAN_PARAM },
 						check: (target, { force }) => !force && requireFile(target),
 						apply: (target, { force }) => this._io(
-							() => IOUtils.remove(target.path, { ignoreAbsent: true, retryReadonly: !!force })),
+							() => lazy.FileIO.remove(target.path, { ignoreAbsent: true, retryReadonly: !!force })),
 					},
 				},
 			};
@@ -418,7 +419,7 @@
 							if (target.exists) {
 								return;
 							}
-							await this._update(target, () => IOUtils.makeDirectory(target.path,
+							await this._update(target, () => lazy.FileIO.makeDirectory(target.path,
 								{ createAncestors: !!recursive, ignoreExisting: !!recursive }));
 						},
 					},
@@ -444,7 +445,7 @@
 							return !recursive && `${target.path} is a directory; pass recursive: true`;
 						},
 						apply: (target, { force }) => this._io(
-							() => IOUtils.remove(target.path, { recursive: true, ignoreAbsent: true, retryReadonly: !!force })),
+							() => lazy.FileIO.remove(target.path, { recursive: true, ignoreAbsent: true, retryReadonly: !!force })),
 					},
 				},
 			};
@@ -453,19 +454,19 @@
 		// An existing destination is replaced through a sibling temp copy, so a failed copy leaves it as it was
 		async _copyTree(src, dest, overwrite) {
 			if (!overwrite || !(await this._io(() => statPath(dest)))) {
-				await this._io(() => IOUtils.copy(src, dest, { recursive: true, noOverwrite: true }));
+				await this._io(() => lazy.FileIO.copy(src, dest, { recursive: true, noOverwrite: true }));
 				return;
 			}
 			let tmp = tmpPathFor(dest);
 			try {
 				await this._io(async () => {
-					await IOUtils.copy(src, tmp, { recursive: true, noOverwrite: true });
-					await IOUtils.remove(dest, { recursive: true });
-					await IOUtils.move(tmp, dest);
+					await lazy.FileIO.copy(src, tmp, { recursive: true, noOverwrite: true });
+					await lazy.FileIO.remove(dest, { recursive: true });
+					await lazy.FileIO.move(tmp, dest);
 				});
 			}
 			finally {
-				await IOUtils.remove(tmp, { recursive: true, ignoreAbsent: true });
+				await lazy.FileIO.remove(tmp, { recursive: true, ignoreAbsent: true });
 			}
 		}
 
@@ -596,7 +597,7 @@
 			let dest = this._canonical(rawDest, "dest");
 			// Recasing a name is a move onto the same file, which noOverwrite would refuse
 			let recase = !overwrite && differsOnlyByCase(target.path, dest) && this._sameFile(target.path, dest);
-			await this._io(() => IOUtils.move(target.path, dest, { noOverwrite: !(overwrite || recase) }));
+			await this._io(() => lazy.FileIO.move(target.path, dest, { noOverwrite: !(overwrite || recase) }));
 			target.path = dest;
 			await this._refresh(target);
 		}
@@ -623,7 +624,7 @@
 		async _readFile(rawPath, { encoding, offset, length }, caller) {
 			let path = await this._readable(rawPath, caller);
 			await this._requireFile(path);
-			let bytes = await this._io(() => IOUtils.read(path, { offset, maxBytes: length }));
+			let bytes = await this._io(() => lazy.FileIO.read(path, { offset, maxBytes: length }));
 			return { data: encoding ? encode(bytes, encoding) : bytes };
 		}
 
@@ -633,10 +634,10 @@
 			if (kindOf(stat) !== "directory") {
 				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${path} is not a directory`);
 			}
-			let children = await this._io(() => IOUtils.getChildren(path));
+			let children = await this._io(() => lazy.FileIO.getChildren(path));
 			let entries = [];
 			for (let child of children) {
-				let name = PathUtils.filename(child);
+				let name = lazy.FilePath.basename(child);
 				if (!withFileTypes) {
 					entries.push(name);
 					continue;

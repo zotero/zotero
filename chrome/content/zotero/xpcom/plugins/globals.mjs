@@ -298,7 +298,7 @@ function setupPreferences(scope) {
 
 /**
  * Set up the `FilePicker` constructor on the plugin scope. `init` parents only to one of
- * the plugin's own windows, given by window ID; anything else gets the hidden window.
+ * the plugin's own windows, given by window ID; anything else gets the main window.
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -308,12 +308,16 @@ function setupFilePicker(scope) {
 	let { FilePicker } = lazy;
 	class PluginFilePicker extends FilePicker {
 		init(parentWindowID, title, mode) {
-			let win = Services.appShell.hiddenDOMWindow;
+			let win = null;
 			if (typeof parentWindowID === "number") {
 				try {
 					win = WindowUtils.getWindow(parentWindowID, "pluginWindow", pluginID);
 				}
 				catch {}
+				// The hidden window exists on macOS only
+				if (!win && !Zotero.isMac) {
+					win = Zotero.getMainWindow() || Services.wm.getMostRecentWindow(null);
+				}
 			}
 			this._pluginMode = mode;
 			return super.init(win, title, mode);
