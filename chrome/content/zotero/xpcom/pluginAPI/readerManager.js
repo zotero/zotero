@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
@@ -126,16 +127,7 @@
 				optionTypeDefinition: {
 					sectionID: "string",
 					pluginID: "string",
-					target: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (SECTION_EVENTS[value]) {
-								return true;
-							}
-							return `Option 'target' must be one of ${Object.keys(SECTION_EVENTS).join(", ")}, got ${value}`;
-						},
-					},
+					target: lazy.Params.oneOf(Object.keys(SECTION_EVENTS)),
 					src: "string",
 					onRender: {
 						type: "function",
@@ -184,16 +176,7 @@
 				optionTypeDefinition: {
 					menuItemID: "string",
 					pluginID: "string",
-					target: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (CONTEXT_MENU_EVENTS[value]) {
-								return true;
-							}
-							return `Option 'target' must be one of ${Object.keys(CONTEXT_MENU_EVENTS).join(", ")}, got ${value}`;
-						},
-					},
+					target: lazy.Params.oneOf(Object.keys(CONTEXT_MENU_EVENTS)),
 					label: "string",
 					icon: {
 						type: "string",

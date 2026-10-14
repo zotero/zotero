@@ -123,9 +123,6 @@
 						type: "array",
 						optional: true,
 						checkHook: (value) => {
-							if (typeof value === "undefined") {
-								return true;
-							}
 							if (!value.length || !value.every(method => VALID_METHODS.includes(method))) {
 								return `Option 'supportedMethods' must be a non-empty subset of ${VALID_METHODS.join(", ")}`;
 							}
@@ -136,9 +133,6 @@
 						type: "array",
 						optional: true,
 						checkHook: (value) => {
-							if (typeof value === "undefined") {
-								return true;
-							}
 							if (!value.every(type => typeof type === "string" && !!type)) {
 								return "Option 'supportedDataTypes' must only contain non-empty strings";
 							}
@@ -153,9 +147,6 @@
 						type: "object",
 						optional: true,
 						checkHook: (value) => {
-							if (typeof value === "undefined") {
-								return true;
-							}
 							try {
 								JSON.stringify(value);
 							}
