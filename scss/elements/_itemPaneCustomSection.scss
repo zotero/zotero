@@ -34,6 +34,13 @@ item-pane-custom-section {
 				max-height: none;
 				display: flex;
 				flex-direction: column;
+
+				// Embedded page browsers stretch past their page-expressed
+				// height, which acts as the flex basis
+				> .plugin-section-browser {
+					flex: 1 1 auto;
+					min-height: 0;
+				}
 			}
 		}
 	}
