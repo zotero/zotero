@@ -404,6 +404,53 @@ describe("Zotero.ItemPaneManager", function () {
 				await waitForCallback(() => section.getBoundingClientRect().height < scrollportHeight() / 2, 50, 10);
 			});
 		});
+
+		describe("resize", function () {
+			before(async function () {
+				// The page sizes its section through zoteroHost.api.resize and records each outcome
+				await FileIO.writeUTF8(
+					PathUtils.join(tmpDir, "resize-page.js"),
+					"var results = document.getElementById('results');\n"
+					+ "function record(name, promise) {\n"
+					+ "  return promise.then(\n"
+					+ "    function (applied) { results.dataset[name] = JSON.stringify(applied); },\n"
+					+ "    function (e) { results.dataset[name] = 'error: ' + e.message; }\n"
+					+ "  );\n"
+					+ "}\n"
+					+ "record('width', zoteroHost.api.resize({ width: 100 }))\n"
+					+ "  .then(function () { return record('bad', zoteroHost.api.resize({ height: '240' })); })\n"
+					+ "  .then(function () { return record('huge', zoteroHost.api.resize({ height: 1e6 })); })\n"
+					+ "  .then(function () { return record('height', zoteroHost.api.resize({ height: 240 })); });\n"
+				);
+				await FileIO.writeUTF8(
+					PathUtils.join(tmpDir, "resize-page.html"),
+					"<!DOCTYPE html><html><head><title>Resize</title></head>"
+					+ "<body><div id='results'></div><script src='resize-page.js'></script></body></html>"
+				);
+			});
+
+			it("should size the section as the page asks, on the height only and within a few screens", async function () {
+				loadSectionPlugin();
+				let paneID = registerSection({ paneID: "resize-example", src: "resize-page.html" });
+				let item = await createDataObject("item");
+				await ZoteroPane.selectItem(item.id);
+				let itemDetails = ZoteroPane.itemPane._itemDetails;
+				let getSection = () => itemDetails.getPanes().find(elem => elem.dataset.pane === paneID);
+				await waitForCallback(() => getSection(), 50, 5);
+				await waitForScrollToPane(itemDetails, paneID);
+				let getBrowser = () => getSection()?.querySelector("browser.plugin-section-browser");
+				// The page's last call is the one that sets the height
+				let results = await waitForCallback(() => {
+					let elem = getBrowser()?.contentDocument?.getElementById("results");
+					return elem?.dataset.height ? elem : false;
+				}, 50, 5);
+				assert.equal(getBrowser().getBoundingClientRect().height, 240);
+				assert.deepEqual(JSON.parse(results.dataset.height), { height: 240 });
+				assert.equal(results.dataset.width, "error: resize: The width can't be set here");
+				assert.equal(results.dataset.bad, "error: resize: Param 'height' must be a non-negative number");
+				assert.deepEqual(JSON.parse(results.dataset.huge), { height: win.screen.availHeight * 4 });
+			});
+		});
 	});
 
 	it("should reserve every built-in pane ID from custom sections", function () {
