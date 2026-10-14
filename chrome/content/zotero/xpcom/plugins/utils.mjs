@@ -26,6 +26,7 @@
 
 import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
+import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
@@ -42,6 +43,46 @@ const CHROME_GLOBAL = Cu.getGlobalForObject({});
  */
 const instanceFacadeCache = new WeakMap();
 const NULL_INSTANCE_SCHEMA = Symbol("nullSchema");
+
+/**
+ * Resolve a URL to a file within the plugin, optionally relative to the plugin's
+ * root, and required to have one of the given extensions.
+ * @param {string} pluginID
+ * @param {string} src - File URL, optionally relative to the plugin's root
+ * @param {string[]} extensions - Allowed file extensions (with leading dot)
+ * @returns {string | null} The absolute URL, or null if src doesn't qualify
+ */
+function resolvePluginFile(pluginID, src, extensions) {
+	let base = PluginProtocol.getBaseURI(pluginID);
+	if (!base) {
+		return null;
+	}
+	let resolved;
+	try {
+		resolved = new URL(String(src ?? ""), base).href;
+	}
+	catch {
+		return null;
+	}
+	if (!resolved.startsWith(base)) {
+		return null;
+	}
+	let pathname = new URL(resolved).pathname.toLowerCase();
+	if (!extensions.some(ext => pathname.endsWith(ext))) {
+		return null;
+	}
+	return resolved;
+}
+
+/**
+ * Resolve a plugin page URL (an `.html`/`.htm` file within the plugin).
+ * @param {string} pluginID
+ * @param {string} src - Page URL, optionally relative to the plugin's root
+ * @returns {string | null} The absolute URL, or null if src doesn't qualify
+ */
+function resolvePluginPage(pluginID, src) {
+	return resolvePluginFile(pluginID, src, [".html", ".htm"]);
+}
 
 const VarCheck = {
 	isObject(v) {
@@ -982,4 +1023,4 @@ const ScopeUtils = {
 	},
 };
 
-export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY };
+export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY, resolvePluginFile, resolvePluginPage };

@@ -2704,6 +2704,14 @@ class Reader {
 	}
 
 	_dispatchEvent(event) {
+		try {
+			Zotero.ReaderManager._handleEvent(event);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		// Legacy raw-event API (privileged plugins only)
 		let wrappedEventCache = new Map();
 		for (let listener of this._registeredListeners) {
 			if (listener.type === event.type) {
@@ -2744,6 +2752,9 @@ class Reader {
 	 */
 
 	/**
+	 * Register a low-level reader event listener. Available to privileged plugins
+	 * only; unprivileged plugins use `Zotero.ReaderManager` instead.
+	 *
 	 * @param {ReaderEventType} type - Event type
 	 * @param {ReaderEventHandler} handler - Event handler
 	 * @param {string} pluginID - Plugin ID

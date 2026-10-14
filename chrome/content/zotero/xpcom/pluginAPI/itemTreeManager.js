@@ -34,7 +34,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginFile: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
+		resolvePluginFile: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	/**

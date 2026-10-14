@@ -383,9 +383,11 @@ const PERMISSION_SCHEMAS = {
 	},
 	reader: {
 		Zotero: {
-			Reader: {
-				registerEventListener: true,
-				unregisterEventListener: true,
+			ReaderManager: {
+				registerSection: "CustomParserCallable",
+				unregisterSection: "CustomParserCallable",
+				registerContextMenuItem: "CustomParserCallable",
+				unregisterContextMenuItem: "CustomParserCallable",
 			},
 		},
 	},
