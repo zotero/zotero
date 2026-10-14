@@ -28,7 +28,9 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	const VALID_TARGETS = [
@@ -86,6 +88,15 @@
 	 */
 
 	/**
+	 * @callback MenuHook
+	 * @param {object} context - Menu context: target-specific data plus `setL10nArgs`,
+	 * `setEnabled`, `setVisible`, and `setIcon`.
+	 * Privileged plugins are instead called with a legacy `(event, context)` signature;
+	 * the leading DOM event and `context.menuElem` are @deprecated.
+	 * @returns {void}
+	 */
+
+	/**
 	 * @typedef MenuData
 	 * @type {object}
 	 * @property {string} menuType - The type of the menu item
@@ -102,11 +113,11 @@
 	 * but other types are allowed as well for custom tab types.
 	 * By default, the menu item is always enabled.
 	 * Only for main window menubar menus and reader window menubar menus
-	 * @property {function} [onShowing] - Function to run when the menu is about to be shown
-	 * @property {function} [onShown] - Function to run when the menu is shown
-	 * @property {function} [onHiding] - Function to run when the menu is about to be hidden
-	 * @property {function} [onHidden] - Function to run when the menu is hidden
-	 * @property {function} [onCommand] - Function to run when the menu is clicked
+	 * @property {MenuHook} [onShowing] - Function to run when the menu is about to be shown
+	 * @property {MenuHook} [onShown] - Function to run when the menu is shown
+	 * @property {MenuHook} [onHiding] - Function to run when the menu is about to be hidden
+	 * @property {MenuHook} [onHidden] - Function to run when the menu is hidden
+	 * @property {MenuHook} [onCommand] - Function to run when the menu is clicked
 	 * @property {MenuData[]} [menus] - The menu items to add to the menu
 	 *
 	 * @typedef MenuOptions
@@ -247,15 +258,30 @@
 			return option;
 		}
 
+		// The chrome DOM event and `context.menuElem` (deprecated, kept for old
+		// privileged plugins) must never cross into unprivileged sandboxes
+		_wrapHook(hook, pluginID) {
+			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
+			let scope = lazy.PluginSandbox.getScope(pluginID);
+			if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
+				return wrapped;
+			}
+			return (event, context) => {
+				if (context) {
+					// Copy descriptors so context getters aren't evaluated here
+					let descriptors = Object.getOwnPropertyDescriptors(context);
+					delete descriptors.menuElem;
+					context = Object.defineProperties({}, descriptors);
+				}
+				return wrapped(context);
+			};
+		}
+
 		_convertMenuHooks(menus, pluginID) {
 			for (let menuData of menus) {
 				for (let hookName of this._hookNames) {
 					if (menuData[hookName]) {
-						menuData[hookName] = lazy.ScopeVariables.fromScope(
-							menuData[hookName],
-							pluginID,
-							{ rootNode: (event, context) => context?.menuElem }
-						);
+						menuData[hookName] = this._wrapHook(menuData[hookName], pluginID);
 					}
 				}
 				if (menuData.menus) {
