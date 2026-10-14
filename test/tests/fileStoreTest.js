@@ -465,6 +465,19 @@ describe("Zotero.FileStore", function () {
 	});
 
 	describe("builder", function () {
+		// The builder runs apart from the store's config, in chrome and in each sandbox, so only this keeps them in step
+		it("should cover every object type and operation the store defines", function () {
+			let types = Zotero.FileStore._fileStore._objectTypes;
+			for (let [type, operations] of Object.entries(Zotero.FileStore.operationNames)) {
+				let editor = FS[type](under("coverage"));
+				for (let op of operations) {
+					assert.isFunction(editor[op], `${type}.${op}`);
+				}
+				let terminal = operations.filter(op => types.get(type).operations[op].terminal);
+				assert.sameMembers([...editor.constructor.TERMINAL_OPS], terminal, `${type} terminal operations`);
+			}
+		});
+
 		it("should round-trip a set through JSON and merge editors of one path", function () {
 			let path = under("json.txt");
 			let set = FS.of(FS.file(path).writeFile("a"), FS.file(path).appendFile(new Uint8Array([1, 2])));

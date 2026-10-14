@@ -29,19 +29,13 @@
 		StoreAPIBase: "chrome://zotero/content/xpcom/pluginAPI/storeAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		FilePath: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
 	});
-
-	const CHANGE_SET_URLS = [
-		"chrome://zotero/content/xpcom/plugins/changeSetBase.js",
-		"chrome://zotero/content/xpcom/plugins/fileChangeSet.js",
-	];
-
-	const OBJECT_TYPES = ["file", "directory"];
 
 	const ENCODINGS = ["utf8", "utf-8", "base64"];
 
@@ -217,17 +211,6 @@
 		return `${path.slice(0, path.lastIndexOf("/") + 1)}.zotero-${Zotero.Utilities.randomString(8)}.tmp`;
 	}
 
-	/**
-	 * The change set builder class, from the scripts the sandboxes load too
-	 */
-	function loadChangeSetClass() {
-		let holder = { FilePath: lazy.FilePath };
-		for (let url of CHANGE_SET_URLS) {
-			Services.scriptloader.loadSubScript(url, holder);
-		}
-		return holder.FileChangeSet;
-	}
-
 	class FileStoreInternal extends lazy.StoreAPIBase {
 		constructor() {
 			super();
@@ -303,29 +286,20 @@
 		 * @returns {StoreAddressDef}
 		 */
 		_pathAddress() {
-			let canonical = (value, fail) => {
-				try {
-					return lazy.PathIdentity.canonicalize(value);
-				}
-				catch (e) {
-					fail.invalid(e.message);
-				}
-				return undefined;
-			};
 			return {
 				fields: ["path"],
 				plan: (entry, _defaults, fail) => {
 					if (typeof entry.path !== "string" || !entry.path) {
 						fail.invalid("needs a path");
 					}
-					return { path: canonical(entry.path, fail) };
+					return { path: this._canonical(entry.path, fail) };
 				},
 				resolve: address => address.path,
 				fromValue: (value, { what }, fail) => {
 					if (typeof value !== "string" || !value) {
 						fail.invalid(`${what} must be a path`);
 					}
-					return canonical(value, fail);
+					return this._canonical(value, fail);
 				},
 			};
 		}
@@ -377,7 +351,7 @@
 		 */
 		async _destination(target, rawDest, { overwrite, replaces = false, recase = false }) {
 			let { INVALID_PARAMS, NOT_ALLOWED } = lazy.StoreAPIBase.errorCodes;
-			let dest = await this._landing(target, this._canonical(rawDest, "dest"));
+			let dest = await this._landing(target, this._canonical(rawDest, this._fail("dest")));
 			// The check refused this already, unless an earlier entry changed where the file lands
 			if (this._sameFile(target.path, dest)) {
 				if (!(recase && differsOnlyByCase(target.path, dest))) {
@@ -526,14 +500,14 @@
 		}
 
 		/**
-		 * A path in the gate's canonical form; InvalidParams when it is not absolute
+		 * A path in the gate's canonical form; InvalidParams through `fail` when it is not absolute
 		 */
-		_canonical(rawPath, what = "path") {
+		_canonical(rawPath, fail = this._fail("path")) {
 			try {
 				return lazy.PathIdentity.canonicalize(rawPath);
 			}
 			catch (e) {
-				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `${what}: ${e.message}`);
+				fail.invalid(e.message);
 			}
 			return undefined;
 		}
@@ -614,7 +588,7 @@
 		 */
 		async _checkDestination(target, rawDest, { recase }, ctx) {
 			let src = target.path;
-			let dest = await this._landing(target, this._canonical(rawDest, "dest"));
+			let dest = await this._landing(target, this._canonical(rawDest, this._fail("dest")));
 			await this._checkAccess(ctx, dest, "write");
 			// Real paths, so another spelling or a link cannot make a file its own destination
 			let realSrc = this._realPath(src);
@@ -696,14 +670,21 @@
 	 * @memberof Zotero
 	 */
 	Zotero.FileStore = {
-		objectTypes: Object.freeze(OBJECT_TYPES),
-
 		errorCodes: lazy.StoreAPIBase.errorCodes,
 
 		// The builder; every fileSystemRead sandbox gets its own copy under the same name
-		ChangeSet: loadChangeSetClass(),
+		ChangeSet: lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/fileChangeSet.js", {
+			globals: { FilePath: lazy.FilePath },
+		}).FileChangeSet,
 
 		_fileStore: new FileStoreInternal(),
+
+		/**
+		 * @returns {string[]} The object types a change set can address
+		 */
+		get objectTypes() {
+			return this._fileStore.objectTypes;
+		},
 
 		/**
 		 * @returns {Record<string, string[]>} Operation names by object type
