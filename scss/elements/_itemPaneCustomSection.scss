@@ -12,6 +12,13 @@ item-pane-custom-section {
 		margin: 0;
 	}
 
+	// Embedded plugin section browsers are sized to their page's root height
+	.plugin-section-browser {
+		display: block;
+		width: 100%;
+		flex-shrink: 0;
+	}
+
 	// Section takes the full visible height of the scrollable pane
 	&[data-full-height]:has(> collapsible-section[open]:not([empty])) {
 		min-height: 100%;
