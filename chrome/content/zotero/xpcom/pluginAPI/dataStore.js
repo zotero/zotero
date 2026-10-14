@@ -242,15 +242,16 @@
 	 *
 	 *
 	 * How an operation names another object: a local ID; a key, bare (resolved in the library of the object
-	 * being edited, else the set's) or with its library; or the `{ ref }` of an object created earlier in the set
+	 * being edited, else the set's) or with its library; or the `{ ref }` of an object the set creates
 	 * @typedef {number | string | { key: string, libraryID?: number } | { ref: string }} IDRef
 	 *
 	 *
 	 * Create params by type
 	 * @typedef {object} DataStoreCreateParams
-	 * @property {{ libraryID: number, itemType: string, parent?: IDRef, linkMode?: "linked_url" }} item
-	 *     - Attachments need linkMode; file-backed link modes wait for the file API. Annotations need a
-	 *     file attachment parent
+	 * @property {{ libraryID: number, itemType: string, parent?: IDRef, linkMode?: "linked_url",
+	 *     annotationType?: string, annotationSortIndex?: string, annotationPosition?: object | string }} item
+	 *     - Attachments need linkMode; file-backed link modes wait for the file API. Annotations need a PDF,
+	 *     EPUB or snapshot parent and the three annotation fields, which only they take
 	 * @property {{ libraryID: number, name: string, parent?: IDRef }} collection
 	 * @property {{ libraryID: number, name: string, conditions?: SearchCondition[] }} search
 	 * @property {{ libraryType: "feed", name: string } & Partial<FeedSettings>} library - Feeds only
@@ -276,8 +277,12 @@
 	// The library operations feeds alone support
 	const feedOnly = what => library => !library.isFeed && `only feeds ${what}`;
 
-	// The core refuses data with a plain Error of its own global; a subclass or a platform exception is something else
-	function isPlainError(e) {
+	// The core refuses data with a plain Error of its own global, or in older setters a thrown string; a subclass or
+	// a platform exception is something else
+	function isCoreRefusal(e) {
+		if (typeof e === "string") {
+			return true;
+		}
 		return e !== null && typeof e === "object" && Object.getPrototypeOf(e) === Cu.getGlobalForObject(e).Error.prototype;
 	}
 
@@ -309,19 +314,16 @@
 	}
 
 	/**
-	 * Replace a search's conditions, as Search.fromJSON does: removing one renumbers those after it, so
-	 * the first is removed until none is left
+	 * Replace a search's conditions through core's own Search.fromJSON, which resets `deleted` to what the JSON
+	 * says, so the search's own goes along
 	 * @param {Zotero.Search} search
 	 * @param {SearchCondition[]} conditions
 	 */
 	function setSearchConditions(search, conditions) {
-		let ids;
-		while ((ids = Object.keys(search.getConditions())).length) {
-			search.removeCondition(ids[0]);
-		}
-		for (let { condition, operator, value } of conditions) {
-			search.addCondition(condition, operator, value ?? "");
-		}
+		search.fromJSON({
+			conditions: conditions.map(condition => ({ ...condition, value: condition.value ?? "" })),
+			deleted: search.deleted,
+		});
 	}
 
 	/**
@@ -483,34 +485,50 @@
 							params: {
 								libraryID: "number",
 								itemType: "string",
-								parent: lazy.DataParams.idRef(true),
+								parent: lazy.DataParams.idRef("item", true),
 								linkMode: { type: "string", optional: true },
+								...Object.fromEntries(lazy.DataItemFields.createFields().map(field => [field, {
+									type: "any",
+									optional: true,
+									checkHook: value => value === undefined || lazy.Params.scalarOrObject.checkHook(value),
+								}])),
 							},
-							handler: ({ libraryID, itemType, parent, linkMode }, ctx) => {
+							handler: async (params, ctx) => {
+								let { libraryID, itemType, parent, linkMode } = params;
 								this._requireEditableLibrary(libraryID);
 								if (!Zotero.ItemTypes.getID(itemType)) {
 									throw new Error(`Unknown item type '${itemType}'`);
 								}
 								let item = new Zotero.Item(itemType);
 								item.libraryID = libraryID;
-								if (itemType === "attachment") {
-									if (linkMode === undefined) {
-										throw new Error("An attachment needs a linkMode");
-									}
+								if (linkMode !== undefined) {
 									// File-backed attachments are created through the file API
 									if (linkMode !== "linked_url") {
 										throw new Error(`linkMode '${linkMode}' needs the file API; only linked_url can be created here`);
 									}
+									// Core refuses it on another kind
 									item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_URL;
 								}
-								else if (linkMode !== undefined) {
-									throw new Error("linkMode applies to attachments only");
+								// Core would save one without
+								else if (itemType === "attachment") {
+									throw new Error("An attachment needs a linkMode");
 								}
 								if (parent !== undefined) {
 									item.parentID = ctx.resolveID("item", parent, { scope: libraryID, what: "Param 'parent'" });
 								}
-								else if (itemType === "annotation") {
-									throw new Error("An annotation needs a file attachment as parent");
+								if (itemType === "annotation") {
+									await this._requireAnnotatable(item, params);
+								}
+								// Under setField's rules, which refuse another kind's property
+								for (let field of lazy.DataItemFields.createFields()) {
+									if (params[field] === undefined) {
+										continue;
+									}
+									let reason = lazy.DataItemFields.check(item, field, params[field]);
+									if (reason) {
+										throw new Error(reason);
+									}
+									lazy.DataItemFields.apply(item, field, params[field]);
 								}
 								return item;
 							},
@@ -565,21 +583,21 @@
 								},
 							},
 							setCollections: {
-								params: { collections: lazy.DataParams.idRefList },
+								params: { collections: lazy.DataParams.idRefList("collection") },
 								apply: (item, { collections }, ctx) => {
 									item.setCollections(collections.map(value => ctx.resolveID("collection", value,
 										{ scope: item.libraryID, what: "Param 'collections'" })));
 								},
 							},
 							addToCollection: {
-								params: { collection: lazy.DataParams.idRef() },
+								params: { collection: lazy.DataParams.idRef("collection") },
 								apply: (item, { collection }, ctx) => {
 									item.addToCollection(ctx.resolveID("collection", collection,
 										{ scope: item.libraryID, what: "Param 'collection'" }));
 								},
 							},
 							removeFromCollection: {
-								params: { collection: lazy.DataParams.idRef() },
+								params: { collection: lazy.DataParams.idRef("collection") },
 								apply: (item, { collection }, ctx) => {
 									item.removeFromCollection(ctx.resolveID("collection", collection,
 										{ scope: item.libraryID, what: "Param 'collection'" }));
@@ -605,13 +623,12 @@
 							},
 							setNote: {
 								params: { note: "string" },
-								check: item => !item.isNote() && !item.isAttachment() && "only notes and attachments have a note",
 								apply: (item, { note }) => {
 									item.setNote(note);
 								},
 							},
 							setParent: {
-								params: { parent: lazy.DataParams.nullableIDRef },
+								params: { parent: lazy.DataParams.nullableIDRef("item") },
 								apply: (item, { parent }, ctx) => {
 									item.parentID = parent === null
 										? false
@@ -645,7 +662,7 @@
 						resolve: id => resolveObject(OBJECTS.collection, id),
 						address: lazy.DataAddress.objectAddress(OBJECTS.collection),
 						create: {
-							params: { libraryID: "number", name: lazy.Params.nonEmptyString, parent: lazy.DataParams.idRef(true) },
+							params: { libraryID: "number", name: lazy.Params.nonEmptyString, parent: lazy.DataParams.idRef("collection", true) },
 							handler: ({ libraryID, name, parent }, ctx) => {
 								this._requireEditableLibrary(libraryID);
 								let collection = new Zotero.Collection();
@@ -671,7 +688,7 @@
 								},
 							},
 							setParent: {
-								params: { parent: lazy.DataParams.nullableIDRef },
+								params: { parent: lazy.DataParams.nullableIDRef("collection") },
 								apply: (collection, { parent }, ctx) => {
 									collection.parentID = parent === null
 										? false
@@ -680,14 +697,14 @@
 							},
 							addItems: {
 								needsID: true,
-								params: { items: lazy.DataParams.idRefList },
+								params: { items: lazy.DataParams.idRefList("item") },
 								apply: (collection, { items }, ctx) => collection.addItems(
 									items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
 								),
 							},
 							removeItems: {
 								needsID: true,
-								params: { items: lazy.DataParams.idRefList },
+								params: { items: lazy.DataParams.idRefList("item") },
 								apply: (collection, { items }, ctx) => collection.removeItems(
 									items.map(value => ctx.resolveID("item", value, { scope: collection.libraryID, what: "Param 'items'" }))
 								),
@@ -713,7 +730,7 @@
 						resolve: id => resolveObject(OBJECTS.search, id),
 						address: lazy.DataAddress.objectAddress(OBJECTS.search),
 						create: {
-							params: { libraryID: "number", name: lazy.Params.nonEmptyString, conditions: lazy.DataParams.conditionList(true) },
+							params: { libraryID: "number", name: "string", conditions: lazy.DataParams.conditionList(true) },
 							handler: ({ libraryID, name, conditions = [] }) => {
 								this._requireEditableLibrary(libraryID);
 								let search = new Zotero.Search();
@@ -731,7 +748,7 @@
 						snapshot: lazy.DataSnapshots.search,
 						operations: {
 							setName: {
-								params: { name: lazy.Params.nonEmptyString },
+								params: { name: "string" },
 								apply: (search, { name }) => {
 									search.name = name;
 								},
@@ -808,7 +825,7 @@
 							},
 							markRead: {
 								needsID: true,
-								params: { items: lazy.DataParams.idRefList, read: "boolean" },
+								params: { items: lazy.DataParams.idRefList("item"), read: "boolean" },
 								check: feedOnly("have items with a read state"),
 								apply: async (library, { items, read }, ctx) => {
 									for (let value of items) {
@@ -858,7 +875,7 @@
 		// The core refuses data in memory; a save, an operation that runs against the database (needsID,
 		// terminal) or any step of a deferred type fails for other reasons
 		_isCallerError(e, { entry, kind, op }) {
-			if (!isPlainError(e) || kind === "save" || !entry.def.transactional) {
+			if (!isCoreRefusal(e) || kind === "save" || !entry.def.transactional) {
 				return false;
 			}
 			return !op || !(op.def.needsID || op.def.terminal);
@@ -905,6 +922,23 @@
 			this._requireLibrary(libraryID);
 			if (!Zotero.Libraries.isEditable(libraryID)) {
 				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED, `Library ${libraryID} is not editable`);
+			}
+		}
+
+		/**
+		 * Refuse a new annotation core refuses only at save, among database failures: a parent that cannot have
+		 * one, as core checks it, or a create block missing what its row needs
+		 * @param {Zotero.Item} item - With its parent set, if any
+		 * @param {object} params - The create block
+		 */
+		async _requireAnnotatable(item, params) {
+			let parentItem = item.parentID && await Zotero.Items.getAsync(item.parentID);
+			if (!parentItem || !parentItem.isFileAttachment() || !parentItem.attachmentReaderType) {
+				throw new Error("An annotation needs a PDF, EPUB or snapshot attachment as parent");
+			}
+			let missing = lazy.DataItemFields.createFields("annotation").filter(field => params[field] === undefined);
+			if (missing.length) {
+				throw new Error(`An annotation needs ${missing.join(", ")}`);
 			}
 		}
 

@@ -40,7 +40,7 @@
  * @property {boolean} [transactional] - Whether entries run inside the store transaction (default true); the
  *     others run after it, in order, not atomically, and a failure among them leaves the earlier ones applied
  * @property {(id: number, ctx: StoreCommitContext) => (object | null | Promise<object | null>)} resolve
- *     - The live object for an ID, or null
+ *     - The live object for an ID, or null; entries that get the same object share it, one applying after another
  * @property {StoreAddressDef} address - How an entry or a reference names an existing object of this type;
  *     the store decides what an address looks like, the base only passes it through
  * @property {StoreCreateDef} [create] - How a new object is made; absent means the type cannot be created
@@ -76,7 +76,8 @@
  * @typedef {object} StoreOperationDef
  * @property {string | string[]} [permissions] - Required on top of the store's and the type's
  * @property {Record<string, PluginAPIOptDefValue>} [params] - Everything in the operation but `op`; unknown keys are rejected
- * @property {boolean} [terminal] - The target no longer exists afterwards (erase): no save, no later operation
+ * @property {boolean} [terminal] - The target no longer exists afterwards (erase): no save, no later operation,
+ *     and no later entry sharing the target
  * @property {boolean} [needsID] - A created target must be saved before this runs
  * @property {(target: object, params: object, ctx: StoreCommitContext) => (string | undefined | Promise<string | undefined>)} [check]
  *     - A reason the operation cannot apply, checked before anything changes; must not resolve refs
@@ -93,17 +94,18 @@
  *     `address.fromValue`, with `scope` as the object being edited
  *
  *
- * How an operation names another object: one this set creates, or any form the type's address accepts
+ * How an operation names another object: one this set creates, or any form the type's address accepts. A
+ * create or operation param that takes one declares `objectType` in its definition, for its value or each element
  * @typedef {{ ref: string } | *} StoreIDRef
  *
  *
- * Entries apply in order, each to one object, and every key besides `changes` is a default the object
- * types read. A single entry stands for a one-entry set
+ * Each entry changes one object, which later entries may change again: created ones apply first, each after
+ * those whose refs it names, then the rest in order. Every other key is a default; a single entry is a set
  * @typedef {object} StoreChangeSet
  * @property {StoreChangeEntry[]} changes
  *
  *
- * `create` makes an object later entries reach as `{ ref }`; otherwise the type's `address.fields` name
+ * `create` makes an object any entry reaches as `{ ref }`; otherwise the type's `address.fields` name
  * an existing one
  * @typedef {object} StoreChangeEntry
  * @property {string} type - One of the store's object types
@@ -118,7 +120,7 @@
  *
  *
  * @typedef {object} StoreCommitResult
- * @property {StoreObjectRef[]} objects - One per entry, in order
+ * @property {StoreObjectRef[]} objects - One per entry, in the set's order
  *
  *
  * What the type's `describe` returns for the target, plus the store's bookkeeping
@@ -260,11 +262,9 @@ class StoreAPIBase extends ControllerAPIBase {
 		if (!validatedOptions.valid) {
 			this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `Invalid commit options: ${validatedOptions.reason}`);
 		}
-		let { entries, defaults } = this._plan(params.changes, context);
+		let { entries, defaults, transactional, deferred } = this._plan(params.changes, context);
 		let ctx = this._createCommitContext(context, defaults);
 
-		let transactional = entries.filter(entry => entry.def.transactional);
-		let deferred = entries.filter(entry => !entry.def.transactional);
 		// What survives a failure: entries applied outside the store transaction, or inside one that
 		// committed before a later entry threw
 		let applied = [];
@@ -318,8 +318,8 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * Check the set before anything is loaded: addressing, operations, params, refs and permissions
 	 * @param {StoreChangeSet | StoreChangeEntry} changeSet
 	 * @param {ControllerCaller} context
-	 * @returns {{ entries: object[], defaults: object }} The planned entries, in order, and every key of
-	 *     the set but `changes`
+	 * @returns {{ entries: object[], defaults: object, transactional: object[], deferred: object[] }} The
+	 *     planned entries in the set's order, every key of the set but `changes`, and the order they apply in
 	 */
 	_plan(changeSet, context) {
 		let { INVALID_PARAMS, PERMISSION_DENIED } = StoreAPIBase.errorCodes;
@@ -352,7 +352,7 @@ class StoreAPIBase extends ControllerAPIBase {
 			}
 			requirePermissions(def.permissions, `${at} (${entry.type})`);
 
-			let planned = { index, type: entry.type, def, ops: [] };
+			let planned = { index, type: entry.type, def, ops: [], uses: [] };
 			if (entry.create !== undefined) {
 				if (!def.create) {
 					this._throw(INVALID_PARAMS, `${at}: ${entry.type} objects cannot be created`);
@@ -376,6 +376,7 @@ class StoreAPIBase extends ControllerAPIBase {
 				refs.add(entry.ref);
 				planned.ref = entry.ref;
 				planned.create = validated.obj;
+				this._collectUses(planned, planned.create, def.create.params || {}, `${at}.create`);
 			}
 			else if (typeof entry.ref === "string") {
 				this._throw(INVALID_PARAMS, `${at}: ref '${entry.ref}' has no create block; the builder merges a ref-addressed editor into the entry creating it`);
@@ -413,10 +414,101 @@ class StoreAPIBase extends ControllerAPIBase {
 				}
 				planned.ops.push({ index: opIndex, name: op.op, def: opDef, params: validated.obj });
 				planned.terminal = !!opDef.terminal;
+				this._collectUses(planned, validated.obj, opDef.params, opAt);
 			});
 			return planned;
 		});
-		return { entries, defaults };
+		this._link(entries);
+		return { entries, defaults, ...this._order(entries) };
+	}
+
+	/**
+	 * Record each `{ ref }` in a param that declares an `objectType`, alone or as an array element, with the
+	 * type it must be and where it sits
+	 * @param {object} planned - The entry, whose `uses` grows
+	 * @param {object} params - Validated create or operation params
+	 * @param {Record<string, PluginAPIOptDefValue>} paramDefs
+	 * @param {string} at - Where the params sit, for messages
+	 */
+	_collectUses(planned, params, paramDefs, at) {
+		for (let [key, value] of Object.entries(params)) {
+			let type = paramDefs[key]?.objectType;
+			if (!type) {
+				continue;
+			}
+			let located = Array.isArray(value)
+				? value.map((element, i) => [element, `${at}.${key}[${i}]`])
+				: [[value, `${at}.${key}`]];
+			for (let [element, where] of located) {
+				let ref = this._refOf(element);
+				if (ref !== undefined) {
+					planned.uses.push({ ref, type, at: where });
+				}
+			}
+		}
+	}
+
+	/**
+	 * Point each ref an entry uses at the entry creating it, refusing any no order could satisfy: one nothing
+	 * creates, the entry's own, one of another type, or one created only after the transaction that needs it
+	 * @param {object[]} entries - The planned entries, in the set's order
+	 */
+	_link(entries) {
+		let { INVALID_PARAMS } = StoreAPIBase.errorCodes;
+		let creators = new Map(entries.filter(entry => entry.create).map(entry => [entry.ref, entry]));
+		for (let entry of entries) {
+			for (let use of entry.uses) {
+				let creator = creators.get(use.ref);
+				if (!creator) {
+					this._throw(INVALID_PARAMS, `${use.at}: no entry creates ref '${use.ref}'`);
+				}
+				if (creator === entry) {
+					this._throw(INVALID_PARAMS, `${use.at}: ref '${use.ref}' is the object this entry creates`);
+				}
+				if (creator.type !== use.type) {
+					this._throw(INVALID_PARAMS, `${use.at}: ref '${use.ref}' is a ${creator.type}, not a ${use.type}`);
+				}
+				if (entry.def.transactional && !creator.def.transactional) {
+					this._throw(INVALID_PARAMS, `${use.at}: ref '${use.ref}' is created after the store transaction this entry applies in`);
+				}
+				use.creator = creator;
+			}
+		}
+	}
+
+	/**
+	 * @returns {string | undefined} The ref a value names, as resolveID reads it
+	 */
+	_refOf(value) {
+		return lazy.VarCheck.isObject(value) && typeof value.ref === "string" ? value.ref : undefined;
+	}
+
+	/**
+	 * Within the store transaction and after it, created objects apply first, each after the ones whose refs
+	 * it names, so a ref reaches its object wherever the set lists it; existing objects follow in order
+	 * @param {object[]} entries - The planned entries, in the set's order
+	 * @returns {{ transactional: object[], deferred: object[] }}
+	 */
+	_order(entries) {
+		let order = (group) => {
+			let waiting = group.filter(entry => entry.create);
+			let ordered = [];
+			while (waiting.length) {
+				// A creator outside the group has applied by then, since _link refused the other direction
+				let next = waiting.findIndex(entry => entry.uses.every(use => !waiting.includes(use.creator)));
+				if (next === -1) {
+					let stuck = waiting.map(entry => `changes[${entry.index}] (ref '${entry.ref}')`).join(", ");
+					this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS,
+						`No creation order satisfies the refs of ${stuck}: each needs another of them created first`);
+				}
+				ordered.push(...waiting.splice(next, 1));
+			}
+			return [...ordered, ...group.filter(entry => !entry.create)];
+		};
+		return {
+			transactional: order(entries.filter(entry => entry.def.transactional)),
+			deferred: order(entries.filter(entry => !entry.def.transactional)),
+		};
 	}
 
 	/**
@@ -492,7 +584,6 @@ class StoreAPIBase extends ControllerAPIBase {
 	 */
 	_createCommitContext(context, defaults) {
 		let { INVALID_PARAMS } = StoreAPIBase.errorCodes;
-		let isObject = lazy.VarCheck.isObject;
 		let refs = new Map();
 		return {
 			pluginID: context.pluginID,
@@ -501,18 +592,20 @@ class StoreAPIBase extends ControllerAPIBase {
 			refs,
 			// A ref names an object this set created; anything else is the type's own address form
 			resolveID: (type, value, { scope, what = "Reference" } = {}) => {
-				if (isObject(value) && typeof value.ref === "string") {
-					let created = refs.get(value.ref);
+				let ref = this._refOf(value);
+				if (ref !== undefined) {
+					// _link already checked refs in params that declare an objectType; these catch one that does not
+					let created = refs.get(ref);
 					if (!created) {
-						this._throw(INVALID_PARAMS, `${what}: no object created earlier in the change set has ref '${value.ref}'`);
+						this._throw(INVALID_PARAMS, `${what}: no object with ref '${ref}' is created before this entry applies`);
 					}
 					if (created.type !== type) {
-						this._throw(INVALID_PARAMS, `${what}: ref '${value.ref}' is a ${created.type}, not a ${type}`);
+						this._throw(INVALID_PARAMS, `${what}: ref '${ref}' is a ${created.type}, not a ${type}`);
 					}
 					// The type says what its objects' IDs are; an unsaved one has none yet
 					let { id } = this._objectTypes.get(created.type).describe(created.target);
 					if (id === undefined || id === null || id === false) {
-						this._throw(INVALID_PARAMS, `${what}: ref '${value.ref}' has no ID yet; it is saved after its own operations`);
+						this._throw(INVALID_PARAMS, `${what}: ref '${ref}' has no ID yet; it is saved after its own operations`);
 					}
 					return id;
 				}
@@ -527,13 +620,23 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * conflicts across the whole set are reported before any operation's check, since they come first
 	 */
 	async _resolve(plan, ctx) {
-		let { NOT_ALLOWED, CONFLICT } = StoreAPIBase.errorCodes;
+		let { INVALID_PARAMS, NOT_ALLOWED, CONFLICT } = StoreAPIBase.errorCodes;
 		let conflicts = [];
 		let existing = plan.filter(entry => !entry.create);
+		// Entries that load one live object share it, so none can follow an entry whose terminal operation ends it
+		let endedBy = new Map();
 		for (let entry of existing) {
 			let at = `changes[${entry.index}]`;
 			let { id, target } = await this._loadTarget(entry.type, entry.address, at, ctx);
 			entry.id = id;
+			let ender = endedBy.get(target);
+			if (ender) {
+				this._throw(INVALID_PARAMS,
+					`${at}: ${entry.type} ${id} no longer exists after changes[${ender.index}] (${ender.ops.at(-1).name})`);
+			}
+			if (entry.terminal) {
+				endedBy.set(target, entry);
+			}
 			if (entry.def.isEditable && !entry.def.isEditable(target)) {
 				this._throw(NOT_ALLOWED, `${at}: ${entry.type} ${entry.id} is not editable`);
 			}
@@ -599,8 +702,8 @@ class StoreAPIBase extends ControllerAPIBase {
 	}
 
 	/**
-	 * Run one step of an entry: what the store deems the caller's error is reported as InvalidParams naming
-	 * the step, anything else propagates as a bug or a platform failure
+	 * Run one step of an entry, naming the step in a refusal: a store's own coded one keeps its code, what
+	 * the store deems the caller's error is InvalidParams, anything else propagates as a bug or a platform failure
 	 * @param {object} entry
 	 * @param {"create" | "check" | "apply" | "save"} kind
 	 * @param {object | null} op - The operation, for check and apply
@@ -611,7 +714,8 @@ class StoreAPIBase extends ControllerAPIBase {
 			return await fn();
 		}
 		catch (e) {
-			if (e instanceof ControllerError || !this._isCallerError(e, { entry, kind, op })) {
+			let coded = e instanceof ControllerError;
+			if (!coded && !this._isCallerError(e, { entry, kind, op })) {
 				throw e;
 			}
 			let where = `changes[${entry.index}]`;
@@ -621,8 +725,13 @@ class StoreAPIBase extends ControllerAPIBase {
 			else {
 				where += kind === "save" ? ` (${entry.type} save)` : `.create (${entry.type})`;
 			}
-			this._log(`${where} refused: ${e.message}`);
-			this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `${where}: ${e.message}`);
+			if (coded) {
+				this._throw(e.code, `${where}: ${e.message}`, e.data);
+			}
+			// A store may count a thrown string as a refusal too
+			let reason = typeof e === "string" ? e : e.message;
+			this._log(`${where} refused: ${reason}`);
+			this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `${where}: ${reason}`);
 		}
 		return undefined;
 	}
