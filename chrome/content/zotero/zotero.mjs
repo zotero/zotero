@@ -124,6 +124,7 @@ const xpcomFilesLocal = [
 	'pluginAPI/windowController',
 	'pluginAPI/tabController',
 	'pluginAPI/dataStore',
+	'pluginAPI/fileStore',
 	'sdt',
 	'reader',
 	// Depend on Zotero.Reader for reader rendering
