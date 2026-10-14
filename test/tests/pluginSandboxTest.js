@@ -314,26 +314,14 @@ describe("Plugin Sandbox", function () {
 				"Prefs should not be exposed without preferences permission");
 		});
 
-		it("should not expose translator APIs with only default permission", function () {
-			plugin.load(["default"]);
-			assert.isTrue(plugin.eval("typeof Zotero.Translators === 'undefined'"),
-				"Translators should not be exposed without dataRead");
-			assert.isTrue(plugin.eval("typeof Zotero.Translate === 'undefined'"),
-				"Translate should not be exposed without dataWrite permission");
-		});
-
 		it("should imply dataRead when dataWrite is granted", function () {
 			plugin.load(["default", "dataWrite"]);
 			assert.isTrue(plugin.eval("typeof Zotero.DataStore.query === 'function'"),
 				"DataStore.query should be exposed via implied dataRead");
 			assert.isTrue(plugin.eval("typeof Zotero.DataStore.ChangeSet === 'function'"),
 				"DataStore.ChangeSet should be exposed via implied dataRead");
-			assert.isTrue(plugin.eval("typeof Zotero.Translators === 'object'"),
-				"Translators should be exposed via implied dataRead");
 			assert.isTrue(plugin.eval("typeof Zotero.DataStore.commit === 'function'"),
 				"DataStore.commit should be exposed with dataWrite");
-			assert.isTrue(plugin.eval("typeof Zotero.Translate === 'object'"),
-				"Translate should be exposed with dataWrite");
 		});
 
 		it("should not expose UI APIs with only default permission", function () {
@@ -374,8 +362,6 @@ describe("Plugin Sandbox", function () {
 				"HTTP should be exposed to every scope");
 			assert.isTrue(plugin.eval("typeof Zotero.Prefs === 'object'"),
 				"Prefs should be exposed with preferences permission");
-			assert.isTrue(plugin.eval("typeof Zotero.Translators === 'object'"),
-				"Translators should be exposed with dataRead");
 			assert.isTrue(plugin.eval("typeof Zotero.FileStore === 'undefined'"),
 				"FileStore should not be exposed without fileSystemRead permission");
 			assert.isTrue(plugin.eval("typeof Zotero.ItemTreeManager === 'undefined'"),

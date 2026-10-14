@@ -104,25 +104,29 @@ describe("PluginTrace", function () {
 
 	describe("instance method tracing", function () {
 		beforeEach(function () {
-			plugin.load(["default", "dataWrite"]);
+			plugin.load(["default", "userPrompt"]);
 			startCapture();
 		});
 
 		it("should trace method calls on returned instances", function () {
-			plugin.eval("new Zotero.Translate.Import().setString('x')");
-			let constructLine = findTrace("construct", "Zotero.Translate.Import");
-			assert.ok(constructLine, "Should have a [construct] trace for Zotero.Translate.Import");
+			// The window is never shown, so the line's DOM work stays queued and nothing opens
+			plugin.eval(`(() => {
+				let progressWindow = new Zotero.ProgressWindow();
+				new progressWindow.ItemProgress("book", "Title").setText("Other");
+			})()`);
+			let constructLine = findTrace("construct", "Zotero.ProgressWindow");
+			assert.ok(constructLine, "Should have a [construct] trace for Zotero.ProgressWindow");
 
-			let methodLine = traceLines.find(l => l.includes("[call]") && l.includes("setString"));
-			assert.ok(methodLine, "Should have a [call] trace for setString. All call traces: "
+			let methodLine = traceLines.find(l => l.includes("[call]") && l.includes("setText"));
+			assert.ok(methodLine, "Should have a [call] trace for setText. All call traces: "
 				+ JSON.stringify(traceLines.filter(l => l.includes("[call]"))));
 			assert.include(methodLine, plugin.id);
 		});
 
 		it("should trace getter access on returned instances", function () {
-			plugin.eval("new Zotero.Translate.Import().type");
-			let getLine = traceLines.find(l => l.includes("[get]") && /\.type\b/.test(l));
-			assert.ok(getLine, "Should have a [get] trace for type");
+			plugin.eval("new Zotero.ProgressWindow().changeHeadline");
+			let getLine = traceLines.find(l => l.includes("[get]") && /\.changeHeadline\b/.test(l));
+			assert.ok(getLine, "Should have a [get] trace for changeHeadline");
 		});
 	});
 

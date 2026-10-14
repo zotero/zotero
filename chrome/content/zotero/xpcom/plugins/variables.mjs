@@ -418,7 +418,7 @@ const ScopeVariables = {
 
 						if (typeof value === "function") {
 							// A schema object with no handler names the function's sub-properties, a namespace
-							// such as Zotero.Translate with .Search and .Web
+							// such as Zotero.Promise with .defer and .delay
 							let nextSchema = VarCheck.nextSchema(schemaNode, prop);
 							if (nextSchema && typeof nextSchema === "object" && !nextSchema[SchemaKey.HANDLER]) {
 								return wrapAllowlist(value, nextSchema, { pathPrefix: propPath });
