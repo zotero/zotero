@@ -28,6 +28,8 @@ import { PluginAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/pluginAPI
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+	PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
@@ -158,6 +160,29 @@ class ManagerAPIBase extends PluginAPIBase {
 		option = validateResult.obj;
 		option[this._config.mainKeyName] = mainKey;
 		return option;
+	}
+
+	/**
+	 * Resolve an unprivileged plugin's image URLs in place, relative ones against its root
+	 * @param {object} obj
+	 * @param {string[]} keys - Keys of `obj` holding image URLs
+	 * @param {string} pluginID
+	 * @returns {boolean} False if a URL is not an allowed resource
+	 */
+	_resolveImageURLs(obj, keys, pluginID) {
+		if (lazy.PluginSandbox.isPrivileged(pluginID)) {
+			return true;
+		}
+		for (let key of keys) {
+			if (!obj[key]) continue;
+			let resolved = lazy.PluginProtocol.resolveImageURL(pluginID, obj[key]);
+			if (resolved === null) {
+				this._log(`'${key}' is not an allowed resource URL, got ${obj[key]}`, "warn");
+				return false;
+			}
+			obj[key] = resolved;
+		}
+		return true;
 	}
 
 	/**
