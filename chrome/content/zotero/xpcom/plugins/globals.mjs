@@ -31,6 +31,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { loadPluginPageInBrowser, stopAutoResize } from "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs";
+import { getWindow, getWindowID, getWindowState } from "chrome://zotero/content/xpcom/pluginAPI/utils.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -86,6 +87,8 @@ const ALLOWED_WINDOW_FEATURES = new Set([
 	"resizable",
 	"minimizable",
 	"alwaysontop",
+	// Only meaningful with options.parentWindowID
+	"dependent",
 ]);
 
 function sanitizeFeatures(features) {
@@ -124,9 +127,11 @@ function setupOpenWindow(scope) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
-			let { windowId, fitContent, notitle } = Cu.waiveXrays(options);
-			if (windowId !== null && windowId !== undefined && typeof windowId !== "string") {
-				throw new Error("openWindow: windowId must be a string");
+			// name: the plugin's label for this kind of window, the <name> in its
+			// pluginWindow/<name>/... menu targets
+			let { name, fitContent, notitle, parentWindowID } = Cu.waiveXrays(options);
+			if (name !== null && name !== undefined && typeof name !== "string") {
+				throw new Error("openWindow: name must be a string");
 			}
 
 			let resolved = resolvePluginPage(pluginID, url);
@@ -142,8 +147,19 @@ function setupOpenWindow(scope) {
 				+ (safeFeatures || "resizable");
 			// Use custom notitle style because the `titlebar=no` feature is ugly
 			let windowArgs = { notitle: !!notitle };
+			// A Zotero.WindowController window ID makes that window the parent: the opener, the
+			// screen and scale the position features resolve against, and the owner of a dependent
+			let parent = null;
+			if (parentWindowID !== undefined && parentWindowID !== null) {
+				try {
+					parent = getWindow(parentWindowID);
+				}
+				catch (e) {
+					throw new scope.Error(`openWindow: ${e.message}`);
+				}
+			}
 			let win = Services.ww.openWindow(
-				null,
+				parent,
 				"chrome://zotero/content/pluginWindow.xhtml",
 				null,
 				chromeFeatures,
@@ -157,18 +173,20 @@ function setupOpenWindow(scope) {
 							.getElementById("plugin-browser");
 
 						// Initialize the plugin window (title sync, menus, lifecycle)
-						win.PluginWindow.init(windowId, pluginID);
+						win.PluginWindow.init(name, pluginID);
 
 						let { messenger, dispose } = await loadPluginPageInBrowser(browser, resolved, {
 							channel: true,
 							pluginID,
 							// The page actor keeps the browser at the document scroll size
 							autoResize: fitContent ? { height: true, width: true, content: true } : {},
-							// The page can close its own window as zoteroHost.api.close()
+							// The page controls its own window as zoteroHost.api.<name>(params)
 							hostAPI: {
 								close: () => {
 									win.close();
 								},
+								moveTo: ({ x, y }) => win.moveTo(x, y),
+								getState: () => getWindowState(win),
 							},
 						});
 						if (!messenger) {
@@ -212,12 +230,16 @@ function setupOpenWindow(scope) {
 							win.addEventListener("unload", () => mo.disconnect(), { once: true });
 						}
 
-						// window: the page's own same-origin window, passed raw
+						// window: the page's own same-origin window, passed raw;
+						// windowID: the wrapper's ID for Zotero.WindowController.
 						resolve(ScopeVariables.toScope({
 							page: messenger,
 							window: browser.contentWindow,
+							windowID: getWindowID(win),
 							close: () => !win.closed && win.close(),
 							focus: () => !win.closed && win.focus(),
+							moveTo: (x, y) => win.moveTo(x, y),
+							getState: () => getWindowState(win),
 						}, pluginID));
 					}
 					catch (e) {
