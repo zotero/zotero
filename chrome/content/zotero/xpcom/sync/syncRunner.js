@@ -307,7 +307,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 				_stopCheck();
 
-				await _doEmbeddingsCheck(client, [...successfulLibraries]);
+				await _doEmbeddingsSync(client, [...successfulLibraries]);
 				break;
 			}
 		}
@@ -838,18 +838,28 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 
 
 	/**
-	 * Have each library's embeddings fetched again if the server has embedded
-	 * it anew.
+	 * Sync each library's embeddings: what the server has embedded anew is
+	 * fetched, and what it has declined is left to the client
 	 */
-	var _doEmbeddingsCheck = async function (client, libraries) {
-		for (let libraryID of libraries) {
-			_stopCheck();
-			try {
-				await Zotero.Embeddings.Sync.checkLibrary(client, libraryID);
+	var _doEmbeddingsSync = async function (client, libraries) {
+		await Zotero.Embeddings.Sync.beginSync();
+		try {
+			for (let libraryID of libraries) {
+				_stopCheck();
+				try {
+					await Zotero.Embeddings.Sync.syncLibrary(client, libraryID, { stopCheck: _stopCheck });
+				}
+				catch (e) {
+					if (e instanceof Zotero.Sync.UserCancelledException) {
+						throw e;
+					}
+					Zotero.debug("Embeddings sync failed for library " + libraryID);
+					Zotero.logError(e);
+				}
 			}
-			catch (e) {
-				Zotero.logError(e);
-			}
+		}
+		finally {
+			await Zotero.Embeddings.Sync.endSync();
 		}
 	};
 	

@@ -216,6 +216,34 @@ Zotero.Streamer_Module.prototype = {
 	},
 	
 	
+	/**
+	 * A library's embeddings changed on the server: have the library synced
+	 * after the delay the server asks for, so that a batch landing for many
+	 * users doesn't bring them all in at once. The sync's embeddings step
+	 * fetches what's new, so nothing else is checked here.
+	 *
+	 * @param {Object} data - { library: '/users/N' | '/groups/N', delay }
+	 *     with delay in milliseconds
+	 */
+	_onEmbeddingsNotification: function (data) {
+		if (!Zotero.Embeddings.isEnabled() || !Zotero.Embeddings.Sync.isAvailable()) {
+			return;
+		}
+		let library = data.library && Zotero.URI.getPathLibrary(data.library);
+		if (!library) {
+			Zotero.debug(`Unknown library '${data.library}' in embeddings notification -- ignoring`);
+			return;
+		}
+		if (!Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
+			Zotero.debug("Library not selected for syncing -- skipping");
+			return;
+		}
+		let seconds = Math.max(1, Math.ceil((parseInt(data.delay) || 0) / 1000));
+		Zotero.debug(`Embeddings changed for ${library.name} -- syncing in ${seconds} s`);
+		Zotero.Sync.Runner.setSyncTimeout(seconds, false, { libraries: [library.libraryID] });
+	},
+
+
 	_isEnabled: function () {
 		return Zotero.Prefs.get('streaming.enabled')
 			// Only connect if either auto-sync or automatic style/translator updates are enabled
@@ -294,6 +322,10 @@ Zotero.Streamer_Module.prototype = {
 					// Update translators and styles
 					if (data.topic == 'translators' || data.topic == 'styles') {
 						await Zotero.Schema.onUpdateNotification(data.delay);
+					}
+					// Embeddings changed on the server for a library
+					else if (data.topic == 'embeddings') {
+						this._onEmbeddingsNotification(data);
 					}
 					// Auto-sync
 					else {

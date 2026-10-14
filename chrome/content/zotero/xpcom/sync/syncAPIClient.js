@@ -537,15 +537,17 @@ Zotero.Sync.APIClient.prototype = {
 	
 	
 	/**
-	 * Which of a library's embeddings of a model have changed since a
-	 * version: the library's current version and, per item key, the version
-	 * its rows last changed at, with the models the server embeds the
-	 * library with when it says.
+	 * What has changed in a library's embeddings of a model since a version,
+	 * in the shape of an upload's results: per item key, the version its
+	 * embeddings last changed at, or why the server declined to embed it.
+	 * The library's embeddings version comes in Last-Modified-Version, as
+	 * full-text versions do.
 	 *
 	 * @param {String} model - Zotero.Embeddings.getModelVersion()
 	 * @param {Integer} [since]
-	 * @return {Promise<Object|false>} - { version, items: { key: version },
-	 *     models }, or false when nothing has changed since `since`
+	 * @return {Promise<Object|false>} - { version,
+	 *     successful: { key: version }, declined: { key: { code, message } } },
+	 *     or false when nothing has changed since `since`
 	 */
 	getEmbeddingVersions: async function (libraryType, libraryTypeID, model, since) {
 		var params = {
@@ -560,7 +562,7 @@ Zotero.Sync.APIClient.prototype = {
 		}
 		var uri = this.buildRequestURI(params);
 		var options = {
-			successCodes: [200, 304, 404]
+			successCodes: [200, 304]
 		};
 		if (since) {
 			options.headers = {
@@ -571,55 +573,45 @@ Zotero.Sync.APIClient.prototype = {
 		if (xmlhttp.status == 304) {
 			return false;
 		}
-		if (xmlhttp.status == 404) {
-			return { version: 0, items: {}, models: [] };
-		}
 		var json = this._parseJSON(xmlhttp.responseText);
 		return {
-			version: json.version || 0,
-			items: json.items || {},
-			models: json.models || null
+			version: parseInt(this._getLastModifiedVersion(xmlhttp)),
+			successful: json.successful || {},
+			declined: json.declined || {}
 		};
 	},
 
 
 	/**
-	 * The server's answer for each of the given items, in a model: its
-	 * embeddings, each vector base64 of its stored int8 form, and the
-	 * version they're from; a refusal; or word that the server is still
-	 * working on it. The model is echoed.
+	 * An item's embeddings in a model, as full text is fetched: one request
+	 * per item, the version in Last-Modified-Version, and 404 when the
+	 * server has none for it.
 	 *
 	 * @param {String} model - Zotero.Embeddings.getModelVersion()
-	 * @param {String[]} itemKeys
-	 * @return {Promise<Object>} - { model, dtype, items: [
-	 *     { key, status: 'success', contentHash, chunks, version,
-	 *         rows: [{ chunkIndex, embedding, anchor }] }
-	 *     | { key, status: 'declined' }
-	 *     | { key, status: 'pending' } ] },
-	 *     each embedding base64 in the encoding `dtype` names; model and dtype
-	 *     null and items empty when the server has no embeddings for the
-	 *     library
+	 * @param {String} itemKey
+	 * @return {Promise<Object|false>} - { version, dtype, contentHash, chunks,
+	 *     rows: [{ chunkIndex, embedding, anchor }] }, each embedding base64
+	 *     of the model's raw output in the encoding `dtype` names; or false
 	 */
-	getEmbeddings: async function (libraryType, libraryTypeID, model, itemKeys = []) {
+	getEmbedding: async function (libraryType, libraryTypeID, model, itemKey) {
 		var params = {
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			target: "embeddings",
+			target: `items/${itemKey}/embeddings`,
 			model
 		};
-		if (itemKeys.length) {
-			params.itemKey = itemKeys.join(',');
-		}
 		var uri = this.buildRequestURI(params);
 		var xmlhttp = await this.makeRequest("GET", uri, { successCodes: [200, 404] });
 		if (xmlhttp.status == 404) {
-			return { model: null, dtype: null, items: [] };
+			return false;
 		}
 		var json = this._parseJSON(xmlhttp.responseText);
 		return {
-			model: json.model || null,
+			version: parseInt(this._getLastModifiedVersion(xmlhttp)),
 			dtype: json.dtype || null,
-			items: json.items || []
+			contentHash: json.contentHash,
+			chunks: json.chunks,
+			rows: json.rows || []
 		};
 	},
 

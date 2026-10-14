@@ -132,10 +132,11 @@ Zotero_Preferences.Advanced = {
 
 		// Phase / status message
 		let phaseLabel = document.getElementById('semantic-search-phase');
-		// Attachments rather than chunks: the chunk counts cover only the
-		// documents cut here, so they can't say what's left
+		// Work a run can do: attachments rather than chunks, since the chunk
+		// counts cover only the documents cut here, and not the ones that
+		// come from the server, which a sync brings
 		let hasRemaining = status.items.done < status.items.total
-			|| status.attachments.done < status.attachments.total;
+			|| status.attachments.done + status.attachments.awaiting < status.attachments.total;
 		if (status.error) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
 		}
@@ -168,15 +169,7 @@ Zotero_Preferences.Advanced = {
 				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-preparing');
 			}
 		}
-		// The server's attachments are asked for, with how far through the
-		// library the step has got
-		else if (status.phase === 'fetching-documents') {
-			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-fetching-documents', {
-				done: status.sweep.done,
-				total: status.sweep.total
-			});
-		}
-		// Then the rest are embedded here -- "here" being worth saying only
+		// The rest are embedded here -- "here" being worth saying only
 		// when there's a server that might have done it, and whose refusals
 		// are the reason for some of it
 		else if (status.phase === 'indexing-documents') {
@@ -193,15 +186,17 @@ Zotero_Preferences.Advanced = {
 		else if (status.phase === 'indexing') {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');
 		}
-		// The server couldn't be reached: its attachments wait for the
-		// retry, which Resume brings forward
-		else if (status.serverUnreachable && !status.indexing && !status.paused) {
-			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-server-unreachable', {
-				minutes: Math.max(1, Math.round((status.serverUnreachable.retryAt - Date.now()) / 60000))
+		// A sync is bringing the server's rows, which move the attachment
+		// count as they land
+		else if (status.syncing && !status.indexing) {
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading-documents', {
+				done: status.attachments.done,
+				total: status.attachments.total
 			});
 		}
-		// Between runs, with attachments still to come from the server
-		else if (status.attachments.awaiting && !status.paused) {
+		// Between runs, with attachments still to come from the server on
+		// the next sync
+		else if (status.attachments.awaiting && !status.paused && !hasRemaining) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-awaiting');
 		}
 		else {
@@ -211,11 +206,11 @@ Zotero_Preferences.Advanced = {
 					: 'preferences-advanced-semantic-search-idle');
 		}
 
-		// Offer a manual restart when enabled but not currently indexing and
-		// indexing is stopped, there's outstanding work, the server couldn't
-		// be reached, or the last run errored out
+		// Offer a manual restart when enabled but not currently indexing or
+		// syncing and indexing is stopped, there's outstanding work, or the
+		// last run errored out
 		document.getElementById('semantic-search-resume').hidden
-			= status.indexing || !(status.error || status.paused || hasRemaining || status.serverUnreachable);
+			= status.indexing || status.syncing || !(status.error || status.paused || hasRemaining);
 
 		// Offer to stop indexing while it's running; a requested stop takes
 		// effect once the current batch finishes, so disable the button in

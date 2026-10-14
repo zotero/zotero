@@ -105,7 +105,7 @@ preferences-advanced-semantic-search-downloading-progress = Downloading… { $pe
 preferences-advanced-semantic-search-preparing = Preparing documents…
 preferences-advanced-semantic-search-preparing-progress = Preparing documents… { $done } / { $total }
 preferences-advanced-semantic-search-indexing-documents = Indexing documents…
-preferences-advanced-semantic-search-fetching-documents = Syncing semantic data… { $done } / { $total }
+preferences-advanced-semantic-search-downloading-documents = Downloading semantic data… { $done } / { $total }
 preferences-advanced-semantic-search-indexing-documents-locally =
     { $declined ->
         [0] Generating semantic data locally for { $count ->
@@ -120,12 +120,7 @@ preferences-advanced-semantic-search-indexing-documents-locally =
                *[other] { $declined } not available
             } from the server)
     }
-preferences-advanced-semantic-search-awaiting = Waiting for embeddings from the server…
-preferences-advanced-semantic-search-server-unreachable =
-    { $minutes ->
-        [one] The server couldn’t be reached. Trying again in { $minutes } minute…
-       *[other] The server couldn’t be reached. Trying again in { $minutes } minutes…
-    }
+preferences-advanced-semantic-search-awaiting = Semantic data will be downloaded on next sync
 preferences-advanced-semantic-search-indexing = Indexing…
 preferences-advanced-semantic-search-stopping = Stopping…
 preferences-advanced-semantic-search-idle = Up to date
@@ -209,6 +204,9 @@ preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
 preferences-sync-settings-heading = Sync
 preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
+preferences-sync-semantic-data =
+    .label = Sync semantic search data
+    .tooltiptext = Download the semantic search data that { -app-name } generates for your files on its servers. Without it, { -app-name } generates it on this computer.
 preferences-sync-reset-heading = Sync Reset
 preferences-sync-fileSyncing-groups =
     .label = Sync attachment files in group libraries using { -app-name } Storage

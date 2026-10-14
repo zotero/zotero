@@ -301,7 +301,7 @@ Zotero.Embeddings = new function () {
 		// from -- the content's hash and, for an attachment with a file here,
 		// the file's key and the extractor that cut it -- the stamp it was
 		// last seen at, and its standing with the server: the version its
-		// rows are from, a refusal, a mark to fetch them again
+		// rows are from, or a refusal
 		await Zotero.DB.queryAsync(
 			"CREATE TABLE embeddings.itemIndexState (\n"
 			+ "    itemID INTEGER PRIMARY KEY,\n"
@@ -310,8 +310,7 @@ Zotero.Embeddings = new function () {
 			+ "    extractor TEXT,\n"
 			+ "    clientDateModified TEXT,\n"
 			+ "    syncVersion INTEGER,\n"
-			+ "    syncDeclined INTEGER,\n"
-			+ "    syncShouldRefresh INTEGER NOT NULL DEFAULT 0\n"
+			+ "    syncDeclined INTEGER\n"
 			+ ")"
 		);
 		await Zotero.DB.queryAsync(
@@ -1227,10 +1226,6 @@ Zotero.Embeddings.Indexing = new function () {
 	// to the items, and the run goes again before it's over
 	let _kicked = false;
 	let _kickTimer = null;
-	// While the server can't be reached: when the run goes back to it and
-	// what went wrong, and the timer that takes it there
-	let _serverUnreachable = null;
-	let _serverRetryTimer = null;
 	// Attachments whose pack a run of this session has made sure of, so
 	// that later runs don't check for it again
 	let _packed = new Set();
@@ -1240,11 +1235,8 @@ Zotero.Embeddings.Indexing = new function () {
 	// Wait longer than the usual debounce before retrying a run that was held
 	// off for memory
 	const LOW_MEMORY_RETRY_DELAY = 5 * 60 * 1000;
-	// How long a run waits before asking the server again after a request
-	// failed. No attachment is cut or embedded in the meantime.
-	this.SERVER_RETRY_DELAY = 5 * 60 * 1000;
-	// Attachments a step takes at a time: the sync request size, and the
-	// most ever held in memory at once
+	// Attachments a step takes at a time: the most ever held in memory at
+	// once
 	this.ATTACHMENT_PAGE_SIZE = 50;
 	// Debounce before starting the consumer, so a burst of changes (e.g. an
 	// import) is picked up in one pass
@@ -1286,15 +1278,34 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 		_initialized = true;
 
-		// Turning semantic search on indexes what's missing; turning it off
-		// stops the indexer and leaves everything stored where it is, so
-		// turning it back on resumes rather than rebuilds.
+		// Turning semantic search on indexes what's missing, and has the
+		// server's embeddings fetched by a sync; turning it off stops the
+		// indexer and leaves everything stored where it is, so turning it
+		// back on resumes rather than rebuilds.
 		Zotero.Prefs.registerObserver('search.bestMatch.enableSemantic', () => {
 			if (Zotero.Embeddings.isEnabled()) {
 				Zotero.Embeddings.Indexing.startIndexing();
+				if (Zotero.Embeddings.Sync.isAvailable()) {
+					Zotero.Sync.Runner.setSyncTimeout(1, false);
+				}
 			}
 			else {
 				Zotero.Embeddings.Indexing.stopIndexing();
+			}
+		});
+
+		// Turning syncing of the server's embeddings on has them fetched by
+		// a sync; turning it off leaves the attachments to the indexer, so
+		// a run goes over them
+		Zotero.Prefs.registerObserver('embeddings.sync.enabled', () => {
+			if (!Zotero.Embeddings.isEnabled()) {
+				return;
+			}
+			if (Zotero.Embeddings.Sync.isAvailable()) {
+				Zotero.Sync.Runner.setSyncTimeout(1, false);
+			}
+			else {
+				Zotero.Embeddings.Indexing.startIndexing();
 			}
 		});
 
@@ -1367,8 +1378,6 @@ Zotero.Embeddings.Indexing = new function () {
 			return Promise.resolve();
 		}
 		Zotero.Prefs.set('embeddings.indexingPaused', false);
-		// Asking the server again now, rather than when the retry was due
-		_clearServerRetry();
 		return (async () => {
 			// If a consumer is still winding down from a stop, let it finish
 			// before starting a fresh run
@@ -1399,7 +1408,6 @@ Zotero.Embeddings.Indexing = new function () {
 			clearTimeout(_kickTimer);
 			_kickTimer = null;
 		}
-		_clearServerRetry();
 		Zotero.Prefs.set('embeddings.indexingPaused', true);
 		Zotero.Embeddings.Indexing.Progress.emit();
 	};
@@ -1542,32 +1550,6 @@ Zotero.Embeddings.Indexing = new function () {
 	}
 
 
-	// Come back to the server once it may be reachable again, by starting a
-	// run as pressing Resume does
-	function _scheduleServerRetry() {
-		if (_serverRetryTimer || !_serverUnreachable) {
-			return;
-		}
-		let delay = Math.max(0, _serverUnreachable.retryAt - Date.now());
-		_serverRetryTimer = setTimeout(() => {
-			_serverRetryTimer = null;
-			if (Zotero.Embeddings.Indexing.isPaused()) {
-				return;
-			}
-			Zotero.debug('Embeddings: asking the server again');
-			Zotero.Embeddings.Indexing.startIndexing().catch(e => Zotero.logError(e));
-		}, delay);
-		Zotero.Embeddings.Indexing.Progress.emit();
-	}
-
-	function _clearServerRetry() {
-		_serverUnreachable = null;
-		if (_serverRetryTimer) {
-			clearTimeout(_serverRetryTimer);
-			_serverRetryTimer = null;
-		}
-	}
-
 	// A count with its noun, for the log
 	function _count(n, noun) {
 		return `${n.toLocaleString()} ${Zotero.Utilities.pluralize(n, noun)}`;
@@ -1632,8 +1614,8 @@ Zotero.Embeddings.Indexing = new function () {
 			await Zotero.Embeddings.Endpoint.recheck();
 
 			Zotero.Embeddings.Indexing.Progress.clearDownload();
-			Zotero.debug('Embeddings: run starting -- server '
-				+ (Zotero.Embeddings.Sync.isAvailable() ? 'available' : 'not available'));
+			Zotero.debug('Embeddings: run starting -- '
+				+ (Zotero.Embeddings.Sync.isAvailable() ? 'with' : 'without') + ' the server');
 			// One kind of work at a time, in a fixed order: the items, then
 			// the attachments through their pipeline. The items go first,
 			// and a kick brings the run back to them, so a just-edited item
@@ -1652,13 +1634,10 @@ Zotero.Embeddings.Indexing = new function () {
 				// gives way to a kick starts over once the items are seen to.
 				let finished = await _reconcileAttachments()
 					&& await _extractAttachments()
-					&& await _fetchAttachments()
 					&& await _cutAttachments()
 					&& await _embedAttachments();
-				// The server couldn't be reached: everything waits for the
-				// retry, which starts the run over. Otherwise over, unless
-				// a kick landed meanwhile.
-				if (_serverUnreachable || (finished && !_kicked)) {
+				// Over, unless a kick landed meanwhile
+				if (finished && !_kicked) {
 					break;
 				}
 			}
@@ -1676,11 +1655,11 @@ Zotero.Embeddings.Indexing = new function () {
 			Zotero.debug(`Embeddings: run ${_stopping ? 'stopped' : 'finished'} after `
 				+ _duration(Date.now() - started));
 			// Go again for a kick that landed as we were finishing up,
-			// unless the attachments are waiting on a sync or on the
-			// server, each of which kicks the run itself
+			// unless the attachments are waiting on a sync, which kicks the
+			// run itself
 			let kicked = _kicked;
 			_kicked = false;
-			if (!_stopping && kicked && !Zotero.Sync.Runner.syncInProgress && !_serverUnreachable) {
+			if (!_stopping && kicked && !Zotero.Sync.Runner.syncInProgress) {
 				_scheduleKick();
 			}
 			// Inference memory is held by the process running the model, and
@@ -1689,9 +1668,6 @@ Zotero.Embeddings.Indexing = new function () {
 			else {
 				try {
 					await Zotero.Embeddings.shutdownEngine();
-					if (_serverUnreachable && !_stopping) {
-						_scheduleServerRetry();
-					}
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -1913,8 +1889,8 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Rows that arrived for a file this client didn't have: now that it
 	// does, they're recorded as the file's if they were made from the
-	// content it cuts to, and dropped otherwise, so the attachment is asked
-	// about anew
+	// content it cuts to. Otherwise they're dropped and the attachment is
+	// left to this client, as rows refused for their content are.
 	async function _adoptRows({ item, sourceKey, record }) {
 		let { Store, Sources } = Zotero.Embeddings.Indexing;
 		let result = await Sources.getAttachmentChunks(item);
@@ -1931,6 +1907,7 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 		else {
 			await Store.deleteItems([item.id]);
+			await Store.setSyncDeclined([item.id]);
 		}
 	}
 
@@ -2052,60 +2029,6 @@ Zotero.Embeddings.Indexing = new function () {
 		return await drain() && finished;
 	}
 
-	// Fetch: ask the server for the rows of every attachment that's its, a
-	// library at a time within each page. What it declines is cut and
-	// embedded here; what it puts off waits. When it can't be reached, every
-	// attachment waits for the retry after SERVER_RETRY_DELAY.
-	//
-	// @return {Promise<Boolean>} - Whether it got to the end
-	async function _fetchAttachments() {
-		if (_serverUnreachable) {
-			return false;
-		}
-		let { Progress } = Zotero.Embeddings.Indexing;
-		let started = false;
-		return _forEachPage(async (page) => {
-			let server = page.filter(payload => _isServers(payload) && _needsAnswer(payload));
-			if (!server.length) {
-				return true;
-			}
-			Zotero.debug(`Embeddings: asking the server for ${_count(server.length, 'attachment')}`);
-			if (!started) {
-				started = true;
-				Progress.resetAwaiting();
-				Progress.setPhase('fetching-documents');
-			}
-			let byLibrary = new Map();
-			for (let payload of server) {
-				let libraryID = payload.item.libraryID;
-				if (!byLibrary.has(libraryID)) {
-					byLibrary.set(libraryID, []);
-				}
-				byLibrary.get(libraryID).push(payload);
-			}
-			for (let [libraryID, payloads] of byLibrary) {
-				if (_shouldYield()) {
-					return false;
-				}
-				let finished;
-				try {
-					finished = await Zotero.Embeddings.Sync.fetch(libraryID, payloads, _shouldStop);
-				}
-				catch (e) {
-					Zotero.logError(e);
-					let delay = Zotero.Embeddings.Indexing.SERVER_RETRY_DELAY;
-					_serverUnreachable = { retryAt: Date.now() + delay, error: e };
-					Zotero.debug(`Embeddings: the server couldn't be reached -- asking again in ${_duration(delay)}`);
-					return false;
-				}
-				if (!finished) {
-					return false;
-				}
-			}
-			return true;
-		});
-	}
-
 	// An attachment's chunks still to embed, as { text, tokens } units with
 	// what each one's row needs. The text embedded is the chunk's embedText,
 	// its own text with the outline path woven in, and each chunk carries
@@ -2215,14 +2138,7 @@ Zotero.Embeddings.Indexing = new function () {
 	// Whether an attachment is the server's to answer for, rather than
 	// this client's to cut and embed
 	function _isServers({ item, record }) {
-		return Zotero.Embeddings.Sync.shouldAskServer(item, record);
-	}
-
-	// Whether the server may have rows for an attachment: chunks still to
-	// embed, marked to be fetched again, or nothing stored and never cut
-	// here
-	function _needsAnswer({ record, rows, pending }) {
-		return pending > 0 || !!record?.syncShouldRefresh || (!rows && !record?.sourceKey);
+		return Zotero.Embeddings.Sync.isServersAttachment(item, record);
 	}
 
 	// Whether an attachment wants cutting: never cut from the file here,
@@ -2308,14 +2224,6 @@ Zotero.Embeddings.Indexing = new function () {
 			// Whether the server is in the picture at all, so the pane can
 			// say when work is done here instead
 			server: Zotero.Embeddings.Sync.isAvailable() && !Zotero.Embeddings.Endpoint.isActive(),
-			// While the server can't be reached: when the run goes back to
-			// it, and what went wrong
-			serverUnreachable: _serverUnreachable
-				? {
-					retryAt: _serverUnreachable.retryAt,
-					error: _serverUnreachable.error.message || String(_serverUnreachable.error)
-				}
-				: null,
 			...Zotero.Embeddings.Indexing.Progress.getStatus(),
 			diagnostics: {
 				...Zotero.Embeddings.Diagnostics.getStatus(),
@@ -2522,15 +2430,16 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	//     count, how many still want a vector, and the stamp seen
 	this.getOutstandingAttachments = async function (afterID, limit) {
 		// An eligible attachment is outstanding with nothing recorded, no
-		// file key, rows to fetch again, a chunk still to embed, or a save
-		// since the index last looked at it (or in the last few seconds)
-		const OUTSTANDING = "(S.itemID IS NULL OR S.sourceKey IS NULL OR S.syncShouldRefresh=1 "
+		// file key, a chunk still to embed, or a save since the index last
+		// looked at it (or in the last few seconds)
+		const OUTSTANDING = "(S.itemID IS NULL OR S.sourceKey IS NULL "
 			+ "OR EXISTS (SELECT 1 FROM embeddings.itemEmbeddings E "
 				+ "WHERE E.itemID=I.itemID AND E.embedding IS NULL) "
 			+ "OR S.clientDateModified IS NOT I.clientDateModified OR I.clientDateModified>=?)";
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT I.itemID, I.clientDateModified, S.itemID AS stateID, S.sourceKey, "
-				+ "S.contentHash, S.extractor, S.syncVersion, S.syncDeclined, S.syncShouldRefresh, "
+				+ "S.contentHash, S.extractor, S.syncVersion, S.syncDeclined, "
+				+ "S.clientDateModified AS stamp, "
 				+ "(SELECT COUNT(*) FROM embeddings.itemEmbeddings E "
 					+ "WHERE E.itemID=I.itemID) AS rowCount, "
 				+ "(SELECT COUNT(*) FROM embeddings.itemEmbeddings E "
@@ -2560,7 +2469,7 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 					extractor: row.extractor,
 					syncVersion: row.syncVersion,
 					syncDeclined: row.syncDeclined,
-					syncShouldRefresh: row.syncShouldRefresh
+					clientDateModified: row.stamp
 				},
 			rows: row.rowCount,
 			pending: row.pendingCount
@@ -2683,6 +2592,27 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			for (let { item, record } of page) {
 				if (!record?.sourceKey && !await this.getAttachmentSourceKey(item)) {
 					missing++;
+				}
+			}
+			afterID = page.at(-1).item.id;
+		}
+	};
+
+	// How many attachments are the server's to embed and have no rows yet.
+	// Those are outstanding by definition, so this pages through the
+	// outstanding attachments, as countWithoutFiles() does.
+	this.countAwaitingServer = async function () {
+		let awaiting = 0;
+		let afterID = 0;
+		while (true) {
+			let page = await this.getOutstandingAttachments(
+				afterID, Zotero.Embeddings.Indexing.ATTACHMENT_PAGE_SIZE);
+			if (!page.length) {
+				return awaiting;
+			}
+			for (let { item, record, rows } of page) {
+				if (!rows && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
+					awaiting++;
 				}
 			}
 			afterID = page.at(-1).item.id;
@@ -2828,14 +2758,13 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	const COUNT_REFRESH_INTERVAL = 5000;
 
 	// The step a run is on: getting the model, the items, then the steps
-	// the attachments go through -- extracted, asked of the server, cut,
-	// embedded here. Extracting and cutting are both 'preparing'.
-	// 'idle' | 'downloading' | 'indexing' | 'fetching-documents' | 'preparing'
-	// | 'indexing-documents'
+	// the attachments go through -- extracted, cut, embedded here.
+	// Extracting and cutting are both 'preparing'.
+	// 'idle' | 'downloading' | 'indexing' | 'preparing' | 'indexing-documents'
 	let _phase = 'idle';
 	// The steps an attachment goes through. Documents in them aren't in the
 	// chunk counts until they've been cut.
-	const ATTACHMENT_PHASES = ['fetching-documents', 'preparing', 'indexing-documents'];
+	const ATTACHMENT_PHASES = ['preparing', 'indexing-documents'];
 	// What the embed step has before it: the attachments and chunks it
 	// embeds here, and how many of those attachments the server declined
 	let _embedWork = null;
@@ -2852,10 +2781,11 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	// reaches its total when the work does: the chunk totals only cover
 	// documents cut here, and grow as more are.
 	let _attachments = { done: 0, total: 0 };
-	// Attachments the server was asked for and didn't answer for in the
-	// last fetch, still working on them or not knowing them yet, which
-	// arrive at its pace rather than the engine's
+	// Attachments that are the server's to embed and have no rows yet,
+	// which arrive by sync at the server's pace rather than the engine's
 	let _awaiting = 0;
+	// Whether a sync's embeddings step is under way
+	let _syncing = false;
 	// How far a step has got through the library's eligible attachments,
 	// files or not. Preparing leaves nothing behind that counting the index
 	// could see -- an extraction only fills a cache -- so the step reports
@@ -2883,6 +2813,9 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 			// caller can tell a complete index from one whose documents
 			// aren't counted yet
 			processing: ATTACHMENT_PHASES.includes(_phase),
+			// Whether a sync is bringing the server's rows, which move the
+			// attachment count as they land
+			syncing: _syncing,
 			items: _items,
 			chunks: _chunks,
 			attachments: { ..._attachments, awaiting: _awaiting },
@@ -2963,19 +2896,13 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 		_attachments = { done: finished, total: _attachments.total };
 	}
 
-	// A fetch starting, and then each batch of it: how many of the
-	// attachments asked for the server didn't answer for
-	this.resetAwaiting = function () {
-		_awaiting = 0;
-	};
-
-	this.addAwaiting = function (count) {
-		_awaiting += count;
+	// A sync's embeddings step starting or ending
+	this.setSyncing = function (syncing) {
+		_syncing = syncing;
 	};
 
 	// How far through the library's attachments a step has got, against
 	// how many there are: what the pane shows while documents are prepared
-	// or asked of the server
 	this.setSweep = function (position) {
 		_sweep = { done: position, total: _eligibleAttachments };
 	};
@@ -3069,6 +2996,7 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 		_eligibleAttachments = await Sources.countEligibleAttachments();
 		let total = _eligibleAttachments - await Sources.countWithoutFiles();
 		_attachments = { done: _attachments.done, total };
+		_awaiting = await Sources.countAwaitingServer();
 		await _readCounts();
 		await Zotero.Embeddings.Diagnostics.refreshChunkShape();
 		_lastCountRefresh = Date.now();
@@ -3167,14 +3095,13 @@ Zotero.Embeddings.Indexing.Store = new function () {
 	// Index state
 
 	// The state rows of the given items, as itemID -> { itemID, sourceKey,
-	// contentHash, extractor, clientDateModified, syncVersion, syncDeclined,
-	// syncShouldRefresh }
+	// contentHash, extractor, clientDateModified, syncVersion, syncDeclined }
 	this.getIndexStates = async function (itemIDs) {
 		let records = new Map();
 		for (let batch of batches(itemIDs)) {
 			let rows = await Zotero.DB.queryAsync(
 				"SELECT itemID, sourceKey, contentHash, extractor, clientDateModified, "
-					+ "syncVersion, syncDeclined, syncShouldRefresh "
+					+ "syncVersion, syncDeclined "
 					+ "FROM embeddings.itemIndexState "
 					+ "WHERE itemID IN (" + placeholders(batch) + ")",
 				batch
@@ -3250,20 +3177,6 @@ Zotero.Embeddings.Indexing.Store = new function () {
 
 	// Sync state
 
-	// Mark the given attachments' rows to be fetched again, the server
-	// having embedded them anew -- which also makes a new ask of any it
-	// declined before
-	this.setSyncRefresh = async function (itemIDs) {
-		for (let batch of batches(itemIDs)) {
-			await Zotero.DB.queryAsync(
-				"INSERT INTO embeddings.itemIndexState (itemID, syncShouldRefresh) VALUES "
-					+ batch.map(() => '(?, 1)').join(',')
-					+ " ON CONFLICT (itemID) DO UPDATE SET syncShouldRefresh = 1, syncDeclined = NULL",
-				batch
-			);
-		}
-	};
-
 	// Meta
 
 	// The model every stored vector is from, or null with nothing recorded
@@ -3299,22 +3212,20 @@ Zotero.Embeddings.Indexing.Store = new function () {
 	// attachment's standing with the server
 	this.clearSyncState = async function (itemID) {
 		await Zotero.DB.queryAsync(
-			"UPDATE embeddings.itemIndexState SET syncDeclined = NULL, syncShouldRefresh = 0 "
-				+ "WHERE itemID=?",
+			"UPDATE embeddings.itemIndexState SET syncDeclined = NULL WHERE itemID=?",
 			itemID
 		);
 	};
 
-	// The server has nothing for the given attachments, which answers any
-	// refresh standing on them
+	// Leave the given attachments to this client: the server declined them,
+	// or its rows for them were refused
 	this.setSyncDeclined = async function (itemIDs) {
 		let now = Date.now();
 		for (let batch of batches(itemIDs)) {
 			await Zotero.DB.queryAsync(
 				"INSERT INTO embeddings.itemIndexState (itemID, syncDeclined) VALUES "
 					+ batch.map(() => '(?, ?)').join(',')
-					+ " ON CONFLICT (itemID) DO UPDATE SET syncDeclined = excluded.syncDeclined, "
-					+ "syncShouldRefresh = 0",
+					+ " ON CONFLICT (itemID) DO UPDATE SET syncDeclined = excluded.syncDeclined",
 				batch.flatMap(itemID => [itemID, now])
 			);
 		}
@@ -4383,33 +4294,43 @@ Zotero.Embeddings.Endpoint = new function () {
  */
 Zotero.Embeddings.Sync = new function () {
 	// Whether the server can be embedding for this client at all: there's
-	// an account to sync with. The pref is an override for testing.
+	// an account to sync with, and the sync pane's option for it is on
 	this.isAvailable = function () {
 		return Zotero.Prefs.get('embeddings.sync.enabled') && Zotero.Sync.Runner.enabled;
 	};
 
-	// Whether an attachment's rows are to be asked of the server: a stored
-	// file the server has (in sync or still to download) in a library
-	// syncing with Zotero Storage, that the server hasn't declined. Nothing is
-	// the server's while an endpoint is active.
+	/**
+	 * Whether a library's attachments are the server's to embed: it syncs,
+	 * and its files go to Zotero Storage. Nothing is the server's while an
+	 * endpoint is active.
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Boolean}
+	 */
+	this.isServersLibrary = function (libraryID) {
+		if (!this.isAvailable() || Zotero.Embeddings.Endpoint.isActive()) {
+			return false;
+		}
+		let library = Zotero.Libraries.get(libraryID);
+		if (!library || !Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
+			return false;
+		}
+		let Storage = Zotero.Sync.Storage.Local;
+		return Storage.getEnabledForLibrary(libraryID) && Storage.getModeForLibrary(libraryID) == 'zfs';
+	};
+
+	// Whether an attachment is the server's to embed rather than this
+	// client's: a stored file the server has (in sync or still to download)
+	// in a library that's the server's, that the server hasn't declined
 	//
 	// @param {Zotero.Item} item
 	// @param {Object} [record] - The item's entry from Store.getIndexStates()
 	// @return {Boolean}
-	this.shouldAskServer = function (item, record = null) {
-		if (!this.isAvailable() || Zotero.Embeddings.Endpoint.isActive()
-				|| !item.isStoredFileAttachment()) {
-			return false;
-		}
-		let library = Zotero.Libraries.get(item.libraryID);
-		if (!Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
+	this.isServersAttachment = function (item, record = null) {
+		if (!item.isStoredFileAttachment() || !this.isServersLibrary(item.libraryID)) {
 			return false;
 		}
 		let Storage = Zotero.Sync.Storage.Local;
-		if (!Storage.getEnabledForLibrary(item.libraryID)
-				|| Storage.getModeForLibrary(item.libraryID) != 'zfs') {
-			return false;
-		}
 		let onServer = [
 			Storage.SYNC_STATE_IN_SYNC,
 			Storage.SYNC_STATE_TO_DOWNLOAD,
@@ -4421,8 +4342,8 @@ Zotero.Embeddings.Sync = new function () {
 		return !record?.syncDeclined;
 	};
 
-	// Attachments asked for per request
-	const MAX_BATCH_ITEMS = 50;
+	// Attachments fetched at once, as full-text sync fetches its items
+	const CONCURRENT_REQUESTS = 8;
 	// How the server's vectors are read, by the dtype it reports with them.
 	// Each is the model's raw output, little-endian, which this client trims,
 	// centers and quantizes itself.
@@ -4432,76 +4353,139 @@ Zotero.Embeddings.Sync = new function () {
 	};
 
 	/**
-	 * Ask the server for the rows of the given attachments. Rows it has are
-	 * taken in through Indexing.addChunks(); a refusal, another model or rows
-	 * from other content leave the attachment to this client; one put off is
-	 * asked about next run. A failed request is thrown.
-	 *
-	 * @param {Integer} libraryID
-	 * @param {Object[]} payloads - Attachments in that library to ask for,
-	 *     as Sources.getOutstandingAttachments() gives them
-	 * @param {Function} shouldStop
-	 * @return {Promise<Boolean>} - Whether it got to the end
+	 * A sync's embeddings step starting: the counts the pane shows are
+	 * brought up to date, and the pane told that rows are about to land
 	 */
-	this.fetch = async function (libraryID, payloads, shouldStop) {
-		let Store = Zotero.Embeddings.Indexing.Store;
-		let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
-		if (!apiKey) {
-			return true;
+	this.beginSync = async function () {
+		let Progress = Zotero.Embeddings.Indexing.Progress;
+		Progress.setSyncing(true);
+		await Progress.refresh();
+	};
+
+	/**
+	 * A sync's embeddings step over, however it ended
+	 */
+	this.endSync = async function () {
+		let Progress = Zotero.Embeddings.Indexing.Progress;
+		Progress.setSyncing(false);
+		await Progress.refresh();
+	};
+
+	/**
+	 * Sync a library's embeddings, as a step of a sync and the way full text
+	 * is synced: see what the server has embedded anew since the version
+	 * last recorded and what it has declined, then fetch the rows of each
+	 * attachment it lists at a version other than the one held, one request
+	 * each, a few at a time. Rows that come are taken in through
+	 * Indexing.addChunks(), which is the judge of them: a decline, rows this
+	 * client can't read and rows made from other content leave the
+	 * attachment to this client; one the server no longer has waits for a
+	 * later look. The version is recorded last, so a sync that fails or
+	 * stops before the end asks from the same version again, and what it
+	 * did fetch is passed over then by the version held. Nothing is done
+	 * for a library that isn't the server's.
+	 *
+	 * @param {Zotero.Sync.APIClient} client
+	 * @param {Integer} libraryID
+	 * @param {Object} [options]
+	 * @param {Function} [options.stopCheck] - Throws to stop the sync
+	 */
+	this.syncLibrary = async function (client, libraryID, { stopCheck = () => {} } = {}) {
+		// The endpoint's verdict is read before isServersLibrary() asks
+		// whether one is active
+		if (!Zotero.Embeddings.isEnabled() || await Zotero.Embeddings.Endpoint.getActive()
+				|| !this.isServersLibrary(libraryID)) {
+			return;
 		}
-		let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
+		await Zotero.Embeddings.initDB();
+		let changes = await _findChangedAttachments(client, libraryID);
+		if (!changes) {
+			return;
+		}
+		stopCheck();
+		await _fetchAttachments(client, libraryID, changes.items, stopCheck);
+		if (changes.version) {
+			await Zotero.Embeddings.Indexing.Store.setSyncVersion(libraryID, changes.version);
+		}
+	};
+
+	// Ask what changed since the version held: what the server lists as
+	// declined is left to this client; what it lists as embedded at a
+	// version other than the one held is to be fetched
+	//
+	// @return {Promise<Object|null>} - { version, items }, the items to
+	//     fetch, or null when nothing has changed
+	async function _findChangedAttachments(client, libraryID) {
+		let Store = Zotero.Embeddings.Indexing.Store;
 		let library = Zotero.Libraries.get(libraryID);
 		let model = Zotero.Embeddings.getModelVersion();
-		let items = payloads.map(payload => payload.item);
-		let records = new Map(payloads.map(payload => [payload.item.id, payload.record]));
-		for (let i = 0; i < items.length; i += MAX_BATCH_ITEMS) {
-			if (shouldStop()) {
-				return false;
-			}
-			let batch = items.slice(i, i + MAX_BATCH_ITEMS);
-			let served = await client.getEmbeddings(
-				library.libraryType, library.libraryTypeID, model, batch.map(item => item.key));
-			// Asked for by model, so an answer in another is the server's
-			// mistake, and rows of it are no use here
-			if (served.model !== model) {
-				Zotero.debug(`Embeddings: the server answered for ${library.name} with `
-					+ `${served.model || 'no model'} -- embedding its attachments here`);
-				await Store.setSyncDeclined(batch.map(item => item.id));
-				continue;
-			}
-			// Vectors in an encoding this client doesn't read would be
-			// misread rather than refused
-			let decoder = Object.hasOwn(DECODERS, served.dtype) ? DECODERS[served.dtype] : null;
-			if (!decoder) {
-				Zotero.debug(`Embeddings: the server sent ${library.name}'s vectors as `
-					+ `${served.dtype || 'no dtype'} -- embedding its attachments here`);
-				await Store.setSyncDeclined(batch.map(item => item.id));
-				continue;
-			}
-			let byKey = new Map(served.items.map(arrival => [arrival.key, arrival]));
-			let counts = { taken: 0, kept: 0, declined: 0, awaiting: 0 };
+		let since = await Store.getSyncVersion(libraryID);
+		let changes = await client.getEmbeddingVersions(
+			library.libraryType, library.libraryTypeID, model, since);
+		if (!changes) {
+			return null;
+		}
+		let { version, successful, declined } = changes;
+		let keys = [...Object.keys(successful), ...Object.keys(declined)];
+		// Keys with no item here are passed over
+		let ids = keys.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)).filter(Boolean);
+		let items = await Zotero.Items.getAsync(ids, { noCache: true });
+		let records = await Store.getIndexStates(items.map(item => item.id));
+		let toFetch = items.filter(item => Object.hasOwn(successful, item.key)
+			&& records.get(item.id)?.syncVersion !== successful[item.key]);
+		let refused = items.filter(item => Object.hasOwn(declined, item.key)).map(item => item.id);
+		if (refused.length) {
+			await Store.setSyncDeclined(refused);
+		}
+		Zotero.debug(`Embeddings: ${library.name} is at version ${version} on the server -- `
+			+ `${keys.length} changed since ${since || 'the start'}, ${toFetch.length} to fetch, `
+			+ `${refused.length} declined`);
+		return { version, items: toFetch };
+	}
+
+	// Fetch the rows of the given attachments, one request each, a few at
+	// a time
+	async function _fetchAttachments(client, libraryID, items, stopCheck) {
+		let Store = Zotero.Embeddings.Indexing.Store;
+		let library = Zotero.Libraries.get(libraryID);
+		let model = Zotero.Embeddings.getModelVersion();
+		if (!items.length) {
+			return;
+		}
+		let records = await Store.getIndexStates(items.map(item => item.id));
+		let counts = { taken: 0, kept: 0, declined: 0, gone: 0 };
+		for (let i = 0; i < items.length; i += CONCURRENT_REQUESTS) {
+			stopCheck();
+			let batch = items.slice(i, i + CONCURRENT_REQUESTS);
+			let answers = await Promise.all(batch.map(item => client.getEmbedding(
+				library.libraryType, library.libraryTypeID, model, item.key)));
 			let declined = [];
-			for (let item of batch) {
-				let arrival = byKey.get(item.key);
-				if (!arrival || arrival.status == 'pending') {
-					counts.awaiting++;
+			for (let j = 0; j < batch.length; j++) {
+				let item = batch[j];
+				let answer = answers[j];
+				// Gone since it was listed: a later look says more
+				if (!answer) {
+					await Store.clearSyncState(item.id);
+					counts.gone++;
 					continue;
 				}
 				// Rows already held from this version: nothing to replace
-				if (arrival.status == 'success' && arrival.version
-						&& records.get(item.id)?.syncVersion === arrival.version) {
+				if (records.get(item.id)?.syncVersion === answer.version) {
 					await Store.clearSyncState(item.id);
 					counts.kept++;
 					continue;
 				}
-				let rows = arrival.status == 'success' ? _decodeRows(arrival.rows, decoder) : null;
+				// Vectors in an encoding this client doesn't read would be
+				// misread rather than refused
+				let decoder = Object.hasOwn(DECODERS, answer.dtype) ? DECODERS[answer.dtype] : null;
+				let rows = decoder ? _decodeRows(answer.rows, decoder) : null;
 				let taken = rows && await Zotero.Embeddings.Indexing.addChunks(
 					item.id,
 					{
 						modelVersion: model,
-						contentHash: arrival.contentHash,
-						chunks: arrival.chunks,
-						version: arrival.version || null,
+						contentHash: answer.contentHash,
+						chunks: answer.chunks,
+						version: answer.version,
 						rows
 					}
 				);
@@ -4516,78 +4500,14 @@ Zotero.Embeddings.Sync = new function () {
 			if (declined.length) {
 				await Store.setSyncDeclined(declined);
 			}
-			Zotero.debug(`Embeddings: asked the server for ${batch.length} `
-				+ Zotero.Utilities.pluralize(batch.length, 'attachment') + ` in ${library.name} -- `
-				+ `${counts.taken} taken, ${counts.kept} kept, ${counts.declined} declined, `
-				+ `${counts.awaiting} still to come`);
-			Zotero.Embeddings.Indexing.Progress.addAwaiting(counts.awaiting);
+			// The rows that landed move the attachment count the pane shows
 			await Zotero.Embeddings.Indexing.Progress.tick();
 		}
-		return true;
-	};
-
-	/**
-	 * See what the server has embedded anew in a library since the version
-	 * last recorded, mark those attachments to be fetched again, declined
-	 * ones included, and start a run for them. The version is recorded last,
-	 * so a failure repeats the delta. Nothing is asked while an endpoint is
-	 * active.
-	 *
-	 * @param {Zotero.Sync.APIClient} client
-	 * @param {Integer} libraryID
-	 */
-	this.checkLibrary = async function (client, libraryID) {
-		if (!Zotero.Embeddings.isEnabled() || !this.isAvailable()
-				|| await Zotero.Embeddings.Endpoint.getActive()) {
-			return;
-		}
-		let Indexing = Zotero.Embeddings.Indexing;
-		let Store = Indexing.Store;
-		let library = Zotero.Libraries.get(libraryID);
-		let model = Zotero.Embeddings.getModelVersion();
-		await Zotero.Embeddings.initDB();
-		let since = await Store.getSyncVersion(libraryID);
-		let changes;
-		try {
-			changes = await client.getEmbeddingVersions(
-				library.libraryType, library.libraryTypeID, model, since);
-		}
-		catch (e) {
-			Zotero.logError(e);
-			return;
-		}
-		if (!changes) {
-			return;
-		}
-		let { version, items: versions, models } = changes;
-		if (models && !models.includes(model)) {
-			Zotero.debug(`Embeddings: the server embeds ${library.name} with `
-				+ `${models.join(', ') || 'no model'}, not ${model}`);
-		}
-		let keys = Object.keys(versions);
-		let refresh = [];
-		if (keys.length) {
-			let ids = keys.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)).filter(Boolean);
-			// Judged without the record, so that declined ones are included
-			let items = (await Zotero.Items.getAsync(ids, { noCache: true }))
-				.filter(item => this.shouldAskServer(item));
-			let records = await Store.getIndexStates(items.map(item => item.id));
-			refresh = items
-				.filter(item => records.get(item.id)?.syncVersion !== versions[item.key])
-				.map(item => item.id);
-			if (refresh.length) {
-				await Store.setSyncRefresh(refresh);
-			}
-		}
-		if (version) {
-			await Store.setSyncVersion(libraryID, version);
-		}
-		Zotero.debug(`Embeddings: ${library.name} is at version ${version} on the server -- `
-			+ `${keys.length} changed since ${since || 'the start'}, ${refresh.length} to fetch again`);
-		if (refresh.length && !Indexing.isPaused()) {
-			Indexing.startIndexing().catch(e => Zotero.logError(e));
-		}
-	};
+		Zotero.debug(`Embeddings: fetched ${items.length} `
+			+ Zotero.Utilities.pluralize(items.length, 'attachment') + ` in ${library.name} -- `
+			+ `${counts.taken} taken, ${counts.kept} kept, ${counts.declined} declined, `
+			+ `${counts.gone} gone`);
+	}
 
 	// An answer's rows with their vectors in the stored form -- trimmed,
 	// centered and quantized as this client's own are -- or null when any
