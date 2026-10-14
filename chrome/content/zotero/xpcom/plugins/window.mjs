@@ -29,7 +29,7 @@ import { ControllerError } from "chrome://zotero/content/xpcom/plugins/apiErrors
 const { NOT_FOUND, INVALID_PARAMS } = ControllerError.codes;
 
 /**
- * Plugin-facing window type -> chrome windowtype; keep in sync with shortcut and window-resource APIs
+ * Plugin-facing window type -> chrome windowtype; the shortcut and window-resource targets are names from here
  * @typedef {keyof typeof WINDOW_TYPES} WindowType
  */
 const WINDOW_TYPES = Object.freeze({

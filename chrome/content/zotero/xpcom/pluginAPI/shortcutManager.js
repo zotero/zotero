@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 	});
 
@@ -37,8 +38,6 @@
 	];
 
 	const NON_SHIFT_MODIFIERS = ["accel", "control", "alt"];
-
-	const FKEY_RE = /^F([1-9]|1[0-2])$/;
 
 	// Why a combo can't be registered, as strings so the value is legible in a log
 	const ShortcutRejectReasons = Object.freeze({
@@ -97,16 +96,7 @@
 						type: "array",
 						children: "string",
 					},
-					target: {
-						type: "string",
-						optional: false,
-						checkHook: (value) => {
-							if (!VALID_TARGETS.includes(value)) {
-								return `Option 'target' must be one of ${VALID_TARGETS.join(", ")}, got ${value}`;
-							}
-							return true;
-						}
-					},
+					target: lazy.Params.oneOf(VALID_TARGETS),
 					onCommand: "function",
 				},
 			};
@@ -129,7 +119,7 @@
 			if (!modifiers.some(m => NON_SHIFT_MODIFIERS.includes(m))) {
 				return { error: `Modifiers must include one of ${NON_SHIFT_MODIFIERS.join(", ")}` };
 			}
-			if (typeof key != "string" || (!FKEY_RE.test(key) && (key.length != 1 || key == " "))) {
+			if (typeof key != "string" || (!Zotero.Shortcuts.FKEY_RE.test(key) && (key.length != 1 || key == " "))) {
 				return { error: `'key' must be a single printable character or F1-F12, got '${key}'` };
 			}
 			return { combo: Zotero.Shortcuts.normalizeCombo(key, modifiers) };
