@@ -216,7 +216,7 @@ Zotero.SyncedSettings = (function () {
 		},
 		
 		set: async function (libraryID, setting, value, version = 0, synced) {
-			if (typeof value == undefined) {
+			if (typeof value == 'undefined') {
 				throw new Error("Value not provided");
 			}
 			
