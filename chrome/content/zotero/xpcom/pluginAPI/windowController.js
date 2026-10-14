@@ -494,7 +494,7 @@
 		 * @param {N} name
 		 * @param {WindowControllerQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<WindowControllerQueryResults[N]>>}
+		 * @returns {Promise<APIResponse<WindowControllerQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.WindowController._windowController.query(name, params, _callerPluginID);
@@ -506,7 +506,7 @@
 		 * @param {N} name
 		 * @param {WindowControllerCommandParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<ControllerResponse<WindowControllerCommandResults[N]>>}
+		 * @returns {Promise<APIResponse<WindowControllerCommandResults[N]>>}
 		 */
 		command(name, params, _callerPluginID) {
 			return Zotero.WindowController._windowController.command(name, params, _callerPluginID);

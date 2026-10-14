@@ -3592,8 +3592,8 @@ describe("Plugin API", function () {
 		const { ControllerAPIBase } = ChromeUtils.importESModule(
 			"chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs"
 		);
-		const ControllerErrorCode = ControllerAPIBase.errorCodes;
-		const { ControllerError } = ChromeUtils.importESModule(
+		const RequestErrorCode = ControllerAPIBase.errorCodes;
+		const { PluginRequestError } = ChromeUtils.importESModule(
 			"chrome://zotero/content/xpcom/plugins/apiErrors.mjs"
 		);
 		const { getWindow, getMainWindow } = ChromeUtils.importESModule(
@@ -3628,7 +3628,7 @@ describe("Plugin API", function () {
 						},
 						gone: {
 							handler: () => {
-								throw new ControllerError(ControllerErrorCode.NOT_FOUND, "gone");
+								throw new PluginRequestError(RequestErrorCode.NOT_FOUND, "gone");
 							},
 						},
 						whoami: {
@@ -3691,28 +3691,28 @@ describe("Plugin API", function () {
 			});
 
 			it("should resolve a failure as a response, never a rejection", async function () {
-				// A ControllerError carries its code; any other exception is an internal error
+				// A PluginRequestError carries its code; any other exception is an internal error
 				assert.deepEqual(await api.query("gone"), {
 					success: false,
 					result: {},
-					error: { code: ControllerErrorCode.NOT_FOUND, message: "gone" },
+					error: { code: RequestErrorCode.NOT_FOUND, message: "gone" },
 				});
 				assert.deepEqual(await api.query("boom"), {
 					success: false,
 					result: {},
-					error: { code: ControllerErrorCode.INTERNAL_ERROR, message: "kaboom" },
+					error: { code: RequestErrorCode.INTERNAL_ERROR, message: "kaboom" },
 				});
 				assert.notProperty(await api.query("whoami"), "error");
 			});
 
 			it("should fail an unknown request", async function () {
-				assert.equal(await failureCode(api.query("nope")), ControllerErrorCode.UNKNOWN_REQUEST);
-				assert.equal(await failureCode(api.command("echo")), ControllerErrorCode.UNKNOWN_REQUEST);
+				assert.equal(await failureCode(api.query("nope")), RequestErrorCode.UNKNOWN_REQUEST);
+				assert.equal(await failureCode(api.command("echo")), RequestErrorCode.UNKNOWN_REQUEST);
 			});
 
 			it("should fail non-object and unknown params, naming the problem", async function () {
-				assert.equal(await failureCode(api.query("echo", 5)), ControllerErrorCode.INVALID_PARAMS);
-				assert.equal(await failureCode(api.query("echo", { nope: 1 })), ControllerErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", 5)), RequestErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", { nope: 1 })), RequestErrorCode.INVALID_PARAMS);
 				let { error } = await api.query("echo", 5);
 				assert.include(error.message, "must be an object");
 				({ error } = await api.query("echo", { nope: 1 }));
@@ -3720,13 +3720,13 @@ describe("Plugin API", function () {
 			});
 
 			it("should treat a prototype name as an unknown param", async function () {
-				assert.equal(await failureCode(api.query("echo", { constructor: 1 })), ControllerErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", { constructor: 1 })), RequestErrorCode.INVALID_PARAMS);
 				let { error } = await api.query("echo", JSON.parse('{ "__proto__": { "value": 1 } }'));
 				assert.include(error.message, "Unknown param '__proto__'");
 			});
 
 			it("should deny a caller naming a plugin that is not loaded", async function () {
-				assert.equal(await failureCode(api.query("echo", {}, "never-loaded@zotero.org")), ControllerErrorCode.PERMISSION_DENIED);
+				assert.equal(await failureCode(api.query("echo", {}, "never-loaded@zotero.org")), RequestErrorCode.PERMISSION_DENIED);
 			});
 
 			it("should hand the handler a detached plain copy of the params", async function () {
@@ -3741,7 +3741,7 @@ describe("Plugin API", function () {
 			});
 
 			it("should fail a result that is not plain data", async function () {
-				assert.equal(await failureCode(api.query("leaky")), ControllerErrorCode.INVALID_RESULT);
+				assert.equal(await failureCode(api.query("leaky")), RequestErrorCode.INVALID_RESULT);
 			});
 
 			it("should bypass permission gates for chrome callers", async function () {
@@ -3752,7 +3752,7 @@ describe("Plugin API", function () {
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default"] }));
 				assert.equal(
 					await failureCode(api.query("gated", {}, UNPRIV_ID)),
-					ControllerErrorCode.PERMISSION_DENIED
+					RequestErrorCode.PERMISSION_DENIED
 				);
 				PluginSandbox.unloadScope(UNPRIV_ID);
 
@@ -3763,14 +3763,14 @@ describe("Plugin API", function () {
 			it("should hand an unprivileged caller's params its pluginID and fail a supplied one", async function () {
 				let { result: { params } } = await api.query("echo", { value: 1 });
 				assert.notProperty(params, "pluginID", "chrome callers have no pluginID");
-				assert.equal(await failureCode(api.query("echo", { pluginID: "x" })), ControllerErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", { pluginID: "x" })), RequestErrorCode.INVALID_PARAMS);
 
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default"] }));
 				({ result: { params } } = await api.query("echo", { value: 1 }, UNPRIV_ID));
 				assert.deepEqual(params, { value: 1, pluginID: UNPRIV_ID });
 				assert.equal(
 					await failureCode(api.query("echo", { pluginID: "x" }, UNPRIV_ID)),
-					ControllerErrorCode.INVALID_PARAMS
+					RequestErrorCode.INVALID_PARAMS
 				);
 			});
 		});
@@ -3789,10 +3789,10 @@ describe("Plugin API", function () {
 
 			it("should reject an unknown or mistyped window ID", function () {
 				let e = assert.throws(() => getWindow(-1), /No window with ID/);
-				assert.instanceOf(e, ControllerError);
-				assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
+				assert.instanceOf(e, PluginRequestError);
+				assert.equal(e.code, RequestErrorCode.NOT_FOUND);
 				e = assert.throws(() => getWindow(win.browsingContext.id, "readerWindow"), /is not a readerWindow/);
-				assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
+				assert.equal(e.code, RequestErrorCode.NOT_FOUND);
 				assert.throws(() => getMainWindow(-1), /No window with ID/);
 				assert.strictEqual(getMainWindow(win.browsingContext.id), win);
 			});
@@ -3832,7 +3832,7 @@ describe("Plugin API", function () {
 					// The owner reaches it; another plugin gets NotFound, as for an unknown ID
 					assert.strictEqual(getWindow(windowID, undefined, OWNER), pluginWin);
 					let e = assert.throws(() => getWindow(windowID, undefined, "other@zotero.org"), /No window with ID/);
-					assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
+					assert.equal(e.code, RequestErrorCode.NOT_FOUND);
 					// Ownership only applies to plugin windows
 					assert.strictEqual(getWindow(win.browsingContext.id, "mainWindow", "other@zotero.org"), win);
 
@@ -3840,11 +3840,11 @@ describe("Plugin API", function () {
 					PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default", "window"] }));
 					({ result: { windows } } = await Zotero.WindowController.query("windows", { type: "pluginWindow" }, UNPRIV_ID));
 					assert.isFalse(windows.some(w => w.windowID === windowID), "another plugin's window listed");
-					assert.equal(await failureCode(Zotero.WindowController.query("getWindowState", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
-					assert.equal(await failureCode(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.query("getWindowState", { windowID }, UNPRIV_ID)), RequestErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID)), RequestErrorCode.NOT_FOUND);
 
 					// closeWindow follows the same ownership rule
-					assert.equal(await failureCode(Zotero.WindowController.command("closeWindow", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("closeWindow", { windowID }, UNPRIV_ID)), RequestErrorCode.NOT_FOUND);
 					await Zotero.WindowController.command("closeWindow", { windowID });
 					for (let attempt = 0; attempt < 100 && !pluginWin.closed; attempt++) {
 						await Zotero.Promise.delay(20);
