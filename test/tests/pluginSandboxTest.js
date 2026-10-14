@@ -4552,6 +4552,48 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
+			it("should map window drag attributes via the injected user sheet", async function () {
+				// The page can't use -moz-window-dragging itself (chrome-only CSS,
+				// dropped from moz-extension author sheets), only the attributes
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "drag.html"),
+					"<!DOCTYPE html><html><head><title>Drag</title></head>"
+					+ "<body><div id='bar' window-dragging>"
+					+ "<button id='btn'>x</button></div>"
+					+ "<div id='free' window-no-drag></div></body></html>"
+				);
+				loadTestScopeWithURI(["default", "openWindow"]);
+				await evalInScope("openWindow('drag.html').then(function (win) { _win = win; })");
+				try {
+					let browser = getPluginWindowBrowsers().pop();
+					assert.isTrue(browser.docShell.windowDraggingAllowed,
+						"the plugin window browser should allow window dragging");
+					let InspectorUtils = browser.ownerDocument.defaultView.InspectorUtils;
+					// The chrome-only property is hidden from CSSOM getPropertyValue
+					// in content documents, so read it from the serialized rule text
+					let getDrag = (id) => {
+						let el = browser.contentWindow.document.getElementById(id);
+						let value = "";
+						for (let rule of InspectorUtils.getMatchingCSSRules(el)) {
+							let m = rule.cssText.match(/-moz-window-dragging: ([\w-]+)/);
+							if (m) {
+								value = m[1];
+							}
+						}
+						return value;
+					};
+					assert.equal(getDrag("bar"), "drag",
+						"window-dragging should map to -moz-window-dragging: drag");
+					assert.equal(getDrag("btn"), "no-drag",
+						"interactive elements inside a drag area should opt out");
+					assert.equal(getDrag("free"), "no-drag",
+						"window-no-drag should map to -moz-window-dragging: no-drag");
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
 			it("should hand the sandbox the page window", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
 				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
