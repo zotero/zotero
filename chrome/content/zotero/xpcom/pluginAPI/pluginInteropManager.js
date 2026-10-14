@@ -303,17 +303,13 @@
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.PluginInteropManager.getCommand,
 		({ pluginID, args }) => {
-			if (args[0] && typeof args[0] === "object") {
-				args[0].callerPluginID = pluginID;
-			}
+			lazy.ScopeVariables.assignTrustedArg(args, 0, "callerPluginID", pluginID);
 		}
 	);
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.PluginInteropManager.register,
 		({ pluginID, args }) => {
-			if (args[0] && typeof args[0] === "object") {
-				args[0].pluginID = pluginID;
-			}
+			lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
 		}
 	);
 	lazy.ScopeVariables.setCustomParser(
