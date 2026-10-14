@@ -27,7 +27,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
@@ -66,7 +66,7 @@
 		"sidenav/locate",
 	];
 
-	// pluginWindow/<windowId>/menubar/<type>
+	// pluginWindow/<name>/menubar/<type>; pluginWindow targets are looked up per owning plugin
 	const VALID_PLUGIN_WINDOW_MENU_TYPES = [
 		"file", "edit", "view", "window", "help",
 	];
@@ -132,7 +132,7 @@
 	 */
 
 
-	class MenuManagerInternal extends lazy.PluginAPIBase {
+	class MenuManagerInternal extends lazy.ManagerAPIBase {
 		_menusTypeDefinition = {
 			menuType: {
 				type: "string",
@@ -222,13 +222,13 @@
 							}
 							let parts = value.split("/");
 							if (parts[0] === "pluginWindow") {
-								// pluginWindow/<windowId>/menubar/<type>
+								// pluginWindow/<name>/menubar/<type>
 								if (parts.length === 4
 										&& parts[2] === "menubar"
 										&& VALID_PLUGIN_WINDOW_MENU_TYPES.includes(parts[3])) {
 									return true;
 								}
-								// pluginWindow/<windowId>/context
+								// pluginWindow/<name>/context
 								if (parts.length === 3
 										&& parts[2] === "context") {
 									return true;
@@ -409,11 +409,13 @@
 		/**
 		 * Get the custom menu data for a target type
 		 * @param {string} targetType - The target type of the menu
+		 * @param {string} [pluginID] - Only this plugin's registrations, for per-plugin targets
 		 * @returns {MenuOptions[]} - The custom menu data for the target type
 		 */
-		getCustomMenuOptions(targetType) {
+		getCustomMenuOptions(targetType, pluginID) {
 			return this.options
-				.filter(option => option.target === targetType)
+				.filter(option => option.target === targetType
+					&& (pluginID === undefined || this._getOptionPluginID(option) === pluginID))
 				// Sort to ensure consistent ordering
 				.sort((a, b) => this._getOptionMainKey(a).localeCompare(this._getOptionMainKey(b)));
 		}
@@ -922,20 +924,25 @@
 		/**
 		 * Check whether any menus are registered for a given target.
 		 * @param {string} targetType
+		 * @param {string} [pluginID] - Only count this plugin's registrations
 		 * @returns {boolean}
 		 */
-		hasMenus(targetType) {
-			return this._menuManager.getCustomMenuOptions(targetType).length > 0;
+		hasMenus(targetType, pluginID) {
+			return this._menuManager.getCustomMenuOptions(targetType, pluginID).length > 0;
 		},
 
-		updateMenuPopup(popupElem, targetType, args) {
-			let options = this._menuManager.getCustomMenuOptions(targetType);
+		/**
+		 * @param {string} [args.pluginID] - Only this plugin's registrations, for the
+		 * pluginWindow/<name>/... targets, which are scoped to the window's owner
+		 */
+		updateMenuPopup(popupElem, targetType, args = {}) {
+			let options = this._menuManager.getCustomMenuOptions(targetType, args.pluginID);
 			// Menus registered for the reader menubar targets show in the main window menubar
 			// while a reader tab is selected
 			let mainMenubarPrefix = "main/menubar/";
 			if (targetType.startsWith(mainMenubarPrefix) && args?.tabType === "reader") {
 				options = options.concat(this._menuManager.getCustomMenuOptions(
-					"reader/menubar/" + targetType.slice(mainMenubarPrefix.length)
+					"reader/menubar/" + targetType.slice(mainMenubarPrefix.length), args.pluginID
 				));
 			}
 			// Ensure l10n files from all registered options are loaded in the popup's window

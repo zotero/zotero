@@ -4273,8 +4273,8 @@ describe("Plugin Sandbox", function () {
 				try {
 					assert.equal(
 						evalInScope("Object.keys(_win).sort().join(',')"),
-						"close,focus,page,window",
-						"the handle should expose only page/window/close/focus"
+						"close,focus,getState,moveTo,page,window,windowID",
+						"the handle should expose the page, its window and the window controls"
 					);
 					assert.equal(
 						evalInScope("Object.keys(_win.page).sort().join(',')"),
@@ -4289,6 +4289,108 @@ describe("Plugin Sandbox", function () {
 					);
 					assert.equal(evalInScope("_win.window.document.title"), "Test",
 						"the page window should be directly scriptable");
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should move and report the state of its window", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				await evalInScope("openWindow('test.html', 'width=300,height=200').then(function (win) { _win = win; })");
+				let browsers = getPluginWindowBrowsers();
+				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
+				let windowID = chromeWin.browsingContext.id;
+				let getState = () => JSON.parse(evalInScope("JSON.stringify(_win.getState())"));
+				try {
+					assert.equal(evalInScope("_win.windowID"), windowID, "the handle should carry the controller window ID");
+					assert.deepEqual(
+						getState(),
+						await Zotero.WindowController.query("getWindowState", { windowID }),
+						"the handle and the controller should agree on the state"
+					);
+
+					// Stay inside the window's screen so the OS doesn't clamp the move
+					let x = chromeWin.screen.availLeft + 40;
+					let y = chromeWin.screen.availTop + 40;
+					evalInScope(`_win.moveTo(${x}, ${y})`);
+					for (let attempt = 0; attempt < 100; attempt++) {
+						if (chromeWin.screenX === x && chromeWin.screenY === y) {
+							break;
+						}
+						await Zotero.Promise.delay(20);
+					}
+					let state = getState();
+					assert.equal(state.sizeMode, "normal");
+					assert.deepEqual([state.x, state.y], [x, y]);
+					assert.deepEqual([state.width, state.height], [chromeWin.outerWidth, chromeWin.outerHeight]);
+
+					// closed flips before the teardown; wait for the teardown itself, when Gecko
+					// nukes the page window and the wrapper's geometry stops resolving
+					let pageWin = chromeWin.document.getElementById("plugin-browser").contentWindow;
+					let tornDown = () => {
+						if (!Cu.isDeadWrapper(pageWin)) {
+							return false;
+						}
+						try {
+							return typeof chromeWin.screenX !== "number";
+						}
+						catch {
+							return true;
+						}
+					};
+					evalInScope("_win.close()");
+					for (let attempt = 0; attempt < 100 && !tornDown(); attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.isTrue(tornDown(), "the wrapper window should have been torn down");
+					// The wrapper's DOM calls fail on their own, the page window is a dead wrapper
+					// rather than a window with closed === true, and isAlive() says so
+					assert.throws(() => evalInScope("_win.getState()"));
+					assert.throws(() => evalInScope("_win.moveTo(0, 0)"));
+					assert.isFalse(evalInScope("_win.page.isAlive()"));
+					// A dead-object TypeError; its message does not survive the trip back to chrome
+					assert.throws(() => evalInScope("_win.window.closed"));
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should open the window with a parent when given a window ID", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let mainWindow = Zotero.getMainWindow();
+				await evalInScope(`
+					openWindow('test.html', 'width=300,height=200,dependent', { parentWindowID: ${mainWindow.browsingContext.id} })
+						.then(function (win) { _win = win; });
+				`);
+				let browsers = getPluginWindowBrowsers();
+				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
+				try {
+					assert.strictEqual(chromeWin.opener, mainWindow, "the parent should be the opener");
+					let appWindow = chromeWin.docShell.treeOwner
+						.QueryInterface(Ci.nsIInterfaceRequestor)
+						.getInterface(Ci.nsIAppWindow);
+					assert.ok(appWindow.chromeFlags & Ci.nsIWebBrowserChrome.CHROME_DEPENDENT, "dependent should be honored");
+
+					// A handle's windowID parents another plugin window
+					await evalInScope(`
+						openWindow('test.html', 'width=300,height=200', { parentWindowID: _win.windowID })
+							.then(function (win) { _child = win; });
+					`);
+					let childBrowsers = getPluginWindowBrowsers();
+					let childWin = childBrowsers[childBrowsers.length - 1].ownerDocument.defaultView;
+					try {
+						assert.strictEqual(childWin.opener, chromeWin, "a plugin window should parent another");
+					}
+					finally {
+						evalInScope("_child.close()");
+					}
+
+					assert.throws(
+						() => evalInScope("openWindow('test.html', '', { parentWindowID: -1 })"),
+						/No window with ID/
+					);
 				}
 				finally {
 					evalInScope("_win.close()");
@@ -4358,6 +4460,49 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(chromeWin.closed, "the wrapper window should close");
 				assert.isFalse(evalInScope("_win.page.isAlive()"),
 					"the page messenger should be dead");
+			});
+
+			it("should let the page control its own window via zoteroHost.api", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let pending = [];
+				scope._reportAPI = (json) => {
+					pending.shift()?.(JSON.parse(json));
+				};
+				await evalInScope(`
+					openWindow('echo.html', 'width=300,height=200').then(function (win) {
+						_win = win;
+						win.page.addMessageListener(function (data) {
+							if (data && (data.type == 'api-result' || data.type == 'api-error')) {
+								_reportAPI(JSON.stringify(data));
+							}
+						});
+					});
+				`);
+				let sendToPage = (data) => {
+					let report = new Promise(resolve => pending.push(resolve));
+					scope._toPage = JSON.stringify(data);
+					evalInScope("_win.page.sendMessage(JSON.parse(_toPage))");
+					return report;
+				};
+				let browsers = getPluginWindowBrowsers();
+				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
+				try {
+					let x = chromeWin.screen.availLeft + 60;
+					let y = chromeWin.screen.availTop + 60;
+					let result = await sendToPage({ type: "call-api", name: "moveTo", params: { x, y } });
+					assert.equal(result.type, "api-result", "moveTo should resolve");
+					for (let attempt = 0; attempt < 100 && (chromeWin.screenX !== x || chromeWin.screenY !== y); attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.deepEqual([chromeWin.screenX, chromeWin.screenY], [x, y]);
+
+					result = await sendToPage({ type: "call-api", name: "getState", params: {} });
+					assert.equal(result.type, "api-result");
+					assert.deepEqual(result.result, JSON.parse(evalInScope("JSON.stringify(_win.getState())")));
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
 			});
 
 			it("should dispatch zoteroHost.api calls to host handlers with object params", async function () {
@@ -5263,6 +5408,98 @@ describe("Plugin Sandbox", function () {
 				await addon.uninstall();
 				await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
 			}
+		});
+	});
+
+	describe("Window and tab controllers", function () {
+		var pluginWin;
+
+		before(async function () {
+			pluginWin = await loadZoteroPane();
+		});
+
+		after(function () {
+			pluginWin.close();
+		});
+
+		it("should not be exposed without the window or tab permission", function () {
+			loadTestScope(["default"]);
+			assert.equal(evalInScope("typeof Zotero.WindowController"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.TabController"), "undefined");
+		});
+
+		it("should expose WindowController with window and TabController only with tab", function () {
+			loadTestScope(["default", "window"]);
+			assert.equal(evalInScope("typeof Zotero.WindowController.query"), "function");
+			assert.equal(evalInScope("typeof Zotero.WindowController.command"), "function");
+			assert.isTrue(evalInScope("Zotero.WindowController.windowTypes.includes('mainWindow')"));
+			assert.equal(evalInScope("typeof Zotero.TabController"), "undefined");
+
+			// tab implies window
+			loadTestScope(["default", "tab"]);
+			assert.equal(evalInScope("typeof Zotero.WindowController.query"), "function");
+			assert.equal(evalInScope("typeof Zotero.TabController.query"), "function");
+			assert.equal(evalInScope("typeof Zotero.TabController.command"), "function");
+			assert.equal(evalInScope("Zotero.TabController.libraryTabID"), "zotero-pane");
+		});
+
+		it("should be exposed via the ui umbrella permission", function () {
+			loadTestScope(["default", "ui"]);
+			assert.equal(evalInScope("typeof Zotero.WindowController.command"), "function");
+			assert.equal(evalInScope("typeof Zotero.TabController.command"), "function");
+		});
+
+		it("should not expose the internal instances", function () {
+			loadTestScope(["default", "tab"]);
+			assert.equal(evalInScope("typeof Zotero.WindowController._windowController"), "undefined");
+			assert.equal(evalInScope("typeof Zotero.TabController._tabController"), "undefined");
+		});
+
+		it("should resolve a query to a plain sandbox object", async function () {
+			loadTestScope(["default", "window"]);
+			let isPlain = await evalInScope(`(async () => {
+				let result = await Zotero.WindowController.query("windows", { type: "mainWindow" });
+				return Object.getPrototypeOf(result) === Object.prototype
+					&& Array.isArray(result.windows)
+					&& result.windows.every(w => typeof w.windowID === "number" && w.type === "mainWindow");
+			})()`);
+			assert.isTrue(isPlain);
+
+			let { windows } = await evalInScope('Zotero.WindowController.query("windows", { type: "mainWindow" })');
+			assert.include(Array.from(windows).map(w => w.windowID), pluginWin.browsingContext.id);
+		});
+
+		it("should run a command from the sandbox", async function () {
+			loadTestScope(["default", "window"]);
+			let stub = sinon.stub(pluginWin, "focus");
+			try {
+				let result = await evalInScope(
+					`Zotero.WindowController.command("focusWindow", { windowID: ${pluginWin.browsingContext.id} })`
+				);
+				assert.isTrue(stub.calledOnce);
+				assert.isEmpty(Object.keys(result));
+			}
+			finally {
+				stub.restore();
+			}
+		});
+
+		it("should reject with the error code in the message", async function () {
+			loadTestScope(["default", "window"]);
+			let e = await getPromiseError(evalInScope('Zotero.WindowController.query("nope")'));
+			assert.ok(e);
+			assert.include(String(e.message), "UnknownRequest");
+		});
+
+		it("should resolve a tab query to plain data", async function () {
+			loadTestScope(["default", "tab"]);
+			// The tab permission implies window, so the scope can look up its own window ID
+			let result = await evalInScope(`(async () => {
+				let { windows } = await Zotero.WindowController.query("windows", { type: "mainWindow" });
+				return Zotero.TabController.query("tabs", { windowID: windows[0].windowID });
+			})()`);
+			assert.equal(result.selectedTabID, "zotero-pane");
+			assert.equal(Array.from(result.tabs)[0].type, "library");
 		});
 	});
 });

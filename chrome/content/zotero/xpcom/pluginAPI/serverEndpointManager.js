@@ -27,7 +27,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		PluginAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginUUID: "chrome://zotero/content/xpcom/plugins/uuid.mjs",
 		NetUtil: "resource://gre/modules/NetUtil.sys.mjs",
@@ -88,7 +88,7 @@
 	 */
 
 
-	class ServerEndpointManagerInternal extends lazy.PluginAPIBase {
+	class ServerEndpointManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
 			super();
 			this.config = {
