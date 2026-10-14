@@ -169,18 +169,9 @@ preferences-plugin-permissions = Permissions
 preferences-plugin-permissions-intro = Manage plugin permissions and data.
 preferences-plugin-permissions-empty = No plugins.
 
-preferences-plugin-permissions-delete-db-button =
-    .label = Delete Database
-
-preferences-plugin-permissions-delete-db-confirm-title = Delete Plugin Database
-preferences-plugin-permissions-delete-db-confirm-body = Delete the database for { $name }? This cannot be undone.
-preferences-plugin-permissions-delete-db-confirm-action = Delete
-
 preferences-plugin-permissions-edit-subpane = Edit Plugin Permissions
 preferences-plugin-permissions-edit-data-heading = Data Directory
 preferences-plugin-permissions-edit-no-data = No data directory.
-preferences-plugin-permissions-edit-db-heading = Database
-preferences-plugin-permissions-edit-no-db = No database.
 preferences-plugin-permissions-grants-heading = File Access Permissions
 preferences-plugin-permissions-grants-empty = No remembered permissions.
 
@@ -188,7 +179,7 @@ preferences-plugin-permissions-edit-status-disabled = This plugin is disabled.
 preferences-plugin-permissions-edit-status-uninstalled = This plugin is no longer installed.
 
 preferences-plugin-permissions-edit-remove-all-heading = Remove All Data
-preferences-plugin-permissions-edit-remove-all-intro = Delete the data directory, database, stored preferences,and remembered permissions for this plugin.
+preferences-plugin-permissions-edit-remove-all-intro = Delete the data directory, stored preferences, and remembered permissions for this plugin.
 preferences-plugin-permissions-edit-remove-all-button =
     .label = Remove All Data…
 preferences-plugin-permissions-edit-remove-all-confirm-title = Remove All Plugin Data
@@ -217,7 +208,6 @@ preferences-plugin-permissions-col-permissions = Permissions
 preferences-plugin-permissions-col-prefs = Prefs
 preferences-plugin-permissions-col-file-access = File Access
 preferences-plugin-permissions-col-data = File
-preferences-plugin-permissions-col-db = DB
 preferences-plugin-permissions-edit-row = Edit
 preferences-plugin-permissions-legacy-badge = Legacy
 preferences-plugin-permissions-legacy-hint = Legacy plugin is not managed by Zotero. Contact the author of the plugin to update.
