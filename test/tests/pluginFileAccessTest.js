@@ -226,6 +226,19 @@ describe("Plugin File Access", function () {
 	});
 
 
+	describe("Attachment grants", function () {
+		it("allows a file the data store handed out, even in the data directory, without a session", async function () {
+			let path = PluginFileAccess.canonicalize(PathUtils.join(Zotero.DataDirectory.dir, "storage", "ZZZZZZZZ", "granted.txt"));
+			let refusal = mode => PluginFileAccess.check(PLUGIN_ID, path, mode).then(() => "", e => e.message);
+			assert.match(await refusal("read"), /not accessible/);
+			PluginFileAccess.grantAttachment(PLUGIN_ID, path, "read");
+			assert.equal(await refusal("read"), "");
+			assert.match(await refusal("write"), /not accessible/);
+			PluginFileAccess.grantAttachment(PLUGIN_ID, path, "write");
+			assert.equal(await refusal("write"), "");
+		});
+	});
+
 	describe("Deny decisions", function () {
 		it("denies when a persisted deny covers the path", async function () {
 			let path = PathUtils.join(tempDir, "deny-here.txt");

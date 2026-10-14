@@ -148,9 +148,8 @@ const PERMISSION_SCHEMAS = {
 	clipboardRead: {
 		Zotero: {
 			Utilities: {
-				Internal: {
-					getClipboard: true,
-				}
+				// getClipboard is added per sandbox by setupClipboard() in globals.mjs, so a "path" answer is canonical
+				Internal: {},
 			},
 		},
 	},

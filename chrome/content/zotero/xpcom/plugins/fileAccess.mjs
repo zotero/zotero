@@ -422,6 +422,9 @@ class FileAccessState {
 	// window -> session ref
 	openPromptWindows = new Map();
 
+	// Folded real path -> mode, for files the data store handed out
+	attachmentGrants = new Map();
+
 	constructor(pluginID) {
 		this.pluginID = pluginID;
 		this.uuid = PluginUUID.getByID(pluginID);
@@ -493,6 +496,10 @@ class FileAccessState {
 		}
 		let path = PathIdentity.canonicalize(rawPath);
 		let realPath = PluginFileAccess._realPath(path);
+
+		// A file the data store handed out needs no prompt, and may sit in the data directory
+		let granted = this.attachmentGrants.get(PathIdentity.foldCase(realPath));
+		if (granted === "write" || granted === mode) return;
 
 		if (isForbidden(realPath)) {
 			throw new Error(
@@ -598,6 +605,10 @@ class FileAccessState {
 			return;
 		}
 		this.activeSession.add({ path, mode });
+	}
+
+	grantAttachment(path, mode) {
+		this.attachmentGrants.set(PathIdentity.foldCase(PluginFileAccess._realPath(path)), mode);
 	}
 
 	listGrants() {
@@ -750,6 +761,11 @@ const PluginFileAccess = {
 	getTempDir(pluginID) {
 		let state = this._states.get(pluginID);
 		return state ? state.getTempDir() : null;
+	},
+
+	// Read, or write with dataWrite, for a file the data store resolved; asking was the grant, until unload
+	grantAttachment(pluginID, path, mode) {
+		this._states.get(pluginID)?.grantAttachment(path, mode);
 	},
 
 	/**
