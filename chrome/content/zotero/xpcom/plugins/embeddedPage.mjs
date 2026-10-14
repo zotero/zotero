@@ -48,7 +48,22 @@ function startAutoResize(element, axes = {}) {
 		return;
 	}
 	try {
-		global.getActor("ZoteroEmbeddedPluginPage").sendAsyncMessage("startAutoResize", { height, width });
+		global.getActor("ZoteroEmbeddedPluginPage")
+			.sendAsyncMessage("startAutoResize", { height, width, content: !!axes.content });
+	}
+	catch (e) {
+		Zotero.debug("Embedded plugin page: resize actor unavailable. " + e);
+	}
+}
+
+// Stop the actor-driven auto-resize; the host keeps its last applied size
+export function stopAutoResize(element) {
+	let global = element.browsingContext?.currentWindowGlobal;
+	if (!global) {
+		return;
+	}
+	try {
+		global.getActor("ZoteroEmbeddedPluginPage").sendAsyncMessage("stopAutoResize", {});
 	}
 	catch (e) {
 		Zotero.debug("Embedded plugin page: resize actor unavailable. " + e);
@@ -69,8 +84,9 @@ function startAutoResize(element, axes = {}) {
  * @param {number} [options.height] - Explicit height in px (iframe host)
  * @param {Function} [options.append] - Inserts the host element; defaults to
  * 		`container.append(el)`
- * @param {{height?: boolean, width?: boolean}} [options.autoResize] - Axes on
- * 		which the host follows the page's own root size (each axis defaults false)
+ * @param {{height?: boolean, width?: boolean, content?: boolean}} [options.autoResize] - Axes on
+ * 		which the host follows the page's root size (each axis defaults false);
+ * 		`content` reports the full document scroll size, for a self-fitting host
  * @param {boolean} [options.channel=false] - Create a `PluginPageChannel` for
  * 		the page; leave false for a static page that needs no messaging
  * @param {string} [options.pluginID] - Owning plugin ID (for the channel)
@@ -85,18 +101,11 @@ function startAutoResize(element, axes = {}) {
 export async function loadEmbeddedPluginPage(container, src, { className, onWindowCreated, width, height, append, autoResize = {}, channel = false, pluginID, onHostMessage } = {}) {
 	let ownerDoc = Cu.unwaiveXrays(container.ownerDocument || container);
 	let insert = append || (el => container.append(el));
-	let deferred = Zotero.Promise.defer();
 
-	// Channel is built once the page loads (the actor binds to the loaded doc)
-	let makeChannel = () => (channel
-		? PluginPageChannel.create({ element, pluginID, onHostMessage })
-		: PluginPageChannel.empty());
-	let element;
+	let useIframe = !ownerDoc.nodePrincipal?.isSystemPrincipal;
 
-	// Content-principal document: host it in a content <iframe>
-	if (!ownerDoc.nodePrincipal?.isSystemPrincipal) {
+	if (useIframe) {
 		let iframe = ownerDoc.createElement("iframe");
-		element = iframe;
 		if (className) {
 			iframe.className = className;
 		}
@@ -106,29 +115,70 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
 		if (height) {
 			iframe.style.height = height + "px";
 		}
-		iframe.setAttribute("src", src);
-		let onLoad = () => {
-			iframe.removeEventListener("load", onLoad);
-			deferred.resolve();
-		};
-		iframe.addEventListener("load", onLoad);
+		// Wire the load synchronously, then insert -- the load starts on insertion
+		let loaded = loadPluginPageInIframe(iframe, src, {
+			autoResize, channel, pluginID, onHostMessage,
+		});
 		insert(iframe);
-		await deferred.promise;
-		let { messenger, dispose } = makeChannel();
-		startAutoResize(iframe, autoResize);
+		let { messenger, dispose } = await loaded;
 		return { element: iframe, messenger, dispose };
 	}
-
-	// Chrome-hosted browser, non-remote so moz-extension: pages load in the
-	// parent process (see plugins/protocol.mjs)
-	let browser = ownerDoc.createXULElement("browser");
-	element = browser;
-	browser.setAttribute("type", "content");
-	browser.setAttribute("disableglobalhistory", "true");
-	if (className) {
-		browser.classList.add(className);
+	else {
+		let browser = ownerDoc.createXULElement("browser");
+		browser.setAttribute("type", "content");
+		browser.setAttribute("disableglobalhistory", "true");
+		if (className) {
+			browser.classList.add(className);
+		}
+		insert(browser);
+		let { messenger, dispose } = await loadPluginPageInBrowser(browser, src, {
+			onWindowCreated, autoResize, channel, pluginID, onHostMessage,
+		});
+		return { element: browser, messenger, dispose };
 	}
-	insert(browser);
+}
+
+/**
+ * Load a plugin page into a content `<iframe>` with the `loadEmbeddedPluginPage`
+ * messaging; `src` is set synchronously, so a detached iframe loads on insertion.
+ *
+ * @param {Element} iframe - An `<iframe>` in a content-principal document
+ * @param {string} src - Absolute URL of a page within the plugin
+ * @param {Object} [options] - `autoResize`, `channel`, `pluginID`,
+ * 		`onHostMessage`, as in `loadEmbeddedPluginPage`
+ * @returns {Promise<{ messenger: object, dispose: function }>} Resolves once
+ * 		the page loads; `messenger` is null without a channel
+ */
+export async function loadPluginPageInIframe(iframe, src, { autoResize = {}, channel = false, pluginID, onHostMessage } = {}) {
+	let deferred = Zotero.Promise.defer();
+	let onLoad = () => {
+		iframe.removeEventListener("load", onLoad);
+		deferred.resolve();
+	};
+	iframe.addEventListener("load", onLoad);
+	iframe.setAttribute("src", src);
+	await deferred.promise;
+	// Channel is built once the page loads (the actor binds to the loaded doc)
+	let { messenger, dispose } = channel
+		? PluginPageChannel.create({ element: iframe, pluginID, onHostMessage })
+		: PluginPageChannel.empty();
+	startAutoResize(iframe, autoResize);
+	return { messenger, dispose };
+}
+
+/**
+ * Load a plugin page into an existing, already-connected content `<browser>`
+ * with the same protections and messaging the `loadEmbeddedPluginPage` hosts get.
+ *
+ * @param {XULElement} browser - A connected, non-remote `<browser type="content">`
+ * @param {string} src - Absolute URL of a page within the plugin
+ * @param {Object} [options] - `onWindowCreated`, `autoResize`, `channel`,
+ * 		`pluginID`, `onHostMessage`, as in `loadEmbeddedPluginPage`
+ * @returns {Promise<{ messenger: object, dispose: function }>} Resolves once
+ * 		the page loads; `messenger` is null without a channel or on load failure
+ */
+export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, autoResize = {}, channel = false, pluginID, onHostMessage } = {}) {
+	let deferred = Zotero.Promise.defer();
 	// Block popups from the embedded page and top navigation from frames nested
 	// inside it; self-navigation is unaffected and handled by the guard below
 	browser.browsingContext.sandboxFlags |= SANDBOXED_AUXILIARY_NAVIGATION
@@ -194,9 +244,12 @@ export async function loadEmbeddedPluginPage(container, src, { className, onWind
 		triggeringPrincipal: Services.scriptSecurityManager.createContentPrincipal(nsURI, {}),
 	});
 	let ok = await deferred.promise;
-	let { messenger, dispose } = ok ? makeChannel() : PluginPageChannel.empty();
+	// Channel is built once the page loads (the actor binds to the loaded doc)
+	let { messenger, dispose } = (ok && channel)
+		? PluginPageChannel.create({ element: browser, pluginID, onHostMessage })
+		: PluginPageChannel.empty();
 	if (ok) {
 		startAutoResize(browser, autoResize);
 	}
-	return { element: browser, messenger, dispose };
+	return { messenger, dispose };
 }

@@ -26,11 +26,12 @@
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
 import { ScopeUtils, INSTANCE_PROXY_FACTORY, resolvePluginPage } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
-import { ScopeVariables, WindowScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
+import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
+import { loadPluginPageInBrowser, stopAutoResize } from "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
 	ConsoleAPI: "resource://gre/modules/Console.sys.mjs",
@@ -114,9 +115,8 @@ function sanitizeFeatures(features) {
 }
 
 /**
- * Set up the `openWindow` function on an unprivileged plugin scope.
- * The function opens a chrome wrapper window with a <browser> element
- * that loads the plugin's HTML content.
+ * Set up `openWindow` on an unprivileged plugin scope: a chrome wrapper window
+ * hosts the plugin's HTML page, driven over a page messenger.
  *
  * @param {Object} scope - The sandbox scope to attach `openWindow` to
  */
@@ -125,7 +125,7 @@ function setupOpenWindow(scope) {
 	let holder = Cu.createObjectIn(scope);
 	Cu.exportFunction(
 		(url, features, options = {}) => {
-			let { windowId, onLoad, fitContent, notitle } = Cu.waiveXrays(options);
+			let { windowId, fitContent, notitle } = Cu.waiveXrays(options);
 			if (windowId !== null && windowId !== undefined && typeof windowId !== "string") {
 				throw new Error("openWindow: windowId must be a string");
 			}
@@ -151,79 +151,82 @@ function setupOpenWindow(scope) {
 				windowArgs
 			);
 
-			return new scope.Promise((resolve) => {
-				win.addEventListener("load", () => {
-					let browser = win.document
-						.getElementById("plugin-browser");
+			return new scope.Promise((resolve, reject) => {
+				win.addEventListener("load", async () => {
+					try {
+						let browser = win.document
+							.getElementById("plugin-browser");
 
-					// Initialize the plugin window (title sync, menus, lifecycle)
-					win.PluginWindow.init(windowId, pluginID);
+						// Initialize the plugin window (title sync, menus, lifecycle)
+						win.PluginWindow.init(windowId, pluginID);
 
-					let nsURI = Services.io.newURI(resolved);
-					let principal = Services.scriptSecurityManager
-						.createContentPrincipal(nsURI, {});
+						let { messenger, dispose } = await loadPluginPageInBrowser(browser, resolved, {
+							channel: true,
+							pluginID,
+							// The page actor keeps the browser at the document scroll size
+							autoResize: fitContent ? { height: true, width: true, content: true } : {},
+							// Reserved host message so the page can close its own window
+							onHostMessage: (data) => {
+								if (data?.type === "close") {
+									win.close();
+								}
+							},
+						});
+						if (!messenger) {
+							win.close();
+							reject(new scope.Error(`openWindow: failed to load ${url}`));
+							return;
+						}
+						win.addEventListener("unload", dispose, { once: true });
 
-					browser.addProgressListener({
-						QueryInterface: ChromeUtils.generateQI([
-							Ci.nsIWebProgressListener,
-							Ci.nsISupportsWeakReference,
-						]),
-						onStateChange(_wp, _req, flags, status) {
-							if ((flags & Ci.nsIWebProgressListener.STATE_STOP)
-								&& (flags & Ci.nsIWebProgressListener.STATE_IS_WINDOW)
-								&& Components.isSuccessCode(status)) {
-								WindowScopeVariables.setupContentL10n(browser).then(() => {
-									Cu.exportFunction(
-										() => win.close(),
-										browser.contentWindow,
-										{ defineAs: "close" }
-									);
-
-									browser.addEventListener("contextmenu", (event) => {
-										let t = event.target;
-										if (t && t.closest
-												&& t.closest("input, textarea, [contenteditable]")) {
-											return;
-										}
-										event.preventDefault();
-									});
-
-									browser.focus();
-									resolve(browser.contentWindow);
-									if (typeof onLoad === "function") {
-										onLoad(browser.contentWindow);
-									}
-									if (fitContent) {
-										// Set explicit size on browser from content before sizeToContent,
-										let docEl = browser.contentDocument.documentElement;
-										browser.style.width = docEl.scrollWidth + "px";
-										browser.style.height = docEl.scrollHeight + "px";
-										browser.removeAttribute("flex");
-										win.sizeToContent();
-										// Only keep syncing if the window is not manually resizable.
-										if (!resizable) {
-											let ro = new win.ResizeObserver(Zotero.Utilities.debounce(() => {
-												browser.style.width = docEl.scrollWidth + "px";
-												browser.style.height = docEl.scrollHeight + "px";
-												win.sizeToContent();
-											}, 100));
-											ro.observe(docEl);
-											win.addEventListener("unload", () => ro.disconnect(), { once: true });
-										}
-									}
-								});
+						browser.addEventListener("contextmenu", (event) => {
+							let t = event.target;
+							if (t && t.closest
+									&& t.closest("input, textarea, [contenteditable]")) {
+								return;
 							}
-						},
-						onLocationChange() {},
-						onProgressChange() {},
-						onStatusChange() {},
-						onSecurityChange() {},
-						onContentBlockingEvent() {},
-					}, Ci.nsIWebProgress.NOTIFY_ALL);
+							event.preventDefault();
+						});
 
-					browser.loadURI(nsURI, {
-						triggeringPrincipal: principal,
-					});
+						browser.focus();
+
+						if (fitContent) {
+							// Fit the window once the actor applies the first size to the
+							// browser's style; until then flex keeps the feature-string size
+							let mo = new win.MutationObserver(() => {
+								mo.disconnect();
+								browser.removeAttribute("flex");
+								win.sizeToContent();
+								if (resizable) {
+									// Fit once, then the user owns the window size
+									stopAutoResize(browser);
+								}
+								else {
+									// Keep the window following the content size
+									let ro = new win.ResizeObserver(Zotero.Utilities.debounce(
+										() => win.sizeToContent(), 100));
+									ro.observe(browser);
+									win.addEventListener("unload", () => ro.disconnect(), { once: true });
+								}
+							});
+							mo.observe(browser, { attributes: true, attributeFilter: ["style"] });
+							win.addEventListener("unload", () => mo.disconnect(), { once: true });
+						}
+
+						resolve(ScopeVariables.toScope({
+							page: messenger,
+							close: () => !win.closed && win.close(),
+							focus: () => !win.closed && win.focus(),
+						}, pluginID));
+					}
+					catch (e) {
+						Zotero.logError(e);
+						try {
+							win.close();
+						}
+						catch {}
+						reject(new scope.Error(`openWindow: ${e?.message || e}`));
+					}
 				}, { once: true });
 			});
 		},
