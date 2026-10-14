@@ -855,12 +855,6 @@
 			};
 		}
 
-		/**
-		 * A read takes the same path from an address to a target as a commit entry does
-		 * @param {string} type
-		 * @param {{ id?: number, libraryID?: number, key?: string }} address - An ID, or a library and key
-		 * @returns {Promise<object>} The snapshot; NotFound otherwise
-		 */
 		// The core refuses data in memory; a save, an operation that runs against the database (needsID,
 		// terminal) or any step of a deferred type fails for other reasons
 		_isCallerError(e, { entry, kind, op }) {
@@ -870,6 +864,12 @@
 			return !op || !(op.def.needsID || op.def.terminal);
 		}
 
+		/**
+		 * A read takes the same path from an address to a target as a commit entry does
+		 * @param {string} type
+		 * @param {{ id?: number, libraryID?: number, key?: string }} address - An ID, or a library and key
+		 * @returns {Promise<object>} The snapshot; NotFound otherwise
+		 */
 		async _getSnapshot(type, { id, libraryID, key }) {
 			let def = this._objectTypes.get(type);
 			let address = def.address.plan({ type, id, libraryID, key }, {}, this._fail());

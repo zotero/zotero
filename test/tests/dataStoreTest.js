@@ -146,8 +146,11 @@ describe("Zotero.DataStore", function () {
 				codes.INVALID_PARAMS);
 		});
 
-		it("should refuse to expect a revision on an object the set creates", function () {
+		it("should refuse to expect a revision on an object the set creates", async function () {
 			assert.throws(() => CS.item({ libraryID, itemType: "book" }).expect(1), /no revision/);
+			await failing(Zotero.DataStore.commit({
+				type: "item", ref: "a", create: { libraryID, itemType: "book" }, revision: 1, ops: [],
+			}), codes.INVALID_PARAMS);
 		});
 	});
 
