@@ -303,6 +303,9 @@ class GrantLayer {
 class SessionGrantLayer extends GrantLayer {
 	_cache = new Map();
 
+	// Calls sharing the session; it ends when the last returns
+	callers = 0;
+
 	donePromise = null;
 
 	resolveDone = null;
@@ -542,29 +545,19 @@ class FileAccessState {
 		}
 	}
 
+	/**
+	 * Run fn inside this plugin's grant session, joining the one already running: a nested call could
+	 * otherwise only wait for itself, so the session ends with the last of its calls instead
+	 */
 	async withSession(fn, options = {}) {
 		let timeout = options.timeout || DEFAULT_SESSION_TIMEOUT_MS;
 
-		while (this.activeSession) {
-			let waitHandle;
-			try {
-				await Promise.race([
-					this.waitForSession(),
-					new Promise((_, reject) => {
-						waitHandle = setTimeout(
-							() => reject(new Error(`Timed out waiting for active session to end for plugin ${this.pluginID}`)),
-							timeout,
-						);
-					}),
-				]);
-			}
-			finally {
-				clearTimeout(waitHandle);
-			}
+		let session = this.activeSession;
+		if (!session) {
+			session = new SessionGrantLayer();
+			this.activeSession = session;
 		}
-
-		let session = new SessionGrantLayer();
-		this.activeSession = session;
+		session.callers++;
 
 		let runTimeoutHandle;
 		let runTimeout = new Promise((_, reject) => {
@@ -582,14 +575,16 @@ class FileAccessState {
 		}
 		finally {
 			clearTimeout(runTimeoutHandle);
-			if (this.activeSession === session) {
-				this.activeSession = null;
+			if (--session.callers === 0) {
+				if (this.activeSession === session) {
+					this.activeSession = null;
+				}
+				session.resolveDone();
+				// If the session ends with a prompt still open (e.g. timeout
+				// abandoned the fn mid-await), close it. The user shouldn't be
+				// left staring at a prompt whose answer can no longer matter.
+				this._closeOpenPrompts(session);
 			}
-			session.resolveDone();
-			// If the session ends with a prompt still open (e.g. timeout
-			// abandoned the fn mid-await), close it. The user shouldn't be
-			// left staring at a prompt whose answer can no longer matter.
-			this._closeOpenPrompts(session);
 		}
 	}
 
