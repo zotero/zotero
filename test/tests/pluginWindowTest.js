@@ -146,12 +146,39 @@ describe("Plugin windows", function () {
 				"<!DOCTYPE html><html><head><title>Echo</title></head>"
 				+ '<body><script src="echo.js"></script></body></html>'
 			);
-			// Fixed-size page larger than its window features, for fitContent
+			// Page asking for a size larger than its window features, for allowResize; it records the outcome
+			await FileIO.writeUTF8(
+				PathUtils.join(tmpDir, "fixed-size.js"),
+				"zoteroHost.api.resize({ width: 500, height: 400 }).then(\n"
+				+ "  function (applied) { document.body.dataset.resize = JSON.stringify(applied); },\n"
+				+ "  function (e) { document.body.dataset.resize = e.message; }\n"
+				+ ");\n"
+			);
 			await FileIO.writeUTF8(
 				PathUtils.join(tmpDir, "fixed-size.html"),
 				"<!DOCTYPE html><html><head><title>Fixed</title>"
 				+ "<style>html, body { margin: 0; padding: 0; }</style></head>"
-				+ "<body><div style='width: 500px; height: 400px;'></div></body></html>"
+				+ "<body><div style='width: 500px; height: 400px;'></div>"
+				+ '<script src="fixed-size.js"></script></body></html>'
+			);
+			// The same, asking for both axes and then the height alone
+			await FileIO.writeUTF8(
+				PathUtils.join(tmpDir, "fixed-height.js"),
+				"function record(name, promise) {\n"
+				+ "  return promise.then(\n"
+				+ "    function (applied) { document.body.dataset[name] = JSON.stringify(applied); },\n"
+				+ "    function (e) { document.body.dataset[name] = e.message; }\n"
+				+ "  );\n"
+				+ "}\n"
+				+ "record('both', zoteroHost.api.resize({ width: 500, height: 400 }))\n"
+				+ "  .then(function () { return record('height', zoteroHost.api.resize({ height: 400 })); });\n"
+			);
+			await FileIO.writeUTF8(
+				PathUtils.join(tmpDir, "fixed-height.html"),
+				"<!DOCTYPE html><html><head><title>Fixed height</title>"
+				+ "<style>html, body { margin: 0; padding: 0; }</style></head>"
+				+ "<body><div style='width: 500px; height: 400px;'></div>"
+				+ '<script src="fixed-height.js"></script></body></html>'
 			);
 			// A page whose external script probes for privileged APIs
 			await FileIO.writeUTF8(
@@ -616,23 +643,92 @@ describe("Plugin windows", function () {
 			}
 		});
 
-		it("should fit the window to the page content with fitContent", async function () {
+		it("should let the page size its window with allowResize", async function () {
 			loadTestScopeWithURI(["default", "window"]);
 			await plugin.eval(`
-					openPluginWindow({ url: 'fixed-size.html', features: { width: 300, height: 200 }, fitContent: true })
+					openPluginWindow({ url: 'fixed-size.html', features: { width: 300, height: 200 }, allowResize: { height: true, width: true } })
 						.then(function (win) { _win = win; });
 				`);
 			let browsers = getPluginWindowBrowsers();
 			let browser = browsers[browsers.length - 1];
 			try {
-				// The page actor reports the document scroll size and the
-				// wrapper window follows once the size is applied
-				for (let i = 0; i < 100 && browser.getBoundingClientRect().width < 499; i++) {
-					await Zotero.Promise.delay(20);
-				}
+				// The page sizes its browser and the wrapper window follows
+				await waitForCallback(() => browser.contentDocument?.body?.dataset.resize, 20, 2);
+				assert.deepEqual(JSON.parse(browser.contentDocument.body.dataset.resize), { width: 500, height: 400 });
 				let rect = browser.getBoundingClientRect();
-				assert.approximately(rect.width, 500, 2, "browser should take the content width");
-				assert.approximately(rect.height, 400, 2, "browser should take the content height");
+				assert.approximately(rect.width, 500, 2, "browser should take the width asked for");
+				assert.approximately(rect.height, 400, 2, "browser should take the height asked for");
+				assert.isAtLeast(browser.ownerDocument.defaultView.innerHeight, 400, "window should fit around the browser");
+			}
+			finally {
+				await closeWin();
+			}
+		});
+
+		it("should let the page size its window on the allowed axes only", async function () {
+			loadTestScopeWithURI(["default", "window"]);
+			await plugin.eval(`
+					openPluginWindow({ url: 'fixed-height.html', features: { width: 300, height: 200 }, allowResize: { height: true } })
+						.then(function (win) { _win = win; });
+				`);
+			let browsers = getPluginWindowBrowsers();
+			let browser = browsers[browsers.length - 1];
+			try {
+				await waitForCallback(() => browser.contentDocument?.body?.dataset.height, 20, 2);
+				let { dataset } = browser.contentDocument.body;
+				assert.include(dataset.both, "The width can't be set here");
+				assert.deepEqual(JSON.parse(dataset.height), { height: 400 });
+				let rect = browser.getBoundingClientRect();
+				assert.approximately(rect.width, 300, 2, "the width the page may not set stays");
+				assert.approximately(rect.height, 400, 2);
+			}
+			finally {
+				await closeWin();
+			}
+		});
+
+		it("should not let the page size a window opened without allowResize", async function () {
+			loadTestScopeWithURI(["default", "window"]);
+			await plugin.eval(`
+					openPluginWindow({ url: 'fixed-size.html', features: { width: 300, height: 200 } })
+						.then(function (win) { _win = win; });
+				`);
+			let browsers = getPluginWindowBrowsers();
+			let browser = browsers[browsers.length - 1];
+			try {
+				await waitForCallback(() => browser.contentDocument?.body?.dataset.resize, 20, 2);
+				assert.include(browser.contentDocument.body.dataset.resize, "Unknown host API");
+				let rect = browser.getBoundingClientRect();
+				assert.approximately(rect.width, 300, 2);
+				assert.approximately(rect.height, 200, 2);
+			}
+			finally {
+				await closeWin();
+			}
+		});
+
+		it("should size an iframe host as the page asks", async function () {
+			let { loadEmbeddedPluginPage } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/embeddedPage.mjs");
+			await FileIO.writeUTF8(
+				PathUtils.join(tmpDir, "sized.js"),
+				"zoteroHost.api.resize({ width: 200, height: 120 });\n"
+			);
+			await FileIO.writeUTF8(
+				PathUtils.join(tmpDir, "sized.html"),
+				"<!DOCTYPE html><html><head><title>Sized</title></head>"
+				+ '<body><script src="sized.js"></script></body></html>'
+			);
+			loadTestScopeWithURI(["default", "window"]);
+			// A content page hosts plugin pages in iframes, as the reader does
+			await plugin.eval("openPluginWindow({ url: 'test.html' }).then(function (win) { _win = win; })");
+			let doc = getLastPluginWindowContent().document;
+			try {
+				let { element } = await loadEmbeddedPluginPage(doc.body, Zotero.Plugins.getBaseURI(plugin.id) + "sized.html", {
+					resize: { height: true, width: true },
+				});
+				await waitForCallback(() => element.contentWindow.innerHeight === 120, 20, 5);
+				assert.equal(element.contentWindow.innerWidth, 200);
+				assert.equal(element.style.height, "120px");
 			}
 			finally {
 				await closeWin();
