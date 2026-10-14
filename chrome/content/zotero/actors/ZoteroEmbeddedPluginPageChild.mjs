@@ -5,6 +5,10 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 	
 	_resizeAxes = { height: false, width: false };
 	
+	_resizeContent = false;
+	
+	_lastSize = null;
+	
 	_pageListeners = new Set();
 	
 	_injected = false;
@@ -22,7 +26,12 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 				break;
 			case "startAutoResize":
 				this._resizeAxes = { height: !!data.height, width: !!data.width };
+				this._resizeContent = !!data.content;
 				this._startAutoResize();
+				break;
+			case "stopAutoResize":
+				this._resizeObserver?.disconnect();
+				this._resizeObserver = null;
 				break;
 		}
 	}
@@ -79,19 +88,37 @@ export class ZoteroEmbeddedPluginPageChild extends JSWindowActorChild {
 		if (!root) {
 			return;
 		}
-		// A root that only fills the viewport (auto width, 100% height) echoes viewport
-		// changes back and spirals when a scrollbar appears, so report only sizes the
-		// page expresses itself; ceil so a fractional size can't leave 1px of overflow
-		let rect = root.getBoundingClientRect();
 		let size = {};
-		if (this._resizeAxes.height && Math.abs(rect.height - root.clientHeight) > 1) {
-			size.height = Math.ceil(rect.height);
+		if (this._resizeContent) {
+			// Full document scroll size, for a host that fits itself to the page
+			if (this._resizeAxes.height) {
+				size.height = root.scrollHeight;
+			}
+			if (this._resizeAxes.width) {
+				size.width = root.scrollWidth;
+			}
 		}
-		if (this._resizeAxes.width && Math.abs(rect.width - root.clientWidth) > 1) {
-			size.width = Math.ceil(rect.width);
+		else {
+			// A viewport-filling root echoes viewport changes back and spirals when a
+			// scrollbar appears, so report only sizes the page expresses itself (ceiled)
+			let rect = root.getBoundingClientRect();
+			if (this._resizeAxes.height && Math.abs(rect.height - root.clientHeight) > 1) {
+				size.height = Math.ceil(rect.height);
+			}
+			if (this._resizeAxes.width && Math.abs(rect.width - root.clientWidth) > 1) {
+				size.width = Math.ceil(rect.width);
+			}
 		}
-		if ("height" in size || "width" in size) {
-			this.sendAsyncMessage("resize", size);
+		if (!("height" in size) && !("width" in size)) {
+			return;
 		}
+		// Skip repeats so a viewport echo can't ping-pong with the parent
+		if (this._lastSize
+				&& this._lastSize.height === size.height
+				&& this._lastSize.width === size.width) {
+			return;
+		}
+		this._lastSize = size;
+		this.sendAsyncMessage("resize", size);
 	}
 }
