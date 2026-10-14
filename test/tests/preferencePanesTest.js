@@ -21,6 +21,7 @@ describe("Zotero.PreferencePanes", function () {
 
 	before(async function () {
 		tmpDir = await getTempDirectory();
+		// The page keeps its browser at its root height through zoteroHost.api.resize
 		await FileIO.writeUTF8(
 			PathUtils.join(tmpDir, "pane-script.js"),
 			"document.getElementById('embedded-pane-marker').setAttribute('data-script-ran', 'true');\n"
@@ -29,6 +30,9 @@ describe("Zotero.PreferencePanes", function () {
 			+ "    zoteroHost.sendMessage({ type: 'pong', value: data.value });\n"
 			+ "  }\n"
 			+ "});\n"
+			+ "new ResizeObserver(function () {\n"
+			+ "  zoteroHost.api.resize({ height: Math.ceil(document.documentElement.getBoundingClientRect().height) });\n"
+			+ "}).observe(document.documentElement);\n"
 		);
 		await FileIO.writeUTF8(
 			PathUtils.join(tmpDir, "prefs.html"),
@@ -166,7 +170,7 @@ describe("Zotero.PreferencePanes", function () {
 		}
 	});
 
-	it("should sync the embedded browser height with the page height", async function () {
+	it("should size the embedded browser as the page asks", async function () {
 		loadPrefPaneTestScope();
 		let paneID = await registerTestPane();
 		let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });

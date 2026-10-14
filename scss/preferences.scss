@@ -92,7 +92,7 @@
 		display: none;
 	}
 
-	// Embedded plugin pane browsers are sized to their page's root height
+	// Embedded plugin pane browsers are sized by their page (zoteroHost.api.resize)
 	& > .pane-container.embedded .plugin-pane-browser {
 		flex-shrink: 0;
 	}

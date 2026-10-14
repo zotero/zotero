@@ -33,7 +33,7 @@
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		loadPluginPageInBrowser: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		sanitizeWindowFeatures: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
-		stopAutoResize: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
+		resizeHost: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
@@ -94,7 +94,7 @@
 	 * @property {{ windowID: number }} closeWindow
 	 * @property {{ windowID: number, pane: "start" | "end", open?: boolean }} togglePane
 	 * @property {{ type: "reader" | "note" | "preferencePane", itemID?: number, location?: object }} openWindow
-	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, fitContent?: boolean, parentWindowID?: number }} openPluginWindow
+	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, allowResize?: { height?: boolean, width?: boolean }, parentWindowID?: number }} openPluginWindow
 	 *
 	 *
 	 * @typedef {object} WindowControllerCommandResults
@@ -167,7 +167,13 @@
 							},
 							name: { type: "string", optional: true },
 							notitle: { type: "boolean", optional: true },
-							fitContent: { type: "boolean", optional: true },
+							allowResize: {
+								type: "object",
+								optional: true,
+								checkHook: value => (value !== null && !Array.isArray(value)
+									&& Object.entries(value).every(([axis, v]) => ["height", "width"].includes(axis) && typeof v === "boolean"))
+									|| "allowResize takes a boolean height and width only",
+							},
 							parentWindowID: { type: "number", optional: true },
 						},
 						scopedResult: true,
@@ -343,7 +349,7 @@
 		 * @param {WindowControllerCommandParams["openPluginWindow"] & { pluginID?: string }} params
 		 * @returns {Promise<PluginWindowHandle>} Wrapped for the plugin's scope
 		 */
-		async _openPluginWindow({ url, features, name, notitle, fitContent, parentWindowID, pluginID }) {
+		async _openPluginWindow({ url, features, name, notitle, allowResize, parentWindowID, pluginID }) {
 			// Only a sandbox caller has a plugin whose pages this can open
 			if (!pluginID) {
 				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, "Only a plugin can open its own window");
@@ -352,8 +358,7 @@
 			if (!resolved) {
 				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'url' must be an .html page within the plugin: ${url}`);
 			}
-			let { str: safeFeatures, values: featureValues } = lazy.sanitizeWindowFeatures(features);
-			let resizable = featureValues.resizable !== false;
+			let { str: safeFeatures } = lazy.sanitizeWindowFeatures(features);
 			// A parent window is the opener, the screen and scale the position features resolve
 			// against, and the owner of a dependent window
 			let parent = parentWindowID === undefined ? null : lazy.WindowUtils.getWindow(parentWindowID, undefined, pluginID);
@@ -369,18 +374,32 @@
 			try {
 				let browser = win.document.getElementById("plugin-browser");
 				win.PluginWindow.init(name, pluginID);
+				// The page controls its own window as zoteroHost.api.<name>(params)
+				let hostAPI = {
+					close: () => win.close(),
+					moveTo: ({ x, y }) => win.moveTo(x, y),
+					getState: () => lazy.WindowUtils.getWindowState(win),
+				};
+				if (allowResize?.height || allowResize?.width) {
+					// The page sizes its window: the browser takes the size and the wrapper fits around it
+					hostAPI.resize = (params) => {
+						// Fixed at its current size as it leaves flex, so the window keeps what the page doesn't set
+						if (browser.hasAttribute("flex")) {
+							let { width, height } = browser.getBoundingClientRect();
+							browser.style.width = width + "px";
+							browser.style.height = height + "px";
+							browser.removeAttribute("flex");
+						}
+						let applied = lazy.resizeHost(browser, allowResize, params);
+						win.sizeToContent();
+						return applied;
+					};
+				}
 				let { messenger, dispose } = await lazy.loadPluginPageInBrowser(browser, resolved, {
 					channel: true,
 					pluginID,
 					tracePath: `${PLUGIN_WINDOW_TRACE_PATH}.page`,
-					// The page actor keeps the browser at the document scroll size
-					autoResize: fitContent ? { height: true, width: true, content: true } : {},
-					// The page controls its own window as zoteroHost.api.<name>(params)
-					hostAPI: {
-						close: () => win.close(),
-						moveTo: ({ x, y }) => win.moveTo(x, y),
-						getState: () => lazy.WindowUtils.getWindowState(win),
-					},
+					hostAPI,
 				});
 				if (!messenger) {
 					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `Failed to load ${url}`);
@@ -393,9 +412,6 @@
 					event.preventDefault();
 				});
 				browser.focus();
-				if (fitContent) {
-					this._fitPluginWindow(win, browser, resizable);
-				}
 				return lazy.ScopeVariables.toScope({
 					page: messenger,
 					windowID: lazy.WindowUtils.getWindowID(win),
@@ -408,31 +424,6 @@
 				}
 				throw e;
 			}
-		}
-
-		/**
-		 * Size the wrapper to the page once the actor applies the first content size; a resizable
-		 * window is then left to the user, a fixed one keeps following the content
-		 * @param {Window} win
-		 * @param {XULElement} browser
-		 * @param {boolean} resizable
-		 */
-		_fitPluginWindow(win, browser, resizable) {
-			let mo = new win.MutationObserver(() => {
-				mo.disconnect();
-				browser.removeAttribute("flex");
-				win.sizeToContent();
-				if (resizable) {
-					lazy.stopAutoResize(browser);
-				}
-				else {
-					let ro = new win.ResizeObserver(Zotero.Utilities.debounce(() => win.sizeToContent(), 100));
-					ro.observe(browser);
-					win.addEventListener("unload", () => ro.disconnect(), { once: true });
-				}
-			});
-			mo.observe(browser, { attributes: true, attributeFilter: ["style"] });
-			win.addEventListener("unload", () => mo.disconnect(), { once: true });
 		}
 
 		/**
