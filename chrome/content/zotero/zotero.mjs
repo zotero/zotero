@@ -121,6 +121,7 @@ const xpcomFilesLocal = [
 	'pluginAPI/itemTreeManager',
 	'pluginAPI/windowResourceManager',
 	'pluginAPI/pluginInteropManager',
+	'pluginAPI/pluginInteropController',
 	'pluginAPI/windowController',
 	'pluginAPI/tabController',
 	'pluginAPI/clipboardController',
