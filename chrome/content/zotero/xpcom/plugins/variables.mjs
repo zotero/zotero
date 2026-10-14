@@ -278,6 +278,29 @@ const ScopeVariables = {
 	},
 
 	/**
+	 * Enforce a trusted property on a parser arg by rebuilding it as a fresh chrome
+	 * object -- an in-place write can be dropped by a plugin accessor or Proxy trap.
+	 *
+	 * @param {Array} args - The parser's args array (mutated in place)
+	 * @param {number} index - Index of the option object in args
+	 * @param {string} key - Property to enforce
+	 * @param {*} value - Trusted value to assign
+	 */
+	assignTrustedArg(args, index, key, value) {
+		let original = args[index];
+		if (!VarCheck.isObject(original)) {
+			return;
+		}
+		let copy = {};
+		for (let k of Object.keys(original)) {
+			if (k === key) continue;
+			copy[k] = original[k];
+		}
+		copy[key] = value;
+		args[index] = copy;
+	},
+
+	/**
 	 * Wrap a host function using a custom arg parser attached on the
 	 * function itself via `setCustomParser`.
 	 */

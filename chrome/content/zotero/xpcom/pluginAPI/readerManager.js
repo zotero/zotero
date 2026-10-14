@@ -428,9 +428,7 @@
 	};
 
 	let injectRegister = ({ pluginID, args }) => {
-		if (args[0] && typeof args[0] === "object") {
-			args[0].pluginID = pluginID;
-		}
+		lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
 	};
 	let injectUnregister = ({ pluginID, args }) => {
 		args[1] = pluginID;
