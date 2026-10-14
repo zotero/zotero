@@ -30,6 +30,7 @@
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
+		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 	});
 
 	const FILE_FLAVOR = "application/x-moz-file";
@@ -38,9 +39,10 @@
 	const KNOWN_FLAVORS = Object.freeze(["text/plain", "text/html", FILE_FLAVOR, IMAGE_FLAVOR]);
 
 	// How each flavor may be asked for, the first entry by default, mapped to the core reader's data type; a
-	// text flavor holds a string, which the core reader cannot give as bytes
+	// text flavor holds a string, which the core reader cannot give as bytes. A file is only its path: its
+	// content goes through Zotero.FileStore and its access gate
 	const FORMS = Object.freeze({
-		[FILE_FLAVOR]: { path: "path", text: "string", bytes: "binary" },
+		[FILE_FLAVOR]: { path: "path" },
 		[IMAGE_FLAVOR]: { bytes: "binary", base64: "string" },
 		other: { text: "string" },
 	});
@@ -54,11 +56,12 @@
 	 *
 	 * @typedef {object} ClipboardControllerQueryResults
 	 * @property {{ flavors: string[] }} flavors - Those present, of the ones asked about
-	 * @property {{ data: string | Uint8Array | null }} read - A file is its canonical path unless asked for its content
+	 * @property {{ data: string | Uint8Array | null }} read - A file is its canonical path
 	 *
 	 *
 	 * @typedef {object} ClipboardControllerCommandParams
-	 * @property {{ data: Record<string, string | Uint8Array> }} write - Flavor -> value; a file flavor takes a canonical path
+	 * @property {{ data: Record<string, string | Uint8Array> }} write - Flavor -> value; a file flavor takes the
+	 *     canonical path of a file the plugin may read
 	 *
 	 *
 	 * @typedef {object} ClipboardControllerCommandResults
@@ -85,8 +88,8 @@
 					write: {
 						permissions: "clipboardWrite",
 						params: { data: { type: "object", checkHook: data => Object.keys(data).length > 0 || "must hold at least one flavor" } },
-						handler: ({ data }) => {
-							Zotero.Utilities.Internal.copyToClipboard(this._native(data));
+						handler: async ({ data }, { caller }) => {
+							Zotero.Utilities.Internal.copyToClipboard(await this._native(data, caller));
 							return {};
 						},
 					},
@@ -116,12 +119,30 @@
 			return form === "bytes" ? new Uint8Array(data) : data;
 		}
 
-		// A file flavor's value is a canonical path here and a native one for the core writer
-		_native(data) {
+		// A file flavor's value is a canonical path here and a native one for the core writer; a sandbox caller may
+		// only place a file it could read, since a paste, even into its own page, hands the file over
+		async _native(data, caller) {
+			let { INVALID_PARAMS, PERMISSION_DENIED } = lazy.ControllerAPIBase.errorCodes;
 			let out = { ...data };
-			if (typeof out[FILE_FLAVOR] === "string") {
-				out[FILE_FLAVOR] = lazy.PathIdentity.toNative(lazy.PathIdentity.canonicalize(out[FILE_FLAVOR]));
+			if (!Object.hasOwn(out, FILE_FLAVOR)) {
+				return out;
 			}
+			let path;
+			try {
+				path = lazy.PathIdentity.canonicalize(out[FILE_FLAVOR]);
+			}
+			catch (e) {
+				this._throw(INVALID_PARAMS, `'${FILE_FLAVOR}': ${e.message}`);
+			}
+			if (caller.pluginID && !caller.privileged) {
+				try {
+					await lazy.PluginFileAccess.check(caller.pluginID, path, "read");
+				}
+				catch (e) {
+					this._throw(PERMISSION_DENIED, e.message);
+				}
+			}
+			out[FILE_FLAVOR] = lazy.PathIdentity.toNative(path);
 			return out;
 		}
 	}
