@@ -78,6 +78,10 @@ Zotero.Embeddings = new function () {
 		}
 	};
 
+	// The oldest chunker whose cut still stands: raise it to reindex what an
+	// older one cut, gradually. Never above the chunker the worker ships.
+	this.MIN_CHUNKER_VERSION = 1;
+
 	const TASK_NAME = 'feature-extraction';
 	// Identifies our engine to the inference runtime, and the model files it
 	// caches for us
@@ -1229,6 +1233,9 @@ Zotero.Embeddings.Indexing = new function () {
 	// Attachments whose pack a run of this session has made sure of, so
 	// that later runs don't check for it again
 	let _packed = new Set();
+	// How many chunks each attachment measured this session cuts into, until
+	// its rows are stored
+	let _measured = new Map();
 
 	// Pacing
 	//
@@ -1253,11 +1260,6 @@ Zotero.Embeddings.Indexing = new function () {
 	// reads and cuts a document per attachment, seconds apiece on a cold
 	// cache, and nothing is stored or reported until the first drain.
 	const EMBED_POOL_FILL_MAX = 3000;
-	// The oldest chunker whose cut is still kept. Rows cut here by an older
-	// one are dropped at reconcile and the attachment is indexed anew, so a
-	// chunker change that matters is forced through by raising this to the
-	// new version; one that doesn't leaves it be, and existing rows stand.
-	const MIN_CHUNKER_VERSION = 1;
 	// Most texts per engine call, whatever the token budget allows
 	const MAX_BATCH_TEXTS = 20;
 
@@ -1634,8 +1636,8 @@ Zotero.Embeddings.Indexing = new function () {
 				// gives way to a kick starts over once the items are seen to.
 				let finished = await _reconcileAttachments()
 					&& await _extractAttachments()
-					&& await _cutAttachments()
-					&& await _embedAttachments();
+					&& await _measureAttachments()
+					&& await _indexAttachments();
 				// Over, unless a kick landed meanwhile
 				if (finished && !_kicked) {
 					break;
@@ -1782,9 +1784,9 @@ Zotero.Embeddings.Indexing = new function () {
 	}
 
 	// Reconcile: whether what's stored still holds. An attachment loses
-	// everything stored when its file is gone, its rows were cut by a chunker
-	// older than MIN_CHUNKER_VERSION, or its file's content changed; one with
-	// the same content under a new file key keeps its rows.
+	// everything stored when its file is gone or its file's content changed;
+	// one with the same content under a new file key keeps its rows. Rows
+	// cut by an outdated chunker stand until the index step replaces them.
 	//
 	// @return {Promise<Boolean>} - Whether it got to the end
 	async function _reconcileAttachments() {
@@ -1795,10 +1797,6 @@ Zotero.Embeddings.Indexing = new function () {
 					return false;
 				}
 				if (!record?.sourceKey) {
-					continue;
-				}
-				if (_chunkerVersionOf(record.extractor) < MIN_CHUNKER_VERSION) {
-					await Store.deleteItems([item.id]);
 					continue;
 				}
 				let sourceKey = await Sources.getAttachmentSourceKey(item);
@@ -1829,19 +1827,12 @@ Zotero.Embeddings.Indexing = new function () {
 			|| contentHash === await Sources.getAttachmentTextHash(item);
 	}
 
-	// The chunker's version in an extractor identity ('pdf/3/1/1' -> 1), or
-	// Infinity for rows not cut here, which no chunker of this client's
-	// outdates
-	function _chunkerVersionOf(extractor) {
-		let version = parseInt(extractor?.split('/').at(-1));
-		return Number.isNaN(version) ? Infinity : version;
-	}
-
 	// Extract: every attachment's text cached as a pack, the server's
 	// included, so no preview waits on an extraction; rows that arrived
-	// before their file are adopted. Only attachments not packed this session
-	// or looked at since saved are asked about, then stamped. The engine goes
-	// down first, since extraction competes with it for the same cores.
+	// before their file are adopted. Only attachments not packed this
+	// session, looked at since saved, or due to be cut again are asked
+	// about, then stamped. The engine goes down first, since extraction
+	// competes with it for the same cores.
 	async function _extractAttachments() {
 		let { Sources, Store } = Zotero.Embeddings.Indexing;
 		let engineDown = false;
@@ -1852,15 +1843,15 @@ Zotero.Embeddings.Indexing = new function () {
 				if (_shouldStop()) {
 					return false;
 				}
-				let { item, record, rows, pending, clientDateModified } = payload;
+				let { item, record, rows, stale, clientDateModified } = payload;
 				let adopt = rows > 0 && !record?.sourceKey;
 				let lookedAt = record?.clientDateModified === clientDateModified;
-				if (!adopt && !pending && (_packed.has(item.id) || lookedAt)) {
+				if (!adopt && (_packed.has(item.id) || (lookedAt && !stale))) {
 					seen.push({ itemID: item.id, clientDateModified });
 					continue;
 				}
 				let sourceKey = await Sources.getAttachmentSourceKey(item);
-				if (sourceKey && (adopt || pending > 0 || !await Zotero.SDT.isCached(item.id))) {
+				if (sourceKey && (adopt || stale || !await Zotero.SDT.isCached(item.id))) {
 					work.push({ ...payload, sourceKey, adopt });
 				}
 				else {
@@ -1911,71 +1902,45 @@ Zotero.Embeddings.Indexing = new function () {
 		}
 	}
 
-	// Cut: this client's attachments cut into chunks, a row per chunk with
-	// its anchor and the vector still to come. The attachments that want
-	// cutting, less the server's -- whose rows are never cut over -- and
-	// those without a file.
-	async function _cutAttachments() {
-		let { Sources } = Zotero.Embeddings.Indexing;
-		let extractors = await Sources.getExtractors();
-		return _forEachPage(async (page) => {
-			let work = [];
-			for (let payload of page.filter(p => !_isServers(p) && _needsCut(p, extractors))) {
-				if (_shouldStop()) {
-					return false;
+	// Measure: how many chunks the attachments to index here cut into, so
+	// the run knows its total before the engine comes up. Each is cut once
+	// until its rows are stored. Nothing else about the run depends on this
+	// step.
+	async function _measureAttachments() {
+		let { Sources, Progress } = Zotero.Embeddings.Indexing;
+		let total = 0;
+		let finished = await _forEachPage(async (page) => {
+			let own = page.filter(payload => !_isServers(payload) && _wantsIndexing(payload));
+			return _forEachAttachment('preparing', own, async ({ item }) => {
+				let chunks = _measured.get(item.id);
+				if (chunks === undefined) {
+					// Without a file there's nothing to cut, as the index
+					// step finds too
+					if (!await Sources.getAttachmentSourceKey(item)) {
+						return;
+					}
+					let result = await Sources.getAttachmentChunks(item);
+					if (result?.failed) {
+						return;
+					}
+					chunks = result ? result.chunks.length : 0;
+					_measured.set(item.id, chunks);
 				}
-				let sourceKey = await Sources.getAttachmentSourceKey(payload.item);
-				if (!sourceKey) {
-					continue;
-				}
-				work.push({ ...payload, sourceKey, extractor: await Sources.getExtractor(payload.item) });
-			}
-			if (work.length) {
-				Zotero.debug(`Embeddings: cutting ${_count(work.length, 'attachment')}`);
-			}
-			return _forEachAttachment('preparing', work, async (payload) => {
-				await _chunkAttachment(payload);
+				total += chunks;
 			});
 		});
+		Zotero.debug(`Embeddings: ${_count(total, 'chunk')} to embed here`);
+		Progress.setChunkWork(total);
+		return finished;
 	}
 
-	// Cut one attachment into a row per chunk with its anchor, the vector
-	// still to come. Rows for the same content stay when this extractor cut
-	// them, so an interrupted attachment resumes, or when they're complete,
-	// since anchors hold across extractors. Anything else stored goes.
-	async function _chunkAttachment({ item, sourceKey, extractor, record, rows, pending, clientDateModified }) {
-		let { Store, Sources } = Zotero.Embeddings.Indexing;
-		let result = await Sources.getAttachmentChunks(item);
-		// Not known right now: left as it is, to be cut on a later run
-		if (result?.failed) {
-			return;
-		}
-		let chunks = result ? result.chunks : [];
-		let contentHash = result ? result.contentHash : null;
-		await Zotero.DB.executeTransaction(async function () {
-			let keep = rows > 0 && record?.contentHash === contentHash;
-			if (keep && record.extractor !== extractor) {
-				if (!pending) {
-					await Store.setSource(item.id, {
-						sourceKey, contentHash, extractor: record.extractor, clientDateModified
-					});
-					return;
-				}
-				keep = false;
-			}
-			await Store.deleteRows(item.id, keep ? chunks.length : 0);
-			for (let [chunkIndex, chunk] of chunks.entries()) {
-				await Store.insertPendingRow(item.id, chunkIndex, chunk.anchor);
-			}
-			await Store.setSource(item.id, { sourceKey, contentHash, extractor, clientDateModified });
-		});
-	}
-
-	// Embed here: every chunk cut here without a vector gets one, the
-	// server's attachments aside. Chunks pool across attachments and pages
-	// and are sorted by length before they go to the engine. Rows are written
-	// as each batch lands, so an interrupted attachment resumes from them.
-	async function _embedAttachments() {
+	// Index here: this client's attachments that want it, each cut once and
+	// embedded, its rows replaced as a unit once every chunk has a vector,
+	// so what it had scores until then. Chunks pool across attachments and
+	// pages and are sorted by length before they go to the engine. Nothing
+	// survives the step giving way but what was stored: an attachment it
+	// was partway through is done over on the next pass.
+	async function _indexAttachments() {
 		let { Progress } = Zotero.Embeddings.Indexing;
 		let started = false;
 		let pool = [];
@@ -1996,30 +1961,38 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				let batch = _nextBatch(units, i);
 				i += batch.length;
-				await _storeAttachmentBatch(batch, await _embedBatch(batch));
+				let vectors = await _embedBatch(batch);
+				let completed = [];
+				batch.forEach((unit, j) => {
+					unit.entry.vectors[unit.chunkIndex] = Zotero.Embeddings.prepare(vectors[j]);
+					if (--unit.entry.remaining === 0) {
+						completed.push(unit.entry);
+					}
+				});
+				await _storeAttachments(completed);
+				Progress.addChunksDone(batch.length);
+				await Progress.tick();
 				// Yield so the UI thread stays responsive between batches
 				await Zotero.Promise.delay(0);
 			}
 			return true;
 		};
 		let finished = await _forEachPage(async (page) => {
-			let own = page.filter(payload => !_isServers(payload) && payload.pending > 0);
+			let own = page.filter(payload => !_isServers(payload) && _wantsIndexing(payload));
 			if (!own.length) {
 				return true;
 			}
-			let ownChunks = own.reduce((sum, { pending }) => sum + pending, 0);
 			// Ones the server declined are this client's
 			let declined = own.filter(payload => payload.record?.syncDeclined).length;
-			Zotero.debug(`Embeddings: page of ${_count(own.length, 'attachment')} to embed here `
-				+ `(${ownChunks} chunks)`
+			Zotero.debug(`Embeddings: page of ${_count(own.length, 'attachment')} to index here`
 				+ (declined ? `, ${declined} of them declined by the server` : ''));
 			if (!started) {
 				started = true;
 				Progress.setEmbedWork({});
 			}
-			Progress.addEmbedWork({ own: own.length, ownChunks, declined });
+			Progress.addEmbedWork({ own: own.length, declined });
 			return _forEachAttachment('indexing-documents', own, async (payload) => {
-				pool.push(...await _getAttachmentUnits(payload));
+				pool.push(...await _chunkAttachment(payload));
 				if (pool.length >= EMBED_POOL_SIZE
 						|| (pool.length && Date.now() - filling >= EMBED_POOL_FILL_MAX)) {
 					await drain();
@@ -2029,53 +2002,80 @@ Zotero.Embeddings.Indexing = new function () {
 		return await drain() && finished;
 	}
 
-	// An attachment's chunks still to embed, as { text, tokens } units with
-	// what each one's row needs. The text embedded is the chunk's embedText,
-	// its own text with the outline path woven in, and each chunk carries
-	// its anchor in the document, none when cut from plain attachment text.
-	async function _getAttachmentUnits({ item, rows }) {
-		let result = await Zotero.Embeddings.Indexing.Sources.getAttachmentChunks(item);
+	// Cut one attachment and queue its chunks as { text, tokens } units,
+	// each pointing at the attachment's entry: what it was cut from, its
+	// anchors by chunk, and the vectors as they come. The text embedded is
+	// the chunk's embedText, its own text with the outline path woven in. An
+	// attachment that cuts to nothing is recorded as such right away.
+	//
+	// @return {Promise<Object[]>} - The units, none when the attachment has
+	//     no file or can't be cut right now
+	async function _chunkAttachment({ item, clientDateModified }) {
+		let { Sources } = Zotero.Embeddings.Indexing;
+		let sourceKey = await Sources.getAttachmentSourceKey(item);
+		if (!sourceKey) {
+			return [];
+		}
+		let extractor = await Sources.getExtractor(item);
+		let result = await Sources.getAttachmentChunks(item);
 		if (result?.failed) {
 			return [];
 		}
 		let chunks = result ? result.chunks : [];
-		// The pack changed since the attachment was cut, so its rows no
-		// longer describe these chunks. Skipped until a newer extractor cuts
-		// it again.
-		if (chunks.length !== rows) {
-			Zotero.debug(`Embeddings: ${item.libraryKey} cuts into ${chunks.length} chunks, `
-				+ `not the ${rows} stored -- skipping`);
+		let entry = {
+			item,
+			sourceKey,
+			extractor,
+			contentHash: result ? result.contentHash : null,
+			clientDateModified,
+			anchors: chunks.map(chunk => chunk.anchor),
+			vectors: new Array(chunks.length),
+			remaining: chunks.length
+		};
+		Zotero.debug(`Embeddings: ${item.libraryKey} cuts into ${chunks.length} chunks`);
+		if (!entry.remaining) {
+			await _storeAttachments([entry]);
 			return [];
 		}
-		let stored = await Zotero.Embeddings.Indexing.Store.getEmbeddedIndexes(item.id);
-		return chunks.flatMap((chunk, chunkIndex) => (stored.has(chunkIndex)
-			? []
-			: [{
-				text: chunk.embedText || chunk.text,
-				tokens: chunk.tokens,
-				item,
-				chunkIndex,
-				anchor: chunk.anchor
-			}]));
+		return chunks.map((chunk, chunkIndex) => ({
+			text: chunk.embedText || chunk.text,
+			tokens: chunk.tokens,
+			chunkIndex,
+			entry
+		}));
 	}
 
-	// Store a batch of attachment chunks as it lands. An attachment may have
-	// been deleted while the batch was embedding, and then its vectors
-	// aren't written back after the delete notifier removed them.
-	async function _storeAttachmentBatch(batch, vectors) {
+	// Store the rows of attachments with every chunk embedded, each
+	// replacing what it had as a unit, and record what they were cut from.
+	// One deleted meanwhile is passed over: the delete notifier removed its
+	// rows.
+	async function _storeAttachments(entries) {
+		let Store = Zotero.Embeddings.Indexing.Store;
+		if (!entries.length) {
+			return;
+		}
 		await Zotero.DB.executeTransaction(async function () {
-			for (let j = 0; j < batch.length; j++) {
-				let { item, chunkIndex, anchor } = batch[j];
+			for (let entry of entries) {
+				let itemID = entry.item.id;
+				// Stored, so no later measure pass comes by it
+				_measured.delete(itemID);
 				// Asked of the id maps, not the cache: the attachments a run
-				// embeds are loaded without being cached
-				if (!Zotero.Items.exists(item.id)) {
+				// indexes are loaded without being cached
+				if (!Zotero.Items.exists(itemID)) {
 					continue;
 				}
-				await Zotero.Embeddings.Indexing.Store.insertRow(item.id, chunkIndex,
-					Zotero.Embeddings.prepare(vectors[j]), anchor);
+				await Store.deleteRows(itemID);
+				for (let [chunkIndex, stored] of entry.vectors.entries()) {
+					await Store.insertRow(itemID, chunkIndex, stored, entry.anchors[chunkIndex]);
+				}
+				await Store.setSource(itemID, {
+					sourceKey: entry.sourceKey,
+					contentHash: entry.contentHash,
+					extractor: entry.extractor,
+					clientDateModified: entry.clientDateModified
+				});
 			}
 		});
-		await Zotero.Embeddings.Indexing.Progress.tick();
 	}
 
 	// Whether the run has been told to stop
@@ -2141,11 +2141,10 @@ Zotero.Embeddings.Indexing = new function () {
 		return Zotero.Embeddings.Sync.isServersAttachment(item, record);
 	}
 
-	// Whether an attachment wants cutting: never cut from the file here,
-	// or chunks still to embed under an extractor that is no longer among
-	// the given current identities
-	function _needsCut({ record, pending }, extractors) {
-		return !record?.sourceKey || (pending > 0 && !extractors.includes(record.extractor));
+	// Whether an attachment wants indexing here: never cut here and with
+	// no rows from anywhere, or cut by an outdated chunker
+	function _wantsIndexing({ record, rows, stale }) {
+		return stale || (!record?.extractor && !rows);
 	}
 
 
@@ -2210,8 +2209,8 @@ Zotero.Embeddings.Indexing = new function () {
 	 *
 	 * Progress comes in two disjoint pairs: `items` counts items, notes and
 	 * annotations, and `attachments` the attachments with a vector for every
-	 * chunk, wherever they were embedded. `chunks` counts the chunks cut
-	 * here, for the rate and the ETA.
+	 * chunk, wherever they were embedded. `chunks` counts what a run embeds
+	 * here, for the ETA.
 	 */
 	this.getStatus = function () {
 		return {
@@ -2309,12 +2308,24 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		return Zotero.SDT.getProcessorVersion(item);
 	};
 
-	// Every identity getExtractor() gives right now, one per kind of
-	// attachment
+	// Whether rows cut by the given extractor identity are due to be cut
+	// again: their chunker is older than the oldest kept. Rows not cut
+	// here, with no identity, never are.
+	//
+	// @param {String|null} extractor - e.g. 'pdf/3/1/1'
+	// @return {Boolean}
+	this.isOutdatedExtractor = function (extractor) {
+		let version = parseInt(extractor?.split('/').at(-1));
+		return !Number.isNaN(version) && version < Zotero.Embeddings.MIN_CHUNKER_VERSION;
+	};
+
+	// The outdated identities among those the stored rows were cut by
 	//
 	// @return {Promise<String[]>}
-	this.getExtractors = async function () {
-		return Zotero.SDT.getProcessorVersions();
+	this.getOutdatedExtractors = async function () {
+		let extractors = await Zotero.DB.columnQueryAsync(
+			"SELECT DISTINCT extractor FROM embeddings.itemIndexState WHERE extractor IS NOT NULL");
+		return extractors.filter(extractor => this.isOutdatedExtractor(extractor));
 	};
 
 	// The items, notes and annotations eligible for indexing, in the
@@ -2425,31 +2436,30 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	// One page of the outstanding attachments: at most `limit` with an id
 	// above `afterID`, in id order
 	//
-	// @return {Promise<Object[]>} - [{ item, record, rows, pending,
+	// @return {Promise<Object[]>} - [{ item, record, rows, stale,
 	//     clientDateModified }]: the item, its state row or null, its row
-	//     count, how many still want a vector, and the stamp seen
+	//     count, whether an outdated chunker cut its rows, and the stamp
+	//     seen
 	this.getOutstandingAttachments = async function (afterID, limit) {
 		// An eligible attachment is outstanding with nothing recorded, no
-		// file key, a chunk still to embed, or a save since the index last
-		// looked at it (or in the last few seconds)
-		const OUTSTANDING = "(S.itemID IS NULL OR S.sourceKey IS NULL "
-			+ "OR EXISTS (SELECT 1 FROM embeddings.itemEmbeddings E "
-				+ "WHERE E.itemID=I.itemID AND E.embedding IS NULL) "
+		// file key, rows cut by an outdated chunker, or a save since the
+		// index last looked at it (or in the last few seconds)
+		let outdated = await this.getOutdatedExtractors();
+		let outstanding = "(S.itemID IS NULL OR S.sourceKey IS NULL "
+			+ (outdated.length ? "OR S.extractor IN (" + outdated.map(() => '?').join(',') + ") " : "")
 			+ "OR S.clientDateModified IS NOT I.clientDateModified OR I.clientDateModified>=?)";
 		let rows = await Zotero.DB.queryAsync(
 			"SELECT I.itemID, I.clientDateModified, S.itemID AS stateID, S.sourceKey, "
 				+ "S.contentHash, S.extractor, S.syncVersion, S.syncDeclined, "
 				+ "S.clientDateModified AS stamp, "
 				+ "(SELECT COUNT(*) FROM embeddings.itemEmbeddings E "
-					+ "WHERE E.itemID=I.itemID) AS rowCount, "
-				+ "(SELECT COUNT(*) FROM embeddings.itemEmbeddings E "
-					+ "WHERE E.itemID=I.itemID AND E.embedding IS NULL) AS pendingCount "
+					+ "WHERE E.itemID=I.itemID) AS rowCount "
 				+ "FROM itemAttachments IA "
 				+ "JOIN items I USING (itemID) "
 				+ "LEFT JOIN embeddings.itemIndexState S ON (S.itemID=I.itemID) "
-				+ "WHERE " + _eligibleAttachmentSQL() + " AND " + OUTSTANDING + " "
+				+ "WHERE " + _eligibleAttachmentSQL() + " AND " + outstanding + " "
 				+ "AND I.itemID>? ORDER BY I.itemID LIMIT ?",
-			[_recentSaveCutoff(), afterID, limit]
+			[...outdated, _recentSaveCutoff(), afterID, limit]
 		);
 		// Loaded without caching, as file sync loads a library's files for
 		// its scan: a run reads attachments across every library, which is
@@ -2472,7 +2482,7 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 					clientDateModified: row.stamp
 				},
 			rows: row.rowCount,
-			pending: row.pendingCount
+			stale: outdated.includes(row.extractor)
 		}));
 	};
 
@@ -2484,6 +2494,20 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 				+ "WHERE " + _eligibleAttachmentSQL()
 				+ (upToID === null ? "" : " AND I.itemID<=?"),
 			upToID === null ? [] : [upToID]
+		);
+	};
+
+	// How many attachments with a file here have every chunk embedded,
+	// whoever embedded it, by a chunker that's still current
+	this.countFinishedAttachments = async function () {
+		let outdated = await this.getOutdatedExtractors();
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM embeddings.itemIndexState WHERE sourceKey IS NOT NULL"
+				+ (outdated.length
+					? " AND (extractor IS NULL OR extractor NOT IN ("
+						+ outdated.map(() => '?').join(',') + "))"
+					: ""),
+			outdated
 		);
 	};
 
@@ -2598,9 +2622,10 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		}
 	};
 
-	// How many attachments are the server's to embed and have no rows yet.
-	// Those are outstanding by definition, so this pages through the
-	// outstanding attachments, as countWithoutFiles() does.
+	// How many attachments are the server's to embed and have no rows yet,
+	// or only rows an outdated chunker cut here. Those are outstanding by
+	// definition, so this pages through the outstanding attachments, as
+	// countWithoutFiles() does.
 	this.countAwaitingServer = async function () {
 		let awaiting = 0;
 		let afterID = 0;
@@ -2610,8 +2635,8 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 			if (!page.length) {
 				return awaiting;
 			}
-			for (let { item, record, rows } of page) {
-				if (!rows && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
+			for (let { item, record, rows, stale } of page) {
+				if ((!rows || stale) && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
 					awaiting++;
 				}
 			}
@@ -2758,31 +2783,33 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	const COUNT_REFRESH_INTERVAL = 5000;
 
 	// The step a run is on: getting the model, the items, then the steps
-	// the attachments go through -- extracted, cut, embedded here.
-	// Extracting and cutting are both 'preparing'.
+	// the attachments go through -- extracted and measured, then indexed
+	// here. Extracting and measuring are both 'preparing'.
 	// 'idle' | 'downloading' | 'indexing' | 'preparing' | 'indexing-documents'
 	let _phase = 'idle';
 	// The steps an attachment goes through. Documents in them aren't in the
-	// chunk counts until they've been cut.
+	// chunk counts until they've been measured.
 	const ATTACHMENT_PHASES = ['preparing', 'indexing-documents'];
-	// What the embed step has before it: the attachments and chunks it
-	// embeds here, and how many of those attachments the server declined
+	// What the index step has before it: the attachments it indexes here,
+	// and how many of them the server declined
 	let _embedWork = null;
 	// Bytes of the model downloaded so far, while the phase is
 	// 'downloading'
 	let _download = null;
-	// Indexed and eligible items, notes and annotations, and the chunks
-	// cut and embedded here: the local inference, not the whole of the
-	// fulltext work, since the server's rows arrive whole
+	// Indexed and eligible items, notes and annotations
 	let _items = { done: 0, total: 0 };
+	// The chunks a run embeds here, as measured, and how many of them it
+	// has embedded: the local inference, not the whole of the fulltext
+	// work, since the server's rows arrive whole
 	let _chunks = { done: 0, total: 0 };
 	// Attachments finished with -- every chunk embedded -- of every one
 	// that will be indexed. Counted in attachments rather than chunks so it
-	// reaches its total when the work does: the chunk totals only cover
-	// documents cut here, and grow as more are.
+	// reaches its total when the work does: the chunk totals only cover a
+	// run's work here.
 	let _attachments = { done: 0, total: 0 };
-	// Attachments that are the server's to embed and have no rows yet,
-	// which arrive by sync at the server's pace rather than the engine's
+	// Attachments that are the server's to embed and have no current rows
+	// yet, which arrive by sync at the server's pace rather than the
+	// engine's
 	let _awaiting = 0;
 	// Whether a sync's embeddings step is under way
 	let _syncing = false;
@@ -2821,9 +2848,8 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 			attachments: { ..._attachments, awaiting: _awaiting },
 			sweep: _sweep,
 			embedWork: _embedWork,
-			// Seconds until the chunks cut here are embedded, at the current
-			// rate. Unknown until the documents are cut, since the total is
-			// still being counted.
+			// Seconds until the chunks measured are embedded, at the current
+			// rate. Unknown while they're still being measured.
 			eta: _phase === 'preparing'
 				? null
 				: Zotero.Embeddings.Diagnostics.estimateSeconds(_chunks.total - _chunks.done)
@@ -2880,7 +2906,7 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	};
 
 	// Counts after the stored index is cleared: nothing done, and no
-	// chunk counts until attachments are cut again
+	// chunk counts until attachments are measured again
 	this.clearCounts = function () {
 		_items = { done: 0, total: _items.total };
 		_chunks = { done: 0, total: 0 };
@@ -2888,11 +2914,9 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 		_awaiting = 0;
 	};
 
-	// Take the index's counts: chunks for the rate and the ETA, attachments
-	// for how much of the work is behind us
+	// Take the index's attachment count: how much of the work is behind us
 	async function _readCounts() {
-		let { chunks, embedded, finished } = await Zotero.Embeddings.Indexing.Store.getIndexCounts();
-		_chunks = { done: embedded, total: chunks };
+		let finished = await Zotero.Embeddings.Indexing.Sources.countFinishedAttachments();
 		_attachments = { done: finished, total: _attachments.total };
 	}
 
@@ -2907,25 +2931,34 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 		_sweep = { done: position, total: _eligibleAttachments };
 	};
 
-	// What the embed step has before it
+	// What the index step has before it
 	//
-	// @param {Object} work - { own, ownChunks, declined }
-	this.setEmbedWork = function ({ own = 0, ownChunks = 0, declined = 0 }) {
-		_embedWork = { own, ownChunks, declined };
+	// @param {Object} work - { own, declined }
+	this.setEmbedWork = function ({ own = 0, declined = 0 }) {
+		_embedWork = { own, declined };
 	};
 
-	// More before the embed step, as each page of it is read
+	// More before the index step, as each page of it is read
 	//
-	// @param {Object} work - { own, ownChunks, declined }, each added to
-	//     what's counted
-	this.addEmbedWork = function ({ own = 0, ownChunks = 0, declined = 0 }) {
+	// @param {Object} work - { own, declined }, each added to what's
+	//     counted
+	this.addEmbedWork = function ({ own = 0, declined = 0 }) {
 		if (_embedWork) {
 			_embedWork = {
 				own: _embedWork.own + own,
-				ownChunks: _embedWork.ownChunks + ownChunks,
 				declined: _embedWork.declined + declined
 			};
 		}
+	};
+
+	// What a run has to embed here, as measured, none of it done yet
+	this.setChunkWork = function (total) {
+		_chunks = { done: 0, total };
+	};
+
+	// Chunks embedded here since
+	this.addChunksDone = function (count) {
+		_chunks = { done: _chunks.done + count, total: _chunks.total };
 	};
 
 	this.startRun = function () {
@@ -3023,11 +3056,10 @@ Zotero.Embeddings.Indexing.Store = new function () {
 
 	// Rows
 
-	// Store one chunk's vector and, when the chunk has one at this point,
-	// its anchor -- filling in the chunk's row if it was cut without a
-	// vector. The vector is already in the form the table holds -- centered
-	// on the model's mean and quantized to int8 -- so that a row made here
-	// and one made by another client take the same path in.
+	// Store one chunk's vector and, when the chunk has one, its anchor. The
+	// vector is already in the form the table holds -- centered on the
+	// model's mean and quantized to int8 -- so that a row made here and one
+	// made by another client take the same path in.
 	//
 	// @param {Int8Array} stored - Zotero.Embeddings.prepare()'s output
 	this.insertRow = async function (itemID, chunkIndex, stored, anchor = null) {
@@ -3041,29 +3073,9 @@ Zotero.Embeddings.Indexing.Store = new function () {
 		);
 	};
 
-	// Store a cut chunk without its vector, leaving a row it already has --
-	// embedded or not -- as it is
-	this.insertPendingRow = async function (itemID, chunkIndex, anchor = null) {
-		await Zotero.DB.queryAsync(
-			"INSERT OR IGNORE INTO embeddings.itemEmbeddings (itemID, chunkIndex, embedding, anchor) "
-				+ "VALUES (?, ?, NULL, ?)",
-			[itemID, chunkIndex, anchor ? Zotero.Embeddings.Indexing.compactAnchor(anchor) : null],
-			{ debugParams: false }
-		);
-	};
-
-	// Delete an item's rows from the given chunk on
-	this.deleteRows = async function (itemID, fromChunkIndex = 0) {
-		await Zotero.DB.queryAsync(
-			"DELETE FROM embeddings.itemEmbeddings WHERE itemID=? AND chunkIndex>=?",
-			[itemID, fromChunkIndex]
-		);
-	};
-
-	// The chunks an item has vectors for
-	this.getEmbeddedIndexes = async function (itemID) {
-		return new Set(await Zotero.DB.columnQueryAsync(
-			"SELECT chunkIndex FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL", itemID));
+	// Delete an item's rows
+	this.deleteRows = async function (itemID) {
+		await Zotero.DB.queryAsync("DELETE FROM embeddings.itemEmbeddings WHERE itemID=?", itemID);
 	};
 
 	// The recorded content hash of each of the given items that has one
@@ -3154,25 +3166,6 @@ Zotero.Embeddings.Indexing.Store = new function () {
 				batch.flatMap(entry => [entry.itemID, entry.clientDateModified])
 			);
 		}
-	};
-
-	// The fulltext work: the chunks of attachments cut here and how many
-	// have vectors, and how many attachments with a file here have every
-	// chunk embedded, whoever embedded it
-	//
-	// @return {Promise<Object>} - { chunks, embedded, finished }
-	this.getIndexCounts = async function () {
-		let fromCut = "FROM embeddings.itemEmbeddings E "
-			+ "JOIN embeddings.itemIndexState S USING (itemID) WHERE S.extractor IS NOT NULL";
-		let chunks = await Zotero.DB.valueQueryAsync("SELECT COUNT(*) " + fromCut);
-		let pending = await Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) " + fromCut + " AND E.embedding IS NULL");
-		let finished = await Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM embeddings.itemIndexState S WHERE S.sourceKey IS NOT NULL "
-				+ "AND NOT EXISTS (SELECT 1 FROM embeddings.itemEmbeddings E "
-				+ "WHERE E.itemID=S.itemID AND E.embedding IS NULL)"
-		);
-		return { chunks, embedded: chunks - pending, finished };
 	};
 
 	// Sync state
@@ -4411,10 +4404,14 @@ Zotero.Embeddings.Sync = new function () {
 
 	// Ask what changed since the version held: what the server lists as
 	// declined is left to this client; what it lists as embedded at a
-	// version other than the one held is to be fetched
+	// version other than the one held is to be fetched. A key with no item
+	// here yet -- one that landed on the server after this sync's data step
+	// -- holds the version back, so the next look lists it again once the
+	// item has arrived.
 	//
 	// @return {Promise<Object|null>} - { version, items }, the items to
-	//     fetch, or null when nothing has changed
+	//     fetch and the version to record (null while a key is passed over),
+	//     or null when nothing has changed
 	async function _findChangedAttachments(client, libraryID) {
 		let Store = Zotero.Embeddings.Indexing.Store;
 		let library = Zotero.Libraries.get(libraryID);
@@ -4427,8 +4424,8 @@ Zotero.Embeddings.Sync = new function () {
 		}
 		let { version, successful, declined } = changes;
 		let keys = [...Object.keys(successful), ...Object.keys(declined)];
-		// Keys with no item here are passed over
 		let ids = keys.map(key => Zotero.Items.getIDFromLibraryAndKey(libraryID, key)).filter(Boolean);
+		let missing = keys.length - ids.length;
 		let items = await Zotero.Items.getAsync(ids, { noCache: true });
 		let records = await Store.getIndexStates(items.map(item => item.id));
 		let toFetch = items.filter(item => Object.hasOwn(successful, item.key)
@@ -4439,8 +4436,9 @@ Zotero.Embeddings.Sync = new function () {
 		}
 		Zotero.debug(`Embeddings: ${library.name} is at version ${version} on the server -- `
 			+ `${keys.length} changed since ${since || 'the start'}, ${toFetch.length} to fetch, `
-			+ `${refused.length} declined`);
-		return { version, items: toFetch };
+			+ `${refused.length} declined`
+			+ (missing ? `, ${missing} with no item here yet, so the version is held` : ''));
+		return { version: missing ? null : version, items: toFetch };
 	}
 
 	// Fetch the rows of the given attachments, one request each, a few at
