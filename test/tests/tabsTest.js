@@ -17,7 +17,7 @@ describe("Zotero_Tabs", function() {
 				title: 'Not italic, <i>italic</i>'
 			});
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tab;
 			while (!tab?.textContent.includes('Not italic, italic')) {
 				await Zotero.Promise.delay(10);
@@ -31,7 +31,7 @@ describe("Zotero_Tabs", function() {
 				title: 'Something bad <img src="missing.jpg" onerror="alert(1)">'
 			});
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tab;
 			while (!tab?.textContent.includes('Something bad <img src="missing.jpg" onerror="alert(1)">')) {
 				await Zotero.Promise.delay(10);
@@ -45,7 +45,7 @@ describe("Zotero_Tabs", function() {
 		it("should not make an unloaded tab reopenable", async function () {
 			let item = await createDataObject('item');
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tabs = win.Zotero_Tabs;
 			tabs.select('zotero-pane');
 			let historyLength = tabs._history.length;

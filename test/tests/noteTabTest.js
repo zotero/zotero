@@ -25,17 +25,18 @@ describe("Note Tab", function () {
 			item.setNote('This is a test note.');
 			await item.saveTx();
 
-			let editorInstance = await Zotero.Notes.open(item.id);
+			let { instance: editorInstance } = await Zotero.Notes.open(item.id);
 
 			assert.isNotNull(editorInstance, "Note editor should be opened");
 			assert.equal(editorInstance.itemID, item.id, "Note editor should be associated with the correct item");
+			assert.equal(editorInstance.window, Zotero.getMainWindow(), "Note editor should know its chrome window");
 
-			let sameNoteEditor = await Zotero.Notes.open(item.id, undefined, {
+			let { instance: sameNoteEditor } = await Zotero.Notes.open(item.id, undefined, {
 				tabID: Zotero_Tabs.selectedID,
 			});
 			assert.equal(editorInstance, sameNoteEditor, "Opening the same note should return the existing editor");
 
-			let duplicateEditorInstance = await Zotero.Notes.open(item.id, undefined, {
+			let { instance: duplicateEditorInstance } = await Zotero.Notes.open(item.id, undefined, {
 				allowDuplicate: true,
 			});
 
@@ -49,11 +50,14 @@ describe("Note Tab", function () {
 				() => !Zotero.Notes._editorInstances.find(e => e.tabID),
 				100, 10);
 
-			await Zotero.Notes.open(item.id, undefined, {
+			let opened = await Zotero.Notes.open(item.id, undefined, {
 				openInBackground: true,
 			});
 
 			assert.equal(Zotero_Tabs.selectedType, 'library', "Tab should be opened in background");
+			assert.isNull(opened.instance, "A background tab has no editor yet");
+			assert.equal(Zotero_Tabs.getTabInfo(opened.tabID).state, 'unloaded', "The background tab should stay unloaded");
+			assert.equal(opened.win, Zotero.getMainWindow());
 		});
 
 		it("should open unloaded note tab", async function () {
@@ -62,11 +66,11 @@ describe("Note Tab", function () {
 			item.setNote("This is a test note.");
 			await item.saveTx();
 
-			let editorInstance = await Zotero.Notes.open(item.id);
+			let { instance: editorInstance } = await Zotero.Notes.open(item.id);
 			let tabID = editorInstance.tabID;
 			Zotero_Tabs.unload(tabID);
 
-			let editor2 = await ZoteroPane.openNote(item.id);
+			let { instance: editor2 } = await ZoteroPane.openNote(item.id);
 
 			assert.equal(editorInstance, editor2, "Unloaded note tab should be reloaded");
 		});
@@ -77,7 +81,7 @@ describe("Note Tab", function () {
 			item.setNote("This is a test note.");
 			await item.saveTx();
 
-			let editorInstance = await Zotero.Notes.open(item.id);
+			let { instance: editorInstance } = await Zotero.Notes.open(item.id);
 			let tabID = editorInstance.tabID;
 
 			let promise = waitForNotifierEvent("select", "tab");
@@ -87,7 +91,7 @@ describe("Note Tab", function () {
 
 			promise = waitForNotifierEvent("select", "tab");
 
-			let editor2 = await ZoteroPane.openNote(item.id);
+			let { instance: editor2 } = await ZoteroPane.openNote(item.id);
 			await promise;
 
 			assert.equal(Zotero_Tabs.selectedID, tabID, "Should select the opened note tab");
