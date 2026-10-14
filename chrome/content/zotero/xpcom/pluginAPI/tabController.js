@@ -83,6 +83,7 @@
 	 * @property {{ windowID: number, tabID: string, index: number }} moveTab
 	 * @property {{ windowID: number, itemIDs: number[], inLibraryRoot?: boolean, noTabSwitch?: boolean }} selectItems
 	 * @property {{ windowID: number, type: CollectionTreeRowType, ids: number[] }} selectCollectionsOrLibraries
+	 * @property {{ windowID: number, type: "reader" | "note", itemID: number, index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} openTab
 	 *
 	 *
 	 * @typedef {object} TabControllerCommandResults
@@ -91,6 +92,7 @@
 	 * @property {{}} moveTab
 	 * @property {{ selected: boolean }} selectItems
 	 * @property {{ selected: boolean }} selectCollectionsOrLibraries
+	 * @property {{ tabID: string }} openTab
 	 */
 
 	class TabControllerInternal extends lazy.ControllerAPIBase {
@@ -154,6 +156,24 @@
 						},
 						handler: ({ windowID, type, ids }) => this._selectCollectionsOrLibraries(
 							lazy.WindowUtils.getMainWindow(windowID), type, ids
+						),
+					},
+					openTab: {
+						params: {
+							windowID: "number",
+							type: {
+								type: "string",
+								checkHook: value => lazy.WindowUtils.OPENABLE_TYPES.includes(value)
+									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_TYPES.join(", ")}, got ${value}`,
+							},
+							itemID: "number",
+							index: { type: "number", optional: true },
+							background: { type: "boolean", optional: true },
+							allowDuplicate: { type: "boolean", optional: true },
+							location: { type: "object", optional: true },
+						},
+						handler: ({ windowID, type, itemID, index, background, allowDuplicate, location }) => this._openTab(
+							lazy.WindowUtils.getMainWindow(windowID), type, itemID, { index, background, allowDuplicate, location }
 						),
 					},
 				},
@@ -248,6 +268,33 @@
 			}
 			this._getTab(win, tabID);
 			win.Zotero_Tabs.move(tabID, index);
+		}
+
+		/**
+		 * Open an item in a new tab; without allowDuplicate an existing tab is selected instead
+		 * @param {Window} win - A main window
+		 * @param {"reader" | "note"} type
+		 * @param {number} itemID
+		 * @param {{ index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} options
+		 * @returns {Promise<TabControllerCommandResults["openTab"]>}
+		 */
+		async _openTab(win, type, itemID, { index, background, allowDuplicate, location }) {
+			if (index !== undefined && (!Number.isInteger(index) || index < 1)) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer >= 1, got ${index}`);
+			}
+			lazy.WindowUtils.getOpenableItem(itemID, type);
+			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
+			let { instance, tabID } = await opener.open(itemID, location, {
+				tabIndex: index,
+				openInBackground: background,
+				allowDuplicate,
+				mainWindow: win,
+			});
+			if (!background) {
+				// Resolve once the content has loaded; a background tab stays unloaded
+				await instance?._initPromise;
+			}
+			return { tabID };
 		}
 
 		/**
