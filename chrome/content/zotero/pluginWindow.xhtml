@@ -31,7 +31,8 @@
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
-		style="display: flex; --tab-min-height: 0;">
+		style="display: flex; --tab-min-height: 0;"
+		tooltip="html-tooltip">
 
 	<linkset>
 		<html:link rel="localization" href="browser/menubar.ftl"/>
@@ -72,6 +73,7 @@
 	</keyset>
 
 	<popupset>
+		<tooltip id="html-tooltip" page="true"/>
 		<menupopup id="pluginContentContextMenu"
 				onpopupshowing="goUpdateGlobalEditMenuItems(true)">
 			<menuitem data-l10n-id="text-action-undo" command="cmd_undo"/>
