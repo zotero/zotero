@@ -451,18 +451,28 @@
 			};
 		}
 
-		// An existing destination is replaced through a sibling temp copy, so a failed copy leaves it as it was
+		// An existing destination is set aside under a temp name and dropped only once the copy is in place,
+		// so a failure leaves it as it was
 		async _copyTree(src, dest, overwrite) {
 			if (!overwrite || !(await this._io(() => statPath(dest)))) {
 				await this._io(() => lazy.FileIO.copy(src, dest, { recursive: true, noOverwrite: true }));
 				return;
 			}
 			let tmp = tmpPathFor(dest);
+			let old = tmpPathFor(dest);
 			try {
 				await this._io(async () => {
 					await lazy.FileIO.copy(src, tmp, { recursive: true, noOverwrite: true });
-					await lazy.FileIO.remove(dest, { recursive: true });
-					await lazy.FileIO.move(tmp, dest);
+					await lazy.FileIO.move(dest, old);
+					try {
+						await lazy.FileIO.move(tmp, dest);
+					}
+					catch (e) {
+						// The old tree goes back; should even that fail, it stays beside the destination
+						await lazy.FileIO.move(old, dest).catch(err => Zotero.logError(err));
+						throw e;
+					}
+					await lazy.FileIO.remove(old, { recursive: true, ignoreAbsent: true });
 				});
 			}
 			finally {

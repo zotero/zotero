@@ -73,6 +73,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 	VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+	PluginTrace: "chrome://zotero/content/xpcom/plugins/trace.mjs",
 });
 
 
@@ -158,21 +159,32 @@ class ControllerAPIBase extends PluginAPIBase {
 	}
 
 	_invoke(registry, kind, name, params, callerPluginID) {
-		return this._respond(() => this._run(registry, kind, name, params, callerPluginID));
+		return this._respond(() => this._run(registry, kind, name, params, callerPluginID), callerPluginID, kind, name);
 	}
 
 	/**
-	 * A failure is a response, not a rejection, so callers branch instead of catching
+	 * A failure is a response, not a rejection, so callers branch instead of catching; a sandbox caller's
+	 * request is traced by name, timed to its response
 	 * @param {() => Promise<object>} fn - Produces the result, or throws
+	 * @param {string} [callerPluginID]
+	 * @param {string} [kind] - query, command or commit
+	 * @param {string} [name] - The query or command name
 	 * @returns {Promise<ControllerResponse>}
 	 */
-	async _respond(fn) {
+	async _respond(fn, callerPluginID, kind, name) {
+		let t = callerPluginID ? lazy.PluginTrace.start() : 0;
+		let response;
 		try {
-			return { success: true, result: await fn() };
+			response = { success: true, result: await fn() };
 		}
 		catch (e) {
-			return { success: false, result: {}, error: this._toResponseError(e) };
+			response = { success: false, result: {}, error: this._toResponseError(e) };
 		}
+		if (t) {
+			let path = `Zotero.${this._config.apiName}.${name ? `${kind}:${name}` : kind}`;
+			lazy.PluginTrace.end(t, callerPluginID, "call", path, response.error?.code);
+		}
+		return response;
 	}
 
 	/**
@@ -228,6 +240,10 @@ class ControllerAPIBase extends PluginAPIBase {
 	 */
 	_getContext(callerPluginID) {
 		let scope = callerPluginID ? lazy.PluginSandbox.getScope(callerPluginID) : null;
+		// A caller named but not loaded is an unloaded plugin, not chrome
+		if (callerPluginID && !scope) {
+			this._throw(ControllerAPIBase.errorCodes.PERMISSION_DENIED, `Plugin ${callerPluginID} is not loaded`);
+		}
 		return {
 			pluginID: callerPluginID,
 			scope,
@@ -280,7 +296,7 @@ class ControllerAPIBase extends PluginAPIBase {
 	 */
 	_validateParams(params, typeDef) {
 		for (let key of Object.keys(params)) {
-			if (!(key in typeDef)) {
+			if (!Object.hasOwn(typeDef, key)) {
 				this._log(`Unknown param '${key}'`, "warn");
 				return { valid: false, reason: `Unknown param '${key}'` };
 			}

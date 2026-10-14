@@ -40,6 +40,9 @@
 	// end: the item pane in a library tab, the context pane otherwise
 	const MAINWINDOW_PANES = ["start", "end"];
 
+	// What a plugin reaches its window handle by, for tracing calls into the page messenger
+	const PLUGIN_WINDOW_TRACE_PATH = "Zotero.WindowController.openPluginWindow";
+
 	/**
 	 * @typedef {object} WindowInfo
 	 * @property {number} windowID - The window's browsing context ID, stable for its lifetime
@@ -382,6 +385,7 @@
 				let { messenger, dispose } = await lazy.loadPluginPageInBrowser(browser, resolved, {
 					channel: true,
 					pluginID,
+					tracePath: `${PLUGIN_WINDOW_TRACE_PATH}.page`,
 					// The page actor keeps the browser at the document scroll size
 					autoResize: fitContent ? { height: true, width: true, content: true } : {},
 					// The page controls its own window as zoteroHost.api.<name>(params)
@@ -408,7 +412,7 @@
 				return lazy.ScopeVariables.toScope({
 					page: messenger,
 					windowID: lazy.WindowUtils.getWindowID(win),
-				}, pluginID);
+				}, pluginID, { path: PLUGIN_WINDOW_TRACE_PATH });
 			}
 			// The wrapper is already open; drop it and let the failure reach the caller's response
 			catch (e) {
