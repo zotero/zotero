@@ -153,11 +153,8 @@
 				button.appendChild(popup);
 			}
 			else {
-				button.addEventListener("command", (event) => {
-					option.onCommand(
-						event,
-						Zotero.ButtonManager.wrapButtonContext(button, () => this._getContext())
-					);
+				button.addEventListener("command", () => {
+					option.onCommand(this._getContext());
 				});
 			}
 			return button;
