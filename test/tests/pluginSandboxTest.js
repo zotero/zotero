@@ -1,6 +1,7 @@
 describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
-	var { PluginFileAccess, PersistedGrantLayer, samePath, containsPath } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/file.mjs");
+	var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
+	var { PathIdentity } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/filePath.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 	var { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 	var { PluginProtocol } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/protocol.mjs");
@@ -501,13 +502,13 @@ describe("Plugin Sandbox", function () {
 			let was = Zotero.isWin;
 			try {
 				Zotero.isWin = false;
-				assert.isFalse(samePath("/A/b", "/a/b"));
-				assert.isFalse(containsPath("/A", "/a/b"));
+				assert.isFalse(PathIdentity.same("/A/b", "/a/b"));
+				assert.isFalse(PathIdentity.contains("/A", "/a/b"));
 				assert.isFalse(PersistedGrantLayer.subsumes({ path: "/A", mode: "read" }, { path: "/a/b", mode: "read" }));
 				Zotero.isWin = true;
-				assert.isTrue(samePath("C:/A/b", "c:/a/B"));
-				assert.isTrue(containsPath("C:/Users/X", "c:/users/x/doc.txt"));
-				assert.isFalse(containsPath("C:/Users/X", "c:/users/xy/doc.txt"));
+				assert.isTrue(PathIdentity.same("C:/A/b", "c:/a/B"));
+				assert.isTrue(PathIdentity.contains("C:/Users/X", "c:/users/x/doc.txt"));
+				assert.isFalse(PathIdentity.contains("C:/Users/X", "c:/users/xy/doc.txt"));
 				assert.isTrue(PersistedGrantLayer.subsumes({ path: "C:/Users/X", mode: "write" }, { path: "c:/users/x/doc.txt", mode: "read" }));
 			}
 			finally {

@@ -27,11 +27,11 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
 
@@ -373,7 +373,7 @@
 				}
 			}
 			if (option.src) {
-				let src = lazy.resolvePluginPage(option.pluginID, option.src);
+				let src = lazy.PluginProtocol.resolvePage(option.pluginID, option.src);
 				if (!src) {
 					this._log(`'src' must be an .html page within the plugin, got ${option.src}`, "warn");
 					return false;

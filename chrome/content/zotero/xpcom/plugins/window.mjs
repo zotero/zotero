@@ -24,9 +24,9 @@
 */
 
 
-import { ControllerAPIBase, ControllerError } from "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs";
+import { ControllerError } from "chrome://zotero/content/xpcom/plugins/apiErrors.mjs";
 
-const { NOT_FOUND, INVALID_PARAMS } = ControllerAPIBase.errorCodes;
+const { NOT_FOUND, INVALID_PARAMS } = ControllerError.codes;
 
 /**
  * Plugin-facing window type -> chrome windowtype; keep in sync with shortcut and window-resource APIs

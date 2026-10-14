@@ -26,7 +26,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		StoreAPIBase: "chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs",
+		StoreAPIBase: "chrome://zotero/content/xpcom/pluginAPI/storeAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		DataParams: "chrome://zotero/content/xpcom/pluginAPI/dataParams.mjs",
@@ -37,7 +37,7 @@
 
 	const CHANGE_SET_URLS = [
 		"chrome://zotero/content/xpcom/plugins/changeSetBase.js",
-		"chrome://zotero/content/xpcom/plugins/changeSet.js",
+		"chrome://zotero/content/xpcom/plugins/dataChangeSet.js",
 	];
 
 	const OBJECT_TYPES = ["item", "collection", "search", "library"];
@@ -268,6 +268,11 @@
 
 	// The library operations feeds alone support
 	const feedOnly = what => library => !library.isFeed && `only feeds ${what}`;
+
+	// The core refuses data with a plain Error of its own global; a subclass or a platform exception is something else
+	function isPlainError(e) {
+		return e !== null && typeof e === "object" && Object.getPrototypeOf(e) === Cu.getGlobalForObject(e).Error.prototype;
+	}
 
 	/**
 	 * @param {Zotero.DataObjects} objects
@@ -845,6 +850,15 @@
 		 * @param {{ id?: number, libraryID?: number, key?: string }} address - An ID, or a library and key
 		 * @returns {Promise<object>} The snapshot; NotFound otherwise
 		 */
+		// The core refuses data in memory; a save, an operation that runs against the database (needsID,
+		// terminal) or any step of a deferred type fails for other reasons
+		_isCallerError(e, { entry, kind, op }) {
+			if (!isPlainError(e) || kind === "save" || !entry.def.transactional) {
+				return false;
+			}
+			return !op || !(op.def.needsID || op.def.terminal);
+		}
+
 		async _getSnapshot(type, { id, libraryID, key }) {
 			let def = this._objectTypes.get(type);
 			let address = def.address.plan({ type, id, libraryID, key }, {}, this._fail());

@@ -3522,11 +3522,11 @@ describe("Plugin API", function () {
 
 	describe("Window Controller", function () {
 		const { ControllerAPIBase } = ChromeUtils.importESModule(
-			"chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs"
+			"chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs"
 		);
 		const ControllerErrorCode = ControllerAPIBase.errorCodes;
 		const { ControllerError } = ChromeUtils.importESModule(
-			"chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs"
+			"chrome://zotero/content/xpcom/plugins/apiErrors.mjs"
 		);
 		const { getWindow, getMainWindow } = ChromeUtils.importESModule(
 			"chrome://zotero/content/xpcom/plugins/window.mjs"

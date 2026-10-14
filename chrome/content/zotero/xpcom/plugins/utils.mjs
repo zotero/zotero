@@ -26,7 +26,6 @@
 
 import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
-import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
 const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
 
@@ -43,46 +42,6 @@ const CHROME_GLOBAL = Cu.getGlobalForObject({});
  */
 const instanceFacadeCache = new WeakMap();
 const NULL_INSTANCE_SCHEMA = Symbol("nullSchema");
-
-/**
- * Resolve a URL to a file within the plugin, optionally relative to the plugin's
- * root, and required to have one of the given extensions.
- * @param {string} pluginID
- * @param {string} src - File URL, optionally relative to the plugin's root
- * @param {string[]} extensions - Allowed file extensions (with leading dot)
- * @returns {string | null} The absolute URL, or null if src doesn't qualify
- */
-function resolvePluginFile(pluginID, src, extensions) {
-	let base = PluginProtocol.getBaseURI(pluginID);
-	if (!base) {
-		return null;
-	}
-	let resolved;
-	try {
-		resolved = new URL(String(src ?? ""), base).href;
-	}
-	catch {
-		return null;
-	}
-	if (!resolved.startsWith(base)) {
-		return null;
-	}
-	let pathname = new URL(resolved).pathname.toLowerCase();
-	if (!extensions.some(ext => pathname.endsWith(ext))) {
-		return null;
-	}
-	return resolved;
-}
-
-/**
- * Resolve a plugin page URL (an `.html`/`.htm` file within the plugin).
- * @param {string} pluginID
- * @param {string} src - Page URL, optionally relative to the plugin's root
- * @returns {string | null} The absolute URL, or null if src doesn't qualify
- */
-function resolvePluginPage(pluginID, src) {
-	return resolvePluginFile(pluginID, src, [".html", ".htm"]);
-}
 
 const VarCheck = {
 	isObject(v) {
@@ -129,6 +88,10 @@ const VarCheck = {
 
 	isArrayLike(v) {
 		return Array.isArray(v) || (this.isObjectLike(v) && typeof v.length === "number");
+	},
+
+	isBytes(v) {
+		return ArrayBuffer.isView(v) || Cu.getClassName(v, true) === "ArrayBuffer";
 	},
 
 	isDOMNode(value) {
@@ -681,6 +644,80 @@ const ScopeUtils = {
 	},
 
 	/**
+	 * The other direction: what a sandbox hands us, as plain data (JSON plus bytes) detached from it
+	 * @param {*} value
+	 * @returns {*}
+	 */
+	toPlainData(value) {
+		return ScopeUtils._toPlainData(value);
+	},
+
+	// The bytes of any view, or a whole buffer, copied into this compartment as a Uint8Array
+	_copyBytes(value) {
+		if (Cu.getClassName(value, true) === "Uint8Array") {
+			return new Uint8Array(value);
+		}
+		let view = ArrayBuffer.isView(value)
+			? new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+			: new Uint8Array(value);
+		return new Uint8Array(view);
+	},
+
+	/**
+	 * What JSON keeps, rebuilt here, plus bytes as a Uint8Array; a BigInt or a cycle throws. An object
+	 * serializes through `toPlain()`, else `toJSON()`, once, as JSON.stringify does
+	 */
+	_toPlainData(value, ancestors = new Set(), serialized = false) {
+		switch (typeof value) {
+			case "string":
+			case "boolean":
+				return value;
+			case "number":
+				return Number.isFinite(value) ? value : null;
+			case "bigint":
+				throw new TypeError("a BigInt is not plain data");
+			case "object":
+				break;
+			default:
+				return undefined;
+		}
+		if (value === null) {
+			return null;
+		}
+		value = Cu.waiveXrays(value);
+		if (!serialized) {
+			if (typeof value.toPlain === "function") {
+				return ScopeUtils._toPlainData(value.toPlain(), ancestors, true);
+			}
+			if (typeof value.toJSON === "function") {
+				return ScopeUtils._toPlainData(value.toJSON(), ancestors, true);
+			}
+		}
+		if (VarCheck.isBytes(value)) {
+			return ScopeUtils._copyBytes(value);
+		}
+		if (ancestors.has(value)) {
+			throw new TypeError("cyclic value");
+		}
+		ancestors.add(value);
+		let plain;
+		if (Array.isArray(value)) {
+			plain = Array.from(value, entry => ScopeUtils._toPlainData(entry, ancestors) ?? null);
+		}
+		else {
+			plain = {};
+			for (let key of Object.keys(value)) {
+				let entry = ScopeUtils._toPlainData(value[key], ancestors);
+				if (entry !== undefined) {
+					Object.defineProperty(plain, key, { value: entry, enumerable: true, writable: true, configurable: true });
+				}
+			}
+		}
+		ancestors.delete(value);
+		return plain;
+	},
+
+	/**
 	 * Ensure a variable is safely exposed in the scope.
 	 * - Functions are exported as callables that scope their returns
 	 * - Plain objects/arrays are cloned into the scope
@@ -726,8 +763,8 @@ const ScopeUtils = {
 			return arr;
 		}
 
-		// Binary data (ArrayBuffer, typed arrays, DataView): structured-clone
-		if (Cu.getClassName(value, true) === "ArrayBuffer" || ArrayBuffer.isView(value)) {
+		// Bytes structured-clone
+		if (VarCheck.isBytes(value)) {
 			return Cu.cloneInto(value, scope);
 		}
 
@@ -1010,4 +1047,4 @@ const ScopeUtils = {
 	},
 };
 
-export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY, resolvePluginFile, resolvePluginPage };
+export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY };

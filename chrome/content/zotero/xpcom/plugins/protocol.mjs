@@ -154,12 +154,52 @@ function canLoadImageURI(value, pluginID) {
 	return canAccessURI(uri.spec, pluginID);
 }
 
+/**
+ * Resolve `src` against the plugin root, staying inside it
+ * @param {string} pluginID
+ * @param {string} src - File URL, optionally relative to the plugin's root
+ * @param {string[]} extensions - Allowed file extensions (with leading dot)
+ * @returns {string | null} The absolute URL, or null if src doesn't qualify
+ */
+function resolveFile(pluginID, src, extensions) {
+	let base = getBaseURI(pluginID);
+	if (!base) {
+		return null;
+	}
+	let resolved;
+	try {
+		resolved = new URL(String(src ?? ""), base).href;
+	}
+	catch {
+		return null;
+	}
+	if (!resolved.startsWith(base)) {
+		return null;
+	}
+	let pathname = new URL(resolved).pathname.toLowerCase();
+	if (!extensions.some(ext => pathname.endsWith(ext))) {
+		return null;
+	}
+	return resolved;
+}
+
+/**
+ * @param {string} pluginID
+ * @param {string} src - Page URL, optionally relative to the plugin's root
+ * @returns {string | null} The absolute URL of an `.html`/`.htm` file inside the plugin, else null
+ */
+function resolvePage(pluginID, src) {
+	return resolveFile(pluginID, src, [".html", ".htm"]);
+}
+
 const PluginProtocol = {
 	register,
 	unregister,
 	getBaseURI,
 	canAccessURI,
 	canLoadImageURI,
+	resolveFile,
+	resolvePage,
 };
 
 export { PluginProtocol };
