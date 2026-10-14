@@ -428,7 +428,6 @@ const PERMISSION_SCHEMAS = {
 				query: "CustomParserCallable",
 				command: "CustomParserCallable",
 				tabTypes: true,
-				libraryTabID: true,
 				errorCodes: true,
 			},
 		},
