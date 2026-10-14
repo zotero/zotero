@@ -385,7 +385,7 @@
 				queries: {
 					item: {
 						params: lazy.DataParams.address("itemID"),
-						handler: ({ itemID, libraryID, key }) => this._getSnapshot("item", { id: itemID, libraryID, key }),
+						handler: ({ itemID, libraryID, key }) => this._readSnapshot("item", { id: itemID, libraryID, key }),
 					},
 					items: {
 						params: { itemIDs: lazy.Params.intList },
@@ -393,7 +393,7 @@
 					},
 					collection: {
 						params: lazy.DataParams.address("collectionID"),
-						handler: ({ collectionID, libraryID, key }) => this._getSnapshot("collection", { id: collectionID, libraryID, key }),
+						handler: ({ collectionID, libraryID, key }) => this._readSnapshot("collection", { id: collectionID, libraryID, key }),
 					},
 					collections: {
 						params: { collectionIDs: lazy.Params.intList },
@@ -401,7 +401,7 @@
 					},
 					search: {
 						params: lazy.DataParams.address("searchID"),
-						handler: ({ searchID, libraryID, key }) => this._getSnapshot("search", { id: searchID, libraryID, key }),
+						handler: ({ searchID, libraryID, key }) => this._readSnapshot("search", { id: searchID, libraryID, key }),
 					},
 					searches: {
 						params: { searchIDs: lazy.Params.intList },
@@ -409,7 +409,7 @@
 					},
 					library: {
 						params: { libraryID: "number" },
-						handler: ({ libraryID }) => this._getSnapshot("library", { id: libraryID }),
+						handler: ({ libraryID }) => this._readSnapshot("library", { id: libraryID }),
 					},
 					libraries: {
 						handler: () => ({
@@ -471,7 +471,7 @@
 						address: lazy.DataAddress.objectAddress(OBJECTS.item),
 						create: {
 							params: {
-								libraryID: "number",
+								libraryID: { type: "number", optional: true },
 								itemType: "string",
 								parent: lazy.DataParams.idRef("item", true),
 								linkMode: { type: "string", optional: true },
@@ -481,8 +481,8 @@
 								}])),
 							},
 							handler: async (params, ctx) => {
-								let { libraryID, itemType, parent, linkMode } = params;
-								this._requireEditableLibrary(libraryID);
+								let { itemType, linkMode } = params;
+								let { libraryID, parentID } = this._placeCreated("item", params, ctx);
 								if (!Zotero.ItemTypes.getID(itemType)) {
 									throw new Error(`Unknown item type '${itemType}'`);
 								}
@@ -500,8 +500,8 @@
 								else if (itemType === "attachment") {
 									throw new Error("An attachment needs a linkMode");
 								}
-								if (parent !== undefined) {
-									item.parentID = ctx.resolveID("item", parent, { scope: libraryID, what: "Param 'parent'" });
+								if (parentID !== undefined) {
+									item.parentID = parentID;
 								}
 								if (itemType === "annotation") {
 									await this._requireAnnotatable(item, params);
@@ -649,14 +649,18 @@
 						resolve: id => resolveObject(OBJECTS.collection, id),
 						address: lazy.DataAddress.objectAddress(OBJECTS.collection),
 						create: {
-							params: { libraryID: "number", name: lazy.Params.nonEmptyString, parent: lazy.DataParams.idRef("collection", true) },
-							handler: ({ libraryID, name, parent }, ctx) => {
-								this._requireEditableLibrary(libraryID);
+							params: {
+								libraryID: { type: "number", optional: true },
+								name: lazy.Params.nonEmptyString,
+								parent: lazy.DataParams.idRef("collection", true),
+							},
+							handler: (params, ctx) => {
+								let { libraryID, parentID } = this._placeCreated("collection", params, ctx);
 								let collection = new Zotero.Collection();
 								collection.libraryID = libraryID;
-								collection.name = name;
-								if (parent !== undefined) {
-									collection.parentID = ctx.resolveID("collection", parent, { scope: libraryID, what: "Param 'parent'" });
+								collection.name = params.name;
+								if (parentID !== undefined) {
+									collection.parentID = parentID;
 								}
 								return collection;
 							},
@@ -869,19 +873,6 @@
 		}
 
 		/**
-		 * A read takes the same path from an address to a target as a commit entry does
-		 * @param {string} type
-		 * @param {{ id?: number, libraryID?: number, key?: string }} address - An ID, or a library and key
-		 * @returns {Promise<object>} The snapshot; NotFound otherwise
-		 */
-		async _getSnapshot(type, { id, libraryID, key }) {
-			let def = this._objectTypes.get(type);
-			let address = def.address.plan({ type, id, libraryID, key }, {}, this._fail());
-			let { target } = await this._loadTarget(type, address);
-			return def.snapshot(target);
-		}
-
-		/**
 		 * @param {"item" | "collection" | "search"} type
 		 * @param {number[]} ids
 		 * @param {string} resultKey
@@ -910,6 +901,36 @@
 			if (!Zotero.Libraries.isEditable(libraryID)) {
 				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED, `Library ${libraryID} is not editable`);
 			}
+		}
+
+		/**
+		 * Where a created object goes: its own libraryID, else its parent's library, else the change set's, the
+		 * order a bare key resolves in. The parent is resolved once here, for the handler to set
+		 * @param {"item" | "collection"} type
+		 * @param {{ libraryID?: number, parent?: StoreIDRef }} params - The create block
+		 * @param {StoreCommitContext} ctx
+		 * @returns {{ libraryID: number, parentID?: number }}
+		 */
+		_placeCreated(type, { libraryID, parent }, ctx) {
+			let parentID;
+			if (parent !== undefined) {
+				parentID = ctx.resolveID(type, parent, { scope: libraryID, what: "Param 'parent'" });
+				if (libraryID === undefined) {
+					let placed = OBJECTS[type].getLibraryAndKeyFromID(parentID);
+					if (!placed) {
+						this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `Param 'parent': no ${type} with ID ${parentID}`);
+					}
+					libraryID = placed.libraryID;
+				}
+			}
+			if (libraryID === undefined && Number.isInteger(ctx.defaults.libraryID)) {
+				libraryID = ctx.defaults.libraryID;
+			}
+			if (libraryID === undefined) {
+				throw new Error(`A new ${type} needs a libraryID, a parent or the change set's libraryID`);
+			}
+			this._requireEditableLibrary(libraryID);
+			return { libraryID, parentID };
 		}
 
 		/**
@@ -1122,6 +1143,9 @@
 		}
 	}
 
+	// The builder scripts, in chrome; every dataRead sandbox gets its own copy under the same names
+	let builder = lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/dataChangeSet.js");
+
 	/**
 	 * Snapshot reads and change set commits for library data. Requests take and return plain objects
 	 * only; a change set is built locally with ChangeSet and applied by commit in one transaction
@@ -1131,8 +1155,7 @@
 	Zotero.DataStore = {
 		errorCodes: lazy.StoreAPIBase.errorCodes,
 
-		// The builder; every dataRead sandbox gets its own copy under the same name
-		ChangeSet: lazy.ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/dataChangeSet.js").DataChangeSet,
+		ChangeSet: builder.DataChangeSet,
 
 		_dataStore: new DataStoreInternal(),
 
@@ -1189,6 +1212,9 @@
 			return Zotero.DataStore._dataStore.commit(changes, options, _callerPluginID);
 		},
 	};
+
+	// The traditional form, parallel to ChangeSet and as every sandbox gets it: Zotero.DataStore.Handle.item(target)
+	Zotero.DataStore.Handle = builder.ChangeSetBase.handleClass(Zotero.DataStore, builder.DataChangeSet);
 
 	let injectCaller = ({ pluginID, args }) => {
 		args[2] = pluginID;
