@@ -35,6 +35,8 @@
  *
  * @typedef {object} RequestAPIConfig
  * @property {string} apiName - Log prefix and error namespace
+ * @property {string | string[]} [permissions] - What every request of this API requires, on top of a request's
+ *     own; the schema already hides methods from a plugin, this holds for calls made on its behalf
  * @property {Record<string, RequestDef>} [queries] - Read-only requests, defined on set
  *
  *
@@ -83,6 +85,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 class RequestAPIBase extends PluginAPIBase {
 	_config = {
 		apiName: "RequestAPIBase",
+		permissions: [],
 	};
 
 	/**
@@ -179,10 +182,10 @@ class RequestAPIBase extends PluginAPIBase {
 		}
 
 		let context = this._getContext(callerPluginID);
-		if (!context.privileged
-				&& !lazy.VarCheck.hasPermissions(context.scope, def.permissions)) {
+		let permissions = [].concat(this._config.permissions, def.permissions);
+		if (!context.privileged && !lazy.VarCheck.hasPermissions(context.scope, permissions)) {
 			this._throw(RequestAPIBase.errorCodes.PERMISSION_DENIED,
-				`${kind} '${name}' requires permission ${[].concat(def.permissions).join(", ")}`);
+				`${kind} '${name}' requires permission ${permissions.join(", ")}`);
 		}
 
 		params = this._toPlainParams(name, params);

@@ -208,63 +208,71 @@
 			super();
 			this.config = {
 				apiName: "FileStore",
-				permissions: "fileSystemWrite",
-				queries: {
-					readFile: {
-						params: { path: lazy.Params.nonEmptyString, encoding: ENCODING_PARAM, offset: COUNT_PARAM, length: COUNT_PARAM },
-						handler: ({ path, ...options }, { caller }) => this._readFile(path, options, caller),
-					},
-					readDir: {
-						params: { path: lazy.Params.nonEmptyString, withFileTypes: BOOLEAN_PARAM },
-						handler: ({ path, withFileTypes }, { caller }) => this._readDir(path, withFileTypes, caller),
-					},
-					stat: {
-						params: { path: lazy.Params.nonEmptyString },
-						handler: async ({ path }, { caller }) => {
-							path = await this._readable(path, caller);
-							return pathStat(path, await this._requireStat(path));
-						},
-					},
-					exists: {
-						params: { path: lazy.Params.nonEmptyString },
-						handler: async ({ path }, { caller }) => {
-							path = await this._readable(path, caller);
-							return { exists: !!(await this._io(() => statPath(path))) };
-						},
-					},
-					digest: {
-						params: { path: lazy.Params.nonEmptyString, algorithm: ALGORITHM_PARAM },
-						handler: async ({ path, algorithm = "sha256" }, { caller }) => {
-							path = await this._readable(path, caller);
-							await this._requireFile(path);
-							return { algorithm, digest: await this._io(() => lazy.FileIO.computeHexDigest(path, algorithm)) };
-						},
-					},
-					access: {
-						params: {
-							path: lazy.Params.nonEmptyString,
-							mode: { ...lazy.Params.oneOf(["read", "write"]), optional: true },
-						},
-						handler: async ({ path, mode = "read" }, { caller }) => {
-							if (mode === "write" && !caller.privileged
-									&& !lazy.VarCheck.hasPermissions(caller.scope, "fileSystemWrite")) {
-								this._throw(lazy.StoreAPIBase.errorCodes.PERMISSION_DENIED,
-									"access to write requires permission fileSystemWrite");
-							}
-							await this._checkAccess(caller, this._canonical(path), mode);
-							return {};
-						},
-					},
-					dirs: {
-						handler: async (_params, { caller }) => ({
-							data: caller.pluginID ? lazy.PluginFileAccess.getDir(caller.pluginID) : null,
-							temp: caller.pluginID ? await lazy.PluginFileAccess.getTempDir(caller.pluginID) : null,
-						}),
-					},
-				},
+				permissions: "fileSystemRead",
+				commitPermissions: "fileSystemWrite",
+				queries: this._queryCatalog(),
 				objectTypes: {
 					file: this._fileType(),
 					directory: this._directoryType(),
+				},
+			};
+		}
+
+		/**
+		 * @returns {Record<string, RequestDef>}
+		 */
+		_queryCatalog() {
+			return {
+				readFile: {
+					params: { path: lazy.Params.nonEmptyString, encoding: ENCODING_PARAM, offset: COUNT_PARAM, length: COUNT_PARAM },
+					handler: ({ path, ...options }, { caller }) => this._readFile(path, options, caller),
+				},
+				readDir: {
+					params: { path: lazy.Params.nonEmptyString, withFileTypes: BOOLEAN_PARAM },
+					handler: ({ path, withFileTypes }, { caller }) => this._readDir(path, withFileTypes, caller),
+				},
+				stat: {
+					params: { path: lazy.Params.nonEmptyString },
+					handler: async ({ path }, { caller }) => {
+						path = await this._readable(path, caller);
+						return pathStat(path, await this._requireStat(path));
+					},
+				},
+				exists: {
+					params: { path: lazy.Params.nonEmptyString },
+					handler: async ({ path }, { caller }) => {
+						path = await this._readable(path, caller);
+						return { exists: !!(await this._io(() => statPath(path))) };
+					},
+				},
+				digest: {
+					params: { path: lazy.Params.nonEmptyString, algorithm: ALGORITHM_PARAM },
+					handler: async ({ path, algorithm = "sha256" }, { caller }) => {
+						path = await this._readable(path, caller);
+						await this._requireFile(path);
+						return { algorithm, digest: await this._io(() => lazy.FileIO.computeHexDigest(path, algorithm)) };
+					},
+				},
+				access: {
+					params: {
+						path: lazy.Params.nonEmptyString,
+						mode: { ...lazy.Params.oneOf(["read", "write"]), optional: true },
+					},
+					handler: async ({ path, mode = "read" }, { caller }) => {
+						if (mode === "write" && !caller.privileged
+								&& !lazy.VarCheck.hasPermissions(caller.scope, "fileSystemWrite")) {
+							this._throw(lazy.StoreAPIBase.errorCodes.PERMISSION_DENIED,
+								"access to write requires permission fileSystemWrite");
+						}
+						await this._checkAccess(caller, this._canonical(path), mode);
+						return {};
+					},
+				},
+				dirs: {
+					handler: async (_params, { caller }) => ({
+						data: caller.pluginID ? lazy.PluginFileAccess.getDir(caller.pluginID) : null,
+						temp: caller.pluginID ? await lazy.PluginFileAccess.getTempDir(caller.pluginID) : null,
+					}),
 				},
 			};
 		}

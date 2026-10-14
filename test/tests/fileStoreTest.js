@@ -849,6 +849,17 @@ describe("Zotero.FileStore", function () {
 			return commit((path, text) => FS.file(path).writeFile(text), path, text);
 		}
 
+		// The schema hides query from a plugin without fileSystemRead; the store's own gate covers calls made on its behalf
+		it("should refuse a query on behalf of a plugin without fileSystemRead", async function () {
+			// Not load(): its FS shorthand needs Zotero.FileStore, which this plugin does not see
+			plugin.load(["default"]);
+			let error = await requestError(Zotero.FileStore.query("dirs", {}, plugin.id), codes.PERMISSION_DENIED);
+			assert.include(error.message, "requires permission fileSystemRead");
+			await requestError(Zotero.FileStore.commit(Zotero.FileStore.ChangeSet.file(outsidePath).rm(), {}, plugin.id),
+				codes.PERMISSION_DENIED);
+			assert.isTrue(await FileIO.exists(outsidePath));
+		});
+
 		it("should give the plugin its own directories, and a privileged one none", async function () {
 			let dirs = await requestResult(query("dirs"));
 			assert.equal(dirs.data, Zotero.File.normalizeToUnix(PathUtils.join(Zotero.DataDirectory.dir, "plugin-data", plugin.uuid)));
