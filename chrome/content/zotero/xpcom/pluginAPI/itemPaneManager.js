@@ -58,7 +58,7 @@
 	 * @property {string} icon - Icon URI.
 	 * @property {string} [darkIcon] - Icon URI in dark mode. If not set, use `icon`.
 	 * @property {string} [l10nID] - data-l10n-id for localization of button tooltiptext.
-	 * @property {SectionEventHook} onClick - Button click callback.
+	 * @property {SectionButtonHook} onClick - Button click callback.
 	 */
 
 	/**
@@ -115,7 +115,7 @@
 	 */
 
 	/**
-	 * @typedef {Object} SectionEventHookArgs
+	 * @typedef {Object} SectionToggleHookArgs
 	 * @property {string} paneID - Registered pane id.
 	 * @property {Document} doc - Document of section.
 	 * @property {HTMLDivElement} body - Section body.
@@ -127,7 +127,25 @@
 	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
 	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
 	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
-	 * @property {Event} event - Event object.
+	 * @property {boolean} open - New section open state.
+	 * @property {Event} [event] - @deprecated Privileged plugins only; use `open` instead.
+	 */
+
+	/**
+	 * @typedef {Object} SectionButtonHookArgs
+	 * @property {string} paneID - Registered pane id.
+	 * @property {Document} doc - Document of section.
+	 * @property {HTMLDivElement} body - Section body.
+	 * @property {Zotero.Item} item - Current item.
+	 * @property {string} tabType - Current tab type.
+	 * @property {boolean} editable - Whether the section is in edit mode.
+	 * @property {SetSectionL10nArgs} setL10nArgs - Set l10n args for section header.
+	 * @property {SetEnabled} setEnabled - Set pane enabled state.
+	 * @property {SetFullHeight} setFullHeight - Set whether the section fills the full available height of the item pane.
+	 * @property {SetSectionSummary} setSectionSummary - Set pane section summary, shown in collapsed header.
+	 * @property {SetSectionButtonStatus} setSectionButtonStatus - Set pane section button status.
+	 * @property {string} buttonType - Type of the clicked button.
+	 * @property {Event} [event] - @deprecated Privileged plugins only; use `buttonType` instead.
 	 */
 
 	/**
@@ -161,13 +179,13 @@
 
 	/**
 	 * @callback SectionToggleHook
-	 * @param {SectionEventHookArgs} props - Event hook arguments.
+	 * @param {SectionToggleHookArgs} props - Toggle hook arguments.
 	 * @returns {void}
 	 */
 
 	/**
-	 * @callback SectionEventHook
-	 * @param {SectionEventHookArgs} props - Event hook arguments.
+	 * @callback SectionButtonHook
+	 * @param {SectionButtonHookArgs} props - Button hook arguments.
 	 * @returns {void}
 	 */
 
@@ -306,16 +324,29 @@
 
 		_hookNames = ['onInit', 'onDestroy', 'onItemChange', 'onRender', 'onAsyncRender', 'onToggle'];
 
+		// The deprecated `event` prop (a chrome DOM event, kept for old privileged
+		// plugins) must never cross into unprivileged sandboxes
+		_wrapHook(hook, pluginID) {
+			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
+			let scope = lazy.PluginSandbox.getScope(pluginID);
+			if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
+				return wrapped;
+			}
+			return (props) => {
+				if (props && props.event !== undefined) {
+					props = { ...props };
+					delete props.event;
+				}
+				return wrapped(props);
+			};
+		}
+
 		_convert(option) {
 			option = super._convert(option);
 
 			for (let hookName of this._hookNames) {
 				if (option[hookName]) {
-					option[hookName] = lazy.ScopeVariables.fromScope(
-						option[hookName],
-						option.pluginID,
-						{ rootNode: props => props.body }
-					);
+					option[hookName] = this._wrapHook(option[hookName], option.pluginID);
 				}
 			}
 
@@ -324,11 +355,7 @@
 					if (button.onClick) {
 						return {
 							...button,
-							onClick: lazy.ScopeVariables.fromScope(
-								button.onClick,
-								option.pluginID,
-								{ rootNode: props => props.body }
-							)
+							onClick: this._wrapHook(button.onClick, option.pluginID)
 						};
 					}
 					return button;
@@ -551,7 +578,7 @@
 		 * @param {SectionL10n | SectionIcon} options.header - Header options. Icon should be 16*16 and `label` need to be localized.
 		 * @param {SectionL10n | SectionIcon} options.sidenav - Sidenav options.  Icon should be 20*20 and `tooltiptext` need to be localized.
 		 * @param {string} [options.bodyXHTML] - Pane body's innerHTML, defaults to XUL namespace.
-		 * 		Only available for privileged plugins.
+		 * 		@deprecated Privileged plugins only; provide a page at `src` instead.
 		 * @param {string} [options.src] - URI of a full HTML page within the plugin, optionally relative
 		 * 		to the plugin's root, shown in an embedded content browser as the section body.
 		 * 		Required for unprivileged plugins, which can't use `bodyXHTML`; optional for
