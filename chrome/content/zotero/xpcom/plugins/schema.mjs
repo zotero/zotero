@@ -72,8 +72,6 @@ const PERMISSION_SCHEMAS = {
 			isWin: true,
 			isLinux: true,
 			locale: true,
-			// Actions
-			launchURL: true,
 			// Locks
 			initializationPromise: true,
 			uiReadyPromise: true,
@@ -99,7 +97,6 @@ const PERMISSION_SCHEMAS = {
 				normalizeToUnix: true,
 				directoryContains: true,
 				truncateFileName: true,
-				reveal: true,
 			},
 			Date: {
 				strToISO: true,
@@ -285,6 +282,11 @@ const PERMISSION_SCHEMAS = {
 			ProgressWindow: "Constructor",
 			Prompt: true,
 			alert: true,
+			// These hand the user's attention to another application, so they are not in the default
+			launchURL: true,
+			File: {
+				reveal: true,
+			},
 		},
 	},
 	window: {

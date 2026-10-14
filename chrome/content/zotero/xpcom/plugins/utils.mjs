@@ -660,30 +660,30 @@ const ScopeUtils = {
 	},
 
 	/**
-	 * The other direction: what a sandbox hands us, as plain data (JSON plus bytes) detached from it
+	 * A value from any compartment as plain data (JSON plus bytes) of one compartment, detached from every
+	 * other; chrome's own unless `into` names another global
 	 * @param {*} value
+	 * @param {object} [into] - The global whose compartment the copy is built in
 	 * @returns {*}
 	 */
-	toPlainData(value) {
-		return ScopeUtils._toPlainData(value);
+	toPlainData(value, into = CHROME_GLOBAL) {
+		return ScopeUtils._toPlainData(value, into);
 	},
 
-	// The bytes of any view, or a whole buffer, copied into this compartment as a Uint8Array
-	_copyBytes(value) {
-		if (Cu.getClassName(value, true) === "Uint8Array") {
-			return new Uint8Array(value);
-		}
+	// The bytes of any view, or a whole buffer, as a Uint8Array of `into`: a view over the same bytes when
+	// they are already in that compartment, a copy when they come from another
+	_bytesInto(value, into) {
 		let view = ArrayBuffer.isView(value)
-			? new Uint8Array(value.buffer, value.byteOffset, value.byteLength)
-			: new Uint8Array(value);
-		return new Uint8Array(view);
+			? new into.Uint8Array(value.buffer, value.byteOffset, value.byteLength)
+			: new into.Uint8Array(value);
+		return VarCheck.isInScope(value, into) ? view : new into.Uint8Array(view);
 	},
 
 	/**
-	 * What JSON keeps, rebuilt here, plus bytes as a Uint8Array; a BigInt or a cycle throws. An object
+	 * What JSON keeps, rebuilt in `into`, plus bytes as a Uint8Array; a BigInt or a cycle throws. An object
 	 * serializes through `toPlain()`, else `toJSON()`, once, as JSON.stringify does
 	 */
-	_toPlainData(value, ancestors = new Set(), serialized = false) {
+	_toPlainData(value, into, ancestors = new Set(), serialized = false) {
 		switch (typeof value) {
 			case "string":
 			case "boolean":
@@ -703,14 +703,14 @@ const ScopeUtils = {
 		value = Cu.waiveXrays(value);
 		if (!serialized) {
 			if (typeof value.toPlain === "function") {
-				return ScopeUtils._toPlainData(value.toPlain(), ancestors, true);
+				return ScopeUtils._toPlainData(value.toPlain(), into, ancestors, true);
 			}
 			if (typeof value.toJSON === "function") {
-				return ScopeUtils._toPlainData(value.toJSON(), ancestors, true);
+				return ScopeUtils._toPlainData(value.toJSON(), into, ancestors, true);
 			}
 		}
 		if (VarCheck.isBytes(value)) {
-			return ScopeUtils._copyBytes(value);
+			return ScopeUtils._bytesInto(value, into);
 		}
 		if (ancestors.has(value)) {
 			throw new TypeError("cyclic value");
@@ -718,12 +718,12 @@ const ScopeUtils = {
 		ancestors.add(value);
 		let plain;
 		if (Array.isArray(value)) {
-			plain = Array.from(value, entry => ScopeUtils._toPlainData(entry, ancestors) ?? null);
+			plain = into.Array.from(value, entry => ScopeUtils._toPlainData(entry, into, ancestors) ?? null);
 		}
 		else {
-			plain = {};
+			plain = new into.Object();
 			for (let key of Object.keys(value)) {
-				let entry = ScopeUtils._toPlainData(value[key], ancestors);
+				let entry = ScopeUtils._toPlainData(value[key], into, ancestors);
 				if (entry !== undefined) {
 					Object.defineProperty(plain, key, { value: entry, enumerable: true, writable: true, configurable: true });
 				}
