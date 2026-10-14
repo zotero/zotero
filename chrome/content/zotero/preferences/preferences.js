@@ -28,7 +28,7 @@
 {
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
-		loadEmbeddedPluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
+		loadEmbeddedPluginPage: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 	});
 
 	// Search tooltip styles for embedded pane pages, mirroring .search-tooltip
@@ -449,40 +449,31 @@
 			heading.textContent = pane.rawLabel;
 			pane.container.append(heading);
 
-			let { loadPromise } = lazy.loadEmbeddedPluginPage(pane.container, pane.src, {
+			// The embedded page triggers navigation by posting `{ type: 'navigate',
+			// paneID }`;
+			let { dispose } = await lazy.loadEmbeddedPluginPage(pane.container, pane.src, {
 				className: 'plugin-pane-browser',
-				// Expose the pane API before any page script runs
-				onWindowCreated: browser => this._exposeEmbeddedPaneAPI(browser, pane),
+				pluginID: pane.pluginID,
+				autoResize: { height: true },
+				channel: true,
+				onHostMessage: (msg) => {
+					if (!msg || msg.type !== 'navigate') {
+						return;
+					}
+					let paneID = String(msg.paneID);
+					let targetPane = this.panes.get(paneID);
+					if (!targetPane || targetPane.pluginID !== pane.pluginID) {
+						Zotero.warn(`Embedded pane navigation to ${paneID} rejected: not registered by this plugin`);
+						return;
+					}
+					this.navigateToPane(paneID).catch(e => Zotero.logError(e));
+				},
 			});
-			await loadPromise;
+			pane._pageChannelDispose = dispose;
 
 			// If this is the first pane to be loaded, notify anyone waiting
 			// (for tests)
 			this._firstPaneLoadDeferred.resolve();
-		},
-
-		/**
-		 * Expose a minimal Zotero_Preferences facade to an embedded pane page:
-		 * navigateToPane(), restricted to panes registered by the same plugin.
-		 *
-		 * @param {XULElement} browser
-		 * @param {Object} pane
-		 */
-		_exposeEmbeddedPaneAPI(browser, pane) {
-			let contentWin = browser.contentWindow;
-			let facade = Cu.createObjectIn(contentWin, { defineAs: 'Zotero_Preferences' });
-			Cu.exportFunction(
-				(paneID) => {
-					paneID = String(paneID);
-					let targetPane = this.panes.get(paneID);
-					if (!targetPane || targetPane.pluginID !== pane.pluginID) {
-						throw new contentWin.Error(`Pane ${paneID} was not registered by this plugin`);
-					}
-					this.navigateToPane(paneID).catch(e => Zotero.logError(e));
-				},
-				facade,
-				{ defineAs: 'navigateToPane' }
-			);
 		},
 
 		/**

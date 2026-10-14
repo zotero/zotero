@@ -31,7 +31,7 @@
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
-		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs",
+		resolvePluginPage: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 
@@ -64,8 +64,7 @@
 	/**
 	 * @typedef {Object} SectionBasicHookArgs
 	 * @property {string} paneID - Registered pane id.
-	 * @property {Document} doc - Document of section.
-	 * @property {HTMLDivElement} body - Section body.
+	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
 	 */
 
 	/**
@@ -83,8 +82,7 @@
 	/**
 	 * @typedef {Object} SectionHookArgs
 	 * @property {string} paneID - Registered pane id.
-	 * @property {Document} doc - Document of section.
-	 * @property {HTMLDivElement} body - Section body.
+	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
 	 * @property {Zotero.Item} item - Current item.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the section is in edit mode.
@@ -98,8 +96,7 @@
 	/**
 	 * @typedef {Object} SectionInitHookArgs
 	 * @property {string} paneID - Registered pane id.
-	 * @property {Document} doc - Document of section.
-	 * @property {HTMLDivElement} body - Section body.
+	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
 	 * @property {Zotero.Item} item - Current item.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the section is in edit mode.
@@ -117,8 +114,7 @@
 	/**
 	 * @typedef {Object} SectionToggleHookArgs
 	 * @property {string} paneID - Registered pane id.
-	 * @property {Document} doc - Document of section.
-	 * @property {HTMLDivElement} body - Section body.
+	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
 	 * @property {Zotero.Item} item - Current item.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the section is in edit mode.
@@ -134,8 +130,7 @@
 	/**
 	 * @typedef {Object} SectionButtonHookArgs
 	 * @property {string} paneID - Registered pane id.
-	 * @property {Document} doc - Document of section.
-	 * @property {HTMLDivElement} body - Section body.
+	 * @property {object} page - Messenger to the section's embedded page; see `PluginPageChannel` (plugins/pageChannel.mjs).
 	 * @property {Zotero.Item} item - Current item.
 	 * @property {string} tabType - Current tab type.
 	 * @property {boolean} editable - Whether the section is in edit mode.

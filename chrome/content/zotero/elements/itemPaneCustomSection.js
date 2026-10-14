@@ -30,7 +30,7 @@
 		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
 		{ global: "current" }
 	);
-	const { loadEmbeddedPluginPage } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/embeddedBrowser.mjs");
+	const { loadEmbeddedPluginPage } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/embeddedPage.mjs");
 
 	class ItemPaneCustomSection extends ItemPaneSectionElementBase {
 		_hooks = {};
@@ -38,6 +38,10 @@
 		_sectionButtons = {};
 
 		_pluginID = null;
+
+		_pageMessenger = null;
+
+		_pageChannelDispose = null;
 
 		_refreshDisabled = true;
 
@@ -164,17 +168,17 @@
 			this._refreshDisabled = false;
 		}
 
-		/**
-		 * Load `src` in an embedded content browser as the section body, then
-		 * fire the init hook and render. Hooks get the page's own document.
-		 */
 		async _initEmbeddedBrowser() {
 			this._body.replaceChildren();
-			let { browser, loadPromise } = loadEmbeddedPluginPage(this._body, this._src, {
+			let { element, messenger, dispose } = await loadEmbeddedPluginPage(this._body, this._src, {
 				className: "plugin-section-browser",
+				pluginID: this._pluginID,
+				autoResize: { height: true },
+				channel: true,
 			});
-			this._embeddedBrowser = browser;
-			await loadPromise;
+			this._embeddedBrowser = element;
+			this._pageMessenger = messenger;
+			this._pageChannelDispose = dispose;
 
 			this._embeddedLoaded = true;
 			this._handleInit();
@@ -195,6 +199,7 @@
 			this._sectionListeners = [];
 
 			this._handleDestroy();
+			this._pageChannelDispose?.();
 		}
 
 		setL10nID(l10nId) {
@@ -247,13 +252,10 @@
 		}
 		
 		_getBasicHookProps() {
-			// Embedded sections give hooks the plugin page's own document
 			if (this._src) {
-				let doc = this._embeddedBrowser?.contentDocument;
 				return {
 					paneID: this.paneID,
-					doc,
-					body: doc?.body,
+					page: this._pageMessenger,
 				};
 			}
 			return {
