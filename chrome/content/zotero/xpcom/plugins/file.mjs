@@ -62,10 +62,23 @@ function getPluginDataDir() {
 	return PathUtils.join(Zotero.DataDirectory.dir, "plugin-data");
 }
 
+// Windows compares paths without regard to case, and nsIFile.normalize keeps the case as given there
+function foldCase(path) {
+	return Zotero.isWin ? path.toLowerCase() : path;
+}
+
+function samePath(a, b) {
+	return foldCase(a) === foldCase(b);
+}
+
+function containsPath(dir, path) {
+	return Zotero.File.directoryContains(foldCase(dir), foldCase(path));
+}
+
 function isPersistBlocked(canonicalPath) {
-	let real = resolveRealPath(canonicalPath);
+	let real = PluginFileAccess._realPath(canonicalPath);
 	for (let p of persistBlockedPaths) {
-		if (Zotero.File.directoryContains(real, resolveRealPath(p))) return true;
+		if (containsPath(real, PluginFileAccess._realPath(p))) return true;
 	}
 	return false;
 }
@@ -98,12 +111,12 @@ function resolveRealPath(rawPath) {
 }
 
 function isForbidden(realPath) {
-	if (Zotero.File.directoryContains(resolveRealPath(PathUtils.profileDir), realPath)) {
+	if (containsPath(PluginFileAccess._realPath(PathUtils.profileDir), realPath)) {
 		return true;
 	}
-	if (Zotero.File.directoryContains(resolveRealPath(Zotero.DataDirectory.dir), realPath)) {
-		let pluginDataDir = resolveRealPath(getPluginDataDir());
-		if (pluginDataDir && Zotero.File.directoryContains(pluginDataDir, realPath)) {
+	if (containsPath(PluginFileAccess._realPath(Zotero.DataDirectory.dir), realPath)) {
+		let pluginDataDir = PluginFileAccess._realPath(getPluginDataDir());
+		if (pluginDataDir && containsPath(pluginDataDir, realPath)) {
 			return false;
 		}
 		return true;
@@ -218,7 +231,7 @@ class GrantLayer {
 			}
 		}
 		if (skipPathCheck) return true;
-		return stronger.path === weaker.path || Zotero.File.directoryContains(stronger.path, weaker.path);
+		return samePath(stronger.path, weaker.path) || containsPath(stronger.path, weaker.path);
 	}
 
 	/**
@@ -395,7 +408,7 @@ class PersistedGrantLayer extends GrantLayer {
 				if (typeof path !== "string" || !path) continue;
 				if (!value || typeof value !== "object" || !GrantLayer.VALID_MODES.includes(value.mode)) continue;
 				// Resolve stored keys so matching is case/symlink-consistent
-				entries.push([resolveRealPath(path), { mode: value.mode }]);
+				entries.push([PluginFileAccess._realPath(path), { mode: value.mode }]);
 			}
 			this._cache = new Map(entries);
 			this._cacheKey = raw;
@@ -508,6 +521,19 @@ class FileAccessState {
 		return canonicalize(PathUtils.join(getPluginDataDir(), this.uuid));
 	}
 
+	_tempDirPath() {
+		return canonicalize(PathUtils.join(Zotero.getTempDirectory().path, `plugin-${this.uuid}`));
+	}
+
+	/**
+	 * A scratch directory under Zotero's, always allowed like the data directory and gone with Zotero's
+	 */
+	getTempDir() {
+		let dir = this._tempDirPath();
+		Zotero.File.createDirectoryIfMissing(dir);
+		return dir;
+	}
+
 	/**
 	 * Check whether the plugin has the necessary grant for `rawPath` and `mode`.
 	 * If not, prompt the user and update grants based on the response.
@@ -521,7 +547,7 @@ class FileAccessState {
 			throw new Error(`Invalid file access mode: ${mode}`);
 		}
 		let path = canonicalize(rawPath);
-		let realPath = resolveRealPath(path);
+		let realPath = PluginFileAccess._realPath(path);
 
 		if (isForbidden(realPath)) {
 			throw new Error(
@@ -620,7 +646,7 @@ class FileAccessState {
 		if (!this.activeSession) return;
 		let path;
 		try {
-			path = resolveRealPath(canonicalize(rawPath));
+			path = PluginFileAccess._realPath(canonicalize(rawPath));
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -647,9 +673,11 @@ class FileAccessState {
 	 * @returns {"allow"|"deny"|null}
 	 */
 	_getDecision(realPath, mode) {
-		let pluginDir = resolveRealPath(this.getDir());
-		if (pluginDir && Zotero.File.directoryContains(pluginDir, realPath)) {
-			return "allow";
+		for (let own of [this.getDir(), this._tempDirPath()]) {
+			let real = PluginFileAccess._realPath(own);
+			if (real && containsPath(real, realPath)) {
+				return "allow";
+			}
 		}
 		if (this.activeSession) {
 			let d = this.activeSession.getDecision({ path: realPath, mode });
@@ -732,6 +760,9 @@ const PluginFileAccess = {
 	// pluginID -> PluginState
 	_states: new Map(),
 
+	// Every real-path lookup of the gate goes through here, so a test can say where a path leads
+	_realPath: resolveRealPath,
+
 	register(pluginID) {
 		this._states.set(pluginID, new FileAccessState(pluginID));
 	},
@@ -767,6 +798,17 @@ const PluginFileAccess = {
 		let state = this._states.get(pluginID);
 		return state ? state.getDir() : null;
 	},
+
+	getTempDir(pluginID) {
+		let state = this._states.get(pluginID);
+		return state ? state.getTempDir() : null;
+	},
+
+	/**
+	 * The canonical form of an absolute native path or file: URL, which every grant and check uses
+	 * @throws {Error} For a relative path
+	 */
+	canonicalize,
 
 	addSessionGrant(pluginID, rawPath, mode) {
 		let state = this._states.get(pluginID);
@@ -824,4 +866,4 @@ const PluginFileAccess = {
 	},
 };
 
-export { PluginFileAccess, PersistedGrantLayer };
+export { PluginFileAccess, PersistedGrantLayer, resolveRealPath, samePath, containsPath };
