@@ -370,6 +370,9 @@ class StoreAPIBase extends ControllerAPIBase {
 				if (!validated.valid) {
 					this._throw(INVALID_PARAMS, `${at}.create: ${validated.reason}`);
 				}
+				if (entry.revision !== undefined) {
+					this._throw(INVALID_PARAMS, `${at}: a created object has no revision to expect`);
+				}
 				refs.add(entry.ref);
 				planned.ref = entry.ref;
 				planned.create = validated.obj;

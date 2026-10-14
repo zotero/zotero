@@ -2872,14 +2872,18 @@ describe("Plugin Sandbox", function () {
 				"Notifier should not be exposed without data permission");
 		});
 
-		it("should only expose File.reveal with default permission", function () {
+		it("should expose File.reveal and launchURL with userPrompt only", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof Zotero.File === 'object'"),
 				"File should be exposed with default permission");
-			assert.isTrue(evalInScope("typeof Zotero.File.reveal === 'function'"),
-				"File.reveal should be exposed with default permission");
+			assert.equal(evalInScope("typeof Zotero.File.reveal"), "undefined",
+				"File.reveal hands the user's attention to another application, so it needs userPrompt");
+			assert.equal(evalInScope("typeof Zotero.launchURL"), "undefined");
 			assert.isTrue(evalInScope("typeof Zotero.FileStore === 'undefined'"),
 				"FileStore should not be exposed without fileSystemRead");
+			loadTestScope(["default", "userPrompt"]);
+			assert.equal(evalInScope("typeof Zotero.File.reveal"), "function");
+			assert.equal(evalInScope("typeof Zotero.launchURL"), "function");
 		});
 
 		it("should expose network APIs with only default permission", function () {

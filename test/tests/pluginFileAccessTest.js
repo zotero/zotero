@@ -266,7 +266,7 @@ describe("Plugin File Access", function () {
 
 
 	describe("withSession lifecycle", function () {
-		it("serializes overlapping sessions", async function () {
+		it("lets overlapping calls share one session, which ends with the last of them", async function () {
 			let order = [];
 			let s1 = PluginFileAccess.withSession(PLUGIN_ID, async () => {
 				order.push("s1-start");
@@ -274,10 +274,26 @@ describe("Plugin File Access", function () {
 				order.push("s1-end");
 			});
 			let s2 = PluginFileAccess.withSession(PLUGIN_ID, async () => {
-				order.push("s2");
+				order.push("s2-start");
+				await Zotero.Promise.delay(40);
+				order.push("s2-end");
 			});
-			await Promise.all([s1, s2]);
-			assert.deepEqual(order, ["s1-start", "s1-end", "s2"]);
+			let ended = PluginFileAccess.waitForSession(PLUGIN_ID).then(() => order.push("session-end"));
+			await Promise.all([s1, s2, ended]);
+			assert.deepEqual(order, ["s1-start", "s2-start", "s1-end", "s2-end", "session-end"]);
+		});
+
+		it("lets a nested call join the session instead of waiting for itself", async function () {
+			let path = PathUtils.join(tempDir, "nested-" + Zotero.Utilities.randomString() + ".txt");
+			let inner = await PluginFileAccess.withSession(PLUGIN_ID, async () => {
+				PluginFileAccess.addSessionGrant(PLUGIN_ID, path, "read");
+				return PluginFileAccess.withSession(PLUGIN_ID, async () => {
+					// The outer call's grant is the inner call's too
+					await PluginFileAccess.check(PLUGIN_ID, path, "read");
+					return "joined";
+				}, { timeout: 500 });
+			}, { timeout: 500 });
+			assert.equal(inner, "joined");
 		});
 
 		it("waitForSession resolves after fn completes", async function () {
