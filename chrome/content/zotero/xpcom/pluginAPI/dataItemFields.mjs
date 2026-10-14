@@ -63,14 +63,19 @@ const DataItemFields = {
 		dateModified: "nothing; it is read-only",
 	},
 
+	// Own keys only, so a prototype name such as constructor is an unknown field
+	_property(field) {
+		return Object.hasOwn(DataItemFields.PROPERTIES, field) ? DataItemFields.PROPERTIES[field] : undefined;
+	},
+
 	/**
 	 * A reason setField cannot set this field on this item, or nothing
 	 */
 	check(item, field, value) {
-		if (field in DataItemFields.REJECTED) {
+		if (Object.hasOwn(DataItemFields.REJECTED, field)) {
 			return `'${field}' is set with ${DataItemFields.REJECTED[field]}`;
 		}
-		let property = DataItemFields.PROPERTIES[field];
+		let property = DataItemFields._property(field);
 		if (property) {
 			if (property.kind === "attachment" && !item.isAttachment()) {
 				return `'${field}' applies to attachments only`;
@@ -89,7 +94,7 @@ const DataItemFields = {
 	},
 
 	apply(item, field, value) {
-		let property = DataItemFields.PROPERTIES[field];
+		let property = DataItemFields._property(field);
 		if (!property) {
 			item.setField(field, String(value));
 			return;

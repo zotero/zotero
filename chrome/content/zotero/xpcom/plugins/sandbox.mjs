@@ -274,18 +274,20 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 		clearInterval,
 		requestIdleCallback,
 		cancelIdleCallback,
-		loadSubScript: (res) => {
-			let uri = new URL(res, baseURI).href;
-			if (!uri.startsWith(baseURI)) {
-				throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
-			}
-			return Services.scriptloader.loadSubScriptWithOptions(uri, { target: scope, allowUnsafeURL: true });
-		},
 		isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 	};
 	for (let key in funcToExport) {
 		defineFunction(scope, key, funcToExport[key]);
 	}
+
+	// Loading code is worth a trace line, unlike the timers above
+	scope.loadSubScript = ScopeUtils.ensureCallableInScope((res) => {
+		let uri = new URL(res, baseURI).href;
+		if (!uri.startsWith(baseURI)) {
+			throw new Error(`loadSubScript: ${res} resolves outside the plugin directory`);
+		}
+		return Services.scriptloader.loadSubScriptWithOptions(uri, { target: scope, allowUnsafeURL: true });
+	}, null, scope, { trace: { pluginID: addon.id, path: "loadSubScript" } });
 
 	defineFrozenIdentity(scope, addon, uuid, false, {
 		permissions,

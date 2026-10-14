@@ -518,6 +518,27 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
+		it("should grant only read on an attachment the user cannot edit, whatever the permissions", async function () {
+			let group = await createGroup();
+			let attachment = await importFileAttachment("test.txt", { libraryID: group.libraryID });
+			group.editable = false;
+			group.filesEditable = false;
+			await group.saveTx();
+			try {
+				loadTestScope(["default", "dataWrite", "fileSystemRead", "fileSystemWrite"]);
+				let file = await evalInScope(`Zotero.DataStore.query("file", { itemID: ${attachment.id} })`);
+				assert.isTrue(file.success, file.error && file.error.message);
+				let read = await readFile(file.result.path);
+				assert.isTrue(read.success, read.error && read.error.message);
+				let write = await writeFile(file.result.path, "changed");
+				assert.isFalse(write.success);
+				assert.equal(write.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
+			}
+			finally {
+				await group.eraseTx();
+			}
+		});
+
 		// A deny on the directory answers a prompt at once, so a missing grant fails instead of waiting
 		it("should resolve a linked file stored relative to the base directory", async function () {
 			let base = await getTempDirectory();
@@ -3609,6 +3630,13 @@ describe("Plugin Sandbox", function () {
 					evalInScope("_win.page.sendMessage(JSON.parse(_toPage))");
 					return report;
 				};
+				let traceLines = [];
+				let traceListener = (line) => {
+					if (line.includes("[PluginTrace]")) {
+						traceLines.push(line);
+					}
+				};
+				Zotero.Debug.addListener(traceListener);
 				try {
 					// Extend this window's host API chrome-side for a round-trip check
 					let browsers = getPluginWindowBrowsers();
@@ -3621,15 +3649,23 @@ describe("Plugin Sandbox", function () {
 					let result = await sendToPage({ type: "call-api", name: "echoBack", params: { value: 21 } });
 					assert.equal(result.type, "api-result", "declared API should resolve");
 					assert.equal(result.result.doubled, 42, "params and result should round-trip");
+					// The call is traced under the page it came from
+					let traced = traceLines.find(l => l.includes("[call]") && l.includes("/echo.html:zoteroHost.api.echoBack"));
+					assert.ok(traced, "Should trace the page's host API call. All traces: " + JSON.stringify(traceLines));
+					assert.include(traced, ADDON_ID);
 
 					let unknown = await sendToPage({ type: "call-api", name: "nope", params: {} });
 					assert.equal(unknown.type, "api-error", "undeclared API should reject");
+					traced = traceLines.find(l => l.includes("/echo.html:zoteroHost.api.nope"));
+					assert.ok(traced, "Should trace the refused call too");
+					assert.include(traced, "failed: Error");
 
 					let badParams = await sendToPage({ type: "call-api-bad" });
 					assert.equal(badParams.type, "api-error", "non-object params should reject");
 					assert.include(badParams.message, "plain object");
 				}
 				finally {
+					Zotero.Debug.removeListener(traceListener);
 					await closeWin();
 				}
 			});
@@ -4418,6 +4454,46 @@ describe("Plugin Sandbox", function () {
 				assert.ok(line, "Should have a [call] trace for console.log");
 			});
 		});
+
+		describe("request tracing", function () {
+			it("should trace a controller request by name, with its outcome", async function () {
+				loadTestScope(["default", "window"]);
+				startCapture();
+				await evalInScope('Zotero.WindowController.query("windows", { type: "mainWindow" })');
+				let line = findTrace("call", "Zotero.WindowController.query:windows");
+				assert.ok(line, "Should have a [call] trace naming the request. All traces: " + JSON.stringify(traceLines));
+				assert.include(line, ADDON_ID);
+				assert.notInclude(line, "failed");
+				await evalInScope('Zotero.WindowController.query("nope")');
+				line = findTrace("call", "Zotero.WindowController.query:nope");
+				assert.ok(line, "Should trace a failed request too");
+				assert.include(line, "failed: UnknownRequest");
+			});
+
+			it("should trace a call that throws", function () {
+				loadTestScope(["default", "preferences"]);
+				startCapture();
+				// The boundary replaces a chrome error's message, so only the throw itself is asserted
+				assert.throws(() => evalInScope("Zotero.Prefs.resetBranch()"));
+				let line = findTrace("call", "Zotero.Prefs.resetBranch");
+				assert.ok(line, "Should have a [call] trace for the failed call. All traces: " + JSON.stringify(traceLines));
+				assert.include(line, "failed: Error");
+			});
+		});
+	});
+
+	describe("Hooks after unload", function () {
+		it("should ignore a hook whose sandbox was nuked instead of throwing", function () {
+			loadTestScope(["default"]);
+			// A sandbox of its own, so nuking it leaves the test scope alone
+			let sandbox = new Cu.Sandbox(Services.scriptSecurityManager.createNullPrincipal({}), { freshCompartment: true });
+			let hook = Cu.evalInSandbox("(function hook() { return 'ran'; })", sandbox);
+			let wrapped = ScopeVariables.fromScope(hook, ADDON_ID);
+			assert.equal(wrapped(), "ran");
+			Cu.nukeSandbox(sandbox);
+			assert.isTrue(Cu.isDeadWrapper(hook));
+			assert.isUndefined(wrapped());
+		});
 	});
 
 	describe("plugin manifest content_security_policy (real install)", function () {
@@ -4613,6 +4689,12 @@ function uninstall() {}
 			loadTestScope(["default", "tab"]);
 			assert.equal(evalInScope("typeof Zotero.WindowController._windowController"), "undefined");
 			assert.equal(evalInScope("typeof Zotero.TabController._tabController"), "undefined");
+		});
+
+		it("should hand out one wrapper per request method", function () {
+			loadTestScope(["default", "tab"]);
+			assert.isTrue(evalInScope("Zotero.WindowController.query === Zotero.WindowController.query"));
+			assert.isTrue(evalInScope("Zotero.TabController.command === Zotero.TabController.command"));
 		});
 
 		it("should resolve a query to a plain sandbox object", async function () {
