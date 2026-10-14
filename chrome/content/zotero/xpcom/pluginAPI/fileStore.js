@@ -533,7 +533,12 @@
 			if (this._objectTypes.has(type) && typeof entry.path === "string") {
 				entry = { ...entry, path: await this._readable(entry.path, caller) };
 			}
-			return super._readSnapshot(type, entry, caller);
+			let snapshot = await super._readSnapshot(type, entry, caller);
+			// A path of the other kind is NotFound, as it is for a commit
+			if (snapshot.type !== type) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${snapshot.path} is a ${snapshot.type}, not a ${type}`);
+			}
+			return snapshot;
 		}
 
 		/**

@@ -50,6 +50,9 @@
  * @property {(target: object, ctx: StoreCommitContext) => Promise<void>} [save] - Persist the target after its
  *     operations; also called before the first operation flagged `needsID` on a created target
  * @property {(target: object) => Promise<void>} [restore] - Drop in-memory changes after a failed commit
+ * @property {(target: object) => Promise<void>} [discard] - Remove a created object again when a later step of
+ *     its own entry fails outside the store transaction, where nothing rolls it back; runs on what the type's
+ *     `create.handler` returned, so a handler that may return an existing object must not define it
  * @property {(target: object) => object} describe - The result entry for a target, at least `{ id }`
  * @property {(target: object) => (object | null)} [snapshot] - The object's snapshot, for the `snapshot` query
  *     and the `snapshots` commit option; null when nothing is there
@@ -344,9 +347,9 @@ class StoreAPIBase extends RequestAPIBase {
 			await run(deferred);
 		}
 		catch (e) {
-			// What the failed entry saved stays; what it changed only in memory goes
+			// What the failed entry saved stays unless it created the object; what it changed only in memory goes
 			if (failed) {
-				await this._restore([failed]);
+				await (failed.create ? this._discard(failed, ctx) : this._restore([failed]));
 			}
 			throw this._withProgress(e, entries, applied, failed);
 		}
@@ -852,6 +855,30 @@ class StoreAPIBase extends RequestAPIBase {
 			catch (e) {
 				lazy.Zotero.logError(e);
 			}
+		}
+	}
+
+	// A created object its failed entry already persisted outside the store transaction is removed again
+	async _discard(entry, ctx) {
+		let { def, target } = entry;
+		if (!target || !def.discard) {
+			return;
+		}
+		let { id } = def.describe(target);
+		if (id === undefined || id === null || id === false) {
+			return;
+		}
+		try {
+			// A save that assigned the ID and then rolled back left nothing to remove
+			if (!(await def.resolve(id, ctx))) {
+				return;
+			}
+			await def.discard(target);
+			entry.target = undefined;
+			this._log(`changes[${entry.index}] (${entry.type}) removed again after its entry failed`);
+		}
+		catch (e) {
+			lazy.Zotero.logError(e);
 		}
 	}
 
