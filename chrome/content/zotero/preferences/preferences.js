@@ -403,7 +403,7 @@
 				];
 				let contentFragment = pane.defaultXUL
 					? MozXULElement.parseXULToFragment(markup, dtdFiles)
-					: this._parseXHTMLToFragment(markup, dtdFiles, pane.pluginID);
+					: this._parseXHTMLToFragment(markup, dtdFiles);
 				contentFragment = document.importNode(contentFragment, true);
 
 				this._initImportedNodesPreInsert(contentFragment);
@@ -411,7 +411,6 @@
 				let heading = document.createElement('h1');
 				heading.textContent = pane.rawLabel;
 				pane.container.append(contentFragment);
-				lazy.WindowScopeVariables.activateInlineHandlers(pane.container, pane.pluginID);
 				if (pane.container.querySelector('.main-section')) {
 					pane.container.querySelector('.main-section').prepend(heading);
 				}
@@ -582,7 +581,7 @@
 			}
 		},
 
-		_parseXHTMLToFragment(str, entities = [], pluginID = null) {
+		_parseXHTMLToFragment(str, entities = []) {
 			// Adapted from MozXULElement.parseXULToFragment
 	
 			/* eslint-disable indent */
@@ -610,8 +609,7 @@
 			let range = doc.createRange();
 			range.selectNodeContents(doc.querySelector('div'));
 			let fragment = range.extractContents();
-	
-			lazy.WindowScopeVariables.sanitizeFragment(fragment, pluginID);
+
 			return fragment;
 		},
 	
