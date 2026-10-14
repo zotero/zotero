@@ -38,9 +38,11 @@
 	const ICON_KEYS = ["icon", "darkIcon", "menuIcon", "darkMenuIcon"];
 
 	const VALID_TARGETS = [
-		// Main window items toolbar
+		// Main window title bar, before the tabs menu button
+		"main/titlebar",
+		// Main window items toolbar (library tab toolbar)
 		"main/library/toolbar",
-		// Reader toolbar
+		// Reader toolbar (reader tab/window toolbar)
 		"reader/toolbar",
 	];
 
@@ -72,16 +74,29 @@
 	 * @property {string} [menuIcon] - A dedicated 16x16 icon used when the button
 	 * is collapsed into the overflow menu. If not provided, `icon` is rendered at 16x16
 	 * @property {string} [darkMenuIcon] - The dark-mode variant of `menuIcon`
-	 * @property {string[]} [enableForTabTypes] - The type of tab for which the button
-	 * should be shown. Available types are "library", "reader/*", "reader/pdf",
-	 * "reader/epub", "reader/snapshot", but other types are allowed as well
-	 * for custom tab types. By default, the button is always shown
+	 * @property {string[]} [enableForTabTypes] - The tab types for which the button
+	 * should be shown. Only applies to reader/toolbar, where "reader/pdf",
+	 * "reader/epub", and "reader/snapshot" limit the button to specific reader
+	 * types. By default, the button is always shown. Ignored for other targets.
 	 * @property {function} [onCommand] - Function to run when the button is clicked.
-	 * Called with the event and a context object. Mutually exclusive with `menus`
+	 * Called with the event and a `ButtonContext`. Mutually exclusive with `menus`
 	 * @property {MenuData[]} [menus] - Menu items for a dropdown button. When provided,
 	 * clicking the button opens a dropdown menu with these items. The menu data is managed
 	 * by `Zotero.MenuManager` and supports the same options as custom menus.
 	 * Mutually exclusive with `onCommand`
+	 */
+
+	/**
+	 * @typedef ButtonContext
+	 * @type {object}
+	 * @property {Element} buttonElem - The button (or overflow menu item) element
+	 * @property {string} tabType - The tab content type, e.g. "library" or "reader"
+	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
+	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
+	 * @property {number[]} itemIDs - The IDs of the items the button acts on: the selected
+	 * items for a library tab, or the tab's own item otherwise. Load them with
+	 * `Zotero.Items.get()`. A tab's reader can be resolved with
+	 * `Zotero.Reader.getByTabID(tabID)`
 	 */
 
 
@@ -227,7 +242,7 @@
 		 * @param {string} targetType - The target type of the buttons
 		 * @param {object} [options]
 		 * @param {string} [options.tabType] - If given, only return buttons enabled
-		 * for this tab type (see `enableForTabTypes`), e.g. "library" or "reader"
+		 * for this tab type (see `enableForTabTypes`), e.g. "reader"
 		 * @param {string} [options.tabSubType] - The tab subtype, e.g. the reader type
 		 * @returns {ButtonOptions[]} - The custom button data for the target type
 		 */
@@ -518,12 +533,14 @@
 		}
 
 		_getContext(reader) {
+			// No reader instance, matching the reader menubar menu context.
+			// Tab readers can be resolved with Zotero.Reader.getByTabID(tabID);
+			// a reader in a separate window has no tabID
 			return {
-				reader,
 				tabType: "reader",
 				tabSubType: reader.type,
 				tabID: reader.tabID,
-				items: [reader._item],
+				itemIDs: reader.itemID ? [reader.itemID] : [],
 			};
 		}
 
