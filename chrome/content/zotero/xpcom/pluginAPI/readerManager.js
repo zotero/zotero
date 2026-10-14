@@ -362,6 +362,7 @@
 					autoResize: { height: true, width: true },
 					channel: !!option.onRender,
 					pluginID: option.pluginID,
+					tracePath: "Zotero.ReaderManager.registerSection.page",
 					append: el => event.append(el),
 				})
 					.then(({ messenger }) => {

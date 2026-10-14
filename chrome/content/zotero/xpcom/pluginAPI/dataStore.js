@@ -1056,7 +1056,7 @@
 
 		/**
 		 * The attachment's file as the file store addresses it; asking is the grant, to read, or to write with
-		 * dataWrite, until the plugin unloads
+		 * dataWrite on a file the user could edit, until the plugin unloads
 		 * @param {number} itemID - An attachment
 		 * @returns {Promise<DataStoreQueryResults["file"]>}
 		 */
@@ -1074,8 +1074,9 @@
 			}
 			let path = lazy.PathIdentity.canonicalize(native);
 			if (caller.pluginID) {
-				let mode = lazy.VarCheck.hasPermissions(caller.scope, "dataWrite") ? "write" : "read";
-				lazy.PluginFileAccess.grantAttachment(caller.pluginID, path, mode);
+				let canWrite = lazy.VarCheck.hasPermissions(caller.scope, "dataWrite")
+					&& item.isEditable() && Zotero.Libraries.get(item.libraryID).filesEditable;
+				lazy.PluginFileAccess.grantAttachment(caller.pluginID, path, canWrite ? "write" : "read");
 			}
 			return { path, exists: await lazy.FileIO.exists(path) };
 		}

@@ -546,13 +546,21 @@ class FileAccessState {
 		let timeout = options.timeout || DEFAULT_SESSION_TIMEOUT_MS;
 
 		while (this.activeSession) {
-			await Promise.race([
-				this.waitForSession(),
-				new Promise((resolve, reject) => setTimeout(
-					() => reject(new Error(`Timed out waiting for active session to end for plugin ${this.pluginID}`)),
-					timeout,
-				)),
-			]);
+			let waitHandle;
+			try {
+				await Promise.race([
+					this.waitForSession(),
+					new Promise((_, reject) => {
+						waitHandle = setTimeout(
+							() => reject(new Error(`Timed out waiting for active session to end for plugin ${this.pluginID}`)),
+							timeout,
+						);
+					}),
+				]);
+			}
+			finally {
+				clearTimeout(waitHandle);
+			}
 		}
 
 		let session = new SessionGrantLayer();

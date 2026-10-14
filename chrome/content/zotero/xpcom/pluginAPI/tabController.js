@@ -30,6 +30,7 @@
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 	});
 
 	const LIBRARY_TAB_ID = "zotero-pane";
@@ -132,7 +133,7 @@
 					selectItems: {
 						params: {
 							windowID: "number",
-							itemIDs: { type: "array", children: "number" },
+							itemIDs: lazy.Params.intList,
 							inLibraryRoot: { type: "boolean", optional: true },
 							noTabSwitch: { type: "boolean", optional: true },
 						},
@@ -150,8 +151,7 @@
 							},
 							ids: {
 								type: "array",
-								children: "number",
-								checkHook: value => value.length > 0 || "Param 'ids' must not be empty",
+								checkHook: value => (value.length ? lazy.Params.intList.checkHook(value) : "Param 'ids' must not be empty"),
 							},
 						},
 						handler: ({ windowID, type, ids }) => this._selectCollectionsOrLibraries(

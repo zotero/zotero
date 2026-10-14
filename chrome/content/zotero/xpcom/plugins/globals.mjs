@@ -446,16 +446,14 @@ function setupFileStore(scope) {
 	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/fileChangeSet.js", { FilePath: path });
 	defineOnMirror(mirror, "ChangeSet", holder.FileChangeSet);
 	defineOnMirror(mirror, "path", path);
-	Cu.exportFunction(
-		(fn) => {
-			let wrappedFn = ScopeVariables.fromScope(fn, pluginID);
-			return ScopeUtils.ensurePromiseVarInScope(
-				PluginFileAccess.withSession(pluginID, wrappedFn), scope, {}
-			);
-		},
-		mirror,
-		{ defineAs: "withSession" }
-	);
+	let withSessionTrace = { pluginID, path: "Zotero.FileStore.withSession" };
+	defineOnMirror(mirror, "withSession", ScopeUtils.ensureCallableInScope(
+		fn => PluginFileAccess.withSession(pluginID, fn),
+		null, scope, {
+			argParser: args => [ScopeVariables.fromScope(args[0], pluginID, { trace: withSessionTrace })],
+			trace: withSessionTrace,
+		}
+	));
 }
 
 export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };
