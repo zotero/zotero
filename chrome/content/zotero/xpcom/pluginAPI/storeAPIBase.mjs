@@ -28,7 +28,8 @@
  * @typedef {object} StoreAPIConfig
  * @property {string} apiName - Log prefix and error namespace
  * @property {Record<string, RequestDef>} [queries] - Read-only requests, as on any request API. Every
- *     store also gets `validate`, which dry-runs a change set, unless it defines its own
+ *     store also gets `validate`, which dry-runs a change set, and `snapshot`, which reads one object by the
+ *     address a change set entry gives it, unless it defines its own
  * @property {Record<string, StoreObjectTypeDef>} objectTypes - What a change set can address, by type name
  * @property {string | string[]} [permissions] - What every commit requires; a type or operation can add to it
  * @property {(fn: () => Promise<void>) => Promise<void>} [transaction]
@@ -50,7 +51,8 @@
  *     operations; also called before the first operation flagged `needsID` on a created target
  * @property {(target: object) => Promise<void>} [restore] - Drop in-memory changes after a failed commit
  * @property {(target: object) => object} describe - The result entry for a target, at least `{ id }`
- * @property {(target: object) => object} [snapshot] - For the `snapshots` commit option
+ * @property {(target: object) => (object | null)} [snapshot] - The object's snapshot, for the `snapshot` query
+ *     and the `snapshots` commit option; null when nothing is there
  * @property {Record<string, StoreOperationDef>} operations
  *
  *
@@ -188,22 +190,42 @@ class StoreAPIBase extends RequestAPIBase {
 	_objectTypes = new Map();
 
 	/**
-	 * Queries are defined as on any request API, plus `validate` unless the store defines one; object types
-	 * under `objectTypes`. Every write is an operation in a change set
+	 * Queries are defined as on any request API, plus `validate` and `snapshot` unless the store defines them;
+	 * object types under `objectTypes`. Every write is an operation in a change set
 	 * @param {StoreAPIConfig} config
 	 */
 	set config(config) {
 		let { objectTypes = {}, ...rest } = config;
 		super.config = rest;
+		for (let [type, def] of Object.entries(objectTypes)) {
+			this._defineObjectType(type, def);
+		}
 		if (!this._queries.has("validate")) {
 			this._define(this._queries, "validate", {
 				params: { changes: "object" },
 				handler: ({ changes }, { caller }) => this._validate(changes, caller),
 			});
 		}
-		for (let [type, def] of Object.entries(objectTypes)) {
-			this._defineObjectType(type, def);
+		if (!this._queries.has("snapshot")) {
+			this._define(this._queries, "snapshot", {
+				params: { type: "string", ...this._addressParams() },
+				handler: ({ type, pluginID: _pluginID, ...entry }, { caller }) => this._readSnapshot(type, entry, caller),
+			});
 		}
+	}
+
+	/**
+	 * Every field any object type's address uses, so one query takes any type's address
+	 * @returns {Record<string, PluginAPIOptDefValue>}
+	 */
+	_addressParams() {
+		let params = {};
+		for (let def of this._objectTypes.values()) {
+			for (let field of def.address.fields) {
+				params[field] = { type: "any", optional: true };
+			}
+		}
+		return params;
 	}
 
 	/**
@@ -561,6 +583,32 @@ class StoreAPIBase extends RequestAPIBase {
 			invalid: message => this._throw(INVALID_PARAMS, `${where}${message}`),
 			notFound: message => this._throw(NOT_FOUND, `${where}${message}`),
 		};
+	}
+
+	/**
+	 * The snapshot of one existing object, addressed as a change set entry addresses it; a store that gates its
+	 * reads does so in an override, before this takes the path a commit entry would
+	 * @param {string} type
+	 * @param {object} entry - The type's address fields
+	 * @param {RequestCaller} _caller
+	 * @returns {Promise<object>} NotFound when nothing is there
+	 */
+	async _readSnapshot(type, entry, _caller) {
+		let { INVALID_PARAMS, NOT_FOUND } = StoreAPIBase.errorCodes;
+		let def = this._objectTypes.get(type);
+		if (!def) {
+			this._throw(INVALID_PARAMS, `type must be one of ${[...this._objectTypes.keys()].join(", ")}, got ${type}`);
+		}
+		if (!def.snapshot) {
+			this._throw(INVALID_PARAMS, `${type} objects have no snapshot`);
+		}
+		let address = def.address.plan({ ...entry, type }, {}, this._fail());
+		let { id, target } = await this._loadTarget(type, address);
+		let snapshot = def.snapshot(target);
+		if (!snapshot) {
+			this._throw(NOT_FOUND, `${type} ${id} does not exist`);
+		}
+		return snapshot;
 	}
 
 	/**
