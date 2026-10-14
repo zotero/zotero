@@ -215,6 +215,13 @@ class ItemChanges extends DataObjectChanges {
 	erase() {
 		return this._push("erase");
 	}
+
+	/**
+	 * @param {string} file - Copied into storage for a stored file, pointed at for a linked one
+	 */
+	relinkAttachmentFile(file) {
+		return this._push("relinkAttachmentFile", { file });
+	}
 }
 
 class CollectionChanges extends DataObjectChanges {
@@ -467,9 +474,8 @@ class DataChangeSet extends ChangeSet {
 	}
 
 	/**
-	 * An existing item by ID, key or snapshot (whose revision is then expected), the item another editor
-	 * creates by its ref or that editor, or a new one from `{ libraryID, itemType, parent?, linkMode? }`, plus
-	 * `annotationType`, `annotationSortIndex` and `annotationPosition` for an annotation
+	 * An existing item by ID, key or snapshot (whose revision is then expected), the item another editor creates
+	 * by its ref or that editor, or a new one from a create block (DataStoreCreateParams.item)
 	 * @param {number | string | object} item
 	 * @param {EditorOptions} [options]
 	 * @returns {ItemChanges}

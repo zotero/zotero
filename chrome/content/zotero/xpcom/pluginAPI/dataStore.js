@@ -204,6 +204,8 @@
 	 * @property {{}} trash
 	 * @property {{}} restore
 	 * @property {{}} erase - Terminal
+	 * @property {{ file: string }} relinkAttachmentFile - A stored attachment copies `file` in, a linked one points at
+	 *     it; its entry runs after the store transaction
 	 *
 	 *
 	 * @typedef {object} CollectionOperationParams
@@ -243,10 +245,10 @@
 	 *
 	 * Create params by type
 	 * @typedef {object} DataStoreCreateParams
-	 * @property {{ libraryID: number, itemType: string, parent?: IDRef, linkMode?: "linked_url",
-	 *     annotationType?: string, annotationSortIndex?: string, annotationPosition?: object | string }} item
-	 *     - Attachments need linkMode; file-backed link modes wait for the file API. Annotations need a PDF,
-	 *     EPUB or snapshot parent and the three annotation fields, which only they take
+	 * @property {{ libraryID: number, itemType: string, parent?: IDRef, linkMode?: "linked_url" | "imported_file" | "linked_file",
+	 *     file?: string, annotationType?: string, annotationSortIndex?: string, annotationPosition?: object | string }} item
+	 *     - Attachments need linkMode, and imported_file or linked_file (user library only) a `file`. Annotations
+	 *     need a PDF, EPUB or snapshot parent and the three annotation fields, which only they take
 	 * @property {{ libraryID: number, name: string, parent?: IDRef }} collection
 	 * @property {{ libraryID: number, name: string, conditions?: SearchCondition[] }} search
 	 * @property {{ libraryType: "feed", name: string } & Partial<FeedSettings>} library - Feeds only
@@ -259,6 +261,17 @@
 		[Zotero.Fulltext.INDEX_STATE_INDEXED]: "indexed",
 		[Zotero.Fulltext.INDEX_STATE_QUEUED]: "queued",
 	};
+
+	// Linking needs write, since the `file` query later grants a linked file by data permission
+	const FILE_ACCESS = {
+		copy: { mode: "read", permission: "fileSystemRead" },
+		link: { mode: "write", permission: "fileSystemWrite" },
+	};
+
+	const FILE_LINK_MODES = new Map([
+		["imported_file", { access: FILE_ACCESS.copy, create: options => Zotero.Attachments.importFromFile(options) }],
+		["linked_file", { access: FILE_ACCESS.link, create: options => Zotero.Attachments.linkFromFile(options) }],
+	]);
 
 	// The core classes behind the keyed object types
 	const OBJECTS = {
@@ -475,23 +488,29 @@
 								itemType: "string",
 								parent: lazy.DataParams.idRef("item", true),
 								linkMode: { type: "string", optional: true },
+								file: { ...lazy.Params.nonEmptyString, optional: true },
 								...Object.fromEntries(lazy.DataItemFields.createFields().map(field => [field, {
 									...lazy.Params.scalarOrObject,
 									optional: true,
 								}])),
 							},
+							// Core imports or links a file in transactions of its own
+							transactional: ({ file }) => file === undefined,
+							prepare: (params, ctx) => this._prepareFile(params, ctx),
 							handler: async (params, ctx) => {
-								let { itemType, linkMode } = params;
+								let { itemType, linkMode, file } = params;
 								let { libraryID, parentID } = this._placeCreated("item", params, ctx);
 								if (!Zotero.ItemTypes.getID(itemType)) {
 									throw new Error(`Unknown item type '${itemType}'`);
 								}
+								if (file !== undefined) {
+									return this._createFileAttachment(linkMode, file, libraryID, parentID);
+								}
 								let item = new Zotero.Item(itemType);
 								item.libraryID = libraryID;
 								if (linkMode !== undefined) {
-									// File-backed attachments are created through the file API
 									if (linkMode !== "linked_url") {
-										throw new Error(`linkMode '${linkMode}' needs the file API; only linked_url can be created here`);
+										throw new Error(`linkMode '${linkMode}' cannot be created; file attachments are imported_file or linked_file`);
 									}
 									// Core refuses it on another kind
 									item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_LINKED_URL;
@@ -522,7 +541,7 @@
 						},
 						revision: item => item.clientVersion,
 						isEditable: item => item.isEditable(),
-						save: item => item.save(),
+						save: (item, ctx) => item.save({ tx: !ctx.transactional }),
 						restore: item => item.reload(null, true),
 						describe: item => ({ id: item.id, key: item.key, libraryID: item.libraryID }),
 						snapshot: lazy.DataSnapshots.item,
@@ -631,7 +650,7 @@
 							trash: {
 								needsID: true,
 								check: item => !Zotero.Libraries.get(item.libraryID)?.hasTrash && "this library has no trash",
-								apply: item => Zotero.Items.trash([item.id]),
+								apply: (item, _params, ctx) => (ctx.transactional ? Zotero.Items.trash([item.id]) : Zotero.Items.trashTx([item.id])),
 							},
 							restore: {
 								apply: (item) => {
@@ -641,7 +660,14 @@
 							erase: {
 								terminal: true,
 								needsID: true,
-								apply: item => item.erase(),
+								apply: (item, _params, ctx) => item.erase({ tx: !ctx.transactional }),
+							},
+							relinkAttachmentFile: {
+								// Core saves the item in a transaction of its own
+								transactional: false,
+								params: { file: lazy.Params.nonEmptyString },
+								prepare: (item, { file }, ctx) => this._prepareRelink(item, file, ctx),
+								apply: (item, { file }) => this._relinkAttachmentFile(item, file),
 							},
 						},
 					},
@@ -951,6 +977,126 @@
 		}
 
 		/**
+		 * @param {object} params - The create block
+		 * @param {StoreCommitContext} ctx
+		 */
+		async _prepareFile(params, ctx) {
+			let { itemType, linkMode, file } = params;
+			let fileMode = FILE_LINK_MODES.get(linkMode);
+			if (file === undefined) {
+				if (fileMode) {
+					throw new Error(`linkMode '${linkMode}' needs a file`);
+				}
+				return;
+			}
+			if (itemType !== "attachment" || !fileMode) {
+				throw new Error(`A file makes an attachment with linkMode ${[...FILE_LINK_MODES.keys()].join(" or ")}`);
+			}
+			// Core makes the item, so nothing applies these
+			let field = lazy.DataItemFields.createFields("annotation").find(name => params[name] !== undefined);
+			if (field) {
+				throw new Error(`'${field}' applies to annotations only`);
+			}
+			await this._gateFile(file, fileMode.access, ctx);
+		}
+
+		/**
+		 * Loaded before the transaction, the target is read only for its kind and link mode, which never change
+		 * @param {Zotero.Item} [item] - None when the entry creates it
+		 * @param {string} file
+		 * @param {StoreCommitContext} ctx
+		 */
+		async _prepareRelink(item, file, ctx) {
+			if (!item) {
+				throw new Error("Only an existing attachment can be relinked");
+			}
+			if (!item.isFileAttachment()) {
+				throw new Error("Only a file attachment has a file to relink");
+			}
+			if (!Zotero.Libraries.get(item.libraryID).filesEditable) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED, `Library ${item.libraryID} does not allow file changes`);
+			}
+			await this._gateFile(file, item.isStoredFileAttachment() ? FILE_ACCESS.copy : FILE_ACCESS.link, ctx);
+		}
+
+		/**
+		 * The file store's checks, for a file the caller hands over
+		 * @param {string} file
+		 * @param {{ mode: "read" | "write", permission: string }} access - One of FILE_ACCESS
+		 * @param {StoreCommitContext} ctx
+		 */
+		async _gateFile(file, { mode, permission }, ctx) {
+			let path = this._canonicalFile(file);
+			if (!ctx.pluginID || ctx.privileged) {
+				return;
+			}
+			if (!lazy.VarCheck.hasPermissions(ctx.scope, permission)) {
+				this._throw(lazy.StoreAPIBase.errorCodes.PERMISSION_DENIED, `Permission ${permission} is required to ${mode} ${path}`);
+			}
+			try {
+				await lazy.PluginFileAccess.check(ctx.pluginID, path, mode);
+			}
+			catch (e) {
+				this._throw(lazy.StoreAPIBase.errorCodes.PERMISSION_DENIED, e.message);
+			}
+		}
+
+		_canonicalFile(file) {
+			try {
+				return lazy.PathIdentity.canonicalize(file);
+			}
+			catch (e) {
+				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `Param 'file': ${e.message}`);
+			}
+			return undefined;
+		}
+
+		/**
+		 * Core's own import or link, which saves and indexes the item
+		 * @param {string} linkMode - One of FILE_LINK_MODES
+		 * @param {string} file - As the create block gives it
+		 * @param {number} libraryID
+		 * @param {number} [parentID]
+		 * @returns {Promise<Zotero.Item>}
+		 */
+		async _createFileAttachment(linkMode, file, libraryID, parentID) {
+			if (!Zotero.Libraries.get(libraryID).filesEditable) {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED, `Library ${libraryID} does not allow file changes`);
+			}
+			// Core refuses one elsewhere only as it saves
+			if (linkMode === "linked_file" && libraryID !== Zotero.Libraries.userLibraryID) {
+				throw new Error("Linked files can only be added to the user library");
+			}
+			let path = await this._requireFile(file);
+			return FILE_LINK_MODES.get(linkMode).create({ file: lazy.PathIdentity.toNative(path), libraryID, parentItemID: parentID });
+		}
+
+		/**
+		 * @param {Zotero.Item} item
+		 * @param {string} file
+		 */
+		async _relinkAttachmentFile(item, file) {
+			let path = await this._requireFile(file);
+			// Core's relink saves without a dateModified update, so earlier operations' changes are saved first
+			await item.saveTx();
+			await item.relinkAttachmentFile(lazy.PathIdentity.toNative(path));
+		}
+
+		/**
+		 * Judged as the entry applies, as the file store judges a path
+		 * @param {string} file
+		 * @returns {Promise<string>} Canonical
+		 */
+		async _requireFile(file) {
+			let path = this._canonicalFile(file);
+			let stat = await lazy.FileIO.stat(path).catch(e => (e?.name === "NotFoundError" ? null : Promise.reject(e)));
+			if (!stat || stat.type !== "regular") {
+				this._throw(lazy.StoreAPIBase.errorCodes.NOT_FOUND, `${path} is not a file`);
+			}
+			return path;
+		}
+
+		/**
 		 * @param {number} libraryID
 		 * @param {SearchCondition[]} [conditions] - None returns every item in the library
 		 * @param {boolean} [includeTrashed]
@@ -1202,7 +1348,8 @@
 		},
 
 		/**
-		 * Apply a change set in one transaction; nothing is applied unless the whole set passes
+		 * Apply a change set in one transaction; nothing is applied unless the whole set passes. Library entries and
+		 * those creating or relinking attachment files run after it, in order, and its error says how far they got
 		 * @param {DataChangeSet | StoreChangeSet} changes
 		 * @param {{ snapshots?: boolean }} [options] - snapshots: return each surviving object's new snapshot
 		 * @param {string} [_callerPluginID]
