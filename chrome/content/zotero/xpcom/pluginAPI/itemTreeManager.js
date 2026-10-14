@@ -204,7 +204,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			// htmlLabel and renderCell content is an SVG URL shown as
 			// an image (see resolveSVGImageURL)
 			let scope = lazy.PluginSandbox.getScope(option.pluginID);
-			let unprivileged = !!scope && !lazy.VarCheck.isPrivilegedScope(scope);
+			let unprivileged = !lazy.PluginSandbox.isPrivileged(option.pluginID);
 			if (unprivileged && option.htmlLabel !== undefined) {
 				let imageURL = resolveSVGImageURL(option.pluginID, option.htmlLabel);
 				if (imageURL) {

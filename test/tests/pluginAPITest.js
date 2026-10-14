@@ -3027,6 +3027,28 @@ describe("Plugin API", function () {
 			assert.equal(result, Zotero.PluginInteropManager.statusCodes.PERMISSION_DENIED);
 		});
 
+		it("should return PERMISSION_DENIED to a caller whose scope was unloaded", function () {
+			evalInProvider(`
+				Zotero.PluginInteropManager.register({
+					pluginID: "${PROVIDER_ID}",
+					commandName: "secret",
+					commandVersion: "1.0.0",
+					command() {
+						return "should not reach";
+					},
+				});
+			`);
+
+			// Even with interop_permissions for the provider, an unloaded caller has none
+			PluginSandbox.unloadScope(CONSUMER_ID);
+			let result = Zotero.PluginInteropManager.getCommand({
+				callerPluginID: CONSUMER_ID,
+				targetPluginID: PROVIDER_ID,
+				commandName: "secret",
+			});
+			assert.equal(result, Zotero.PluginInteropManager.statusCodes.PERMISSION_DENIED);
+		});
+
 		it("should prevent unprivileged plugin from spoofing callerPluginID", function () {
 			evalInProvider(`
 				Zotero.PluginInteropManager.register({

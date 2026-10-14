@@ -158,7 +158,7 @@
 				return CommandStatus.VERSION_TOO_HIGH;
 			}
 
-			if (callerPluginID) {
+			if (callerPluginID && !lazy.PluginSandbox.isPrivileged(callerPluginID)) {
 				let callerScope = lazy.PluginSandbox.getScope(callerPluginID);
 				if (!lazy.VarCheck.checkScopePermission(callerScope, "INTEROP_PERMISSIONS", targetPluginID)) {
 					this._log(

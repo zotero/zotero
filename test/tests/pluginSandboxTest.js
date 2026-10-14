@@ -180,6 +180,14 @@ describe("Plugin Sandbox", function () {
 				"ok", "WebAssembly compiles in the sandbox");
 		});
 
+		it("should remember an unloaded plugin's privilege", function () {
+			loadTestScope(["default"]);
+			PluginSandbox.unloadScope(ADDON_ID);
+			assert.isFalse(PluginSandbox.isPrivileged(ADDON_ID));
+			assert.isTrue(PluginSandbox.isPrivileged("never-loaded@zotero.org"),
+				"an ID that never loaded a scope is first-party");
+		});
+
 		it("should always recreate the scope on reload, never reusing", function () {
 			PluginSandbox.loadScope(createMockAddon(["default"]));
 			let scope1 = PluginSandbox.getScope(ADDON_ID);
@@ -1872,6 +1880,45 @@ describe("Plugin Sandbox", function () {
 				assert.equal(option.htmlLabel.svgSrc, Zotero.Plugins.getBaseURI(ADDON_ID) + "label.svg",
 					"a plugin .svg URL label should resolve against the plugin root");
 				Zotero.ItemTreeManager.unregisterColumn(urlLabelKey);
+			});
+
+			function isColumnRegistered(dataKey) {
+				return Object.keys(Zotero.ItemTreeManager._columnManager._optionsCache)
+					.some(key => key.includes(dataKey));
+			}
+
+			it("should refuse an unloaded plugin's late calls", function () {
+				// Once used, the mirror keeps the callable, and the sandbox still runs until it is nuked
+				evalInScope("Zotero.ItemTreeManager.registerColumn");
+				PluginSandbox.unloadScope(ADDON_ID);
+				assert.throws(() => evalInScope(`
+					Zotero.ItemTreeManager.registerColumn({
+						dataKey: 'sandbox-unloaded-col',
+						label: 'Late Column',
+						dataProvider: function() { return ''; },
+					});
+				`));
+				assert.isFalse(isColumnRegistered("sandbox-unloaded-col"));
+			});
+
+			it("should refuse late calls from a sandbox replaced by a reload", function () {
+				evalInScope("Zotero.ItemTreeManager.registerColumn");
+				let oldScope = scope;
+				loadTestScope(["default", "dataRead", "itemTree", "itemPane", "menu", "reader"]);
+				let column = `{
+					dataKey: 'sandbox-reloaded-col',
+					label: 'Reloaded Column',
+					dataProvider: function() { return ''; },
+				}`;
+				assert.throws(() => Cu.evalInSandbox(`Zotero.ItemTreeManager.registerColumn(${column})`, oldScope),
+					undefined, undefined, "a callable the old sandbox kept");
+				assert.throws(() => Cu.evalInSandbox("Zotero.ItemTreeManager.unregisterColumn", oldScope),
+					undefined, undefined, "a callable the old sandbox first reaches after the reload");
+				assert.isFalse(isColumnRegistered("sandbox-reloaded-col"));
+
+				let dataKey = evalInScope(`Zotero.ItemTreeManager.registerColumn(${column})`);
+				assert.isTrue(isColumnRegistered("sandbox-reloaded-col"), "the new sandbox still registers");
+				Zotero.ItemTreeManager.unregisterColumn(dataKey);
 			});
 		});
 

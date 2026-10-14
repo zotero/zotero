@@ -31,7 +31,6 @@
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
 	const ICON_KEYS = ["icon", "darkIcon", "menuIcon", "darkMenuIcon"];
@@ -172,8 +171,7 @@
 				return false;
 			}
 
-			let scope = lazy.PluginSandbox.getScope(option.pluginID);
-			if (scope && !lazy.VarCheck.isPrivilegedScope(scope)) {
+			if (!lazy.PluginSandbox.isPrivileged(option.pluginID)) {
 				for (let key of ICON_KEYS) {
 					if (option[key] && !lazy.PluginProtocol
 							.canLoadImageURI(option[key], option.pluginID)) {

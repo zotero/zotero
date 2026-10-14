@@ -28,7 +28,6 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
@@ -190,8 +189,7 @@
 
 			// Unprivileged plugins can't insert content into the preferences document.
 			// Their pane is a full HTML page shown in an embedded content browser.
-			let scope = lazy.PluginSandbox.getScope(options.pluginID);
-			let embedded = !!scope && !lazy.VarCheck.isPrivilegedScope(scope);
+			let embedded = !lazy.PluginSandbox.isPrivileged(options.pluginID);
 			if (embedded) {
 				let dropped = ['scripts', 'stylesheets', 'l10nFiles'].filter(key => options[key].length);
 				if (dropped.length) {
