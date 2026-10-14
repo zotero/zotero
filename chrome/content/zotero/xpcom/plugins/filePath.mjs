@@ -23,8 +23,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-const HELPERS = ["isAbsolute", "normalize", "join", "dirname", "basename", "extname"];
-
 function requireString(value, what) {
 	if (typeof value !== "string") {
 		throw new TypeError(`${what} must be a string`);
@@ -43,7 +41,7 @@ function withRootSeparator(value) {
 
 /**
  * Node-named path helpers over the canonical form (forward slashes everywhere), backed by PathUtils and
- * Zotero's normalizer, so only this platform's paths are understood; a sandbox gets them through exportFilePath
+ * Zotero's normalizer, so only this platform's paths are understood; globals.mjs mirrors them into a sandbox
  */
 const FilePath = Object.freeze({
 	sep: "/",
@@ -94,24 +92,62 @@ const FilePath = Object.freeze({
 });
 
 /**
- * The helpers as functions of a sandbox, each failure arriving there as its own TypeError
- * @param {object} scope
- * @returns {object}
+ * Which path is which, for grants and destination checks: the canonical spelling, the real target behind
+ * symlinks, and comparison folded on Windows only
  */
-function exportFilePath(scope) {
-	let mirror = Cu.createObjectIn(scope);
-	Object.defineProperty(mirror, "sep", { value: FilePath.sep, enumerable: true });
-	for (let name of HELPERS) {
-		Cu.exportFunction((...args) => {
-			try {
-				return FilePath[name](...args);
-			}
-			catch (e) {
-				throw new scope.TypeError(String(e?.message ?? e));
-			}
-		}, mirror, { defineAs: name });
-	}
-	return mirror;
-}
+const PathIdentity = {
+	// The canonical form of an absolute native path or file: URL, which every grant, address and result uses
+	canonicalize(rawPath) {
+		if (typeof rawPath !== "string" || !rawPath) {
+			throw new Error("File path must be a non-empty string");
+		}
+		let path = rawPath;
+		if (path.startsWith("file:")) {
+			path = Services.io.newURI(path).QueryInterface(Ci.nsIFileURL).file.path;
+		}
+		if (!PathUtils.isAbsolute(path)) {
+			throw new Error(`File path must be absolute: ${rawPath}`);
+		}
+		return Zotero.File.normalizeToUnix(path);
+	},
 
-export { FilePath, exportFilePath };
+	// The path with its symlinks resolved, a missing tail kept as given
+	realPath(rawPath) {
+		let canonical = rawPath;
+		try {
+			canonical = Zotero.File.normalizeToUnix(rawPath);
+			let f = Zotero.File.pathToFile(Zotero.isWin ? canonical.replace(/\//g, "\\") : canonical);
+			let leaves = [];
+			while (f && !f.exists()) {
+				leaves.unshift(f.leafName);
+				f = f.parent;
+			}
+			if (f) {
+				f.normalize();
+				for (let leaf of leaves) {
+					f.append(leaf);
+				}
+				return Zotero.File.normalizeToUnix(f.path);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		return canonical;
+	},
+
+	// Windows compares paths without regard to case, and nsIFile.normalize keeps the case as given there
+	foldCase(path) {
+		return Zotero.isWin ? path.toLowerCase() : path;
+	},
+
+	same(a, b) {
+		return PathIdentity.foldCase(a) === PathIdentity.foldCase(b);
+	},
+
+	contains(dir, path) {
+		return Zotero.File.directoryContains(PathIdentity.foldCase(dir), PathIdentity.foldCase(path));
+	},
+};
+
+export { FilePath, PathIdentity };
