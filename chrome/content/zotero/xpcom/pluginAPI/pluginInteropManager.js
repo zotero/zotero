@@ -34,13 +34,14 @@
 		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	});
 
-	const CommandStatus = {
+	// Statuses getCommand() returns in place of a command, in the order a lookup meets them
+	const CommandStatus = Object.freeze({
 		OK: 0,
 		NOT_FOUND: 1,
 		VERSION_TOO_LOW: 2,
 		VERSION_TOO_HIGH: 3,
 		PERMISSION_DENIED: 4,
-	};
+	});
 
 	/**
 	 * Build a rejection reason that lives in the caller's compartment
@@ -257,12 +258,12 @@
 	 * if (typeof greet === "function") {
 	 *     let greeting = greet({ name: "World" }); // "Hello, World"
 	 * }
-	 * else if (greet === Zotero.PluginInteropManager.NOT_FOUND) {
+	 * else if (greet === Zotero.PluginInteropManager.statusCodes.NOT_FOUND) {
 	 *     // Command not registered
 	 * }
 	 */
 	Zotero.PluginInteropManager = {
-		...CommandStatus,
+		statusCodes: CommandStatus,
 
 		_registry: new PluginInteropManagerInternal(),
 
@@ -291,7 +292,8 @@
 		 * Pass `checkOnly: true` to verify availability without creating a wrapper
 		 *
 		 * @param {PluginInteropGetOptions} options
-		 * @returns {function|CommandStatus} - The callable command, or a status code in `checkOnly`.
+		 * @returns {function|CommandStatus} - The callable command, or one of `statusCodes`
+		 * when it can't be called, or `statusCodes.OK` in `checkOnly`.
 		 */
 		getCommand(options) {
 			return this._registry.getCommand(options);
