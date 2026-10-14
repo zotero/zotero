@@ -30,6 +30,7 @@
 		ControllerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		loadPluginPageInBrowser: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		sanitizeWindowFeatures: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 		stopAutoResize: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
@@ -112,12 +113,7 @@
 				queries: {
 					windows: {
 						params: {
-							type: {
-								type: "string",
-								optional: true,
-								checkHook: value => value === undefined || value in lazy.WindowUtils.WINDOW_TYPES
-									|| `Param 'type' must be one of ${Object.keys(lazy.WindowUtils.WINDOW_TYPES).join(", ")}, got ${value}`,
-							},
+							type: { ...lazy.Params.oneOf(Object.keys(lazy.WindowUtils.WINDOW_TYPES)), optional: true },
 						},
 						handler: ({ type, pluginID }) => this._queryWindows(type, pluginID),
 					},
@@ -146,22 +142,14 @@
 					togglePane: {
 						params: {
 							windowID: "number",
-							pane: {
-								type: "string",
-								checkHook: value => MAINWINDOW_PANES.includes(value)
-									|| `Param 'pane' must be one of ${MAINWINDOW_PANES.join(", ")}, got ${value}`,
-							},
+							pane: lazy.Params.oneOf(MAINWINDOW_PANES),
 							open: { type: "boolean", optional: true },
 						},
 						handler: ({ windowID, pane, open, pluginID }) => this._togglePane(windowID, pane, open, pluginID),
 					},
 					openWindow: {
 						params: {
-							type: {
-								type: "string",
-								checkHook: value => lazy.WindowUtils.OPENABLE_WINDOW_TYPES.includes(value)
-									|| `Param 'type' must be one of ${lazy.WindowUtils.OPENABLE_WINDOW_TYPES.join(", ")}, got ${value}`,
-							},
+							type: lazy.Params.oneOf(lazy.WindowUtils.OPENABLE_WINDOW_TYPES),
 							itemID: { type: "number", optional: true },
 							location: { type: "object", optional: true },
 						},
@@ -173,9 +161,8 @@
 							features: {
 								type: "object",
 								optional: true,
-								checkHook: value => value === undefined
-									|| (value !== null && !Array.isArray(value)
-										&& Object.values(value).every(v => ["boolean", "number"].includes(typeof v)))
+								checkHook: value => (value !== null && !Array.isArray(value)
+									&& Object.values(value).every(v => ["boolean", "number"].includes(typeof v)))
 									|| "every feature must be a boolean or a number",
 							},
 							name: { type: "string", optional: true },

@@ -92,27 +92,19 @@
 	 * @property {{ recursive?: boolean, force?: boolean }} rm - Terminal; recursive is required, as in Node
 	 */
 
-	const ENCODING_PARAM = {
-		type: "string",
-		optional: true,
-		checkHook: value => value === undefined || ENCODINGS.includes(value) || "must be utf8 or base64",
-	};
+	const ENCODING_PARAM = { ...lazy.Params.oneOf(ENCODINGS), optional: true };
 
 	const BOOLEAN_PARAM = { type: "boolean", optional: true };
 
 	const COUNT_PARAM = {
 		type: "number",
 		optional: true,
-		checkHook: value => value === undefined || (Number.isInteger(value) && value >= 0) || "must be a non-negative integer",
+		checkHook: value => (Number.isInteger(value) && value >= 0) || "must be a non-negative integer",
 	};
 
 	const HASHES = ["sha256", "sha384", "sha512"];
 
-	const ALGORITHM_PARAM = {
-		type: "string",
-		optional: true,
-		checkHook: value => value === undefined || HASHES.includes(value) || `must be one of ${HASHES.join(", ")}`,
-	};
+	const ALGORITHM_PARAM = { ...lazy.Params.oneOf(HASHES), optional: true };
 
 	const DATA_PARAM = {
 		type: "any",
@@ -251,11 +243,7 @@
 					access: {
 						params: {
 							path: lazy.Params.nonEmptyString,
-							mode: {
-								type: "string",
-								optional: true,
-								checkHook: value => value === undefined || value === "read" || value === "write" || "must be read or write",
-							},
+							mode: { ...lazy.Params.oneOf(["read", "write"]), optional: true },
 						},
 						handler: async ({ path, mode = "read" }, { caller }) => {
 							if (mode === "write" && !caller.privileged

@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
@@ -278,8 +279,6 @@
 			};
 		}
 
-		_hookNames = ['onInit', 'onDestroy', 'onItemChange', 'onRender', 'onAsyncRender', 'onToggle'];
-
 		// Kept equal to `_builtInPanes` in itemPaneSidenav.js, which the window owns; itemPaneTest compares them
 		_builtInPaneIDs = [
 			"info",
@@ -325,7 +324,7 @@
 		_convert(option) {
 			option = super._convert(option);
 
-			for (let hookName of this._hookNames) {
+			for (let hookName of this._functionOptionNames()) {
 				if (option[hookName]) {
 					option[hookName] = this._wrapHook(option[hookName], option.pluginID,
 						{ sync: this._syncHookNames.includes(hookName) });
@@ -464,17 +463,7 @@
 							l10nID: "string",
 						}
 					},
-					position: {
-						type: "string",
-						optional: true,
-						checkHook: (val) => {
-							if (typeof val !== "undefined"
-								&& !["start", "afterCreators", "end"].includes(val)) {
-								return `"position" must be "start", "afterCreators", or "end", got ${val}`;
-							}
-							return true;
-						}
-					},
+					position: { ...lazy.Params.oneOf(["start", "afterCreators", "end"]), optional: true },
 					multiline: {
 						type: "boolean",
 						optional: true,
@@ -507,7 +496,7 @@
 		_convert(option) {
 			option = super._convert(option);
 
-			for (let hookName of ["onGetData", "onSetData", "onItemChange"]) {
+			for (let hookName of this._functionOptionNames()) {
 				if (option[hookName]) {
 					// onSetData only writes, so it commits a change set like any async caller
 					option[hookName] = this._wrapHook(option[hookName], option.pluginID,

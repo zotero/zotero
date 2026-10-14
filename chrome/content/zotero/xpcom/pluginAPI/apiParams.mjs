@@ -24,6 +24,12 @@
 */
 
 const Params = {
+	// A string from a fixed list; the message names the values, the path is the validator's
+	oneOf: values => ({
+		type: "string",
+		checkHook: value => values.includes(value) || `must be one of ${values.join(", ")}, got ${value}`,
+	}),
+
 	intList: {
 		type: "array",
 		checkHook: value => value.every(Number.isInteger) || "every entry must be an integer",
