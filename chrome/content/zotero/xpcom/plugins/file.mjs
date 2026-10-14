@@ -795,16 +795,8 @@ const PluginFileAccess = {
 		return canonicalize(PathUtils.join(getPluginDataDir(), uuid));
 	},
 
-	getDbDirByUUID(uuid) {
-		return canonicalize(PathUtils.join(Zotero.DataDirectory.dir, "plugin-db", uuid));
-	},
-
 	async getDataDirSizeByUUID(uuid) {
 		return _getDirSize(this.getDataDirByUUID(uuid));
-	},
-
-	async getDbDirSizeByUUID(uuid) {
-		return _getDirSize(this.getDbDirByUUID(uuid));
 	},
 
 	async clearDataDirByUUID(uuid) {
@@ -815,16 +807,6 @@ const PluginFileAccess = {
 
 	async deleteDataDirByUUID(uuid) {
 		let dir = this.getDataDirByUUID(uuid);
-		try {
-			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
-		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-	},
-
-	async deleteDbDirByUUID(uuid) {
-		let dir = this.getDbDirByUUID(uuid);
 		try {
 			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
 		}
