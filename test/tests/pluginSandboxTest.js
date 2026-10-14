@@ -2644,6 +2644,26 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
+		// The getter holds the gate, so a manager handing one out cannot forget it
+		it("should gate itemGetter itself on dataRead", async function () {
+			let item = await createDataObject('item', { title: 'Getter Gate' });
+			try {
+				loadTestScope(["default", "itemTree", "itemPane"]);
+				assert.isNull(Zotero.DataStore.itemGetter(item.id, ADDON_ID)(), "without dataRead");
+
+				loadTestScope(["default", "dataRead"]);
+				assert.isNotNull(Zotero.DataStore.itemGetter(item.id, ADDON_ID)(), "with dataRead");
+				PluginSandbox.unloadScope(ADDON_ID);
+				assert.isNull(Zotero.DataStore.itemGetter(item.id, ADDON_ID)(), "once unloaded");
+
+				assert.equal(Zotero.DataStore.itemGetter(item.id, "zotero@zotero.org")().data.title, 'Getter Gate',
+					"a first-party caller reads");
+			}
+			finally {
+				await item.eraseTx();
+			}
+		});
+
 		// A privileged plugin gets the new payloads without losing its deprecated live ones
 		it("should pass live objects and the new ID/getItem props to privileged callbacks", async function () {
 			let item = new Zotero.Item('book');

@@ -30,7 +30,6 @@
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
@@ -287,17 +286,12 @@
 		// Sync hooks also get `getItem`; privileged plugins keep the deprecated live `item` and `event`
 		_wrapHook(hook, pluginID, { sync = false } = {}) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
-			let scope = lazy.PluginSandbox.getScope(pluginID);
 			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
-			// hasPermissions() is false without a scope, so privileged is checked separately
-			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 			return (props) => {
 				if (props) {
 					let { event, item, ...rest } = props;
 					if (sync && "itemID" in props) {
-						rest.getItem = canReadData
-							? Zotero.DataStore.itemGetter(props.itemID, pluginID)
-							: () => null;
+						rest.getItem = Zotero.DataStore.itemGetter(props.itemID, pluginID);
 					}
 					if (privileged) {
 						if ("item" in props) rest.item = item;
@@ -526,17 +520,12 @@
 		// Sync hooks also get `getItem`, since the row answers before it renders; privileged plugins keep `item`
 		_wrapHook(hook, pluginID, { sync = false } = {}) {
 			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
-			let scope = lazy.PluginSandbox.getScope(pluginID);
 			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
-			// hasPermissions() is false without a scope, so privileged is checked separately
-			let canReadData = privileged || lazy.VarCheck.hasPermissions(scope, "dataRead");
 			return (props) => {
 				if (props && "itemID" in props) {
 					let { item, ...rest } = props;
 					if (sync) {
-						rest.getItem = canReadData
-							? Zotero.DataStore.itemGetter(props.itemID, pluginID)
-							: () => null;
+						rest.getItem = Zotero.DataStore.itemGetter(props.itemID, pluginID);
 					}
 					if (privileged) {
 						rest.item = item;
