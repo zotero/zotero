@@ -412,7 +412,7 @@
 		 * @param {N} name
 		 * @param {TabControllerQueryParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<TabControllerQueryResults[N]>}
+		 * @returns {Promise<ControllerResponse<TabControllerQueryResults[N]>>}
 		 */
 		query(name, params, _callerPluginID) {
 			return Zotero.TabController._tabController.query(name, params, _callerPluginID);
@@ -424,7 +424,7 @@
 		 * @param {N} name
 		 * @param {TabControllerCommandParams[N]} [params]
 		 * @param {string} [_callerPluginID]
-		 * @returns {Promise<TabControllerCommandResults[N]>}
+		 * @returns {Promise<ControllerResponse<TabControllerCommandResults[N]>>}
 		 */
 		command(name, params, _callerPluginID) {
 			return Zotero.TabController._tabController.command(name, params, _callerPluginID);

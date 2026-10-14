@@ -3494,6 +3494,9 @@ describe("Plugin API", function () {
 			"chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs"
 		);
 		const ControllerErrorCode = ControllerAPIBase.errorCodes;
+		const { ControllerError } = ChromeUtils.importESModule(
+			"chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs"
+		);
 		const { getWindow, getMainWindow } = ChromeUtils.importESModule(
 			"chrome://zotero/content/xpcom/plugins/window.mjs"
 		).WindowUtils;
@@ -3519,6 +3522,16 @@ describe("Plugin API", function () {
 						leaky: {
 							handler: () => ({ big: BigInt(1) }),
 						},
+						boom: {
+							handler: () => {
+								throw new TypeError("kaboom");
+							},
+						},
+						gone: {
+							handler: () => {
+								throw new ControllerError(ControllerErrorCode.NOT_FOUND, "gone");
+							},
+						},
 						whoami: {
 							handler(_params, { kind, name }) {
 								return { apiName: this._config.apiName, kind, name };
@@ -3534,10 +3547,13 @@ describe("Plugin API", function () {
 			}
 		}
 
-		async function rejectionName(promise) {
-			let e = await getPromiseError(promise);
-			assert.ok(e, "expected a rejection");
-			return e.name;
+		// A failed response's code, checking the rest of the envelope on the way
+		async function failureCode(promise) {
+			let { success, result, error } = await promise;
+			assert.isFalse(success, "expected a failed response");
+			assert.deepEqual(result, {}, "a failed response carries an empty result");
+			assert.isString(error.message);
+			return error.code;
 		}
 
 		describe("ControllerAPIBase", function () {
@@ -3555,7 +3571,7 @@ describe("Plugin API", function () {
 			});
 
 			it("should list defined requests", function () {
-				assert.sameMembers(api.requestNames.queries, ["echo", "gated", "leaky", "whoami"]);
+				assert.sameMembers(api.requestNames.queries, ["echo", "gated", "leaky", "boom", "gone", "whoami"]);
 				assert.sameMembers(api.requestNames.commands, ["noop"]);
 			});
 
@@ -3571,61 +3587,80 @@ describe("Plugin API", function () {
 			it("should call the handler with the controller as this and the request in context", async function () {
 				assert.deepEqual(
 					await api.query("whoami"),
-					{ apiName: "TestController", kind: "query", name: "whoami" }
+					{ success: true, result: { apiName: "TestController", kind: "query", name: "whoami" } }
 				);
 			});
 
-			it("should reject an unknown request", async function () {
-				assert.equal(await rejectionName(api.query("nope")), ControllerErrorCode.UNKNOWN_REQUEST);
-				assert.equal(await rejectionName(api.command("echo")), ControllerErrorCode.UNKNOWN_REQUEST);
+			it("should resolve a failure as a response, never a rejection", async function () {
+				// A ControllerError carries its code; any other exception is an internal error
+				assert.deepEqual(await api.query("gone"), {
+					success: false,
+					result: {},
+					error: { code: ControllerErrorCode.NOT_FOUND, message: "gone" },
+				});
+				assert.deepEqual(await api.query("boom"), {
+					success: false,
+					result: {},
+					error: { code: ControllerErrorCode.INTERNAL_ERROR, message: "kaboom" },
+				});
+				assert.notProperty(await api.query("whoami"), "error");
 			});
 
-			it("should reject non-object and unknown params", async function () {
-				assert.equal(await rejectionName(api.query("echo", 5)), ControllerErrorCode.INVALID_PARAMS);
-				assert.equal(await rejectionName(api.query("echo", { nope: 1 })), ControllerErrorCode.INVALID_PARAMS);
+			it("should fail an unknown request", async function () {
+				assert.equal(await failureCode(api.query("nope")), ControllerErrorCode.UNKNOWN_REQUEST);
+				assert.equal(await failureCode(api.command("echo")), ControllerErrorCode.UNKNOWN_REQUEST);
+			});
+
+			it("should fail non-object and unknown params, naming the problem", async function () {
+				assert.equal(await failureCode(api.query("echo", 5)), ControllerErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", { nope: 1 })), ControllerErrorCode.INVALID_PARAMS);
+				let { error } = await api.query("echo", 5);
+				assert.include(error.message, "must be an object");
+				({ error } = await api.query("echo", { nope: 1 }));
+				assert.include(error.message, "Unknown param 'nope'");
 			});
 
 			it("should hand the handler a detached plain copy of the params", async function () {
 				let params = { value: { list: [1, 2] } };
-				let { params: received } = await api.query("echo", params);
+				let { result: { params: received } } = await api.query("echo", params);
 				assert.deepEqual(received, params);
 				assert.notStrictEqual(received.value, params.value);
 			});
 
 			it("should resolve an undefined result to an empty object", async function () {
-				assert.deepEqual(await api.command("noop"), {});
+				assert.deepEqual(await api.command("noop"), { success: true, result: {} });
 			});
 
-			it("should reject a result that is not JSON-serializable", async function () {
-				assert.equal(await rejectionName(api.query("leaky")), ControllerErrorCode.INVALID_RESULT);
+			it("should fail a result that is not JSON-serializable", async function () {
+				assert.equal(await failureCode(api.query("leaky")), ControllerErrorCode.INVALID_RESULT);
 			});
 
 			it("should bypass permission gates for chrome callers", async function () {
-				assert.deepEqual(await api.query("gated"), { ok: true });
+				assert.deepEqual(await api.query("gated"), { success: true, result: { ok: true } });
 			});
 
 			it("should gate requests on the caller plugin's permissions", async function () {
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default"] }));
 				assert.equal(
-					await rejectionName(api.query("gated", {}, UNPRIV_ID)),
+					await failureCode(api.query("gated", {}, UNPRIV_ID)),
 					ControllerErrorCode.PERMISSION_DENIED
 				);
 				PluginSandbox.unloadScope(UNPRIV_ID);
 
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default", "dataRead"] }));
-				assert.deepEqual(await api.query("gated", {}, UNPRIV_ID), { ok: true });
+				assert.deepEqual(await api.query("gated", {}, UNPRIV_ID), { success: true, result: { ok: true } });
 			});
 
-			it("should hand an unprivileged caller's params its pluginID and reject a supplied one", async function () {
-				let { params } = await api.query("echo", { value: 1 });
+			it("should hand an unprivileged caller's params its pluginID and fail a supplied one", async function () {
+				let { result: { params } } = await api.query("echo", { value: 1 });
 				assert.notProperty(params, "pluginID", "chrome callers have no pluginID");
-				assert.equal(await rejectionName(api.query("echo", { pluginID: "x" })), ControllerErrorCode.INVALID_PARAMS);
+				assert.equal(await failureCode(api.query("echo", { pluginID: "x" })), ControllerErrorCode.INVALID_PARAMS);
 
 				PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default"] }));
-				({ params } = await api.query("echo", { value: 1 }, UNPRIV_ID));
+				({ result: { params } } = await api.query("echo", { value: 1 }, UNPRIV_ID));
 				assert.deepEqual(params, { value: 1, pluginID: UNPRIV_ID });
 				assert.equal(
-					await rejectionName(api.query("echo", { pluginID: "x" }, UNPRIV_ID)),
+					await failureCode(api.query("echo", { pluginID: "x" }, UNPRIV_ID)),
 					ControllerErrorCode.INVALID_PARAMS
 				);
 			});
@@ -3633,7 +3668,7 @@ describe("Plugin API", function () {
 
 		describe("Zotero.WindowController", function () {
 			it("should list the main window with a resolvable window ID", async function () {
-				let { windows } = await Zotero.WindowController.query("windows", { type: "mainWindow" });
+				let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "mainWindow" });
 				let info = windows.find(w => w.windowID === win.browsingContext.id);
 				assert.ok(info, "test window not listed");
 				assert.isNumber(info.windowID);
@@ -3645,27 +3680,26 @@ describe("Plugin API", function () {
 
 			it("should reject an unknown or mistyped window ID", function () {
 				let e = assert.throws(() => getWindow(-1), /No window with ID/);
-				assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+				assert.instanceOf(e, ControllerError);
+				assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
 				e = assert.throws(() => getWindow(win.browsingContext.id, "readerWindow"), /is not a readerWindow/);
-				assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+				assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
 				assert.throws(() => getMainWindow(-1), /No window with ID/);
 				assert.strictEqual(getMainWindow(win.browsingContext.id), win);
 			});
 
 			it("should list every window type when no type is given", async function () {
-				let { windows } = await Zotero.WindowController.query("windows");
+				let { result: { windows } } = await Zotero.WindowController.query("windows");
 				assert.isTrue(windows.some(w => w.type === "mainWindow"));
 				assert.isTrue(windows.every(w => Zotero.WindowController.windowTypes.includes(w.type)));
 			});
 
-			it("should reject an unknown window type", async function () {
-				let e = await getPromiseError(Zotero.WindowController.query("windows", { type: "popup" }));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
+			it("should fail an unknown window type", async function () {
+				assert.equal(await failureCode(Zotero.WindowController.query("windows", { type: "popup" })), Zotero.WindowController.errorCodes.INVALID_PARAMS);
 			});
 
 			it("should refuse to open a plugin window for a chrome caller", async function () {
-				let e = await getPromiseError(Zotero.WindowController.command("openPluginWindow", { url: "page.html" }));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_ALLOWED);
+				assert.equal(await failureCode(Zotero.WindowController.command("openPluginWindow", { url: "page.html" })), Zotero.WindowController.errorCodes.NOT_ALLOWED);
 			});
 
 			it("should list plugin windows with their owner and hide them from other plugins", async function () {
@@ -3679,7 +3713,7 @@ describe("Plugin API", function () {
 				let windowID = pluginWin.browsingContext.id;
 				try {
 					// Chrome sees every plugin window, with its owner
-					let { windows } = await Zotero.WindowController.query("windows", { type: "pluginWindow" });
+					let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "pluginWindow" });
 					let info = windows.find(w => w.windowID === windowID);
 					assert.ok(info, "plugin window not listed");
 					assert.equal(info.type, "pluginWindow");
@@ -3689,22 +3723,19 @@ describe("Plugin API", function () {
 					// The owner reaches it; another plugin gets NotFound, as for an unknown ID
 					assert.strictEqual(getWindow(windowID, undefined, OWNER), pluginWin);
 					let e = assert.throws(() => getWindow(windowID, undefined, "other@zotero.org"), /No window with ID/);
-					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					assert.equal(e.code, ControllerErrorCode.NOT_FOUND);
 					// Ownership only applies to plugin windows
 					assert.strictEqual(getWindow(win.browsingContext.id, "mainWindow", "other@zotero.org"), win);
 
 					// Through the controller, an unprivileged caller neither lists nor reaches it
 					PluginSandbox.loadScope(createMockPlugin({ id: UNPRIV_ID, permissions: ["default", "window"] }));
-					({ windows } = await Zotero.WindowController.query("windows", { type: "pluginWindow" }, UNPRIV_ID));
+					({ result: { windows } } = await Zotero.WindowController.query("windows", { type: "pluginWindow" }, UNPRIV_ID));
 					assert.isFalse(windows.some(w => w.windowID === windowID), "another plugin's window listed");
-					e = await getPromiseError(Zotero.WindowController.query("getWindowState", { windowID }, UNPRIV_ID));
-					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
-					e = await getPromiseError(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID));
-					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.query("getWindowState", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("focusWindow", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
 
 					// closeWindow follows the same ownership rule
-					e = await getPromiseError(Zotero.WindowController.command("closeWindow", { windowID }, UNPRIV_ID));
-					assert.equal(e.name, ControllerErrorCode.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("closeWindow", { windowID }, UNPRIV_ID)), ControllerErrorCode.NOT_FOUND);
 					await Zotero.WindowController.command("closeWindow", { windowID });
 					for (let attempt = 0; attempt < 100 && !pluginWin.closed; attempt++) {
 						await Zotero.Promise.delay(20);
@@ -3725,7 +3756,7 @@ describe("Plugin API", function () {
 			it("should focus a window by ID", async function () {
 				let stub = sinon.stub(win, "focus");
 				try {
-					let result = await Zotero.WindowController.command(
+					let { result } = await Zotero.WindowController.command(
 						"focusWindow",
 						{ windowID: win.browsingContext.id }
 					);
@@ -3737,16 +3768,14 @@ describe("Plugin API", function () {
 				}
 			});
 
-			it("should reject focusing an unknown window or without an ID", async function () {
-				let e = await getPromiseError(Zotero.WindowController.command("focusWindow", { windowID: -1 }));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.WindowController.command("focusWindow"));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
+			it("should fail focusing an unknown window or without an ID", async function () {
+				assert.equal(await failureCode(Zotero.WindowController.command("focusWindow", { windowID: -1 })), Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.command("focusWindow")), Zotero.WindowController.errorCodes.INVALID_PARAMS);
 			});
 
 			it("should report a window's size mode, focus, position and size", async function () {
 				let windowID = win.browsingContext.id;
-				let state = await Zotero.WindowController.query("getWindowState", { windowID });
+				let { result: state } = await Zotero.WindowController.query("getWindowState", { windowID });
 				assert.include(["normal", "minimized", "maximized", "fullscreen"], state.sizeMode);
 				assert.isBoolean(state.focused);
 				assert.deepEqual(
@@ -3754,10 +3783,8 @@ describe("Plugin API", function () {
 					[win.screenX, win.screenY, win.outerWidth, win.outerHeight]
 				);
 				assert.sameMembers(Object.keys(state), ["sizeMode", "focused", "x", "y", "width", "height"]);
-				let e = await getPromiseError(Zotero.WindowController.query("getWindowState", { windowID: -1 }));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.WindowController.query("getWindowState"));
-				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.WindowController.query("getWindowState", { windowID: -1 })), Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.query("getWindowState")), Zotero.WindowController.errorCodes.INVALID_PARAMS);
 			});
 
 			it("should toggle a main window's panes and report the new state", async function () {
@@ -3765,10 +3792,10 @@ describe("Plugin API", function () {
 				let windowID = win.browsingContext.id;
 				for (let pane of ["item", "tagSelector", "context"]) {
 					let { open: before } = controller._getPaneState(win, pane);
-					let { open } = await Zotero.WindowController.command("togglePane", { windowID, pane });
+					let { result: { open } } = await Zotero.WindowController.command("togglePane", { windowID, pane });
 					assert.equal(open, !before, `${pane} toggled`);
 					assert.deepEqual(controller._getPaneState(win, pane), { open }, `${pane} state`);
-					({ open } = await Zotero.WindowController.command("togglePane", { windowID, pane }));
+					({ result: { open } } = await Zotero.WindowController.command("togglePane", { windowID, pane }));
 					assert.equal(open, before, `${pane} restored`);
 				}
 			});
@@ -3777,26 +3804,17 @@ describe("Plugin API", function () {
 				let controller = Zotero.WindowController._windowController;
 				let windowID = win.browsingContext.id;
 				for (let pane of ["item", "tagSelector", "context"]) {
-					let state = await Zotero.WindowController.query("getPaneState", { windowID, pane });
+					let { result: state } = await Zotero.WindowController.query("getPaneState", { windowID, pane });
 					assert.isBoolean(state.open, pane);
 					assert.deepEqual(state, controller._getPaneState(win, pane), pane);
 				}
-				let e = await getPromiseError(
-					Zotero.WindowController.query("getPaneState", { windowID: -1, pane: "item" })
-				);
-				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.query("getPaneState", { windowID: -1, pane: "item" })), Zotero.WindowController.errorCodes.NOT_FOUND);
 			});
 
-			it("should reject toggling an unknown pane or a pane of an unknown window", async function () {
+			it("should fail toggling an unknown pane or a pane of an unknown window", async function () {
 				let windowID = win.browsingContext.id;
-				let e = await getPromiseError(
-					Zotero.WindowController.command("togglePane", { windowID, pane: "nope" })
-				);
-				assert.equal(e.name, Zotero.WindowController.errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(
-					Zotero.WindowController.command("togglePane", { windowID: -1, pane: "item" })
-				);
-				assert.equal(e.name, Zotero.WindowController.errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.WindowController.command("togglePane", { windowID, pane: "nope" })), Zotero.WindowController.errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.WindowController.command("togglePane", { windowID: -1, pane: "item" })), Zotero.WindowController.errorCodes.NOT_FOUND);
 			});
 
 			it("should open a note and a reader in their own windows and reuse an existing one", async function () {
@@ -3804,20 +3822,20 @@ describe("Plugin API", function () {
 				let attachment = await importFileAttachment("test.pdf");
 				let opened = [];
 				try {
-					let { windowID } = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
+					let { result: { windowID } } = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
 					let noteWin = getWindow(windowID, "noteWindow");
 					opened.push(noteWin);
 					assert.equal(noteWin.name, "zotero-note-" + note.id);
-					let again = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
+					let { result: again } = await Zotero.WindowController.command("openWindow", { type: "note", itemID: note.id });
 					assert.equal(again.windowID, windowID, "an existing note window should be reused");
 
-					({ windowID } = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id }));
+					({ result: { windowID } } = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id }));
 					let readerWin = getWindow(windowID, "readerWindow");
 					opened.push(readerWin);
 					assert.equal(readerWin.reader.itemID, attachment.id);
-					let { windows } = await Zotero.WindowController.query("windows", { type: "readerWindow" });
+					let { result: { windows } } = await Zotero.WindowController.query("windows", { type: "readerWindow" });
 					assert.isTrue(windows.some(w => w.windowID === windowID), "the reader window should be listed");
-					again = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id });
+					({ result: again } = await Zotero.WindowController.command("openWindow", { type: "reader", itemID: attachment.id }));
 					assert.equal(again.windowID, windowID, "an existing reader window should be reused");
 
 					// closeWindow reaches any window type
@@ -3828,12 +3846,9 @@ describe("Plugin API", function () {
 					assert.isTrue(readerWin.closed, "closeWindow should close a reader window");
 
 					let errorCodes = Zotero.WindowController.errorCodes;
-					let e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "note", itemID: -1 }));
-					assert.equal(e.name, errorCodes.NOT_FOUND);
-					e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "reader", itemID: note.id }));
-					assert.equal(e.name, errorCodes.INVALID_PARAMS);
-					e = await getPromiseError(Zotero.WindowController.command("openWindow", { type: "library", itemID: note.id }));
-					assert.equal(e.name, errorCodes.INVALID_PARAMS);
+					assert.equal(await failureCode(Zotero.WindowController.command("openWindow", { type: "note", itemID: -1 })), errorCodes.NOT_FOUND);
+					assert.equal(await failureCode(Zotero.WindowController.command("openWindow", { type: "reader", itemID: note.id })), errorCodes.INVALID_PARAMS);
+					assert.equal(await failureCode(Zotero.WindowController.command("openWindow", { type: "library", itemID: note.id })), errorCodes.INVALID_PARAMS);
 				}
 				finally {
 					for (let w of opened) {
@@ -3862,7 +3877,7 @@ describe("Plugin API", function () {
 			// after the opener resolves
 			async function waitForTabState(tabID, state) {
 				for (let attempt = 0; attempt < 100; attempt++) {
-					let { tabs } = await Zotero.TabController.query("tabs", { windowID });
+					let { result: { tabs } } = await Zotero.TabController.query("tabs", { windowID });
 					let tab = tabs.find(t => t.tabID === tabID);
 					if (tab?.state === state) {
 						return tabs;
@@ -3882,16 +3897,13 @@ describe("Plugin API", function () {
 
 			it("should require a window ID on every request", async function () {
 				let errorCodes = Zotero.TabController.errorCodes;
-				let e = await getPromiseError(Zotero.TabController.query("tabs"));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("selectTab", { tabID: libraryTabID }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.query("tabs", { windowID: -1 }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.query("tabs")), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectTab", { tabID: libraryTabID })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.query("tabs", { windowID: -1 })), errorCodes.NOT_FOUND);
 			});
 
 			it("should describe the library tab with its selection", async function () {
-				let result = await Zotero.TabController.query("tabs", { windowID });
+				let { result } = await Zotero.TabController.query("tabs", { windowID });
 				assert.equal(result.windowID, windowID);
 				assert.equal(result.selectedTabID, libraryTabID);
 				let [library] = result.tabs;
@@ -3912,7 +3924,7 @@ describe("Plugin API", function () {
 				let { tabID: tab2ID } = await Zotero.Notes.open(note2.id, null, { openInBackground: true });
 
 				let tabs = await waitForTabState(editor.tabID, "loaded");
-				let { selectedTabID } = await Zotero.TabController.query("tabs", { windowID });
+				let { result: { selectedTabID } } = await Zotero.TabController.query("tabs", { windowID });
 				assert.equal(selectedTabID, editor.tabID);
 				assert.lengthOf(tabs, 3);
 				assert.isFalse(tabs[0].selected);
@@ -3931,12 +3943,12 @@ describe("Plugin API", function () {
 				assert.equal(win.Zotero_Tabs.selectedID, libraryTabID);
 
 				await Zotero.TabController.command("moveTab", { windowID, tabID: tab2ID, index: 1 });
-				({ tabs } = await Zotero.TabController.query("tabs", { windowID }));
+				({ result: { tabs } } = await Zotero.TabController.query("tabs", { windowID }));
 				assert.equal(tabs[1].tabID, tab2ID);
 				assert.equal(tabs[2].tabID, editor.tabID);
 
 				await Zotero.TabController.command("closeTabs", { windowID, tabIDs: [editor.tabID, tab2ID] });
-				({ tabs } = await Zotero.TabController.query("tabs", { windowID }));
+				({ result: { tabs } } = await Zotero.TabController.query("tabs", { windowID }));
 				assert.lengthOf(tabs, 1);
 			});
 
@@ -3959,28 +3971,28 @@ describe("Plugin API", function () {
 				let { instance: editor } = await Zotero.Notes.open(note.id);
 				assert.equal(win.Zotero_Tabs.selectedID, editor.tabID);
 
-				let result = await Zotero.TabController.command("selectItems", { windowID, itemIDs: [item1.id, item2.id] });
+				let { result } = await Zotero.TabController.command("selectItems", { windowID, itemIDs: [item1.id, item2.id] });
 				assert.deepEqual(result, { selected: true });
 				assert.equal(win.Zotero_Tabs.selectedID, libraryTabID);
 				assert.sameMembers(win.ZoteroPane.getSelectedItems(true), [item1.id, item2.id]);
 
 				win.Zotero_Tabs.select(editor.tabID);
-				result = await Zotero.TabController.command(
+				({ result } = await Zotero.TabController.command(
 					"selectItems",
 					{ windowID, itemIDs: [item1.id], noTabSwitch: true }
-				);
+				));
 				assert.deepEqual(result, { selected: true });
 				assert.equal(win.Zotero_Tabs.selectedID, editor.tabID);
 				assert.sameMembers(win.ZoteroPane.getSelectedItems(true, { libraryTabOnly: true }), [item1.id]);
 
-				result = await Zotero.TabController.command("selectItems", { windowID, itemIDs: [] });
+				({ result } = await Zotero.TabController.command("selectItems", { windowID, itemIDs: [] }));
 				assert.deepEqual(result, { selected: false });
 			});
 
 			it("should select collections or libraries by type and IDs", async function () {
 				let collection1 = await createDataObject("collection");
 				let collection2 = await createDataObject("collection");
-				let result = await Zotero.TabController.command(
+				let { result } = await Zotero.TabController.command(
 					"selectCollectionsOrLibraries",
 					{ windowID, type: "collection", ids: [collection1.id] }
 				);
@@ -3988,56 +4000,52 @@ describe("Plugin API", function () {
 				assert.sameMembers(win.ZoteroPane.getSelectedCollections(true), [collection1.id]);
 
 				// Several IDs use the tree's multi-selection
-				result = await Zotero.TabController.command(
+				({ result } = await Zotero.TabController.command(
 					"selectCollectionsOrLibraries",
 					{ windowID, type: "collection", ids: [collection1.id, collection2.id] }
-				);
+				));
 				assert.deepEqual(result, { selected: true });
 				assert.sameMembers(win.ZoteroPane.getSelectedCollections(true), [collection1.id, collection2.id]);
-				let { tabs } = await Zotero.TabController.query("tabs", { windowID });
+				let { result: { tabs } } = await Zotero.TabController.query("tabs", { windowID });
 				assert.sameMembers(tabs[0].collectionIDs, [collection1.id, collection2.id]);
 
 				let libraryID = Zotero.Libraries.userLibraryID;
-				result = await Zotero.TabController.command(
+				({ result } = await Zotero.TabController.command(
 					"selectCollectionsOrLibraries",
 					{ windowID, type: "trash", ids: [libraryID] }
-				);
+				));
 				assert.deepEqual(result, { selected: true });
 				assert.isTrue(win.ZoteroPane.getCollectionTreeRows()[0].isTrash());
 
-				result = await Zotero.TabController.command(
+				({ result } = await Zotero.TabController.command(
 					"selectCollectionsOrLibraries",
 					{ windowID, type: "library", ids: [libraryID] }
-				);
+				));
 				assert.deepEqual(result, { selected: true });
 				let rows = win.ZoteroPane.getCollectionTreeRows();
 				assert.lengthOf(rows, 1);
 				assert.isTrue(rows[0].isLibrary());
 			});
 
-			it("should reject unknown tabs, items and rows and protect the library tab", async function () {
+			it("should fail on unknown tabs, items and rows and protect the library tab", async function () {
 				let errorCodes = Zotero.TabController.errorCodes;
-				let e = await getPromiseError(Zotero.TabController.command("selectTab", { windowID, tabID: "nope" }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.TabController.command("closeTabs", { windowID, tabIDs: [libraryTabID] }));
-				assert.equal(e.name, errorCodes.NOT_ALLOWED);
-				e = await getPromiseError(Zotero.TabController.command("moveTab", { windowID, tabID: libraryTabID, index: 1 }));
-				assert.equal(e.name, errorCodes.NOT_ALLOWED);
-				e = await getPromiseError(Zotero.TabController.command("moveTab", { windowID, tabID: "nope", index: 0 }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("selectItems", { windowID, itemIDs: [-1] }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "nope", ids: [1] }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [999999] }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [] }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectTab", { windowID, tabID: "nope" })), errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.command("closeTabs", { windowID, tabIDs: [libraryTabID] })), errorCodes.NOT_ALLOWED);
+				assert.equal(await failureCode(Zotero.TabController.command("moveTab", { windowID, tabID: libraryTabID, index: 1 })), errorCodes.NOT_ALLOWED);
+				assert.equal(await failureCode(Zotero.TabController.command("moveTab", { windowID, tabID: "nope", index: 0 })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectItems", { windowID, itemIDs: [-1] })), errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "nope", ids: [1] })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [999999] })), errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [] })), errorCodes.INVALID_PARAMS);
+				// The validator's reason reaches the caller
+				let { error } = await Zotero.TabController.command("moveTab", { windowID, tabID: "nope", index: "1" });
+				assert.equal(error.code, errorCodes.INVALID_PARAMS);
+				assert.include(error.message, '["index"]');
 			});
 
 			it("should open notes and readers in tabs, reusing a tab unless duplicates are allowed", async function () {
 				let note = await createDataObject("item", { itemType: "note" });
-				let { tabID } = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
+				let { result: { tabID } } = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
 				assert.equal(win.Zotero_Tabs.selectedID, tabID);
 				let tabs = await waitForTabState(tabID, "loaded");
 				let tab = tabs.find(t => t.tabID === tabID);
@@ -4046,17 +4054,17 @@ describe("Plugin API", function () {
 
 				// The same item selects the existing tab
 				await Zotero.TabController.command("selectTab", { windowID, tabID: libraryTabID });
-				let again = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
+				let { result: again } = await Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id });
 				assert.equal(again.tabID, tabID);
 				assert.equal(win.Zotero_Tabs.selectedID, tabID);
 
 				// A background duplicate is a new, unselected tab at the requested index, left unloaded
-				let dup = await Zotero.TabController.command("openTab", {
+				let { result: dup } = await Zotero.TabController.command("openTab", {
 					windowID, type: "note", itemID: note.id, background: true, allowDuplicate: true, index: 1,
 				});
 				assert.notEqual(dup.tabID, tabID);
 				assert.equal(win.Zotero_Tabs.selectedID, tabID);
-				({ tabs } = await Zotero.TabController.query("tabs", { windowID }));
+				({ result: { tabs } } = await Zotero.TabController.query("tabs", { windowID }));
 				let dupTab = tabs.find(t => t.tabID === dup.tabID);
 				assert.equal(dupTab.index, 1);
 				assert.equal(dupTab.state, "unloaded");
@@ -4064,7 +4072,7 @@ describe("Plugin API", function () {
 				// An existing unloaded tab for the item is loaded and reused
 				let attachment = await importFileAttachment("test.pdf");
 				let { id: unloadedID } = win.Zotero_Tabs.add({ type: "reader-unloaded", title: "PDF", data: { itemID: attachment.id } });
-				({ tabID } = await Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: attachment.id }));
+				({ result: { tabID } } = await Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: attachment.id }));
 				assert.equal(tabID, unloadedID);
 				tabs = await waitForTabState(tabID, "loaded");
 				tab = tabs.find(t => t.tabID === tabID);
@@ -4073,22 +4081,16 @@ describe("Plugin API", function () {
 				assert.isTrue(tab.selected);
 			});
 
-			it("should reject opening a missing item, an item of the wrong kind, or a bad index", async function () {
+			it("should fail opening a missing item, an item of the wrong kind, or a bad index", async function () {
 				let errorCodes = Zotero.TabController.errorCodes;
 				let item = await createDataObject("item");
 				let note = await createDataObject("item", { itemType: "note" });
-				let e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: -1 }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
-				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: item.id }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: item.id }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "library", itemID: note.id }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id, index: 0 }));
-				assert.equal(e.name, errorCodes.INVALID_PARAMS);
-				e = await getPromiseError(Zotero.TabController.command("openTab", { windowID: -1, type: "note", itemID: note.id }));
-				assert.equal(e.name, errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: -1 })), errorCodes.NOT_FOUND);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: item.id })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID, type: "reader", itemID: item.id })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID, type: "library", itemID: note.id })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID, type: "note", itemID: note.id, index: 0 })), errorCodes.INVALID_PARAMS);
+				assert.equal(await failureCode(Zotero.TabController.command("openTab", { windowID: -1, type: "note", itemID: note.id })), errorCodes.NOT_FOUND);
 			});
 		});
 	});
