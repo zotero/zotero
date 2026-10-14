@@ -379,25 +379,6 @@ function setupFilePicker(scope) {
 	});
 }
 
-const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
-
-/**
- * Load a change set builder into the sandbox, so a draft is a plain object of the plugin's compartment
- * until commit hands its JSON to chrome
- * @param {Object} scope - The sandbox scope
- * @param {string} url - The store's builder script, evaluated after the shared base
- * @param {Object} [globals] - Free variables the scripts read, put on the holder first
- * @returns {Object} The holder the scripts defined their classes on
- */
-function loadChangeSet(scope, url, globals = {}) {
-	let holder = Cu.createObjectIn(scope);
-	Object.assign(holder, globals);
-	for (let script of [CHANGE_SET_BASE_URL, url]) {
-		Services.scriptloader.loadSubScript(script, holder);
-	}
-	return holder;
-}
-
 function defineOnMirror(mirror, name, value) {
 	Object.defineProperty(mirror, name, { value, enumerable: true, configurable: false, writable: false });
 }
@@ -411,7 +392,7 @@ function setupDataStore(scope) {
 	// Force-create the lazy DataStore mirror so we can attach to it
 	let mirror = Cu.waiveXrays(scope).Zotero.DataStore;
 	if (!mirror) return;
-	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/dataChangeSet.js");
+	let holder = ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/dataChangeSet.js", { scope });
 	defineOnMirror(mirror, "ChangeSet", holder.DataChangeSet);
 }
 
@@ -443,7 +424,10 @@ function setupFileStore(scope) {
 	let mirror = Cu.waiveXrays(scope).Zotero.FileStore;
 	if (!mirror) return;
 	let path = exportFilePath(scope);
-	let holder = loadChangeSet(scope, "chrome://zotero/content/xpcom/plugins/fileChangeSet.js", { FilePath: path });
+	let holder = ScopeUtils.loadChangeSet("chrome://zotero/content/xpcom/plugins/fileChangeSet.js", {
+		scope,
+		globals: { FilePath: path },
+	});
 	defineOnMirror(mirror, "ChangeSet", holder.FileChangeSet);
 	defineOnMirror(mirror, "path", path);
 	let withSessionTrace = { pluginID, path: "Zotero.FileStore.withSession" };
