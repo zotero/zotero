@@ -24,9 +24,9 @@
 */
 
 
-import { ControllerError } from "chrome://zotero/content/xpcom/plugins/apiErrors.mjs";
+import { PluginRequestError } from "chrome://zotero/content/xpcom/plugins/apiErrors.mjs";
 
-const { NOT_FOUND, INVALID_PARAMS } = ControllerError.codes;
+const { NOT_FOUND, INVALID_PARAMS } = PluginRequestError.codes;
 
 /**
  * Plugin-facing window type -> chrome windowtype; the shortcut and window-resource targets are names from here
@@ -93,10 +93,10 @@ function getWindow(windowID, type, callerPluginID) {
 		}
 	}
 	if (!win || (callerPluginID && !canAccessWindow(win, callerPluginID))) {
-		throw new ControllerError(NOT_FOUND, `No window with ID ${windowID}`);
+		throw new PluginRequestError(NOT_FOUND, `No window with ID ${windowID}`);
 	}
 	if (type && win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
-		throw new ControllerError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
+		throw new PluginRequestError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
 	}
 	return win;
 }
@@ -117,13 +117,13 @@ function getMainWindow(windowID) {
 function getOpenableItem(itemID, type) {
 	let item = Zotero.Items.get(itemID);
 	if (!item) {
-		throw new ControllerError(NOT_FOUND, `No item with ID ${itemID}`);
+		throw new PluginRequestError(NOT_FOUND, `No item with ID ${itemID}`);
 	}
 	let openable = type === "reader"
 		? item.isFileAttachment() && !!item.attachmentReaderType
 		: item.isNote();
 	if (!openable) {
-		throw new ControllerError(INVALID_PARAMS, `Item ${itemID} cannot be opened as ${type}`);
+		throw new PluginRequestError(INVALID_PARAMS, `Item ${itemID} cannot be opened as ${type}`);
 	}
 	return item;
 }

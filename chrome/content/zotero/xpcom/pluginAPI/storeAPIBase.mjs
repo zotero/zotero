@@ -27,7 +27,7 @@
 /**
  * @typedef {object} StoreAPIConfig
  * @property {string} apiName - Log prefix and error namespace
- * @property {Record<string, ControllerRequestDef>} [queries] - Read-only requests, as on a controller. Every
+ * @property {Record<string, RequestDef>} [queries] - Read-only requests, as on any request API. Every
  *     store also gets `validate`, which dry-runs a change set, unless it defines its own
  * @property {Record<string, StoreObjectTypeDef>} objectTypes - What a change set can address, by type name
  * @property {string | string[]} [permissions] - What every commit requires; a type or operation can add to it
@@ -148,8 +148,8 @@
  */
 
 
-import { ControllerAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/controllerAPIBase.mjs";
-import { ControllerError } from "chrome://zotero/content/xpcom/plugins/apiErrors.mjs";
+import { RequestAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/requestAPIBase.mjs";
+import { PluginRequestError } from "chrome://zotero/content/xpcom/plugins/apiErrors.mjs";
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
@@ -162,7 +162,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
  * Store-style API: plugins read snapshots through queries, describe changes locally as a change set, and
  * commit it once; the store checks the whole set, then applies it to the live objects in one transaction
  */
-class StoreAPIBase extends ControllerAPIBase {
+class StoreAPIBase extends RequestAPIBase {
 	_config = {
 		apiName: "StoreAPIBase",
 		permissions: [],
@@ -170,10 +170,10 @@ class StoreAPIBase extends ControllerAPIBase {
 	};
 
 	/**
-	 * The controller codes plus the one outcome only a commit has
+	 * The request codes plus the one outcome only a commit has
 	 */
 	static errorCodes = Object.freeze({
-		...ControllerAPIBase.errorCodes,
+		...RequestAPIBase.errorCodes,
 		// An entry's revision no longer matches its object; nothing was applied
 		CONFLICT: "Conflict",
 	});
@@ -188,15 +188,12 @@ class StoreAPIBase extends ControllerAPIBase {
 	_objectTypes = new Map();
 
 	/**
-	 * Queries are defined as on a controller, plus `validate` unless the store defines one; object types
-	 * under `objectTypes`. Commands are refused: every write is an operation in a change set
+	 * Queries are defined as on any request API, plus `validate` unless the store defines one; object types
+	 * under `objectTypes`. Every write is an operation in a change set
 	 * @param {StoreAPIConfig} config
 	 */
 	set config(config) {
-		let { objectTypes = {}, commands, ...rest } = config;
-		if (commands) {
-			throw new Error(`${rest.apiName || this._config.apiName}: a store has no commands; writes are change set operations`);
-		}
+		let { objectTypes = {}, ...rest } = config;
 		super.config = rest;
 		if (!this._queries.has("validate")) {
 			this._define(this._queries, "validate", {
@@ -232,7 +229,7 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * @param {StoreChangeSet | { toPlain: () => StoreChangeSet }} changes - A change set builder or its JSON
 	 * @param {{ snapshots?: boolean }} [options]
 	 * @param {string} [callerPluginID] - Injected for sandbox callers; omitted by chrome
-	 * @returns {Promise<ControllerResponse<StoreCommitResult>>}
+	 * @returns {Promise<APIResponse<StoreCommitResult>>}
 	 */
 	commit(changes, options = {}, callerPluginID) {
 		return this._respond(() => this._commit(changes, options, callerPluginID), callerPluginID, "commit");
@@ -324,7 +321,7 @@ class StoreAPIBase extends ControllerAPIBase {
 	/**
 	 * Check the set before anything is loaded: addressing, operations, params, refs and permissions
 	 * @param {StoreChangeSet | StoreChangeEntry} changeSet
-	 * @param {ControllerCaller} context
+	 * @param {RequestCaller} context
 	 * @returns {{ entries: object[], defaults: object, transactional: object[], deferred: object[] }} The
 	 *     planned entries in the set's order, every key of the set but `changes`, and the order they apply in
 	 */
@@ -532,9 +529,9 @@ class StoreAPIBase extends ControllerAPIBase {
 			return e;
 		}
 		// A platform failure is still a bug to log, but the caller needs the progress more than the stack
-		if (!(e instanceof ControllerError)) {
+		if (!(e instanceof PluginRequestError)) {
 			lazy.Zotero.logError(e);
-			e = new ControllerError(ControllerAPIBase.errorCodes.INTERNAL_ERROR, String(e?.message ?? e));
+			e = new PluginRequestError(RequestAPIBase.errorCodes.INTERNAL_ERROR, String(e?.message ?? e));
 		}
 		// The target's own ID, since an operation such as a rename may have moved the object
 		let locate = entry => ({
@@ -585,7 +582,7 @@ class StoreAPIBase extends ControllerAPIBase {
 	}
 
 	/**
-	 * @param {ControllerCaller} context
+	 * @param {RequestCaller} context
 	 * @param {object} defaults - Every change set key but `changes`
 	 * @returns {StoreCommitContext}
 	 */
@@ -721,7 +718,7 @@ class StoreAPIBase extends ControllerAPIBase {
 			return await fn();
 		}
 		catch (e) {
-			let coded = e instanceof ControllerError;
+			let coded = e instanceof PluginRequestError;
 			if (!coded && !this._isCallerError(e, { entry, kind, op })) {
 				throw e;
 			}
@@ -793,7 +790,7 @@ class StoreAPIBase extends ControllerAPIBase {
 	 * The checks a commit makes before it changes anything, as data; stops at the first blocking issue.
 	 * Runs outside the transaction, so a passing set can still conflict when committed
 	 * @param {StoreChangeSet} changes
-	 * @param {ControllerCaller} context
+	 * @param {RequestCaller} context
 	 * @returns {Promise<{ issues: StoreIssue[] }>}
 	 */
 	async _validate(changes, context) {
@@ -803,7 +800,7 @@ class StoreAPIBase extends ControllerAPIBase {
 			await this._resolve(entries, this._createCommitContext(context, defaults));
 		}
 		catch (e) {
-			if (!(e instanceof ControllerError)) {
+			if (!(e instanceof PluginRequestError)) {
 				throw e;
 			}
 			issues.push(Object.assign({ code: e.code, message: e.message }, e.data));

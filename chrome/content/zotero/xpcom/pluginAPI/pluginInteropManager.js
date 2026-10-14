@@ -35,7 +35,7 @@
 	});
 
 	// Statuses getCommand() returns in place of a command, in the order a lookup meets
-	// them; strings so the value is legible in a log, as in ControllerAPIBase.errorCodes
+	// them; strings so the value is legible in a log, as in RequestAPIBase.errorCodes
 	const CommandStatus = Object.freeze({
 		OK: "OK",
 		NOT_FOUND: "NotFound",
