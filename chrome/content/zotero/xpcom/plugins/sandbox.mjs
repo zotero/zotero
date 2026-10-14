@@ -35,6 +35,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
+import { PluginWorkers } from "chrome://zotero/content/xpcom/plugins/workers.mjs";
 import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
@@ -108,6 +109,7 @@ function unloadScope(id) {
 	scopes.delete(id);
 	PluginProtocol.unregister(id);
 	PluginFileAccess.unregister(id);
+	PluginWorkers.unregister(id);
 	// Delay nuke to allow any pending operations to complete
 	setTimeout(() => {
 		Cu.nukeSandbox(scope);
@@ -249,14 +251,18 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 				"btoa",
 				"Blob",
 				"DOMParser",
+				"Event",
 				"fetch",
+				"MessageChannel",
 				"TextDecoder",
 				"TextEncoder",
 				"URL",
 				"URLSearchParams",
 				"XMLHttpRequest"
 			],
-			wantXrays: true,
+			// Objects of the plugin's own origin, such as its workers' events, cross as they are; chrome's
+			// stay opaque to a content principal regardless
+			wantXrays: false,
 			allowWaivers: true,
 			freshCompartment: true,
 		}
@@ -326,6 +332,9 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	// The sandbox principal bounds requests to host_permissions
 	setupHTTP(scope);
+
+	// Worker comes from a document of the plugin's origin, as its pages do
+	PluginWorkers.setup(scope);
 
 	if (permissions.includes("preferences")) {
 		setupPreferences(scope);
