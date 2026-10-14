@@ -23,37 +23,113 @@
 	***** END LICENSE BLOCK *****
 */
 
-function requireString(value, what) {
-	if (typeof value !== "string") {
-		throw new TypeError(`${what} must be a string`);
-	}
-	return value;
-}
+/**
+ * Which path is which, for grants and destination checks. Canonical paths throughout (forward slashes, one
+ * spelling per place): `canonicalize` is the one way in from any spelling, `toNative` the one way out
+ */
+const PathIdentity = {
+	// Any spelling to the canonical one; Win32's `\\?\` and `\\.\` aliases fold away, which no platform API does
+	_canonical(path) {
+		path = Zotero.File.normalizeToUnix(path);
+		return Zotero.isWin ? path.replace(/^\/\/[?.]\/(UNC\/)?/i, (_, unc) => (unc ? "//" : "")) : path;
+	},
 
-function toNative(value) {
-	return Zotero.isWin ? value.replace(/\//g, "\\") : value;
-}
+	// The canonical form of an absolute path in any spelling, or of a file: URL
+	canonicalize(rawPath) {
+		if (typeof rawPath !== "string" || !rawPath) {
+			throw new Error("File path must be a non-empty string");
+		}
+		let path = rawPath;
+		if (path.startsWith("file:")) {
+			path = Services.io.newURI(path).QueryInterface(Ci.nsIFileURL).file.path;
+		}
+		path = PathIdentity._canonical(path);
+		if (!PathUtils.isAbsolute(PathIdentity.toNative(path))) {
+			throw new Error(`File path must be absolute: ${rawPath}`);
+		}
+		return path;
+	},
 
-// PathUtils spells a drive root without its separator
-function withRootSeparator(value) {
-	return /^[A-Za-z]:$/.test(value) ? `${value}\\` : value;
-}
+	// The spelling a platform API takes
+	toNative(path) {
+		return Zotero.isWin ? path.replaceAll("/", "\\") : path;
+	},
+
+	// The canonical parent, null at a root; PathUtils takes the native spelling only
+	parent(path) {
+		let parent = PathUtils.parent(PathIdentity.toNative(path));
+		return parent === null ? null : PathIdentity._canonical(parent);
+	},
+
+	// isSymlink() is always false on Windows, where `target` reads through a symlink or junction once the file
+	// is stat-ed; elsewhere it answers for a dangling link too and throws where there is nothing at all
+	_isLink(file) {
+		if (Zotero.isWin) {
+			return file.exists() && file.target !== file.path;
+		}
+		try {
+			return file.isSymlink();
+		}
+		catch {
+			return false;
+		}
+	},
+
+	// Where the path really leads, a missing tail kept as given; a link that leads nowhere is an error, since
+	// writing through it would create its target
+	realPath(path, hops = 40) {
+		let file = Zotero.File.pathToFile(PathIdentity.toNative(path));
+		let leaves = [];
+		for (; file.parent; file = file.parent) {
+			leaves.unshift(file.leafName);
+		}
+		for (let i = 0; i < leaves.length; i++) {
+			file.append(leaves[i]);
+			if (PathIdentity._isLink(file)) {
+				if (!hops) {
+					throw new Error(`Too many links resolving ${path}`);
+				}
+				let target = PathIdentity.canonicalize(file.target);
+				return PathIdentity.realPath(PathIdentity._canonical([target, ...leaves.slice(i + 1)].join("/")), hops - 1);
+			}
+		}
+		return PathIdentity.canonicalize(file.path);
+	},
+
+	// Folded where the default file system ignores case
+	foldCase(path) {
+		return Zotero.isWin || Zotero.isMac ? path.toLowerCase() : path;
+	},
+
+	same(a, b) {
+		return PathIdentity.foldCase(a) === PathIdentity.foldCase(b);
+	},
+
+	// Pure, since both are canonical already; a directory contains itself
+	contains(dir, path) {
+		dir = PathIdentity.foldCase(dir);
+		path = PathIdentity.foldCase(path);
+		return path === dir || path.startsWith(dir.endsWith("/") ? dir : `${dir}/`);
+	},
+};
 
 /**
- * Node-named path helpers over the canonical form (forward slashes everywhere), backed by PathUtils and
- * Zotero's normalizer, so only this platform's paths are understood; globals.mjs mirrors them into a sandbox
+ * Node-named helpers for a plugin: any spelling this platform understands in, canonical out, backed by
+ * PathUtils and the core normalizer; globals.mjs mirrors them into a sandbox
  */
 const FilePath = Object.freeze({
 	sep: "/",
 
 	isAbsolute(value) {
-		return typeof value === "string" && value !== "" && PathUtils.isAbsolute(toNative(value));
+		return typeof value === "string" && value !== "" && PathUtils.isAbsolute(PathIdentity.toNative(value));
 	},
 
 	// Collapses `.`, `..` and repeated separators; a `..` above a root is an error, where Node clamps
 	normalize(value) {
-		requireString(value, "path");
-		return value === "" ? "." : Zotero.File.normalizeToUnix(value) || ".";
+		if (typeof value !== "string") {
+			throw new TypeError("path must be a string");
+		}
+		return value === "" ? "." : PathIdentity._canonical(value) || ".";
 	},
 
 	join(...parts) {
@@ -64,8 +140,7 @@ const FilePath = Object.freeze({
 	dirname(value) {
 		let normalized = FilePath.normalize(value);
 		if (FilePath.isAbsolute(normalized)) {
-			let parent = PathUtils.parent(toNative(normalized));
-			return parent === null ? normalized : FilePath.normalize(withRootSeparator(parent));
+			return PathIdentity.parent(normalized) ?? normalized;
 		}
 		let index = normalized.lastIndexOf("/");
 		return index === -1 ? "." : normalized.slice(0, index) || ".";
@@ -75,7 +150,7 @@ const FilePath = Object.freeze({
 		let normalized = FilePath.normalize(value);
 		let name = normalized.slice(normalized.lastIndexOf("/") + 1);
 		// A root has no name, whatever its spelling on this platform
-		if (FilePath.isAbsolute(normalized) && PathUtils.parent(toNative(normalized)) === null) {
+		if (FilePath.isAbsolute(normalized) && PathIdentity.parent(normalized) === null) {
 			name = "";
 		}
 		if (ext && name !== ext && name.endsWith(ext)) {
@@ -90,64 +165,5 @@ const FilePath = Object.freeze({
 		return index > 0 ? name.slice(index) : "";
 	},
 });
-
-/**
- * Which path is which, for grants and destination checks: the canonical spelling, the real target behind
- * symlinks, and comparison folded on Windows only
- */
-const PathIdentity = {
-	// The canonical form of an absolute native path or file: URL, which every grant, address and result uses
-	canonicalize(rawPath) {
-		if (typeof rawPath !== "string" || !rawPath) {
-			throw new Error("File path must be a non-empty string");
-		}
-		let path = rawPath;
-		if (path.startsWith("file:")) {
-			path = Services.io.newURI(path).QueryInterface(Ci.nsIFileURL).file.path;
-		}
-		if (!PathUtils.isAbsolute(path)) {
-			throw new Error(`File path must be absolute: ${rawPath}`);
-		}
-		return Zotero.File.normalizeToUnix(path);
-	},
-
-	// The path with its symlinks resolved, a missing tail kept as given
-	realPath(rawPath) {
-		let canonical = rawPath;
-		try {
-			canonical = Zotero.File.normalizeToUnix(rawPath);
-			let f = Zotero.File.pathToFile(Zotero.isWin ? canonical.replace(/\//g, "\\") : canonical);
-			let leaves = [];
-			while (f && !f.exists()) {
-				leaves.unshift(f.leafName);
-				f = f.parent;
-			}
-			if (f) {
-				f.normalize();
-				for (let leaf of leaves) {
-					f.append(leaf);
-				}
-				return Zotero.File.normalizeToUnix(f.path);
-			}
-		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-		return canonical;
-	},
-
-	// Windows compares paths without regard to case, and nsIFile.normalize keeps the case as given there
-	foldCase(path) {
-		return Zotero.isWin ? path.toLowerCase() : path;
-	},
-
-	same(a, b) {
-		return PathIdentity.foldCase(a) === PathIdentity.foldCase(b);
-	},
-
-	contains(dir, path) {
-		return Zotero.File.directoryContains(PathIdentity.foldCase(dir), PathIdentity.foldCase(path));
-	},
-};
 
 export { FilePath, PathIdentity };

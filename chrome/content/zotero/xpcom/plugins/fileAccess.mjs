@@ -27,7 +27,8 @@
 import { setTimeout, clearTimeout, requestIdleCallback } from "resource://gre/modules/Timer.sys.mjs";
 import { FileUtils } from "resource://gre/modules/FileUtils.sys.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
-import { PathIdentity } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
+import { FilePath, PathIdentity } from "chrome://zotero/content/xpcom/plugins/filePath.mjs";
+import { FileIO } from "chrome://zotero/content/xpcom/plugins/fileIO.mjs";
 
 const FILE_ACCESS_PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 
@@ -35,52 +36,39 @@ const FILE_ACCESS_PREF_PREFIX = "extensions.zotero.pluginFileAccess.";
 // file pickers and chained ops can legitimately take minutes.
 const DEFAULT_SESSION_TIMEOUT_MS = 5 * 60 * 1000;
 
-// Paths that cannot be granted with "always" persistence (root, system dirs).
-let persistBlockedPaths = [];
+// Directories that cannot be granted with "always" persistence, besides the home directory
+let persistBlockedPaths = Services.appinfo.OS === "WINNT"
+	? ["C:/", "C:/Windows", "C:/Program Files", "C:/Program Files (x86)"]
+	: ["/", "/etc", "/usr", "/bin", "/sbin", "/System", "/Library"];
 
-persistBlockedPaths.push(FileUtils.getDir("Home", []).path);
-if (Services.appinfo.OS === "WINNT") {
-	persistBlockedPaths.push(
-		"C:\\",
-		"C:\\Windows",
-		"C:\\Program Files",
-		"C:\\Program Files (x86)",
-	);
+// The platform's own directories, canonical from here on; the data directory is a pref, so read each time
+function homeDir() {
+	return PathIdentity.canonicalize(FileUtils.getDir("Home", []).path);
 }
-else {
-	persistBlockedPaths.push(
-		"/",
-		"/etc",
-		"/usr",
-		"/bin",
-		"/sbin",
-		"/System",
-		"/Library",
-	);
+
+function profileDir() {
+	return PathIdentity.canonicalize(PathUtils.profileDir);
+}
+
+function dataDir() {
+	return PathIdentity.canonicalize(Zotero.DataDirectory.dir);
 }
 
 function getPluginDataDir() {
-	return PathUtils.join(Zotero.DataDirectory.dir, "plugin-data");
+	return FilePath.join(dataDir(), "plugin-data");
 }
 
-function isPersistBlocked(canonicalPath) {
-	let real = PluginFileAccess._realPath(canonicalPath);
-	for (let p of persistBlockedPaths) {
-		if (PathIdentity.contains(real, PluginFileAccess._realPath(p))) return true;
-	}
-	return false;
+function isPersistBlocked(path) {
+	let real = PluginFileAccess._realPath(path);
+	return [homeDir(), ...persistBlockedPaths].some(p => PathIdentity.contains(real, PluginFileAccess._realPath(p)));
 }
 
 function isForbidden(realPath) {
-	if (PathIdentity.contains(PluginFileAccess._realPath(PathUtils.profileDir), realPath)) {
+	if (PathIdentity.contains(PluginFileAccess._realPath(profileDir()), realPath)) {
 		return true;
 	}
-	if (PathIdentity.contains(PluginFileAccess._realPath(Zotero.DataDirectory.dir), realPath)) {
-		let pluginDataDir = PluginFileAccess._realPath(getPluginDataDir());
-		if (pluginDataDir && PathIdentity.contains(pluginDataDir, realPath)) {
-			return false;
-		}
-		return true;
+	if (PathIdentity.contains(PluginFileAccess._realPath(dataDir()), realPath)) {
+		return !PathIdentity.contains(PluginFileAccess._realPath(getPluginDataDir()), realPath);
 	}
 	return false;
 }
@@ -134,12 +122,15 @@ async function showPrompt(pluginID, path, mode, promptArgs, options = {}) {
 	});
 }
 
+// TEMP: This is for the preference pane plugins page
 async function _getDirSize(path) {
 	if (!path) return 0;
 	try {
-		if (!(await IOUtils.exists(path))) return 0;
+		if (!(await FileIO.exists(path))) return 0;
+		// The commands below take the platform's spelling
+		let nativePath = PathIdentity.toNative(path);
 		if (Services.appinfo.OS === "WINNT") {
-			let escaped = path.replace(/'/g, "''");
+			let escaped = nativePath.replace(/'/g, "''");
 			let out = await Zotero.Utilities.Internal.subprocess(
 				"powershell.exe",
 				[
@@ -152,7 +143,7 @@ async function _getDirSize(path) {
 			);
 			return parseInt(out.trim()) || 0;
 		}
-		let out = await Zotero.Utilities.Internal.subprocess("du", ["-sk", path]);
+		let out = await Zotero.Utilities.Internal.subprocess("du", ["-sk", nativePath]);
 		let m = out.trim().match(/^(\d+)/);
 		return m ? parseInt(m[1]) * 1024 : 0;
 	}
@@ -189,21 +180,22 @@ class GrantLayer {
 	}
 
 	* _grants() {
-		for (let [path, { mode }] of this.cache) {
+		for (let { path, mode } of this.cache.values()) {
 			yield { path, mode };
 		}
 	}
 
+	// Keyed by the folded spelling, so a lookup matches however the path was cased
 	_get({ path }) {
-		return this.cache.get(path);
+		return this.cache.get(PathIdentity.foldCase(path));
 	}
 
 	_set({ path, mode }) {
-		this.cache.set(path, { mode });
+		this.cache.set(PathIdentity.foldCase(path), { path, mode });
 	}
 
 	_delete({ path }) {
-		this.cache.delete(path);
+		this.cache.delete(PathIdentity.foldCase(path));
 	}
 
 	_batchDelete(grants) {
@@ -259,11 +251,11 @@ class GrantLayer {
 		let currentPath = path;
 		let cache = this.cache;
 		while (currentPath) {
-			let g = cache.get(currentPath);
+			let g = cache.get(PathIdentity.foldCase(currentPath));
 			if (g && GrantLayer.subsumes(g, { path, mode }, { skipPathCheck: true })) {
 				return true;
 			}
-			currentPath = PathUtils.parent(currentPath);
+			currentPath = PathIdentity.parent(currentPath);
 		}
 		return false;
 	}
@@ -278,14 +270,14 @@ class GrantLayer {
 		let currentPath = path;
 		let cache = this.cache;
 		while (currentPath) {
-			let g = cache.get(currentPath);
+			let g = cache.get(PathIdentity.foldCase(currentPath));
 			if (g) {
 				if (g.mode === "deny") return "deny";
 				if (g.mode === mode || (g.mode === "write" && mode === "read")) {
 					return "allow";
 				}
 			}
-			currentPath = PathUtils.parent(currentPath);
+			currentPath = PathIdentity.parent(currentPath);
 		}
 		return null;
 	}
@@ -354,8 +346,16 @@ class PersistedGrantLayer extends GrantLayer {
 				let [path, value] = entry;
 				if (typeof path !== "string" || !path) continue;
 				if (!value || typeof value !== "object" || !GrantLayer.VALID_MODES.includes(value.mode)) continue;
-				// Resolve stored keys so matching is case/symlink-consistent
-				entries.push([PluginFileAccess._realPath(path), { mode: value.mode }]);
+				// Resolved again, since a link on the way may have changed since the grant was made
+				let real = path;
+				try {
+					real = PluginFileAccess._realPath(path);
+				}
+				catch (e) {
+					Zotero.logError(e);
+					continue;
+				}
+				entries.push([PathIdentity.foldCase(real), { path: real, mode: value.mode }]);
 			}
 			this._cache = new Map(entries);
 			this._cacheKey = raw;
@@ -369,7 +369,7 @@ class PersistedGrantLayer extends GrantLayer {
 	}
 
 	_writeCache() {
-		let entries = [...this._cache.entries()];
+		let entries = [...this._cache.values()].map(({ path, mode }) => [path, { mode }]);
 		let raw = JSON.stringify(entries);
 		Zotero.Prefs.set(this._prefKey, raw, true);
 		this._cacheKey = raw;
@@ -426,8 +426,6 @@ class FileAccessState {
 		this.pluginID = pluginID;
 		this.uuid = PluginUUID.getByID(pluginID);
 		this.persistedGrants = new PersistedGrantLayer(this.uuid);
-		Zotero.File.createDirectoryIfMissing(getPluginDataDir());
-		Zotero.File.createDirectoryIfMissing(this.getDir());
 	}
 
 	destroy() {
@@ -465,19 +463,19 @@ class FileAccessState {
 	}
 
 	getDir() {
-		return PathIdentity.canonicalize(PathUtils.join(getPluginDataDir(), this.uuid));
+		return FilePath.join(getPluginDataDir(), this.uuid);
 	}
 
 	_tempDirPath() {
-		return PathIdentity.canonicalize(PathUtils.join(Zotero.getTempDirectory().path, `plugin-${this.uuid}`));
+		return FilePath.join(PathIdentity.canonicalize(Zotero.getTempDirectory().path), `plugin-${this.uuid}`);
 	}
 
 	/**
 	 * A scratch directory under Zotero's, always allowed like the data directory and gone with Zotero's
 	 */
-	getTempDir() {
+	async getTempDir() {
 		let dir = this._tempDirPath();
-		Zotero.File.createDirectoryIfMissing(dir);
+		await FileIO.makeDirectory(dir);
 		return dir;
 	}
 
@@ -518,7 +516,7 @@ class FileAccessState {
 
 		let isDeny = answer.decision === "deny";
 		let grantPath = answer.scope === "parent"
-			? (PathUtils.parent(realPath) || realPath)
+			? (PathIdentity.parent(realPath) || realPath)
 			: realPath;
 		let grant = { path: grantPath, mode: isDeny ? "deny" : mode };
 
@@ -656,14 +654,14 @@ class FileAccessState {
 			let req = this.queue[0];
 			let canPersistFile = !isPersistBlocked(req.path);
 			let canPersistParent = false;
-			let parentPath = PathUtils.parent(req.path);
+			let parentPath = PathIdentity.parent(req.path);
 			if (parentPath) {
 				canPersistParent = !isPersistBlocked(parentPath);
 			}
 
 			let isDirectory = false;
 			try {
-				isDirectory = (await IOUtils.stat(req.path)).type === "directory";
+				isDirectory = (await FileIO.stat(req.path)).type === "directory";
 			}
 			catch {}
 
@@ -710,8 +708,11 @@ const PluginFileAccess = {
 	// Every real-path lookup of the gate goes through here, so a test can say where a path leads
 	_realPath: PathIdentity.realPath,
 
+	// The state answers at once; the plugin's data directory exists once the promise resolves
 	register(pluginID) {
-		this._states.set(pluginID, new FileAccessState(pluginID));
+		let state = new FileAccessState(pluginID);
+		this._states.set(pluginID, state);
+		return FileIO.makeDirectory(state.getDir());
 	},
 
 	unregister(pluginID) {
@@ -781,7 +782,7 @@ const PluginFileAccess = {
 	},
 
 	getDataDirByUUID(uuid) {
-		return PathIdentity.canonicalize(PathUtils.join(getPluginDataDir(), uuid));
+		return FilePath.join(getPluginDataDir(), uuid);
 	},
 
 	async getDataDirSizeByUUID(uuid) {
@@ -790,14 +791,13 @@ const PluginFileAccess = {
 
 	async clearDataDirByUUID(uuid) {
 		await this.deleteDataDirByUUID(uuid);
-		let dir = this.getDataDirByUUID(uuid);
-		Zotero.File.createDirectoryIfMissing(dir);
+		await FileIO.makeDirectory(this.getDataDirByUUID(uuid));
 	},
 
 	async deleteDataDirByUUID(uuid) {
 		let dir = this.getDataDirByUUID(uuid);
 		try {
-			await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+			await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
 		}
 		catch (e) {
 			Zotero.logError(e);
