@@ -24,10 +24,10 @@
 */
 
 /**
- * A request failure with its response code (one of ControllerError.codes) and optional JSON
+ * A request failure with its response code (one of PluginRequestError.codes) and optional JSON
  * details the response carries as `error.data`; anything else a handler throws is a bug
  */
-class ControllerError extends Error {
+class PluginRequestError extends Error {
 	static codes = Object.freeze({
 		// No query or command of that name
 		UNKNOWN_REQUEST: "UnknownRequest",
@@ -41,13 +41,13 @@ class ControllerError extends Error {
 		NOT_ALLOWED: "NotAllowed",
 		// A handler returned something that is not JSON data
 		INVALID_RESULT: "InvalidResult",
-		// A handler threw anything but a ControllerError; logged
+		// A handler threw anything but a PluginRequestError; logged
 		INTERNAL_ERROR: "InternalError",
 	});
 
 	constructor(code, message, data) {
 		super(message);
-		this.name = "ControllerError";
+		this.name = "PluginRequestError";
 		this.code = code;
 		if (data !== undefined) {
 			this.data = data;
@@ -55,4 +55,4 @@ class ControllerError extends Error {
 	}
 }
 
-export { ControllerError };
+export { PluginRequestError };
