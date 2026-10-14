@@ -322,3 +322,35 @@ export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, a
 	}
 	return { messenger, dispose };
 }
+
+// window.open-style features a plugin may set on its own window
+const ALLOWED_WINDOW_FEATURES = new Set([
+	"width",
+	"height",
+	"left",
+	"top",
+	"centerscreen",
+	"resizable",
+	"minimizable",
+	"alwaysontop",
+	// Only meaningful with a parent window
+	"dependent",
+]);
+
+/**
+ * Keep the allowed features of a plugin window
+ * @param {Object<string, boolean | number>} [features] - window.open-style features by name
+ * @returns {{ str: string, values: Object<string, boolean | number> }} As Services.ww.openWindow takes them, and by name
+ */
+export function sanitizeWindowFeatures(features = {}) {
+	let values = {};
+	for (let [key, value] of Object.entries(features)) {
+		if (ALLOWED_WINDOW_FEATURES.has(key)) {
+			values[key] = value;
+		}
+	}
+	let str = Object.entries(values)
+		.map(([key, value]) => (value === true ? key : `${key}=${value === false ? "no" : value}`))
+		.join(",");
+	return { str, values };
+}

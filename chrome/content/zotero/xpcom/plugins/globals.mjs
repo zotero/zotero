@@ -25,12 +25,11 @@
 
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-import { ScopeUtils, VarCheck, INSTANCE_PROXY_FACTORY, resolvePluginPage } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { ScopeUtils, INSTANCE_PROXY_FACTORY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/file.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
-import { loadPluginPageInBrowser, stopAutoResize } from "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs";
 import { WindowUtils } from "chrome://zotero/content/xpcom/plugins/window.mjs";
 
 const lazy = XPCOMUtils.declareLazy({
@@ -76,187 +75,6 @@ function setupInstanceProxy(scope) {
 		configurable: false,
 		writable: false,
 	});
-}
-
-const ALLOWED_WINDOW_FEATURES = new Set([
-	"width",
-	"height",
-	"left",
-	"top",
-	"centerscreen",
-	"resizable",
-	"minimizable",
-	"alwaysontop",
-	// Only meaningful with options.parentWindowID
-	"dependent",
-]);
-
-function sanitizeFeatures(features) {
-	let values = {};
-	let parts = [];
-	for (let raw of String(features || "").split(",")) {
-		let s = raw.trim();
-		if (!s) continue;
-		let eq = s.indexOf("=");
-		let name = (eq === -1 ? s : s.slice(0, eq)).trim().toLowerCase();
-		if (!ALLOWED_WINDOW_FEATURES.has(name)) continue;
-		let value = eq === -1 ? "" : s.slice(eq + 1).trim();
-		let low = value.toLowerCase();
-		if (value === "" || low === "yes" || low === "1" || low === "true") {
-			values[name] = true;
-		}
-		else if (low === "no" || low === "0" || low === "false") {
-			values[name] = false;
-		}
-		else {
-			values[name] = value;
-		}
-		parts.push(value === "" ? name : `${name}=${value}`);
-	}
-	return { str: parts.join(","), values };
-}
-
-/**
- * Set up `openWindow` on an unprivileged plugin scope: a chrome wrapper window
- * hosts the plugin's HTML page, driven over a page messenger.
- *
- * @param {Object} scope - The sandbox scope to attach `openWindow` to
- */
-function setupOpenWindow(scope) {
-	let pluginID = scope.PLUGIN_ID;
-	let holder = Cu.createObjectIn(scope);
-	Cu.exportFunction(
-		(url, features, options = {}) => {
-			// name: the plugin's label for this kind of window, the <name> in its
-			// pluginWindow/<name>/... menu targets
-			let { name, fitContent, notitle, parentWindowID } = Cu.waiveXrays(options);
-			if (name !== null && name !== undefined && typeof name !== "string") {
-				throw new Error("openWindow: name must be a string");
-			}
-
-			let resolved = resolvePluginPage(pluginID, url);
-			if (!resolved) {
-				throw new Error(`openWindow: url must be an .html page within the plugin: ${url}`);
-			}
-
-			let { str: safeFeatures, values: featureValues } = sanitizeFeatures(features);
-
-			// Open a chrome wrapper window with a <browser> element for the plugin's HTML content
-			let resizable = featureValues.resizable !== false;
-			let chromeFeatures = "chrome,dialog=no,"
-				+ (safeFeatures || "resizable");
-			// Use custom notitle style because the `titlebar=no` feature is ugly
-			let windowArgs = { notitle: !!notitle };
-			// A Zotero.WindowController window ID makes that window the parent: the opener, the
-			// screen and scale the position features resolve against, and the owner of a dependent
-			let parent = null;
-			if (parentWindowID !== undefined && parentWindowID !== null) {
-				try {
-					parent = WindowUtils.getWindow(parentWindowID, undefined, pluginID);
-				}
-				catch (e) {
-					throw new scope.Error(`openWindow: ${e.message}`);
-				}
-			}
-			let win = Services.ww.openWindow(
-				parent,
-				"chrome://zotero/content/pluginWindow.xhtml",
-				null,
-				chromeFeatures,
-				windowArgs
-			);
-
-			return new scope.Promise((resolve, reject) => {
-				win.addEventListener("load", async () => {
-					try {
-						let browser = win.document
-							.getElementById("plugin-browser");
-
-						// Initialize the plugin window (title sync, menus, lifecycle)
-						win.PluginWindow.init(name, pluginID);
-
-						let { messenger, dispose } = await loadPluginPageInBrowser(browser, resolved, {
-							channel: true,
-							pluginID,
-							// The page actor keeps the browser at the document scroll size
-							autoResize: fitContent ? { height: true, width: true, content: true } : {},
-							// The page controls its own window as zoteroHost.api.<name>(params)
-							hostAPI: {
-								close: () => {
-									win.close();
-								},
-								moveTo: ({ x, y }) => win.moveTo(x, y),
-								getState: () => WindowUtils.getWindowState(win),
-							},
-						});
-						if (!messenger) {
-							win.close();
-							reject(new scope.Error(`openWindow: failed to load ${url}`));
-							return;
-						}
-						win.addEventListener("unload", dispose, { once: true });
-
-						browser.addEventListener("contextmenu", (event) => {
-							let t = event.target;
-							if (t && t.closest
-									&& t.closest("input, textarea, [contenteditable]")) {
-								return;
-							}
-							event.preventDefault();
-						});
-
-						browser.focus();
-
-						if (fitContent) {
-							// Fit the window once the actor applies the first size to the
-							// browser's style; until then flex keeps the feature-string size
-							let mo = new win.MutationObserver(() => {
-								mo.disconnect();
-								browser.removeAttribute("flex");
-								win.sizeToContent();
-								if (resizable) {
-									// Fit once, then the user owns the window size
-									stopAutoResize(browser);
-								}
-								else {
-									// Keep the window following the content size
-									let ro = new win.ResizeObserver(Zotero.Utilities.debounce(
-										() => win.sizeToContent(), 100));
-									ro.observe(browser);
-									win.addEventListener("unload", () => ro.disconnect(), { once: true });
-								}
-							});
-							mo.observe(browser, { attributes: true, attributeFilter: ["style"] });
-							win.addEventListener("unload", () => mo.disconnect(), { once: true });
-						}
-
-						// window: the page's own same-origin window, passed raw;
-						// windowID: the wrapper's ID for Zotero.WindowController.
-						resolve(ScopeVariables.toScope({
-							page: messenger,
-							window: browser.contentWindow,
-							windowID: WindowUtils.getWindowID(win),
-							close: () => !win.closed && win.close(),
-							focus: () => !win.closed && win.focus(),
-							moveTo: (x, y) => win.moveTo(x, y),
-							getState: () => WindowUtils.getWindowState(win),
-						}, pluginID));
-					}
-					catch (e) {
-						Zotero.logError(e);
-						try {
-							win.close();
-						}
-						catch {}
-						reject(new scope.Error(`openWindow: ${e?.message || e}`));
-					}
-				}, { once: true });
-			});
-		},
-		holder,
-		{ defineAs: "f" }
-	);
-	scope.openWindow = holder.f;
 }
 
 /**
@@ -479,8 +297,8 @@ function setupPreferences(scope) {
 }
 
 /**
- * Set up the `FilePicker` constructor on the plugin scope. `init` only
- * parents to a plugin-held window; anything else gets the hidden window.
+ * Set up the `FilePicker` constructor on the plugin scope. `init` parents only to one of
+ * the plugin's own windows, given by window ID; anything else gets the hidden window.
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -489,10 +307,13 @@ function setupFilePicker(scope) {
 	let canWrite = scope.PERMISSIONS.includes("fileSystemWrite");
 	let { FilePicker } = lazy;
 	class PluginFilePicker extends FilePicker {
-		init(parentWindow, title, mode) {
-			let win = ScopeVariables.fromScope(parentWindow, pluginID);
-			if (!VarCheck.isWindowObject(win) || win.closed) {
-				win = Services.appShell.hiddenDOMWindow;
+		init(parentWindowID, title, mode) {
+			let win = Services.appShell.hiddenDOMWindow;
+			if (typeof parentWindowID === "number") {
+				try {
+					win = WindowUtils.getWindow(parentWindowID, "pluginWindow", pluginID);
+				}
+				catch {}
 			}
 			this._pluginMode = mode;
 			return super.init(win, title, mode);
@@ -633,4 +454,4 @@ function setupFile(scope) {
 	}
 }
 
-export { setupConsole, setupInstanceProxy, setupOpenWindow, setupHTTP, setupPreferences, setupFilePicker, setupFile };
+export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupFile };
