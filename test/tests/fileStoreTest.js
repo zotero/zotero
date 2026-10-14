@@ -376,6 +376,9 @@ describe("Zotero.FileStore", function () {
 			// The other kind is NotFound for a query as for a commit
 			await requestError(commit(dir => FS.file(dir).writeFile("x"), dir), codes.NOT_FOUND);
 			await requestError(query("readFile", { path: dir }), codes.NOT_FOUND);
+			let error = await requestError(query("snapshot", { type: "file", path: dir }), codes.NOT_FOUND);
+			assert.include(error.message, "is a directory, not a file");
+			assert.equal(await plugin.run(dir => Zotero.FileStore.Handle.file(dir).snapshot().catch(e => e.code), dir), codes.NOT_FOUND);
 			await requestError(query("readDir", { path: under("plain.txt") }), codes.NOT_FOUND);
 			// An OS refusal is NotAllowed with the platform's reason, not a bug of ours; Windows says NotFound instead
 			await requestError(query("stat", { path: under("z".repeat(300)) }), Zotero.isWin ? codes.NOT_FOUND : codes.NOT_ALLOWED);

@@ -544,6 +544,8 @@
 						isEditable: item => item.isEditable(),
 						save: (item, ctx) => item.save({ tx: !ctx.transactional }),
 						restore: item => item.reload(null, true),
+						// A file attachment core imported or linked before a later step of its entry failed
+						discard: item => item.eraseTx(),
 						describe: item => ({ id: item.id, key: item.key, libraryID: item.libraryID }),
 						snapshot: lazy.DataSnapshots.item,
 						operations: {
@@ -810,6 +812,7 @@
 						// Feeds are not user-editable libraries, but their own settings are
 						isEditable: library => library.editable || !!library.isFeed,
 						save: library => (library.isFeed && Object.keys(library._changed).length ? library.saveTx() : undefined),
+						discard: library => library.eraseTx(),
 						describe: library => ({ id: library.libraryID }),
 						snapshot: lazy.DataSnapshots.library,
 						operations: {
@@ -878,7 +881,7 @@
 									tag: lazy.Params.nonEmptyString,
 									color: {
 										type: "any",
-										checkHook: value => value === null || typeof value === "string" || "must be a hex color string or null",
+										checkHook: value => value === null || /^#[0-9a-f]{6}$/i.test(value) || "must be a hex color such as #ff6666, or null",
 									},
 									position: { type: "number", optional: true },
 								},
