@@ -519,6 +519,33 @@ describe("Zotero.DataStore", function () {
 			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Kept');
 		});
 
+		// A read loads only what the object lacks; reloading it would drop the in-flight commit's unsaved changes
+		it("should keep a commit's changes when the object is read while the commit is in flight", async function () {
+			let item = await createDataObject('item', { title: 'Before' });
+			let gate = Zotero.Promise.defer();
+			let save = sinon.stub(Zotero.Item.prototype, 'save').callsFake(async function (...args) {
+				await gate.promise;
+				return save.wrappedMethod.apply(this, args);
+			});
+			let committing;
+			try {
+				committing = commit(itemID => CS.item(itemID).setField("title", "After"), item.id);
+				for (let i = 0; i < 100 && !save.called; i++) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.isTrue(save.called, "the commit reached the save");
+				let snapshot = await requestResult(query("item", { itemID: item.id }));
+				assert.equal(snapshot.id, item.id);
+			}
+			finally {
+				gate.resolve();
+				save.restore();
+			}
+			let { objects } = await requestResult(committing);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'After');
+			assert.equal(objects[0].revision, item.clientVersion);
+		});
+
 		it("should refuse to rename an unknown tag before applying anything", async function () {
 			let item = await createDataObject('item', { title: 'Untouched' });
 			let error = await requestError(commit((itemID, unknown) => CS.of(
@@ -1011,6 +1038,100 @@ describe("Zotero.DataStore", function () {
 			assert.equal(denied.title, 'Read only');
 			assert.equal(denied.code, codes.PERMISSION_DENIED);
 			assert.equal(item.getField('title'), 'Read only');
+		});
+
+		// save() and snapshot() take turns; what is pushed while one runs waits for the next save
+		it("should keep what is pushed while a save is in flight for the next save", async function () {
+			let item = await createDataObject('item', { title: 'In flight' });
+			let gate = Zotero.Promise.defer();
+			let save = sinon.stub(Zotero.Item.prototype, 'save').callsFake(async function (...args) {
+				await gate.promise;
+				return save.wrappedMethod.apply(this, args);
+			});
+			try {
+				let saving = plugin.run((itemID) => {
+					globalThis.handle = Zotero.DataStore.Handle.item(itemID).setField("title", "Saved first");
+					return globalThis.handle.save();
+				}, item.id);
+				for (let i = 0; i < 100 && !save.called; i++) {
+					await Zotero.Promise.delay(10);
+				}
+				assert.isTrue(save.called, "the commit reached the save");
+				plugin.eval('handle.addTag("pushed meanwhile")');
+				gate.resolve();
+				await saving;
+			}
+			finally {
+				gate.resolve();
+				save.restore();
+			}
+			assert.equal(plugin.eval("handle.ops.length"), 1);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Saved first');
+			assert.isEmpty(Zotero.Items.get(item.id).getTags());
+			await plugin.run(() => globalThis.handle.save());
+			assert.equal(plugin.eval("handle.ops.length"), 0);
+			assert.deepEqual(Zotero.Items.get(item.id).getTags().map(t => t.tag), ['pushed meanwhile']);
+		});
+
+		it("should keep what is pushed while a snapshot is in flight", async function () {
+			let item = await createDataObject('item', { title: 'Read meanwhile' });
+			let out = await plugin.run(async (itemID) => {
+				let handle = Zotero.DataStore.Handle.item(itemID);
+				let reading = handle.snapshot();
+				handle.addTag("pushed meanwhile");
+				let { revision } = await reading;
+				return { pending: handle.ops.length, expects: handle.revision === revision };
+			}, item.id);
+			assert.equal(out.pending, 1);
+			assert.isTrue(out.expects);
+		});
+
+		it("should save once when save is called twice at once", async function () {
+			let title = 'Saved twice at once ' + Zotero.Utilities.randomString();
+			let existing = await createDataObject('item');
+			let out = await plugin.run(async (title, itemID) => {
+				let created = Zotero.DataStore.Handle.item({ libraryID, itemType: "book" }).setField("title", title);
+				let [a, b] = await Promise.all([created.save(), created.save()]);
+				let edited = Zotero.DataStore.Handle.item(itemID)
+					.addCreator({ firstName: "Only", lastName: "Once", creatorType: "author" });
+				await Promise.all([edited.save(), edited.save()]);
+				return { sameID: a.id === b.id, id: a.id };
+			}, title, existing.id);
+			assert.isTrue(out.sameID);
+			let search = new Zotero.Search();
+			search.libraryID = libraryID;
+			search.addCondition("title", "is", title);
+			assert.deepEqual(await search.search(), [out.id], "one object is created");
+			assert.lengthOf(Zotero.Items.get(existing.id).getCreators(), 1, "each operation applies once");
+		});
+
+		it("should save and read nothing more after an erasing save, and say so", async function () {
+			let item = await createDataObject('item');
+			let out = await plugin.run(async (itemID) => {
+				let handle = Zotero.DataStore.Handle.item(itemID);
+				let erased = await handle.erase().save();
+				let pushed;
+				try {
+					handle.addTag("x");
+					pushed = "pushed";
+				}
+				catch (e) {
+					pushed = e.message;
+				}
+				return {
+					erased: erased.erased,
+					pending: handle.ops.length,
+					save: await handle.save().then(() => "saved", e => e.message),
+					snapshot: await handle.snapshot().then(() => "read", e => e.message),
+					pushed,
+				};
+			}, item.id);
+			assert.isTrue(out.erased);
+			assert.equal(out.pending, 0);
+			assert.match(out.save, /gone after erase/);
+			assert.match(out.snapshot, /gone after erase/);
+			assert.match(out.pushed, /No operation can follow erase/);
+			assert.isFalse(Zotero.Items.exists(item.id));
 		});
 	});
 
