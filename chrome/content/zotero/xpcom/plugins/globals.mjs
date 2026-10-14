@@ -25,7 +25,7 @@
 
 
 import { XPCOMUtils } from "resource://gre/modules/XPCOMUtils.sys.mjs";
-import { ScopeUtils, INSTANCE_PROXY_FACTORY, resolvePluginPage } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { ScopeUtils, VarCheck, INSTANCE_PROXY_FACTORY, resolvePluginPage } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.mjs";
 import { PLUGIN_DB_SCHEMA } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
@@ -213,8 +213,10 @@ function setupOpenWindow(scope) {
 							win.addEventListener("unload", () => mo.disconnect(), { once: true });
 						}
 
+						// window: the page's own same-origin window, passed raw
 						resolve(ScopeVariables.toScope({
 							page: messenger,
+							window: browser.contentWindow,
 							close: () => !win.closed && win.close(),
 							focus: () => !win.closed && win.focus(),
 						}, pluginID));
@@ -456,10 +458,8 @@ function setupPreferences(scope) {
 }
 
 /**
- * Set up the `FilePicker` constructor on the plugin scope.
- * The `init` method is overridden to unwrap the sandbox-side
- * parentWindow argument via `fromScope` before passing it to
- * the real nsIFilePicker.
+ * Set up the `FilePicker` constructor on the plugin scope. `init` only
+ * parents to a plugin-held window; anything else gets the hidden window.
  *
  * @param {Object} scope - The sandbox scope
  */
@@ -469,9 +469,12 @@ function setupFilePicker(scope) {
 	let { FilePicker } = lazy;
 	class PluginFilePicker extends FilePicker {
 		init(parentWindow, title, mode) {
-			parentWindow = ScopeVariables.fromScope(parentWindow, pluginID);
+			let win = ScopeVariables.fromScope(parentWindow, pluginID);
+			if (!VarCheck.isWindowObject(win) || win.closed) {
+				win = Services.appShell.hiddenDOMWindow;
+			}
 			this._pluginMode = mode;
-			return super.init(parentWindow, title, mode);
+			return super.init(win, title, mode);
 		}
 
 		// After the user picks file(s)/folder, auto-grant access in the current session.
@@ -571,7 +574,7 @@ function setupFile(scope) {
 		if (typeof uriStr !== "string" || !/^https?:\/\//i.test(uriStr)) {
 			throw new Error(`Zotero.File.${method}: only http(s) URIs are supported`);
 		}
-		if (!PluginProtocol.canAccessURI(pluginID, uriStr)) {
+		if (!PluginProtocol.canAccessURI(uriStr, pluginID)) {
 			throw new Error(`Zotero.File.${method}: URI not allowed by host_permissions`);
 		}
 	}

@@ -24,7 +24,7 @@
 */
 
 
-import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS, WINDOW_SCHEMAS, MAIN_WINDOW_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
+import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 
@@ -140,33 +140,10 @@ const VarCheck = {
 		return false;
 	},
 
-	isElementWithinSubtree(targetElem, rootElem) {
-		if (!VarCheck.isDOMNode(targetElem) || !VarCheck.isDOMNode(rootElem)) {
-			return false;
-		}
-		try {
-			return rootElem.contains(targetElem);
-		}
-		catch {}
-		return false;
-	},
-
-	isDocumentObject(value) {
-		if (!VarCheck.isObjectLike(value)) return false;
-		try {
-			// Document nodes have nodeType === 9
-			if (value.nodeType === 9) {
-				return true;
-			}
-		}
-		catch {}
-		return false;
-	},
-
 	isWindowObject(value) {
 		if (!VarCheck.isObjectLike(value)) return false;
 		try {
-			return value.window === value;
+			return !Cu.isDeadWrapper(value) && Cu.getClassName(value, true) === "Window";
 		}
 		catch {}
 		return false;
@@ -200,6 +177,14 @@ const VarCheck = {
 	isInScope(value, scopeGlobal) {
 		if (!this.isObjectLike(value)) return true;
 		return Cu.getGlobalForObject(value) === scopeGlobal;
+	},
+
+	// Whether a window/node belongs to a page from the plugin's own origin,
+	// which its sandbox holds the content principal for
+	isPluginOwnContent(value, pluginID) {
+		if (!pluginID) return false;
+		let doc = value.document || value.ownerDocument || value;
+		return doc?.nodePrincipal?.addonPolicy?.id === pluginID;
 	},
 
 	hasOriginalRef(v) {
@@ -393,8 +378,7 @@ const VarCheck = {
 
 	/**
 	 * Collect matching schemas from a schema map based on permissions.
-	 * Supports composite keys (e.g. "mainWindow,dataWrite") that require
-	 * all listed permissions to be present.
+	 * Composite keys (e.g. "menu,dataWrite") require all listed permissions.
 	 */
 	_collectSchemas(schemaMap, permissions) {
 		let permSet = new Set(permissions);
@@ -411,17 +395,6 @@ const VarCheck = {
 
 	getPermissionSchema(permissions) {
 		let schemas = [PERMISSION_SCHEMAS.default, ...this._collectSchemas(PERMISSION_SCHEMAS, permissions)];
-		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
-	},
-
-	getWindowSchema(permissions) {
-		let schemas = [WINDOW_SCHEMAS.default, ...this._collectSchemas(WINDOW_SCHEMAS, permissions)];
-		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
-	},
-
-	getMainWindowSchema(permissions) {
-		let winSchema = this.getWindowSchema(permissions);
-		let schemas = [MAIN_WINDOW_SCHEMAS.default, winSchema, ...this._collectSchemas(MAIN_WINDOW_SCHEMAS, permissions)];
 		return schemas.reduce((acc, s) => this.mergeSchema(acc, s), undefined);
 	},
 
@@ -728,6 +701,15 @@ const ScopeUtils = {
 
 		if (VarCheck.hasOriginalRef(value)) {
 			return value;
+		}
+
+		// Privileged windows and DOM nodes never cross into a sandbox --
+		// only nodes from the plugin's own same-origin pages pass through
+		if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
+			if (VarCheck.isPluginOwnContent(value, scope.PLUGIN_ID)) {
+				return value;
+			}
+			return undefined;
 		}
 
 		if (Array.isArray(value)) {
