@@ -46,7 +46,6 @@ const IMPLIED_PERMISSIONS = {
 		"reader",
 		"preferencePane",
 		"userPrompt",
-		"openWindow",
 		"window",
 		"tab",
 	],
@@ -413,10 +412,8 @@ const PERMISSION_SCHEMAS = {
 			alert: true,
 		},
 	},
-	openWindow: {
-		// Set up directly by setupOpenWindow() in globals.mjs
-	},
 	window: {
+		// Also exposes the `openWindow` global, set up by setupOpenWindow() in globals.mjs
 		Zotero: {
 			WindowController: {
 				query: "CustomParserCallable",

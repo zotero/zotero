@@ -4017,13 +4017,13 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("openWindow API", function () {
-		it("should not be available without 'openWindow' permission", function () {
+		it("should not be available without 'window' permission", function () {
 			loadTestScope(["default"]);
 			assert.isTrue(evalInScope("typeof openWindow === 'undefined'"));
 		});
 
 		it("should reject disallowed URLs (external, file://, and non-.html files)", function () {
-			loadTestScope(["default", "openWindow"]);
+			loadTestScope(["default", "window"]);
 			let badURLs = [
 				"https://example.com/page.html",
 				"file:///etc/page.html",
@@ -4207,7 +4207,7 @@ describe("Plugin Sandbox", function () {
 			// The handle's properties are sandbox-side accessors, so the tests
 			// drive it from inside the sandbox, the way a plugin would
 			it("should open an .html window and resolve with a page handle", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let alive = await evalInScope(`
 					openWindow('test.html').then(function (win) {
 						_win = win;
@@ -4235,7 +4235,7 @@ describe("Plugin Sandbox", function () {
 					+ "<button id='btn'>x</button></div>"
 					+ "<div id='free' window-no-drag></div></body></html>"
 				);
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('drag.html').then(function (win) { _win = win; })");
 				try {
 					let browser = getPluginWindowBrowsers().pop();
@@ -4268,7 +4268,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should hand the sandbox the page window", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
 				try {
 					assert.equal(
@@ -4296,7 +4296,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should move and report the state of its window", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('test.html', 'width=300,height=200').then(function (win) { _win = win; })");
 				let browsers = getPluginWindowBrowsers();
 				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
@@ -4358,7 +4358,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should open the window with a parent when given a window ID", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let mainWindow = Zotero.getMainWindow();
 				await evalInScope(`
 					openWindow('test.html', 'width=300,height=200,dependent', { parentWindowID: ${mainWindow.browsingContext.id} })
@@ -4398,7 +4398,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should accept a plugin-held window as a FilePicker parent", async function () {
-				loadTestScopeWithURI(["default", "openWindow", "fileSystemRead"]);
+				loadTestScopeWithURI(["default", "window", "fileSystemRead"]);
 				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
 				try {
 					// init() doesn't show the native dialog, so it's safe to call
@@ -4425,7 +4425,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should message the page over the page messenger", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let pongPromise = new Promise((resolve) => {
 					scope._resolvePong = resolve;
 				});
@@ -4449,7 +4449,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should close the window when the page calls the close host API", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('echo.html').then(function (win) { _win = win; })");
 				let browsers = getPluginWindowBrowsers();
 				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
@@ -4463,7 +4463,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should let the page control its own window via zoteroHost.api", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let pending = [];
 				scope._reportAPI = (json) => {
 					pending.shift()?.(JSON.parse(json));
@@ -4506,7 +4506,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should dispatch zoteroHost.api calls to host handlers with object params", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let pending = [];
 				scope._reportAPI = (json) => {
 					pending.shift()?.(JSON.parse(json));
@@ -4553,7 +4553,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should fit the window to the page content with fitContent", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope(`
 					openWindow('fixed-size.html', 'width=300,height=200', { fitContent: true })
 						.then(function (win) { _win = win; });
@@ -4587,7 +4587,7 @@ describe("Plugin Sandbox", function () {
 					+ `<script src="${remoteURL}"></script>`
 					+ "</body></html>"
 				);
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('remote-script.html').then(function (win) { _win = win; })");
 				let contentWin = getLastPluginWindowContent();
 				try {
@@ -4624,7 +4624,7 @@ describe("Plugin Sandbox", function () {
 					id,
 					name: "CSP Remote " + id,
 					syncGUID: guid,
-					permissions: ["default", "openWindow"],
+					permissions: ["default", "window"],
 					contentSecurityPolicy: csp,
 					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
 				});
@@ -4672,7 +4672,7 @@ describe("Plugin Sandbox", function () {
 					id,
 					name: "CSP Probe " + id,
 					syncGUID: guid,
-					permissions: ["default", "openWindow"],
+					permissions: ["default", "window"],
 					contentSecurityPolicy: csp,
 					resourceURI: PathUtils.toFileURI(tmpDir) + "/",
 				});
@@ -4716,7 +4716,7 @@ describe("Plugin Sandbox", function () {
 			it("enforces the extension-page CSP: inline + eval blocked; same-origin scripts exempt", async function () {
 				// Inline + eval() are blocked, but the page's own same-origin script
 				// runs: moz-extension same-origin resources are CSP-exempt in Gecko.
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('csp-inline.html').then(function (win) { _win = win; })");
 				try {
 					let w = getLastPluginWindowContent().wrappedJSObject;
@@ -4730,7 +4730,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("does not let a plugin loosen its CSP via a <meta> tag (eval stays blocked)", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('csp-meta.html').then(function (win) { _win = win; })");
 				try {
 					let w = getLastPluginWindowContent().wrappedJSObject;
@@ -4745,7 +4745,7 @@ describe("Plugin Sandbox", function () {
 
 
 			it("should load relative CSS and JS resources", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('resources.html').then(function (win) { _win = win; })");
 				let contentWin = getLastPluginWindowContent();
 				try {
@@ -4763,7 +4763,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should open separate windows for each call", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				let countBefore = getPluginWindowBrowsers().length;
 				await evalInScope("openWindow('test.html').then(function (win) { _win1 = win; })");
 				await evalInScope("openWindow('test.html').then(function (win) { _win2 = win; })");
@@ -4779,7 +4779,7 @@ describe("Plugin Sandbox", function () {
 			});
 
 			it("should not expose privileged APIs in the content window", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
+				loadTestScopeWithURI(["default", "window"]);
 				await evalInScope("openWindow('privileged.html').then(function (win) { _win = win; })");
 				try {
 					let results = getLastPluginWindowContent().document.getElementById("results");
