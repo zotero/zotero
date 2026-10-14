@@ -283,6 +283,9 @@
 	// The library operations feeds alone support
 	const feedOnly = what => library => !library.isFeed && `only feeds ${what}`;
 
+	// Only feed settings change the library object itself; the tag helpers write rows
+	const feedChanged = library => !!library.isFeed && Object.keys(library._changed).length > 0;
+
 	// The core refuses data with a plain Error of its own global, or in older setters a thrown string; a subclass or
 	// a platform exception is something else
 	function isCoreRefusal(e) {
@@ -805,13 +808,18 @@
 								...lazy.DataParams.feedSettings,
 								url: lazy.Params.nonEmptyString,
 							},
-							handler: ({ libraryType: _type, name, ...settings }) => new Zotero.Feed(
-								Object.fromEntries([["name", name], ...Object.entries(settings).filter(([, value]) => value !== undefined)])
-							),
+							handler: ({ libraryType: _type, name, ...settings }) => {
+								this._requireNewFeedURL(settings.url);
+								return new Zotero.Feed(
+									Object.fromEntries([["name", name], ...Object.entries(settings).filter(([, value]) => value !== undefined)])
+								);
+							},
 						},
 						// Feeds are not user-editable libraries, but their own settings are
 						isEditable: library => library.editable || !!library.isFeed,
-						save: library => (library.isFeed && Object.keys(library._changed).length ? library.saveTx() : undefined),
+						save: library => (feedChanged(library) ? library.saveTx() : undefined),
+						// A failed save leaves the feed's settings changed in memory; core's own reload, used by its save
+						restore: library => (feedChanged(library) ? library._reloadFromDB() : undefined),
 						discard: library => library.eraseTx(),
 						describe: library => ({ id: library.libraryID }),
 						snapshot: lazy.DataSnapshots.library,
@@ -825,7 +833,8 @@
 							},
 							setFeed: {
 								params: lazy.DataParams.feedSettings,
-								check: feedOnly("have feed settings"),
+								check: (library, { url }) => feedOnly("have feed settings")(library)
+									|| (url !== undefined && this._requireNewFeedURL(url, library.libraryID)),
 								apply: (library, settings) => {
 									for (let setting of Object.keys(lazy.DataParams.feedSettings)) {
 										if (settings[setting] !== undefined) {
@@ -885,6 +894,11 @@
 									},
 									position: { type: "number", optional: true },
 								},
+								// Core keeps the limit in the tag selector only
+								check: (library, { tag, color }) => color !== null
+									&& !Zotero.Tags.getColor(library.libraryID, tag)
+									&& Zotero.Tags.getColors(library.libraryID).size >= Zotero.Tags.MAX_COLORED_TAGS
+									&& `at most ${Zotero.Tags.MAX_COLORED_TAGS} tags can have a color`,
 								apply: (library, { tag, color, position }) => Zotero.Tags.setColor(library.libraryID, tag, color, position),
 							},
 						},
@@ -930,6 +944,18 @@
 			this._requireLibrary(libraryID);
 			if (!Zotero.Libraries.isEditable(libraryID)) {
 				this._throw(lazy.StoreAPIBase.errorCodes.NOT_ALLOWED, `Library ${libraryID} is not editable`);
+			}
+		}
+
+		/**
+		 * Core refuses a second feed for a URL only as it saves, after the store transaction
+		 * @param {string} url
+		 * @param {number} [libraryID] - The feed the URL may already belong to
+		 */
+		_requireNewFeedURL(url, libraryID) {
+			let existing = Zotero.Feeds.existsByURL(url) && Zotero.Feeds.getByURL(url);
+			if (existing && existing.libraryID !== libraryID) {
+				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `A feed for ${url} already exists`);
 			}
 		}
 
