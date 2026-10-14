@@ -614,6 +614,10 @@ class FileAccessState {
 		this.attachmentGrants.set(PathIdentity.foldCase(PluginFileAccess._realPath(path)), mode);
 	}
 
+	hasAttachmentGrant(path) {
+		return this.attachmentGrants.has(PathIdentity.foldCase(PluginFileAccess._realPath(path)));
+	}
+
 	listGrants() {
 		return this.persistedGrants.list();
 	}
@@ -769,6 +773,11 @@ const PluginFileAccess = {
 	// Read, or write with dataWrite, for a file the data store resolved; asking was the grant, until unload
 	grantAttachment(pluginID, path, mode) {
 		this._states.get(pluginID)?.grantAttachment(path, mode);
+	},
+
+	// Whether the data store handed this path out as an attachment's file
+	hasAttachmentGrant(pluginID, path) {
+		return !!this._states.get(pluginID)?.hasAttachmentGrant(path);
 	},
 
 	/**
