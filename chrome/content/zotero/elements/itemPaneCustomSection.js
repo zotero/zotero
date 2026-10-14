@@ -173,7 +173,7 @@
 			let { element, messenger, dispose } = await loadEmbeddedPluginPage(this._body, this._src, {
 				className: "plugin-section-browser",
 				pluginID: this._pluginID,
-				autoResize: { height: true },
+				resize: { height: true },
 				channel: true,
 				tracePath: "Zotero.ItemPaneManager.registerSection.page",
 			});

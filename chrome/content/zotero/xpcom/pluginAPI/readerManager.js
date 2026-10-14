@@ -344,7 +344,7 @@
 				let context = option.onRender ? this._readerContext(event) : null;
 				lazy.loadEmbeddedPluginPage(doc, option._url, {
 					className: `${CUSTOM_SECTION_CLASS} ${option.sectionID}`,
-					autoResize: { height: true, width: true },
+					resize: { height: true, width: true },
 					channel: !!option.onRender,
 					pluginID: option.pluginID,
 					tracePath: "Zotero.ReaderManager.registerSection.page",

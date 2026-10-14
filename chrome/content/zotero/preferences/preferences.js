@@ -452,7 +452,7 @@
 			let { messenger, dispose } = await lazy.loadEmbeddedPluginPage(pane.container, pane.src, {
 				className: 'plugin-pane-browser',
 				pluginID: pane.pluginID,
-				autoResize: { height: true },
+				resize: { height: true },
 				channel: true,
 				tracePath: 'Zotero.PreferencePanes.register.page',
 				hostAPI: {
