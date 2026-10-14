@@ -139,11 +139,78 @@ describe("Zotero.DataStore", function () {
 			assert.lengthOf(ids, 3);
 		});
 
-		it("should refuse a ref no earlier entry created", async function () {
+		it("should create an object before an edit that names it, wherever the set lists it", async function () {
+			let item = await createDataObject('item');
+			let collection = CS.collection({ libraryID, name: "Created after" });
+			let { objects } = await ok(Zotero.DataStore.commit(CS.of(
+				CS.item(item.id).setField("title", "Filed").addToCollection(collection),
+				collection
+			)));
+			assert.deepEqual(objects.map(object => object.type), ["item", "collection"]);
+			assert.include(Zotero.Collections.get(objects[1].id).getChildItems(true), item.id);
+		});
+
+		// Merging the third editor into the first would leave the item out of the collection
+		it("should keep an object edited again after another in its place", async function () {
 			let collection = await createDataObject('collection');
-			await failing(
-				Zotero.DataStore.commit(CS.collection(collection.id).addItems([{ ref: "nope" }])),
-				codes.INVALID_PARAMS);
+			let item = await createDataObject('item');
+			let set = CS.of(
+				CS.item(item.id).addToCollection(collection.id),
+				CS.collection(collection.id).removeItems([item.id]),
+				CS.item(item.id).addToCollection(collection.id)
+			);
+			assert.equal(set.size, 3);
+			let { objects } = await ok(Zotero.DataStore.commit(set));
+			assert.lengthOf(objects, 3);
+			assert.include(Zotero.Collections.get(collection.id).getChildItems(true), item.id);
+		});
+
+		it("should refuse an entry on an object an earlier entry erases", async function () {
+			let item = await createDataObject('item', { title: 'Erased first' });
+			let other = await createDataObject('item');
+			let error = await failing(Zotero.DataStore.commit(CS.of(
+				CS.item(item.id).erase(),
+				CS.item(other.id).setField("title", "x"),
+				CS.item(item.id).setField("title", "Too late")
+			)), codes.INVALID_PARAMS);
+			assert.include(error.message, `changes[2]: item ${item.id} no longer exists after changes[0] (erase)`);
+			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Erased first');
+		});
+
+		it("should create a parent before a child the set lists ahead of it", async function () {
+			let parent = CS.item({ libraryID, itemType: "book" }).setField("title", "Parent");
+			let child = CS.item({ libraryID, itemType: "note", parent }).setNote("<p>Child</p>");
+			let { objects } = await ok(Zotero.DataStore.commit(CS.of(child, parent)));
+			assert.equal(Zotero.Items.get(objects[0].id).parentID, objects[1].id);
+		});
+
+		it("should refuse created objects that each need the other created first", async function () {
+			let item = CS.item({ libraryID, itemType: "book" }, { ref: "i" });
+			let collection = CS.collection({ libraryID, name: "Cycle" }, { ref: "c" }).addItems([item]);
+			let set = CS.of(item.addToCollection(collection), collection);
+			let error = await failing(Zotero.DataStore.commit(set), codes.INVALID_PARAMS);
+			assert.include(error.message, "changes[0] (ref 'i'), changes[1] (ref 'c')");
+			let { issues } = await ok(Zotero.DataStore.query("validate", { changes: set }));
+			assert.equal(issues[0].code, codes.INVALID_PARAMS);
+		});
+
+		// Refs are linked before anything loads, so validate names the param as a commit does
+		it("should refuse a ref nothing creates, of another type or to its own object", async function () {
+			let collection = await createDataObject('collection');
+			let existing = await createDataObject('item');
+			let created = CS.item({ libraryID, itemType: "book" });
+			let self = CS.collection({ libraryID, name: "Self" });
+			for (let [set, at] of [
+				[CS.collection(collection.id).addItems([existing.id, { ref: "nope" }]), "changes[0].ops[0].items[1]"],
+				[CS.of(created, CS.item(existing.id).addToCollection(created)), "changes[1].ops[0].collection"],
+				[self.setParent(self), "changes[0].ops[0].parent"],
+			]) {
+				let error = await failing(Zotero.DataStore.commit(set), codes.INVALID_PARAMS);
+				assert.include(error.message, at);
+				let { issues } = await ok(Zotero.DataStore.query("validate", { changes: set }));
+				assert.include(issues[0].message, at);
+			}
+			assert.notInclude(Zotero.Collections.get(collection.id).getChildItems(true), existing.id);
 		});
 
 		it("should refuse to expect a revision on an object the set creates", async function () {
@@ -191,6 +258,19 @@ describe("Zotero.DataStore", function () {
 			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Atomic');
 		});
 
+		it("should refuse editing and creating in a read-only library, naming the entry", async function () {
+			let group = await createGroup({ editable: true });
+			let item = await createDataObject('item', { libraryID: group.libraryID });
+			group.editable = false;
+			await group.saveTx();
+			let edit = await failing(Zotero.DataStore.commit(CS.item(item.id).setField("title", "x")), codes.NOT_ALLOWED);
+			assert.include(edit.message, `changes[0]: item ${item.id} is not editable`);
+			let create = await failing(
+				Zotero.DataStore.commit(CS.item({ libraryID: group.libraryID, itemType: "book" })),
+				codes.NOT_ALLOWED);
+			assert.include(create.message, `changes[0].create (item): Library ${group.libraryID} is not editable`);
+		});
+
 		// A stale snapshot is what the caller has to fix first, so it outranks a bad operation later on
 		it("should report a stale revision before a later entry's bad operation", async function () {
 			let stale = await createDataObject('item', { title: 'Stale' });
@@ -231,6 +311,16 @@ describe("Zotero.DataStore", function () {
 			let conditions = result.objects[0].snapshot.data.conditions;
 			assert.lengthOf(conditions, 1);
 			assert.equal(conditions[0].value, "only");
+		});
+
+		// Core's Search.fromJSON resets deleted to what the JSON says
+		it("should keep a trashed search in the trash when its conditions change", async function () {
+			let search = await createDataObject('search');
+			search.deleted = true;
+			await search.saveTx();
+			await ok(Zotero.DataStore.commit(
+				CS.search(search.id).setConditions([{ condition: "title", operator: "contains", value: "kept" }])));
+			assert.isTrue(Zotero.Searches.get(search.id).deleted);
 		});
 
 		it("should refuse an operation after a terminal one", async function () {
@@ -279,6 +369,20 @@ describe("Zotero.DataStore", function () {
 			)), codes.INVALID_PARAMS);
 			assert.match(error.message, /^changes\[0\]\.ops\[1\] \(item\.setCreators\): .*creator type 'nonsense'/);
 			assert.equal(Zotero.Items.get(item.id).getField('title'), 'Kept');
+		});
+
+		// Older core setters refuse by throwing a string, which counts as a refusal too
+		it("should report core refusing another kind's data as InvalidParams in core's words", async function () {
+			let book = await createDataObject('item', { itemType: 'book' });
+			for (let [set, words] of [
+				[CS.item(book.id).setNote("<p>x</p>"), "(item.setNote): updateNote() can only be called on notes and attachments"],
+				[CS.item(book.id).setField("contentType", "text/plain"), "(item.setField): .attachmentContentType can only be set for attachment items"],
+				[CS.item({ libraryID, itemType: "book", linkMode: "linked_url" }), ".create (item): .attachmentLinkMode can only be set for attachment items"],
+				[CS.search({ libraryID, name: "" }), ".create (search): Saved search name cannot be empty"],
+			]) {
+				let error = await failing(Zotero.DataStore.commit(set), codes.INVALID_PARAMS);
+				assert.include(error.message, words);
+			}
 		});
 
 		it("should report a bug in an operation as InternalError", async function () {
@@ -342,6 +446,54 @@ describe("Zotero.DataStore", function () {
 			assert.equal(described.id, item.id);
 			assert.notEqual(described.revision, before.revision);
 			assert.equal(described.snapshot.data.title, "Described again");
+		});
+	});
+
+	describe("annotations", function () {
+		var attachment;
+		var fields = {
+			annotationType: "highlight",
+			annotationSortIndex: "00000|000000|00000",
+			annotationPosition: { pageIndex: 0, rects: [[0, 0, 10, 10]] },
+		};
+
+		before(async function () {
+			attachment = await importPDFAttachment();
+		});
+
+		it("should create an annotation with its row and its parent", async function () {
+			let { objects } = await ok(Zotero.DataStore.commit(
+				CS.item({ libraryID, itemType: "annotation", parent: attachment.id, ...fields })
+					.setField("annotationText", "Quoted")
+					.setField("annotationColor", "#ffd400")
+			));
+			let annotation = Zotero.Items.get(objects[0].id);
+			assert.equal(annotation.parentID, attachment.id);
+			assert.equal(annotation.annotationType, "highlight");
+			assert.equal(annotation.annotationText, "Quoted");
+			assert.deepEqual(JSON.parse(annotation.annotationPosition), fields.annotationPosition);
+		});
+
+		// Core checks the parent only with annotation data, so without it the annotation saved with no row
+		it("should refuse an annotation without an annotatable parent or the fields its row needs", async function () {
+			let book = await createDataObject('item');
+			for (let [create, reason] of [
+				[{ parent: book.id, ...fields }, "needs a PDF, EPUB or snapshot attachment as parent"],
+				[{ ...fields }, "needs a PDF, EPUB or snapshot attachment as parent"],
+				[{ parent: attachment.id, annotationType: "highlight" }, "needs annotationSortIndex, annotationPosition"],
+				[{ parent: attachment.id, ...fields, annotationType: "bogus" }, "Unknown annotation type 'bogus'"],
+				[{ parent: attachment.id, ...fields, annotationSortIndex: "1" }, "Invalid sortIndex '1'"],
+			]) {
+				let error = await failing(
+					Zotero.DataStore.commit(CS.item({ libraryID, itemType: "annotation", ...create })),
+					codes.INVALID_PARAMS);
+				assert.include(error.message, `changes[0].create (item): `);
+				assert.include(error.message, reason);
+			}
+			let error = await failing(
+				Zotero.DataStore.commit(CS.item({ libraryID, itemType: "book", annotationType: "highlight" })),
+				codes.INVALID_PARAMS);
+			assert.include(error.message, "'annotationType' applies to annotations only");
 		});
 	});
 

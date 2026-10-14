@@ -414,7 +414,7 @@ function existing(type, target, { revision, libraryID } = {}, keyed = true) {
 }
 
 /**
- * An editor for an object the commit creates; later entries reach it as { ref } or by passing the editor
+ * An editor for an object the commit creates; any entry reaches it as { ref } or by passing the editor
  * @param {string} type
  * @param {object} create - The type's create params
  * @param {string} [ref] - Generated when omitted
@@ -462,7 +462,8 @@ class DataChangeSet extends ChangeSet {
 
 	/**
 	 * An existing item by ID, key or snapshot (whose revision is then expected), the item another editor
-	 * creates by its ref or that editor, or a new one from `{ libraryID, itemType, parent?, linkMode? }`
+	 * creates by its ref or that editor, or a new one from `{ libraryID, itemType, parent?, linkMode? }`, plus
+	 * `annotationType`, `annotationSortIndex` and `annotationPosition` for an annotation
 	 * @param {number | string | object} item
 	 * @param {EditorOptions} [options]
 	 * @returns {ItemChanges}
