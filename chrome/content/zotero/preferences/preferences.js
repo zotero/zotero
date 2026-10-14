@@ -449,27 +449,35 @@
 			heading.textContent = pane.rawLabel;
 			pane.container.append(heading);
 
-			// The embedded page triggers navigation by posting `{ type: 'navigate',
-			// paneID }`;
-			let { dispose } = await lazy.loadEmbeddedPluginPage(pane.container, pane.src, {
+			// The embedded page navigates as zoteroHost.api.navigate({ paneID }),
+			// restricted to panes registered by the same plugin
+			let { messenger, dispose } = await lazy.loadEmbeddedPluginPage(pane.container, pane.src, {
 				className: 'plugin-pane-browser',
 				pluginID: pane.pluginID,
 				autoResize: { height: true },
 				channel: true,
-				onHostMessage: (msg) => {
-					if (!msg || msg.type !== 'navigate') {
-						return;
-					}
-					let paneID = String(msg.paneID);
-					let targetPane = this.panes.get(paneID);
-					if (!targetPane || targetPane.pluginID !== pane.pluginID) {
-						Zotero.warn(`Embedded pane navigation to ${paneID} rejected: not registered by this plugin`);
-						return;
-					}
-					this.navigateToPane(paneID).catch(e => Zotero.logError(e));
+				hostAPI: {
+					navigate: ({ paneID }) => {
+						paneID = String(paneID);
+						let targetPane = this.panes.get(paneID);
+						if (!targetPane || targetPane.pluginID !== pane.pluginID) {
+							throw new Error(`Navigation to ${paneID} rejected: not registered by this plugin`);
+						}
+						return this.navigateToPane(paneID);
+					},
 				},
 			});
 			pane._pageChannelDispose = dispose;
+
+			// Hand the plugin its pane page's messenger
+			if (pane.onLoad) {
+				try {
+					pane.onLoad({ paneID: pane.id, page: messenger });
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
 
 			// If this is the first pane to be loaded, notify anyone waiting
 			// (for tests)
