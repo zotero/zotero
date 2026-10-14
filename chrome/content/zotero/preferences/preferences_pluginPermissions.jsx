@@ -32,6 +32,8 @@ var { PluginUUID } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/uuid.mjs");
 var { PluginNames } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/names.mjs");
+var { PluginPrefs } = ChromeUtils.importESModule(
+	"chrome://zotero/content/xpcom/plugins/prefs.mjs");
 var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
 var { PathIdentity } = ChromeUtils.importESModule(
@@ -311,7 +313,7 @@ Zotero_Preferences.PluginPermissions = {
 			else {
 				let keys = new Set();
 				try {
-					for (let k of Services.prefs.getBranch(`extensions.${uuid}.`).getChildList("")) {
+					for (let k of Services.prefs.getBranch(PluginPrefs.getBranch(uuid)).getChildList("")) {
 						keys.add(k);
 					}
 				}
@@ -619,10 +621,9 @@ Zotero_Preferences.PluginPermissions = {
 		});
 	},
 
-	// Prefs live under `extensions.<uuid>.` (see setupPreferences in
-	// xpcom/plugins/globals.mjs).
+	// Prefs live under the plugin's branch (see setupPreferences in xpcom/plugins/globals.mjs)
 	_renderEditPrefs: async function () {
-		let prefPrefix = `extensions.${this._editTarget.uuid}.`;
+		let prefPrefix = PluginPrefs.getBranch(this._editTarget.uuid);
 		let rootBranch = Services.prefs.getBranch("");
 		let userBranch = Services.prefs.getBranch(prefPrefix);
 		let defaultBranch;
@@ -794,7 +795,7 @@ Zotero_Preferences.PluginPermissions = {
 
 	addEditPref: async function () {
 		if (!this._editTarget) return;
-		let prefPrefix = `extensions.${this._editTarget.uuid}.`;
+		let prefPrefix = PluginPrefs.getBranch(this._editTarget.uuid);
 		let rootBranch = Services.prefs.getBranch("");
 
 		let [title, nameMsg, nameInvalid, nameExists, typeMsg, valMsg] = await Promise.all([
@@ -860,7 +861,7 @@ Zotero_Preferences.PluginPermissions = {
 		});
 		if (!confirmed) return;
 
-		let prefPrefix = `extensions.${this._editTarget.uuid}.`;
+		let prefPrefix = PluginPrefs.getBranch(this._editTarget.uuid);
 		let rootBranch = Services.prefs.getBranch("");
 		let userBranch = Services.prefs.getBranch(prefPrefix);
 		let defaultBranch;
@@ -989,7 +990,7 @@ Zotero_Preferences.PluginPermissions = {
 		// would just leave an empty list behind.
 		PluginFileAccess.clearFileAccess(uuid);
 		await PluginFileAccess.deleteDataDirByUUID(uuid);
-		let prefBranch = Services.prefs.getBranch(`extensions.${uuid}.`);
+		let prefBranch = Services.prefs.getBranch(PluginPrefs.getBranch(uuid));
 		for (let key of prefBranch.getChildList("")) {
 			try {
 				prefBranch.clearUserPref(key);

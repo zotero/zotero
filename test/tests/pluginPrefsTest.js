@@ -1,5 +1,7 @@
 describe("Plugin Zotero.Prefs", function () {
 	var plugin = usePluginSandbox();
+	var { PluginUUID } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/uuid.mjs");
+	var { PluginPrefs } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/prefs.mjs");
 
 	let testPrefKeys = [];
 
@@ -26,7 +28,7 @@ describe("Plugin Zotero.Prefs", function () {
 
 	describe("auto-prefixed namespace (global=false)", function () {
 		// Full pref path prefix for the mock addon
-		var OWN_PREFIX = 'extensions.' + plugin.uuid + '.';
+		var OWN_PREFIX = PluginPrefs.getBranch(plugin.uuid);
 
 		beforeEach(function () {
 			plugin.load(["default", "preferences"]);
@@ -226,6 +228,115 @@ describe("Plugin Zotero.Prefs", function () {
 			plugin.load(["default", "preferences"], { prefPermissions: ["extensions.zotero.sync"] });
 			assert.throws(() => plugin.eval("Zotero.Prefs.resetBranch([], 'extensions.zotero.sync')"),
 				undefined, undefined, "resetBranch covering sync.* must be denied");
+		});
+	});
+
+	describe("default prefs (prefs.js)", function () {
+		var { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+		var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+		var { FileIO } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileIO.mjs");
+
+		// Zotero.Plugins runs prefs.js on install, so this takes a real plugin rather than the mock sandbox
+		async function installWithPrefs(id, permissions, prefsJS, manifest = {}) {
+			let dir = await getTempDirectory();
+			await FileIO.writeUTF8(PathUtils.join(dir, "manifest.json"), JSON.stringify({
+				manifest_version: 2,
+				name: "Default Prefs Test",
+				version: "1.0." + Date.now(),
+				applications: { zotero: { id, update_url: "https://example.invalid/none.json", strict_max_version: "9999.*" } },
+				permissions,
+				...manifest,
+			}));
+			await FileIO.writeUTF8(PathUtils.join(dir, "bootstrap.js"),
+				"function install() {}\nfunction startup() {}\nfunction shutdown() {}\nfunction uninstall() {}\n");
+			await FileIO.writeUTF8(PathUtils.join(dir, "prefs.js"), prefsJS);
+			let addon = await AddonManager.installTemporaryAddon(Zotero.File.pathToFile(dir));
+			return {
+				addon,
+				async remove() {
+					await addon.uninstall();
+					await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
+				},
+			};
+		}
+
+		// The install resolves before Zotero.Plugins finishes its onInstalled work
+		async function waitForDefault(key) {
+			for (let i = 0; i < 50 && Zotero.Prefs.get(key, true) === undefined; i++) {
+				await Zotero.Promise.delay(100);
+			}
+		}
+
+		it("should name an unprivileged plugin's defaults relative to its branch and keep chrome out of reach", async function () {
+			const ID = "default-prefs-test@zotero.org";
+			let installed = await installWithPrefs(ID, ["preferences"], [
+				'pref("featureEnabled", false);',
+				'pref("retryCount", 1);',
+				'pref("greeting", "(default greeting)");',
+				// prefs.js is plugin code, so it sees pref() and nothing of chrome
+				'pref("reach", typeof Services + "/" + typeof ChromeUtils + "/" + typeof pref);',
+				// And none of it runs once the load returns
+				'Promise.resolve().then(() => pref("late", "ran"));',
+				"",
+			].join("\n"));
+			try {
+				await waitForDefault(PluginPrefs.getBranch(PluginUUID.getByID(ID)) + "greeting");
+				// The plugin reads them back as it reads any pref of its own
+				let read = Cu.evalInSandbox(`JSON.stringify({
+					featureEnabled: Zotero.Prefs.get("featureEnabled"),
+					retryCount: Zotero.Prefs.get("retryCount"),
+					greeting: Zotero.Prefs.get("greeting"),
+					reach: Zotero.Prefs.get("reach"),
+					late: Zotero.Prefs.get("late"),
+				})`, PluginSandbox.getScope(ID));
+				// An unset "late" is dropped by JSON.stringify
+				assert.deepEqual(JSON.parse(read), {
+					featureEnabled: false,
+					retryCount: 1,
+					greeting: "(default greeting)",
+					reach: "undefined/undefined/function",
+				});
+			}
+			finally {
+				await installed.remove();
+			}
+		});
+
+		it("should take an unprivileged plugin's global default as Zotero.Prefs would, gated by pref_permissions", async function () {
+			const ID = "default-prefs-global-test@zotero.org";
+			const DECLARED = "extensions.zotero.test.defaultPrefs.declared";
+			testPrefKeys.push("test.defaultPrefs.declared");
+			let fontSize = Zotero.Prefs.get("fontSize");
+			let installed = await installWithPrefs(ID, ["preferences"], [
+				`pref("${DECLARED}", "declared", true);`,
+				// Undeclared: refused, and the error ends the file
+				'pref("extensions.zotero.fontSize", "99", true);',
+				"",
+			].join("\n"), { pref_permissions: ["extensions.zotero.test.defaultPrefs."] });
+			try {
+				await waitForDefault(DECLARED);
+				assert.equal(Zotero.Prefs.get(DECLARED, true), "declared");
+				assert.equal(Zotero.Prefs.get("fontSize"), fontSize);
+			}
+			finally {
+				await installed.remove();
+			}
+		});
+
+		it("should take a privileged plugin's defaults by their full names, in the same sandbox", async function () {
+			const ID = "default-prefs-privileged-test@zotero.org";
+			const KEY = "extensions.zotero.test.defaultPrefs.privileged";
+			const REACH = "extensions.zotero.test.defaultPrefs.reach";
+			testPrefKeys.push("test.defaultPrefs.privileged", "test.defaultPrefs.reach");
+			let installed = await installWithPrefs(ID, undefined, `pref("${KEY}", 7);\npref("${REACH}", typeof Services);\n`);
+			try {
+				await waitForDefault(KEY);
+				assert.strictEqual(Zotero.Prefs.get(KEY, true), 7);
+				assert.strictEqual(Zotero.Prefs.get(REACH, true), "undefined");
+			}
+			finally {
+				await installed.remove();
+			}
 		});
 	});
 });
