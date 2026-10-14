@@ -31,7 +31,6 @@
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
-		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		loadEmbeddedPluginPage: "chrome://zotero/content/xpcom/plugins/embeddedPage.mjs",
 	});
 
@@ -110,8 +109,7 @@
 	// Shared safety check: an unprivileged plugin's icon must be a declared
 	// resource (data:image/svg or its own moz-extension/chrome/resource URL).
 	function iconAllowed(pluginID, url) {
-		let scope = lazy.PluginSandbox.getScope(pluginID);
-		if (!scope || lazy.VarCheck.isPrivilegedScope(scope)) {
+		if (lazy.PluginSandbox.isPrivileged(pluginID)) {
 			return true;
 		}
 		return lazy.PluginProtocol.canLoadImageURI(url, pluginID);
