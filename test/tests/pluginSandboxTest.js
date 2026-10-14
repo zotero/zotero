@@ -3749,8 +3749,9 @@ describe("Plugin Sandbox", function () {
 				}
 			});
 
-			it("should restrict context.menuElem to its own subtree via rootNode", function () {
-				// Register a menu with onCommand that probes menuElem restrictions
+			// _wrapHook must strip the chrome DOM event and context.menuElem
+			// before an unprivileged hook runs (privileged plugins keep both)
+			it("should strip the DOM event and context.menuElem from unprivileged hooks", function () {
 				evalInScope(`
 					var _restrictResults = {};
 					var _restrictMenuID = Zotero.MenuManager.registerMenu({
@@ -3760,26 +3761,12 @@ describe("Plugin Sandbox", function () {
 						menus: [{
 							menuType: 'menuitem',
 							l10nID: 'general-print',
-							onCommand: function(event, context) {
-								var elem = context.menuElem;
-								_restrictResults.hasElem = !!elem;
-								_restrictResults.tagName = elem.tagName;
-								// parentNode is outside rootNode subtree -- should be null
-								_restrictResults.parentNode = elem.parentNode;
-								// documentGlobal is blocked
-								try {
-									elem.documentGlobal;
-									_restrictResults.documentGlobal = 'accessible';
-								} catch(e) {
-									_restrictResults.documentGlobal = 'blocked';
-								}
-								// ownerDocument returns a safe document
-								_restrictResults.hasDocument = typeof elem.ownerDocument === 'object';
-								// child within subtree should be accessible
-								_restrictResults.childCount = elem.childElementCount;
-								var firstChild = elem.firstElementChild;
-								_restrictResults.childTag = firstChild
-									? firstChild.tagName : null;
+							onCommand: function (context) {
+								_restrictResults.argCount = arguments.length;
+								_restrictResults.hasMenuElem = context
+									? 'menuElem' in context : null;
+								_restrictResults.itemID = context && context.itemIDs
+									? context.itemIDs[0] : null;
 							}
 						}]
 					});
@@ -3788,34 +3775,20 @@ describe("Plugin Sandbox", function () {
 				let option = Zotero.MenuManager._menuManager._optionsCache[menuID];
 				let onCommand = option.menus[0].onCommand;
 
-				// Build a DOM tree: parent > menuElem > child
-				let parent = pluginWin.document.createElement('div');
 				let menuElem = pluginWin.document.createElement('menuitem');
-				let child = pluginWin.document.createElement('label');
-				menuElem.appendChild(child);
-				parent.appendChild(menuElem);
-				pluginWin.document.documentElement.appendChild(parent);
-
 				try {
-					// Invoke the wrapped callback with a mock context
-					onCommand(null, { menuElem });
+					// Invoke the wrapped callback the way MenuManager does, with
+					// a chrome event placeholder and a menuElem in the context
+					onCommand(null, { menuElem, itemIDs: [123] });
 
-					assert.isTrue(evalInScope("_restrictResults.hasElem"),
-						"menuElem should be accessible");
-					assert.equal(evalInScope("_restrictResults.tagName"), "menuitem");
-					assert.isNull(evalInScope("_restrictResults.parentNode"),
-						"parentNode should be null (outside rootNode subtree)");
-					assert.equal(evalInScope("_restrictResults.documentGlobal"), "accessible",
-						"documentGlobal should be accessible");
-					assert.isTrue(evalInScope("_restrictResults.hasDocument"),
-						"ownerDocument should be a safe document");
-					assert.equal(evalInScope("_restrictResults.childCount"), 1,
-						"children within subtree should be accessible");
-					assert.equal(evalInScope("_restrictResults.childTag"), "label",
-						"child element tag should be correct");
+					assert.equal(evalInScope("_restrictResults.argCount"), 1,
+						"the hook should receive (context) only -- no DOM event");
+					assert.isFalse(evalInScope("_restrictResults.hasMenuElem"),
+						"menuElem should be stripped from the context");
+					assert.equal(evalInScope("_restrictResults.itemID"), 123,
+						"other context properties should pass through");
 				}
 				finally {
-					parent.remove();
 					evalInScope("Zotero.MenuManager.unregisterMenu(_restrictMenuID)");
 				}
 			});
@@ -3887,7 +3860,8 @@ describe("Plugin Sandbox", function () {
 						menus: [{
 							menuType: 'menuitem',
 							l10nID: 'general-print',
-							onCommand: function (event, context) { _probe(context.items[0], _menuResults); }
+							// Unprivileged menu hooks receive (context) only
+							onCommand: function (context) { _probe(context.items[0], _menuResults); }
 						}]
 					});
 				`);
@@ -4647,6 +4621,25 @@ describe("Plugin Sandbox", function () {
 				scope = PluginSandbox.getScope(ADDON_ID);
 			}
 
+			// The wrapper window's content never crosses into the sandbox, so
+			// tests reach it chrome-side instead (newest window last)
+			function getPluginWindowBrowsers() {
+				let browsers = [];
+				for (let win of Services.wm.getEnumerator(null)) {
+					if (win.location.href === "chrome://zotero/content/pluginWindow.xhtml") {
+						browsers.push(win.document.getElementById("plugin-browser"));
+					}
+				}
+				return browsers;
+			}
+
+			function getLastPluginWindowContent() {
+				let browsers = getPluginWindowBrowsers();
+				return browsers.length
+					? browsers[browsers.length - 1].contentWindow
+					: null;
+			}
+
 			before(async function () {
 				mainWin = await loadZoteroPane();
 				tmpDir = await getTempDirectory();
@@ -4671,6 +4664,32 @@ describe("Plugin Sandbox", function () {
 					+ "</head><body><div id='test-div'>Styled</div>"
 					+ '<script src="script.js"></script></body></html>';
 				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "resources.html"), resourceHtml);
+				// Page that echoes plugin messages over window.zoteroHost, for
+				// page-messenger tests (external script to satisfy the page CSP)
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "echo.js"),
+					"zoteroHost.addMessageListener(function (data) {\n"
+					+ "  if (!data) return;\n"
+					+ "  if (data.type === 'ping') {\n"
+					+ "    zoteroHost.sendMessage({ type: 'pong', value: data.value });\n"
+					+ "  }\n"
+					+ "  else if (data.type === 'request-close') {\n"
+					+ "    zoteroHost.sendMessage({ type: 'close' });\n"
+					+ "  }\n"
+					+ "});\n"
+				);
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "echo.html"),
+					"<!DOCTYPE html><html><head><title>Echo</title></head>"
+					+ '<body><script src="echo.js"></script></body></html>'
+				);
+				// Fixed-size page larger than its window features, for fitContent
+				await IOUtils.writeUTF8(
+					PathUtils.join(tmpDir, "fixed-size.html"),
+					"<!DOCTYPE html><html><head><title>Fixed</title>"
+					+ "<style>html, body { margin: 0; padding: 0; }</style></head>"
+					+ "<body><div style='width: 500px; height: 400px;'></div></body></html>"
+				);
 				// Create an HTML + external JS that probes privileged APIs
 				await IOUtils.writeUTF8(
 					PathUtils.join(tmpDir, "probe.js"),
@@ -4735,15 +4754,105 @@ describe("Plugin Sandbox", function () {
 				await IOUtils.remove(tmpDir, { recursive: true });
 			});
 
-			it("should open an .html window and resolve with a window object", async function () {
+			// The handle's properties are sandbox-side accessors, so the tests
+			// drive it from inside the sandbox, the way a plugin would
+			it("should open an .html window and resolve with a page handle", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('test.html')");
+				let alive = await evalInScope(`
+					openWindow('test.html').then(function (win) {
+						_win = win;
+						return win.page.isAlive();
+					});
+				`);
 				try {
-					assert.ok(win, "openWindow should resolve with a window");
-					assert.equal(win.document.title, "Test");
+					assert.isTrue(alive, "the page messenger should be alive");
+					// The content window stays chrome-side
+					let contentWin = getLastPluginWindowContent();
+					assert.equal(contentWin.document.title, "Test");
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should not hand the sandbox any DOM handle to the opened window", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				await evalInScope("openWindow('test.html').then(function (win) { _win = win; })");
+				try {
+					assert.equal(
+						evalInScope("Object.keys(_win).sort().join(',')"),
+						"close,focus,page",
+						"the handle should expose only page/close/focus"
+					);
+					assert.equal(
+						evalInScope("Object.keys(_win.page).sort().join(',')"),
+						"addMessageListener,isAlive,removeMessageListener,sendMessage",
+						"the messenger should expose only the messaging methods"
+					);
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should message the page over the page messenger", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				let pongPromise = new Promise((resolve) => {
+					scope._resolvePong = resolve;
+				});
+				await evalInScope(`
+					openWindow('echo.html').then(function (win) {
+						_win = win;
+						win.page.addMessageListener(function (data) {
+							if (data && data.type == 'pong') {
+								_resolvePong(data.value);
+							}
+						});
+						win.page.sendMessage({ type: 'ping', value: 42 });
+					});
+				`);
+				try {
+					assert.equal(await pongPromise, 42, "the page should echo over zoteroHost");
+				}
+				finally {
+					evalInScope("_win.close()");
+				}
+			});
+
+			it("should close the window when the page posts a { type: 'close' } host message", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				await evalInScope("openWindow('echo.html').then(function (win) { _win = win; })");
+				let browsers = getPluginWindowBrowsers();
+				let chromeWin = browsers[browsers.length - 1].ownerDocument.defaultView;
+				evalInScope("_win.page.sendMessage({ type: 'request-close' })");
+				for (let i = 0; i < 100 && !chromeWin.closed; i++) {
+					await Zotero.Promise.delay(20);
+				}
+				assert.isTrue(chromeWin.closed, "the wrapper window should close");
+				assert.isFalse(evalInScope("_win.page.isAlive()"),
+					"the page messenger should be dead");
+			});
+
+			it("should fit the window to the page content with fitContent", async function () {
+				loadTestScopeWithURI(["default", "openWindow"]);
+				await evalInScope(`
+					openWindow('fixed-size.html', 'width=300,height=200', { fitContent: true })
+						.then(function (win) { _win = win; });
+				`);
+				let browsers = getPluginWindowBrowsers();
+				let browser = browsers[browsers.length - 1];
+				try {
+					// The page actor reports the document scroll size and the
+					// wrapper window follows once the size is applied
+					for (let i = 0; i < 100 && browser.getBoundingClientRect().width < 499; i++) {
+						await Zotero.Promise.delay(20);
+					}
+					let rect = browser.getBoundingClientRect();
+					assert.approximately(rect.width, 500, 2, "browser should take the content width");
+					assert.approximately(rect.height, 400, 2, "browser should take the content height");
+				}
+				finally {
+					evalInScope("_win.close()");
 				}
 			});
 
@@ -4760,16 +4869,17 @@ describe("Plugin Sandbox", function () {
 					+ "</body></html>"
 				);
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('remote-script.html')");
+				await evalInScope("openWindow('remote-script.html').then(function (win) { _win = win; })");
+				let contentWin = getLastPluginWindowContent();
 				try {
-					for (let i = 0; i < 100 && win.wrappedJSObject._remoteRan === undefined; i++) {
+					for (let i = 0; i < 100 && contentWin.wrappedJSObject._remoteRan === undefined; i++) {
 						await Zotero.Promise.delay(20);
 					}
-					assert.notOk(win.wrappedJSObject._remoteRan,
+					assert.notOk(contentWin.wrappedJSObject._remoteRan,
 						"a cross-origin script must be blocked by the extension-page CSP");
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
 				}
 			});
 
@@ -4801,15 +4911,16 @@ describe("Plugin Sandbox", function () {
 				});
 				PluginSandbox.loadScope(addon);
 				let s = PluginSandbox.getScope(id);
-				let win = await Cu.evalInSandbox("openWindow('remote-fetch.html')", s);
+				await Cu.evalInSandbox("openWindow('remote-fetch.html').then(function (win) { _win = win; })", s);
+				let contentWin = getLastPluginWindowContent();
 				try {
-					for (let i = 0; i < 100 && win.wrappedJSObject._fetchStatus === "pending"; i++) {
+					for (let i = 0; i < 100 && contentWin.wrappedJSObject._fetchStatus === "pending"; i++) {
 						await Zotero.Promise.delay(20);
 					}
-					return win.wrappedJSObject._fetchStatus;
+					return contentWin.wrappedJSObject._fetchStatus;
 				}
 				finally {
-					win.close();
+					Cu.evalInSandbox("_win.close()", s);
 					PluginSandbox.unloadScope(id);
 				}
 			}
@@ -4848,13 +4959,13 @@ describe("Plugin Sandbox", function () {
 				});
 				PluginSandbox.loadScope(addon);
 				let s = PluginSandbox.getScope(id);
-				let win = await Cu.evalInSandbox("openWindow('csp-inline.html')", s);
+				await Cu.evalInSandbox("openWindow('csp-inline.html').then(function (win) { _win = win; })", s);
 				try {
-					let w = win.wrappedJSObject;
+					let w = getLastPluginWindowContent().wrappedJSObject;
 					return { evalStatus: w._evalStatus, wasmStatus: w._wasmStatus };
 				}
 				finally {
-					win.close();
+					Cu.evalInSandbox("_win.close()", s);
 					PluginSandbox.unloadScope(id);
 				}
 			}
@@ -4887,140 +4998,72 @@ describe("Plugin Sandbox", function () {
 				// Inline + eval() are blocked, but the page's own same-origin script
 				// runs: moz-extension same-origin resources are CSP-exempt in Gecko.
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('csp-inline.html')");
+				await evalInScope("openWindow('csp-inline.html').then(function (win) { _win = win; })");
 				try {
-					let w = win.wrappedJSObject;
+					let w = getLastPluginWindowContent().wrappedJSObject;
 					assert.isTrue(w._probeRan, "same-origin external script runs (CSP-exempt)");
 					assert.notOk(w._inlineRan, "inline script should be blocked by the extension-page CSP");
 					assert.equal(w._evalStatus, "blocked", "eval() should be blocked by the extension-page CSP");
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
 				}
 			});
 
 			it("does not let a plugin loosen its CSP via a <meta> tag (eval stays blocked)", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('csp-meta.html')");
+				await evalInScope("openWindow('csp-meta.html').then(function (win) { _win = win; })");
 				try {
-					let w = win.wrappedJSObject;
+					let w = getLastPluginWindowContent().wrappedJSObject;
 					assert.isTrue(w._probeRan, "external script should still run");
 					assert.equal(w._evalStatus, "blocked",
 						"a meta CSP adding 'unsafe-eval' must not override the stricter policy CSP");
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
 				}
 			});
 
-
-			it("should call onLoad callback with the content window", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
-				let cbkLoadPromise = new Promise((resolve) => {
-					scope._resolveOnLoad = resolve;
-				});
-				let win = await evalInScope(`
-					openWindow('test.html', '', {
-						onLoad: function(w) {
-							_resolveOnLoad(w);
-						}
-					});
-				`);
-				try {
-					let cbkWin = await cbkLoadPromise;
-					assert.ok(cbkWin, "onLoad callback should receive a window");
-					assert.equal(cbkWin.document.title, "Test");
-					assert.equal(cbkWin, win, "onLoad window should be the same as the resolved window");
-				}
-				finally {
-					win.close();
-				}
-			});
 
 			it("should load relative CSS and JS resources", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('resources.html')");
+				await evalInScope("openWindow('resources.html').then(function (win) { _win = win; })");
+				let contentWin = getLastPluginWindowContent();
 				try {
-					assert.equal(win.document.title, "Resources");
+					assert.equal(contentWin.document.title, "Resources");
 					// JS resource should have executed (check DOM attribute, not expando -- Xrays hide expandos)
-					let div = win.document.getElementById("test-div");
+					let div = contentWin.document.getElementById("test-div");
 					assert.equal(div.getAttribute("data-script-loaded"), "true", "script.js should have executed");
 					// CSS resource should have been applied
-					let color = win.getComputedStyle(div).color;
+					let color = contentWin.getComputedStyle(div).color;
 					assert.equal(color, "rgb(255, 0, 0)", "style.css should set color to red");
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
 				}
 			});
 
-			it("should reveal content expandos via wrappedJSObject", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('resources.html')");
-				try {
-					// Xray wrappers hide expandos set by content scripts
-					assert.isUndefined(win._pluginScriptLoaded, "Xray should hide expando properties");
-					// wrappedJSObject waives Xrays and reveals content-set expandos
-					assert.isTrue(win.wrappedJSObject._pluginScriptLoaded, "wrappedJSObject should reveal expando properties");
-				}
-				finally {
-					win.close();
-				}
-			});
-
-			it("should allow plugin scope to manipulate the DOM of the opened window", async function () {
-				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('test.html')");
-				try {
-					// Store the window on the scope so sandbox code can reference it
-					scope._testWin = win;
-
-					// Modify existing element from plugin scope
-					evalInScope("_testWin.document.getElementById('test-div').textContent = 'Modified'");
-					assert.equal(
-						win.document.getElementById("test-div").textContent,
-						"Modified",
-						"Plugin scope should be able to modify element text"
-					);
-
-					// Create and append a new element from plugin scope
-					evalInScope(
-						`let el = _testWin.document.createElement('p');
-						el.id = 'new-el';
-						el.textContent = 'Added by plugin';
-						_testWin.document.body.appendChild(el);`
-					);
-					let newEl = win.document.getElementById("new-el");
-					assert.ok(newEl, "Plugin scope should be able to append new elements");
-					assert.equal(newEl.textContent, "Added by plugin");
-				}
-				finally {
-					win.close();
-				}
-			});
 			it("should open separate windows for each call", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win1 = await evalInScope("openWindow('test.html')");
-				let win2 = await evalInScope("openWindow('test.html')");
+				let countBefore = getPluginWindowBrowsers().length;
+				await evalInScope("openWindow('test.html').then(function (win) { _win1 = win; })");
+				await evalInScope("openWindow('test.html').then(function (win) { _win2 = win; })");
 				try {
-					assert.notEqual(win1, win2, "Each openWindow call should return a different window");
-					// Mutating one should not affect the other
-					win1.document.getElementById("test-div").textContent = "Window 1";
-					win2.document.getElementById("test-div").textContent = "Window 2";
-					assert.equal(win1.document.getElementById("test-div").textContent, "Window 1");
-					assert.equal(win2.document.getElementById("test-div").textContent, "Window 2");
+					assert.isTrue(evalInScope("_win1 !== _win2"),
+						"Each openWindow call should resolve to a distinct handle");
+					assert.equal(getPluginWindowBrowsers().length, countBefore + 2,
+						"each call should open its own wrapper window");
 				}
 				finally {
-					win1.close();
-					win2.close();
+					evalInScope("_win1.close(); _win2.close()");
 				}
 			});
 
 			it("should not expose privileged APIs in the content window", async function () {
 				loadTestScopeWithURI(["default", "openWindow"]);
-				let win = await evalInScope("openWindow('privileged.html')");
+				await evalInScope("openWindow('privileged.html').then(function (win) { _win = win; })");
 				try {
-					let results = win.document.getElementById("results");
+					let results = getLastPluginWindowContent().document.getElementById("results");
 					// Components is excluded -- it exists in content as a neutered object (accessing properties throws)
 					let privilegedAPIs = ["chromeutils", "services", "ioutils", "pathutils", "cu", "cc", "ci", "zotero"];
 					for (let api of privilegedAPIs) {
@@ -5038,91 +5081,18 @@ describe("Plugin Sandbox", function () {
 					);
 				}
 				finally {
-					win.close();
+					evalInScope("_win.close()");
 				}
 			});
 
-			describe("createFrame", function () {
-				function setupSafeScope() {
-					scope._safeDoc = WindowScopeVariables.createSafeDocument(
-						mainWin.document, ADDON_ID, {}
-					);
-					// Wrap container as a safe element so sandbox can call appendChild
-					scope._container = WindowScopeVariables.createSafeHTMLElement(
-						mainWin.document.documentElement, ADDON_ID, {}
-					);
-				}
-
-				afterEach(function () {
-					// Clean up any appended browser elements
-					let browsers = mainWin.document.querySelectorAll('browser[type="content"][disableglobalhistory="true"]');
-					for (let b of browsers) {
-						b.remove();
-					}
-				});
-
-				it("should load plugin content and call onLoad with contentWindow", async function () {
-					loadTestScopeWithURI(["default"]);
-					setupSafeScope();
-
-					let contentWin = await evalInScope(`
-						new Promise((resolve) => {
-							let frame = _safeDoc.createFrame("test.html", {
-								onLoad: function(win) {
-									resolve(win);
-								},
-							});
-							_container.appendChild(frame);
-						});
-					`);
-					assert.ok(contentWin, "createFrame should call onLoad with content window");
-					assert.equal(contentWin.document.title, "Test");
-					assert.equal(
-						contentWin.document.getElementById("test-div").textContent,
-						"Hello"
-					);
-				});
-
-				it("should reject URLs outside plugin root", function () {
-					loadTestScopeWithURI(["default"]);
-					setupSafeScope();
-					assert.throws(
-						() => evalInScope('_safeDoc.createFrame("https://evil.com/page.html", { onLoad: function() {} })'),
-						undefined, undefined, "Should reject URLs outside plugin root");
-				});
-
-				it("should reject non-.html files", function () {
-					loadTestScopeWithURI(["default"]);
-					setupSafeScope();
-					assert.throws(
-						() => evalInScope('_safeDoc.createFrame("script.js", { onLoad: function() {} })'),
-						undefined, undefined, "Should reject non-.html files");
-				});
-
-				it("should not expose privileged APIs in frame content", async function () {
-					loadTestScopeWithURI(["default"]);
-					setupSafeScope();
-
-					let contentWin = await evalInScope(`
-						new Promise((resolve) => {
-							let frame = _safeDoc.createFrame("privileged.html", {
-								onLoad: function(win) {
-									resolve(win);
-								},
-							});
-							_container.appendChild(frame);
-						});
-					`);
-					let results = contentWin.document.getElementById("results");
-					let privilegedAPIs = ["chromeutils", "services", "ioutils", "pathutils", "cu", "cc", "ci", "zotero"];
-					for (let api of privilegedAPIs) {
-						assert.equal(
-							results.getAttribute("data-" + api),
-							"undefined",
-							`${api} should not be accessible in frame content`
-						);
-					}
-				});
+			// Removed API -- plugin pages in chrome documents are hosted by the
+			// managers via loadEmbeddedPluginPage, never by the plugin itself
+			it("should not expose createFrame on safe documents", function () {
+				loadTestScopeWithURI(["default"]);
+				scope._safeDoc = WindowScopeVariables.createSafeDocument(
+					mainWin.document, ADDON_ID, {}
+				);
+				assert.isTrue(evalInScope("typeof _safeDoc.createFrame === 'undefined'"));
 			});
 
 		});
