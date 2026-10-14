@@ -262,11 +262,41 @@ var ZoteroPane = new function () {
 		titleBar.addEventListener("keydown", (event) => {
 			let cmdOrCtrlOnly = e => (Zotero.isMac ? (e.metaKey && !e.ctrlKey) : e.ctrlKey) && !e.shiftKey && !e.altKey;
 
+			// Custom plugin buttons before the tabs menu button, keyed by class
+			// since their ids are dynamic. Collapsed buttons are skipped; the
+			// overflow button is hidden unless some are collapsed
+			let customButtonActions = {
+				ArrowNext: () => {
+					let next = event.target.nextElementSibling;
+					while (next?.hidden) {
+						next = next.nextElementSibling;
+					}
+					return next || document.getElementById('zotero-tb-tabs-menu');
+				},
+				ArrowPrevious: () => {
+					let prev = event.target.previousElementSibling;
+					while (prev?.hidden) {
+						prev = prev.previousElementSibling;
+					}
+					return prev;
+				},
+				Tab: () => document.getElementById('zotero-tb-sync-error'),
+				ShiftTab: () => {
+					Zotero_Tabs.moveFocus("current");
+				},
+			};
+
 			// Mapping of target ids and possible key presses to desired focus outcomes
 			let actionsMap = {
+				'zotero-custom-button': customButtonActions,
+				'zotero-custom-button-overflow': customButtonActions,
 				'zotero-tb-tabs-menu': {
 					ArrowNext: () => null,
-					ArrowPrevious: () => null,
+					ArrowPrevious: () => {
+						let buttons = document.querySelectorAll(
+							'#zotero-titlebar-custom-buttons > toolbarbutton:not([hidden])');
+						return buttons.length ? buttons[buttons.length - 1] : null;
+					},
 					Tab: () => document.getElementById('zotero-tb-sync-error'),
 					ShiftTab: () => {
 						Zotero_Tabs.moveFocus("current");
