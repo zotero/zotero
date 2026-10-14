@@ -2495,6 +2495,14 @@ describe("Item pane", function () {
 			await Zotero.Items.erase(item.id);
 			Zotero.ItemPaneManager.unregisterSection(registeredID);
 		});
+
+		it("should reserve every built-in pane ID from custom sections", async function () {
+			await waitForSidenav();
+			assert.sameMembers(
+				Zotero.ItemPaneManager._sectionManager._builtInPaneIDs,
+				ZoteroPane.itemPane._itemDetails.sidenav._builtInPanes
+			);
+		});
 	});
 
 	describe("Custom section full height", function () {
