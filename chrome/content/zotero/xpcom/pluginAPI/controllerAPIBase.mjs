@@ -39,6 +39,7 @@ import { RequestAPIBase } from "chrome://zotero/content/xpcom/pluginAPI/requestA
 class ControllerAPIBase extends RequestAPIBase {
 	_config = {
 		apiName: "ControllerAPIBase",
+		permissions: [],
 	};
 
 	/**
