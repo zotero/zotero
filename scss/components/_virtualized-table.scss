@@ -107,6 +107,22 @@
 		}
 	}
 
+	// SVG cell content of plugin custom columns (ItemTreeManager renderCell):
+	// the image box fills the cell, so fixed-size SVGs render at their own
+	// size (shrunk if the cell is smaller), viewBox-only SVGs scale to the
+	// cell, and SVGs without intrinsic dimensions stretch to it
+	.cell:has(> img.cell-svg) {
+		align-self: stretch;
+	}
+
+	.cell img.cell-svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: scale-down;
+		object-position: left center;
+	}
+
 	.row {
 		display: flex;
 		flex-direction: row;

@@ -1305,6 +1305,10 @@ class VirtualizedTable extends React.Component {
 					label = column.htmlLabel;
 				} else if (typeof column.htmlLabel === "string") {
 					label = <span dangerouslySetInnerHTML={{ __html: column.htmlLabel }} />;
+				} else if (column.htmlLabel.svgSrc) {
+					// SVG from an unprivileged plugin. SVG as image rendering blocks
+					// scripts and external loads
+					label = <img src={column.htmlLabel.svgSrc} alt={column.label} />;
 				}
 			}
 			let resizer = (<Draggable

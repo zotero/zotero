@@ -30,15 +30,15 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 const SANDBOXED_AUXILIARY_NAVIGATION = 0x2;
 
 /**
- * Resolve a plugin page URL for use in an embedded browser or plugin window:
- * optionally relative to the plugin's root, and required to be an .html/.htm
- * page within the plugin.
+ * Resolve a URL to a file within the plugin: optionally relative to the
+ * plugin's root, and required to have one of the given extensions.
  *
  * @param {string} pluginID
- * @param {string} src - Page URL, optionally relative to the plugin's root
+ * @param {string} src - File URL, optionally relative to the plugin's root
+ * @param {string[]} extensions - Allowed file extensions (with leading dot)
  * @returns {string | null} The absolute URL, or null if src doesn't qualify
  */
-export function resolvePluginPage(pluginID, src) {
+export function resolvePluginFile(pluginID, src, extensions) {
 	let base = PluginProtocol.getBaseURI(pluginID);
 	if (!base) {
 		return null;
@@ -54,10 +54,21 @@ export function resolvePluginPage(pluginID, src) {
 		return null;
 	}
 	let pathname = new URL(resolved).pathname.toLowerCase();
-	if (!pathname.endsWith(".html") && !pathname.endsWith(".htm")) {
+	if (!extensions.some(ext => pathname.endsWith(ext))) {
 		return null;
 	}
 	return resolved;
+}
+
+/**
+ * Resolve a plugin page URL for use in an embedded browser or plugin window.
+ *
+ * @param {string} pluginID
+ * @param {string} src - Page URL, optionally relative to the plugin's root
+ * @returns {string | null} The absolute URL, or null if src doesn't qualify
+ */
+export function resolvePluginPage(pluginID, src) {
+	return resolvePluginFile(pluginID, src, [".html", ".htm"]);
 }
 
 /**
