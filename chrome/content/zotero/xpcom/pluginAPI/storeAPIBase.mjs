@@ -38,8 +38,8 @@
  *
  * @typedef {object} StoreObjectTypeDef
  * @property {string | string[]} [permissions] - Required on top of the store's for every entry of this type
- * @property {boolean} [transactional] - Whether entries run inside the store transaction (default true); the
- *     others run after it, in order, not atomically, and a failure among them leaves the earlier ones applied
+ * @property {boolean} [transactional] - Whether entries run inside the store transaction (default true), else after
+ *     it, in order and not atomically; a create or an operation can move its own entry out too
  * @property {(id: number, ctx: StoreCommitContext) => (object | null | Promise<object | null>)} resolve
  *     - The live object for an ID, or null; entries that get the same object share it, one applying after another
  * @property {StoreAddressDef} address - How an entry or a reference names an existing object of this type;
@@ -73,6 +73,9 @@
  * @typedef {object} StoreCreateDef
  * @property {Record<string, PluginAPIOptDefValue>} [params]
  * @property {(params: object, ctx: StoreCommitContext) => (object | Promise<object>)} handler - The new, unsaved target
+ * @property {(params: object) => boolean} [transactional] - false when the create opens its own transaction
+ * @property {(params: object, ctx: StoreCommitContext) => Promise<void>} [prepare] - Runs before the store
+ *     transaction and any load, for a check that may wait on the user, such as a file prompt
  *
  *
  * @typedef {object} StoreOperationDef
@@ -81,6 +84,9 @@
  * @property {boolean} [terminal] - The target no longer exists afterwards (erase): no save, no later operation,
  *     and no later entry sharing the target
  * @property {boolean} [needsID] - A created target must be saved before this runs
+ * @property {boolean} [transactional] - false when the operation opens its own transaction
+ * @property {(target: object | undefined, params: object, ctx: StoreCommitContext) => Promise<void>} [prepare]
+ *     - As a create's, with the target as loaded before the transaction, so only what cannot change may be read
  * @property {(target: object, params: object, ctx: StoreCommitContext) => (string | undefined | Promise<string | undefined>)} [check]
  *     - A reason the operation cannot apply, checked before anything changes; must not resolve refs
  * @property {(target: object, params: object, ctx: StoreCommitContext) => (void | Promise<void>)} apply
@@ -89,6 +95,8 @@
  * @typedef {object} StoreCommitContext
  * @property {string} [pluginID] - The calling plugin; unset for chrome
  * @property {boolean} privileged
+ * @property {object | null} scope - The caller's sandbox scope, for permission checks
+ * @property {boolean} [transactional] - While an entry applies, whether it runs inside the store transaction
  * @property {object} defaults - Every change set key but `changes`, for the object types to read
  * @property {Map<string, { type: string, target: object }>} refs - Objects created so far, by ref
  * @property {(type: string, value: StoreIDRef, options?: { scope?: *, what?: string }) => *} resolveID
@@ -290,6 +298,7 @@ class StoreAPIBase extends RequestAPIBase {
 		}
 		let { entries, defaults, transactional, deferred } = this._plan(params.changes, context);
 		let ctx = this._createCommitContext(context, defaults);
+		await this._prepare(entries, ctx);
 
 		// What survives a failure: entries applied outside the store transaction, or inside one that
 		// committed before a later entry threw
@@ -330,11 +339,15 @@ class StoreAPIBase extends RequestAPIBase {
 			}
 			throw this._withProgress(e, entries, applied, failed);
 		}
-		// Types that manage their own transactions apply after the store's, in order
+		// Entries that open their own transactions apply after the store's, in order
 		try {
 			await run(deferred);
 		}
 		catch (e) {
+			// What the failed entry saved stays; what it changed only in memory goes
+			if (failed) {
+				await this._restore([failed]);
+			}
 			throw this._withProgress(e, entries, applied, failed);
 		}
 		return this._describe(entries, validatedOptions.obj.snapshots);
@@ -378,7 +391,7 @@ class StoreAPIBase extends RequestAPIBase {
 			}
 			requirePermissions(def.permissions, `${at} (${entry.type})`);
 
-			let planned = { index, type: entry.type, def, ops: [], uses: [] };
+			let planned = { index, type: entry.type, def, ops: [], uses: [], transactional: def.transactional };
 			if (entry.create !== undefined) {
 				if (!def.create) {
 					this._throw(INVALID_PARAMS, `${at}: ${entry.type} objects cannot be created`);
@@ -402,6 +415,9 @@ class StoreAPIBase extends RequestAPIBase {
 				refs.add(entry.ref);
 				planned.ref = entry.ref;
 				planned.create = validated.obj;
+				if (def.create.transactional?.(validated.obj) === false) {
+					planned.transactional = false;
+				}
 				this._collectUses(planned, planned.create, def.create.params || {}, `${at}.create`);
 			}
 			else if (typeof entry.ref === "string") {
@@ -440,6 +456,9 @@ class StoreAPIBase extends RequestAPIBase {
 				}
 				planned.ops.push({ index: opIndex, name: op.op, def: opDef, params: validated.obj });
 				planned.terminal = !!opDef.terminal;
+				if (opDef.transactional === false) {
+					planned.transactional = false;
+				}
 				this._collectUses(planned, validated.obj, opDef.params, opAt);
 			});
 			return planned;
@@ -494,7 +513,7 @@ class StoreAPIBase extends RequestAPIBase {
 				if (creator.type !== use.type) {
 					this._throw(INVALID_PARAMS, `${use.at}: ref '${use.ref}' is a ${creator.type}, not a ${use.type}`);
 				}
-				if (entry.def.transactional && !creator.def.transactional) {
+				if (entry.transactional && !creator.transactional) {
 					this._throw(INVALID_PARAMS, `${use.at}: ref '${use.ref}' is created after the store transaction this entry applies in`);
 				}
 				use.creator = creator;
@@ -532,8 +551,8 @@ class StoreAPIBase extends RequestAPIBase {
 			return [...ordered, ...group.filter(entry => !entry.create)];
 		};
 		return {
-			transactional: order(entries.filter(entry => entry.def.transactional)),
-			deferred: order(entries.filter(entry => !entry.def.transactional)),
+			transactional: order(entries.filter(entry => entry.transactional)),
+			deferred: order(entries.filter(entry => !entry.transactional)),
 		};
 	}
 
@@ -640,6 +659,7 @@ class StoreAPIBase extends RequestAPIBase {
 		return {
 			pluginID: context.pluginID,
 			privileged: context.privileged,
+			scope: context.scope,
 			defaults,
 			refs,
 			// A ref names an object this set created; anything else is the type's own address form
@@ -665,6 +685,27 @@ class StoreAPIBase extends RequestAPIBase {
 				return def.address.fromValue(value, { defaults, scope, type, what }, this._fail(what));
 			},
 		};
+	}
+
+	/**
+	 * Run the checks that may wait on the user, so no prompt holds the store transaction open
+	 */
+	async _prepare(plan, ctx) {
+		for (let entry of plan) {
+			if (entry.create && entry.def.create.prepare) {
+				await this._callOp(entry, "prepare", null, () => entry.def.create.prepare(entry.create, ctx));
+			}
+			let preparing = entry.ops.filter(op => op.def.prepare);
+			if (!preparing.length) {
+				continue;
+			}
+			let target = entry.create
+				? undefined
+				: (await this._loadTarget(entry.type, entry.address, `changes[${entry.index}]`, ctx)).target;
+			for (let op of preparing) {
+				await this._callOp(entry, "prepare", op, () => op.def.prepare(target, op.params, ctx));
+			}
+		}
 	}
 
 	/**
@@ -729,6 +770,7 @@ class StoreAPIBase extends RequestAPIBase {
 	 */
 	async _applyEntry(entry, ctx) {
 		let { def } = entry;
+		ctx = { ...ctx, transactional: entry.transactional };
 		let target = entry.target;
 		let saved = !entry.create;
 		if (entry.create) {
@@ -757,8 +799,8 @@ class StoreAPIBase extends RequestAPIBase {
 	 * Run one step of an entry, naming the step in a refusal: a store's own coded one keeps its code, what
 	 * the store deems the caller's error is InvalidParams, anything else propagates as a bug or a platform failure
 	 * @param {object} entry
-	 * @param {"create" | "check" | "apply" | "save"} kind
-	 * @param {object | null} op - The operation, for check and apply
+	 * @param {"prepare" | "create" | "check" | "apply" | "save"} kind
+	 * @param {object | null} op - The operation, for its prepare, check and apply
 	 * @param {() => any} fn
 	 */
 	async _callOp(entry, kind, op, fn) {
@@ -792,7 +834,7 @@ class StoreAPIBase extends RequestAPIBase {
 	 * Whether a failed step is the caller's data being refused, to report as InvalidParams naming the step;
 	 * the base says never, a store built on a core that validates in memory decides by step and error class
 	 * @param {*} e
-	 * @param {{ entry: object, kind: "create" | "check" | "apply" | "save", op: object | null }} step
+	 * @param {{ entry: object, kind: "prepare" | "create" | "check" | "apply" | "save", op: object | null }} step
 	 * @returns {boolean}
 	 */
 	_isCallerError(_e, _step) {
@@ -845,7 +887,9 @@ class StoreAPIBase extends RequestAPIBase {
 		let issues = [];
 		try {
 			let { entries, defaults } = this._plan(changes, context);
-			await this._resolve(entries, this._createCommitContext(context, defaults));
+			let ctx = this._createCommitContext(context, defaults);
+			await this._prepare(entries, ctx);
+			await this._resolve(entries, ctx);
 		}
 		catch (e) {
 			if (!(e instanceof PluginRequestError)) {
