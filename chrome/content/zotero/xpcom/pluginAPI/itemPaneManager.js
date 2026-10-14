@@ -280,6 +280,20 @@
 
 		_hookNames = ['onInit', 'onDestroy', 'onItemChange', 'onRender', 'onAsyncRender', 'onToggle'];
 
+		// Kept equal to `_builtInPanes` in itemPaneSidenav.js, which the window owns; itemPaneTest compares them
+		_builtInPaneIDs = [
+			"info",
+			"abstract",
+			"attachments",
+			"notes",
+			"note-info",
+			"attachment-info",
+			"attachment-annotations",
+			"libraries-collections",
+			"tags",
+			"related"
+		];
+
 		// The pane reads these back before it returns, so they cannot await a query
 		_syncHookNames = ['onItemChange', 'onRender'];
 
@@ -334,21 +348,8 @@
 		}
 
 		_validate(option) {
-			// Keep in sync with itemDetails.js
-			let builtInPaneIDs = [
-				"info",
-				"abstract",
-				"attachments",
-				"notes",
-				"attachment-info",
-				"attachment-annotations",
-				"libraries-collections",
-				"tags",
-				"related"
-			];
-
 			let mainKey = this._namespacedMainKey(option);
-			if (builtInPaneIDs.includes(mainKey)) {
+			if (this._builtInPaneIDs.includes(mainKey)) {
 				this._log(`'paneID' must not conflict with built-in paneID, got ${mainKey}`, "warn");
 				return false;
 			}
