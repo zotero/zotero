@@ -133,9 +133,10 @@
 				}
 				let listener = (event) => {
 					if (!this._hooksReady) return;
+					// `event` is deprecated and stripped for unprivileged plugins by ItemPaneManager
 					let props = this._assembleProps(
 						this._getHookProps(),
-						{ event },
+						{ buttonType: type, event },
 					);
 					onClick(props);
 				};
@@ -326,7 +327,7 @@
 			if (!this._hooks.toggle || !this._hooksReady) return;
 			let props = this._assembleProps(
 				this._getHookProps(),
-				{ event },
+				{ open: this._section.open, event },
 			);
 			this._hooks.toggle(props);
 		};
