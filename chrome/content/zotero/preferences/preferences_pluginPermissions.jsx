@@ -34,6 +34,10 @@ var { PluginNames } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/names.mjs");
 var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
+var { PathIdentity } = ChromeUtils.importESModule(
+	"chrome://zotero/content/xpcom/plugins/filePath.mjs");
+var { FileIO } = ChromeUtils.importESModule(
+	"chrome://zotero/content/xpcom/plugins/fileIO.mjs");
 var { PluginSandbox } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 var { VarCheck } = ChromeUtils.importESModule(
@@ -530,9 +534,9 @@ Zotero_Preferences.PluginPermissions = {
 	},
 
 	_refreshDirSection: async function ({ dir, size, dirID, emptyID, actionsID }) {
-		let exists = await IOUtils.exists(dir);
+		let exists = await FileIO.exists(dir);
 		let bytes = exists ? await size() : 0;
-		document.getElementById(dirID).textContent = `${dir} (${formatSize(bytes)})`;
+		document.getElementById(dirID).textContent = `${PathIdentity.toNative(dir)} (${formatSize(bytes)})`;
 		document.getElementById(dirID).hidden = !exists;
 		document.getElementById(emptyID).hidden = exists;
 		document.getElementById(actionsID).hidden = !exists;
@@ -546,7 +550,8 @@ Zotero_Preferences.PluginPermissions = {
 		grants.sort((a, b) => a.path.localeCompare(b.path));
 		this._editGrants = grants.map(grant => ({
 			mode: grant.mode,
-			path: grant.path,
+			// Shown in the platform's spelling; the layer keeps the canonical one
+			path: PathIdentity.toNative(grant.path),
 			remove: {
 				iconKey: "minus-circle",
 				isFocusable: true,

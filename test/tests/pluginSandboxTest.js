@@ -2,6 +2,7 @@ describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileAccess.mjs");
 	var { PathIdentity } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/filePath.mjs");
+	var { FileIO } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/fileIO.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 	var { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 	var { PluginProtocol } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/protocol.mjs");
@@ -333,15 +334,15 @@ describe("Plugin Sandbox", function () {
 
 		before(async function () {
 			pluginDataDir = PathUtils.join(Zotero.DataDirectory.dir, "plugin-data", PLUGIN_UUID);
-			await IOUtils.makeDirectory(pluginDataDir, { ignoreExisting: true, createAncestors: true });
+			await FileIO.makeDirectory(pluginDataDir, { ignoreExisting: true, createAncestors: true });
 			// Lives outside the plugin's auto-allowed directories
 			outsideDir = await getTempDirectory();
 			outsidePath = PathUtils.join(outsideDir, "outside-" + Zotero.Utilities.randomString() + ".txt");
-			await IOUtils.writeUTF8(outsidePath, "outside content");
+			await FileIO.writeUTF8(outsidePath, "outside content");
 		});
 
 		after(async function () {
-			await IOUtils.remove(outsidePath, { ignoreAbsent: true });
+			await FileIO.remove(outsidePath, { ignoreAbsent: true });
 		});
 
 		beforeEach(function () {
@@ -378,7 +379,7 @@ describe("Plugin Sandbox", function () {
 				assert.equal(read.result.data, "from the sandbox");
 			}
 			finally {
-				await IOUtils.remove(target, { ignoreAbsent: true });
+				await FileIO.remove(target, { ignoreAbsent: true });
 			}
 		});
 
@@ -388,12 +389,12 @@ describe("Plugin Sandbox", function () {
 				let res = await evalInScope(`Zotero.FileStore.commit(`
 					+ `Zotero.FileStore.ChangeSet.file(${JSON.stringify(target)}).writeFile(new Uint8Array([0, 255, 10])))`);
 				assert.isTrue(res.success, res.error && res.error.message);
-				assert.deepEqual(Array.from(await IOUtils.read(target)), [0, 255, 10]);
+				assert.deepEqual(Array.from(await FileIO.read(target)), [0, 255, 10]);
 				// A JSON-style entry carries a typed array of any kind too
 				res = await evalInScope(`Zotero.FileStore.commit({ changes: [{ type: "file", path: ${JSON.stringify(target)}, `
 					+ `ops: [{ op: "appendFile", data: new Uint16Array([0x0201]) }] }] })`);
 				assert.isTrue(res.success, res.error && res.error.message);
-				assert.deepEqual(Array.from(await IOUtils.read(target)), [0, 255, 10, 1, 2]);
+				assert.deepEqual(Array.from(await FileIO.read(target)), [0, 255, 10, 1, 2]);
 
 				let read = await evalInScope(`Zotero.FileStore.query("readFile", { path: ${JSON.stringify(target)} })`
 					+ `.then(r => ({ success: r.success, isBytes: r.result.data instanceof Uint8Array, bytes: Array.from(r.result.data) }))`);
@@ -405,7 +406,7 @@ describe("Plugin Sandbox", function () {
 				assert.equal(base64.result.data, btoa("\x00\xff\n\x01\x02"));
 			}
 			finally {
-				await IOUtils.remove(target, { ignoreAbsent: true });
+				await FileIO.remove(target, { ignoreAbsent: true });
 			}
 		});
 
@@ -441,12 +442,12 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(res.textIntact, `text of ${res.textLength} chars came back different`);
 				assert.equal(res.byteLength, 8 * 1024 * 1024);
 				assert.equal(res.mismatches, 0);
-				let onDisk = await IOUtils.read(target);
+				let onDisk = await FileIO.read(target);
 				assert.equal(onDisk.byteLength, 8 * 1024 * 1024);
 				assert.equal(onDisk[onDisk.length - 1], ((onDisk.length - 1) * 2654435761) >>> 24);
 			}
 			finally {
-				await IOUtils.remove(target, { ignoreAbsent: true });
+				await FileIO.remove(target, { ignoreAbsent: true });
 			}
 		});
 
@@ -466,14 +467,14 @@ describe("Plugin Sandbox", function () {
 			let target = dirs.result.temp + "/in-temp-" + Zotero.Utilities.randomString() + ".txt";
 			let res = await writeFile(target, "temp");
 			assert.isTrue(res.success, res.error && res.error.message);
-			assert.equal(await IOUtils.readUTF8(target), "temp");
+			assert.equal(await FileIO.readUTF8(target), "temp");
 		});
 
 		// Where a path leads is simulated, so a link out of plugin-data needs no link on this file system
 		it("should judge a path by where it really leads, not by how it is spelled", async function () {
 			let spelledInside = inDataDir("looks-inside");
 			let spelledOutside = PathUtils.join(outsideDir, "looks-outside-" + Zotero.Utilities.randomString() + ".txt");
-			let realInside = PluginFileAccess._realPath(inDataDir("really-inside"));
+			let realInside = PluginFileAccess._realPath(PluginFileAccess.canonicalize(inDataDir("really-inside")));
 			let stub = sinon.stub(PluginFileAccess, "_realPath").callsFake(function (p) {
 				let canonical = Zotero.File.normalizeToUnix(p);
 				if (canonical === Zotero.File.normalizeToUnix(spelledInside)) {
@@ -498,13 +499,17 @@ describe("Plugin Sandbox", function () {
 			}
 		});
 
-		it("should compare paths without regard to case on Windows only", function () {
-			let was = Zotero.isWin;
+		it("should compare paths without regard to case where the default file system ignores it", function () {
+			let was = { isWin: Zotero.isWin, isMac: Zotero.isMac };
 			try {
 				Zotero.isWin = false;
+				Zotero.isMac = false;
 				assert.isFalse(PathIdentity.same("/A/b", "/a/b"));
 				assert.isFalse(PathIdentity.contains("/A", "/a/b"));
 				assert.isFalse(PersistedGrantLayer.subsumes({ path: "/A", mode: "read" }, { path: "/a/b", mode: "read" }));
+				Zotero.isMac = true;
+				assert.isTrue(PathIdentity.same("/A/b", "/a/b"));
+				assert.isTrue(PathIdentity.contains("/Users/X", "/users/x/doc.txt"));
 				Zotero.isWin = true;
 				assert.isTrue(PathIdentity.same("C:/A/b", "c:/a/B"));
 				assert.isTrue(PathIdentity.contains("C:/Users/X", "c:/users/x/doc.txt"));
@@ -512,7 +517,56 @@ describe("Plugin Sandbox", function () {
 				assert.isTrue(PersistedGrantLayer.subsumes({ path: "C:/Users/X", mode: "write" }, { path: "c:/users/x/doc.txt", mode: "read" }));
 			}
 			finally {
-				Zotero.isWin = was;
+				Object.assign(Zotero, was);
+			}
+		});
+
+		// A real link, so the walk itself runs; Windows needs a privilege to make one
+		it("should follow a symlink out of plugin-data and refuse one that leads nowhere", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			}
+			let link = inDataDir("link-out");
+			let dangling = inDataDir("link-nowhere");
+			let nowhere = PathUtils.join(outsideDir, "never-" + Zotero.Utilities.randomString() + ".txt");
+			await Zotero.Utilities.Internal.subprocess("ln", ["-s", outsidePath, link]);
+			await Zotero.Utilities.Internal.subprocess("ln", ["-s", nowhere, dangling]);
+			try {
+				let escape = await readFile(link);
+				assert.isFalse(escape.success);
+				assert.equal(escape.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
+				let through = await writeFile(dangling, "x");
+				assert.isFalse(through.success);
+				assert.equal(through.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
+				assert.isFalse(await FileIO.exists(nowhere));
+			}
+			finally {
+				await Zotero.Utilities.Internal.subprocess("rm", ["-f", link, dangling]);
+			}
+		});
+
+		it("should see through a junction on Windows", async function () {
+			if (!Zotero.isWin) {
+				this.skip();
+			}
+			// A junction needs no privilege, which is what makes it the escape to catch
+			let base = await getTempDirectory();
+			let target = PathUtils.join(base, "target");
+			let junction = PathUtils.join(base, "junction");
+			await IOUtils.makeDirectory(target);
+			// Subprocess does not search PATH here
+			let cmd = Services.env.get("COMSPEC") || "C:\\Windows\\System32\\cmd.exe";
+			let made = await Zotero.Utilities.Internal.subprocess(cmd, ["/c", "mklink", "/J", junction, target]);
+			try {
+				assert.isTrue(await IOUtils.exists(junction), `mklink via ${cmd} said: ${made}`);
+				// Windows stores the target's long name in the junction, so the resolved path is compared by
+				// shape: a short-name spelling of the temp dir would not match it letter for letter
+				let throughJunction = PathIdentity.realPath(PathIdentity.canonicalize(PathUtils.join(junction, "inside.txt")));
+				assert.notInclude(throughJunction, "/junction/", "the junction should be seen through");
+				assert.isTrue(throughJunction.endsWith("/target/inside.txt"), throughJunction);
+			}
+			finally {
+				await Zotero.Utilities.Internal.subprocess(cmd, ["/c", "rmdir", junction]);
 			}
 		});
 
@@ -527,7 +581,7 @@ describe("Plugin Sandbox", function () {
 			let res = await writeFile(target, "denied");
 			assert.isFalse(res.success);
 			assert.equal(res.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
-			assert.isFalse(await IOUtils.exists(target), "no file should have been written");
+			assert.isFalse(await FileIO.exists(target), "no file should have been written");
 		});
 
 		it("should refuse access to the profile and to the data directory outside plugin-data", async function () {
@@ -563,13 +617,13 @@ describe("Plugin Sandbox", function () {
 					let res = await writeFile(target, "session payload");
 					assert.isTrue(res.success, res.error && res.error.message);
 				});
-				assert.equal(await IOUtils.readUTF8(target), "session payload");
+				assert.equal(await FileIO.readUTF8(target), "session payload");
 				let after = await readFile(target);
 				assert.isFalse(after.success, "the grant is gone with the session");
 				assert.equal(after.error.code, Zotero.FileStore.errorCodes.PERMISSION_DENIED);
 			}
 			finally {
-				await IOUtils.remove(target, { ignoreAbsent: true });
+				await FileIO.remove(target, { ignoreAbsent: true });
 			}
 		});
 
@@ -610,13 +664,13 @@ describe("Plugin Sandbox", function () {
 		before(async function () {
 			let scratch = await getTempDirectory();
 			pickedDir = PathUtils.join(scratch, "picked-dir-" + Zotero.Utilities.randomString());
-			await IOUtils.makeDirectory(pickedDir);
+			await FileIO.makeDirectory(pickedDir);
 			pickedFile = PathUtils.join(pickedDir, "picked.txt");
-			await IOUtils.writeUTF8(pickedFile, "picked content");
+			await FileIO.writeUTF8(pickedFile, "picked content");
 		});
 
 		after(async function () {
-			await IOUtils.remove(pickedDir, { recursive: true, ignoreAbsent: true });
+			await FileIO.remove(pickedDir, { recursive: true, ignoreAbsent: true });
 		});
 
 		beforeEach(function () {
@@ -661,10 +715,10 @@ describe("Plugin Sandbox", function () {
 					let res = await writeFile(target, "saved");
 					assert.isTrue(res.success, res.error && res.error.message);
 				});
-				assert.equal(await IOUtils.readUTF8(target), "saved");
+				assert.equal(await FileIO.readUTF8(target), "saved");
 			}
 			finally {
-				await IOUtils.remove(target, { ignoreAbsent: true });
+				await FileIO.remove(target, { ignoreAbsent: true });
 			}
 		});
 
@@ -681,13 +735,13 @@ describe("Plugin Sandbox", function () {
 				});
 			}
 			finally {
-				await IOUtils.remove(inner, { ignoreAbsent: true });
+				await FileIO.remove(inner, { ignoreAbsent: true });
 			}
 		});
 
 		it("modeOpenMultiple grant covers each picked file independently", async function () {
 			let extra = PathUtils.join(pickedDir, "extra.txt");
-			await IOUtils.writeUTF8(extra, "extra content");
+			await FileIO.writeUTF8(extra, "extra content");
 			try {
 				await PluginFileAccess.withSession(ADDON_ID, async () => {
 					// FilePicker.show() iterates `this.files` and grants read on each.
@@ -698,7 +752,7 @@ describe("Plugin Sandbox", function () {
 				});
 			}
 			finally {
-				await IOUtils.remove(extra, { ignoreAbsent: true });
+				await FileIO.remove(extra, { ignoreAbsent: true });
 			}
 		});
 
@@ -1788,7 +1842,7 @@ describe("Plugin Sandbox", function () {
 
 				before(async function () {
 					tmpDir = await getTempDirectory();
-					await IOUtils.writeUTF8(
+					await FileIO.writeUTF8(
 						PathUtils.join(tmpDir, "section-script.js"),
 						"document.getElementById('section-marker').setAttribute('data-script-ran', 'true');\n"
 						// Page-side messaging: the injected zoteroHost messenger renders
@@ -1799,7 +1853,7 @@ describe("Plugin Sandbox", function () {
 						+ "  }\n"
 						+ "});\n"
 					);
-					await IOUtils.writeUTF8(
+					await FileIO.writeUTF8(
 						PathUtils.join(tmpDir, "section.html"),
 						"<!DOCTYPE html><html><head><title>Section</title></head><body>"
 						+ "<div id='section-marker'>Embedded section body</div>"
@@ -2580,9 +2634,10 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("Main window access removal", function () {
-		it("should block chrome windows and DOM nodes crossing into the sandbox", function () {
+		it("should block chrome windows and DOM nodes crossing into the sandbox", async function () {
 			loadTestScope(["default"]);
-			let mainWin = Zotero.getMainWindow();
+			// Windows has no main window left at this point of the suite
+			let mainWin = Zotero.getMainWindow() || await loadZoteroPane();
 			scope._hostWin = ScopeVariables.toScope(mainWin, ADDON_ID);
 			scope._hostNode = ScopeVariables.toScope(mainWin.document.documentElement, ADDON_ID);
 			scope._hostEvent = ScopeVariables.toScope(new mainWin.CustomEvent("test"), ADDON_ID);
@@ -2975,15 +3030,15 @@ describe("Plugin Sandbox", function () {
 				// Create a simple HTML file in the temp directory
 				let htmlContent = "<!DOCTYPE html><html><head><title>Test</title></head>"
 					+ "<body><div id='test-div'>Hello</div></body></html>";
-				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "test.html"), htmlContent);
+				await FileIO.writeUTF8(PathUtils.join(tmpDir, "test.html"), htmlContent);
 				// Also create an XHTML file to test rejection
-				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "test.xhtml"), "<html></html>");
+				await FileIO.writeUTF8(PathUtils.join(tmpDir, "test.xhtml"), "<html></html>");
 				// Create CSS and JS files for resource loading test
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "style.css"),
 					"#test-div { color: rgb(255, 0, 0); }"
 				);
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "script.js"),
 					"document.getElementById('test-div').setAttribute('data-script-loaded', 'true');\n"
 					+ "window._pluginScriptLoaded = true;"
@@ -2992,10 +3047,10 @@ describe("Plugin Sandbox", function () {
 					+ '<link rel="stylesheet" href="style.css">'
 					+ "</head><body><div id='test-div'>Styled</div>"
 					+ '<script src="script.js"></script></body></html>';
-				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "resources.html"), resourceHtml);
+				await FileIO.writeUTF8(PathUtils.join(tmpDir, "resources.html"), resourceHtml);
 				// Page that echoes plugin messages and relays zoteroHost.api calls,
 				// for page-messenger tests (external script to satisfy the page CSP)
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "echo.js"),
 					"function reportAPI(promise) {\n"
 					+ "  promise.then(\n"
@@ -3023,20 +3078,20 @@ describe("Plugin Sandbox", function () {
 					+ "  }\n"
 					+ "});\n"
 				);
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "echo.html"),
 					"<!DOCTYPE html><html><head><title>Echo</title></head>"
 					+ '<body><script src="echo.js"></script></body></html>'
 				);
 				// Fixed-size page larger than its window features, for fitContent
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "fixed-size.html"),
 					"<!DOCTYPE html><html><head><title>Fixed</title>"
 					+ "<style>html, body { margin: 0; padding: 0; }</style></head>"
 					+ "<body><div style='width: 500px; height: 400px;'></div></body></html>"
 				);
 				// Create an HTML + external JS that probes privileged APIs
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "probe.js"),
 					"var apis = ['ChromeUtils', 'Services', 'IOUtils', 'PathUtils', 'Cu', 'Cc', 'Ci', 'Zotero'];\n"
 					+ "var r = document.getElementById('results');\n"
@@ -3053,11 +3108,11 @@ describe("Plugin Sandbox", function () {
 				let privilegedProbeHtml = "<!DOCTYPE html><html><head><title>Privilege Probe</title></head>"
 					+ "<body><div id='results'></div>"
 					+ '<script src="probe.js"></script></body></html>';
-				await IOUtils.writeUTF8(PathUtils.join(tmpDir, "privileged.html"), privilegedProbeHtml);
+				await FileIO.writeUTF8(PathUtils.join(tmpDir, "privileged.html"), privilegedProbeHtml);
 
 				// CSP probe: a same-origin external script that records whether
 				// eval() is permitted by the page's Content-Security-Policy.
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "csp-probe.js"),
 					"window._probeRan = true;\n"
 					+ "try {\n"
@@ -3076,7 +3131,7 @@ describe("Plugin Sandbox", function () {
 				);
 				// Inline script (should be blocked by 'self'-only script-src) plus
 				// the external eval probe (external same-origin script is allowed).
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "csp-inline.html"),
 					"<!DOCTYPE html><html><head></head><body>"
 					+ "<script>window._inlineRan = true;</script>"
@@ -3084,7 +3139,7 @@ describe("Plugin Sandbox", function () {
 				);
 				// A page trying to loosen its own CSP via <meta> to allow eval.
 				// meta can only tighten, so eval should still be blocked.
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "csp-meta.html"),
 					"<!DOCTYPE html><html><head>"
 					+ '<meta http-equiv="Content-Security-Policy" '
@@ -3096,7 +3151,7 @@ describe("Plugin Sandbox", function () {
 
 			after(async function () {
 				mainWin.close();
-				await IOUtils.remove(tmpDir, { recursive: true });
+				await FileIO.remove(tmpDir, { recursive: true });
 			});
 
 			// The handle's properties are sandbox-side accessors, so the tests
@@ -3151,7 +3206,7 @@ describe("Plugin Sandbox", function () {
 			it("should map window drag attributes via the injected user sheet", async function () {
 				// The page can't use -moz-window-dragging itself (chrome-only CSS,
 				// dropped from moz-extension author sheets), only the attributes
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "drag.html"),
 					"<!DOCTYPE html><html><head><title>Drag</title></head>"
 					+ "<body><div id='bar' window-dragging>"
@@ -3352,12 +3407,12 @@ describe("Plugin Sandbox", function () {
 					assert.strictEqual(initSpy.lastCall.args[0], chromeWin.browsingContext,
 						"the plugin's own window should be the parent");
 
-					// Anything else -- no parent, an unknown ID, a window that isn't the plugin's -- gets the hidden window
-					let hidden = Services.appShell.hiddenDOMWindow.browsingContext;
+					// Anything else -- no parent, an unknown ID, a window that isn't the plugin's -- gets the main window
+					let fallback = Zotero.getMainWindow().browsingContext;
 					for (let [name, parent] of [["_fp2", "null"], ["_fp3", "-1"], ["_fp4", String(mainWin.browsingContext.id)]]) {
 						makePicker(name);
 						evalInScope(`${name}.init(${parent}, "Other parent", ${name}.modeOpen)`);
-						assert.strictEqual(initSpy.lastCall.args[0], hidden, `${parent} should parent to the hidden window`);
+						assert.strictEqual(initSpy.lastCall.args[0], fallback, `${parent} should parent to the main window`);
 					}
 				}
 				finally {
@@ -3525,7 +3580,7 @@ describe("Plugin Sandbox", function () {
 				let remoteURL = registerServerEndpoint("GET", function () {
 					return [200, "application/javascript", "window._remoteRan = true;"];
 				});
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "remote-script.html"),
 					"<!DOCTYPE html><html><head></head><body>"
 					+ `<script src="${remoteURL}"></script>`
@@ -3548,7 +3603,7 @@ describe("Plugin Sandbox", function () {
 			// Fresh-id plugin with a declared CSP; opens a page whose external
 			// (CSP-allowed) probe does a remote fetch, and returns the fetch status.
 			async function remoteFetchStatus(id, guid, csp, remoteURL) {
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "remote-fetch-probe.js"),
 					"window._fetchStatus = 'pending';\n"
 					// no-cors so a CORS rejection isn't mistaken for a CSP block;
@@ -3558,7 +3613,7 @@ describe("Plugin Sandbox", function () {
 					+ "  function () { window._fetchStatus = 'blocked'; }\n"
 					+ ");\n"
 				);
-				await IOUtils.writeUTF8(
+				await FileIO.writeUTF8(
 					PathUtils.join(tmpDir, "remote-fetch.html"),
 					"<!DOCTYPE html><html><head></head><body>"
 					+ '<script src="remote-fetch-probe.js"></script></body></html>'
@@ -3780,7 +3835,7 @@ describe("Plugin Sandbox", function () {
 
 		before(async function () {
 			tmpDir = await getTempDirectory();
-			await IOUtils.writeUTF8(
+			await FileIO.writeUTF8(
 				PathUtils.join(tmpDir, "pane-script.js"),
 				"document.getElementById('embedded-pane-marker').setAttribute('data-script-ran', 'true');\n"
 				+ "zoteroHost.addMessageListener(function (data) {\n"
@@ -3789,7 +3844,7 @@ describe("Plugin Sandbox", function () {
 				+ "  }\n"
 				+ "});\n"
 			);
-			await IOUtils.writeUTF8(
+			await FileIO.writeUTF8(
 				PathUtils.join(tmpDir, "prefs.html"),
 				"<!DOCTYPE html><html><head><title>Pane</title></head><body>"
 				+ "<div id='embedded-pane-marker'>Frobnicate the widgets</div>"
@@ -3800,7 +3855,7 @@ describe("Plugin Sandbox", function () {
 		});
 
 		after(async function () {
-			await IOUtils.remove(tmpDir, { recursive: true });
+			await FileIO.remove(tmpDir, { recursive: true });
 		});
 
 		afterEach(function () {
@@ -4136,7 +4191,7 @@ describe("Plugin Sandbox", function () {
 			}
 			finally {
 				PluginSandbox.unloadScope(ADDON_ID);
-				await IOUtils.remove(tmpDir, { recursive: true });
+				await FileIO.remove(tmpDir, { recursive: true });
 			}
 		});
 	});
@@ -4288,7 +4343,7 @@ describe("Plugin Sandbox", function () {
 
 		it("passes the manifest content_security_policy through to installPermissions and the policy", async function () {
 			let dir = await getTempDirectory();
-			await IOUtils.writeUTF8(
+			await FileIO.writeUTF8(
 				PathUtils.join(dir, "manifest.json"),
 				JSON.stringify({
 					manifest_version: 2,
@@ -4304,7 +4359,7 @@ describe("Plugin Sandbox", function () {
 					content_security_policy: "script-src 'self'; object-src 'self'; connect-src 'none';",
 				})
 			);
-			await IOUtils.writeUTF8(
+			await FileIO.writeUTF8(
 				PathUtils.join(dir, "bootstrap.js"),
 				"function install() {}\nfunction startup() {}\nfunction shutdown() {}\nfunction uninstall() {}\n"
 			);
@@ -4323,7 +4378,7 @@ describe("Plugin Sandbox", function () {
 			}
 			finally {
 				await addon.uninstall();
-				await IOUtils.remove(dir, { recursive: true, ignoreAbsent: true });
+				await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
 			}
 		});
 	});
