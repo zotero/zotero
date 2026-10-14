@@ -293,6 +293,7 @@
 	}
 
 	/**
+	 * Loads only what is missing: loadAllData() reloads every type and would drop another commit's unsaved changes
 	 * @param {Zotero.DataObjects} objects
 	 * @param {number} id
 	 * @returns {Promise<Zotero.DataObject | null>} Fully loaded
@@ -302,7 +303,7 @@
 		if (!object) {
 			return null;
 		}
-		await object.loadAllData();
+		await objects.loadDataTypes([object]);
 		return object;
 	}
 
@@ -347,7 +348,7 @@
 				throw e;
 			}
 			Zotero.Items.getAsync(itemID)
-				.then(loaded => loaded?.loadAllData())
+				.then(loaded => loaded && Zotero.Items.loadDataTypes([loaded]))
 				.catch(err => Zotero.logError(err));
 			return null;
 		}
