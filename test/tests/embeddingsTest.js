@@ -1,23 +1,36 @@
 "use strict";
 
 describe("Zotero.Embeddings", function () {
-	// The mean vector of the stand-in calibration below, which tests build
+	// The mean vector of the stand-in storage below, which tests build
 	// their stored vectors around
 	var testMean;
-	var calibrationStub;
+	var testModel;
+	var modelStub;
+	var meanStub;
 
 	before(function () {
 		Zotero.Embeddings.Indexing.init();
 		testMean = testCalibrationMean();
 		// Stands in for a recorded model, which the test environment has no
-		// downloaded model to measure, for every test in the file
-		calibrationStub = sinon.stub(Zotero.Embeddings, 'getCalibration')
-			.returns({ mean: testMean, minScore: 0.2, maxDisplayScore: 0.6 });
+		// downloaded model to measure, for every test in the file: the real
+		// model with a band its vectors are built around, stored centered on
+		// a mean
+		testModel = { ...Zotero.Embeddings.getModelConfig(), minScore: 0.2, maxDisplayScore: 0.6 };
+		modelStub = sinon.stub(Zotero.Embeddings, 'getModelConfig').returns(testModel);
+		meanStub = sinon.stub(Zotero.Embeddings, 'getStorageMean').returns(testMean);
 	});
 
 	after(function () {
-		calibrationStub.restore();
+		modelStub.restore();
+		meanStub.restore();
 	});
+
+	// The model as the tests see it with the given fields changed, until
+	// restored, which a stubs list does along with the rest
+	var modelOverride = (overrides) => {
+		modelStub.returns({ ...testModel, ...overrides });
+		return { restore: () => modelStub.returns(testModel) };
+	};
 
 	// A structure as the pack reader materializes one, from sections
 	// given as [outlinePath, blocks]: for a section with a path, a heading
@@ -136,14 +149,36 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
-	describe("#getCalibration()", function () {
-		it("should decode the recorded calibration to a mean of the model's width", function () {
-			let recorded = calibrationStub.wrappedMethod;
-			let { mean, minScore, maxDisplayScore } = recorded.call(Zotero.Embeddings);
-			// Built in the module's global, so not this scope's Float32Array
-			assert.equal(mean.constructor.name, 'Float32Array');
-			assert.include([256, 384, 512, 768, 1024], mean.length);
+	describe("#getModelConfig()", function () {
+		it("should record a band, and a storage mean of the model's width when there is one", function () {
+			let { minScore, maxDisplayScore, dims } = modelStub.wrappedMethod.call(Zotero.Embeddings);
 			assert.isBelow(minScore, maxDisplayScore);
+			let mean = meanStub.wrappedMethod.call(Zotero.Embeddings);
+			if (mean !== null) {
+				// Built in the module's global, so not this scope's Float32Array
+				assert.equal(mean.constructor.name, 'Float32Array');
+				assert.equal(mean.length, dims);
+			}
+		});
+	});
+
+	describe("#prepare()", function () {
+		it("should center on the storage mean only when there is one", function () {
+			let vector = Float32Array.from({ length: testMean.length }, (_, i) => Math.sin(i) * 0.1);
+			assert.deepEqual(
+				Array.from(Zotero.Embeddings.prepare(vector)),
+				Array.from(Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, testMean)))
+			);
+			meanStub.returns(null);
+			try {
+				assert.deepEqual(
+					Array.from(Zotero.Embeddings.prepare(vector)),
+					Array.from(Zotero.Embeddings.quantize(vector))
+				);
+			}
+			finally {
+				meanStub.returns(testMean);
+			}
 		});
 	});
 
@@ -473,7 +508,6 @@ describe("Zotero.Embeddings", function () {
 			sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 			sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 			sinon.stub(Zotero.Embeddings, 'download').resolves(),
-			sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 			sinon.stub(Zotero.Embeddings, 'embedPassages')
 				.callsFake(async texts => texts.map(() => axis(0))),
 			sinon.stub(Zotero.SDT, 'ensure').resolves(true)
@@ -545,7 +579,7 @@ describe("Zotero.Embeddings", function () {
 			let stubs = [
 				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
-				sinon.stub(Zotero.Embeddings, 'getDimensions').returns(testMean.length)
+				modelOverride({ dims: testMean.length })
 			];
 			try {
 				assert.isTrue(await Zotero.Embeddings.Indexing.addChunks(item.id, arrival([
@@ -577,7 +611,7 @@ describe("Zotero.Embeddings", function () {
 				}));
 				// And rows that couldn't be stored or scored: a vector of
 				// another width, an index given twice, an anchor that isn't one
-				let width = Zotero.Embeddings.getDimensions();
+				let width = Zotero.Embeddings.getModelConfig().dims;
 				assert.isFalse(await Zotero.Embeddings.Indexing.addChunks(item.id, arrival([
 					{ chunkIndex: 0, embedding: new Int8Array(width + 1), anchor: null },
 					{ chunkIndex: 1, embedding: prepared(axis(0)), anchor: null }
@@ -843,7 +877,6 @@ describe("Zotero.Embeddings", function () {
 				createEngine,
 				sinon.stub(Zotero.ML, 'shutdown').resolves(),
 				sinon.stub(Zotero.ML, 'getOptimalConcurrency').returns(2),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1')
 			];
 		}
@@ -1545,10 +1578,9 @@ describe("Zotero.Embeddings", function () {
 						.callsFake(async texts => texts.map(() => axis(0))),
 					sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 					sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
-					sinon.stub(Zotero.Embeddings, 'getDimensions').returns(testMean.length),
+					modelOverride({ dims: testMean.length }),
 					sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 					sinon.stub(Zotero.Embeddings, 'download').resolves(),
-					sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 					sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 					// Every file has gone up, unless a test says otherwise
 					sinon.stub(Zotero.Item.prototype, 'attachmentSyncState')
@@ -1667,7 +1699,7 @@ describe("Zotero.Embeddings", function () {
 					// finished and prepared
 					let expected = vectors.map(vector => Array.from(Zotero.Embeddings.prepare(
 						Zotero.Embeddings.finishVector(Float32Array.from(VectorArray.from(vector))))));
-					assert.equal(expected[0].length, Zotero.Embeddings.getDimensions());
+					assert.equal(expected[0].length, Zotero.Embeddings.getModelConfig().dims);
 					assert.deepEqual(await storedVectors(attachment.id), expected, dtype);
 				}
 			});
@@ -2250,7 +2282,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				// What the run did, in order, as the steps themselves report it
 				sinon.stub(Zotero.Embeddings, 'embedPassages').callsFake(async (passages) => {
 					events.push(passages.some(text => text.includes('A section with enough'))
@@ -2622,6 +2653,62 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should clear embeddings stored under another storage version and keep ones with none recorded", async function () {
+			this.timeout(60000);
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
+				sinon.stub(Zotero.Embeddings, 'getStorageVersion').returns(7),
+				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'embedPassages')
+					.callsFake(async texts => texts.map(() => new Float32Array(4).fill(0.5)))
+			];
+			let item = await createDataObject('item', { title: 'Item whose rows are stored another way' });
+			// Recorded as the item is now, so the run has nothing of its own
+			// to do with it and only the storage version decides; a server
+			// version marks the seeded row, which embedding here would drop
+			let { text } = (await Zotero.Embeddings.Indexing.Sources.getItemTexts([item.id])).get(item.id);
+			let hash = Zotero.Utilities.Internal.md5(text);
+			let stamp = await Zotero.DB.valueQueryAsync(
+				"SELECT clientDateModified FROM items WHERE itemID=?", item.id);
+			let seed = async (version) => {
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.itemIndexState "
+						+ "(itemID, contentHash, clientDateModified, syncVersion) VALUES (?, ?, ?, 42)",
+					[item.id, hash, stamp]
+				);
+				await Zotero.DB.queryAsync(
+					"REPLACE INTO embeddings.embeddingsMeta (key, value) VALUES ('modelVersion', 'test-model/1')");
+				await Zotero.DB.queryAsync("DELETE FROM embeddings.embeddingsMeta WHERE key='storageVersion'");
+				if (version !== null) {
+					await Zotero.DB.queryAsync(
+						"INSERT INTO embeddings.embeddingsMeta (key, value) VALUES ('storageVersion', ?)", version);
+				}
+			};
+			let kept = () => Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM embeddings.itemIndexState WHERE itemID=? AND syncVersion=42", item.id);
+			let recorded = () => Zotero.Embeddings.Indexing.Store.getIndexedStorageVersion();
+			try {
+				await Zotero.Embeddings.initDB();
+				// Stored before storage versions were recorded: taken as this one
+				await seed(null);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(await kept(), 1);
+				assert.strictEqual(await recorded(), 7);
+
+				// Stored another way: can't be compared, so cleared
+				await seed(6);
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.equal(await kept(), 0);
+				assert.strictEqual(await recorded(), 7);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.indexingPaused');
+			}
+		});
+
 		it("should remove a deleted item's embedding", async function () {
 			await Zotero.Embeddings.initDB();
 			let stub = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true);
@@ -2665,7 +2752,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -2756,7 +2842,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -2810,7 +2895,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -2860,7 +2944,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 			];
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
@@ -2900,7 +2983,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				// The extraction itself is sdt.js's concern (see sdtTest.js);
 				// what's under test is what indexing does with the sections
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
@@ -3012,7 +3094,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(sdtStructure(sections))
 			];
@@ -3105,7 +3186,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(sdtStructure(sections))
 			];
@@ -3177,7 +3257,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(sdtStructure(sections))
 			];
@@ -3211,7 +3290,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(sdtStructure([
 					['', ['Owls hunt at night. '.repeat(200)]],
@@ -3263,7 +3341,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(sdtStructure([
 					['Discussion', [
@@ -3309,7 +3386,6 @@ describe("Zotero.Embeddings", function () {
 			let item = await createDataObject('item', { title: 'Parent of derived attachment' });
 			let attachment = await importPDFAttachment(item);
 			let stubs = [
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				stubItemChunks(sdtStructure([
 					['Results', ['Owls hunt at night. '.repeat(200)]],
 					['Discussion', ['Hawks hunt by day. '.repeat(200)]]
@@ -3343,7 +3419,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.Embeddings, 'embedPassages')
 					.callsFake(async texts => texts.map(() => axis(0))),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
@@ -3401,7 +3476,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				ensureStub,
 				itemChunksStub
 			];
@@ -3447,7 +3521,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				ensureStub,
 				stubItemChunks(
 					sdtStructure([['', ['A section with enough words to be worth indexing.']]]))
@@ -3485,7 +3558,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				stubItemChunks(
 					sdtStructure([['', ['Herons wade the shallows at dawn, hunting by sight.']]]))
@@ -3696,7 +3768,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				sinon.stub(Zotero.SDT, 'getItemChunks').resolves({ ok: false, reason: 'failed' })
 			];
@@ -3755,7 +3826,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				itemChunksStub
 			];
@@ -3850,7 +3920,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				sinon.stub(Zotero.Embeddings, 'getModelName').returns('bekko-embedding-v1-a25m'),
 				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(Float32Array.from(testMean)),
 				sinon.stub(Zotero.SDT, 'ensure').resolves(true),
 				itemChunksStub

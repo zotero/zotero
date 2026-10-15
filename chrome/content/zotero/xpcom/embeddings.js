@@ -39,16 +39,16 @@ Zotero.Embeddings = new function () {
 	// where its files come from -- is answered here.
 	//
 
-	// Every field is a fact read off the model's card or config, except
-	// `calibration`, which can only be learned by running it: the mean its
-	// embeddings share and the scores the Relevance bar is drawn against.
-	// Those are measured with Calibration.record() and pasted in -- never
-	// fitted by hand -- and a `revision` bump means measuring again.
-	const MODEL = {
+	// Every field is a fact read off the model's card or config, except the
+	// score band, which can only be learned by running it. That is measured
+	// with Calibration.record() and pasted in -- never fitted by hand -- and
+	// a `revision` bump means measuring again.
+	const MODEL = Object.freeze({
 		name: 'bekko-embedding-v1-a25m',
 		// Bump when a change alters the vectors -- dtype, upstream weights,
-		// prefixes, pooling, the mean they're centered on -- so that stored
-		// embeddings are detected as stale and reindexed
+		// prefixes, pooling -- so that stored embeddings are detected as
+		// stale and reindexed. The server is asked for this identity, so a
+		// bump has it embed anew too.
 		revision: 1,
 		// HF repo id, and the transformers.js pipeline id
 		modelId: 'hotchpotch/bekko-embedding-v1-a25m',
@@ -71,12 +71,18 @@ Zotero.Embeddings = new function () {
 		leadingSpace: true,
 		// How the same model is served from llama.cpp
 		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
-		calibration: {
-			minScore: 0.34,
-			maxDisplayScore: 0.54,
-			mean: 'PqFavOYNOLx1IDi9qH2BvaxQ27zU/qW8nE/ePJtGxrwYwuy7SX+buykW8Lsjc5A7mABAvAlBG70BiY07Sa1avVx+mrt0/L+8NpaMvKjWir26UIa9lVP/vI7A+ry4KAa90fU/OwSdUTvTOJu8Z5oivXZ8RL274v68yHldvZqXhTxkAYA8aV5MvQ5LujprwUW7KTSEvfQLFb2rw1O93Yj+u1g2Tjwz98E6pGYOPFxXi72pUPu84J0HvZaF3bwbx+w705kvvW3/cj2W2SG8wBcZu5Q6G7xd0xm8uPhEvKBjm7zLtwK9Q57HPSPjg7xobXK8B0PavG+ylLxTEiC9uK+tPOMgH7zpzZW5CMXsu3quQTzOLym9q9nLvHaPl7r50JO81+kEvKzyNbvquoK8AfZ6u0KBLrtFooA7fp2QvEVedLxHDaW8llSFvFNiz7z8Nxk8NPnyvJOjMLk6J1m7CRHuvFNnmDuhqge8Fz+9vLbqCbxQ0qK7VlqfvI8J9LwVPVu8AWwJvcc0xby6HbW8GHUuvIhAO73H7/a8l9OjvFUoH7zHnNO8rKcnPBakq7z5vZu8kwsMvYaV3zzrHYS8VTyLPFRX5byS6La8tKLGO/Y1wboh6qC8oxdCvDuaGTxuSuk7MYzYvLonNjsrLWO7sioCvfs4ALxFNzS9/tWPvFTs1zvRHU86vy0gurIR4rwu/1U8qMacvMyg2Lyc6pq8tuPxu9WfCTxS6Z28svKjvB9Esju0aGW83viTO6QqmDve/rM8m2IeO/bW6bylzB28vpG6vPpTzLtNRpG8qwCdvBJMObxTsBi6MOj9Ork9EL0cDis9bQIcvdMt4bzyTrK8rEzBvFfh2jzxYOS81FIEvO6TgLwNGBi9z3Xquh2GkrzNpIm7biGDu1iVsrxjvJy8zS1dPDlBCbyqYBa9piRivGh/hLyfszM8ydtpPErN+LzMNeW8yCogvO/noLt625E7GngBvRUK+LzAQt27fKM3vMqcDbxW9py8P/AMvYPW4Lsp8Rg8gPJKvMNQWDyJVxW5yWCBvBpeD73XJRS8R8sYvJFa1rsD97Q5WU0tvPTvBj20Z1a805+duyWUxLynXlG6eP2ZO3kYxLzlJTm9vcItvPGWtrxwqlu8+spCvDE+mbnuYua8K6C0vCh/hLyUGkY7B4GOvK6KALwij2E84fvFvCax57yPjgw9FXjxvL2aKrw6JM07qxSsO8NZwLxmn7i89tPWvGlCxLyNzD+7ooAkvfpjTTsX4Zy8wMwjvZDi0bzwK+U7kc1svMFOsDuewtq7Z/7dO83wlLypIKi8sTUPvEUMb7v7eUi9WkVUvBgojDom5Qu9HJchPH1EDbzUevu8rUZEvQ=='
-		}
-	};
+		// The score band: the floor below which a result isn't shown, and the
+		// score at which the Relevance bar fills.
+		minScore: 0.40,
+		maxDisplayScore: 0.57
+	});
+
+	// How vectors are stored: quantized to int8, centered first on `mean`
+	// when one is given -- base64 float32, as Calibration.record() gives it
+	// for a model whose embeddings crowd around a shared direction. Bump
+	// `version` when either changes: every stored vector is then replaced,
+	// fetched again from the server and embedded again here.
+	const STORAGE_CONFIG = { version: 1, mean: null };
 
 	// How the text of items, notes and annotations is assembled for
 	// embedding, by kind: bump one when its assembly changes, so what was
@@ -99,12 +105,12 @@ Zotero.Embeddings = new function () {
 	const MODEL_HUB_URL_TEMPLATE = '{model}/resolve/{revision}';
 
 	/**
-	 * Name of the model, for logging and for the identity stored with the
-	 * vectors.
-	 * @return {String}
+	 * The active model's facts, as MODEL records them: name, revision,
+	 * dims, prefixes, pooling, serving, and the score band.
+	 * @return {Object}
 	 */
-	this.getModelName = function () {
-		return MODEL.name;
+	this.getModelConfig = function () {
+		return MODEL;
 	};
 
 	/**
@@ -122,49 +128,8 @@ Zotero.Embeddings = new function () {
 	 * @return {String}
 	 */
 	this.getModelVersion = function () {
-		return `${MODEL.name}/${MODEL.revision}`;
-	};
-
-	/**
-	 * Width of every stored vector
-	 * @return {Number}
-	 */
-	this.getDimensions = function () {
-		return MODEL.dims;
-	};
-
-	/**
-	 * The string embedQuery() prepends to every query.
-	 *
-	 * @return {String}
-	 */
-	this.getQueryPrefix = function () {
-		return MODEL.queryPrefix;
-	};
-
-	/**
-	 * The string embedPassages() prepends to every passage.
-	 *
-	 * @return {String}
-	 */
-	this.getPassagePrefix = function () {
-		return MODEL.passagePrefix;
-	};
-
-	/**
-	 * How the model combines token vectors: 'cls' or 'mean'.
-	 * @return {String}
-	 */
-	this.getPooling = function () {
-		return MODEL.pooling;
-	};
-
-	/**
-	 * How the model can be served from llama.cpp
-	 * @return {Object} - { gguf, quant }
-	 */
-	this.getServing = function () {
-		return MODEL.serving;
+		let { name, revision } = this.getModelConfig();
+		return `${name}/${revision}`;
 	};
 
 	/**
@@ -696,16 +661,16 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * Center a raw embedding on the active model's mean and quantize it: the
-	 * form every vector is stored and compared in.
+	 * A raw embedding in the form every vector is stored and compared in:
+	 * centered on the storage mean when there is one, then quantized.
 	 *
 	 * @param {Float32Array} vector
 	 * @return {Int8Array}
 	 */
 	this.prepare = function (vector) {
-		let mean = this.getCalibration().mean;
+		let mean = this.getStorageMean();
 		// A mean of a different width than the vector is no mean to center on
-		if (mean.length === vector.length) {
+		if (mean && mean.length === vector.length) {
 			vector = this.center(vector, mean);
 		}
 		return this.quantize(vector);
@@ -734,29 +699,36 @@ Zotero.Embeddings = new function () {
 	// Zotero.Embeddings.Calibration and recorded in MODEL.calibration.
 	//
 
+	/**
+	 * The version of the form vectors are stored in. Rows stored under
+	 * another can't be compared with this one's, whatever model made them.
+	 *
+	 * @return {Number}
+	 */
+	this.getStorageVersion = function () {
+		return STORAGE_CONFIG.version;
+	};
+
 	// Decoded on first use
-	let _calibration = null;
+	let _storageMean;
 
 	/**
-	 * The model's calibration, with its mean decoded.
+	 * The mean stored vectors are centered on, or null when they're stored
+	 * as they come.
 	 *
-	 * @return {Object} - { mean: Float32Array, minScore, maxDisplayScore }
+	 * @return {Float32Array|null}
 	 */
-	this.getCalibration = function () {
-		if (!_calibration) {
-			let recorded = MODEL.calibration;
-			if (!recorded) {
-				throw new Error(`Model '${MODEL.name}' has no calibration -- record one with `
-					+ 'Zotero.Embeddings.Calibration.record()');
+	this.getStorageMean = function () {
+		if (_storageMean === undefined) {
+			if (STORAGE_CONFIG.mean) {
+				let bytes = Uint8Array.from(atob(STORAGE_CONFIG.mean), c => c.charCodeAt(0));
+				_storageMean = new Float32Array(bytes.buffer);
 			}
-			let bytes = Uint8Array.from(atob(recorded.mean), c => c.charCodeAt(0));
-			_calibration = {
-				mean: new Float32Array(bytes.buffer),
-				minScore: recorded.minScore,
-				maxDisplayScore: recorded.maxDisplayScore
-			};
+			else {
+				_storageMean = null;
+			}
 		}
-		return _calibration;
+		return _storageMean;
 	};
 
 
@@ -846,7 +818,7 @@ Zotero.Embeddings = new function () {
 	 * @return {Float32Array}
 	 */
 	this.finishVector = function (vector) {
-		let dims = this.getDimensions();
+		let { dims } = this.getModelConfig();
 		if (vector.length > dims) {
 			vector = vector.slice(0, dims);
 		}
@@ -949,7 +921,7 @@ Zotero.Embeddings = new function () {
 	 * @return {Number} - 0-1, or above 1 unclamped
 	 */
 	this.getScoreFraction = function (score, { clamped = true } = {}) {
-		let { minScore, maxDisplayScore } = this.getCalibration();
+		let { minScore, maxDisplayScore } = this.getModelConfig();
 		let fraction = (score - minScore) / (maxDisplayScore - minScore);
 		return clamped ? Math.min(1, Math.max(0, fraction)) : Math.max(0, fraction);
 	};
@@ -985,18 +957,29 @@ Zotero.Embeddings = new function () {
 	// The shared guard of the scoring paths: confirm the stored vectors were
 	// produced by the active model. During a reindex after a revision bump
 	// the database isn't stamped for the new revision until the indexer
-	// starts filling it. Returns the calibration for the scoring that follows.
+	// starts filling it. Returns the model's config, for the score band.
 	async function _requireReadyIndex() {
 		await Zotero.Embeddings.initDB();
+		let Store = Zotero.Embeddings.Indexing.Store;
 		let modelVersion = Zotero.Embeddings.getModelVersion();
-		let indexedVersion = await Zotero.Embeddings.Indexing.Store.getIndexedModelVersion();
+		let indexedVersion = await Store.getIndexedModelVersion();
 		if (indexedVersion !== modelVersion) {
 			throw new Zotero.Embeddings.IndexNotReadyError(
 				`Embeddings index is for '${indexedVersion || 'no model'}', `
 					+ `but the active model is '${modelVersion}'`
 			);
 		}
-		return Zotero.Embeddings.getCalibration();
+		// An index with no storage version recorded predates them, and is
+		// taken as stored this way
+		let storageVersion = Zotero.Embeddings.getStorageVersion();
+		let indexedStorage = await Store.getIndexedStorageVersion();
+		if (indexedStorage !== null && indexedStorage !== storageVersion) {
+			throw new Zotero.Embeddings.IndexNotReadyError(
+				`Embeddings index is stored under version ${indexedStorage}, `
+					+ `but this client stores under ${storageVersion}`
+			);
+		}
+		return Zotero.Embeddings.getModelConfig();
 	}
 
 	/**
@@ -1019,10 +1002,9 @@ Zotero.Embeddings = new function () {
 		if (!itemIDs.length || !this.isEnabled()) {
 			return { scores, previewableIDs };
 		}
-		let calibration = await _requireReadyIndex();
+		let { minScore } = await _requireReadyIndex();
 		let query = this.prepare(await this.embedQuery(queryText));
 		let scoring = _scoreExpression(query);
-		let minScore = calibration.minScore;
 
 		// Score the candidates in chunks, under SQLite's bound-parameter
 		// limit. SQLite reduces each item to the two numbers below, so
@@ -1089,7 +1071,7 @@ Zotero.Embeddings = new function () {
 		if (!this.isEnabled()) {
 			return [];
 		}
-		let calibration = await _requireReadyIndex();
+		let { minScore } = await _requireReadyIndex();
 		let query = this.prepare(await this.embedQuery(queryText));
 		let scoring = _scoreExpression(query);
 		// Where each chunk sits, and its score; the vector itself stays in SQL
@@ -1098,7 +1080,7 @@ Zotero.Embeddings = new function () {
 				+ "SELECT chunkIndex, anchor, " + scoring.sql + " AS score "
 				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL"
 				+ ") WHERE score >= ? ORDER BY score DESC, chunkIndex",
-			[...scoring.params, itemID, calibration.minScore]
+			[...scoring.params, itemID, minScore]
 		);
 		// A chunk's heading is only known once it's read back, so chunks are
 		// read in batches until enough outside reference lists are found
@@ -1492,7 +1474,7 @@ Zotero.Embeddings.Indexing = new function () {
 	// model's width -- another width fails every query that scores it --
 	// and each anchor an object or null
 	function _areRowsWellFormed(rows, chunks) {
-		let width = Zotero.Embeddings.getDimensions();
+		let { dims: width } = Zotero.Embeddings.getModelConfig();
 		let indexes = new Set();
 		for (let { chunkIndex, embedding, anchor } of rows) {
 			if (!Number.isInteger(chunkIndex) || chunkIndex < 0 || chunkIndex >= chunks
@@ -1510,22 +1492,36 @@ Zotero.Embeddings.Indexing = new function () {
 		return true;
 	}
 
-	// Make sure the stored vectors are the active model's, as recorded in the
-	// meta table. On a mismatch -- a `revision` bump -- everything stored is
-	// cleared, and indexing rebuilds it.
+	// Make sure the stored vectors are the active model's and stored the way
+	// this client stores them, as recorded in the meta table. On a mismatch
+	// -- a `revision` bump, or a STORAGE_CONFIG version bump -- everything
+	// stored is cleared, and indexing and sync rebuild it. An index with no
+	// storage version recorded predates them, and is taken as stored this
+	// way.
 	async function _ensureIndexMatchesModel() {
-		let current = Zotero.Embeddings.getModelVersion();
-		let indexed = await Zotero.Embeddings.Indexing.Store.getIndexedModelVersion();
-		if (indexed === current) {
-			return;
+		let Store = Zotero.Embeddings.Indexing.Store;
+		let model = Zotero.Embeddings.getModelVersion();
+		let storage = Zotero.Embeddings.getStorageVersion();
+		let indexedModel = await Store.getIndexedModelVersion();
+		let indexedStorage = await Store.getIndexedStorageVersion();
+		let mismatch = null;
+		if (indexedModel && indexedModel !== model) {
+			mismatch = `from '${indexedModel}' but the active model is '${model}'`;
 		}
-		if (indexed) {
-			Zotero.debug(`Embeddings: stored embeddings are from '${indexed}' `
-				+ `but the active model is '${current}' -- clearing for reindexing`);
-			await Zotero.Embeddings.Indexing.Store.clear();
+		else if (indexedStorage !== null && indexedStorage !== storage) {
+			mismatch = `stored under version ${indexedStorage} but this client stores under ${storage}`;
+		}
+		if (mismatch) {
+			Zotero.debug(`Embeddings: stored embeddings are ${mismatch} -- clearing for reindexing`);
+			await Store.clear();
 			Zotero.Embeddings.Indexing.Progress.clearCounts();
 		}
-		await Zotero.Embeddings.Indexing.Store.setIndexedModelVersion(current);
+		if (indexedModel !== model) {
+			await Store.setIndexedModelVersion(model);
+		}
+		if (indexedStorage !== storage) {
+			await Store.setIndexedStorageVersion(storage);
+		}
 	}
 
 	// Drop what's stored for items that are gone or in a library that's no
@@ -2234,7 +2230,7 @@ Zotero.Embeddings.Indexing = new function () {
 	this.getStatus = function () {
 		return {
 			enabled: Zotero.Embeddings.isEnabled(),
-			model: Zotero.Embeddings.getModelName(),
+			model: Zotero.Embeddings.getModelConfig().name,
 			indexing: _indexing,
 			// A stop has been requested but the current batch is still finishing
 			stopping: _indexing && _stopping,
@@ -3256,6 +3252,22 @@ Zotero.Embeddings.Indexing.Store = new function () {
 		);
 	};
 
+	// The version of the form every stored vector is in, as
+	// Zotero.Embeddings.getStorageVersion() gives it, or null with none
+	// recorded
+	this.getIndexedStorageVersion = async function () {
+		let value = await Zotero.DB.valueQueryAsync(
+			"SELECT value FROM embeddings.embeddingsMeta WHERE key='storageVersion'");
+		return value === false ? null : parseInt(value);
+	};
+
+	this.setIndexedStorageVersion = async function (version) {
+		await Zotero.DB.queryAsync(
+			"REPLACE INTO embeddings.embeddingsMeta (key, value) VALUES ('storageVersion', ?)",
+			[version]
+		);
+	};
+
 	// The server's version of a library's embeddings as of this client's
 	// last look at what changed, or null
 	this.getSyncVersion = async function (libraryID) {
@@ -3794,16 +3806,23 @@ Zotero.Embeddings.Calibration = new function () {
 	};
 
 	/**
-	 * Run the active model over its corpus and derive its three numbers: the
-	 * mean of the passage embeddings, and the two ends of the score band, read
-	 * off the distributions of matched and near-miss scores.
+	 * Run the active model over its corpus and derive its numbers: the two
+	 * ends of the score band, read off the distributions of matched and
+	 * near-miss scores, and the mean of the passage embeddings. The mean's
+	 * length says whether vectors want centering on it: near 1 for a model
+	 * whose embeddings crowd around a shared direction, which centering
+	 * pulls apart, well below for one that spreads them out.
 	 *
-	 * @return {Promise<Object>} - { mean, minScore, maxDisplayScore }
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.centered] - Whether to score centered on
+	 *     the mean, as a model stored with one is; by default, whether the
+	 *     active storage has a mean
+	 * @return {Promise<Object>} - { mean, meanLength, minScore,
+	 *     maxDisplayScore }
 	 */
-	this.measure = async function () {
+	this.measure = async function ({ centered = Zotero.Embeddings.getStorageMean() !== null } = {}) {
 		let triples = this.getCorpus();
-		let queryPrefix = Zotero.Embeddings.getQueryPrefix();
-		let passagePrefix = Zotero.Embeddings.getPassagePrefix();
+		let { queryPrefix, passagePrefix } = Zotero.Embeddings.getModelConfig();
 		Zotero.debug(`Embeddings: measuring against ${triples.length} `
 			+ `query/passage/near-miss triples`);
 		let queries = await _embedAll(triples.map(triple => queryPrefix + triple.query));
@@ -3820,9 +3839,14 @@ Zotero.Embeddings.Calibration = new function () {
 			}
 		}
 
-		// Scoring compares centered, quantized vectors, so calibrate on those,
-		// using the same transform and comparison the search path uses
-		let prepare = vector => Zotero.Embeddings.quantize(Zotero.Embeddings.center(vector, mean));
+		let meanLength = Math.hypot(...mean);
+		Zotero.debug(`Embeddings: the mean of the passage embeddings has length ${meanLength.toFixed(3)}`);
+
+		// Scoring compares quantized vectors, centered when stored so, so
+		// calibrate on those, using the same transform and comparison the
+		// search path uses
+		let prepare = vector => Zotero.Embeddings.quantize(
+			centered ? Zotero.Embeddings.center(vector, mean) : vector);
 		queries = queries.map(prepare);
 		let scores = vectors => vectors.map(
 			(vector, i) => Zotero.Embeddings.cosine(queries[i], prepare(vector))
@@ -3838,23 +3862,30 @@ Zotero.Embeddings.Calibration = new function () {
 		// anything, and every score it produced would clamp to a full or empty
 		// bar. Better to fail loudly than to index with it.
 		if (maxDisplayScore <= minScore) {
-			throw new Error(`Model '${Zotero.Embeddings.getModelName()}' scores matched text `
+			throw new Error(`Model '${Zotero.Embeddings.getModelConfig().name}' scores matched text `
 				+ `(${maxDisplayScore.toFixed(4)}) no higher than near misses `
 				+ `(${minScore.toFixed(4)}) -- it can't rank search results`);
 		}
-		return { mean, minScore, maxDisplayScore };
+		return { mean, meanLength, minScore, maxDisplayScore };
 	};
 
 	/**
-	 * measure(), formatted for MODEL's `calibration` entry.
+	 * measure(), formatted for pasting: the band for MODEL's `calibration`
+	 * entry, and the mean for STORAGE_CONFIG when scored centered on it.
 	 *
-	 * @return {Promise<Object>} - { minScore, maxDisplayScore, mean }, the
-	 *     mean as base64
+	 * @param {Object} [options] - measure()'s
+	 * @return {Promise<Object>} - { calibration: { minScore,
+	 *     maxDisplayScore }, storage: { mean } }, the mean as base64 and
+	 *     null when not centered
 	 */
-	this.record = async function () {
-		let { mean, minScore, maxDisplayScore } = await this.measure();
+	this.record = async function (options) {
+		let { mean, minScore, maxDisplayScore } = await this.measure(options);
+		let centered = options?.centered ?? Zotero.Embeddings.getStorageMean() !== null;
 		let bytes = new Uint8Array(mean.buffer, mean.byteOffset, mean.byteLength);
-		return { minScore, maxDisplayScore, mean: btoa(String.fromCharCode(...bytes)) };
+		return {
+			calibration: { minScore, maxDisplayScore },
+			storage: { mean: centered ? btoa(String.fromCharCode(...bytes)) : null }
+		};
 	};
 
 	async function _embedAll(texts) {
@@ -3920,7 +3951,7 @@ Zotero.Embeddings.Endpoint = new function () {
 	 * @return {Boolean}
 	 */
 	this.isSupported = function () {
-		return !!Zotero.Embeddings.getServing();
+		return !!Zotero.Embeddings.getModelConfig().serving;
 	};
 
 	/**
@@ -3931,13 +3962,13 @@ Zotero.Embeddings.Endpoint = new function () {
 	 *     can't be served
 	 */
 	this.getCommand = function () {
-		let serving = Zotero.Embeddings.getServing();
+		let { serving, pooling } = Zotero.Embeddings.getModelConfig();
 		if (!serving) {
 			return null;
 		}
 		return {
 			command: `llama serve -hf ${serving.gguf}:${serving.quant} --embeddings `
-				+ `--pooling ${Zotero.Embeddings.getPooling()} `
+				+ `--pooling ${pooling} `
 				+ `-c ${SERVER_CONTEXT} -ub ${SERVER_CONTEXT} -b ${SERVER_CONTEXT} --port 8080`,
 			url: 'http://localhost:8080/v1/embeddings'
 		};
@@ -3973,7 +4004,7 @@ Zotero.Embeddings.Endpoint = new function () {
 			await _save(verdict);
 			return verdict;
 		};
-		let prefix = E.getPassagePrefix();
+		let { passagePrefix: prefix } = E.getModelConfig();
 		let { regular, padded } = _probeTexts();
 		let local = await E.embedMany([...regular, padded].map(text => prefix + text));
 		let localPadded = local.pop();
@@ -4081,7 +4112,7 @@ Zotero.Embeddings.Endpoint = new function () {
 	this.getSentinel = async function () {
 		let modelVersion = Zotero.Embeddings.getModelVersion();
 		if (_sentinel?.modelVersion !== modelVersion) {
-			let text = Zotero.Embeddings.getPassagePrefix() + _probeTexts().regular[0];
+			let text = Zotero.Embeddings.getModelConfig().passagePrefix + _probeTexts().regular[0];
 			let [vector] = await Zotero.Embeddings.embedMany([text]);
 			_sentinel = { modelVersion, text, vector };
 		}
@@ -4615,7 +4646,7 @@ Zotero.Embeddings.Sync = new function () {
 			return null;
 		}
 		let vector = Float32Array.from(new VectorArray(bytes.buffer));
-		if (vector.length < Zotero.Embeddings.getDimensions() || !vector.every(Number.isFinite)) {
+		if (vector.length < Zotero.Embeddings.getModelConfig().dims || !vector.every(Number.isFinite)) {
 			return null;
 		}
 		return vector;

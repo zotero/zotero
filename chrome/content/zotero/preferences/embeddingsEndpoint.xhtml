@@ -103,9 +103,9 @@
 			remove.hidden = !stored;
 			document.addEventListener('dialogextra2', removeEndpoint);
 
-			let serving = Zotero.Embeddings.getServing();
-			document.getElementById('endpoint-model').value = Zotero.Embeddings.getModelName();
-			document.getElementById('endpoint-pooling').value = Zotero.Embeddings.getPooling();
+			let { serving, name, pooling } = Zotero.Embeddings.getModelConfig();
+			document.getElementById('endpoint-model').value = name;
+			document.getElementById('endpoint-pooling').value = pooling;
 			document.getElementById('endpoint-file').value = `${serving.gguf} (${serving.quant})`;
 			document.getElementById('endpoint-command').value = command;
 			document.l10n.setAttributes(document.getElementById('endpoint-command-url'),
@@ -175,7 +175,7 @@
 			}
 			document.l10n.setAttributes(box,
 				`preferences-advanced-semantic-search-endpoint-error-${verdict.state}`,
-				{ pooling: Zotero.Embeddings.getPooling() });
+				{ pooling: Zotero.Embeddings.getModelConfig().pooling });
 		}
 	</script>
 </dialog>
