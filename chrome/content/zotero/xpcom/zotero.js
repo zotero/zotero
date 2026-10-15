@@ -1823,7 +1823,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 			if (msg) {
 				label.hidden = false;
-				label.value = msg;
+				// Text content rather than value, so long messages wrap inside the box
+				label.textContent = msg;
 			}
 			else {
 				label.hidden = true;
