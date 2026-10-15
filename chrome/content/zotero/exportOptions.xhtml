@@ -7,7 +7,6 @@
 %zoteroDTD;
 ]>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.exportOptions.title;"
 	drawintitlebar-platforms="mac"
@@ -23,13 +22,15 @@
 	</script>
 	<script src="charsetMenu.js"/>
 	<script src="exportOptions.js"/>
-	<script type="application/javascript">
-	<![CDATA[
+	<script>
 		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
 		observerService.notifyObservers(null, "charsetmenu-selected", "other");
-	]]>
 	</script>
 
+	<linkset>
+		<html:link rel="localization" href="branding/brand.ftl"/>
+		<html:link rel="localization" href="zotero.ftl"/>
+	</linkset>
 	
 	<vbox id="zotero-export-options-container" flex="1">
 		<hbox align="center">
@@ -38,6 +39,7 @@
 				<menupopup id="format-popup"/>
 			</menulist>
 		</hbox>
+		<label id="warning-cannot-import" data-l10n-id="export-warning-cannot-import"/>
 		<groupbox id="translator-options">
 			<caption id="translator-options-label" label="&zotero.exportOptions.translatorOptions.label;"/>
 			
@@ -47,6 +49,9 @@
 				<menulist id="export-option-exportCharset" native="true"/>
 			</vbox>
 		</groupbox>
+		<label id="warning-backup" data-l10n-id="export-warning-backup">
+			<label class="zotero-text-link" is="zotero-text-link" href="https://www.zotero.org/support/zotero_data#backing_up_your_zotero_data" data-l10n-name="backup-help-link"/>
+		</label>
 	</vbox>
 </dialog>
 </window>
