@@ -72,6 +72,145 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('firstCreator'), "B");
 		});
 
+		it("should return composer as firstCreator for an audioRecording without a primary creator", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'audioRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "translator"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "composer"
+				}
+			]);
+			assert.equal(item.getField('firstCreator'), "D");
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), "D");
+			assert.equal(item.sortCreator, "D C");
+		});
+		
+		it("should return wordsBy as firstCreator for an audioRecording without a primary creator", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'audioRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "translator"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "wordsBy"
+				},
+				{
+					firstName: "E",
+					lastName: "F",
+					creatorType: "wordsBy"
+				}
+			]);
+			var expected = Zotero.getString('general.andJoiner', ['⁨D⁩', '⁨F⁩']);
+			assert.equal(item.getField('firstCreator'), expected);
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), expected);
+			assert.equal(item.sortCreator, "D C F E");
+		});
+		
+		it("should show composer and wordsBy alongside performer for an audioRecording", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'audioRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "performer"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "translator"
+				},
+				{
+					firstName: "E",
+					lastName: "F",
+					creatorType: "composer"
+				}
+			]);
+			var expected = Zotero.getString('general.andJoiner', ['⁨B⁩', '⁨F⁩']);
+			assert.equal(item.getField('firstCreator'), expected);
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), expected);
+			assert.equal(item.sortCreator, "B A F E");
+			
+			item.setCreators([
+				...item.getCreators(),
+				{
+					firstName: "G",
+					lastName: "H",
+					creatorType: "wordsBy"
+				}
+			]);
+			expected = "B " + Zotero.getString('general.etAl');
+			assert.equal(Zotero.Items.getFirstCreatorFromData(item.itemTypeID, item.getCreators()), expected);
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), expected);
+			assert.equal(item.sortCreator, "B A F E H G");
+		});
+		
+		it("should show wordsBy alongside performer for an audioRecording", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'audioRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "wordsBy"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "performer"
+				}
+			]);
+			var expected = Zotero.getString('general.andJoiner', ['⁨B⁩', '⁨D⁩']);
+			assert.equal(item.getField('firstCreator'), expected);
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), expected);
+			assert.equal(item.sortCreator, "B A D C");
+		});
+		
+		it("should prefer composer and wordsBy over contributor", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'audioRecording' });
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "wordsBy"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "contributor"
+				},
+				{
+					firstName: "E",
+					lastName: "F",
+					creatorType: "composer"
+				}
+			]);
+			var expected = Zotero.getString('general.andJoiner', ['⁨B⁩', '⁨F⁩']);
+			assert.equal(item.getField('firstCreator'), expected);
+			
+			await item.saveTx();
+			assert.equal(item.getField('firstCreator'), expected);
+			assert.equal(item.sortCreator, "B A F E");
+		});
+
 		it("should strip bidi isolates from firstCreator when unformatted = true", async function () {
 			var item = createUnsavedDataObject('item');
 			item.setCreators([
