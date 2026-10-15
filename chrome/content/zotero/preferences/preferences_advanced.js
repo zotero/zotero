@@ -260,8 +260,8 @@ Zotero_Preferences.Advanced = {
 		if (index == 0) {
 			Zotero.Schema.resetTranslatorsAndStyles()
 			.then(function () {
-				if (Zotero_Preferences.Export) {
-					Zotero_Preferences.Export.populateQuickCopyList();
+				if (Zotero_Preferences.QuickCopy) {
+					Zotero_Preferences.QuickCopy.populateQuickCopyList();
 				}
 			});
 		}
@@ -286,8 +286,8 @@ Zotero_Preferences.Advanced = {
 			button.disabled = true;
 			try {
 				await Zotero.Schema.resetTranslators();
-				if (Zotero_Preferences.Export) {
-					Zotero_Preferences.Export.populateQuickCopyList();
+				if (Zotero_Preferences.QuickCopy) {
+					Zotero_Preferences.QuickCopy.populateQuickCopyList();
 				}
 			}
 			finally {
