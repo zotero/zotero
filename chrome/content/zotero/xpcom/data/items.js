@@ -298,6 +298,7 @@ Zotero.Items = function () {
 		var sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
 		var allItemIDs = [];
+		var fieldIDsByType = new Map();
 		await Zotero.DB.queryAsync(
 			sql,
 			params,
@@ -306,9 +307,13 @@ Zotero.Items = function () {
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
-					
+
 					// Set nonexistent fields in the cache list to false (instead of null)
-					let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+					let fieldIDs = fieldIDsByType.get(item.itemTypeID);
+					if (!fieldIDs) {
+						fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
+						fieldIDsByType.set(item.itemTypeID, fieldIDs);
+					}
 					for (let j=0; j<fieldIDs.length; j++) {
 						let fieldID = fieldIDs[j];
 						if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
@@ -399,7 +404,6 @@ Zotero.Items = function () {
 			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
 			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
 		var params = [libraryID];
-		var rows = await Zotero.DB.queryAsync(sql, params, { noCache: true });
 		
 		// Mark creator indexes above the number of creators as changed,
 		// so that they're cleared if the item is saved
@@ -420,46 +424,52 @@ Zotero.Items = function () {
 		var item;
 		var index = 0;
 		var maxOrderIndex = -1;
-		for (let i = 0; i < rows.length; i++) {
-			let row = rows[i];
-			let itemID = row.itemID;
-			
-			if (itemID != lastItemID) {
-				if (!this._objectCache[itemID]) {
-					throw new Error("Item " + itemID + " not loaded");
+		// Read columns by index as rows arrive, rather than building a Proxy row
+		// object for every item/creator pair
+		await Zotero.DB.queryAsync(sql, params, {
+			noCache: true,
+			onRow: (row, cancel) => {
+				let itemID = row.getResultByIndex(0);
+				let creatorID = row.getResultByIndex(1);
+				
+				if (itemID != lastItemID) {
+					if (!this._objectCache[itemID]) {
+						throw new Error("Item " + itemID + " not loaded");
+					}
+					item = this._objectCache[itemID];
+					
+					item._creators = [];
+					item._creatorIDs = [];
+					item._loaded.creators = true;
+					item._clearChanged('creators');
+					
+					if (!creatorID) {
+						lastItemID = itemID;
+						return;
+					}
+					
+					if (index <= maxOrderIndex) {
+						fixIncorrectIndexes(item, index, maxOrderIndex);
+					}
+					
+					index = 0;
+					maxOrderIndex = -1;
 				}
-				item = this._objectCache[itemID];
 				
-				item._creators = [];
-				item._creatorIDs = [];
-				item._loaded.creators = true;
-				item._clearChanged('creators');
+				lastItemID = itemID;
 				
-				if (!row.creatorID) {
-					lastItemID = row.itemID;
-					continue;
+				let orderIndex = row.getResultByIndex(3);
+				if (orderIndex > maxOrderIndex) {
+					maxOrderIndex = orderIndex;
 				}
 				
-				if (index <= maxOrderIndex) {
-					fixIncorrectIndexes(item, index, maxOrderIndex);
-				}
-				
-				index = 0;
-				maxOrderIndex = -1;
+				let creatorData = Zotero.Creators.get(creatorID);
+				creatorData.creatorTypeID = row.getResultByIndex(2);
+				item._creators[index] = creatorData;
+				item._creatorIDs[index] = creatorID;
+				index++;
 			}
-			
-			lastItemID = row.itemID;
-			
-			if (row.orderIndex > maxOrderIndex) {
-				maxOrderIndex = row.orderIndex;
-			}
-			
-			let creatorData = Zotero.Creators.get(row.creatorID);
-			creatorData.creatorTypeID = row.creatorTypeID;
-			item._creators[index] = creatorData;
-			item._creatorIDs[index] = row.creatorID;
-			index++;
-		}
+		});
 		
 		if (index <= maxOrderIndex) {
 			fixIncorrectIndexes(item, index, maxOrderIndex);
