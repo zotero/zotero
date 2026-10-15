@@ -34,19 +34,19 @@ import cx from 'classnames';
 // We'll want to replace this with a single component shared between the PDF reader and the rest
 // of the codebase.
 function AnnotationBox({ data }) {
-	var textStyle = {
-		borderLeft: "2px solid " + data.color
-	};
-	
+	// Same icons as the item pane's annotation rows
+	var iconType = data.type == 'image' ? 'area' : data.type;
+
 	return (
 		<div className="AnnotationBox">
 			<div className="title">{Zotero.getString('itemTypes.annotation')}</div>
-			<div className="container">
+			<div className="container" style={{ '--annotation-color': data.color }}>
 				<div className="header">
+					<img className="icon" src={`chrome://zotero/skin/16/universal/annotate-${iconType}.svg`} alt=""/>
 					<div>{Zotero.Cite.getLocatorString('page')} {data.pageLabel}</div>
 				</div>
 				{data.text !== undefined
-					? <div className="text" style={textStyle}>{data.text}</div>
+					? <div className="text">{data.text}</div>
 					: ''}
 				{data.type == 'image'
 					// TODO: Localize

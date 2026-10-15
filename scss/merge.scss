@@ -1,3 +1,7 @@
+@import "abstracts/variables";
+@import "abstracts/functions";
+@import "abstracts/mixins";
+
 wizardpage {
 	overflow: hidden;
 	min-width: 780px;
@@ -8,6 +12,8 @@ merge-group {
 	display: flex;
 	overflow: hidden auto;
 	gap: 8px;
+	// Room for the focus ring and the selected ring, which the scrollport would clip
+	padding: 4px;
 
 	merge-pane {
 		flex: 1;
@@ -16,15 +22,44 @@ merge-group {
 		max-height: 0;
 		min-width: 250px;
 
+		// Each version is a card; the chosen one gets an accent ring and heading
 		& groupbox {
 			flex: 1;
+			margin: 0;
+			padding: 6px 8px;
+			background: var(--material-background);
+			border: var(--material-border-quinary);
+			border-radius: 5px;
+			@include focus-ring;
 		}
 
-		&[selected] h2,
-		&[selected] attachment-box #title {
-			color: red;
+		h2 {
 			font-weight: 600;
-			text-decoration: underline;
+		}
+
+		&[selected] groupbox {
+			border-color: var(--color-accent);
+			box-shadow: 0 0 0 1px var(--color-accent);
+		}
+
+		// Only the heading: an accent-colored attachment title would read as a link
+		&[selected] h2 {
+			color: var(--color-accent);
+		}
+
+		// Forced colors drop the ring's shadow and repaint the accent as plain text color,
+		// so mark the chosen version with a Highlight border and an underlined heading
+		@media (forced-colors: active) {
+			&[selected] groupbox {
+				border: 2px solid Highlight;
+				padding: 5px 7px;
+			}
+
+			// Highlight is a background color and can be unreadable as text, so underline instead
+			&[selected] h2 {
+				color: CanvasText;
+				text-decoration: underline;
+			}
 		}
 
 		.parent-row {
@@ -39,26 +74,25 @@ merge-group {
 			min-width: 15em;
 		}
 
+		.choose-button {
+			margin-inline: 0;
+			margin-top: 6px;
+		}
+
 		collapsible-section {
 			border-bottom: none !important;
 		}
 	}
 
+	// Versions you can choose by clicking the whole card (notes and files use the button)
 	&:not([mergetype="note"]) {
-		#left-pane:active h2,
-		#right-pane:active h2,
-		#left-pane:active attachment-box #title,
-		#right-pane:active attachment-box #title {
-			color: red;
-			font-weight: 600;
+		:is(#left-pane, #right-pane):not([selected]) groupbox:hover {
+			background: var(--material-mix-quinary);
 		}
-	}
 
-	#left-pane:hover:not([selected]) h2,
-	#left-pane groupbox:focus:not([selected]) h2,
-	#right-pane:hover:not([selected]) h2,
-	#right-pane groupbox:focus:not([selected]) h2 {
-		text-decoration: underline;
+		:is(#left-pane, #right-pane):not([selected]) groupbox:active {
+			background: var(--material-mix-quarternary);
+		}
 	}
 
 	editable-text .input:read-only {
@@ -84,4 +118,10 @@ merge-group {
 #zotero-step-count label:last-child {
 	margin-right: 1em;
 	font-weight: 600;
+}
+
+// zotero.css fixes groupbox headings at 14px; keep that size at the default 13px base
+// but scale with the font size setting
+merge-pane groupbox > label > h2 {
+	font-size: calc(14em / 13);
 }
