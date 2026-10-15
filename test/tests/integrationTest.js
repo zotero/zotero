@@ -97,6 +97,7 @@ describe("Zotero.Integration", function () {
 				throw new Error("noteType must be an integer");
 			}
 			var field = new DocumentPluginDummy.Field(this, this.fieldIdx++);
+			field.noteIndex = noteType ? 1 : 0;
 			this.fields.push(field);
 			return field;
 		},
@@ -138,7 +139,12 @@ describe("Zotero.Integration", function () {
 		 * Converts all fields in a document to a different fieldType or noteType
 		 * @params {DocumentPluginDummy.Field[]} fields
 		 */
-		convert: (fields, toFieldType, toNoteType, count) => 0,
+		convert: (fields, toFieldType, toNoteType, count) => {
+			for (let i = 0; i < count; i++) {
+				fields[i].noteIndex = toNoteType[i] ? 1 : 0;
+			}
+			return 0;
+		},
 		/**
 		 * Cleans up the document state and resumes processor for editing
 		 */
@@ -235,7 +241,9 @@ describe("Zotero.Integration", function () {
 		 * This field's note index, if it is in a footnote or endnote; otherwise zero.
 		 * @returns {Number}
 		 */
-		getNoteIndex: () => 0,
+		getNoteIndex: function () {
+			return this.noteIndex || 0;
+		},
 		
 		/**
 		 * Whether this field is adjacent to the next field (meaning they can be merged).
@@ -277,6 +285,9 @@ describe("Zotero.Integration", function () {
 	var addEditCitationSpy, displayDialogStub;
 	var styleID = "http://www.zotero.org/styles/apa";
 	var stylePath = OS.Path.join(getTestDataDirectory().path, 'apa.csl');
+	var noteStyleID = "https://www.zotero-chinese.com/styles/法学引注手册（多语言，重复引用不省略）";
+	var noteStylePath = OS.Path.join(
+		getTestDataDirectory().path, 'handbook-of-legal-citations-zh.csl');
 
 	var commandList = [
 		'addCitation', 'editCitation', 'addEditCitation',
@@ -342,6 +353,38 @@ describe("Zotero.Integration", function () {
 			io._acceptDeferred.resolve(() => {});
 		};
 	}
+
+	function setAuthorOnlyItem(item) {
+		dialogResults.citationDialog = async function (dialogName, io) {
+			item = Zotero.Cite.getItem(item.id);
+			io.citation.citationItems = [{
+				id: item.id,
+				uris: item.cslURIs,
+				itemData: item.cslItemData,
+			}];
+			io.citationForm = 'author-only';
+			io._acceptDeferred.resolve(() => {});
+		};
+	}
+
+	function setNarrativeItems(items, headIndex = 0, infix = ' ', unsorted = false) {
+		if (items.length == undefined) items = [items];
+		dialogResults.citationDialog = async function (dialogName, io) {
+			io.citation.citationItems = items.map(function (item, index) {
+				item = Zotero.Cite.getItem(item.id);
+				return {
+					id: item.id,
+					uris: item.cslURIs,
+					itemData: item.cslItemData,
+					...(index == headIndex && { 'is-narrative-head': true }),
+				};
+			});
+			io.citation.properties.unsorted = unsorted;
+			io.citationForm = 'narrative';
+			io.narrativeInfix = infix;
+			io._acceptDeferred.resolve(() => {});
+		};
+	}
 	
 	async function insertMultipleCitations() {
 		var docID = this.test.fullTitle();
@@ -368,6 +411,7 @@ describe("Zotero.Integration", function () {
 	before(function* () {
 		yield Zotero.Styles.init();
 		yield Zotero.Styles.install({file: stylePath}, styleID, true);
+		yield Zotero.Styles.install({ file: noteStylePath }, noteStyleID, true);
 
 		testItems = [];
 		for (let i = 0; i < 5; i++) {
@@ -407,7 +451,119 @@ describe("Zotero.Integration", function () {
 		displayDialogStub.restore();
 		addEditCitationSpy.restore();
 	});
-	
+
+	describe('Session', function () {
+		describe('#_prepareCitationForCiteproc()', function () {
+			it('should transiently suppress the marked Remainder item', function () {
+				let citation = {
+					properties: { mode: 'suppress-author' },
+					citationItems: [
+						{ id: 1, 'is-narrative-head': true },
+						{ id: 2 },
+					],
+				};
+				let prepared = Zotero.Integration.Session.prototype
+					._prepareCitationForCiteproc(citation, { clone: true });
+				assert.isTrue(prepared.citationItems[0]['suppress-author']);
+				assert.notProperty(prepared.citationItems[1], 'suppress-author');
+				assert.notProperty(citation.citationItems[0], 'suppress-author');
+			});
+		});
+
+		describe('#_relinkItems()', function () {
+			var session;
+			var firstCitation;
+			var secondCitation;
+			var firstReplacement;
+			var secondReplacement;
+
+			beforeEach(function () {
+				firstCitation = {
+					citationItems: [
+						{ id: 'stale-id', cslItemID: 'embedded/first', uris: ['old:first'] },
+						{
+							id: 'stale-unreplaced',
+							cslItemID: 'embedded/unreplaced',
+							uris: ['old:unreplaced'],
+						},
+						{ id: 2, uris: ['old:second'] },
+					],
+				};
+				secondCitation = {
+					citationItems: [
+						{ id: 'embedded/first', uris: ['old:first'] },
+					],
+				};
+				firstReplacement = { id: 100 };
+				secondReplacement = { id: 101 };
+				session = {
+					citationsByIndex: {
+						2: firstCitation,
+						9: secondCitation,
+					},
+					citationsByItemID: {},
+					updateIndices: {},
+					uriMap: {
+						getURIsForItemID: id => [`new:${id}`],
+					},
+					bibliography: {
+						uncitedItemIDs: new Set(['embedded/second']),
+						omittedItemIDs: new Set(['embedded/first']),
+						customEntryText: {
+							'embedded/first': 'First custom entry',
+							'embedded/second': 'Second custom entry',
+						},
+					},
+					bibliographyHasChanged: false,
+					bibliographyDataHasChanged: false,
+				};
+			});
+
+			it('should relink every citation occurrence and bibliography entry', function () {
+				Zotero.Integration.Session.prototype._relinkItems.call(session, [
+					{ oldItemID: 'embedded/first', item: firstReplacement },
+					{ oldItemID: 'embedded/second', item: secondReplacement },
+				]);
+
+				assert.equal(firstCitation.citationItems[0].id, firstReplacement.id);
+				assert.notProperty(firstCitation.citationItems[0], 'cslItemID');
+				assert.deepEqual(firstCitation.citationItems[0].uris, ['new:100']);
+				assert.equal(secondCitation.citationItems[0].id, firstReplacement.id);
+				assert.deepEqual(secondCitation.citationItems[0].uris, ['new:100']);
+				assert.deepEqual(Object.keys(session.updateIndices), ['2', '9']);
+				assert.deepEqual(session.citationsByItemID[firstReplacement.id], [
+					firstCitation,
+					secondCitation,
+				]);
+				assert.deepEqual(
+					session.citationsByItemID['embedded/unreplaced'],
+					[firstCitation]
+				);
+				assert.notProperty(session.citationsByItemID, 'stale-unreplaced');
+				assert.deepEqual(session.citationsByItemID[2], [firstCitation]);
+
+				assert.deepEqual(
+					[...session.bibliography.uncitedItemIDs],
+					[String(secondReplacement.id)]
+				);
+				assert.deepEqual(
+					[...session.bibliography.omittedItemIDs],
+					[String(firstReplacement.id)]
+				);
+				assert.equal(
+					session.bibliography.customEntryText[firstReplacement.id],
+					'First custom entry'
+				);
+				assert.equal(
+					session.bibliography.customEntryText[secondReplacement.id],
+					'Second custom entry'
+				);
+				assert.isTrue(session.bibliographyHasChanged);
+				assert.isTrue(session.bibliographyDataHasChanged);
+			});
+		});
+	});
+
 	describe('Interface', function () {
 		describe('#execCommand', function () {
 			var setDocumentDataSpy;
@@ -755,6 +911,226 @@ describe("Zotero.Integration", function () {
 				getCiteprocBibliographySpy.restore();
 			});
 			
+			it('should place citation forms correctly in note styles', async function () {
+				var ordinaryDocID = this.test.fullTitle() + ' ordinary';
+				await initDoc(ordinaryDocID, {
+					prefs: {
+						noteType: 1,
+						fieldType: 'Field',
+						automaticJournalAbbreviations: true,
+					},
+				});
+				setAddEditItems(testItems[0]);
+				await execCommand('addEditCitation', ordinaryDocID);
+				let ordinaryDoc = applications[ordinaryDocID].doc;
+				assert.equal(await ordinaryDoc.fields[0].getNoteIndex(), 1);
+				sinon.stub(ordinaryDoc, 'cursorInField').resolves(ordinaryDoc.fields[0]);
+				sinon.stub(ordinaryDoc, 'canInsertField').resolves(false);
+				setAuthorOnlyItem(testItems[0]);
+				await execCommand('addEditCitation', ordinaryDocID);
+				assert.equal(await ordinaryDoc.fields[0].getNoteIndex(), 0);
+
+				var narrativeDocID = this.test.fullTitle() + ' narrative';
+				await initDoc(narrativeDocID, {
+					prefs: {
+						noteType: 1,
+						fieldType: 'Field',
+						automaticJournalAbbreviations: true,
+					},
+				});
+				setNarrativeItems(testItems.slice(0, 2), 0, ' ', true);
+				await execCommand('addEditCitation', narrativeDocID);
+				let narrativeFields = applications[narrativeDocID].doc.fields;
+				assert.equal(await narrativeFields[0].getNoteIndex(), 0);
+				assert.equal(await narrativeFields[1].getNoteIndex(), 1);
+
+				var noteStyleDocID = this.test.fullTitle() + ' note style';
+				await initDoc(noteStyleDocID, {
+					style: {
+						styleID: noteStyleID,
+						locale: 'en-US',
+						hasBibliography: true,
+						bibliographyStyleHasBeenSet: true,
+					},
+					prefs: {
+						noteType: 1,
+						fieldType: 'Field',
+						automaticJournalAbbreviations: true,
+					},
+				});
+				setNarrativeItems(testItems[0], 0, ' ', true);
+				await execCommand('addEditCitation', noteStyleDocID);
+				let noteStyleFields = applications[noteStyleDocID].doc.fields;
+				assert.include(noteStyleFields[0].text, 'Author No0');
+				assert.notInclude(noteStyleFields[1].text, 'Author No0');
+
+				var authorOnlyDocID = this.test.fullTitle() + ' author only';
+				await initDoc(authorOnlyDocID, {
+					prefs: {
+						noteType: 1,
+						fieldType: 'Field',
+						automaticJournalAbbreviations: true,
+					},
+				});
+				setAuthorOnlyItem(testItems[0]);
+				await execCommand('addEditCitation', authorOnlyDocID);
+				let authorOnlyDoc = applications[authorOnlyDocID].doc;
+				assert.equal(await authorOnlyDoc.fields[0].getNoteIndex(), 0);
+				assert.equal(new Zotero.Integration.DocumentData(authorOnlyDoc.data).dataVersion, 5);
+			});
+
+			it('should insert and serialize a narrative citation group', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID);
+				var doc = applications[docID].doc;
+
+				var insertTextSpy = sinon.spy(doc, 'insertText');
+				setNarrativeItems(testItems.slice(0, 2), 0, '  argues\t ', true);
+				await execCommand('addEditCitation', docID);
+
+				assert.isTrue(insertTextSpy.calledWith(' argues '));
+				assert.equal(doc.fields.length, 2);
+				var headField = await Zotero.Integration.Field.loadExisting(doc.fields[0]);
+				var remainderField = await Zotero.Integration.Field.loadExisting(doc.fields[1]);
+				var head = await headField.unserialize();
+				var remainder = await remainderField.unserialize();
+				assert.equal(headField.type, INTEGRATION_TYPE_ITEM);
+				assert.equal(head.properties.mode, 'author-only');
+				assert.equal(head.citationItems.length, 1);
+				assert.equal(head.citationItems[0].id, testItems[0].id);
+				assert.equal(remainder.properties.mode, 'suppress-author');
+				assert.equal(remainder.citationItems.length, 2);
+				assert.isTrue(remainder.citationItems[0]['is-narrative-head']);
+				assert.equal(new Zotero.Integration.DocumentData(doc.data).dataVersion, 5);
+			});
+
+			it('should synchronize a sorted Narrative Head by occurrence', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID);
+				var doc = applications[docID].doc;
+
+				setNarrativeItems([testItems[2], testItems[0], testItems[0]], 0);
+				await execCommand('addEditCitation', docID);
+
+				var headField = await Zotero.Integration.Field.loadExisting(doc.fields[0]);
+				var remainderField = await Zotero.Integration.Field.loadExisting(doc.fields[1]);
+				var head = await headField.unserialize();
+				var remainder = await remainderField.unserialize();
+				assert.equal(head.citationItems[0].id, testItems[0].id);
+				assert.isTrue(remainder.citationItems[1]['is-narrative-head']);
+				assert.notOk(remainder.citationItems[2]['is-narrative-head']);
+			});
+
+			it('should update sorted Head metadata without replacing preserved text', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID);
+				var doc = applications[docID].doc;
+				let itemA = await createDataObject('item', { title: 'A' });
+				itemA.setCreator(0, { creatorType: 'author', name: 'Author A' });
+				await itemA.saveTx();
+				let itemB = await createDataObject('item', { title: 'B' });
+				itemB.setCreator(0, { creatorType: 'author', name: 'Author B' });
+				await itemB.saveTx();
+				setNarrativeItems([itemA, itemB]);
+				await execCommand('addEditCitation', docID);
+
+				let headCode = doc.fields[0].code;
+				let headData = JSON.parse(headCode.slice(headCode.indexOf('{')));
+				headData.properties.dontUpdate = true;
+				await doc.fields[0].setCode('ITEM CSL_CITATION ' + JSON.stringify(headData));
+				await doc.fields[0].setText('CUSTOM HEAD');
+				itemA.setCreator(0, { creatorType: 'author', name: 'Author Z' });
+				await itemA.saveTx();
+
+				await execCommand('refresh', docID);
+
+				let headField = await Zotero.Integration.Field.loadExisting(doc.fields[0]);
+				let remainderField = await Zotero.Integration.Field.loadExisting(doc.fields[1]);
+				let head = await headField.unserialize();
+				let remainder = await remainderField.unserialize();
+				assert.equal(head.citationItems[0].id, itemB.id);
+				assert.equal(await doc.fields[0].getText(), 'CUSTOM HEAD');
+				assert.isTrue(head.properties.dontUpdate);
+				assert.isTrue(remainder.citationItems[1]['is-narrative-head']);
+			});
+
+			it('should insert a narrative citation with delayed citation updates', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID, {
+					prefs: {
+						noteType: 0,
+						fieldType: 'Field',
+						automaticJournalAbbreviations: true,
+						delayCitationUpdates: true,
+					},
+				});
+				var doc = applications[docID].doc;
+				setAddEditItems(testItems[0]);
+				await execCommand('addEditCitation', docID);
+
+				setNarrativeItems(testItems.slice(1, 3));
+				await execCommand('addEditCitation', docID);
+
+				assert.equal(doc.fields.length, 3);
+				var headField = await Zotero.Integration.Field.loadExisting(doc.fields[1]);
+				var remainderField = await Zotero.Integration.Field.loadExisting(doc.fields[2]);
+				assert.equal((await headField.unserialize()).properties.mode, 'author-only');
+				assert.equal((await remainderField.unserialize()).properties.mode, 'suppress-author');
+			});
+
+			it('should edit a narrative citation group from its head', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID);
+				var doc = applications[docID].doc;
+				setNarrativeItems(testItems.slice(0, 2));
+				await execCommand('addEditCitation', docID);
+
+				sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+				sinon.stub(doc, 'canInsertField').resolves(false);
+				dialogResults.citationDialog = async function (dialogName, io) {
+					assert.equal(io.citationForm, 'narrative');
+					assert.equal(io.citation.citationItems.length, 2);
+					io.citationForm = 'ordinary';
+					io._acceptDeferred.resolve(() => {});
+				};
+				await execCommand('addEditCitation', docID);
+
+				assert.equal(doc.fields.length, 1);
+				var citationField = await Zotero.Integration.Field.loadExisting(doc.fields[0]);
+				var citation = await citationField.unserialize();
+				assert.notProperty(citation.properties, 'mode');
+				assert.notProperty(citation.citationItems[0], 'is-narrative-head');
+			});
+
+			it('should preserve the remainder sequence when merging a narrative group', async function () {
+				var docID = this.test.fullTitle();
+				await initDoc(docID);
+				var doc = applications[docID].doc;
+				setNarrativeItems([testItems[0], testItems[0], testItems[1]]);
+				await execCommand('addEditCitation', docID);
+				setAddEditItems(testItems[2]);
+				await execCommand('addEditCitation', docID);
+				let remainderCode = doc.fields[1].code;
+				let remainderData = JSON.parse(remainderCode.slice(remainderCode.indexOf('{')));
+				remainderData.citationItems[0]['suppress-author'] = true;
+				await doc.fields[1].setCode('ITEM CSL_CITATION ' + JSON.stringify(remainderData));
+
+				doc.fields[0].adjacent = true;
+				doc.fields[1].adjacent = true;
+				await execCommand('refresh', docID);
+
+				assert.equal(doc.fields.length, 1);
+				var citationField = await Zotero.Integration.Field.loadExisting(doc.fields[0]);
+				var citation = await citationField.unserialize();
+				assert.deepEqual(
+					citation.citationItems.map(item => item.id),
+					[testItems[0].id, testItems[0].id, testItems[1].id, testItems[2].id]
+				);
+				assert.notProperty(citation.properties, 'mode');
+				assert.isFalse(citation.citationItems.some(item => item['is-narrative-head']));
+				assert.isFalse(citation.citationItems.some(item => item['suppress-author']));
+			});
+
 			describe('when original citation text has been modified', function () {
 				var displayAlertStub;
 				before(function* () {
@@ -1139,6 +1515,25 @@ describe("Zotero.Integration", function () {
 		});
 	});
 	
+	describe("Citation", function () {
+		it('should recognize Narrative Groups only from a matching marked occurrence', function () {
+			let head = {
+				properties: { mode: 'author-only' },
+				citationItems: [{ id: 1 }],
+			};
+			let remainder = {
+				properties: { mode: 'suppress-author' },
+				citationItems: [{ id: 1 }],
+			};
+			assert.isFalse(Zotero.Integration.Citation.isNarrativeGroup(head, remainder));
+
+			remainder.citationItems.push({ id: 1, 'is-narrative-head': true });
+			assert.isTrue(Zotero.Integration.Citation.isNarrativeGroup(head, remainder));
+			remainder.citationItems[1].id = 2;
+			assert.isFalse(Zotero.Integration.Citation.isNarrativeGroup(head, remainder));
+		});
+	});
+
 	describe("CitationField", function () {
 		describe('#unserialize', function () {
 			it('should recover All Caps corrupted citation field', async function () {
@@ -1307,6 +1702,27 @@ describe("Zotero.Integration", function () {
 			Zotero.debug.restore();
 		});
 		
+		it('should permanently serialize narrative document data as version 5', function () {
+			var data = new Zotero.Integration.DocumentData();
+			data.dataVersion = 5;
+			data.sessionID = "narrative-sesh";
+			data.style = {
+				styleID,
+				locale: 'en-US',
+				hasBibliography: false,
+				bibliographyStyleHasBeenSet: true
+			};
+			data.prefs = {
+				noteType: 0,
+				fieldType: "Field",
+				automaticJournalAbbreviations: true
+			};
+
+			var serializedData = data.serialize();
+			assert.include(serializedData, 'data-version="5"');
+			assert.equal(new Zotero.Integration.DocumentData(serializedData).dataVersion, '5');
+		});
+
 		it('should properly serialize document data to JSON (data ver 4)', function () {
 			var data = new Zotero.Integration.DocumentData();
 			// data version 4 triggers serialization to JSON

@@ -1,8 +1,9 @@
 .split-menu-button {
 	display: flex;
 	align-items: center;
-	padding-right: 0;
+	padding-right: 6px;
 	gap: 6px;
+	flex-grow: 1;
 
 	& [anonid="button-image-and-text-box"] {
 		flex: 1;
@@ -33,6 +34,7 @@
 		display: flex;
 		align-items: center;
 		overflow: hidden;
+		min-width: 8px;
 	}
 
 	& [anonid="dropmarker-separator"] {
@@ -46,5 +48,9 @@
 		color: var(--fill-secondary);
 		fill: currentColor;
 		-moz-context-properties: fill,fill-opacity;
+	}
+
+	@media (-moz-platform: mac) {
+		padding-right: 0;
 	}
 }

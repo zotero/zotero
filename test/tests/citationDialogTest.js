@@ -16,7 +16,7 @@ describe("Citation Dialog", function () {
 		preview: () => {},
 		allCitedDataLoadedPromise: Promise.resolve(),
 	};
-	let dialog, win, doc, IOManager, CitationDataManager, SearchHandler;
+	let dialog, win, doc, IOManager, CitationDataManager, CitationFormManager, SearchHandler;
 
 	before(async function () {
 		// Zotero.Cite.getLocatorString() requires styles to be initialized
@@ -29,6 +29,7 @@ describe("Citation Dialog", function () {
 		doc = dialog.document;
 		IOManager = dialog.IOManager;
 		CitationDataManager = dialog.CitationDataManager;
+		CitationFormManager = dialog.CitationFormManager;
 		SearchHandler = dialog.SearchHandler;
 		// wait for everything (e.g. itemTree/collectionTree) inside of the dialog to be loaded.
 		while (!dialog.DIALOG_STATE.loaded) {
@@ -113,10 +114,14 @@ describe("Citation Dialog", function () {
 			suffix: undefined,
 			"suppress-author": undefined
 		};
-		let itemOne, itemTwo, bubbleInput, ZoteroCiteGetItemStub, surrogateCitedItem;
+		var itemOne, itemTwo, bubbleInput, headInput, infixInput, infixSeparator;
+		var ZoteroCiteGetItemStub, surrogateCitedItem;
 
 		before(async function () {
-			bubbleInput = dialog.document.querySelector("bubble-input");
+			bubbleInput = doc.getElementById("bubble-input");
+			headInput = doc.getElementById("narrative-head-input");
+			infixInput = doc.getElementById("narrative-infix");
+			infixSeparator = doc.getElementById("narrative-infix-separator");
 	
 			// Virtual Zotero.Item for a cited item that does not exist in the library.
 			// Same logic as in Zotero.Integration.Citation.loadItemData.
@@ -164,9 +169,19 @@ describe("Citation Dialog", function () {
 		beforeEach(function () {
 			io.citation.citationItems = [];
 			io.citation.sortable = false;
+			io.citationForm = "ordinary";
+			io.originalCitationForm = "ordinary";
+			io.citationFormChanged = false;
+			io.narrativeInfix = "";
+			io.narrativeInfixAvailable = true;
+			infixInput.value = "";
 			dialog.document.getElementById("keepSorted").checked = false;
 			io.sort = () => {};
 			CitationDataManager.items = [];
+			CitationFormManager.form = "ordinary";
+			CitationFormManager.headReferenceID = null;
+			IOManager._activeBubbleInput = bubbleInput;
+			CitationFormManager.updateUI();
 			IOManager.updateBubbleInput();
 		});
 
@@ -270,7 +285,7 @@ describe("Citation Dialog", function () {
 			// ensure the order is correct
 			assert.equal(CitationDataManager.items[0].dialogReferenceID, bubbleItemTwo.dialogReferenceID);
 			assert.equal(CitationDataManager.items[1].dialogReferenceID, bubbleItemOne.dialogReferenceID);
-			bubbles = dialog.document.querySelector("bubble-input").getAllBubbles();
+			bubbles = bubbleInput.getAllBubbles();
 			assert.equal(bubbles[0].getAttribute("dialogReferenceID"), bubbleItemTwo.dialogReferenceID);
 			assert.equal(bubbles[1].getAttribute("dialogReferenceID"), bubbleItemOne.dialogReferenceID);
 		});
@@ -345,6 +360,180 @@ describe("Citation Dialog", function () {
 				}
 			];
 			assert.deepEqual(io.citation.citationItems, expected);
+		});
+
+		it("should split Narrative citations into Head, Infix, and Remainder inputs", async function () {
+			itemOne.setField("date", "2024");
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+
+			let firstItem = CitationDataManager.items[0];
+			let headBubbles = headInput.getAllBubbles();
+			let remainderBubbles = bubbleInput.getAllBubbles();
+			assert.equal(CitationFormManager.headReferenceID, firstItem.dialogReferenceID);
+			assert.isTrue(firstItem.isNarrativeHead);
+			assert.isTrue(doc.getElementById("citation-inputs").classList.contains("narrative"));
+			assert.isFalse(headInput.hidden);
+			assert.isFalse(infixInput.hidden);
+			assert.isTrue(infixSeparator.hidden);
+			assert.lengthOf(headBubbles, 1);
+			assert.equal(headBubbles[0].textContent, "Last_One");
+			assert.isFalse(headBubbles[0].draggable);
+			assert.equal(remainderBubbles[0].textContent, "2024");
+			assert.isTrue(remainderBubbles[0].draggable);
+			assert.equal(headBubbles[0].getAttribute("dialogReferenceID"), firstItem.dialogReferenceID);
+			assert.lengthOf(remainderBubbles, 2);
+			assert.isTrue(remainderBubbles[0].classList.contains("narrative-head-item"));
+			assert.equal(
+				headInput.querySelector(".input").getAttribute("data-l10n-id"),
+				"integration-citationDialog-narrative-head-input"
+			);
+			assert.equal(
+				bubbleInput.querySelector(".input").getAttribute("data-l10n-id"),
+				"integration-citationDialog-narrative-remainder-input"
+			);
+			assert.equal(infixInput.getAttribute("data-l10n-id"),
+				"integration-citationDialog-narrative-infix-input");
+
+			CitationDataManager.updateCitationObject(true);
+			assert.equal(io.citation.properties.mode, "suppress-author");
+			assert.isTrue(io.citation.citationItems[0]["is-narrative-head"]);
+			itemOne.setField("date", "");
+		});
+
+		it("should separate Head and Remainder when the Narrative Infix is unavailable", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			io.narrativeInfixAvailable = false;
+			CitationFormManager.setForm("narrative");
+
+			assert.isTrue(infixInput.hidden);
+			assert.isTrue(infixInput.disabled);
+			assert.isFalse(infixSeparator.hidden);
+		});
+
+		it("should clear the Head designation without removing the item from Remainder", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			let headItem = CitationDataManager.items[0];
+			headInput.querySelector(".input:last-child").focus();
+
+			IOManager._deleteItem(headItem.dialogReferenceID, headInput);
+
+			assert.lengthOf(CitationDataManager.items, 2);
+			assert.equal(CitationDataManager.items[0], headItem);
+			assert.isNull(CitationFormManager.headReferenceID);
+			assert.lengthOf(headInput.getAllBubbles(), 0);
+			assert.lengthOf(bubbleInput.getAllBubbles(), 2);
+			assert.isFalse(bubbleInput.getAllBubbles()[0].classList.contains("narrative-head-item"));
+			assert.equal(headInput.querySelector(".input").getAttribute("data-l10n-id"),
+				"integration-citationDialog-narrative-head-input");
+			assert.equal(CitationFormManager.form, "narrative");
+			assert.isTrue(doc.getElementById("accept-button").disabled);
+			assert.isTrue(doc.getElementById("citation-preview").hidden);
+			assert.equal(doc.getElementById("citation-preview-content").innerHTML, "");
+		});
+
+		it("should remove the Head from both inputs when removed from Remainder", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			let headItem = CitationDataManager.items[0];
+
+			IOManager._deleteItem(headItem.dialogReferenceID, bubbleInput);
+
+			assert.lengthOf(CitationDataManager.items, 1);
+			assert.equal(CitationDataManager.items[0].id, itemTwo.id);
+			assert.isNull(CitationFormManager.headReferenceID);
+			assert.lengthOf(headInput.getAllBubbles(), 0);
+			assert.lengthOf(bubbleInput.getAllBubbles(), 1);
+		});
+
+		it("should switch the Head when an item is dropped into the Head input", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			let newHead = CitationDataManager.items[1];
+
+			IOManager._moveItem(newHead.dialogReferenceID, 0, headInput);
+
+			assert.equal(CitationDataManager.items[0], newHead);
+			assert.equal(CitationFormManager.headReferenceID, newHead.dialogReferenceID);
+			assert.equal(headInput.getAllBubbles()[0].getAttribute("dialogReferenceID"),
+				newHead.dialogReferenceID);
+			assert.isTrue(bubbleInput.getAllBubbles()[0].classList.contains("narrative-head-item"));
+		});
+
+		it("should switch the Head when another Remainder item is reordered first", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			let newHead = CitationDataManager.items[1];
+
+			IOManager._moveItem(newHead.dialogReferenceID, 0, bubbleInput);
+
+			assert.equal(CitationDataManager.items[0], newHead);
+			assert.equal(CitationFormManager.headReferenceID, newHead.dialogReferenceID);
+			assert.equal(headInput.getAllBubbles()[0].getAttribute("dialogReferenceID"),
+				newHead.dialogReferenceID);
+		});
+
+		it("should not choose a Head when Remainder is reordered while Head is empty", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			CitationFormManager.setForm("narrative");
+			CitationFormManager.setHead(null);
+			let movedItem = CitationDataManager.items[1];
+
+			IOManager._moveItem(movedItem.dialogReferenceID, 0, bubbleInput);
+
+			assert.equal(CitationDataManager.items[0], movedItem);
+			assert.isNull(CitationFormManager.headReferenceID);
+			assert.lengthOf(headInput.getAllBubbles(), 0);
+			assert.isTrue(doc.getElementById("accept-button").disabled);
+		});
+
+		it("should select a new Head without removing the previous Head from Remainder", async function () {
+			await IOManager.addItemsToCitation([itemOne]);
+			CitationFormManager.setForm("narrative");
+			headInput.refocusInput();
+
+			await IOManager.addItemsToCitation([itemTwo]);
+
+			assert.lengthOf(CitationDataManager.items, 2);
+			assert.sameMembers(CitationDataManager.items.map(item => item.id), [itemOne.id, itemTwo.id]);
+			assert.equal(CitationFormManager.headReferenceID,
+				CitationDataManager.items.find(item => item.id == itemTwo.id).dialogReferenceID);
+			assert.lengthOf(headInput.getAllBubbles(), 1);
+			assert.lengthOf(bubbleInput.getAllBubbles(), 2);
+		});
+
+		it("should edit the Narrative Infix without triggering citation search", function () {
+			CitationFormManager.setForm("narrative");
+			let searchValue = SearchHandler.searchValue;
+
+			infixInput.value = "  argues\t ";
+			infixInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+			assert.equal(io.narrativeInfix, " argues ");
+			assert.equal(CitationFormManager.normalizeInfix(" \t "), " ");
+			assert.equal(SearchHandler.searchValue, searchValue);
+		});
+
+		it("should disable Author Only until the citation has one source", async function () {
+			await IOManager.addItemsToCitation([itemOne, itemTwo]);
+			assert.equal(doc.getElementById("citation-form-author-only")
+				.getAttribute("aria-disabled"), "true");
+			CitationFormManager.setForm("author-only");
+			assert.equal(CitationFormManager.form, "ordinary");
+
+			CitationFormManager.setForm("narrative");
+			CitationFormManager.setForm("author-only");
+			assert.equal(CitationFormManager.form, "narrative");
+
+			IOManager._deleteItem(CitationDataManager.items[1].dialogReferenceID, bubbleInput);
+			assert.equal(doc.getElementById("citation-form-author-only")
+				.getAttribute("aria-disabled"), "false");
+			CitationFormManager.setForm("author-only");
+			CitationDataManager.updateCitationObject(true);
+			assert.equal(CitationFormManager.form, "author-only");
+			assert.equal(io.citation.properties.mode, "author-only");
+			assert.lengthOf(io.citation.citationItems, 1);
 		});
 
 		it("should add a locator to a just added bubble", async function () {
@@ -448,6 +637,19 @@ describe("Citation Dialog", function () {
 			assert.isTrue(dialog.document.getElementById("list-layout").hidden);
 		});
 
+		it("should show citation forms beside citing modes only in Citation mode", async function () {
+			let formArea = doc.getElementById("citation-form-area");
+			assert.equal(formArea.previousElementSibling.id, "dialog-type-setting");
+			assert.equal(formArea.parentElement.id, "bottom-area-wrapper");
+			for (let type of ["citation", "annotations", "add-note", "citation"]) {
+				while (SearchHandler.searching) {
+					await Zotero.Promise.delay(10);
+				}
+				await dialog.setDialogType(type);
+				assert.equal(formArea.hidden, type != "citation");
+			}
+		});
+
 		it("should show the citation preview only when the citation has items", async function () {
 			let prefWas = Zotero.Prefs.get("integration.citationPreviewShown");
 			Zotero.Prefs.set("integration.citationPreviewShown", true);
@@ -522,7 +724,7 @@ describe("Citation Dialog", function () {
 			assert.sameMembers(CitationDataManager.items.map(item => item.id), [itemOne.id, itemTwo.id]);
 
 			// a number typed after a multi-item add is not applied as a page locator
-			let input = dialog.document.querySelector("bubble-input").refocusInput();
+			let input = dialog.document.getElementById("bubble-input").refocusInput();
 			input.value = "123";
 			IOManager._handleInputEnter(input);
 			assert.isTrue(CitationDataManager.items.every(item => !item.locator));
@@ -990,7 +1192,7 @@ describe("Citation Dialog", function () {
 			dialog.document.querySelector(`.item[id="${highlightAnnotation.id}"]`).click();
 			await Zotero.Promise.delay();
 			// Expect that it becomes a bubble
-			let bubbles = dialog.document.querySelector("bubble-input").getAllBubbles();
+			let bubbles = dialog.document.getElementById("bubble-input").getAllBubbles();
 			assert.equal(bubbles.length, 1);
 			assert.equal(bubbles[0].textContent, `Last_One “highlighted text”`);
 		});
@@ -1087,7 +1289,7 @@ describe("Citation Dialog", function () {
 
 		it("should display preview popup on bubble click", async function () {
 			await dialog.IOManager.addItemsToCitation([highlightAnnotation]);
-			let bubble = dialog.document.querySelector("bubble-input .bubble");
+			let bubble = dialog.document.querySelector("#bubble-input .bubble");
 			let popup = dialog.document.getElementById("itemDetails");
 
 			let popupOpenPromise = popup.state == "open"
