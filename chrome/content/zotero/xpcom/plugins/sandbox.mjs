@@ -306,7 +306,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	defineFrozenIdentity(scope, addon, uuid, false, {
 		permissions,
-		hostPermissions: addon.installPermissions?.host_permissions || [],
+		hostPermissions: addon.installPermissions?.origins || [],
 		prefPermissions: addon.installPermissions?.pref_permissions || [],
 		interopPermissions: addon.installPermissions?.interop_permissions || [],
 	});
