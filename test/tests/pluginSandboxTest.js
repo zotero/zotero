@@ -57,6 +57,12 @@ describe("Plugin Sandbox", function () {
 			assert.include(Array.from(perms), "default");
 		});
 
+		it("should expose the declared host permissions as HOST_PERMISSIONS", function () {
+			// AddonManager keeps a manifest's host_permissions as installPermissions.origins
+			plugin.load(["default"], { origins: ["*://example.com/*"] });
+			assert.deepEqual(plugin.run(() => Array.from(HOST_PERMISSIONS)), ["*://example.com/*"]);
+		});
+
 		it("should expose the expected base globals (timers, console, web APIs)", function () {
 			plugin.load(["default"]);
 			let fns = [
