@@ -119,6 +119,7 @@ reader-spread-mode = Spreads
 reader-flow-mode = Page Layout
 reader-columns = Columns
 reader-split-view = Split View
+reader-citation-and-link-previews = Citation and Link Previews
 reader-themes = Themes
 reader-vertical = Vertical
 reader-horizontal = Horizontal
@@ -203,6 +204,17 @@ reader-selected-pages = { $count ->
     *[other] { $count } pages selected
 }
 reader-page-options = Page Options
+
+reader-reference-popup = Reference
+reader-reference-expand = Expand reference
+reader-reference-collapse = Collapse reference
+reader-reference-no-match = No match found
+reader-reference-error = Could not complete this request.
+reader-reference-retry = Retry
+reader-reference-find-online = Find Online
+reader-reference-existing = In your library
+reader-reference-action-add-to-library = Add to Library
+reader-reference-action-open-attachment = Open Attachment
 
 reader-read-aloud = Read Aloud
 reader-read-aloud-from-here = Read Aloud from Here

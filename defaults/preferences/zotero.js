@@ -242,6 +242,7 @@ pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 pref("extensions.zotero.reader.textSelectionAnnotationMode", "highlight");
 pref("extensions.zotero.reader.lightTheme", "");
 pref("extensions.zotero.reader.darkTheme", "dark");
+pref("extensions.zotero.reader.citationAndLinkPreviews", true);
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
 pref("extensions.zotero.reader.ebookHyphenate", true);
 pref("extensions.zotero.reader.autoDisableTool.note", true);

@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { ReaderReferenceSession } = ChromeUtils.importESModule('chrome://zotero/content/xpcom/readerReferences.mjs');
+
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
@@ -243,6 +245,9 @@ class ReaderInstance {
 			}
 		}
 
+		this._referenceSession?.dispose();
+		this._referenceSession = new ReaderReferenceSession(this._item, this);
+
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
 			data,
@@ -266,6 +271,7 @@ class ReaderInstance {
 			customThemes: getCustomThemes(),
 			lightTheme: Zotero.Prefs.get('reader.lightTheme'),
 			darkTheme: Zotero.Prefs.get('reader.darkTheme'),
+			citationAndLinkPreviews: Zotero.Prefs.get('reader.citationAndLinkPreviews'),
 			fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 			hyphenate: Zotero.Prefs.get('reader.ebookHyphenate'),
 			autoDisableNoteTool: Zotero.Prefs.get('reader.autoDisableTool.note'),
@@ -279,6 +285,7 @@ class ReaderInstance {
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
 			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
 			getSDTPack: this._createGetSDTPack(this._iframeWindow),
+			...this._referenceSession.readerOptions,
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
 				// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
@@ -639,6 +646,9 @@ class ReaderInstance {
 			onSetDarkTheme: (themeName) => {
 				Zotero.Prefs.set('reader.darkTheme', themeName || false);
 			},
+			onSetCitationAndLinkPreviews: (enabled) => {
+				Zotero.Prefs.set('reader.citationAndLinkPreviews', enabled);
+			},
 			onSetReadAloudVoice: this._setReadAloudVoice.bind(this),
 			onSetReadAloudEnabledVoices: this._setReadAloudEnabledVoices.bind(this),
 			onSetReadAloudStatus: this._setReadAloudStatus.bind(this),
@@ -673,6 +683,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.textSelectionAnnotationMode', this._handleTextSelectionAnnotationModeChange),
 			Zotero.Prefs.registerObserver('reader.lightTheme', this._handleLightThemeChange),
 			Zotero.Prefs.registerObserver('reader.darkTheme', this._handleDarkThemeChange),
+			Zotero.Prefs.registerObserver('reader.citationAndLinkPreviews', this._handleCitationAndLinkPreviewsChange),
 			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.ebookHyphenate', this._handleEbookPrefChange),
 			Zotero.Prefs.registerObserver('reader.autoDisableTool.note', this._handleAutoDisableToolPrefChange),
@@ -709,6 +720,8 @@ class ReaderInstance {
 			return;
 		}
 		this._isUninitialized = true;
+		this._referenceSession?.dispose();
+		this._referenceSession = null;
 		if (this._customEventHandler && this._iframeWindow) {
 			try {
 				this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
@@ -1229,6 +1242,12 @@ class ReaderInstance {
 
 	_handleDarkThemeChange = () => {
 		this._internalReader.setDarkTheme(Zotero.Prefs.get('reader.darkTheme'));
+	};
+
+	_handleCitationAndLinkPreviewsChange = () => {
+		this._internalReader.setCitationAndLinkPreviews(
+			Zotero.Prefs.get('reader.citationAndLinkPreviews')
+		);
 	};
 
 	_handleEbookPrefChange = () => {
