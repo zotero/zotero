@@ -1,5 +1,5 @@
 /* global describe, it, before, after, beforeEach, afterEach, assert, sinon,
- loadZoteroPane, importPDFAttachment */
+ loadZoteroPane, importPDFAttachment, waitForWindow */
 
 describe("Window controls", function () {
 	let win;
@@ -119,13 +119,14 @@ describe("Window controls", function () {
 
 		it("should use the same preference in a detached reader", async function () {
 			let attachment = await importPDFAttachment();
+			// A newly opened window can still expose a complete about:blank document.
+			// Observe the reader document's load before requesting the window.
+			let windowPromise = waitForWindow('chrome://zotero/content/reader.xhtml');
 			let reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
 			try {
-				if (reader._window.document.readyState != 'complete') {
-					await new Promise(resolve => reader._window.addEventListener('load', resolve,
-						{ once: true }));
-				}
-				let readerBar = reader._window.document.getElementById('reader-menubar');
+				let readerWindow = await windowPromise;
+				let readerBar = readerWindow.document.getElementById('reader-menubar');
+				assert.isNotNull(readerBar);
 				Zotero.Prefs.set('ui.autoHideMenuBar', true);
 				assert.isTrue(readerBar.hasAttribute('autohide'));
 				Zotero.Prefs.set('ui.autoHideMenuBar', false);
