@@ -56,7 +56,10 @@ jobs:
                 network=true
                 windows=true
               fi
-              if grep -qE '^app/(win/|build\.sh$|scripts/(dir_build|fetch_xulrunner|prepare_build)$)' <<< "$files"; then
+              windows_pattern='^app/(win/|build\.sh$|scripts/(dir_build|fetch_xulrunner|prepare_build)$)'
+              windows_pattern+='|^chrome/content/zotero/(windowControls\.js|zoteroPane\.xhtml|reader\.xhtml)$'
+              windows_pattern+='|^scss/win/_titleBar\.scss$|^test/tests/windowControlsTest\.js$'
+              if grep -qE "$windows_pattern" <<< "$files"; then
                 windows=true
               fi
             fi
@@ -335,7 +338,7 @@ jobs:
       # The step timeout turns a startup hang into a failure
       - name: Run tests
         timeout-minutes: 15
-        run: test/runtests.sh -f -r 3 -b -x app/staging/Zotero_win-${{ matrix.arch }}/zotero.exe db file
+        run: test/runtests.sh -f -r 3 -b -x app/staging/Zotero_win-${{ matrix.arch }}/zotero.exe db file windowControls
 
   utilities:
     name: Utilities Tests
