@@ -2042,79 +2042,112 @@ async function writeMultipleObjects(endpoint, requestData, kind) {
 	}
 
 	let results = new MultiWriteResults();
-
-	for (let i = 0; i < body.length; i++) {
-		let entry = body[i];
-		let providedKey = '';
+	// Keep independent object transactions and per-index results, but notify
+	// observers once for a multi-object request instead of after each save.
+	let notifierQueues = [];
+	async function saveObject(obj) {
+		if (body.length === 1) {
+			return obj.saveTx();
+		}
+		let notifierQueue = new Zotero.Notifier.Queue();
 		try {
-			if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-				throw new HTTPError(400, `Invalid value for index ${i} in uploaded data; expected JSON ${kind} object`);
-			}
-			providedKey = typeof entry.key === 'string' ? entry.key : '';
-
-			let obj;
-			let isUpdate = false;
-			if (providedKey) {
-				validateObjectKey(providedKey);
-				// Keyed writes require a concurrency precondition, either request-level or
-				// per-object (mirroring dataserver's checkJSONObjectVersion())
-				if (!libraryVersionValidated
-						&& (entry.version === undefined || entry.version === null)) {
-					throw new HTTPError(428, "Either If-Unmodified-Since-Version or "
-						+ "'version' property must be provided for 'key'-based writes");
-				}
-				obj = await getExistingObjectByKey(libraryID, providedKey, kind);
-				if (obj) {
-					isUpdate = true;
-					if (entry.version !== undefined && entry.version !== null) {
-						let expectedVersion = parseInt(entry.version);
-						if (Number.isNaN(expectedVersion)) {
-							throw new HTTPError(400, "Invalid version value");
-						}
-						if (expectedVersion !== obj.clientVersion) {
-							throw new HTTPError(412, `${kind} version mismatch: expected ${expectedVersion}, found ${obj.clientVersion}`);
-						}
-					}
-					// POST follows PATCH semantics: merge patch with existing
-					let existingJSON = obj.toJSON();
-					entry = mergePatchJSON(existingJSON, entry);
-				}
-				else {
-					if (entry.version !== undefined && entry.version !== null
-							&& parseInt(entry.version) > 0) {
-						throw new HTTPError(404, `${kind} doesn't exist `
-							+ `(expected version ${parseInt(entry.version)}; use 0 instead)`);
-					}
-					obj = await makeNewObjectWithKey(libraryID, kind, entry.itemType, providedKey);
-				}
-			}
-			else {
-				obj = makeNewObject(libraryID, kind, entry.itemType);
-			}
-
-			applyJSONToObject(obj, entry, kind);
-
-			if (obj.hasChanged()) {
-				await obj.saveTx();
-				let json = await dataObjectToResponseJSON(obj);
-				results.addSuccess(i, json);
-			}
-			else if (isUpdate) {
-				results.addUnchanged(i, obj.key);
-			}
-			else {
-				// New object with nothing to set -- treat as success
-				await obj.saveTx();
-				let json = await dataObjectToResponseJSON(obj);
-				results.addSuccess(i, json);
-			}
+			await obj.saveTx({ notifierQueue });
 		}
 		catch (e) {
-			Zotero.debug(`Local API: ${kind} write index ${i} failed: ${e.message || e}`, 2);
-			if (!(e instanceof HTTPError)) {
+			// A post-commit failure must still notify observers about persisted data.
+			if (e.committed) {
+				notifierQueues.push(notifierQueue);
+			}
+			throw e;
+		}
+		notifierQueues.push(notifierQueue);
+	}
+
+	try {
+		for (let i = 0; i < body.length; i++) {
+			let entry = body[i];
+			let providedKey = '';
+			try {
+				if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+					throw new HTTPError(400, `Invalid value for index ${i} in uploaded data; expected JSON ${kind} object`);
+				}
+				providedKey = typeof entry.key === 'string' ? entry.key : '';
+
+				let obj;
+				let isUpdate = false;
+				if (providedKey) {
+					validateObjectKey(providedKey);
+					// Keyed writes require a concurrency precondition, either request-level or
+					// per-object (mirroring dataserver's checkJSONObjectVersion())
+					if (!libraryVersionValidated
+							&& (entry.version === undefined || entry.version === null)) {
+						throw new HTTPError(428, "Either If-Unmodified-Since-Version or "
+							+ "'version' property must be provided for 'key'-based writes");
+					}
+					obj = await getExistingObjectByKey(libraryID, providedKey, kind);
+					if (obj) {
+						isUpdate = true;
+						if (entry.version !== undefined && entry.version !== null) {
+							let expectedVersion = parseInt(entry.version);
+							if (Number.isNaN(expectedVersion)) {
+								throw new HTTPError(400, "Invalid version value");
+							}
+							if (expectedVersion !== obj.clientVersion) {
+								throw new HTTPError(412, `${kind} version mismatch: expected ${expectedVersion}, found ${obj.clientVersion}`);
+							}
+						}
+						// POST follows PATCH semantics: merge patch with existing
+						let existingJSON = obj.toJSON();
+						entry = mergePatchJSON(existingJSON, entry);
+					}
+					else {
+						if (entry.version !== undefined && entry.version !== null
+								&& parseInt(entry.version) > 0) {
+							throw new HTTPError(404, `${kind} doesn't exist `
+								+ `(expected version ${parseInt(entry.version)}; use 0 instead)`);
+						}
+						obj = await makeNewObjectWithKey(libraryID, kind, entry.itemType, providedKey);
+					}
+				}
+				else {
+					obj = makeNewObject(libraryID, kind, entry.itemType);
+				}
+
+				applyJSONToObject(obj, entry, kind);
+
+				if (obj.hasChanged()) {
+					await saveObject(obj);
+					let json = await dataObjectToResponseJSON(obj);
+					results.addSuccess(i, json);
+				}
+				else if (isUpdate) {
+					results.addUnchanged(i, obj.key);
+				}
+				else {
+					// New object with nothing to set -- treat as success
+					await saveObject(obj);
+					let json = await dataObjectToResponseJSON(obj);
+					results.addSuccess(i, json);
+				}
+			}
+			catch (e) {
+				Zotero.debug(`Local API: ${kind} write index ${i} failed: ${e.message || e}`, 2);
+				if (!(e instanceof HTTPError)) {
+					Zotero.logError(e);
+				}
+				results.addFailure(i, providedKey, e);
+			}
+		}
+	}
+	finally {
+		if (notifierQueues.length) {
+			try {
+				await Zotero.Notifier.commit(notifierQueues);
+			}
+			catch (e) {
+				// Saves have committed; a notification error must not change their results.
 				Zotero.logError(e);
 			}
-			results.addFailure(i, providedKey, e);
 		}
 	}
 

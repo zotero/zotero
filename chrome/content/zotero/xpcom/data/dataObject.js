@@ -1106,7 +1106,19 @@ Zotero.DataObject.prototype.save = async function (options = {}) {
 				}
 			}
 		}
-		this._postSave(env);
+		try {
+			this._postSave(env);
+		}
+		catch (e) {
+			// saveTx() has already committed before post-save callbacks run.
+			if (env.options.tx) {
+				if (!e || !['object', 'function'].includes(typeof e) || !Object.isExtensible(e)) {
+					e = new Error(String(e), { cause: e });
+				}
+				e.committed = true;
+			}
+			throw e;
+		}
 		return result;
 	}
 	catch(e) {

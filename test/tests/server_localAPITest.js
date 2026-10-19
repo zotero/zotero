@@ -883,6 +883,196 @@ describe("Local API Server", function () {
 		});
 
 		describe("POST <userOrGroupPrefix>/items", function () {
+			describe("deferred notifications", function () {
+				let observerID;
+				let events;
+				let keys;
+
+				beforeEach(function () {
+					events = [];
+					keys = [];
+					observerID = Zotero.Notifier.registerObserver({
+						notify(event, type, ids) {
+							events.push({ event, type, ids: [...ids] });
+						}
+					}, ['item'], 'local-api-deferred-test');
+				});
+
+				afterEach(async function () {
+					Zotero.Notifier.unregisterObserver(observerID);
+					for (let key of keys) {
+						let item = await Zotero.Items.getByLibraryAndKeyAsync(
+							Zotero.Libraries.userLibraryID, key);
+						if (item) await item.eraseTx();
+					}
+				});
+
+				function entry(title) {
+					let key = Zotero.Utilities.generateObjectKey();
+					keys.push(key);
+					return { key, version: 0, itemType: 'journalArticle', title };
+				}
+
+				function addedIDs() {
+					return events.filter(e => e.event === 'add' && e.type === 'item')
+						.flatMap(e => e.ids);
+				}
+
+				it("should coalesce notifications while retaining independent object saves and versions", async function () {
+					let version = Zotero.Libraries.userLibrary.clientVersion;
+					let save = sinon.spy(Zotero.Item.prototype, 'saveTx');
+					let response;
+					try {
+						({ response } = await apiPost('/users/0/items', {
+							body: [entry('Deferred A'), entry('Deferred B'), entry('Deferred C')]
+						}));
+						assert.equal(save.callCount, 3);
+					}
+					finally {
+						save.restore();
+					}
+					assert.lengthOf(Object.keys(response.successful), 3);
+					assert.equal(Zotero.Libraries.userLibrary.clientVersion, version + 3);
+					assert.lengthOf(events.filter(e => e.event === 'add'), 1);
+					assert.lengthOf(addedIDs(), 3);
+				});
+
+				it("should resolve a parent and its PDF child before grouped notifications", async function () {
+					let parent = entry('Parent with PDF');
+					let child = { ...entry('PDF'), itemType: 'attachment', parentItem: parent.key,
+						linkMode: 'imported_file', contentType: 'application/pdf', filename: 'publisher.pdf' };
+					let { response } = await apiPost('/users/0/items', { body: [parent, child] });
+					assert.lengthOf(Object.keys(response.successful), 2);
+					let savedParent = await Zotero.Items.getByLibraryAndKeyAsync(
+						Zotero.Libraries.userLibraryID, parent.key);
+					let savedChild = await Zotero.Items.getByLibraryAndKeyAsync(
+						Zotero.Libraries.userLibraryID, child.key);
+					assert.equal(savedChild.parentItemKey, parent.key);
+					assert.equal(savedParent.numAttachments(), 1);
+					assert.isTrue(events.some(e => e.event === 'modify' && e.ids.includes(savedParent.id)));
+				});
+
+				it("should notify only successful entries in a partially valid batch", async function () {
+					let { response } = await apiPost('/users/0/items', {
+						body: [entry('Valid A'), { itemType: 'invalid' }, entry('Valid C')]
+					});
+					assert.sameMembers(Object.keys(response.successful), ['0', '2']);
+					assert.equal(response.failed['1'].code, 400);
+					assert.lengthOf(addedIDs(), 2);
+				});
+
+				it("should discard notifications from a rolled-back save", async function () {
+					let failed = entry('Injected rollback');
+					let original = Zotero.Item.prototype._finalizeSave;
+					let stub = sinon.stub(Zotero.Item.prototype, '_finalizeSave')
+						.callsFake(async function (env) {
+							let fail = this.key === failed.key;
+							let result = await original.call(this, env);
+							if (fail) throw new Error('Injected rollback');
+							return result;
+						});
+					let response;
+					try {
+						({ response } = await apiPost('/users/0/items', {
+							body: [failed, entry('After rollback')]
+						}));
+					}
+					finally {
+						stub.restore();
+					}
+					assert.property(response.failed, '0');
+					assert.property(response.successful, '1');
+					assert.lengthOf(addedIDs(), 1);
+					assert.isFalse(await Zotero.Items.getByLibraryAndKeyAsync(
+						Zotero.Libraries.userLibraryID, failed.key));
+				});
+
+				it("should notify persisted data when response serialization fails", async function () {
+					let failed = entry('Injected serialization failure');
+					let original = Zotero.Item.prototype.toResponseJSONAsync;
+					let stub = sinon.stub(Zotero.Item.prototype, 'toResponseJSONAsync')
+						.callsFake(async function (options) {
+							if (this.key === failed.key) throw new Error('Injected serialization failure');
+							return original.call(this, options);
+						});
+					try {
+						let { response } = await apiPost('/users/0/items', {
+							body: [failed, entry('Serialization succeeds')]
+						});
+						assert.property(response.failed, '0');
+						assert.property(response.successful, '1');
+						assert.lengthOf(addedIDs(), 2);
+					}
+					finally {
+						stub.restore();
+					}
+				});
+
+				it("should notify persisted data when a post-save callback fails", async function () {
+					let failed = entry('Injected post-save failure');
+					let original = Zotero.DataObject.prototype._postSave;
+					let stub = sinon.stub(Zotero.DataObject.prototype, '_postSave')
+						.callsFake(function (env) {
+							original.call(this, env);
+							if (this.objectType === 'item' && this.key === failed.key) {
+								throw new Error('Injected post-save failure');
+							}
+						});
+					try {
+						let { response } = await apiPost('/users/0/items', {
+							body: [failed, entry('Post-save succeeds')]
+						});
+						assert.property(response.failed, '0');
+						assert.lengthOf(addedIDs(), 2);
+					}
+					finally {
+						stub.restore();
+					}
+				});
+
+				it("should retain notifications for primitive and frozen post-save errors", async function () {
+					for (let error of ['Post-save string', Object.freeze(new Error('Frozen post-save error'))]) {
+						events.length = 0;
+						let failed = entry('Non-extensible error');
+						let original = Zotero.DataObject.prototype._postSave;
+						let stub = sinon.stub(Zotero.DataObject.prototype, '_postSave')
+							.callsFake(function (env) {
+								original.call(this, env);
+								if (this.objectType === 'item' && this.key === failed.key) throw error;
+							});
+						try {
+							let { response } = await apiPost('/users/0/items', {
+								body: [failed, entry('Other committed item')]
+							});
+							assert.property(response.failed, '0');
+							assert.lengthOf(addedIDs(), 2);
+						}
+						finally {
+							stub.restore();
+						}
+					}
+				});
+
+				it("should preserve committed results when notifier commit fails", async function () {
+					let original = Zotero.Notifier.commit;
+					let stub = sinon.stub(Zotero.Notifier, 'commit').callsFake(function (queues, ...rest) {
+						if (Array.isArray(queues)) throw new Error('Injected notifier failure');
+						return original.call(this, queues, ...rest);
+					});
+					try {
+						let { status, response } = await apiPost('/users/0/items', {
+							body: [entry('Notify A'), entry('Notify B')]
+						});
+						assert.equal(status, 200);
+						assert.lengthOf(Object.keys(response.successful), 2);
+						assert.isEmpty(response.failed);
+					}
+					finally {
+						stub.restore();
+					}
+				});
+			});
+
 			it("should create a single item", async function () {
 				let { response } = await apiPost('/users/0/items', {
 					body: [{
