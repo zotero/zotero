@@ -1,4 +1,4 @@
--- 130
+-- 131
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -150,6 +150,7 @@ CREATE TABLE syncedSettings (
     value NOT NULL,
     version INT NOT NULL DEFAULT 0,
     synced INT NOT NULL DEFAULT 0,
+    clientVersion INT NOT NULL DEFAULT 0,
     PRIMARY KEY (setting, libraryID),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );

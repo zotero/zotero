@@ -593,6 +593,90 @@ describe("Local API Server", function () {
 		});
 	});
 
+	describe("<userOrGroupPrefix>/settings", function () {
+		let libraryID;
+		
+		before(async function () {
+			libraryID = Zotero.Libraries.userLibraryID;
+			await Zotero.SyncedSettings.set(libraryID, 'tagColors', [{ name: 'A', color: '#ff0000' }]);
+			await Zotero.SyncedSettings.set(libraryID, 'lastPageIndex_u_ABCD2345', 5);
+		});
+		
+		after(async function () {
+			await Zotero.SyncedSettings.clear(libraryID, 'tagColors');
+			await Zotero.SyncedSettings.clear(libraryID, 'lastPageIndex_u_ABCD2345');
+		});
+		
+		it("should return all settings with local versions", async function () {
+			let xhr = await apiGet('/users/0/settings');
+			let tagColorsVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'tagColors').clientVersion;
+			let pageIndexVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'lastPageIndex_u_ABCD2345').clientVersion;
+			assert.deepEqual(xhr.response, {
+				tagColors: {
+					value: [{ name: 'A', color: '#ff0000' }],
+					version: tagColorsVersion
+				},
+				lastPageIndex_u_ABCD2345: {
+					value: 5,
+					version: pageIndexVersion
+				}
+			});
+			assert.equal(
+				parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+				Zotero.Libraries.userLibrary.clientVersion
+			);
+		});
+		
+		it("should filter settings with ?since", async function () {
+			let tagColorsVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'tagColors').clientVersion;
+			let { response } = await apiGet(`/users/0/settings?since=${tagColorsVersion}`);
+			assert.sameMembers(Object.keys(response), ['lastPageIndex_u_ABCD2345']);
+		});
+		
+		it("should return 304 for If-Modified-Since-Version at the library version", async function () {
+			let { status } = await apiGet('/users/0/settings', {
+				headers: {
+					'Zotero-Allowed-Request': '1',
+					'If-Modified-Since-Version': String(Zotero.Libraries.userLibrary.clientVersion),
+				},
+				successCodes: [304],
+				responseType: 'text'
+			});
+			assert.equal(status, 304);
+		});
+		
+		it("should return a single setting", async function () {
+			let xhr = await apiGet('/users/0/settings/tagColors');
+			let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'tagColors').clientVersion;
+			assert.deepEqual(xhr.response, {
+				value: [{ name: 'A', color: '#ff0000' }],
+				version: clientVersion
+			});
+			assert.equal(parseInt(xhr.getResponseHeader('Last-Modified-Version')), clientVersion);
+		});
+		
+		it("should return 404 for a missing setting", async function () {
+			let { status } = await apiGet('/users/0/settings/feeds', {
+				successCodes: [404],
+				responseType: 'text'
+			});
+			assert.equal(status, 404);
+		});
+		
+		it("should return group library settings", async function () {
+			let group = await getGroup();
+			await Zotero.SyncedSettings.set(group.libraryID, 'tagColors', [{ name: 'G', color: '#00ff00' }]);
+			try {
+				let { response } = await apiGet(`/groups/${group.groupID}/settings`);
+				assert.deepEqual(response.tagColors.value, [{ name: 'G', color: '#00ff00' }]);
+				assert.notProperty(response, 'lastPageIndex_u_ABCD2345');
+			}
+			finally {
+				await Zotero.SyncedSettings.clear(group.libraryID, 'tagColors');
+			}
+		});
+	});
+
 	// ===================================================================
 	// Write request tests
 	// ===================================================================
@@ -2364,6 +2448,357 @@ describe("Local API Server", function () {
 					}
 				);
 				assert.equal(status, 405);
+			});
+		});
+
+		describe("POST/PUT/DELETE <userOrGroupPrefix>/settings", function () {
+			let libraryID;
+			
+			before(function () {
+				libraryID = Zotero.Libraries.userLibraryID;
+			});
+			
+			afterEach(async function () {
+				for (let name of Object.keys(Zotero.SyncedSettings.getAll(libraryID))) {
+					await Zotero.SyncedSettings.clear(libraryID, name);
+				}
+			});
+			
+			it("should create multiple settings via POST", async function () {
+				let xhr = await apiPost('/users/0/settings', {
+					body: {
+						tagColors: { value: [{ name: 'A', color: '#ff0000' }] },
+						lastPageIndex_u_ABCD2345: { value: 12.5 },
+					},
+					headers: { 'Zotero-Write-Token': newWriteToken() },
+					successCodes: [204]
+				});
+				assert.equal(xhr.status, 204);
+				assert.deepEqual(
+					Zotero.SyncedSettings.get(libraryID, 'tagColors'),
+					[{ name: 'A', color: '#ff0000' }]
+				);
+				assert.equal(Zotero.SyncedSettings.get(libraryID, 'lastPageIndex_u_ABCD2345'), 12.5);
+				let libraryVersion = Zotero.Libraries.userLibrary.clientVersion;
+				assert.equal(parseInt(xhr.getResponseHeader('Last-Modified-Version')), libraryVersion);
+				// Both settings are written in the same transaction
+				assert.equal(Zotero.SyncedSettings.getMetadata(libraryID, 'tagColors').clientVersion, libraryVersion);
+				assert.equal(
+					Zotero.SyncedSettings.getMetadata(libraryID, 'lastPageIndex_u_ABCD2345').clientVersion,
+					libraryVersion
+				);
+				// Locally written settings need to be uploaded
+				assert.isFalse(Zotero.SyncedSettings.getMetadata(libraryID, 'tagColors').synced);
+			});
+			
+			it("should not change versions when POSTing an unchanged value", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'tagColors', [{ name: 'A', color: '#ff0000' }]);
+				let libraryVersion = Zotero.Libraries.userLibrary.clientVersion;
+				let xhr = await apiPost('/users/0/settings', {
+					body: { tagColors: { value: [{ name: 'A', color: '#ff0000' }] } },
+					successCodes: [204]
+				});
+				assert.equal(parseInt(xhr.getResponseHeader('Last-Modified-Version')), libraryVersion);
+				assert.equal(Zotero.Libraries.userLibrary.clientVersion, libraryVersion);
+			});
+			
+			it("should reject an entire POST if any setting is invalid", async function () {
+				let { status, response } = await apiPost('/users/0/settings', {
+					body: {
+						tagColors: { value: [{ name: 'A', color: '#ff0000' }] },
+						notASetting: { value: 'foo' },
+					},
+					successCodes: [400],
+					responseType: 'text'
+				});
+				assert.equal(status, 400);
+				assert.include(response, "Invalid setting 'notASetting'");
+				assert.isNull(Zotero.SyncedSettings.get(libraryID, 'tagColors'));
+			});
+			
+			it("should validate setting values", async function () {
+				let invalid = {
+					tagColors: [],
+					autoRenameFiles: 'yes',
+					feeds: [1],
+					attachmentRenameTemplate: '',
+					autoRenameFilesFileTypes: ['application/pdf'],
+					lastPageIndex_u_ABCD2345: 12.55,
+					lastReadAloudPosition_u_ABCD2345: 5,
+				};
+				for (let [name, value] of Object.entries(invalid)) {
+					let { status } = await apiPost('/users/0/settings', {
+						body: { [name]: { value } },
+						successCodes: [400],
+						responseType: 'text'
+					});
+					assert.equal(status, 400, name);
+				}
+				assert.isEmpty(Object.keys(Zotero.SyncedSettings.getAll(libraryID)));
+			});
+			
+			it("should accept file renaming and read-aloud settings", async function () {
+				await apiPost('/users/0/settings', {
+					body: {
+						autoRenameFilesFileTypes: { value: 'application/pdf,application/epub+zip' },
+						lastReadAloudPosition_u_ABCD2345: { value: { index: 3 } },
+					},
+					successCodes: [204]
+				});
+				assert.equal(
+					Zotero.SyncedSettings.get(libraryID, 'autoRenameFilesFileTypes'),
+					'application/pdf,application/epub+zip'
+				);
+				assert.deepEqual(
+					Zotero.SyncedSettings.get(libraryID, 'lastReadAloudPosition_u_ABCD2345'),
+					{ index: 3 }
+				);
+			});
+			
+			it("should reject a POST with an outdated setting version", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'autoRenameFiles').clientVersion;
+				let { status } = await apiPost('/users/0/settings', {
+					body: { autoRenameFiles: { value: false, version: clientVersion - 1 } },
+					successCodes: [412],
+					responseType: 'text'
+				});
+				assert.equal(status, 412);
+				assert.isTrue(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+			});
+			
+			it("should reject a POST with an outdated If-Unmodified-Since-Version", async function () {
+				let libraryVersion = Zotero.Libraries.userLibrary.clientVersion;
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let { status } = await apiPost('/users/0/settings', {
+					body: { autoRenameFiles: { value: false } },
+					headers: { 'If-Unmodified-Since-Version': String(libraryVersion) },
+					successCodes: [412],
+					responseType: 'text'
+				});
+				assert.equal(status, 412);
+			});
+			
+			it("should reject lastPageIndex settings in a group library", async function () {
+				let group = await getGroup();
+				let { status } = await apiPost(`/groups/${group.groupID}/settings`, {
+					body: { lastPageIndex_u_ABCD2345: { value: 1 } },
+					successCodes: [400],
+					responseType: 'text'
+				});
+				assert.equal(status, 400);
+			});
+			
+			it("should create a setting via PUT without a version", async function () {
+				let xhr = await apiPut('/users/0/settings/autoRenameFiles', {
+					body: { value: true },
+					successCodes: [204]
+				});
+				assert.equal(xhr.status, 204);
+				assert.isTrue(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+			});
+			
+			it("should require a version to update a setting via PUT", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let { status } = await apiPut('/users/0/settings/autoRenameFiles', {
+					body: { value: false },
+					successCodes: [428],
+					responseType: 'text'
+				});
+				assert.equal(status, 428);
+				assert.isTrue(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+			});
+			
+			it("should update a setting via PUT with a version", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'autoRenameFiles').clientVersion;
+				
+				let { status } = await apiPut('/users/0/settings/autoRenameFiles', {
+					body: { value: false, version: clientVersion - 1 },
+					successCodes: [412],
+					responseType: 'text'
+				});
+				assert.equal(status, 412);
+				
+				let xhr = await apiPut('/users/0/settings/autoRenameFiles', {
+					body: { value: false },
+					headers: { 'If-Unmodified-Since-Version': String(clientVersion) },
+					successCodes: [204]
+				});
+				assert.equal(xhr.status, 204);
+				assert.isFalse(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+				let newVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'autoRenameFiles').clientVersion;
+				assert.isAbove(newVersion, clientVersion);
+				assert.equal(parseInt(xhr.getResponseHeader('Last-Modified-Version')), newVersion);
+			});
+			
+			it("should return 404 for a PUT with a version for a missing setting", async function () {
+				let { status } = await apiPut('/users/0/settings/autoRenameFiles', {
+					body: { value: true, version: 5 },
+					successCodes: [404],
+					responseType: 'text'
+				});
+				assert.equal(status, 404);
+			});
+			
+			it("should delete a setting", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'autoRenameFiles').clientVersion;
+				
+				let { status } = await apiDelete('/users/0/settings/autoRenameFiles', {
+					headers: { 'If-Unmodified-Since-Version': String(clientVersion - 1) },
+					successCodes: [412],
+					responseType: 'text'
+				});
+				assert.equal(status, 412);
+				
+				let xhr = await apiDelete('/users/0/settings/autoRenameFiles', {
+					headers: { 'If-Unmodified-Since-Version': String(clientVersion) },
+					successCodes: [204]
+				});
+				assert.equal(xhr.status, 204);
+				assert.isNull(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+				assert.isAbove(Zotero.Libraries.userLibrary.clientVersion, clientVersion);
+			});
+			
+			it("should delete a setting without a version", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let { status } = await apiDelete('/users/0/settings/autoRenameFiles', {
+					successCodes: [204]
+				});
+				assert.equal(status, 204);
+				assert.isNull(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+			});
+			
+			it("should delete multiple settings", async function () {
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', '{{ title }}');
+				await Zotero.SyncedSettings.set(libraryID, 'tagColors', [{ name: 'A', color: '#ff0000' }]);
+				
+				let xhr = await apiDelete(
+					'/users/0/settings?settingKey=autoRenameFiles,attachmentRenameTemplate,feeds',
+					{
+						headers: {
+							'If-Unmodified-Since-Version': String(Zotero.Libraries.userLibrary.clientVersion),
+						},
+						successCodes: [204]
+					}
+				);
+				assert.equal(xhr.status, 204);
+				assert.equal(
+					parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+					Zotero.Libraries.userLibrary.clientVersion
+				);
+				assert.isNull(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+				assert.isNull(Zotero.SyncedSettings.get(libraryID, 'attachmentRenameTemplate'));
+				assert.isOk(Zotero.SyncedSettings.get(libraryID, 'tagColors'));
+			});
+			
+			it("should reject a multi-setting DELETE with an outdated If-Unmodified-Since-Version", async function () {
+				let libraryVersion = Zotero.Libraries.userLibrary.clientVersion;
+				await Zotero.SyncedSettings.set(libraryID, 'autoRenameFiles', true);
+				let { status } = await apiDelete('/users/0/settings?settingKey=autoRenameFiles', {
+					headers: { 'If-Unmodified-Since-Version': String(libraryVersion) },
+					successCodes: [412],
+					responseType: 'text'
+				});
+				assert.equal(status, 412);
+				assert.isTrue(Zotero.SyncedSettings.get(libraryID, 'autoRenameFiles'));
+			});
+			
+			it("should require settingKey for a multi-setting DELETE", async function () {
+				let { status } = await apiDelete('/users/0/settings', {
+					successCodes: [400],
+					responseType: 'text'
+				});
+				assert.equal(status, 400);
+			});
+			
+			describe("Admin-only settings in group libraries", function () {
+				let group;
+				
+				beforeEach(async function () {
+					group = await createGroup();
+				});
+				
+				afterEach(async function () {
+					await group.eraseTx();
+				});
+				
+				it("should reject PUT and DELETE by non-admins", async function () {
+					let { status } = await apiPut(`/groups/${group.groupID}/settings/autoRenameFiles`, {
+						body: { value: true },
+						successCodes: [403],
+						responseType: 'text'
+					});
+					assert.equal(status, 403);
+					assert.isNull(Zotero.SyncedSettings.get(group.libraryID, 'autoRenameFiles'));
+					
+					await Zotero.SyncedSettings.set(group.libraryID, 'autoRenameFiles', true);
+					({ status } = await apiDelete(`/groups/${group.groupID}/settings/autoRenameFiles`, {
+						successCodes: [403],
+						responseType: 'text'
+					}));
+					assert.equal(status, 403);
+					({ status } = await apiDelete(
+						`/groups/${group.groupID}/settings?settingKey=tagColors,autoRenameFiles`,
+						{
+							successCodes: [403],
+							responseType: 'text'
+						}
+					));
+					assert.equal(status, 403);
+					assert.isTrue(Zotero.SyncedSettings.get(group.libraryID, 'autoRenameFiles'));
+				});
+				
+				it("should save other settings and report admin-only settings as failed in a POST by a non-admin", async function () {
+					let xhr = await apiPost(`/groups/${group.groupID}/settings`, {
+						body: {
+							tagColors: { value: [{ name: 'A', color: '#ff0000' }] },
+							autoRenameFiles: { value: true },
+						}
+					});
+					assert.equal(xhr.status, 200);
+					assert.deepEqual(xhr.response.failed, {
+						1: {
+							key: 'autoRenameFiles',
+							code: 403,
+							message: "Only group admins can change setting 'autoRenameFiles'"
+						}
+					});
+					assert.isOk(Zotero.SyncedSettings.get(group.libraryID, 'tagColors'));
+					assert.isNull(Zotero.SyncedSettings.get(group.libraryID, 'autoRenameFiles'));
+					assert.equal(
+						parseInt(xhr.getResponseHeader('Last-Modified-Version')),
+						Zotero.Libraries.get(group.libraryID).clientVersion
+					);
+				});
+				
+				it("should allow admins to change admin-only settings", async function () {
+					group.isAdmin = true;
+					await group.saveTx();
+					
+					let { status } = await apiPost(`/groups/${group.groupID}/settings`, {
+						body: { autoRenameFiles: { value: true } },
+						successCodes: [204]
+					});
+					assert.equal(status, 204);
+					assert.isTrue(Zotero.SyncedSettings.get(group.libraryID, 'autoRenameFiles'));
+					
+					({ status } = await apiDelete(`/groups/${group.groupID}/settings/autoRenameFiles`, {
+						successCodes: [204]
+					}));
+					assert.equal(status, 204);
+				});
+			});
+			
+			it("should return 404 when deleting a missing setting", async function () {
+				let { status } = await apiDelete('/users/0/settings/autoRenameFiles', {
+					headers: { 'If-Unmodified-Since-Version': '0' },
+					successCodes: [404],
+					responseType: 'text'
+				});
+				assert.equal(status, 404);
 			});
 		});
 
