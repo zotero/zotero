@@ -97,6 +97,36 @@ const MAX_WRITE_OBJECTS = 50;
 // Maximum number of keys in a multi-delete query parameter
 const MAX_DELETE_OBJECTS = 50;
 
+// Maximum number of settings in a single write (mirrors dataserver $maxWriteSettings)
+const MAX_WRITE_SETTINGS = 270;
+
+// Maximum length of a setting value (mirrors dataserver Zotero_Settings::$MAX_VALUE_LENGTH)
+const MAX_SETTING_VALUE_LENGTH = 30000;
+
+// Settings that can be written (mirrors dataserver Zotero_Settings::$allowedSettings)
+const ALLOWED_SETTINGS = [
+	'attachmentRenameTemplate',
+	'autoRenameFiles',
+	'autoRenameFilesFileTypes',
+	'feeds',
+	'tagColors',
+	/^lastPageIndex_(u|g[0-9]+)_[A-Z0-9]{8}$/,
+	/^lastRead_(g[0-9]+)_[A-Z0-9]{8}$/,
+	/^lastReadAloudPosition_(u|g[0-9]+)_[A-Z0-9]{8}$/,
+	'readerCustomThemes',
+];
+
+// Settings that only group admins can change in group libraries
+// (mirrors dataserver Zotero_Settings::$adminOnlySettings)
+const ADMIN_ONLY_SETTINGS = [
+	'attachmentRenameTemplate',
+	'autoRenameFiles',
+	'autoRenameFilesFileTypes',
+];
+
+// Maximum number of settings in a multi-delete query parameter
+const MAX_DELETE_SETTINGS = 100;
+
 /**
  * @type {Map<string, number>} token -> expiryEpochMs
  */
@@ -962,13 +992,218 @@ Zotero.Server.Endpoints["/api/creatorFields"] = Zotero.Server.LocalAPI.CreatorFi
 
 
 Zotero.Server.LocalAPI.Settings = class extends LocalAPIEndpoint {
-	supportedMethods = ['GET'];
+	supportedMethods = ['GET', 'POST', 'DELETE'];
 
-	run(_) {
-		return [200, 'application/json', '{}'];
+	async run(requestData) {
+		let { libraryID, searchParams, headers } = requestData;
+		let library = Zotero.Libraries.get(libraryID);
+		
+		if (requestData.method === 'DELETE') {
+			this._checkLibraryIfUnmodifiedSinceVersion(requestData);
+			if (!searchParams.get('settingKey')) {
+				throw new HTTPError(400, 'settingKey parameter not provided');
+			}
+			let names = searchParams.get('settingKey').split(',');
+			if (names.length > MAX_DELETE_SETTINGS) {
+				throw new HTTPError(400, `Cannot delete more than ${MAX_DELETE_SETTINGS} settings at once`);
+			}
+			for (let name of names) {
+				checkSettingAdminAccess(libraryID, name);
+			}
+			await Zotero.DB.executeTransaction(async () => {
+				for (let name of names) {
+					await Zotero.SyncedSettings.clear(libraryID, name);
+				}
+			});
+			return [204, { 'Last-Modified-Version': library.clientVersion }, ''];
+		}
+		
+		if (requestData.method === 'POST') {
+			let token = this._checkWriteToken(requestData);
+			this._checkLibraryIfUnmodifiedSinceVersion(requestData);
+			let body = this._parseJSONBody(requestData.data);
+			if (!body || typeof body !== 'object' || Array.isArray(body)) {
+				throw new HTTPError(400, 'Uploaded data must be a JSON object');
+			}
+			if (Object.keys(body).length > MAX_WRITE_SETTINGS) {
+				throw new HTTPError(413, `Cannot add more than ${MAX_WRITE_SETTINGS} settings at a time`);
+			}
+			
+			// Settings that only group admins can change are reported as failures in a write
+			// report, and the rest are written normally
+			let results = new MultiWriteResults();
+			let restricted = false;
+			
+			// Validate everything first
+			let changes = [];
+			for (let [i, [name, json]] of Object.entries(body).entries()) {
+				try {
+					checkSettingAdminAccess(libraryID, name);
+				}
+				catch (e) {
+					results.addFailure(i, name, e);
+					restricted = true;
+					continue;
+				}
+				if (!json || typeof json !== 'object' || Array.isArray(json)) {
+					throw new HTTPError(400, `Invalid property '${name}'; expected JSON setting object`);
+				}
+				validateSettingJSON(libraryID, name, json);
+				if (json.version !== undefined) {
+					checkSettingVersion(libraryID, name, json.version);
+				}
+				if (settingValueChanged(libraryID, name, json.value)) {
+					changes.push([name, json.value]);
+				}
+			}
+			
+			if (changes.length) {
+				await Zotero.DB.executeTransaction(async () => {
+					for (let [name, value] of changes) {
+						await Zotero.SyncedSettings.set(libraryID, name, value);
+					}
+				});
+			}
+			this._recordWriteToken(token);
+			if (restricted) {
+				return [
+					200,
+					{
+						'Content-Type': 'application/json',
+						'Last-Modified-Version': library.clientVersion,
+					},
+					JSON.stringify(results.toJSON(), null, 4)
+				];
+			}
+			return [204, { 'Last-Modified-Version': library.clientVersion }, ''];
+		}
+		
+		let lastModifiedVersion = library.clientVersion;
+		let ifModifiedSinceVersion = parseInt(headers.get('If-Modified-Since-Version'));
+		if (ifModifiedSinceVersion && lastModifiedVersion <= ifModifiedSinceVersion) {
+			return [304, { 'Last-Modified-Version': lastModifiedVersion }, ''];
+		}
+		let since = 0;
+		if (searchParams.has('since')) {
+			since = parseInt(searchParams.get('since'));
+			if (Number.isNaN(since)) {
+				throw new HTTPError(400, `Invalid 'since' value '${searchParams.get('since')}'`);
+			}
+		}
+		let json = {};
+		for (let [name, setting] of Object.entries(Zotero.SyncedSettings.getAll(libraryID))) {
+			if (setting.clientVersion > since) {
+				json[name] = settingToResponseJSON(setting);
+			}
+		}
+		return [
+			200,
+			{
+				'Content-Type': 'application/json',
+				'Last-Modified-Version': lastModifiedVersion,
+				'Total-Results': Object.keys(json).length,
+			},
+			JSON.stringify(json, null, 4)
+		];
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/settings"] = Zotero.Server.LocalAPI.Settings;
+Zotero.Server.Endpoints["/api/groups/:groupID/settings"] = Zotero.Server.LocalAPI.Settings;
+
+Zotero.Server.LocalAPI.Setting = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET', 'PUT', 'DELETE'];
+
+	async run(requestData) {
+		let { libraryID, pathParams, headers } = requestData;
+		let name = pathParams.settingKey;
+		let library = Zotero.Libraries.get(libraryID);
+		let metadata = Zotero.SyncedSettings.getMetadata(libraryID, name);
+		
+		if (requestData.method === 'PUT' || requestData.method === 'DELETE') {
+			checkSettingAdminAccess(libraryID, name);
+		}
+		
+		if (requestData.method === 'PUT') {
+			let json = this._parseJSONBody(requestData.data);
+			if (!json || typeof json !== 'object' || Array.isArray(json)) {
+				throw new HTTPError(400, 'Uploaded data must be a JSON object');
+			}
+			validateSettingJSON(libraryID, name, json);
+			
+			let headerVersion = headers.get('If-Unmodified-Since-Version');
+			if (headerVersion !== null) {
+				headerVersion = parseInt(headerVersion);
+				if (Number.isNaN(headerVersion) || headerVersion < 0) {
+					throw new HTTPError(400, 'Invalid If-Unmodified-Since-Version value');
+				}
+				if (json.version !== undefined && json.version !== headerVersion) {
+					throw new HTTPError(400, 'If-Unmodified-Since-Version value does not match JSON '
+						+ `'version' property (${headerVersion} != ${json.version})`);
+				}
+				if (!metadata && headerVersion > 0) {
+					throw new HTTPError(404, `Setting not found (expected version ${headerVersion})`);
+				}
+				if (metadata && metadata.clientVersion > headerVersion) {
+					throw new HTTPError(412, 'Setting has been modified since specified version '
+						+ `(expected ${headerVersion}, found ${metadata.clientVersion})`);
+				}
+			}
+			else if (json.version !== undefined) {
+				checkSettingVersion(libraryID, name, json.version);
+			}
+			else if (metadata) {
+				throw new HTTPError(428, "Either If-Unmodified-Since-Version or 'version' property "
+					+ 'must be provided for single-setting writes');
+			}
+			
+			if (settingValueChanged(libraryID, name, json.value)) {
+				await Zotero.SyncedSettings.set(libraryID, name, json.value);
+			}
+			return [204, { 'Last-Modified-Version': library.clientVersion }, ''];
+		}
+		
+		if (!metadata) {
+			return [404, 'text/plain', 'Setting not found'];
+		}
+		
+		if (requestData.method === 'DELETE') {
+			// Like the web API, a version isn't required, but check it if one is provided
+			let headerVersion = headers.get('If-Unmodified-Since-Version');
+			if (headerVersion !== null) {
+				headerVersion = parseInt(headerVersion);
+				if (Number.isNaN(headerVersion) || headerVersion < 0) {
+					throw new HTTPError(400, 'Invalid If-Unmodified-Since-Version value');
+				}
+				if (metadata.clientVersion > headerVersion) {
+					throw new HTTPError(412, 'Setting has been modified since specified version '
+						+ `(expected ${headerVersion}, found ${metadata.clientVersion})`);
+				}
+			}
+			await Zotero.SyncedSettings.clear(libraryID, name);
+			return [204, { 'Last-Modified-Version': library.clientVersion }, ''];
+		}
+		
+		let lastModifiedVersion = metadata.clientVersion;
+		let ifModifiedSinceVersion = parseInt(headers.get('If-Modified-Since-Version'));
+		if (ifModifiedSinceVersion && lastModifiedVersion <= ifModifiedSinceVersion) {
+			return [304, { 'Last-Modified-Version': lastModifiedVersion }, ''];
+		}
+		let json = settingToResponseJSON({
+			value: Zotero.SyncedSettings.get(libraryID, name),
+			...metadata
+		});
+		return [
+			200,
+			{
+				'Content-Type': 'application/json',
+				'Last-Modified-Version': lastModifiedVersion,
+			},
+			JSON.stringify(json, null, 4)
+		];
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/settings/:settingKey"] = Zotero.Server.LocalAPI.Setting;
+Zotero.Server.Endpoints["/api/groups/:groupID/settings/:settingKey"] = Zotero.Server.LocalAPI.Setting;
 
 
 Zotero.Server.LocalAPI.Collections = class extends LocalAPIEndpoint {
@@ -2004,6 +2239,149 @@ function mergePatchJSON(existingJSON, patchJSON) {
 		merged[k] = patchJSON[k];
 	}
 	return merged;
+}
+
+/**
+ * Validate a setting name and JSON object ({ value, version? }) for a write, using the same rules
+ * as the dataserver so that settings written locally can be synced.
+ *
+ * @throws HTTPError
+ */
+function validateSettingJSON(libraryID, name, json) {
+	if (!ALLOWED_SETTINGS.some(s => (s instanceof RegExp ? s.test(name) : s === name))) {
+		throw new HTTPError(400, `Invalid setting '${name}'`);
+	}
+	if (json.value === undefined || json.value === null) {
+		throw new HTTPError(400, "'value' property not provided");
+	}
+	for (let key of Object.keys(json)) {
+		if (key !== 'value' && key !== 'version') {
+			throw new HTTPError(400, `Invalid property '${key}'`);
+		}
+	}
+	if (json.version !== undefined && (!Number.isInteger(json.version) || json.version < 0)) {
+		throw new HTTPError(400, "'version' must be an integer");
+	}
+	
+	let value = json.value;
+	let length = [...(typeof value == 'string' ? value : JSON.stringify(value))].length;
+	if (length > MAX_SETTING_VALUE_LENGTH) {
+		throw new HTTPError(400, `'value' cannot be longer than ${MAX_SETTING_VALUE_LENGTH} characters`);
+	}
+	
+	let baseName = name.match(/^[a-z]+/i)[0];
+	switch (baseName) {
+		// Object settings
+		case 'feeds':
+		case 'lastReadAloudPosition':
+			if (typeof value != 'object' || Array.isArray(value)) {
+				throw new HTTPError(400, "'value' must be an object");
+			}
+			break;
+		
+		// Array settings
+		case 'readerCustomThemes':
+		case 'tagColors':
+			if (!Array.isArray(value)) {
+				throw new HTTPError(400, "'value' must be an array");
+			}
+			if (!value.length) {
+				throw new HTTPError(400, "'value' array cannot be empty");
+			}
+			break;
+		
+		// Integer settings
+		case 'lastRead':
+			if (!Number.isInteger(value)) {
+				throw new HTTPError(400, "'value' must be an integer");
+			}
+			break;
+		
+		// Boolean settings
+		case 'autoRenameFiles':
+			if (typeof value != 'boolean') {
+				throw new HTTPError(400, "'value' must be a boolean");
+			}
+			break;
+		
+		case 'lastPageIndex':
+			if (typeof value != 'number' && typeof value != 'string') {
+				throw new HTTPError(400, "'value' must be an integer, string, or decimal");
+			}
+			// Snapshots use 0 <= scrollYPercent <= 100 with 0-1 decimal places
+			if (typeof value == 'number' && !Number.isInteger(value)) {
+				if (value < 0 || value > 100) {
+					throw new HTTPError(400, "Decimal value must be between 0 and 100");
+				}
+				if (Number(value.toFixed(1)) !== value) {
+					throw new HTTPError(400, "Decimal value must be to one decimal place");
+				}
+			}
+			if (value === '') {
+				throw new HTTPError(400, "'value' cannot be empty");
+			}
+			break;
+		
+		// String settings
+		default:
+			if (typeof value != 'string') {
+				throw new HTTPError(400, "'value' must be a string");
+			}
+			if (value === '') {
+				throw new HTTPError(400, "'value' cannot be empty");
+			}
+			break;
+	}
+	
+	if ((baseName == 'lastPageIndex' || baseName == 'lastRead')
+			&& libraryID != Zotero.Libraries.userLibraryID) {
+		throw new HTTPError(400, `${baseName} can only be set in user library`);
+	}
+}
+
+/**
+ * Check a setting's JSON 'version' property against its current local version. A version of 0
+ * means the setting must not exist yet.
+ *
+ * @throws HTTPError
+ */
+function checkSettingVersion(libraryID, name, version) {
+	let metadata = Zotero.SyncedSettings.getMetadata(libraryID, name);
+	if (!metadata) {
+		if (version > 0) {
+			throw new HTTPError(404, `Setting '${name}' doesn't exist (expected version ${version}; use 0 instead)`);
+		}
+		return;
+	}
+	if (metadata.clientVersion !== version) {
+		throw new HTTPError(412, `Setting '${name}' has been modified since specified version `
+			+ `(expected ${version}, found ${metadata.clientVersion})`);
+	}
+}
+
+/**
+ * Throw a 403 if the setting can only be changed by group admins and the current user
+ * isn't an admin of the setting's group library
+ *
+ * @throws HTTPError
+ */
+function checkSettingAdminAccess(libraryID, name) {
+	let library = Zotero.Libraries.get(libraryID);
+	if (ADMIN_ONLY_SETTINGS.includes(name) && library.libraryType == 'group' && !library.isAdmin) {
+		throw new HTTPError(403, `Only group admins can change setting '${name}'`);
+	}
+}
+
+function settingValueChanged(libraryID, name, value) {
+	let currentValue = Zotero.SyncedSettings.get(libraryID, name);
+	return currentValue === null || JSON.stringify(currentValue) !== JSON.stringify(value);
+}
+
+function settingToResponseJSON(setting) {
+	return {
+		value: setting.value,
+		version: setting.clientVersion
+	};
 }
 
 /**
