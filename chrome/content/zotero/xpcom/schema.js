@@ -3857,6 +3857,12 @@ Zotero.Schema = new function () {
 					}
 				}
 			}
+			
+			else if (i == 132) {
+				if (!(await Zotero.DB.columnExists('syncedSettings', 'clientVersion'))) {
+					await Zotero.DB.queryAsync("ALTER TABLE syncedSettings ADD COLUMN clientVersion INT NOT NULL DEFAULT 0");
+				}
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);
