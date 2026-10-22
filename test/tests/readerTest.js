@@ -391,7 +391,7 @@ describe("Reader", function () {
 			);
 			
 			try {
-				var reader = await Zotero.Reader.open(attachment.itemID);
+				var { instance: reader } = await Zotero.Reader.open(attachment.itemID);
 				await reader._initPromise;
 				assert.ok(reader._internalReader);
 			}
