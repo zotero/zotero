@@ -991,9 +991,27 @@ Zotero.Utilities.Internal = {
 			}
 			// Custom / generic flavors: read as raw bytes or as a string
 			if (dataType === "binary") {
-				return this._inputStreamToArrayBuffer(
-					data.value.QueryInterface(Components.interfaces.nsIInputStream)
-				);
+				if (data.value instanceof Components.interfaces.nsIInputStream) {
+					return this._inputStreamToArrayBuffer(data.value);
+				}
+				// Native clipboards (e.g. GTK) return custom flavors as primitives --
+				// nsISupportsCString holds raw bytes, nsISupportsString holds bytes as UTF-16 units
+				if (data.value instanceof Components.interfaces.nsISupportsCString) {
+					let str = data.value.data;
+					let bytes = new Uint8Array(str.length);
+					for (let i = 0; i < str.length; i++) {
+						bytes[i] = str.charCodeAt(i);
+					}
+					return bytes.buffer;
+				}
+				let str = data.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+				let bytes = new Uint8Array(str.length * 2);
+				for (let i = 0; i < str.length; i++) {
+					let code = str.charCodeAt(i);
+					bytes[i * 2] = code & 0xFF;
+					bytes[i * 2 + 1] = code >> 8;
+				}
+				return bytes.buffer;
 			}
 			if (dataType === "path") {
 				return null;
