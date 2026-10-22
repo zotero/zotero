@@ -603,6 +603,8 @@ describe("Plugin File Access", function () {
 		});
 
 		it("opens in the bottom-right of the screen", async function () {
+			// Headless CI has no WM to honor moveTo()
+			if (Zotero.automatedTest) this.skip();
 			let path = PathUtils.join(tempDir, "position.txt");
 			let { promptPromise, sessionPromise } = triggerPrompt(path);
 			let win = await promptPromise;
@@ -610,10 +612,14 @@ describe("Plugin File Access", function () {
 			// the usable area. WMs may clamp/snap, so use a generous margin.
 			let expectedRight = win.screen.availLeft + win.screen.availWidth - 50;
 			let expectedBottom = win.screen.availTop + win.screen.availHeight - 30;
-			let actualRight = win.screenX + win.outerWidth;
-			let actualBottom = win.screenY + win.outerHeight;
-			assert.closeTo(actualRight, expectedRight, 50, "right edge near screen right");
-			assert.closeTo(actualBottom, expectedBottom, 50, "bottom edge near screen bottom");
+			// _positionWindow() runs once Fluent resolves, so wait for the move
+			for (let attempt = 0;
+				attempt < 50 && Math.abs(win.screenX + win.outerWidth - expectedRight) > 50;
+				attempt++) {
+				await Zotero.Promise.delay(20);
+			}
+			assert.closeTo(win.screenX + win.outerWidth, expectedRight, 50, "right edge near screen right");
+			assert.closeTo(win.screenY + win.outerHeight, expectedBottom, 50, "bottom edge near screen bottom");
 
 			win.PluginFileAccessPrompt._choose("deny", "file");
 			await sessionPromise;
