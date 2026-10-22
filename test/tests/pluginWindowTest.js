@@ -564,10 +564,13 @@ describe("Plugin windows", function () {
 				let y = chromeWin.screen.availTop + 60;
 				let result = await sendToPage({ type: "call-api", name: "moveTo", params: { x, y } });
 				assert.equal(result.type, "api-result", "moveTo should resolve");
-				for (let attempt = 0; attempt < 100 && (chromeWin.screenX !== x || chromeWin.screenY !== y); attempt++) {
-					await Zotero.Promise.delay(20);
+				// Headless CI has no WM to honor moveTo()
+				if (!Zotero.automatedTest) {
+					for (let attempt = 0; attempt < 100 && (chromeWin.screenX !== x || chromeWin.screenY !== y); attempt++) {
+						await Zotero.Promise.delay(20);
+					}
+					assert.deepEqual([chromeWin.screenX, chromeWin.screenY], [x, y]);
 				}
-				assert.deepEqual([chromeWin.screenX, chromeWin.screenY], [x, y]);
 
 				result = await sendToPage({ type: "call-api", name: "getState", params: {} });
 				assert.equal(result.type, "api-result");
