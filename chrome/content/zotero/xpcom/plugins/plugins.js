@@ -29,6 +29,11 @@ Zotero.Plugins = new function () {
 	var lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		XPIDatabase: "resource://gre/modules/addons/XPIDatabase.sys.mjs",
+		VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+		PluginPrefs: "chrome://zotero/content/xpcom/plugins/prefs.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -37,7 +42,7 @@ Zotero.Plugins = new function () {
 			Ci.amIAddonManagerStartup,
 		],
 	});
-	var scopes = new Map();
+
 	var observers = new Set();
 	var addonVersions = new Map();
 
@@ -77,7 +82,7 @@ Zotero.Plugins = new function () {
 				continue;
 			}
 			addonVersions.set(addon.id, addon.version);
-			_loadScope(addon);
+			await lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
@@ -103,7 +108,11 @@ Zotero.Plugins = new function () {
 					}
 					let { addons } = await AddonManager.getActiveAddons(["extension"]);
 					for (let addon of addons) {
-						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+						let extraParams = {};
+						if (lazy.VarCheck.isPrivilegedPermission(addon)) {
+							extraParams.window = domWindow;
+						}
+						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, extraParams);
 					}
 				}
 				domWindow.addEventListener("load", onload, false);
@@ -117,107 +126,16 @@ Zotero.Plugins = new function () {
 				}
 				let { addons } = await AddonManager.getActiveAddons(["extension"]);
 				for (let addon of addons) {
-					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+					let extraParams = {};
+					if (lazy.VarCheck.isPrivilegedPermission(addon)) {
+						extraParams.window = domWindow;
+					}
+					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_UNLOAD, extraParams);
 				}
 			},
 		};
 		Services.wm.addListener(mainWindowListener);
 	};
-	
-	
-	/**
-	 * Adapted from loadBootstrapScope() in Firefox 60 ESR
-	 *
-	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
-	 */
-	function _loadScope(addon) {
-		if (scopes.has(addon.id)) {
-			return;
-		}
-		var scope = new Cu.Sandbox(
-			Services.scriptSecurityManager.getSystemPrincipal(),
-			{
-				sandboxName: addon.id,
-				wantGlobalProperties: [
-					"atob",
-					"btoa",
-					"Blob",
-					"crypto",
-					"CSS",
-					"ChromeUtils",
-					"DOMParser",
-					"fetch",
-					"File",
-					"FileReader",
-					"TextDecoder",
-					"TextEncoder",
-					"URL",
-					"URLSearchParams",
-					"XMLHttpRequest"
-				]
-			}
-		);
-		for (let name in REASONS) {
-			scope[name] = REASONS[name];
-		}
-		Object.assign(
-			scope,
-			{
-				Zotero,
-				ChromeWorker,
-				IOUtils,
-				Localization,
-				PathUtils,
-				Services,
-				Worker,
-				XMLSerializer,
-				
-				// Add additional global functions
-				setTimeout,
-				clearTimeout,
-				setInterval,
-				clearInterval,
-				requestIdleCallback,
-				cancelIdleCallback,
-			}
-		);
-		
-		// fx140: Shim ChromeUtils.import() in the plugin scope
-		// TODO: Do we want this?
-		scope.ChromeUtils = new Proxy(scope.ChromeUtils, {
-			get(target, property, receiver) {
-				if (property === 'import') {
-					return function (uri) {
-						let esmURI = uri.replace('.jsm', uri.includes('/zotero/') ? '.mjs' : '.sys.mjs');
-						Zotero.warn('ChromeUtils.import() has been removed. Use importESModule():\n'
-							+ `  ChromeUtils.importESModule("${esmURI}");`);
-						return receiver.importESModule(esmURI);
-					};
-				}
-				return Reflect.get(target, property, receiver);
-			}
-		});
-		
-		scopes.set(addon.id, scope);
-		
-		try {
-			let uri = addon.getResourceURI().spec + 'bootstrap.js';
-			Services.scriptloader.loadSubScriptWithOptions(
-				uri,
-				{
-					target: scope,
-					ignoreCache: true,
-					// Plugins are loaded from jar:file: URIs, which the script loader
-					// otherwise refuses (Mozilla bug 1974213)
-					allowUnsafeURL: true
-				}
-			);
-		}
-		catch (e) {
-			Zotero.logError(e);
-		}
-	}
-	
 	
 	/**
 	 * Adapted from callBootstrapMethod() in Firefox 60 ESR
@@ -235,29 +153,38 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
-			let scope = scopes.get(id);
+			let scope = lazy.PluginSandbox.getScope(id);
 			
 			let func;
 			try {
 				func = scope[method] || Cu.evalInSandbox(`${method};`, scope);
 			}
-			catch (e) {}
+			catch {}
 			
 			if (!func) {
 				Zotero.warn(`Plugin ${id} is missing bootstrap method '${method}'`);
 				return;
 			}
 			
+			let isPrivileged = lazy.VarCheck.isPrivilegedPermission(addon);
 			let params = {
 				id: addon.id,
 				version: addon.version,
-				rootURI: addon.getResourceURI().spec
+				baseURI: lazy.PluginProtocol.getBaseURI(addon.id),
 			};
+			// Keep compatibility with legacy plugins
+			if (isPrivileged) {
+				params.rootURI = addon.getResourceURI().spec;
+			}
 			if (extraParams) {
 				Object.assign(params, extraParams);
 			}
 			let result;
 			try {
+				if (!isPrivileged) {
+					params = lazy.ScopeUtils.ensurePromiseVarInScope(params, scope);
+					reason = Cu.cloneInto(reason, scope);
+				}
 				result = func.call(scope, params, reason);
 				// If bootstrap method returns a promise, wait for it
 				if (result && result.then) {
@@ -305,29 +232,23 @@ Zotero.Plugins = new function () {
 	}
 	
 	
-	function _unloadScope(id) {
-		scopes.delete(id);
-	}
-	
-	
-	this.getRootURI = async function (id) {
-		var addon = await AddonManager.getAddonByID(id);
-		return addon.getResourceURI().spec;
+	this.getBaseURI = function (id) {
+		return lazy.PluginProtocol.getBaseURI(id);
 	};
 	
-	
+
 	/**
 	 * Resolve a URI in the context of a plugin. If the passed URI is relative, it will be resolved relative to the
-	 * plugin root URI. If it's absolute, it will be returned unchanged.
+	 * plugin base URI. If it's absolute, it will be returned unchanged.
 	 *
 	 * @param {String} id Plugin ID
 	 * @param {String | URL} uri
 	 * @throws {TypeError} On an invalid URI
 	 * @return {Promise<String>}
 	 */
-	this.resolveURI = async function (id, uri) {
-		// We can't use addon.getResourceURI(path) here because that only accepts a relative path
-		return new URL(uri, await this.getRootURI(id)).href;
+	this.resolveURI = function (id, uri) {
+		let baseURI = this.getBaseURI(id);
+		return new URL(uri, baseURI).href;
 	};
 	
 	
@@ -485,7 +406,7 @@ Zotero.Plugins = new function () {
 	this.getAllPluginIDs = async function () {
 		let addons = await AddonManager.getAddonsByTypes(["extension"]);
 		return addons.map(addon => addon.id);
-	}
+	};
 
 
 	/**
@@ -507,30 +428,21 @@ Zotero.Plugins = new function () {
 	};
 	
 	
-	function setDefaultPrefs(addon) {
-		var branch = Services.prefs.getDefaultBranch("");
-		var obj = {
-			pref(pref, value) {
-				switch (typeof value) {
-					case 'boolean':
-						branch.setBoolPref(pref, value);
-						break;
-					case 'string':
-						branch.setStringPref(pref, value);
-						break;
-					case 'number':
-						branch.setIntPref(pref, value);
-						break;
-					default:
-						Zotero.logError(`Invalid type '${typeof value}' for pref '${pref}'`);
-				}
-			}
-		};
+	/**
+	 * Run a plugin's prefs.js in an empty sandbox, its pref(name, value, global) calls reaching `pref`. A
+	 * privileged plugin names prefs in full; an unprivileged one as it does with Zotero.Prefs, gated alike
+	 */
+	function loadDefaultPrefs(addon, pref) {
+		let resolve = lazy.VarCheck.isPrivilegedPermission(addon)
+			? name => name
+			: lazy.PluginPrefs.access(addon.id, addon.installPermissions?.pref_permissions).resolve;
+		let sandbox = new Cu.Sandbox(null, { sandboxName: `${addon.id} prefs.js`, wantGlobalProperties: [] });
+		Cu.exportFunction((name, value, global) => pref(resolve(name, global), value), sandbox, { defineAs: "pref" });
 		try {
 			Services.scriptloader.loadSubScriptWithOptions(
-				addon.getResourceURI("prefs.js").spec,
+				lazy.PluginProtocol.getBaseURI(addon.id) + "prefs.js",
 				{
-					target: obj,
+					target: sandbox,
 					ignoreCache: true,
 					allowUnsafeURL: true
 				}
@@ -540,34 +452,41 @@ Zotero.Plugins = new function () {
 			if (!e.toString().startsWith('Error opening input stream')) {
 				Zotero.logError(e);
 			}
+		}
+		finally {
+			// Nuking also drops the microtasks the script queued, so nothing of it runs after this
+			Cu.nukeSandbox(sandbox);
 		}
 	}
-	
-	
+
+
+	function setDefaultPrefs(addon) {
+		var branch = Services.prefs.getDefaultBranch("");
+		loadDefaultPrefs(addon, (pref, value) => {
+			switch (typeof value) {
+				case 'boolean':
+					branch.setBoolPref(pref, value);
+					break;
+				case 'string':
+					branch.setStringPref(pref, value);
+					break;
+				case 'number':
+					branch.setIntPref(pref, value);
+					break;
+				default:
+					Zotero.logError(`Invalid type '${typeof value}' for pref '${pref}'`);
+			}
+		});
+	}
+
+
 	function clearDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
-		var obj = {
-			pref(pref, _value) {
-				if (!branch.prefHasUserValue(pref)) {
-					branch.clearUserPref(pref);
-				}
+		loadDefaultPrefs(addon, (pref, _value) => {
+			if (!branch.prefHasUserValue(pref)) {
+				branch.clearUserPref(pref);
 			}
-		};
-		try {
-			Services.scriptloader.loadSubScriptWithOptions(
-				addon.getResourceURI("prefs.js").spec,
-				{
-					target: obj,
-					ignoreCache: true,
-					allowUnsafeURL: true
-				}
-			);
-		}
-		catch (e) {
-			if (!e.toString().startsWith('Error opening input stream')) {
-				Zotero.logError(e);
-			}
-		}
+		});
 	}
 	
 	
@@ -587,11 +506,11 @@ Zotero.Plugins = new function () {
 	 * @returns {Promise<void>}
 	 */
 	async function registerLocales(addon) {
-		let rootURI = addon.getResourceURI();
+		let baseURI = lazy.PluginProtocol.getBaseURI(addon.id);
 		let zoteroLocales = Services.locale.availableLocales;
 		let pluginLocales;
 		try {
-			pluginLocales = await readDirectory(rootURI, 'locale', true);
+			pluginLocales = await readDirectory(baseURI, 'locale', true);
 			if (!pluginLocales.length) {
 				return;
 			}
@@ -606,7 +525,7 @@ Zotero.Plugins = new function () {
 		for (let pluginLocale of pluginLocales) {
 			let files;
 			try {
-				files = await readDirectory(rootURI, `locale/${pluginLocale}`);
+				files = await readDirectory(baseURI, `locale/${pluginLocale}`);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -615,7 +534,7 @@ Zotero.Plugins = new function () {
 			let contents = new Map();
 			for (let file of files) {
 				if (!file.endsWith('.ftl')) continue;
-				let url = rootURI.spec + `locale/${pluginLocale}/${file}`;
+				let url = baseURI + `locale/${pluginLocale}/${file}`;
 				try {
 					contents.set(file, await Zotero.File.getResourceAsync(url));
 				}
@@ -702,15 +621,26 @@ Zotero.Plugins = new function () {
 	 * Read the contents of a directory in a plugin.
 	 * https://searchfox.org/mozilla-esr115/rev/7a83be92b8356ea63559bc3623b2b91a43f2ae05/toolkit/components/extensions/Extension.sys.mjs#882
 	 *
-	 * @param {nsIURI} rootURI
+	 * @param {string} baseURI -- moz-extension:// base URI for the plugin
 	 * @param {string} path
 	 * @param {boolean} [directoriesOnly=false]
 	 * @returns {Promise<string[]>}
 	 */
-	async function readDirectory(rootURI, path, directoriesOnly = false) {
+	async function readDirectory(baseURI, path, directoriesOnly = false) {
+		// Resolve moz-extension:// to the underlying file/jar URI for filesystem access
+		let uri = Services.io.newURI(baseURI);
+		let rootURI;
+		if (uri.scheme === 'moz-extension') {
+			let policy = WebExtensionPolicy.getByHostname(uri.host);
+			rootURI = Services.io.newURI(policy.baseURL);
+		}
+		else {
+			rootURI = uri;
+		}
+
 		if (rootURI instanceof Ci.nsIFileURL) {
-			let uri = Services.io.newURI("./" + path, null, rootURI);
-			let fullPath = uri.QueryInterface(Ci.nsIFileURL).file.path;
+			let pathURI = Services.io.newURI("./" + path, null, rootURI);
+			let fullPath = pathURI.QueryInterface(Ci.nsIFileURL).file.path;
 
 			let results = [];
 			try {
@@ -721,7 +651,7 @@ Zotero.Plugins = new function () {
 					}
 				}
 			}
-			catch (ex) {
+			catch {
 				// Fall-through, return what we have.
 			}
 			return results;
@@ -870,7 +800,7 @@ Zotero.Plugins = new function () {
 				Services.obs.notifyObservers(null, "startupcache-invalidate");
 				unregisterLocales(existingAddon);
 				clearDefaultPrefs(existingAddon);
-				_unloadScope(existingAddon.id);
+				lazy.PluginSandbox.unloadScope(existingAddon.id);
 				addonVersions.delete(existingAddon.id);
 			}
 		},
@@ -893,7 +823,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			
-			_loadScope(addon);
+			await lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'install', reason);
@@ -907,7 +837,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
-			_loadScope(addon);
+			await lazy.PluginSandbox.loadScope(addon, REASONS);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
@@ -921,6 +851,7 @@ Zotero.Plugins = new function () {
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_DISABLE);
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
+			lazy.PluginSandbox.unloadScope(addon.id);
 		},
 		
 		async onUninstalling(addon) {
@@ -937,7 +868,7 @@ Zotero.Plugins = new function () {
 		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
-			_unloadScope(addon.id);
+			lazy.PluginSandbox.unloadScope(addon.id);
 			addonVersions.delete(addon.id);
 		},
 		

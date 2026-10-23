@@ -28,7 +28,33 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 {
-	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
+	const lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
+	});
+
+	/**
+	 * The resolved URL is shown via <img>, where SVG-as-image mode blocks
+	 * scripts and external loads.
+	 *
+	 * @param {string} pluginID
+	 * @param {string} url - data:image/svg+xml URL, or an .svg URL optionally
+	 * 		relative to the plugin's root
+	 * @returns {string | null} Null if the value isn't an accepted SVG URL
+	 */
+	function resolveSVGImageURL(pluginID, url) {
+		if (typeof url !== "string") {
+			return null;
+		}
+		let parsed = URL.parse(url);
+		if (parsed?.protocol === "data:") {
+			return /^image\/svg\+xml[;,]/i.test(parsed.pathname) ? url : null;
+		}
+		return lazy.PluginProtocol.resolveFile(pluginID, url, [".svg"]);
+	}
 
 
 	/**
@@ -37,9 +63,17 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 
 
 	/**
+	 * @typedef {object} ItemTreeColumnContext
+	 * @property {number} itemID - The row's item
+	 * @property {SyncItemGetter} getItem - A cell answers synchronously, so this is how a column reads data
+	 */
+
+	/**
 	 * @typedef {function} ItemTreeColumnDataProvider
-	 * @param {Zotero.Item} item - The item to get data from
+	 * @param {Zotero.Item | ItemTreeColumnContext} item - An `ItemTreeColumnContext` for unprivileged
+	 * 		plugins. The live item privileged plugins get is @deprecated
 	 * @param {string} dataKey - The dataKey of the column
+	 * @param {ItemTreeColumnContext} context - The same context, passed to every plugin
 	 * @returns {string} - The data to display in the column
 	 */
 
@@ -49,12 +83,17 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	 * @param {string} data - The data to display in the column
 	 * @param {ItemTreeColumnOptions | {className: string}} column - The column options
 	 * @param {boolean} isFirstColumn - true if this is the first column
-	 * @param {Document} doc - The document of the item tree
-	 * @returns {HTMLElement} - The HTML to display in the cell
+	 * @param {Document} doc - The document of the item tree. Not passed to unprivileged plugins,
+	 * 		whose renderCell returns an SVG URL instead of an element
+	 * @returns {HTMLElement | string} - The cell element, or for unprivileged plugins an SVG URL
+	 * 		(a `data:image/svg+xml` URL or a plugin .svg URL) shown as an image filling the
+	 * 		cell. Size via the root <svg>: width/height for a fixed size, only a viewBox to
+	 * 		scale to the cell, neither to stretch to it. Anything else falls back to the
+	 * 		plain cell data.
 	 */
 
 
-	class ItemTreeColumnManagerInternal extends PluginAPIBase {
+	class ItemTreeColumnManagerInternal extends lazy.ManagerAPIBase {
 		constructor() {
 			super();
 			this.config = {
@@ -151,14 +190,73 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			};
 		}
 
-		_add(option) {
-			option = Object.assign({}, option);
+		_convert(option) {
+			option = super._convert(option);
+
 			option.enabledTreeIDs = option.enabledTreeIDs || ["main"];
 			if (option.enabledTreeIDs.includes("*")) {
 				option.enabledTreeIDs = ["*"];
 			}
 			option.showInColumnPicker = option.showInColumnPicker === undefined ? true : option.showInColumnPicker;
-			return super._add(option);
+
+			// Unprivileged plugins can't build free-form markup or DOM.
+			// htmlLabel and renderCell content is an SVG URL shown as
+			// an image (see resolveSVGImageURL)
+			let unprivileged = !lazy.PluginSandbox.isPrivileged(option.pluginID);
+			if (unprivileged && option.htmlLabel !== undefined) {
+				let imageURL = resolveSVGImageURL(option.pluginID, option.htmlLabel);
+				if (imageURL) {
+					// Marker object rendered as <img> by virtualized-table
+					option.htmlLabel = { svgSrc: imageURL };
+				}
+				else {
+					this._log("'htmlLabel' must be a data:image/svg+xml URL or a plugin .svg URL for unprivileged plugins", "warn");
+					delete option.htmlLabel;
+				}
+			}
+
+			if (unprivileged && option.renderCell) {
+				// The plugin returns an SVG URL; the cell is built chrome-side
+				let getSVG = lazy.ScopeVariables.fromScope(option.renderCell, option.pluginID);
+				let pluginID = option.pluginID;
+				option.renderCell = function (index, data, column, isFirstColumn, doc) {
+					let cell = doc.createElement("span");
+					cell.className = `cell ${column.className}`;
+					let imageURL = resolveSVGImageURL(pluginID, getSVG(index, data, column, isFirstColumn));
+					if (imageURL) {
+						let img = doc.createElement("img");
+						img.className = "cell-svg";
+						img.src = imageURL;
+						img.alt = data === undefined || data === null ? "" : String(data);
+						cell.appendChild(img);
+					}
+					else if (data !== undefined && data !== null) {
+						cell.textContent = data;
+					}
+					return cell;
+				};
+			}
+
+			if (option.dataProvider) {
+				let provider = lazy.ScopeVariables.fromScope(option.dataProvider, option.pluginID);
+				let pluginID = option.pluginID;
+				// A cell answers synchronously, so `getItem` replaces the live item, and rides along as the
+				// third argument since a privileged plugin's first stays the live item
+				provider = ((wrapped, item, dataKey) => {
+					let context = {
+						itemID: item.id,
+						getItem: Zotero.DataStore.itemGetter(item.id, pluginID),
+					};
+					try {
+						return wrapped(unprivileged ? context : item, dataKey, context);
+					}
+					finally {
+						context.getItem.expire?.();
+					}
+				}).bind(null, provider);
+				option.dataProvider = provider;
+			}
+			return option;
 		}
 
 		_validate(option) {
@@ -169,7 +267,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				return false;
 			}
 
-			return super._validate(option);
+			option = super._validate(option);
+			if (!option || !this._resolveImageURLs(option, ["iconPath"], option.pluginID)) {
+				return false;
+			}
+			return option;
 		}
 
 		refresh() {
@@ -206,8 +308,13 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		 * @param {boolean} [option.noPadding] - Set to true for columns with padding disabled in stylesheet
 		 * @param {number} [option.minWidth] - Override the default [20px] column min-width for resizing
 		 * @param {React.Component} [option.iconLabel] - Set an Icon label instead of a text-based one
-		 * @param {string} [option.iconPath] - Set an Icon path, overrides {iconLabel}
-		 * @param {string | React.Component} [option.htmlLabel] - Set an HTML label, overrides {iconLabel} and {label}. Can be a HTML string or a React component.
+		 * @param {string} [option.iconPath] - Set an Icon path, optionally relative to the plugin root, overrides {iconLabel}
+		 * @param {string | React.Component} [option.htmlLabel] - Set an HTML label,
+		 * 		overrides {iconLabel} and {label}. Can be a HTML string or a React component for
+		 * 		privileged plugins; unprivileged plugins must pass a `data:image/svg+xml` URL or
+		 * 		the URL of an .svg file within the plugin, shown as an image. Unlike renderCell,
+		 * 		header images render at their intrinsic size, so declare width/height on the
+		 * 		root <svg>.
 		 * @param {boolean} [option.showInColumnPicker=true] - Default: true. Set to true to show in column picker.
 		 * @param {boolean} [option.columnPickerSubMenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
 		 * @param {boolean} [option.primary] - Should only be one column at the time. Title is the primary column
@@ -278,36 +385,17 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		},
 
 		/**
-		 * @deprecated Use `registerColumn` instead.
-		 */
-		registerColumns(options) {
-			if (!Array.isArray(options)) {
-				options = [options];
-			}
-			return options.map(option => this.registerColumn(option));
-		},
-
-		/**
 		 * Unregister a custom column.
 		 * @param {string} dataKey - The dataKey of the column to unregister
 		 * @returns {boolean} - true if the column was unregistered, false if the column was not found
 		 */
-		unregisterColumn(dataKey) {
-			return this._columnManager.unregister(dataKey);
+		unregisterColumn(dataKey, _callerPluginID) {
+			return this._columnManager.unregister(dataKey, _callerPluginID);
 		},
 
 		/**
-		 * @deprecated Use `unregisterColumn` instead.
-		 */
-		unregisterColumns(dataKeys) {
-			if (!Array.isArray(dataKeys)) {
-				dataKeys = [dataKeys];
-			}
-			return dataKeys.map(dataKey => this.unregisterColumn(dataKey));
-		},
-
-		/**
-		 * Refresh the columns in the item tree
+		 * Refresh the columns in the item tree, re-running every `dataProvider`. A column shows a value
+		 * `dataProvider` can't compute synchronously by caching the async result and then refreshing
 		 * @returns {void}
 		 */
 		refreshColumns() {
@@ -359,9 +447,27 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		getCustomCellData(item, dataKey) {
 			const option = this._columnManager._optionsCache[dataKey];
 			if (option && option.dataProvider) {
-				return option.dataProvider(item, dataKey);
+				// A throwing provider must not take the tree down with it
+				try {
+					return option.dataProvider(item, dataKey);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 			return "";
 		},
 	};
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.ItemTreeManager.registerColumn,
+		({ pluginID, args }) => {
+			lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.ItemTreeManager.unregisterColumn,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
+		}
+	);
 }

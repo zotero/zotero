@@ -49,7 +49,8 @@
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		width="800"
 		height="600"
-		style="display: flex;">
+		style="display: flex;"
+		tooltip="html-tooltip">
 	
 	<linkset>
 		<html:link rel="localization" href="branding/brand.ftl"/>
@@ -80,6 +81,21 @@
 		<key modifiers="accel" key="L" oncommand="document.getElementById('prefs-search').focus()"/>
 		<key id="key_find" modifiers="accel" key="F" oncommand="document.getElementById('prefs-search').focus()"/>
 	</keyset>
+
+	<popupset>
+		<tooltip id="html-tooltip" page="true"/>
+		<panel
+			is="autocomplete-richlistbox-popup"
+			type="autocomplete-richlistbox"
+			id="PopupAutoComplete"
+			role="group"
+			noautofocus="true"
+			hidden="true"
+			overflowpadding="4"
+			norolluponanchor="true"
+			nomaxresults="true"
+		/>
+	</popupset>
 
 	<html:div id="prefs-outer-container">
 		<richlistbox id="prefs-navigation"></richlistbox>

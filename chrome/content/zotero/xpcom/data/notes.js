@@ -40,13 +40,14 @@ Zotero.Notes = new function () {
 	 * @param {number} itemID
 	 * @param {Object} location - Not implemented yet
 	 * @param {Object} options
-	 * @returns {Promise<Zotero.EditorInstance | null>} Instance of Zotero.EditorInstance for the note.
-	 * If the note tab is opened in background (unloaded), returns null.
+	 * @returns {Promise<{ instance: Zotero.EditorInstance | null, tabID: string | null, win: Window }>}
+	 *     The editor is null for a background tab, which stays unloaded; the tab is null in a window
 	 */
-	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey } = {}) {
+	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey, mainWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = Zotero.getMainWindow();
+		// mainWindow: the main window to open a tab in; defaults to the most recent one
+		let win = mainWindow || Zotero.getMainWindow();
 
 		if (!win) {
 			openInWindow = true;
@@ -81,19 +82,9 @@ Zotero.Notes = new function () {
 		if (win && !openInWindow && !allowDuplicate && !editorInstance) {
 			let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 			if (existingTabID) {
-				win.Zotero_Tabs.select(existingTabID, false, { location });
-				// Wait for the note editor to load
-				let timeout = 3000;
-				for (let i = 0; i < timeout; i += 100) {
-					editorInstance = this._editorInstances.find(r => r.itemID === itemID && r.viewMode === 'tab');
-					if (editorInstance) {
-						return editorInstance;
-					}
-					await new Promise(resolve => setTimeout(resolve, 100));
-				}
-				if (!editorInstance) {
-					throw new Error('Timed out waiting for note editor to load');
-				}
+				// Selecting the unloaded tab runs its load hook, which resolves with the editor it opened
+				editorInstance = await win.Zotero_Tabs.select(existingTabID, false, { location });
+				return { instance: editorInstance, tabID: existingTabID, win };
 			}
 		}
 
@@ -109,9 +100,16 @@ Zotero.Notes = new function () {
 				// TODO: implement this
 				editorInstance.navigate(location);
 			}
-			return editorInstance;
+			return {
+				instance: editorInstance,
+				tabID: editorInstance.tabID || null,
+				win: openInWindow ? editorInstance.window : win,
+			};
 		}
 
+		// The tab holding the note, or the note window, whichever it opens in
+		let id = null;
+		let noteWindow = null;
 		if (openInWindow) {
 			let name = null;
 		
@@ -121,7 +119,7 @@ Zotero.Notes = new function () {
 			}
 
 			let io = { itemID, parentItemKey, location, _initPromise: Zotero.Promise.defer() };
-			Services.ww.openWindow(
+			noteWindow = Services.ww.openWindow(
 				win,
 				'chrome://zotero/content/note.xhtml',
 				name,
@@ -132,7 +130,6 @@ Zotero.Notes = new function () {
 			noteEditor = io.noteEditor;
 		}
 		else {
-			let id;
 			let container;
 			let select = !openInBackground;
 			if (tabID) {
@@ -155,7 +152,8 @@ Zotero.Notes = new function () {
 			}
 
 			if (openInBackground) {
-				return null;
+				// The tab stays unloaded until selected, so there is no editor yet
+				return { instance: null, tabID: id, win };
 			}
 
 			if (!noteEditor) {
@@ -179,18 +177,22 @@ Zotero.Notes = new function () {
 
 				container.addEventListener('tab-selection-change', (event) => {
 					if (event.detail.selected) {
-						this._updateLayout();
+						this._updateLayout(win);
 					}
 				});
 			}
 
 			if (select) {
-				this._updateLayout();
+				this._updateLayout(win);
 				noteEditor.focus();
 			}
 		}
 		await noteEditor._initPromise;
-		return noteEditor._editorInstance;
+		return {
+			instance: noteEditor._editorInstance,
+			tabID: id,
+			win: noteWindow || win,
+		};
 	};
 
 	this.setBottomPlaceholderHeight = function (noteEditor, height) {
@@ -209,8 +211,7 @@ Zotero.Notes = new function () {
 		noteEditor.setContextPaneOpen(open);
 	};
 
-	this._updateLayout = function () {
-		let win = Zotero.getMainWindow();
+	this._updateLayout = function (win) {
 		win.ZoteroContextPane.update();
 		let { sidebarState } = win.Zotero_Tabs.updateSidebarLayout();
 		this.toggleSidebar(sidebarState.open);

@@ -76,6 +76,13 @@ class EditorInstance {
 		return this._tabID;
 	}
 
+	/**
+	 * @returns {Window} The chrome window hosting the editor: a main window for a tab, or the note window
+	 */
+	get window() {
+		return this._iframeWindow.browsingContext.topChromeWindow;
+	}
+
 	async init(options) {
 		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
