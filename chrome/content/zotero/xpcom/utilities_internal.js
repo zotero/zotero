@@ -179,6 +179,7 @@ Zotero.Utilities.Internal = {
 	 *     Other string values are wrapped as nsISupportsString,
 	 *     ArrayBuffer/TypedArray as nsIArrayBufferInputStream,
 	 *     and nsISupports objects are passed through directly.
+	 *     Such custom flavors may behave differently across platforms and apps.
 	 */
 	copyToClipboard: function (data) {
 		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
@@ -926,6 +927,7 @@ Zotero.Utilities.Internal = {
 	 *   application/x-moz-file          | nsIFile       | file as text | ArrayBuffer | path
 	 *   application/x-moz-nativeimage   | imgIContainer | PNG base64   | ArrayBuffer | --
 	 *   text/* and custom flavors       | string        | string       | ArrayBuffer | --
+	 * Custom flavors may behave differently across platforms and apps.
 	 *
 	 * @param {String} mimeType MIME type (flavor) of data to get
 	 * @param {"string" | "binary" | "path" | null} [dataType] How to interpret the data: "string", "binary",
@@ -934,19 +936,26 @@ Zotero.Utilities.Internal = {
 	 */
 	getClipboard: function (mimeType, dataType) {
 		let clip = Services.clipboard;
-		if (!clip.hasDataMatchingFlavors([mimeType], 1, clip.kGlobalClipboard)) {
-			return null;
-		}
-		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
-						.createInstance(Components.interfaces.nsITransferable);
-		transferable.init(null);
-		transferable.addDataFlavor(mimeType);
-		clip.getData(transferable, clip.kGlobalClipboard);
+		// Some platforms can't give a copied image back as a native image, so fall back to PNG
+		let flavors = mimeType === "application/x-moz-nativeimage" ? [mimeType, "image/png"] : [mimeType];
+		let flavor;
 		let data = {};
-		try {
-			transferable.getTransferData(mimeType, data, {});
+		for (flavor of flavors) {
+			if (!clip.hasDataMatchingFlavors([flavor], clip.kGlobalClipboard)) {
+				continue;
+			}
+			let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+							.createInstance(Components.interfaces.nsITransferable);
+			transferable.init(null);
+			transferable.addDataFlavor(flavor);
+			clip.getData(transferable, clip.kGlobalClipboard);
+			try {
+				transferable.getTransferData(flavor, data, {});
+				break;
+			}
+			catch {}
 		}
-		catch {
+		if (!data.value) {
 			return null;
 		}
 		try {
@@ -967,16 +976,27 @@ Zotero.Utilities.Internal = {
 					return dataType === "binary" ? buffer : new TextDecoder().decode(buffer);
 				}
 				case "application/x-moz-nativeimage": {
-					let image = data.value.QueryInterface(Components.interfaces.imgIContainer);
-					if (!dataType) {
-						return image;
-					}
-					if (dataType !== "binary" && dataType !== "string") {
+					if (dataType && dataType !== "binary" && dataType !== "string") {
 						return null;
 					}
 					let imgTools = Components.classes["@mozilla.org/image/tools;1"]
 						.getService(Components.interfaces.imgITools);
-					let buffer = this._inputStreamToArrayBuffer(imgTools.encodeImage(image, "image/png"));
+					let buffer;
+					if (flavor === "image/png") {
+						buffer = this._inputStreamToArrayBuffer(
+							data.value.QueryInterface(Components.interfaces.nsIInputStream)
+						);
+						if (!dataType) {
+							return imgTools.decodeImageFromArrayBuffer(buffer, "image/png");
+						}
+					}
+					else {
+						let image = data.value.QueryInterface(Components.interfaces.imgIContainer);
+						if (!dataType) {
+							return image;
+						}
+						buffer = this._inputStreamToArrayBuffer(imgTools.encodeImage(image, "image/png"));
+					}
 					if (dataType === "binary") {
 						return buffer;
 					}
@@ -991,27 +1011,9 @@ Zotero.Utilities.Internal = {
 			}
 			// Custom / generic flavors: read as raw bytes or as a string
 			if (dataType === "binary") {
-				if (data.value instanceof Components.interfaces.nsIInputStream) {
-					return this._inputStreamToArrayBuffer(data.value);
-				}
-				// Native clipboards (e.g. GTK) return custom flavors as primitives --
-				// nsISupportsCString holds raw bytes, nsISupportsString holds bytes as UTF-16 units
-				if (data.value instanceof Components.interfaces.nsISupportsCString) {
-					let str = data.value.data;
-					let bytes = new Uint8Array(str.length);
-					for (let i = 0; i < str.length; i++) {
-						bytes[i] = str.charCodeAt(i);
-					}
-					return bytes.buffer;
-				}
-				let str = data.value.QueryInterface(Components.interfaces.nsISupportsString).data;
-				let bytes = new Uint8Array(str.length * 2);
-				for (let i = 0; i < str.length; i++) {
-					let code = str.charCodeAt(i);
-					bytes[i * 2] = code & 0xFF;
-					bytes[i * 2 + 1] = code >> 8;
-				}
-				return bytes.buffer;
+				return this._inputStreamToArrayBuffer(
+					data.value.QueryInterface(Components.interfaces.nsIInputStream)
+				);
 			}
 			if (dataType === "path") {
 				return null;
