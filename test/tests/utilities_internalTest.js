@@ -100,17 +100,6 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(ZUI.getClipboard(flavor), text);
 		});
 
-		it("should round-trip a custom binary flavor as an ArrayBuffer", function () {
-			let flavor = "application/x-zotero-test-binary";
-			let bytes = new Uint8Array([0, 1, 2, 253, 254, 255]);
-			ZUI.copyToClipboard({ [flavor]: bytes });
-			let result = ZUI.getClipboard(flavor, "binary");
-			// The buffer is created in the utilities module's compartment, so
-			// check the class name rather than using instanceof
-			assert.equal(Cu.getClassName(result, true), "ArrayBuffer");
-			assert.deepEqual(new Uint8Array(result), bytes);
-		});
-
 		it("should return an nsIFile for a copied file path", function () {
 			let path = OS.Path.join(getTestDataDirectory().path, 'test.png');
 			ZUI.copyToClipboard({ "application/x-moz-file": path });

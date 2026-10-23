@@ -61,7 +61,7 @@
 	 *
 	 * @typedef {object} ClipboardControllerCommandParams
 	 * @property {{ data: Record<string, string | Uint8Array> }} write - Flavor -> value; a file flavor takes the
-	 *     canonical path of a file the plugin may read
+	 *     canonical path of a file the plugin may read. Custom flavors may differ across platforms and apps
 	 *
 	 *
 	 * @typedef {object} ClipboardControllerCommandResults
