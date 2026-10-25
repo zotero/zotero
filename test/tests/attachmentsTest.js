@@ -1495,6 +1495,33 @@ describe("Zotero.Attachments", function () {
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
 		});
 		
+		it("should handle a custom resolver with an uppercase mode", async function () {
+			var doi = doi4;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', doi);
+			await item.saveTx();
+			
+			var resolvers = [{
+				name: 'Custom',
+				method: 'GET',
+				url: 'http://website/{doi}/json',
+				mode: 'JSON',
+				selector: '.oa_locations.url_for_pdf'
+			}];
+			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
+			
+			var attachment = await Zotero.Attachments.addAvailableFile(item);
+			
+			assert.equal(requestStub.callCount, 4);
+			assert.equal(downloadSpy.callCount, 1);
+			var call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', pageURL6));
+			
+			assert.ok(attachment);
+			assert.equal(attachment.toJSON().url, pdfURL);
+		});
+		
 		it("should handle a custom resolver in JSON mode with mapped properties", async function () {
 			var doi = doi4;
 			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });

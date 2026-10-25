@@ -1388,7 +1388,8 @@ Zotero.Attachments = new function () {
 							if (!url.includes('{doi}')) {
 								throw new Error("'url' must include '{doi}'");
 							}
-							if (!['html', 'json'].includes(mode.toLowerCase())) {
+							mode = mode.toLowerCase();
+							if (!['html', 'json'].includes(mode)) {
 								throw new Error("'mode' must be 'html' or 'json'");
 							}
 							if (!selector) {
