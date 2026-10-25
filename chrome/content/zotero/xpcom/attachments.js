@@ -1250,7 +1250,12 @@ Zotero.Attachments = new function () {
 	this.canFindFileForItem = function (item) {
 		return item.isRegularItem()
 			&& !item.isFeedItem
-			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI') || !!item.getField('PMCID'))
+			&& (!!item.getField('DOI')
+				|| !!item.getField('url')
+				|| !!item.getExtraField('DOI')
+				|| !!item.getField('PMCID')
+				|| !!this._getItemArXivID(item)
+				|| (!!Zotero.Prefs.get('findPDFs.openDatabases') && !!this._getItemPMID(item)))
 			&& this.FIND_AVAILABLE_FILE_TYPES.every(type => item.numFileAttachmentsWithContentType(type) == 0);
 	};
 
@@ -1267,19 +1272,24 @@ Zotero.Attachments = new function () {
 	/**
 	 * Get the file resolvers that can be used for a given item based on the available fields
 	 *
+	 * 'openDatabases' queries free third-party databases (Europe PMC, DOAJ, dblp, and OpenAlex
+	 * when an API key is set) and is left out of the automatic lookups done on save
+	 *
 	 * @param {Zotero.Item} item
-	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
+	 * @param {String[]} [methods=['doi', 'url', 'oa', 'openDatabases', 'custom']]
 	 * @param {Boolean} [automatic=false] - Only include custom resolvers with `automatic: true`
 	 * @return {Object[]} - An array of urlResolvers (see downloadFirstAvailableFile())
 	 */
 	this.getFileResolvers = function (item, methods, automatic) {
 		if (!methods) {
-			methods = ['doi', 'url', 'oa', 'custom'];
+			methods = ['doi', 'url', 'oa', 'openDatabases', 'custom'];
 		}
 		
 		var useDOI = methods.includes('doi');
 		var useURL = methods.includes('url');
 		var useOA = methods.includes('oa');
+		var useOpenDatabases = methods.includes('openDatabases')
+			&& !!Zotero.Prefs.get('findPDFs.openDatabases');
 		var useCustom = methods.includes('custom');
 		
 		var resolvers = [];
@@ -1335,6 +1345,23 @@ Zotero.Attachments = new function () {
 				pageURL: `https://pmc.ncbi.nlm.nih.gov/articles/${pmcid}/`,
 				accessMethod: 'oa'
 			});
+		}
+		
+		var arXivID = this._getItemArXivID(item);
+		if (useOA && arXivID) {
+			resolvers.push({
+				url: `https://arxiv.org/pdf/${arXivID}`,
+				pageURL: `https://arxiv.org/abs/${arXivID}`,
+				accessMethod: 'oa'
+			});
+		}
+		
+		if (useOpenDatabases) {
+			resolvers.push(...this._getOpenDatabaseResolvers(item, {
+				doi,
+				pmcid,
+				pmid: this._getItemPMID(item)
+			}));
 		}
 
 		if (useCustom && doi) {
@@ -1485,6 +1512,242 @@ Zotero.Attachments = new function () {
 					}
 				}
 			}
+		}
+		
+		return resolvers;
+	};
+	
+	
+	/**
+	 * Get an arXiv identifier from the Archive ID, Extra, DOI, or URL field
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {String|null} - New-style ('2101.00001v2') or old-style ('hep-th/9901001') ID
+	 */
+	this._getItemArXivID = function (item) {
+		var idPattern = '(\\d{4}\\.\\d{4,5}|[a-z][a-z-]*(?:\\.[A-Z]{2})?/\\d{7})(v\\d+)?';
+		var patterns = [
+			[item.getField('archiveID'), new RegExp(`^\\s*arXiv:\\s*${idPattern}\\s*$`, 'i')],
+			[item.getField('extra'), new RegExp(`^\\s*arXiv(?:\\s*ID)?:\\s*${idPattern}\\s*$`, 'im')],
+			[item.getField('DOI'), new RegExp(`^10\\.48550/arXiv\\.${idPattern}$`, 'i')],
+			[item.getField('url'), new RegExp(`^https?://(?:www\\.|export\\.)?arxiv\\.org/(?:abs|pdf)/${idPattern}(?:\\.pdf)?/?$`, 'i')]
+		];
+		for (let [value, re] of patterns) {
+			let matches = value && value.match(re);
+			if (matches) {
+				return matches[1] + (matches[2] || '');
+			}
+		}
+		return null;
+	};
+	
+	
+	/**
+	 * Get a PubMed ID from the PMID field or a 'PMID:' line in Extra
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {String|null}
+	 */
+	this._getItemPMID = function (item) {
+		var pmid = item.getField('PMID');
+		if (pmid && /^\d+$/.test(pmid.trim())) {
+			return pmid.trim();
+		}
+		var matches = item.getField('extra').match(/^\s*PMID:\s*(\d+)\s*$/im);
+		return matches ? matches[1] : null;
+	};
+	
+	
+	/**
+	 * Get resolvers that look up open copies in free third-party databases
+	 *
+	 * Each resolver is a function, so a database is only queried if earlier resolvers
+	 * haven't found a file
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Object} ids
+	 * @param {String} [ids.doi]
+	 * @param {String} [ids.pmcid]
+	 * @param {String} [ids.pmid]
+	 * @return {Function[]}
+	 */
+	this._getOpenDatabaseResolvers = function (item, { doi, pmcid, pmid }) {
+		var resolvers = [];
+		
+		var makeResolver = (name, url, parse) => {
+			return async function () {
+				Zotero.debug(`Looking for files via ${name}`);
+				try {
+					let req = await Zotero.HTTP.request(
+						'GET',
+						url,
+						{
+							responseType: 'json',
+							timeout: 10000,
+							successCodes: [200, 404],
+							// Move on to the next resolver instead of waiting on a failing
+							// third-party server
+							errorDelayMax: 0,
+							noRetryOnThrottle: true
+						}
+					);
+					if (req.status != 200 || !req.response) {
+						return [];
+					}
+					return parse(req.response)
+						.filter(o => o.url || o.pageURL)
+						.map(o => Object.assign(o, { accessMethod: 'oa' }));
+				}
+				catch (e) {
+					Zotero.debug(`Error looking for files via ${name}`, 2);
+					Zotero.debug(e, 2);
+					return [];
+				}
+			};
+		};
+		
+		// OpenAlex requires a (free) API key
+		var openAlexAPIKey = Zotero.Prefs.get('findPDFs.openAlexAPIKey');
+		if (doi && openAlexAPIKey) {
+			let url = 'https://api.openalex.org/works/doi:'
+				+ doi.split('/').map(part => encodeURIComponent(part)).join('/')
+				+ '?' + new URLSearchParams({ api_key: openAlexAPIKey });
+			resolvers.push(makeResolver('OpenAlex', url, (json) => {
+				return [json.best_oa_location, ...(json.locations || [])]
+					.filter(location => location && location.is_oa)
+					.map(location => ({
+						url: location.pdf_url || undefined,
+						pageURL: location.landing_page_url || undefined,
+						articleVersion: location.version || undefined
+					}));
+			}));
+		}
+		
+		// Europe PMC, which also maps PMIDs to open-access PubMed Central copies
+		var query;
+		if (pmcid) {
+			query = `PMCID:${pmcid}`;
+		}
+		else if (pmid) {
+			query = `EXT_ID:${pmid} AND SRC:MED`;
+		}
+		else if (doi) {
+			query = `DOI:"${doi}"`;
+		}
+		if (query) {
+			let url = 'https://www.ebi.ac.uk/europepmc/webservices/rest/search?'
+				+ new URLSearchParams({ query, resultType: 'core', format: 'json', pageSize: 1 });
+			resolvers.push(makeResolver('Europe PMC', url, (json) => {
+				let result = json.resultList && json.resultList.result && json.resultList.result[0];
+				if (!result) {
+					return [];
+				}
+				let results = [];
+				let fullTextURLs = (result.fullTextUrlList && result.fullTextUrlList.fullTextUrl) || [];
+				for (let fullTextURL of fullTextURLs) {
+					// 'OA' (open access) or 'F' (free to read)
+					if (!['OA', 'F'].includes(fullTextURL.availabilityCode) || !fullTextURL.url) {
+						continue;
+					}
+					if (fullTextURL.documentStyle == 'pdf') {
+						results.push({ url: fullTextURL.url });
+					}
+					else if (fullTextURL.documentStyle == 'html') {
+						results.push({ pageURL: fullTextURL.url });
+					}
+				}
+				if (result.pmcid && result.isOpenAccess == 'Y') {
+					results.push({
+						url: `https://europepmc.org/articles/${result.pmcid}?pdf=render`,
+						pageURL: `https://pmc.ncbi.nlm.nih.gov/articles/${result.pmcid}/`
+					});
+				}
+				// Direct PDFs first
+				return results.sort((a, b) => !!b.url - !!a.url);
+			}));
+		}
+		
+		// Directory of Open Access Journals
+		if (doi) {
+			let url = 'https://doaj.org/api/search/articles/'
+				+ encodeURIComponent(`doi:"${doi}"`);
+			resolvers.push(makeResolver('DOAJ', url, (json) => {
+				let results = [];
+				for (let result of json.results || []) {
+					let bibjson = result.bibjson || {};
+					let sameDOI = (bibjson.identifier || []).some(
+						identifier => (identifier.type || '').toLowerCase() == 'doi'
+							&& (Zotero.Utilities.cleanDOI(identifier.id || '') || '').toLowerCase() == doi.toLowerCase()
+					);
+					if (!sameDOI) {
+						continue;
+					}
+					for (let link of bibjson.link || []) {
+						if (link.type != 'fulltext' || !link.url) {
+							continue;
+						}
+						if ((link.content_type || '').toLowerCase() == 'pdf') {
+							results.push({ url: link.url });
+						}
+						else {
+							results.push({ pageURL: link.url });
+						}
+					}
+				}
+				return results;
+			}));
+		}
+		
+		// dblp has no DOI lookup, so match on title, plus year and an author when available
+		var title = item.getField('title');
+		var normalize = str => str.normalize('NFD')
+			.replace(/\p{M}/gu, '')
+			.toLowerCase()
+			.replace(/[^\p{L}\p{N}]+/gu, '');
+		// Skip short titles, which are likely to match unrelated works
+		if (title && normalize(title).length >= 20) {
+			let year = parseInt(item.getField('year'));
+			let lastNames = item.getCreators()
+				.map(creator => normalize(creator.lastName || ''))
+				.filter(Boolean);
+			let url = 'https://dblp.org/search/publ/api?'
+				+ new URLSearchParams({ q: title, format: 'json', h: 10 });
+			resolvers.push(makeResolver('dblp', url, (json) => {
+				let hits = (json.result && json.result.hits && json.result.hits.hit) || [];
+				let results = [];
+				for (let hit of hits) {
+					let info = hit.info || {};
+					if (normalize(info.title || '') != normalize(title)) {
+						continue;
+					}
+					let hitYear = parseInt(info.year);
+					if (year && hitYear && Math.abs(year - hitYear) > 1) {
+						continue;
+					}
+					if (lastNames.length) {
+						let authors = [].concat((info.authors && info.authors.author) || [])
+							.map(author => typeof author == 'string' ? author : (author.text || ''))
+							// Strip dblp's homonym numbers ('John Smith 0001')
+							.map(author => normalize(author.replace(/\s+\d+$/, '')));
+						if (!lastNames.some(lastName => authors.some(author => author.endsWith(lastName)))) {
+							continue;
+						}
+					}
+					for (let ee of [].concat(info.ee || [])) {
+						if (typeof ee != 'string' || !/^https?:\/\//.test(ee)) {
+							continue;
+						}
+						if (/\.pdf$/i.test(ee)) {
+							results.push({ url: ee });
+						}
+						else {
+							results.push({ pageURL: ee });
+						}
+					}
+				}
+				// Direct PDFs first
+				return results.sort((a, b) => !!b.url - !!a.url);
+			}));
 		}
 		
 		return resolvers;

@@ -940,6 +940,8 @@ describe("Zotero.Attachments", function () {
 			epubSize = await OS.File.stat(epubPath).size;
 			
 			Zotero.Prefs.clear('findPDFs.resolvers');
+			// Third-party database lookups are tested separately
+			Zotero.Prefs.set('findPDFs.openDatabases', false);
 		});
 		
 		beforeEach(async function () {
@@ -992,6 +994,7 @@ describe("Zotero.Attachments", function () {
 		after(() => {
 			Zotero.HTTP.request.restore();
 			Zotero.HTTP.download.restore();
+			Zotero.Prefs.clear('findPDFs.openDatabases');
 		});
 		
 		it("should add a PDF from a resolved DOI webpage", async function () {
@@ -1083,6 +1086,50 @@ describe("Zotero.Attachments", function () {
 				pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC9262588/',
 				accessMethod: 'oa'
 			});
+		});
+
+		it("should include an arXiv resolver from an Archive ID", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'preprint' });
+			item.setField('title', 'Test');
+			item.setField('archiveID', 'arXiv:2101.00001v2');
+			await item.saveTx();
+
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa']);
+
+			assert.deepEqual(resolvers, [
+				{
+					url: 'https://arxiv.org/pdf/2101.00001v2',
+					pageURL: 'https://arxiv.org/abs/2101.00001v2',
+					accessMethod: 'oa'
+				}
+			]);
+		});
+
+		it("should get an arXiv ID from Extra, an arXiv DOI, or an arXiv URL", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('extra', 'Foo: Bar\narXiv: hep-th/9901001');
+			assert.equal(Zotero.Attachments._getItemArXivID(item), 'hep-th/9901001');
+			
+			item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('DOI', '10.48550/arXiv.2101.00001');
+			assert.equal(Zotero.Attachments._getItemArXivID(item), '2101.00001');
+			
+			item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('url', 'https://arxiv.org/abs/2101.00001v3');
+			assert.equal(Zotero.Attachments._getItemArXivID(item), '2101.00001v3');
+			
+			item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('url', 'https://example.com/abs/2101.00001');
+			assert.isNull(Zotero.Attachments._getItemArXivID(item));
+		});
+
+		it("should allow finding files for an item with an arXiv ID", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'preprint' });
+			item.setField('title', 'Test');
+			item.setField('archiveID', 'arXiv:2101.00001');
+			await item.saveTx();
+
+			assert.isTrue(Zotero.Attachments.canFindFileForItem(item));
 		});
 
 		it("should allow finding files for an item with a PMCID", async function () {
@@ -1807,6 +1854,270 @@ describe("Zotero.Attachments", function () {
 			assert.equal(requests, 1);
 		});
 	});
+	
+	describe("Find Full Text via open databases", function () {
+		var requestStub;
+		var responses;
+		
+		async function fakeRequest(method, url) {
+			for (let [prefix, response] of responses) {
+				if (url.startsWith(prefix)) {
+					return { status: 200, response };
+				}
+			}
+			return { status: 404, response: null };
+		}
+		
+		before(function () {
+			requestStub = sinon.stub(Zotero.HTTP, 'request');
+			requestStub.callsFake(fakeRequest);
+		});
+		
+		beforeEach(function () {
+			responses = [];
+			requestStub.resetHistory();
+			Zotero.Prefs.set('findPDFs.openDatabases', true);
+		});
+		
+		afterEach(function () {
+			Zotero.Prefs.clear('findPDFs.openDatabases');
+			Zotero.Prefs.clear('findPDFs.openAlexAPIKey');
+		});
+		
+		after(function () {
+			requestStub.restore();
+		});
+		
+		it("should not include open databases when disabled", function () {
+			Zotero.Prefs.set('findPDFs.openDatabases', false);
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+			assert.lengthOf(resolvers, 0);
+		});
+		
+		it("should not include open databases in the automatic methods", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['oa', 'custom'], true);
+			// Only the Zotero OA lookup
+			assert.lengthOf(resolvers, 1);
+		});
+		
+		it("should only query OpenAlex when an API key is set", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			// Europe PMC, DOAJ
+			assert.lengthOf(Zotero.Attachments.getFileResolvers(item, ['openDatabases']), 2);
+			
+			Zotero.Prefs.set('findPDFs.openAlexAPIKey', 'key');
+			assert.lengthOf(Zotero.Attachments.getFileResolvers(item, ['openDatabases']), 3);
+		});
+		
+		it("should get open-access locations from OpenAlex", async function () {
+			Zotero.Prefs.set('findPDFs.openAlexAPIKey', 'key');
+			responses.push(['https://api.openalex.org/works/doi:10.1234/abcd?api_key=key', {
+				best_oa_location: {
+					is_oa: true,
+					pdf_url: 'https://example.com/a.pdf',
+					landing_page_url: 'https://example.com/a',
+					version: 'acceptedVersion'
+				},
+				locations: [
+					{
+						is_oa: false,
+						pdf_url: 'https://example.com/closed.pdf'
+					}
+				]
+			}]);
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+			var results = await resolvers[0]();
+			assert.deepEqual(results, [
+				{
+					url: 'https://example.com/a.pdf',
+					pageURL: 'https://example.com/a',
+					articleVersion: 'acceptedVersion',
+					accessMethod: 'oa'
+				}
+			]);
+		});
+		
+		it("should get an open-access PubMed Central copy from Europe PMC via a PMID", async function () {
+			responses.push(['https://www.ebi.ac.uk/europepmc/webservices/rest/search?', {
+				resultList: {
+					result: [
+						{
+							pmid: '123',
+							pmcid: 'PMC456',
+							isOpenAccess: 'Y',
+							fullTextUrlList: {
+								fullTextUrl: [
+									{
+										availabilityCode: 'S',
+										documentStyle: 'pdf',
+										url: 'https://publisher.example.com/closed.pdf'
+									},
+									{
+										availabilityCode: 'OA',
+										documentStyle: 'html',
+										url: 'https://europepmc.org/articles/PMC456'
+									}
+								]
+							}
+						}
+					]
+				}
+			}]);
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('extra', 'PMID: 123');
+			await item.saveTx();
+			
+			assert.isTrue(Zotero.Attachments.canFindFileForItem(item));
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+			assert.lengthOf(resolvers, 1);
+			var results = await resolvers[0]();
+			
+			var requestURL = new URL(requestStub.getCall(0).args[1]);
+			assert.equal(requestURL.searchParams.get('query'), 'EXT_ID:123 AND SRC:MED');
+			assert.deepEqual(results, [
+				{
+					url: 'https://europepmc.org/articles/PMC456?pdf=render',
+					pageURL: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC456/',
+					accessMethod: 'oa'
+				},
+				{
+					pageURL: 'https://europepmc.org/articles/PMC456',
+					accessMethod: 'oa'
+				}
+			]);
+		});
+		
+		it("should get full-text links from DOAJ for a matching DOI", async function () {
+			responses.push(['https://doaj.org/api/search/articles/', {
+				results: [
+					{
+						bibjson: {
+							identifier: [{ type: 'doi', id: '10.9999/other' }],
+							link: [{ type: 'fulltext', url: 'https://example.com/other' }]
+						}
+					},
+					{
+						bibjson: {
+							identifier: [{ type: 'doi', id: '10.1234/ABCD' }],
+							link: [
+								{ type: 'fulltext', url: 'https://example.com/a.pdf', content_type: 'PDF' },
+								{ type: 'fulltext', url: 'https://example.com/a', content_type: 'HTML' }
+							]
+						}
+					}
+				]
+			}]);
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+			var results = await resolvers[1]();
+			assert.deepEqual(results, [
+				{ url: 'https://example.com/a.pdf', accessMethod: 'oa' },
+				{ pageURL: 'https://example.com/a', accessMethod: 'oa' }
+			]);
+		});
+		
+		it("should get electronic editions from dblp for a matching title, year, and author", async function () {
+			var title = 'Attention Is All You Need';
+			responses.push(['https://dblp.org/search/publ/api?', {
+				result: {
+					hits: {
+						hit: [
+							{
+								info: {
+									title: 'Attention is All you Need.',
+									year: '2017',
+									authors: { author: [{ text: 'Ashish Vaswani' }, { text: 'Noam Shazeer 0001' }] },
+									ee: 'https://proceedings.example.com/paper.pdf'
+								}
+							},
+							{
+								info: {
+									title: 'Attention Is All You Need.',
+									year: '2017',
+									authors: { author: { text: 'Noam Shazeer 0001' } },
+									ee: ['https://arxiv.org/abs/1706.03762']
+								}
+							},
+							{
+								// Wrong year
+								info: {
+									title: 'Attention Is All You Need.',
+									year: '2005',
+									authors: { author: { text: 'Ashish Vaswani' } },
+									ee: 'https://example.com/old'
+								}
+							},
+							{
+								// Wrong title
+								info: {
+									title: 'Attention Is Not All You Need.',
+									year: '2017',
+									authors: { author: { text: 'Ashish Vaswani' } },
+									ee: 'https://example.com/other'
+								}
+							}
+						]
+					}
+				}
+			}]);
+			var item = createUnsavedDataObject('item', { itemType: 'conferencePaper' });
+			item.setField('title', title);
+			item.setField('date', '2017');
+			item.setCreators([{ firstName: 'Noam', lastName: 'Shazeer', creatorType: 'author' }]);
+			
+			var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+			assert.lengthOf(resolvers, 1);
+			var results = await resolvers[0]();
+			assert.deepEqual(results, [
+				{ url: 'https://proceedings.example.com/paper.pdf', accessMethod: 'oa' },
+				{ pageURL: 'https://arxiv.org/abs/1706.03762', accessMethod: 'oa' }
+			]);
+		});
+		
+		it("should skip dblp for short titles", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'conferencePaper' });
+			item.setField('title', 'Short Title');
+			
+			assert.lengthOf(Zotero.Attachments.getFileResolvers(item, ['openDatabases']), 0);
+		});
+		
+		it("should return nothing when a database request fails", async function () {
+			requestStub.callsFake(async function () {
+				throw new Error("Network error");
+			});
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', '10.1234/abcd');
+			
+			try {
+				var resolvers = Zotero.Attachments.getFileResolvers(item, ['openDatabases']);
+				assert.deepEqual(await resolvers[0](), []);
+			}
+			finally {
+				requestStub.callsFake(fakeRequest);
+			}
+		});
+	});
+	
 	
 	describe("#getFileBaseNameFromItem()", function () {
 		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection, itemSpaces, itemSuffixes, itemKeepHyphens,

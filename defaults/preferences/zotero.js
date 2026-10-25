@@ -27,6 +27,8 @@ pref("extensions.zotero.openURL.resolver","");
 pref("extensions.zotero.automaticSnapshots",true);
 pref("extensions.zotero.downloadAssociatedFiles",true);
 pref("extensions.zotero.findPDFs.resolvers", '[]');
+pref("extensions.zotero.findPDFs.openDatabases", true);
+pref("extensions.zotero.findPDFs.openAlexAPIKey", "");
 pref("extensions.zotero.reportTranslationFailure",true);
 pref("extensions.zotero.automaticTags",true);
 pref("extensions.zotero.hideContextAnnotationRows", true);
