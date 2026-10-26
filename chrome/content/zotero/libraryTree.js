@@ -71,23 +71,49 @@ var LibraryTree = class LibraryTree extends React.Component {
 		// reaching the tree (e.g., a drag that left the window). Clear the leftover drop
 		// indicator when mouse movement resumes.
 		this.domEl.addEventListener('mousemove', this._clearDropIndicator, { passive: true });
+		this.domEl.addEventListener('dragleave', this._handleTreeDragLeave, { passive: true });
 	}
 
 	componentWillUnmount() {
 		this.domEl.removeChild(this._dragImageContainer);
 		this.domEl.removeEventListener('mousemove', this._clearDropIndicator);
+		this.domEl.removeEventListener('dragleave', this._handleTreeDragLeave);
 	}
 
-	_clearDropIndicator = () => {
-		let dropRow = this._dropRow;
-		if (dropRow === null || dropRow === undefined) return;
-		this._dropRow = null;
-		// The row may no longer exist if rows were removed, in which case the next full
-		// render drops it
-		if (this.tree && dropRow < this.rowCount) {
-			this.tree.invalidateRow(dropRow);
+	// A drag leaving the tree doesn't always send a dragleave to the drop row -- e.g., a fast
+	// exit from the window can target the table body instead -- so also clear the drop
+	// indicator when the drag leaves the tree as a whole
+	_handleTreeDragLeave = (event) => {
+		if (!event.relatedTarget || !this.domEl.contains(event.relatedTarget)) {
+			this._clearDropIndicator();
 		}
 	};
+
+	_clearDropIndicator = () => {
+		if (this._dropRow === null || this._dropRow === undefined) return;
+		this._setDropRow(null);
+	};
+
+	/**
+	 * Update the drop indicator on the existing row elements without re-rendering the rows.
+	 * Re-rendering replaces the cells under the pointer during a drag, which can keep the
+	 * row from receiving a dragleave when the drag leaves quickly, leaving the indicator stuck.
+	 */
+	_setDropRow(row) {
+		let prevDropRow = this._dropRow;
+		this._dropRow = row;
+		for (let index of new Set([prevDropRow, row])) {
+			if (typeof index != 'number') continue;
+			let div = this.tree?.getRowElement(index);
+			if (div) {
+				this._renderDropIndicator(div, index);
+			}
+		}
+	}
+
+	_renderDropIndicator(div, index) {
+		div.classList.toggle('drop', this._dropRow == index);
+	}
 
 	componentDidCatch(error, info) {
 		// Async operations might attempt to update the react components

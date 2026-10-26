@@ -1601,7 +1601,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						// if the dragged over row is still the same after delay, expand it
 						if (!this.isContainerOpen(index) && this._dragoverRow == index) {
 							this._flashingRow = index;
-							this.tree.invalidateRow(index);
+							// Update in place, as in _setDropRow()
+							this.tree.getRowElement(index)?.classList.add('flashing');
 							// wait for the flashing to finish and then expand the container
 							await Zotero.Promise.delay(300); // 0.2s CSS animation length * 1.5 runs
 							this._flashingRow = null;
@@ -1717,15 +1718,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			return false;
 		} finally {
-			let prevDropRow = this._dropRow;
-			if (event.dataTransfer.dropEffect != 'none') {
-				this._dropRow = index;
-			} else {
-				this._dropRow = null;
-			}
-			if (prevDropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
-				typeof prevDropRow == 'number' && this.tree.invalidateRow(prevDropRow);
-				this.tree.invalidateRow(index);
+			let dropRow = event.dataTransfer.dropEffect != 'none' ? index : null;
+			if (dropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
+				this._setDropRow(dropRow);
 			}
 		}
 	}
@@ -1740,10 +1735,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	onDragLeave = (e) => {
 		if (!e.currentTarget.classList.contains('row')) return;
-		let dropRow = this._dropRow;
-		this._dropRow = null;
 		this._dragoverRow = null;
-		this.tree.invalidateRow(dropRow);
+		this._clearDropIndicator();
 	}
 
 	// when something is dragged over the container rows, they may be expanded.

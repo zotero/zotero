@@ -1971,11 +1971,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	};
 
 	onDragLeave() {
-		let dropRow = this._dropRow;
-		this._dropRow = null;
-		if (dropRow !== null) {
-			this.tree.invalidateRow(dropRow);
-		}
+		this._clearDropIndicator();
 	};
 
 
@@ -2258,17 +2254,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		row.renderRow(div, index, columns, rowData, this._renderCtx);
 		
-		if (this._dropRow == index) {
-			let span;
-			if (Zotero.DragDrop.currentOrientation != 0) {
-				span = document.createElement('span');
-				span.className = Zotero.DragDrop.currentOrientation < 0 ? 'drop-before' : 'drop-after';
-				div.appendChild(span);
-			}
-			else {
-				div.classList.add('drop');
-			}
-		}
+		this._renderDropIndicator(div, index);
 
 		if (!oldDiv) {
 			if (this.props.dragAndDrop && row.isDraggable) {
@@ -2291,6 +2277,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		return div;
+	}
+
+	_renderDropIndicator(div, index) {
+		div.classList.remove('drop');
+		div.querySelector(':scope > .drop-before, :scope > .drop-after')?.remove();
+		if (this._dropRow != index) {
+			return;
+		}
+		if (Zotero.DragDrop.currentOrientation != 0) {
+			let span = document.createElement('span');
+			span.className = Zotero.DragDrop.currentOrientation < 0 ? 'drop-before' : 'drop-after';
+			div.appendChild(span);
+		}
+		else {
+			div.classList.add('drop');
+		}
 	}
 
 	_renderCell(index, data, column, isFirstColumn) {

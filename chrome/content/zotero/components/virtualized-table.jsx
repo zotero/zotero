@@ -1687,6 +1687,14 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
+	 * Get the rendered element for a row, if it's currently rendered
+	 * @param index
+	 */
+	getRowElement(index) {
+		return this._jsWindow?.getElementByIndex(index) || null;
+	}
+
+	/**
 	 * Rerender a row range in the underlying windowed-list
 	 * @param startIndex
 	 * @param endIndex

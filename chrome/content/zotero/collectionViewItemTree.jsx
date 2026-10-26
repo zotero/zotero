@@ -1439,16 +1439,9 @@ class CollectionViewItemTree extends ItemTree {
 			return false;
 		}
 		finally {
-			let prevDropRow = this._dropRow;
-			if (event.dataTransfer.dropEffect != 'none') {
-				this._dropRow = row;
-			}
-			else {
-				this._dropRow = null;
-			}
-			if (prevDropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
-				typeof prevDropRow == 'number' && this.tree.invalidateRow(prevDropRow);
-				this.tree.invalidateRow(row);
+			let dropRow = event.dataTransfer.dropEffect != 'none' ? row : null;
+			if (dropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
+				this._setDropRow(dropRow);
 			}
 		}
 	};
