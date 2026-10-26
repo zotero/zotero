@@ -537,8 +537,16 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			}
 		}
 		
+		try {
+			let { CertRevocations } = ChromeUtils.importESModule("chrome://zotero/content/modules/certRevocations.mjs");
+			await CertRevocations.update();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
 		Zotero.HTTP.triggerProxyAuth();
-		
+
 		// Add notifier queue callbacks to the DB layer
 		Zotero.DB.addCallback('begin', id => Zotero.Notifier.begin(id));
 		Zotero.DB.addCallback('commit', id => Zotero.Notifier.commit(null, id));

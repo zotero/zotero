@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# Replace Firefox's bundled OneCRL list with the current one from Remote Settings
+#
+# Usage: fetch_onecrl FILE
+
+URL="https://firefox.settings.services.mozilla.com/v1/buckets/security-state/collections/onecrl/changeset?_expected=0"
+
+file="$1"
+tmp_file="$file.tmp"
+
+curl -sSf --retry 3 "$URL" -o "$tmp_file"
+python3 -c '
+import json, sys
+with open(sys.argv[1]) as f:
+	changeset = json.load(f)
+if not changeset["changes"]:
+	raise Exception("OneCRL list is empty")
+with open(sys.argv[2], "w") as f:
+	json.dump({"data": changeset["changes"], "timestamp": changeset["timestamp"]}, f)
+print("Fetched {} OneCRL records".format(len(changeset["changes"])))
+' "$tmp_file" "$file"
+rm "$tmp_file"

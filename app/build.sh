@@ -427,6 +427,11 @@ echo "" >> $prefs_file
 
 rm -rf defaults-z
 
+# Update the OneCRL list applied by CertRevocations at startup
+if [ $quick_build -eq 0 ]; then
+	"$CALLDIR/scripts/fetch_onecrl" defaults/settings/security-state/onecrl.json
+fi
+
 # Platform-specific prefs
 if [ $BUILD_MAC == 1 ]; then
 	perl -pi -e 's/pref\("browser\.preferences\.instantApply", false\);/pref\("browser\.preferences\.instantApply", true);/' $prefs_file
