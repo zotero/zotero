@@ -430,7 +430,7 @@ describe("Zotero.Sync.Data.Local", function () {
 		it("should return true for unsynced setting", async function () {
 			var group = await createGroup();
 			var libraryID = group.libraryID;
-			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_AAAAAAAA", { foo: "bar" });
 			assert.isTrue(await Zotero.Sync.Data.Local._libraryHasUnsyncedData(libraryID));
 		});
 		
@@ -458,7 +458,7 @@ describe("Zotero.Sync.Data.Local", function () {
 			var libraryID = group.libraryID;
 			
 			// New setting
-			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_AAAAAAAA", { foo: "bar" });
 			
 			// Changed collection
 			var changedCollection = await createDataObject('collection', { libraryID, version: 1 });
@@ -495,7 +495,7 @@ describe("Zotero.Sync.Data.Local", function () {
 			
 			await Zotero.Sync.Data.Local.resetUnsyncedLibraryData(libraryID);
 			
-			assert.isNull(Zotero.SyncedSettings.get(group.libraryID, "testSetting"));
+			assert.isNull(Zotero.SyncedSettings.get(group.libraryID, "lastPageIndex_u_AAAAAAAA"));
 			
 			assert.equal(changedCollection.name, originalCollectionName);
 			assert.isTrue(changedCollection.synced);

@@ -527,8 +527,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			library.libraryVersion = library.storageVersion = lastLibraryVersion;
 			await library.saveTx();
 			
-			await Zotero.SyncedSettings.set(libraryID, "testSetting1", { foo: "bar" });
-			await Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "foo" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_BBBBBBBB", { foo: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_CCCCCCCC", { bar: "foo" });
 			
 			var types = Zotero.DataObjectUtilities.getTypes();
 			var objects = {};
@@ -550,12 +550,12 @@ describe("Zotero.Sync.Data.Engine", function () {
 					if (req.url == baseURL + "users/1/settings") {
 						let json = JSON.parse(req.requestBody);
 						assert.lengthOf(Object.keys(json), 2);
-						assert.property(json, "testSetting1");
-						assert.property(json, "testSetting2");
-						assert.property(json.testSetting1, "value");
-						assert.property(json.testSetting2, "value");
-						assert.propertyVal(json.testSetting1.value, "foo", "bar");
-						assert.propertyVal(json.testSetting2.value, "bar", "foo");
+						assert.property(json, "lastPageIndex_u_BBBBBBBB");
+						assert.property(json, "lastPageIndex_u_CCCCCCCC");
+						assert.property(json.lastPageIndex_u_BBBBBBBB, "value");
+						assert.property(json.lastPageIndex_u_CCCCCCCC, "value");
+						assert.propertyVal(json.lastPageIndex_u_BBBBBBBB.value, "foo", "bar");
+						assert.propertyVal(json.lastPageIndex_u_CCCCCCCC.value, "bar", "foo");
 						req.respond(
 							204,
 							{
@@ -605,7 +605,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			
 			await engine.start();
 			
-			await Zotero.SyncedSettings.set(libraryID, "testSetting2", { bar: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_CCCCCCCC", { bar: "bar" });
 			
 			assert.equal(library.libraryVersion, lastLibraryVersion);
 			assert.equal(library.storageVersion, lastLibraryVersion);
@@ -636,9 +636,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 					if (req.url == baseURL + "users/1/settings") {
 						let json = JSON.parse(req.requestBody);
 						assert.lengthOf(Object.keys(json), 1);
-						assert.property(json, "testSetting2");
-						assert.property(json.testSetting2, "value");
-						assert.propertyVal(json.testSetting2.value, "bar", "bar");
+						assert.property(json, "lastPageIndex_u_CCCCCCCC");
+						assert.property(json.lastPageIndex_u_CCCCCCCC, "value");
+						assert.propertyVal(json.lastPageIndex_u_CCCCCCCC.value, "bar", "bar");
 						req.respond(
 							204,
 							{
@@ -969,7 +969,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			library.libraryVersion = library.storageVersion = lastLibraryVersion;
 			await library.saveTx();
 			
-			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_AAAAAAAA", { foo: "bar" });
 			
 			server.respond(function (req) {
 				if (req.method == "POST") {
@@ -1070,7 +1070,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			library.storageVersion = 4;
 			await library.saveTx();
 			
-			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: "bar" });
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_AAAAAAAA", { foo: "bar" });
 			
 			server.respond(function (req) {
 				if (req.method == "POST") {
@@ -1110,14 +1110,14 @@ describe("Zotero.Sync.Data.Engine", function () {
 			await library.saveTx();
 
 			// Create and then delete a setting
-			await Zotero.SyncedSettings.set(libraryID, "testSetting1", "value1");
-			await Zotero.SyncedSettings.set(libraryID, "testSetting2", "value2");
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_BBBBBBBB", "value1");
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_CCCCCCCC", "value2");
 			// Mark as synced so the delete log is the only thing to upload
 			await Zotero.SyncedSettings.markAsSynced(
-				libraryID, ["testSetting1", "testSetting2"], lastLibraryVersion
+				libraryID, ["lastPageIndex_u_BBBBBBBB", "lastPageIndex_u_CCCCCCCC"], lastLibraryVersion
 			);
-			await Zotero.SyncedSettings.clear(libraryID, "testSetting1");
-			await Zotero.SyncedSettings.clear(libraryID, "testSetting2");
+			await Zotero.SyncedSettings.clear(libraryID, "lastPageIndex_u_BBBBBBBB");
+			await Zotero.SyncedSettings.clear(libraryID, "lastPageIndex_u_CCCCCCCC");
 
 			let deletedKeys = [];
 			server.respond(function (req) {
@@ -1141,7 +1141,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 
 			await engine.start();
 
-			assert.sameMembers(deletedKeys, ["testSetting1", "testSetting2"]);
+			assert.sameMembers(deletedKeys, ["lastPageIndex_u_BBBBBBBB", "lastPageIndex_u_CCCCCCCC"]);
 			// Delete log should be cleared
 			let remaining = await Zotero.Sync.Data.Local.getDeleted('setting', libraryID);
 			assert.lengthOf(remaining, 0);
@@ -5230,8 +5230,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 				};
 			}
 			
-			await Zotero.SyncedSettings.set(libraryID, "testSetting", { foo: 2 });
-			var settingsJSON = { testSetting: { value: { foo: 2 } } }
+			await Zotero.SyncedSettings.set(libraryID, "lastPageIndex_u_AAAAAAAA", { foo: 2 });
+			var settingsJSON = { lastPageIndex_u_AAAAAAAA: { value: { foo: 2 } } }
 			postData.setting = {
 				expectedVersion: lastLibraryVersion++
 			};
@@ -5333,9 +5333,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 			await engine._restoreToServer();
 			
 			// Check settings
-			var setting = Zotero.SyncedSettings.get(libraryID, "testSetting");
+			var setting = Zotero.SyncedSettings.get(libraryID, "lastPageIndex_u_AAAAAAAA");
 			assert.deepEqual(setting, { foo: 2 });
-			var settingMetadata = Zotero.SyncedSettings.getMetadata(libraryID, "testSetting");
+			var settingMetadata = Zotero.SyncedSettings.getMetadata(libraryID, "lastPageIndex_u_AAAAAAAA");
 			assert.equal(settingMetadata.version, postData.setting.expectedVersion + 1);
 			assert.isTrue(settingMetadata.synced);
 			
