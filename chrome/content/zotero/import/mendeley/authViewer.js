@@ -26,7 +26,7 @@ window.addEventListener('unload', () => {
 });
 
 window.addEventListener("load", () => {
-	// basicViewer uses remote="false" browser, we need to re-construct the browser so it's
+	// basicViewer uses a non-remote browser, we need to re-construct the browser so it's
 	// capable of loading a mendeley auth website
 	const browser = document.querySelector('browser');
 	browser.setAttribute('remote', 'true');
