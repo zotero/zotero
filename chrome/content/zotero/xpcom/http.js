@@ -728,6 +728,14 @@ Zotero.HTTP = new function () {
 			}, timeout);
 		}
 
+		// Report a dropped connection as status 0, as request() does, so that callers and
+		// _retryOnServerError() handle it the same way
+		function connectionError(e) {
+			let msg = "HTTP GET " + ctx.dispURL + " failed: " + e;
+			Zotero.debug(msg, 1);
+			return new Zotero.HTTP.UnexpectedStatusException({ status: 0 }, url, msg);
+		}
+
 		let response;
 		try {
 			response = await fetch(url, fetchOptions);
@@ -738,7 +746,7 @@ Zotero.HTTP = new function () {
 			if (controller.signal.aborted) {
 				throw new Zotero.HTTP.TimeoutException(timeout);
 			}
-			throw e;
+			throw connectionError(e);
 		}
 		clearTimeout(connectTimerID);
 
@@ -778,7 +786,9 @@ Zotero.HTTP = new function () {
 			await IOUtils.write(path, new Uint8Array());
 			while (true) {
 				resetInactivityTimer();
-				let { done, value } = await reader.read();
+				let { done, value } = await reader.read().catch((e) => {
+					throw connectionError(e);
+				});
 				if (done) break;
 				await IOUtils.write(path, value, { mode: 'append' });
 				totalBytes += value.byteLength;

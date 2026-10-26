@@ -510,6 +510,20 @@ describe("Zotero.HTTP", function () {
 				}
 			);
 			httpd.registerPathHandler(
+				'/download/truncated',
+				{
+					handle: function (request, response) {
+						response.seizePower();
+						response.write("HTTP/1.1 200 OK\r\n"
+							+ "Content-Type: application/octet-stream\r\n"
+							+ "Content-Length: 10000\r\n"
+							+ "\r\n"
+							+ "x".repeat(100));
+						response.finish();
+					}
+				}
+			);
+			httpd.registerPathHandler(
 				'/download/redirect-to-file',
 				{
 					handle: function (request, response) {
@@ -647,6 +661,24 @@ describe("Zotero.HTTP", function () {
 			assert.equal(e.status, 404);
 			// File should not exist
 			assert.isFalse(await IOUtils.exists(dest));
+		});
+
+		it("should throw UnexpectedStatusException with status 0 if the connection is refused", async function () {
+			let dest = PathUtils.join(tmpDir, "refused.bin");
+			let e = await getPromiseError(
+				Zotero.HTTP.download("http://127.0.0.1:1/", dest)
+			);
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(e.status, 0);
+		});
+
+		it("should throw UnexpectedStatusException with status 0 if the connection drops during the download", async function () {
+			let dest = PathUtils.join(tmpDir, "truncated.bin");
+			let e = await getPromiseError(
+				Zotero.HTTP.download(baseURL + "download/truncated", dest)
+			);
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+			assert.equal(e.status, 0);
 		});
 
 		it("should allow non-success status with successCodes", async function () {
