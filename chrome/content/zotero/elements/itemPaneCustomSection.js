@@ -30,11 +30,18 @@
 		"chrome://zotero/content/elements/itemPaneSectionElementBase.mjs",
 		{ global: "current" }
 	);
+	const { loadEmbeddedPluginPage } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/embeddedPage.mjs");
 
 	class ItemPaneCustomSection extends ItemPaneSectionElementBase {
 		_hooks = {};
 
 		_sectionButtons = {};
+
+		_pluginID = null;
+
+		_pageMessenger = null;
+
+		_pageChannelDispose = null;
 
 		_refreshDisabled = true;
 
@@ -54,6 +61,14 @@
 				<html:style class="custom-style"></html:style>
 			`;
 			return MozXULElement.parseXULToFragment(content);
+		}
+
+		get pluginID() {
+			return this._pluginID;
+		}
+
+		set pluginID(pluginID) {
+			this._pluginID = pluginID;
 		}
 
 		get paneID() {
@@ -84,6 +99,22 @@
 			}
 		}
 
+		get src() {
+			return this._src;
+		}
+
+		set src(src) {
+			this._src = src;
+		}
+
+		get fullHeight() {
+			return this.hasAttribute("data-full-height");
+		}
+
+		set fullHeight(val) {
+			this.toggleAttribute("data-full-height", !!val);
+		}
+
 		init() {
 			this._section = this.querySelector("collapsible-section");
 			this._body = this._section.querySelector('[data-type="body"]');
@@ -105,9 +136,11 @@
 					darkIcon = icon;
 				}
 				let listener = (event) => {
+					if (!this._hooksReady) return;
+					// `event` is deprecated and stripped for unprivileged plugins by ItemPaneManager
 					let props = this._assembleProps(
 						this._getHookProps(),
-						{ event },
+						{ buttonType: type, event },
 					);
 					onClick(props);
 				};
@@ -123,10 +156,43 @@
 			this._section.addEventListener("toggle", this._handleToggle);
 			this._sectionListeners.push({ type: "toggle", listener: this._handleToggle });
 
-			this._handleInit();
+			if (this._src) {
+				// Hooks fire once the page has loaded (_initEmbeddedBrowser)
+				this._initEmbeddedBrowser().catch(e => Zotero.logError(e));
+			}
+			else {
+				this._handleInit();
+			}
 
 			// Disable refresh until data is load
 			this._refreshDisabled = false;
+		}
+
+		async _initEmbeddedBrowser() {
+			this._body.replaceChildren();
+			let { element, messenger, dispose } = await loadEmbeddedPluginPage(this._body, this._src, {
+				className: "plugin-section-browser",
+				pluginID: this._pluginID,
+				resize: { height: true },
+				channel: true,
+				tracePath: "Zotero.ItemPaneManager.registerSection.page",
+			});
+			this._embeddedBrowser = element;
+			this._pageMessenger = messenger;
+			this._pageChannelDispose = dispose;
+
+			this._embeddedLoaded = true;
+			this._handleInit();
+			// Replay an item change that happened while the page was loading
+			if (this.item) {
+				this._handleItemChange();
+			}
+			await this._forceRenderAll();
+		}
+
+		// Embedded sections must not fire hooks before the page has loaded
+		get _hooksReady() {
+			return !this._src || !!this._embeddedLoaded;
 		}
 
 		destroy() {
@@ -134,6 +200,7 @@
 			this._sectionListeners = [];
 
 			this._handleDestroy();
+			this._pageChannelDispose?.();
 		}
 
 		setL10nID(l10nId) {
@@ -186,6 +253,12 @@
 		}
 		
 		_getBasicHookProps() {
+			if (this._src) {
+				return {
+					paneID: this.paneID,
+					page: this._pageMessenger,
+				};
+			}
 			return {
 				paneID: this.paneID,
 				doc: document,
@@ -195,11 +268,14 @@
 
 		_getUIHookProps() {
 			return {
+				itemID: this.item?.id,
+				// @deprecated Privileged plugins only; the manager strips it for everyone else
 				item: this.item,
 				tabType: this.tabType,
 				editable: this.editable,
 				setL10nArgs: l10nArgs => this.setL10nArgs(l10nArgs),
 				setEnabled: enabled => this.hidden = !enabled,
+				setFullHeight: fullHeight => this.fullHeight = fullHeight,
 				setSectionSummary: summary => this._section.summary = summary,
 				setSectionButtonStatus: (type, options) => {
 					let { disabled, hidden } = options;
@@ -229,19 +305,20 @@
 		}
 
 		_handleDestroy() {
-			if (!this._hooks.destroy) return;
+			// If the embedded page never loaded, the init hook never fired
+			if (!this._hooks.destroy || !this._hooksReady) return;
 			let props = this._assembleProps(this._getBasicHookProps());
 			this._hooks.destroy(props);
 		}
 
 		render() {
-			if (!this._hooks.render) return false;
+			if (!this._hooks.render || !this._hooksReady) return false;
 			if (!this.initialized || this._isAlreadyRendered()) return false;
 			return this._hooks.render(this._assembleProps(this._getHookProps()));
 		}
 
 		async asyncRender() {
-			if (!this._hooks.asyncRender) return false;
+			if (!this._hooks.asyncRender || !this._hooksReady) return false;
 			if (!this.initialized || this._isAlreadyRendered("async")) return false;
 			return this._hooks.asyncRender(this._assembleProps(this._getHookProps()));
 		}
@@ -252,16 +329,16 @@
 		}
 
 		_handleToggle = (event) => {
-			if (!this._hooks.toggle) return;
+			if (!this._hooks.toggle || !this._hooksReady) return;
 			let props = this._assembleProps(
 				this._getHookProps(),
-				{ event },
+				{ open: this._section.open, event },
 			);
 			this._hooks.toggle(props);
 		};
 
 		_handleItemChange() {
-			if (!this._hooks.itemChange) return;
+			if (!this._hooks.itemChange || !this._hooksReady) return;
 			let props = this._assembleProps(this._getHookProps());
 			this._hooks.itemChange(props);
 		}

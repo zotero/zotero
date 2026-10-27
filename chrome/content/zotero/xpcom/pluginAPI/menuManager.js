@@ -25,7 +25,14 @@
 
 
 {
-	const PluginAPIBase = ChromeUtils.importESModule("chrome://zotero/content/xpcom/pluginAPI/pluginAPIBase.mjs").PluginAPIBase;
+	const lazy = {};
+	ChromeUtils.defineESModuleGetters(lazy, {
+		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
+		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
+		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
+	});
 
 	const VALID_TARGETS = [
 		// Main window menubar menus
@@ -59,6 +66,11 @@
 		"sidenav/locate",
 	];
 
+	// pluginWindow/<name>/menubar/<type>; pluginWindow targets are looked up per owning plugin
+	const VALID_PLUGIN_WINDOW_MENU_TYPES = [
+		"file", "edit", "view", "window", "help",
+	];
+
 	const GROUPED_TARGETS = [
 		"main/library/collection",
 		"main/library/item",
@@ -72,8 +84,18 @@
 
 	const CUSTOM_MENU_CLASS = "zotero-custom-menu-item";
 
+	const ICON_KEYS = ["icon", "darkIcon"];
+
 	/**
 	 * @namespace Zotero
+	 */
+
+	/**
+	 * @callback MenuHook
+	 * @param {object} context - Target-specific data plus `setL10nArgs`, `setEnabled`, `setVisible`,
+	 * `setIcon`, and the selection as `itemIDs`, `libraryIDs`, `collectionIDs`. Privileged plugins take a
+	 * legacy `(event, context)` signature and also get @deprecated live `items`, `collectionTreeRows`, `menuElem`
+	 * @returns {void}
 	 */
 
 	/**
@@ -82,22 +104,22 @@
 	 * @property {string} menuType - The type of the menu item
 	 * @property {string} [l10nID] - The l10n ID for the menu item
 	 * @property {string} [l10nArgs] - Arguments for the l10n ID. Support for object type is deprecated.
-	 * @property {string} [icon] - The icon for the menu item
+	 * @property {string} [icon] - The icon URL for the menu item, optionally relative to the plugin root
 	 * - For menu icons, it is recommended to use an SVG icon with a size of 16x16.
 	 * Use `fill="context-fill"` in the SVG to use the default icon color
 	 * for automatic hover and dark mode support.
 	 * @property {string} [darkIcon] - The dark icon for the menu item
 	 * - If not provided, the light icon will be used for both light and dark mode.
 	 * @property {string[]} [enableForTabTypes] - The type of tab for which the menu item should be enabled.
-	 * Available types are "library", "reader/*", "reader/pdf", "reader/epub", "reader/snapshot",
-	 * but other types are allowed as well for custom tab types.
+	 * Available types are "library", "reader" or "reader/*" for every reader type, and "reader/pdf",
+	 * "reader/epub", "reader/snapshot", but other types are allowed as well for custom tab types.
 	 * By default, the menu item is always enabled.
 	 * Only for main window menubar menus and reader window menubar menus
-	 * @property {function} [onShowing] - Function to run when the menu is about to be shown
-	 * @property {function} [onShown] - Function to run when the menu is shown
-	 * @property {function} [onHiding] - Function to run when the menu is about to be hidden
-	 * @property {function} [onHidden] - Function to run when the menu is hidden
-	 * @property {function} [onCommand] - Function to run when the menu is clicked
+	 * @property {MenuHook} [onShowing] - Function to run when the menu is about to be shown
+	 * @property {MenuHook} [onShown] - Function to run when the menu is shown
+	 * @property {MenuHook} [onHiding] - Function to run when the menu is about to be hidden
+	 * @property {MenuHook} [onHidden] - Function to run when the menu is hidden
+	 * @property {MenuHook} [onCommand] - Function to run when the menu is clicked
 	 * @property {MenuData[]} [menus] - The menu items to add to the menu
 	 *
 	 * @typedef MenuOptions
@@ -109,18 +131,9 @@
 	 */
 
 
-	class MenuManagerInternal extends PluginAPIBase {
+	class MenuManagerInternal extends lazy.ManagerAPIBase {
 		_menusTypeDefinition = {
-			menuType: {
-				type: "string",
-				optional: false,
-				checkHook: (value) => {
-					if (!VALID_MENU_TYPES.includes(value)) {
-						return `Option 'type' must be one of ${VALID_MENU_TYPES.join(", ")}, got ${value}`;
-					}
-					return true;
-				}
-			},
+			menuType: lazy.Params.oneOf(VALID_MENU_TYPES),
 			l10nID: {
 				type: "string",
 				optional: true,
@@ -128,7 +141,7 @@
 			l10nArgs: {
 				// TODO: remove support for object type in the future.
 				checkHook: (value) => {
-					if (typeof value === "undefined" || typeof value === "string") {
+					if (typeof value === "string") {
 						return true;
 					}
 					if (typeof value === "object") {
@@ -194,17 +207,38 @@
 						type: "string",
 						optional: false,
 						checkHook: (value) => {
-							if (!VALID_TARGETS.includes(value)) {
-								return `Option 'target' must be one of ${VALID_TARGETS.join(", ")}, got ${value}`;
+							if (VALID_TARGETS.includes(value)) {
+								return true;
 							}
-							return true;
+							let parts = value.split("/");
+							if (parts[0] === "pluginWindow") {
+								// pluginWindow/<name>/menubar/<type>
+								if (parts.length === 4
+										&& parts[2] === "menubar"
+										&& VALID_PLUGIN_WINDOW_MENU_TYPES.includes(parts[3])) {
+									return true;
+								}
+								// pluginWindow/<name>/context
+								if (parts.length === 3
+										&& parts[2] === "context") {
+									return true;
+								}
+							}
+							// button/<buttonKey>: dropdown menus of custom buttons,
+							// managed by Zotero.ButtonManager
+							if (parts[0] === "button" && value.length > "button/".length) {
+								return true;
+							}
+							return `Option 'target' must be one of ${VALID_TARGETS.join(", ")} or a valid pluginWindow target, got ${value}`;
 						}
 					},
-					// l10nFiles: {
-					// 	type: "array",
-					// 	optional: true,
-					// 	children: "string",
-					// },
+					// Only for pluginWindow menubar menus.
+					// For other menus, use `Zotero.WindowResourceManager`.
+					l10nFiles: {
+						type: "array",
+						optional: true,
+						children: "string",
+					},
 					// Type check will be done in the _validate function for nested menus
 					menus: {
 						type: "array",
@@ -212,6 +246,59 @@
 					}
 				},
 			};
+		}
+
+		_hookNames = this._functionOptionNames(this._menusTypeDefinition);
+
+		_convert(option) {
+			option = super._convert(option);
+			this._convertMenuHooks(option.menus, option.pluginID);
+			return option;
+		}
+
+		// Contexts carry the selection as IDs; this drops what only privileged plugins still get, all
+		// @deprecated: the live `items` and `collectionTreeRows`, `menuElem` and the leading DOM event
+		_wrapHook(hook, pluginID) {
+			let wrapped = lazy.ScopeVariables.fromScope(hook, pluginID);
+			let privileged = lazy.PluginSandbox.isPrivileged(pluginID);
+			if (privileged) {
+				return (event, source) => wrapped(event, source);
+			}
+			return (event, source) => {
+				let context = source;
+				if (source) {
+					// Copy descriptors so context getters aren't evaluated here
+					let descriptors = Object.getOwnPropertyDescriptors(source);
+					delete descriptors.menuElem;
+					delete descriptors.collectionTreeRow;
+					delete descriptors.items;
+					delete descriptors.collectionTreeRows;
+					context = Object.defineProperties({}, descriptors);
+					// Runtime icons resolve like registered ones
+					if (typeof source.setIcon === "function") {
+						context.setIcon = (icon, darkIcon) => {
+							let icons = { icon, darkIcon };
+							if (this._resolveImageURLs(icons, ICON_KEYS, pluginID)) {
+								source.setIcon(icons.icon, icons.darkIcon);
+							}
+						};
+					}
+				}
+				return wrapped(context);
+			};
+		}
+
+		_convertMenuHooks(menus, pluginID) {
+			for (let menuData of menus) {
+				for (let hookName of this._hookNames) {
+					if (menuData[hookName]) {
+						menuData[hookName] = this._wrapHook(menuData[hookName], pluginID);
+					}
+				}
+				if (menuData.menus) {
+					this._convertMenuHooks(menuData.menus, pluginID);
+				}
+			}
 		}
 
 		/**
@@ -222,6 +309,12 @@
 			option = super._validate(option);
 
 			if (!option) {
+				return false;
+			}
+
+			let isPluginWindowTarget = option.target?.startsWith("pluginWindow/");
+			if (option.l10nFiles?.length && !isPluginWindowTarget) {
+				this._log("Invalid menu: 'l10nFiles' is only supported for pluginWindow targets", "warn");
 				return false;
 			}
 
@@ -242,7 +335,7 @@
 
 			// Validate nested menus recursively
 			for (let i = 0; i < option.menus.length; i++) {
-				let result = this._validateMenuData(option.menus[i], `menus[${i}]`);
+				let result = this._validateMenuData(option.menus[i], option.pluginID, `menus[${i}]`);
 				if (!result.valid) {
 					return false;
 				}
@@ -256,13 +349,14 @@
 		/**
 		 * Validate the menu data recursively
 		 * @param {MenuData} menuData - The menu data to validate
+		 * @param {string} pluginID - The ID of the plugin registering the menu
 		 * @param {string} [path] - The path to the menu data
 		 * @returns {{obj: MenuData | undefined, valid: boolean}} - The validated menu data and whether it is valid
 		 */
-		_validateMenuData(menuData, path = "") {
+		_validateMenuData(menuData, pluginID, path = "") {
 			// Validate the menu data itself
 			let selfResult = this._validateObject(menuData, this._menusTypeDefinition, path);
-			if (!selfResult.valid) {
+			if (!selfResult.valid || !this._resolveImageURLs(selfResult.obj, ICON_KEYS, pluginID)) {
 				return {
 					valid: false,
 				};
@@ -287,7 +381,7 @@
 				};
 			}
 			for (let i = 0; i < menuData.menus.length; i++) {
-				let menuResult = this._validateMenuData(menuData.menus[i], `${path}.menus[${i}]`);
+				let menuResult = this._validateMenuData(menuData.menus[i], pluginID, `${path}.menus[${i}]`);
 				if (!menuResult.valid) {
 					return {
 						valid: false,
@@ -325,13 +419,27 @@
 		/**
 		 * Get the custom menu data for a target type
 		 * @param {string} targetType - The target type of the menu
+		 * @param {string} [pluginID] - Only this plugin's registrations, for per-plugin targets
 		 * @returns {MenuOptions[]} - The custom menu data for the target type
 		 */
-		getCustomMenuOptions(targetType) {
+		getCustomMenuOptions(targetType, pluginID) {
 			return this.options
-				.filter(option => option.target === targetType)
+				.filter(option => option.target === targetType
+					&& (pluginID === undefined || this._getOptionPluginID(option) === pluginID))
 				// Sort to ensure consistent ordering
 				.sort((a, b) => this._getOptionMainKey(a).localeCompare(this._getOptionMainKey(b)));
+		}
+
+		/**
+		 * Ensure l10n files are loaded in the popup window, loading any that are missing.
+		 * @param {Window} win - The window that owns the popup element
+		 * @param {string[]} l10nFiles - Array of FTL resource paths to ensure are loaded
+		 */
+		_ensureL10nFilesInWindow(win, l10nFiles) {
+			if (!l10nFiles?.length) return;
+			for (let file of l10nFiles) {
+				win.MozXULElement.insertFTLIfNeeded(file);
+			}
 		}
 
 		/**
@@ -362,17 +470,6 @@
 				return;
 			}
 			
-			// let win = popupElem.documentGlobal;
-			// let doc = popupElem.ownerDocument;
-
-			// TODO: maybe we can let plugins to load their own l10n files in onShowing,
-			// because otherwise we'll have to manage the l10n files unload when unregistering
-			// if (menuData.l10nFiles?.length > 0) {
-			// 	// Load l10n files
-			// 	for (let l10nFile of menuData.l10nFiles) {
-			// 		win.MozXULElement.insertFTLIfNeeded(l10nFile);
-			// 	}
-			// }
 
 			if (!skipGrouping) {
 				// Group menus if needed
@@ -484,7 +581,7 @@
 				}
 			}
 
-			this._updateMenuClasses(menuElem, menuData, targetType, { tabType, tabSubType });
+			this._updateMenuVisibility(menuElem, menuData, targetType, { tabType, tabSubType });
 
 			this._updateMenuEvents(menuElem, popupElem, menuData, targetType, {
 				event,
@@ -496,7 +593,8 @@
 		}
 
 		/**
-		 * Update the menu element classes
+		 * Show a main or reader window menubar item only in the tabs it is enabled for; the popup reuses the
+		 * element, so this runs on every showing
 		 * @param {XULElement} menuElem - The menu element to update
 		 * @param {MenuData} menuData - The menu data to update the element
 		 * @param {string} targetType - The target type of the menu
@@ -506,60 +604,12 @@
 		 * for main window menubar menus and reader window menubar menus
 		 * @returns {void}
 		 */
-		_updateMenuClasses(menuElem, menuData, targetType, args) {
+		_updateMenuVisibility(menuElem, menuData, targetType, args) {
 			let { tabType, tabSubType } = args;
-			// Update dynamic classes of the menu item
-			let cachedDynamicClasses = new Set();
-
-			// Init the menu based on the content type for main window tabs and reader window
 			if ((targetType.startsWith("main/menubar") || targetType.startsWith("reader/menubar"))
 					&& menuData.enableForTabTypes) {
-				// argument tabType and tabSubType are not empty
-				let shouldHide = true;
-				for (let type of menuData.enableForTabTypes) {
-					let [_tabType, _tabSubType] = type.split("/");
-
-					// Only show the menu item if the tab type matches
-					cachedDynamicClasses.add(`menu-type-${_tabType}`);
-
-					if (_tabSubType) {
-						if (_tabType === "reader" && _tabSubType === "*") {
-							// Show the menu item for all reader types
-							cachedDynamicClasses.add("pdf");
-							cachedDynamicClasses.add("epub");
-							cachedDynamicClasses.add("snapshot");
-						}
-						else {
-							// Only show the menu item if the tab subtype (reader type) matches
-							cachedDynamicClasses.add(_tabSubType);
-						}
-					}
-
-					if (shouldHide
-							&& tabType === _tabType
-							&& (_tabSubType === "*" || tabSubType === _tabSubType)) {
-						shouldHide = false;
-					}
-				}
-				if (shouldHide) {
-					menuElem.hidden = true;
-				}
+				menuElem.hidden = !lazy.WindowUtils.matchesTabType(menuData.enableForTabTypes, tabType, tabSubType);
 			}
-
-			// Remove previous dynamic classes
-			if (menuElem.dataset.dynamicClasses) {
-				let previousDynamicClasses = menuElem.dataset.dynamicClasses.split(",");
-				for (let dynamicClass of previousDynamicClasses) {
-					if (dynamicClass && !cachedDynamicClasses.has(dynamicClass)) {
-						menuElem.classList.remove(dynamicClass);
-					}
-				}
-			}
-			// Add new dynamic classes
-			for (let dynamicClass of cachedDynamicClasses) {
-				menuElem.classList.add(dynamicClass);
-			}
-			menuElem.dataset.dynamicClasses = Array.from(cachedDynamicClasses).join(",");
 		}
 
 		/**
@@ -830,12 +880,31 @@
 		 * @param {string} paneID
 		 * @returns {boolean}
 		 */
-		unregisterMenu(paneID) {
-			return this._menuManager.unregister(paneID);
+		unregisterMenu(paneID, _callerPluginID) {
+			return this._menuManager.unregister(paneID, _callerPluginID);
 		},
 
-		updateMenuPopup(popupElem, targetType, args) {
-			let options = this._menuManager.getCustomMenuOptions(targetType);
+		/**
+		 * Check whether any menus are registered for a given target.
+		 * @param {string} targetType
+		 * @param {string} [pluginID] - Only count this plugin's registrations
+		 * @returns {boolean}
+		 */
+		hasMenus(targetType, pluginID) {
+			return this._menuManager.getCustomMenuOptions(targetType, pluginID).length > 0;
+		},
+
+		/**
+		 * @param {string} [args.pluginID] - Only this plugin's registrations, for the
+		 * pluginWindow/<name>/... targets, which are scoped to the window's owner
+		 */
+		updateMenuPopup(popupElem, targetType, args = {}) {
+			let options = this._menuManager.getCustomMenuOptions(targetType, args.pluginID);
+			// Ensure l10n files from all registered options are loaded in the popup's window
+			let win = popupElem.documentGlobal;
+			for (let option of options) {
+				this._menuManager._ensureL10nFilesInWindow(win, option.l10nFiles);
+			}
 			// Flatten the menus array
 			let menus = [];
 			for (let option of options) {
@@ -844,4 +913,17 @@
 			this._menuManager.updateMenuPopup(popupElem, menus, targetType, args);
 		},
 	};
+
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.MenuManager.registerMenu,
+		({ pluginID, args }) => {
+			lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+		}
+	);
+	lazy.ScopeVariables.setCustomParser(
+		Zotero.MenuManager.unregisterMenu,
+		({ pluginID, args }) => {
+			args[1] = pluginID;
+		}
+	);
 }

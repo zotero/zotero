@@ -1,0 +1,32 @@
+<vbox id="zotero-prefpane-plugin-permissions"
+		onload="event.waitUntil(Zotero_Preferences.PluginPermissions.init())">
+	<vbox class="main-section">
+		<groupbox aria-labelledby="plugin-permissions-heading" aria-describedby="plugin-permissions-intro">
+			<description id="plugin-permissions-intro" data-l10n-id="preferences-plugin-permissions-intro"/>
+			<separator class="thin"/>
+			<hbox class="virtualized-table-container" flex="1">
+				<html:div id="plugin-permissions-table" class="permissions-table"/>
+			</hbox>
+
+			<vbox id="plugin-permissions-selection-info" hidden="true">
+				<description id="plugin-permissions-info-legacy"
+					class="plugin-info-banner banner-error"
+					data-l10n-id="preferences-plugin-permissions-legacy-hint" hidden="true"/>
+
+				<hbox id="plugin-permissions-info-uninstalled"
+						class="plugin-info-banner banner-warning banner-with-action" hidden="true">
+					<description flex="1"
+						data-l10n-id="preferences-plugin-permissions-edit-status-uninstalled"/>
+					<button data-l10n-id="preferences-plugin-permissions-edit-remove-all-button"
+						oncommand="Zotero_Preferences.PluginPermissions.removeAllForSelected()"/>
+				</hbox>
+
+				<vbox id="plugin-permissions-info-installed" class="plugin-info-banner" hidden="true">
+					<description data-l10n-id="preferences-plugin-permissions-installed-heading"/>
+					<description id="plugin-permissions-info-permissions-text"
+						class="plugin-permissions-list"/>
+				</vbox>
+			</vbox>
+		</groupbox>
+	</vbox>
+</vbox>

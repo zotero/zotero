@@ -47,10 +47,11 @@
  * @property {PluginAPIOptDefType} [type] - The type of the value
  * @property {boolean} [optional] - Whether the value is optional, default false
  * @property {PluginAPIOptDefCheckHook} [checkHook]
- *  - A function to check the value, returning true if it is valid
- * @property {PluginAPIOptDefConfig} [children]
+ *  - A function to check the value, returning true if it is valid; not called for an optional value left out
+ * @property {PluginAPIOptDefConfig | PluginAPIOptDefType} [children]
  *  - The type definition of the children of the object. The children can be
- * an object or an array of objects with the same structure
+ * an object or an array of objects with the same structure; for an array, a type
+ * name instead is what every element must be
  * @property {any} [fallbackReturn] - The value to return if the check hook fails
  * The fallback return is only used if the value is a function and it throws an error
  * If no fallback return is defined, the function will return null
@@ -70,127 +71,29 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 
+/**
+ * Shared plumbing for both plugin API types: config, option validation, and logging
+ */
 class PluginAPIBase {
-	_optionsCache = {};
-
-	_lastUpdateID = "";
-
-	/**
-	 * @type {PluginAPIConfig}
-	 */
 	_config = {
 		apiName: "PluginAPIBase",
-		mainKeyName: "id",
-		pluginIDKeyName: "pluginID",
-		notifyType: "unknown",
-		notifyAction: "refresh",
-		optionTypeDefinition: {},
 	};
-
-	get updateID() {
-		return this._lastUpdateID;
-	}
-
-	get options() {
-		return Object.values(this._optionsCache).map(opt => Object.assign({}, opt));
-	}
-
-	get data() {
-		return {
-			updateID: this.updateID,
-			options: this.options,
-		};
-	}
 
 	/**
 	 * Set the configuration
-	 * @param {PluginAPIConfig} config - The configuration to set
+	 * @param {PluginAPIConfig | RequestAPIConfig} config - The configuration to set
 	 */
 	set config(config) {
 		Object.assign(this._config, config);
 	}
 
 	/**
-	 * Register an option. Must be valid with a unique mainKey defined by _config#mainKeyName
-	 * @param {object} option - The option to register
-	 * @returns {string | false} - The mainKey of the registered option, or false if the option is invalid
+	 * The options a definition types as functions, which a manager wraps for the plugin's scope
+	 * @param {Record<string, PluginAPIOptDefValue>} [typeDef]
+	 * @returns {string[]}
 	 */
-	register(option) {
-		let mainKey = this._add(option);
-		if (!mainKey) {
-			return false;
-		}
-		this._addPluginShutdownObserver();
-		this._refresh();
-		return mainKey;
-	}
-
-	/**
-	 * Unregister an option by mainKey
-	 * @param {string} mainKey - The mainKey of the option to unregister
-	 * @returns {boolean} - True if the option was successfully unregistered
-	 */
-	unregister(mainKey) {
-		const success = this._remove(mainKey);
-		if (!success) {
-			return false;
-		}
-		this._refresh();
-		return true;
-	}
-
-	/**
-	 * Internal implementation of registering an option, can be overridden by subclasses
-	 * @param {object} option - The option to add
-	 * @returns {string | false} - The mainKey of the added option, or false if the option is invalid
-	 */
-	_add(option) {
-		option = this._validate(option);
-		if (option === false) {
-			return false;
-		}
-
-		let mainKey = this._getOptionMainKey(option);
-		this._optionsCache[mainKey] = option;
-		return mainKey;
-	}
-
-	/**
-	 * Internal implementation of unregistering an option, can be overridden by subclasses
-	 * @param {object} mainKey - The mainKey of the option to remove
-	 * @returns {boolean} - True if the option was successfully removed
-	 */
-	_remove(mainKey) {
-		if (!this._optionsCache[mainKey]) {
-			this._log(`Can't remove unknown option '${mainKey}'`, "warn");
-			return false;
-		}
-		delete this._optionsCache[mainKey];
-		return true;
-	}
-
-	/**
-	 * Internal implementation of validating an option, can be overridden by subclasses
-	 * @param {object} option
-	 * @returns {object | false} - The option if it is valid, or false if it is invalid
-	 */
-	_validate(option) {
-		let mainKey = this._namespacedMainKey(option);
-
-		if (this._optionsCache[mainKey]) {
-			this._log(`'${this._config.mainKeyName}' must be unique, got ${mainKey}`, "warn");
-			return false;
-		}
-
-		let validateResult = this._validateObject(option, this._config.optionTypeDefinition);
-
-		if (!validateResult.valid) {
-			return false;
-		}
-
-		option = validateResult.obj;
-		option[this._config.mainKeyName] = mainKey;
-		return option;
+	_functionOptionNames(typeDef = this._config.optionTypeDefinition) {
+		return Object.keys(typeDef).filter(key => typeDef[key] === "function" || typeDef[key]?.type === "function");
 	}
 
 	/**
@@ -198,10 +101,11 @@ class PluginAPIBase {
 	 * @param {object} obj - The object to validate
 	 * @param {object} typeDef - The type definition to validate against
 	 * @param {string} path - The path to the object in the type definition
-	 * @returns {{obj?: object, valid: boolean}} - The validated object if valid and the validation flag
+	 * @returns {{obj?: object, valid: boolean, reason?: string}} - The validated object if valid, else why not
 	 */
 	_validateObject(obj, typeDef, path = "") {
-		obj = Object.assign({}, obj);
+		// A copy of the own properties; through Object.assign, a __proto__ key would set the prototype
+		obj = Object.fromEntries(Object.entries(obj ?? {}));
 
 		try {
 			for (let key of Object.keys(typeDef)) {
@@ -237,13 +141,16 @@ class PluginAPIBase {
 					if (!Array.isArray(val)) {
 						throw new Error(`Option ${fullPath} must be ${requiredType}, got ${typeof val}`);
 					}
+					// Copy into a chrome-compartment array since Object.assign
+					// only shallow-copies and the array may be from a sandbox
+					val = obj[key] = Array.from(val);
 				}
 				// Should be required type or undefined
 				else if (requiredType && requiredType !== "any" && !["undefined", requiredType].includes(gotType)) {
 					throw new Error(`Option ${fullPath} must be ${requiredType}, got ${typeof val}`);
 				}
 				
-				if (requirement.checkHook) {
+				if (requirement.checkHook && gotType !== "undefined") {
 					let result = requirement.checkHook(val);
 					if (result !== true) {
 						throw new Error(`Option ${fullPath} failed check: ${result}`);
@@ -252,8 +159,14 @@ class PluginAPIBase {
 
 				if (requirement.children) {
 					if (Array.isArray(val)) {
-						// Only validate array elements if they are objects
-						if (val.length > 0 && typeof val[0] == "object") {
+						// A type name is checked on every element; a definition validates object elements
+						if (typeof requirement.children === "string") {
+							let bad = val.findIndex(v => typeof v !== requirement.children);
+							if (bad !== -1) {
+								throw new Error(`Option ${fullPath}[${bad}] must be ${requirement.children}, got ${typeof val[bad]}`);
+							}
+						}
+						else if (val.length > 0 && typeof val[0] == "object") {
 							for (let i = 0; i < val.length; i++) {
 								let result = this._validateObject(val[i], requirement.children, `${path}.${key}[${i}].`);
 								if (!result.valid) {
@@ -277,7 +190,7 @@ class PluginAPIBase {
 				// Validations passed, continue with post-processing
 
 				// Wrap functions for safe execution
-				if (gotType === "function") {
+				if (gotType === "function" && !requirement.unsafeFunction) {
 					obj[key] = (...args) => {
 						try {
 							return val(...args);
@@ -295,6 +208,7 @@ class PluginAPIBase {
 			this._log(String(e), "warn");
 			return {
 				valid: false,
+				reason: e.message,
 			};
 		}
 
@@ -304,90 +218,8 @@ class PluginAPIBase {
 		};
 	}
 
-	/**
-	 * Make sure the mainKey is namespaced with the pluginID
-	 * @param {object} option
-	 * @returns {string}
-	 */
-	_namespacedMainKey(option) {
-		let mainKey = this._getOptionMainKey(option);
-		let pluginID = this._getOptionPluginID(option);
-		if (pluginID && mainKey) {
-			// Make sure the return value is valid as class name or element id
-			return CSS.escape(`${pluginID}-${mainKey}`);
-		}
-		return mainKey;
-	}
-
-	/**
-	 * Notify the receiver to update
-	 */
-	async _refresh(ids = [], extraData = {}) {
-		if (!this._config.notifyType || this._config.notifyType === "unknown") {
-			return;
-		}
-		this._lastUpdateID = this._generateRandomKey();
-		// register(), unregister(), and refresh() call _refresh() without awaiting it, so yield
-		// first to keep observers -- and the plugin hooks they call -- from running before those
-		// calls return
-		await Promise.resolve();
-		await lazy.Zotero.Notifier.trigger(
-			this._config.notifyAction,
-			this._config.notifyType,
-			ids,
-			extraData,
-		);
-	}
-
-	/**
-	 * Unregister all stored options by pluginID
-	 * @param {string} pluginID - PluginID
-	 * @returns {Promise<string[]>} - The mainKeys of the unregistered options
-	 */
-	async _unregisterByPluginID(pluginID) {
-		let paneIDs = Object.keys(this._optionsCache).filter(
-			id => this._getOptionPluginID(this._optionsCache[id]) == pluginID);
-		if (paneIDs.length === 0) {
-			return [];
-		}
-		// Remove the registrations one by one
-		paneIDs.forEach(id => this._remove(id));
-		this._log(`Registrations for plugin ${pluginID} are unregistered due to shutdown`);
-		await this._refresh();
-		return paneIDs;
-	}
-
-	/**
-	 * Ensure the plugin shutdown observer is added
-	 * @returns {void}
-	 */
-	_addPluginShutdownObserver() {
-		if (this._observerAdded) {
-			return;
-		}
-
-		lazy.Zotero.Plugins.addObserver({
-			shutdown: ({ id: pluginID }) => {
-				this._unregisterByPluginID(pluginID);
-			}
-		});
-		this._observerAdded = true;
-	}
-
 	_log(message, logType = "debug") {
 		lazy.Zotero[logType](`${this._config.apiName}: ${message}`);
-	}
-
-	_getOptionPluginID(option) {
-		return option[this._config.pluginIDKeyName];
-	}
-
-	_getOptionMainKey(option) {
-		return option[this._config.mainKeyName];
-	}
-
-	_generateRandomKey() {
-		return `${lazy.Zotero.Utilities.randomString()}-${new Date().getTime()}`;
 	}
 }
 
