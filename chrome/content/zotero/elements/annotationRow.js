@@ -64,6 +64,23 @@
 			this.setAttribute('annotation-id', annotation.id);
 		}
 
+		/**
+		 * Words to mark in the annotation's text, comment and tags, as
+		 * Zotero.Lexical.findHighlightRanges() takes them, or null for none
+		 */
+		get highlightTerms() {
+			return this._highlightTerms ?? null;
+		}
+
+		set highlightTerms(terms) {
+			this._highlightTerms = terms?.length ? terms : null;
+			if (this.initialized) {
+				for (let element of this.querySelectorAll('.quote, .comment, .tags')) {
+					this._mark(element, element.textContent);
+				}
+			}
+		}
+
 		get action() {
 			return this._action;
 		}
@@ -134,21 +151,21 @@
 				let text = document.createElement('div');
 				text.classList.add('quote');
 				let plainQuote = parserUtils.convertToPlainText(this._annotation.annotationText, Ci.nsIDocumentEncoder.OutputRaw, 0);
-				text.textContent = plainQuote;
+				this._mark(text, plainQuote);
 				this._body.append(text);
 			}
-			
+
 			if (this._annotation.annotationComment) {
 				let comment = document.createElement('div');
 				comment.classList.add('comment');
 				let plainComment = parserUtils.convertToPlainText(this._annotation.annotationComment, Ci.nsIDocumentEncoder.OutputRaw, 0);
-				comment.textContent = plainComment;
+				this._mark(comment, plainComment);
 				this._body.append(comment);
 			}
-			
+
 			let tags = this._annotation.getTags();
 			this._tags.hidden = !tags.length;
-			this._tags.textContent = tags.map(tag => tag.tag).sort(Zotero.localeCompare).join(Zotero.getString('punctuation.comma') + ' ');
+			this._mark(this._tags, tags.map(tag => tag.tag).sort(Zotero.localeCompare).join(Zotero.getString('punctuation.comma') + ' '));
 			
 			this.style.setProperty('--annotation-color', this._annotation.annotationColor);
 			// A11y - make focusable + add screen reader's labels
@@ -160,6 +177,22 @@
 			let a11yDescription = `${ariaComment} ${ariaTags}`;
 			this.setAttribute("aria-label", a11yLabel);
 			this.setAttribute("aria-description", a11yDescription);
+		}
+
+		// Set an element's text, with the highlight terms wrapped in marks
+		_mark(element, text) {
+			let nodes = [];
+			let last = 0;
+			for (let [start, end] of Zotero.Lexical.findHighlightRanges(this._highlightTerms, text)) {
+				nodes.push(text.slice(last, start));
+				let mark = document.createElement('span');
+				mark.className = 'search-match';
+				mark.textContent = text.slice(start, end);
+				nodes.push(mark);
+				last = end;
+			}
+			nodes.push(text.slice(last));
+			element.replaceChildren(...nodes);
 		}
 	}
 

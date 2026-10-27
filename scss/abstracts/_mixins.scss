@@ -287,6 +287,14 @@
 	}
 }
 
+// A search's words where they match in shown text, as editable-text marks
+// them in fields (see its HIGHLIGHT_COLOR)
+@mixin search-match-highlight {
+	background: #f9ee79;
+	color: #1a1a1a;
+	border-radius: 2px;
+}
+
 /*
 	This mixin replaces the default focus-rings - those are platform-specific, do not show up on some
 	components (e.g. toolbarbutton) and sometimes are too wide (e.g. around textfield on macOS).

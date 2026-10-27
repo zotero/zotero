@@ -76,3 +76,8 @@ annotation-row, search-result-row {
 		word-break: break-word;
 	}
 }
+
+// A best-match search's words
+annotation-row .search-match {
+	@include search-match-highlight;
+}

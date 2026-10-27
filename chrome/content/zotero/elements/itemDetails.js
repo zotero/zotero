@@ -71,6 +71,18 @@
 			this._item = item;
 		}
 
+		/**
+		 * Words to mark in the item's fields (see editable-text's
+		 * highlightTerms), handed to every section on render
+		 */
+		get highlightTerms() {
+			return this._highlightTerms ?? null;
+		}
+
+		set highlightTerms(terms) {
+			this._highlightTerms = terms ?? null;
+		}
+
 		get extraItems() {
 			return this._extraItems ?? [];
 		}
@@ -255,6 +267,7 @@
 				box.item = item;
 				box.extraItems = this.extraItems;
 				box.collectionTreeRows = this.collectionTreeRows;
+				box.highlightTerms = this.highlightTerms;
 				if (this.extraItems.length > 0) {
 					// mark everything, except the header and the info pane, as hidden
 					box.hidden = box.dataset.pane !== 'info' && box !== this._header;

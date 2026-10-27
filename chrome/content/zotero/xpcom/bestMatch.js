@@ -72,6 +72,10 @@ Zotero.BestMatch = new function () {
 	// scrolling stutters.
 	const PREVIEW_PAUSE_RATIO = 3;
 	const PREVIEW_MAX_PAUSE = 250;
+	// A query with more lexical terms than this is a passage, not a list of
+	// words: what the lexical engine makes of it is noise, so a hybrid
+	// ranking leaves it to the semantic engine alone
+	const LONG_QUERY_TERMS = 10;
 
 	this.MAX_QUOTED_PASSAGES = MAX_QUOTED_PASSAGES;
 	this.PRELOADED_MATCH_PREVIEWS = PRELOADED_MATCH_PREVIEWS;
@@ -101,6 +105,16 @@ Zotero.BestMatch = new function () {
 
 	function _hasPreviews(itemID) {
 		return !!Zotero.Items.get(itemID)?.isFileAttachment?.();
+	}
+
+	function _isLongQuery(queryText) {
+		return Zotero.Lexical.parseQuery(queryText || '').length > LONG_QUERY_TERMS;
+	}
+
+	// The lexical engine's match records for the items that survived the
+	// margin cut
+	function _keep(matches, scores) {
+		return new Map([...matches].filter(([itemID]) => scores.has(itemID)));
 	}
 
 	// Resolves the next time the main thread is idle, or after
@@ -185,9 +199,11 @@ Zotero.BestMatch = new function () {
 	 * never displays as more relevant than one ranked above it.
 	 *
 	 * With a semantic model enabled, both engines score concurrently and
-	 * their results fuse (see _fuse()). A semantic index that isn't ready --
-	 * mid-build or mid-model-switch -- drops the semantic engine from the
-	 * query instead of failing it, leaving the lexical scores alone.
+	 * their results fuse (see _fuse()) -- unless the query runs past
+	 * LONG_QUERY_TERMS, a pasted passage rather than words to look for,
+	 * which the semantic engine ranks alone. A semantic index that isn't
+	 * ready -- mid-build or mid-model-switch -- drops the semantic engine
+	 * from the query instead of failing it, leaving the lexical scores alone.
 	 *
 	 * @param {String} queryText
 	 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -199,12 +215,13 @@ Zotero.BestMatch = new function () {
 	 *     stages; return true to abandon scoring with a ScoringCancelledError
 	 * @return {Promise<Object>} - { scores, matches }: scores maps
 	 *     itemID -> score (0-1, higher is more relevant); matches says which
-	 *     items each engine can show match excerpts in, as { lexical,
-	 *     semantic } Sets of itemIDs (see getMatchingExcerpts()). Every
-	 *     lexical match has excerpts to show; a semantic match does only
-	 *     when a previewable chunk carries it (see
+	 *     items each engine can show match excerpts in (see
+	 *     getMatchingExcerpts()): `lexical` maps itemID -> where the words
+	 *     matched (see Zotero.Lexical.scoreItemIDs()), `semantic` is a Set
+	 *     of itemIDs. Every lexical match has excerpts to show; a semantic
+	 *     match does only when a previewable chunk carries it (see
 	 *     Zotero.Embeddings.scoreItemIDs()). An engine that didn't rank
-	 *     contributes an empty Set.
+	 *     contributes an empty collection.
 	 * @throws {Zotero.BestMatch.ScoringCancelledError}
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
@@ -212,6 +229,9 @@ Zotero.BestMatch = new function () {
 			let engine = options.engine || 'hybrid';
 			let semanticApplies = _useSemantic()
 				&& !!Zotero.Embeddings.normalizeQuery(queryText || '');
+			if (engine == 'hybrid' && semanticApplies && _isLongQuery(queryText)) {
+				engine = 'semantic';
+			}
 			if (engine == 'semantic' && semanticApplies) {
 				let semantic = await Zotero.Embeddings.scoreItemIDs(queryText, itemIDs, options);
 				let kept = _nearTop(semantic.scores, _semanticFraction);
@@ -228,19 +248,18 @@ Zotero.BestMatch = new function () {
 						([itemID, fraction]) => [itemID, fraction / scale]
 					)),
 					matches: {
-						lexical: new Set(),
+						lexical: new Map(),
 						semantic: new Set([...semantic.previewableIDs].filter(id => kept.has(id)))
 					}
 				};
 			}
 			// A query the semantic engine can't embed ranks lexically alone
 			if (engine == 'lexical' || !semanticApplies) {
-				let scores = _nearTop(
-					await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options), share => share
-				);
+				let lexical = await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
+				let scores = _nearTop(lexical.scores, share => share);
 				return {
 					scores,
-					matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+					matches: { lexical: _keep(lexical.matches, scores), semantic: new Set() }
 				};
 			}
 			// Both engines score the same candidates concurrently. allSettled
@@ -257,11 +276,11 @@ Zotero.BestMatch = new function () {
 				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
 					Zotero.debug("Semantic index not ready -- ranking lexically: "
 						+ semantic.reason.message);
-					let scores = _nearTop(lexical.value, share => share);
+					let scores = _nearTop(lexical.value.scores, share => share);
 					return {
 						scores,
 						matches: {
-							lexical: new Set(scores.keys()),
+							lexical: _keep(lexical.value.matches, scores),
 							semantic: new Set()
 						}
 					};
@@ -270,12 +289,12 @@ Zotero.BestMatch = new function () {
 			}
 			// Each engine's tail is cut against its own strongest match, so
 			// an item enters fusion only with the evidence that stood up
-			let lexicalScores = _nearTop(lexical.value, share => share);
+			let lexicalScores = _nearTop(lexical.value.scores, share => share);
 			let semanticScores = _nearTop(semantic.value.scores, _semanticFraction);
 			return {
 				scores: _fuse(lexicalScores, semanticScores),
 				matches: {
-					lexical: new Set(lexicalScores.keys()),
+					lexical: _keep(lexical.value.matches, lexicalScores),
 					semantic: new Set(
 						[...semantic.value.previewableIDs].filter(id => semanticScores.has(id))
 					)
@@ -311,6 +330,11 @@ Zotero.BestMatch = new function () {
 			this._engine = engine;
 			this._previews = new Map();
 			this._effectiveScores = new Map();
+			// Where the lexical engine matched each item, from the last
+			// scoring pass (see Zotero.Lexical.scoreItemIDs()), and the terms
+			// it scored with
+			this._lexicalMatches = new Map();
+			this._lexicalTerms = null;
 			this._disposed = false;
 			// Bumped per background pass, so a re-score abandons the last one
 			this._derivation = 0;
@@ -356,8 +380,11 @@ Zotero.BestMatch = new function () {
 			if (this._disposed) {
 				return scores;
 			}
+			this._lexicalMatches = matches.lexical;
+			// The scoring terms are the same in every record that has them
+			this._lexicalTerms = [...matches.lexical.values()].find(record => record.terms)?.terms ?? null;
 			let previews = new Map();
-			for (let itemID of new Set([...matches.lexical, ...matches.semantic])) {
+			for (let itemID of new Set([...matches.lexical.keys(), ...matches.semantic])) {
 				if (!scores.has(itemID) || !_hasPreviews(itemID)) {
 					continue;
 				}
@@ -538,6 +565,17 @@ Zotero.BestMatch = new function () {
 			let preview = this._previews.get(itemID);
 			return preview && preview.state != 'empty' ? preview : null;
 		};
+
+		/**
+		 * The query's words to mark where an item's own text is shown (see
+		 * Zotero.Lexical.findHighlightRanges()), or null when the lexical
+		 * engine matched nothing in the last scoring pass
+		 *
+		 * @return {Object[]|null}
+		 */
+		get highlightTerms() {
+			return this._lexicalTerms && this._lexicalEnabled() ? this._lexicalTerms : null;
+		}
 
 		/**
 		 * Derive the given items' previews, in order, for previews put back

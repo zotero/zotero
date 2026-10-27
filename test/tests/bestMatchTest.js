@@ -18,8 +18,15 @@ describe("Zotero.BestMatch", function () {
 		// scores directly
 		stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
 			.callsFake(fraction || (score => score)));
+		// Per-test lexical fakes return bare score Maps too; wrap them in
+		// the engine's { scores, matches } envelope, with a match record
+		// for every scored item
 		if (lexical) {
-			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').callsFake(lexical));
+			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
+				.callsFake(async (...args) => {
+					let scores = await lexical(...args);
+					return { scores, matches: new Map([...scores.keys()].map(id => [id, {}])) };
+				}));
 		}
 		// Per-test semantic fakes return bare score Maps; wrap them in the
 		// engine's { scores, previewableIDs } envelope
@@ -162,15 +169,17 @@ describe("Zotero.BestMatch", function () {
 			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.5]]);
 			// The engine that didn't rank shows matches in nothing
 			assert.equal(matches.semantic.size, 0);
-			assert.sameMembers([...matches.lexical], [1, 2]);
+			assert.sameMembers([...matches.lexical.keys()], [1, 2]);
 		});
 
 		it("should report which items each engine can show matches in", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
 				.callsFake(score => score));
-			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
-				.resolves(new Map([[1, 0.9]])));
+			stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves({
+				scores: new Map([[1, 0.9]]),
+				matches: new Map([[1, {}]])
+			}));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').resolves({
 				scores: new Map([[2, 0.8], [3, 0.7]]),
 				previewableIDs: new Set([2])
@@ -178,7 +187,7 @@ describe("Zotero.BestMatch", function () {
 
 			let { matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
 			// Every lexical match has excerpts to show...
-			assert.sameMembers([...matches.lexical], [1]);
+			assert.sameMembers([...matches.lexical.keys()], [1]);
 			// ...while a semantic match shows only through previewable chunks
 			assert.sameMembers([...matches.semantic], [2]);
 		});
@@ -297,8 +306,10 @@ describe("Zotero.BestMatch", function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction')
 					.callsFake(score => score));
-				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
-					.resolves(new Map([[1, 0.8], [2, 0.9]])));
+				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves({
+					scores: new Map([[1, 0.8], [2, 0.9]]),
+					matches: new Map([[1, {}], [2, {}]])
+				}));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').resolves({
 					scores: new Map([[1, 0.9], [2, 0.05]]),
 					previewableIDs: new Set([1, 2])
@@ -308,7 +319,7 @@ describe("Zotero.BestMatch", function () {
 				// Item 2 stays, on its lexical evidence alone
 				assert.closeTo(scores.get(2), rrf([0.9, 1]), 1e-12);
 				assert.closeTo(scores.get(1), rrf([0.8, 2], [0.9, 1]), 1e-12);
-				assert.sameMembers([...matches.lexical], [1, 2]);
+				assert.sameMembers([...matches.lexical.keys()], [1, 2]);
 				assert.sameMembers([...matches.semantic], [1]);
 			});
 
@@ -343,7 +354,7 @@ describe("Zotero.BestMatch", function () {
 				let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2], { engine: 'semantic' });
 				assert.isTrue(lexical.calledOnce);
 				assert.sameMembers([...scores.keys()], [1]);
-				assert.sameMembers([...matches.lexical], [1]);
+				assert.sameMembers([...matches.lexical.keys()], [1]);
 				assert.isEmpty([...matches.semantic]);
 			});
 		});

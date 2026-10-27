@@ -28,6 +28,11 @@
 {
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 
+	// The background marking a search's words in a field. The find selection
+	// reads its colors as legacy HTML colors -- a hex triplet or a name;
+	// rgb() and alpha come out as unrelated colors.
+	const HIGHLIGHT_COLOR = '#f9ee79';
+
 	const lazy = {};
 	XPCOMUtils.defineLazyPreferenceGetter(
 		lazy,
@@ -209,6 +214,19 @@
 			return this._input;
 		}
 
+		/**
+		 * Words to mark in the text while it isn't being edited, as
+		 * Zotero.Lexical.findHighlightRanges() takes them, or null for none
+		 */
+		get highlightTerms() {
+			return this._highlightTerms ?? null;
+		}
+
+		set highlightTerms(terms) {
+			this._highlightTerms = terms?.length ? terms : null;
+			this._applyHighlights();
+		}
+
 		get multipleValues() {
 			return this.hasAttribute('multiple-values');
 		}
@@ -282,6 +300,10 @@
 			// Stop the shared observer from holding a reference to our input
 			if (this._input) {
 				EditableText._resizeObserver.unobserve(this._input);
+			}
+			if (this._highlightFrame) {
+				cancelAnimationFrame(this._highlightFrame);
+				this._highlightFrame = null;
 			}
 		}
 
@@ -441,6 +463,9 @@
 					this._input.dir = this.dir;
 				}
 			}
+
+			// The value or the input itself may have changed
+			this._applyHighlights();
 		}
 		
 		_handleInput = () => {
@@ -472,7 +497,8 @@
 			this.dispatchEvent(new CustomEvent('focus'));
 			let valueAfterFocus = this.value;
 			this.classList.add("focused");
-			
+			this._applyHighlights();
+
 			// Select all text if focused via keyboard
 			if (!this._focusMousedownEvent) {
 				this.select();
@@ -527,6 +553,7 @@
 			this._input.scrollLeft = 0;
 			this._input.setSelectionRange(0, 0);
 			delete this._input.dataset.initialValue;
+			this._applyHighlights();
 		}
 
 		_handleKeyDown = (event) => {
@@ -608,6 +635,74 @@
 			}
 		};
 		
+		// Mark the highlight terms in the input's text, or clear the marks
+		// while the field is being edited. Marks go through the input's own
+		// editor as its find selection, the one thing that paints inside a
+		// text control, where document markup can't reach. Accessing the
+		// editor creates it, so a field with nothing to mark, that never had
+		// marks, is left alone.
+		//
+		// Deferred a frame: a field marked while its box is still being laid
+		// out -- the info box builds its table as a block and turns it back
+		// into a grid -- gets a new editor when the frames settle, and marks
+		// put on the old one go with it.
+		_applyHighlights() {
+			if (!this._input || (!this._highlightTerms && !this._highlighted)
+					|| this._highlightFrame) {
+				return;
+			}
+			this._highlightFrame = requestAnimationFrame(() => {
+				this._highlightFrame = null;
+				this._applyHighlightsNow();
+			});
+		}
+
+		_applyHighlightsNow() {
+			if (!this._input || (!this._highlightTerms && !this._highlighted)) {
+				return;
+			}
+			let editor = this._input.editor;
+			let controller = editor?.selectionController;
+			let selection;
+			try {
+				selection = controller?.getSelection(Ci.nsISelectionController.SELECTION_FIND);
+			}
+			catch {
+				// Not laid out yet: marked on its next render
+			}
+			if (!selection) {
+				return;
+			}
+			selection.removeAllRanges();
+			this._highlighted = false;
+			if (this._highlightTerms && !this.focused) {
+				// The editor keeps the value in text nodes under its root
+				let nodes = [];
+				let text = '';
+				let walker = document.createTreeWalker(editor.rootElement, NodeFilter.SHOW_TEXT);
+				for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+					nodes.push({ node, start: text.length });
+					text += node.data;
+				}
+				for (let [start, end] of Zotero.Lexical.findHighlightRanges(this._highlightTerms, text)) {
+					let entry = nodes.findLast(entry => entry.start <= start);
+					if (!entry) {
+						continue;
+					}
+					let range = document.createRange();
+					range.setStart(entry.node, start - entry.start);
+					range.setEnd(entry.node, Math.min(end - entry.start, entry.node.data.length));
+					selection.addRange(range);
+					this._highlighted = true;
+				}
+				if (this._highlighted) {
+					selection.setColors('currentColor', HIGHLIGHT_COLOR,
+						'currentColor', HIGHLIGHT_COLOR);
+				}
+			}
+			controller.repaintSelection(Ci.nsISelectionController.SELECTION_FIND);
+		}
+
 		_isOverflowing() {
 			// Very small floating-point-error allowance
 			const EPSILON = 0.001;

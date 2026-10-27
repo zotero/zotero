@@ -274,12 +274,22 @@ describe("CollectionViewItemTree", function () {
 				});
 			}
 
+			// The same for Lexical scoreItemIDs fakes, whose envelope is
+			// { scores, matches } with a match record for every scored item
+			function lexicalEnvelope(fake) {
+				return async (...args) => {
+					let scores = await (typeof fake == 'function' ? fake(...args) : fake);
+					return { scores, matches: new Map([...scores.keys()].map(id => [id, {}])) };
+				};
+			}
+
 			beforeEach(function () {
 				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 				// No lexical matches, so the fused ranking and the bars carry
 				// the semantic scores these tests control
-				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs').resolves(new Map()));
+				stubs.push(sinon.stub(Zotero.Lexical, 'scoreItemIDs')
+					.callsFake(lexicalEnvelope(new Map())));
 				// A fully built index by default, so no indexing banner appears
 				stubs.push(sinon.stub(Zotero.Embeddings.Indexing, 'getStatus').returns({
 					enabled: true,
@@ -519,8 +529,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchrow A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
@@ -584,10 +594,10 @@ describe("CollectionViewItemTree", function () {
 					// with a match among them, the non-matching one is context
 					let matching = await createAnnotation('highlight', attachment);
 					let context = await createAnnotation('highlight', attachment);
-					Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
+					Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
 						[attachment.id, matching.id]
 							.filter(id => itemIDs.includes(id))
-							.map(id => [id, 0.8])));
+							.map(id => [id, 0.8]))));
 					stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 						.callsFake(scoreEnvelope(new Map())));
 					stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype,
@@ -621,8 +631,8 @@ describe("CollectionViewItemTree", function () {
 				note.parentID = item.id;
 				note.setNote('<p>notematch text</p>');
 				await note.saveTx();
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(note.id) ? [[note.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(note.id) ? [[note.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				await select(win, col);
@@ -641,8 +651,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchselect A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
@@ -691,8 +701,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchcut A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				let text = 'First part. Second sentence here, and more text follows.';
@@ -715,8 +725,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "matchmark A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				let text = 'An opening sentence. The owl sentence is quoted. A closing one.';
@@ -748,8 +758,8 @@ describe("CollectionViewItemTree", function () {
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
 				// Random text, so it never matches the query
 				await createAnnotation('highlight', attachment);
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
@@ -787,8 +797,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "openmatch A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				let position = { pageIndex: 3, rects: [[1, 2, 3, 4]] };
@@ -839,8 +849,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "quotedrows A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				let entries = [0, 1, 2, 3, 4].map(i => ({
@@ -884,8 +894,8 @@ describe("CollectionViewItemTree", function () {
 				}
 				// Descending, so the extra attachment is the one left over
 				let ids = attachments.map(att => att.id);
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					ids.filter(id => itemIDs.includes(id)).map((id, i) => [id, 0.9 - i / 100])));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					ids.filter(id => itemIDs.includes(id)).map((id, i) => [id, 0.9 - i / 100]))));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				// Held open, so the search has to resolve without it
@@ -923,8 +933,8 @@ describe("CollectionViewItemTree", function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "emptyfill A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
-				Zotero.Lexical.scoreItemIDs.callsFake(async (query, itemIDs) => new Map(
-					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : []));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
 					.callsFake(scoreEnvelope(new Map())));
 				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([]));

@@ -99,8 +99,7 @@ preferences-advanced-semantic-search-enabled =
 preferences-advanced-semantic-search-disabled =
     .label = Disabled
 preferences-advanced-best-match-margin = Quality cutoff below top (%):
-preferences-advanced-best-match-margin-description = At 30%, results scoring up to 30% below the best one are kept; 100% keeps every result, 0 drops everything but the top match.
-preferences-advanced-semantic-search-downloading = Downloading…
+preferences-advanced-best-match-margin-description = At 30%, results scoring up to 30% below the best one are kept; 100% keeps every result, 0 drops everything but the top match.preferences-advanced-semantic-search-downloading = Downloading…
 preferences-advanced-semantic-search-downloading-progress = Downloading… { $percent }%
 preferences-advanced-semantic-search-preparing = Preparing documents…
 preferences-advanced-semantic-search-preparing-progress = Preparing documents… { $done } / { $total }
@@ -257,4 +256,3 @@ fulltext-stats-attachments-indexed = Attachments indexed:
 fulltext-stats-partially-indexed = Partially indexed:
 fulltext-stats-not-available = Full-text content or file not available:
 fulltext-stats-notes-indexed = Notes indexed:
-fulltext-stats-items-indexed = Items and annotations indexed:

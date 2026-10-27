@@ -417,7 +417,7 @@
 				}
 			}
 			.search-match-highlight {
-				font-weight: 600;
+				@include search-match-highlight;
 			}
 		}
 

@@ -283,6 +283,7 @@
 			valueElement.className = 'zotero-box-label';
 			valueElement.readOnly = !this.editable;
 			valueElement.value = valueText;
+			valueElement.highlightTerms = this.highlightTerms;
 			let params = {
 				fieldName: 'tag',
 				libraryID: this._item.libraryID,

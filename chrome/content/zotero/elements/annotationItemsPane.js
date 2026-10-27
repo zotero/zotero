@@ -47,6 +47,21 @@
 			this._filter = val;
 		}
 
+		/**
+		 * Words to mark in the annotations' text (see annotation-row's
+		 * highlightTerms), or null for none
+		 */
+		get highlightTerms() {
+			return this._highlightTerms ?? null;
+		}
+
+		set highlightTerms(terms) {
+			this._highlightTerms = terms ?? null;
+			for (let row of this.querySelectorAll('annotation-row')) {
+				row.highlightTerms = this._highlightTerms;
+			}
+		}
+
 		init() {
 			this._body = this.querySelector('.body');
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item']);
@@ -118,6 +133,7 @@
 					if (!row) {
 						row = document.createXULElement('annotation-row');
 						row.annotation = annotation;
+						row.highlightTerms = this.highlightTerms;
 						section.querySelector('.body').append(row);
 					}
 					// Hide annotation rows that are filtered out

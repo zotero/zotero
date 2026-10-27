@@ -55,7 +55,7 @@ search-result-row {
 
 	// Where the query's words are in the passage
 	.body .quote .match {
-		font-weight: 600;
+		@include search-match-highlight;
 	}
 
 	// The line the tree row quotes, in the primary color against the

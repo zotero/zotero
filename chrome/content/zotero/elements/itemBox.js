@@ -1960,6 +1960,21 @@
 			return valueElement;
 		}
 
+		_fieldHighlightTerms(fieldName) {
+			const NO_HIGHLIGHT_FIELDS = new Set([
+				'itemType', 'dateAdded', 'dateModified', 'createdBy', 'lastModifiedBy'
+			]);
+			return NO_HIGHLIGHT_FIELDS.has(fieldName) ? null : this.highlightTerms;
+		}
+
+		// Only the fields holding the item's own data are marked, custom
+		// rows and the rest left alone
+		_applyHighlightTerms() {
+			for (let field of this.querySelectorAll('editable-text[fieldname]')) {
+				field.highlightTerms = this._fieldHighlightTerms(field.getAttribute('fieldname'));
+			}
+		}
+
 		createFieldValueElement(valueText, fieldName, extraFieldValues = []) {
 			valueText += '';
 			let rawValueText = valueText;
@@ -2033,7 +2048,8 @@
 				// autocomplete for creator names is added in addCreatorRow
 				this.addAutocompleteToElement(valueElement);
 			}
-			
+			valueElement.highlightTerms = this._fieldHighlightTerms(fieldName);
+
 			valueElement.values = [valueText, ...extraFieldValues];
 			const hasMultipleValues = extraFieldValues.length && extraFieldValues.some(v => (v + '') !== rawValueText);
 			if (hasMultipleValues) {

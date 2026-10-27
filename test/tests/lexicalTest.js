@@ -196,6 +196,11 @@ describe("Zotero.Lexical", function () {
 		const BASE_ROWID = 940000000;
 		var inserted = [];
 
+		// Just the scores
+		async function scoresFor(...args) {
+			return (await Zotero.Lexical.scoreItemIDs(...args)).scores;
+		}
+
 		async function addContentDoc(id, text) {
 			let rowid = BASE_ROWID + id;
 			await Zotero.DB.queryAsync(
@@ -242,7 +247,7 @@ describe("Zotero.Lexical", function () {
 			let item = await createDataObject('item',
 				{ title: 'Lexproxcommunism in the twentieth century' });
 
-			let scores = await Zotero.Lexical.scoreItemIDs(
+			let scores = await scoresFor(
 				'lexproxfall lexproxcommunism', [near, far, item.id]);
 			assert.isTrue(scores.has(near));
 			assert.isFalse(scores.has(far));
@@ -257,7 +262,7 @@ describe("Zotero.Lexical", function () {
 			let scattered = await addContentDoc(64,
 				'lexpcova lexpcovb ' + 'filler '.repeat(300) + 'lexpcovc lexpcovd');
 
-			let scores = await Zotero.Lexical.scoreItemIDs(
+			let scores = await scoresFor(
 				'lexpcova lexpcovb lexpcovc lexpcovd', [most, half, scattered]);
 			// Three of four words in one passage is saying the query...
 			assert.isTrue(scores.has(most));
@@ -269,7 +274,7 @@ describe("Zotero.Lexical", function () {
 		it("should return scores as 0-1 fractions", async function () {
 			let item = await createDataObject('item',
 				{ title: 'Lexfrac owls of the northern coast' });
-			let scores = await Zotero.Lexical.scoreItemIDs('lexfrac ', [item.id]);
+			let scores = await scoresFor('lexfrac ', [item.id]);
 			let score = scores.get(item.id);
 			assert.isAbove(score, 0);
 			assert.isAtMost(score, 1);
@@ -281,7 +286,7 @@ describe("Zotero.Lexical", function () {
 			let scattered = await createDataObject('item',
 				{ title: 'Lexadjacent education for the special handbook' });
 
-			let scores = await Zotero.Lexical.scoreItemIDs(
+			let scores = await scoresFor(
 				'lexadjacent special education ', [adjacent.id, scattered.id]);
 			// Not clearing the floor is the weakest ranking there is, so a
 			// missing score reads as 0 either way
@@ -299,7 +304,7 @@ describe("Zotero.Lexical", function () {
 				'lexsowl lexsmigration routes across norway seasons');
 			let noise = await addContentDoc(2, 'lexsother archive entry');
 
-			let scores = await Zotero.Lexical.scoreItemIDs(
+			let scores = await scoresFor(
 				'lexsowl lexsmigration in the lexsunited lexsstates ',
 				[full.id, census.id, norway, noise]
 			);
@@ -311,28 +316,107 @@ describe("Zotero.Lexical", function () {
 		});
 
 		it("should rank a title match above the same words in a document", async function () {
-			// The item-text index is scored with per-column weights, so the
-			// column a match lands in moves the score
+			// A document's share is capped below a full short-text match
 			let titled = await createDataObject('item',
 				{ title: 'Lexcolumn owls of the coast' });
 			let document = await addContentDoc(3, 'lexcolumn owls of the coast');
-			let scores = await Zotero.Lexical.scoreItemIDs(
+			let scores = await scoresFor(
 				'lexcolumn owls ', [titled.id, document]);
 			assert.isAbove(scores.get(titled.id), scores.get(document));
+		});
+
+		it("should rank an item named by creator and year above a document citing them", async function () {
+			let paper = await createDataObject('item', { title: 'Owls of the coast' });
+			paper.setCreators([{ firstName: 'Jane', lastName: 'Lexsmithson', creatorType: 'author' }]);
+			paper.setField('date', '2019-03-01');
+			await paper.saveTx();
+			let earlier = await createDataObject('item', { title: 'Coastal wetlands' });
+			earlier.setCreators([{ firstName: 'Jane', lastName: 'Lexsmithson', creatorType: 'author' }]);
+			earlier.setField('date', '2018-06-01');
+			await earlier.saveTx();
+			let citing = await addContentDoc(8,
+				'as lexsmithson 2019 showed, and lexsmithson 2019 argued again, '
+					+ 'the lexsmithson 2019 survey remains the reference');
+
+			let scores = await scoresFor(
+				'lexsmithson 2019', [paper.id, earlier.id, citing]);
+			// The paper the query names comes first, however often the
+			// document repeats its words...
+			assert.isAbove(scores.get(paper.id), scores.get(citing));
+			// ...and a paper by the same author from another year carries
+			// only part of the query
+			assert.isAbove(scores.get(paper.id), scores.get(earlier.id));
+			assert.isAbove(scores.get(earlier.id), 0);
+		});
+
+		it("should match a tag", async function () {
+			let tagged = await createDataObject('item',
+				{ title: 'Coastal study', tags: [{ tag: 'lextagword' }] });
+			let scores = await scoresFor('lextagword ', [tagged.id]);
+			assert.isAbove(scores.get(tagged.id), 0);
+		});
+
+		it("should not lower a title match for an item with an abstract", async function () {
+			let bare = await createDataObject('item', { title: 'Lexabstract owls' });
+			let full = await createDataObject('item', { title: 'Lexabstract owls' });
+			full.setField('abstractNote', 'Filler sentence about nothing in particular. '.repeat(40));
+			await full.saveTx();
+			let scores = await scoresFor('lexabstract ', [bare.id, full.id]);
+			assert.equal(scores.get(full.id), scores.get(bare.id));
+		});
+
+		it("should match a word as a whole token, or by its completions after an asterisk", async function () {
+			let item = await createDataObject('item', { title: 'Lexprefixes of owls' });
+			let scores = await scoresFor('lexprefix ', [item.id]);
+			assert.isFalse(scores.has(item.id));
+			scores = await scoresFor('lexprefix*', [item.id]);
+			assert.isAbove(scores.get(item.id), 0);
+			// Never by the tokens it sits inside
+			scores = await scoresFor('refix*', [item.id]);
+			assert.isFalse(scores.has(item.id));
+		});
+
+		it("should count a note's text no more than a document's", async function () {
+			let note = new Zotero.Item('note');
+			note.setNote('<p>Lexnotekind owls</p>');
+			await note.saveTx();
+			let titled = await createDataObject('item', { title: 'Lexnotekind owls' });
+			let scores = await scoresFor('lexnotekind ', [note.id, titled.id]);
+			assert.isAbove(scores.get(titled.id), scores.get(note.id));
+			assert.isAbove(scores.get(note.id), 0);
+		});
+
+		it("should record where the query matched, for marking the matches", async function () {
+			let item = await createDataObject('item', { title: 'Lexrecord Owl Atlas' });
+			item.setCreators([{ firstName: 'Ada', lastName: 'Lexrecord', creatorType: 'author' }]);
+			await item.saveTx();
+			let { matches } = await Zotero.Lexical.scoreItemIDs('lexrecord ', [item.id]);
+			let record = matches.get(item.id);
+			assert.isTrue(record.fields.has(Zotero.ItemFields.getID('title')));
+			assert.isTrue(record.creators.has(0));
+			assert.isFalse(record.content);
+
+			// The terms it was scored with mark its text the way they matched
+			assert.deepEqual(Zotero.Lexical.findHighlightRanges(record.terms, 'Lexrecord Owl Atlas'),
+				[[0, 9]]);
+			assert.deepEqual(Zotero.Lexical.findHighlightRanges(record.terms, 'Lexrecordson'), []);
+			// A wildcard marks the whole token it completes
+			assert.deepEqual(Zotero.Lexical.findHighlightRanges(
+				Zotero.Lexical.parseQuery('lexrecord*'), 'Lexrecordson'), [[0, 12]]);
 		});
 
 		it("should rank a document returning to a term above one passing mention", async function () {
 			let filler = Array.from({ length: 300 }, (x, i) => `lexsfill${i}`).join(' ');
 			let buried = await addContentDoc(4, `lexsdeep ${filler}`);
 			let focused = await addContentDoc(5, 'lexsdeep lexsdeep lexsdeep summary');
-			let scores = await Zotero.Lexical.scoreItemIDs('lexsdeep ', [buried, focused]);
+			let scores = await scoresFor('lexsdeep ', [buried, focused]);
 			assert.isAbove(scores.get(focused), scores.get(buried));
 		});
 
 		it("should only score the requested candidates", async function () {
 			let wanted = await addContentDoc(6, 'lexcandidate archive one');
 			await addContentDoc(7, 'lexcandidate archive two');
-			let scores = await Zotero.Lexical.scoreItemIDs('lexcandidate ', [wanted]);
+			let scores = await scoresFor('lexcandidate ', [wanted]);
 			assert.deepEqual([...scores.keys()], [wanted]);
 		});
 
@@ -342,7 +426,7 @@ describe("Zotero.Lexical", function () {
 			await note.saveTx();
 			await Zotero.DB.queryAsync(
 				"DELETE FROM ftindex.fulltextNoteIndexState WHERE itemID=?", note.id);
-			let scores = await Zotero.Lexical.scoreItemIDs('lexunindexed ', [note.id]);
+			let scores = await scoresFor('lexunindexed ', [note.id]);
 			assert.isAbove(scores.get(note.id), 0);
 		});
 
@@ -354,39 +438,35 @@ describe("Zotero.Lexical", function () {
 			note.setNote('<p>Lexnewword only</p>');
 			await note.saveTx();
 
-			let scores = await Zotero.Lexical.scoreItemIDs('lexnewword ', [note.id]);
+			let scores = await scoresFor('lexnewword ', [note.id]);
 			assert.isAbove(scores.get(note.id), 0);
 		});
 
-		it("should weigh terms only as far as the corpus can tell them apart", async function () {
-			// FTS5's BM25 floors the inverse document frequency of a term in
-			// more than about half a corpus, so in a corpus too small (or too
-			// uniform) for any term to be rare, every term weighs the same and
-			// ranking falls back to term frequency alone. Ordering survives;
-			// term importance doesn't.
-			let corpusSize = await Zotero.DB.valueQueryAsync(
-				"SELECT COUNT(*) FROM ftindex.fulltextItemText");
-			let common = await createDataObject('item',
-				{ title: 'Lexweigh lexweigh lexweigh repeated' });
-			let single = await createDataObject('item', { title: 'Lexweigh once only' });
-			let scores = await Zotero.Lexical.scoreItemIDs('lexweigh ', [common.id, single.id]);
-			// Whatever the corpus can say about the term, repetition still ranks
-			assert.isAbove(scores.get(common.id), scores.get(single.id) ?? 0);
-			assert.isAtLeast(corpusSize, 1);
+		it("should weigh a term by its rarity among the library's items", async function () {
+			// A word in several items' titles says less than one in a single
+			// title, so the item carrying the rare word ranks first
+			for (let i = 0; i < 4; i++) {
+				await createDataObject('item', { title: `Lexcommonword entry ${i}` });
+			}
+			let common = await createDataObject('item', { title: 'Lexcommonword only' });
+			let rare = await createDataObject('item', { title: 'Lexrareword only' });
+			let scores = await scoresFor(
+				'lexrareword lexcommonword', [common.id, rare.id]);
+			assert.isAbove(scores.get(rare.id), scores.get(common.id));
 		});
 
 		it("should return nothing for a query with no terms", async function () {
-			assert.equal((await Zotero.Lexical.scoreItemIDs('', [1])).size, 0);
-			assert.equal((await Zotero.Lexical.scoreItemIDs('!!! ...', [1])).size, 0);
+			assert.equal((await scoresFor('', [1])).size, 0);
+			assert.equal((await scoresFor('!!! ...', [1])).size, 0);
 		});
 
 		it("should return nothing for no candidates", async function () {
-			assert.equal((await Zotero.Lexical.scoreItemIDs('owl ', [])).size, 0);
+			assert.equal((await scoresFor('owl ', [])).size, 0);
 		});
 
 		it("should abandon scoring when cancelled", async function () {
 			let item = await createDataObject('item', { title: 'Lexscancel target' });
-			let e = await getPromiseError(Zotero.Lexical.scoreItemIDs(
+			let e = await getPromiseError(scoresFor(
 				'lexscancel ', [item.id], { shouldCancel: () => true }));
 			assert.instanceOf(e, Zotero.Lexical.ScoringCancelledError);
 		});
@@ -448,6 +528,20 @@ describe("Zotero.Lexical", function () {
 			assert.isNotEmpty(excerpts);
 			assert.equal(excerpts[0].source, 'content');
 			assert.match(rangeTexts(excerpts[0])[0], /^easy[\s-]+to[\s-]+use$/i);
+		});
+
+		it("should excerpt a regular item's creators, tags and date", async function () {
+			let item = await createDataObject('item',
+				{ title: 'Coastal owls', tags: [{ tag: 'lexkwic reading' }] });
+			item.setCreators([{ firstName: 'Ada', lastName: 'Lexkwic', creatorType: 'author' }]);
+			item.setField('date', 'March 2019');
+			await item.saveTx();
+
+			let excerpts = await Zotero.Lexical.getMatchingExcerpts('lexkwic 2019', item.id);
+			let bySource = Object.fromEntries(excerpts.map(e => [e.source, e]));
+			assert.deepEqual(rangeTexts(bySource.creator), ['Lexkwic']);
+			assert.deepEqual(rangeTexts(bySource.tag), ['lexkwic']);
+			assert.deepEqual(rangeTexts(bySource.date), ['2019']);
 		});
 
 		it("should excerpt a note's text without its markup", async function () {

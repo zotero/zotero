@@ -196,6 +196,7 @@
 			this.mode = "annotations";
 			let annotationsViewer = document.getElementById("zotero-annotations-pane");
 			annotationsViewer.items = annotations;
+			annotationsViewer.highlightTerms = this._itemsView?.bestMatchSession?.highlightTerms ?? null;
 			annotationsViewer.render();
 			return true;
 		}
@@ -239,6 +240,8 @@
 			this._itemDetails.item = items[0];
 			this._itemDetails.extraItems = items.slice(1);
 			this._itemDetails.collectionTreeRows = this.collectionTreeRows;
+			// The words a best-match search is looking for, to mark in the item's fields
+			this._itemDetails.highlightTerms = this._itemsView?.bestMatchSession?.highlightTerms ?? null;
 
 			this._itemDetails.render();
 

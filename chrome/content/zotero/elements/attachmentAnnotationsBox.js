@@ -130,10 +130,17 @@
 			}
 		}
 
+		_applyHighlightTerms() {
+			for (let row of this.querySelectorAll('annotation-row')) {
+				row.highlightTerms = this.highlightTerms;
+			}
+		}
+
 		addRow(annotation) {
 			let row = document.createXULElement('annotation-row');
 			row.annotation = annotation;
-			
+			row.highlightTerms = this.highlightTerms;
+
 			let index = this._annotationItems.findIndex(item => item.id == annotation.id);
 			if (index < 0 || index >= this._body.children.length) {
 				this._body.append(row);

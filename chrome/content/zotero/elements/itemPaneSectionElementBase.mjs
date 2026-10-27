@@ -67,6 +67,27 @@ export class ItemPaneSectionElementBase extends XULElementBase {
 		this._collectionTreeRows = collectionTreeRows;
 	}
 
+	/**
+	 * Words to mark in the section's fields (see editable-text's
+	 * highlightTerms), or null for none. Applied to the fields the section
+	 * has; a section that creates fields while rendering gives them the
+	 * terms as it does.
+	 */
+	get highlightTerms() {
+		return this._highlightTerms ?? null;
+	}
+
+	set highlightTerms(terms) {
+		this._highlightTerms = terms ?? null;
+		this._applyHighlightTerms();
+	}
+
+	_applyHighlightTerms() {
+		for (let field of this.querySelectorAll('editable-text')) {
+			field.highlightTerms = this._highlightTerms ?? null;
+		}
+	}
+
 	_syncRenderPending = false;
 
 	_asyncRenderPending = false;
