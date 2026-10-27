@@ -2595,10 +2595,7 @@
 		"string": "Source text is processed by external text-to-speech providers"
 	},
 	"reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes": {
-		"string": "{ subscription-name } plans include monthly Premium Voice minutes"
-	},
-	"reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits": {
-		"string": "Request credits for additional minutes during beta"
+		"string": "{ subscription-name } subscriptions include hours of Premium Voice listening each month"
 	},
 	"reader-read-aloud-sample-text": {
 		"string": "I am the local voice { name }"
