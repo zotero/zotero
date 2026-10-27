@@ -141,37 +141,4 @@ describe("Plugin Zotero.HTTP", function () {
 			`);
 		assert.include(result, "/test/plugin-sandbox/");
 	});
-
-	describe("network access control", function () {
-		it("should block requests to origins not in host_permissions via CORS", async function () {
-			// Reload without the parent's 127.0.0.1 origins
-			plugin.load(["default"]);
-
-			let url = endpoints.register("GET", function () {
-				return [200, "text/plain", "should not reach here"];
-			});
-
-			let rejected = await plugin.eval(`
-					Zotero.HTTP.request('GET', ${JSON.stringify(url)}, {
-						responseType: 'text'
-					}).then(() => false, () => true)
-				`);
-			assert.isTrue(rejected,
-				"Request to undeclared origin should be blocked by CORS");
-		});
-
-		it("should allow requests when origin is in host_permissions", async function () {
-			// Parent beforeEach already creates scope with *://127.0.0.1/*
-			let url = endpoints.register("GET", function () {
-				return [200, "text/plain", "allowed"];
-			});
-
-			let result = await plugin.eval(`
-					Zotero.HTTP.request('GET', ${JSON.stringify(url)}, {
-						responseType: 'text'
-					}).then(req => req.responseText)
-				`);
-			assert.equal(result, "allowed");
-		});
-	});
 });

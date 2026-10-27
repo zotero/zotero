@@ -14,6 +14,7 @@ function usePluginSandbox({ id = "test-sandbox@zotero.org", name = "Test Sandbox
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { PluginUUID } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/uuid.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+	var { PluginNetwork } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/network.mjs");
 
 	/** @typedef {object} PluginTestSandbox */
 	var sandbox = {
@@ -66,8 +67,10 @@ function usePluginSandbox({ id = "test-sandbox@zotero.org", name = "Test Sandbox
 		},
 	};
 
-	before(function () {
-		return Zotero.initializationPromise;
+	before(async function () {
+		await Zotero.initializationPromise;
+		// The harness runs plugin code without bootstrap.js, which loadScope holds back until the gate is live
+		await PluginNetwork.init();
 	});
 
 	afterEach(function () {
