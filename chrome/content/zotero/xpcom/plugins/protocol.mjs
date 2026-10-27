@@ -104,6 +104,19 @@ function getBaseURI(pluginID) {
 }
 
 /**
+ * @param {string} host - A moz-extension:// hostname
+ * @returns {string | null} The ID of the plugin registered under it, null once it is unregistered
+ */
+function getIDByHost(host) {
+	for (let [pluginID, policy] of policies) {
+		if (policy.mozExtensionHostname === host) {
+			return pluginID;
+		}
+	}
+	return null;
+}
+
+/**
  * Check whether a plugin's host_permissions cover the given URI string.
  *
  * @param {string} value - URI to test; must be a parseable URI string
@@ -196,6 +209,7 @@ const PluginProtocol = {
 	register,
 	unregister,
 	getBaseURI,
+	getIDByHost,
 	canAccessURI,
 	resolveImageURL,
 	resolveFile,

@@ -80,9 +80,7 @@ function setupInstanceProxy(scope) {
 /**
  * Set up Zotero.HTTP on the plugin scope.
  * Uses a XHR factory created inside the sandbox so instances carry the
- * sandbox's restricted principal (constrained by allowedOrigins from
- * host_permissions). Firefox's built-in principal security enforces
- * URL access control.
+ * sandbox's principal, whose requests PluginNetwork bounds to host_permissions.
  *
  * @param {Object} scope - The sandbox scope
  */

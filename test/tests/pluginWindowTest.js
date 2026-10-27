@@ -65,9 +65,9 @@ describe("Plugin windows", function () {
 		var tmpDir;
 		var mainWin;
 
-		function loadTestScopeWithURI(permissions, contentSecurityPolicy = null, sandbox = plugin) {
+		function loadTestScopeWithURI(permissions, contentSecurityPolicy = null, sandbox = plugin, origins = []) {
 			// Point the plugin root at the temp dir holding our test HTML file.
-			sandbox.load(permissions, { contentSecurityPolicy, resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
+			sandbox.load(permissions, { contentSecurityPolicy, origins, resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
 			sandbox.eval(OPEN_PLUGIN_WINDOW);
 		}
 
@@ -750,7 +750,8 @@ describe("Plugin windows", function () {
 				+ `<script src="${remoteURL}"></script>`
 				+ "</body></html>"
 			);
-			loadTestScopeWithURI(["default", "window"]);
+			// The host is declared, so only the CSP can block the script
+			loadTestScopeWithURI(["default", "window"], null, plugin, ["*://127.0.0.1/*"]);
 			// openWindow resolves once the document has loaded, and a parser-inserted script runs
 			// before that, so an allowed script would already have left its mark
 			await plugin.eval("openPluginWindow({ url: 'remote-script.html' }).then(function (win) { _win = win; })");
@@ -782,7 +783,8 @@ describe("Plugin windows", function () {
 				"<!DOCTYPE html><html><head></head><body>"
 				+ '<script src="remote-fetch-probe.js"></script></body></html>'
 			);
-			loadTestScopeWithURI(["default", "window"], csp, sandbox);
+			// The host is declared, so only the CSP can block the fetch
+			loadTestScopeWithURI(["default", "window"], csp, sandbox, ["*://127.0.0.1/*"]);
 			await sandbox.eval("openPluginWindow({ url: 'remote-fetch.html' }).then(function (win) { _win = win; })");
 			let contentWin = getLastPluginWindowContent();
 			try {

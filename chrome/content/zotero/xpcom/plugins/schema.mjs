@@ -53,7 +53,7 @@ const IMPLIED_PERMISSIONS = {
 
 const PERMISSION_SCHEMAS = {
 	// Zotero.HTTP is set up for every scope by setupHTTP() in globals.mjs, using the
-	// sandbox's XMLHttpRequest so requests stay bounded by host_permissions.
+	// sandbox's XMLHttpRequest so PluginNetwork bounds requests to host_permissions.
 	default: {
 		Zotero: {
 			// Logging
