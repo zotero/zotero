@@ -36,6 +36,7 @@ import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAcce
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
 import { PluginWorkers } from "chrome://zotero/content/xpcom/plugins/workers.mjs";
+import { PluginNetwork } from "chrome://zotero/content/xpcom/plugins/network.mjs";
 import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
@@ -81,7 +82,10 @@ async function loadScope(addon, globalVars = {}) {
 		Zotero.debug(`Loading unprivileged scope for plugin ${addon.id}, permissions: ${currentPermissions}`);
 		scope = loadUnprivilegedScope(addon, uuid, globalVars);
 	}
-	
+
+	// No plugin code runs before its requests are bounded to host_permissions
+	await PluginNetwork.init();
+
 	// A plugin's own files come through its moz-extension policy, which the loader does not count as trusted
 	try {
 		let uri = PluginProtocol.getBaseURI(addon.id) + 'bootstrap.js';
@@ -330,7 +334,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	Object.assign(scope, extraGlobals);
 
-	// The sandbox principal bounds requests to host_permissions
+	// PluginNetwork bounds the sandbox principal's requests to host_permissions
 	setupHTTP(scope);
 
 	// Worker comes from a document of the plugin's origin, as its pages do
