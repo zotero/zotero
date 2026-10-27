@@ -1070,26 +1070,30 @@ describe("CollectionViewItemTree", function () {
 				assert.deepEqual(itemsView._rows.map(row => row.id), [itemB.id, itemA.id]);
 			});
 
-			it("should keep a rank-only advanced search's results when the index isn't ready", async function () {
+			it("should rank an advanced search's results lexically when the index isn't ready", async function () {
 				let col = await createDataObject('collection');
-				let itemA = await createDataObject('item', { title: "notready A", collections: [col.id] });
-				let itemB = await createDataObject('item', { title: "notready B", collections: [col.id] });
+				let itemA = await createDataObject('item', { title: "notready alpha", collections: [col.id] });
+				await createDataObject('item', { title: "notready beta", collections: [col.id] });
 				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(async () => {
 					throw new Zotero.Embeddings.IndexNotReadyError('test');
 				}));
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(itemA.id) ? [[itemA.id, 0.8]] : [])));
 				let s = new Zotero.Search();
 				s.libraryID = col.libraryID;
 				s.addCondition('resultLevel', 'item');
 				s.addCondition('title', 'contains', 'notready');
-				s.addCondition('bestMatch', 'hybrid', 'some query');
+				s.addCondition('bestMatch', 'hybrid', 'alpha');
 
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('advanced-search', s);
 
-				// Membership is untouched; the rows just aren't ranked
-				assert.sameMembers(itemsView._rows.map(row => row.id), [itemA.id, itemB.id]);
-				assert.equal(itemsView.getCellText(0, 'relevance'), '');
+				// The conditions define the scope, the ranking what's shown of
+				// it: the item the words don't match is left out, as in a
+				// quick search
+				assert.deepEqual(itemsView._rows.map(row => row.id), [itemA.id]);
+				assert.equal(itemsView.getCellText(0, 'relevance'), '1');
 				await itemsView.setFilter('advanced-search', null);
 			});
 
@@ -1115,10 +1119,12 @@ describe("CollectionViewItemTree", function () {
 				await itemsView.setFilter('advanced-search', s);
 
 				// The search returned top-level items only, but the attachment
-				// was ranked, lifting its parent above the item nothing matched
-				// in, and it shows as a match beneath it
+				// was ranked, keeping its parent in the results -- the item
+				// nothing matched in is left out -- and it shows as a match
+				// beneath it
 				let topLevel = itemsView._rows.filter(row => row.level == 0).map(row => row.id);
-				assert.deepEqual(topLevel, [parent.id, plain.id]);
+				assert.deepEqual(topLevel, [parent.id]);
+				assert.notInclude(itemsView._rows.map(row => row.id), plain.id);
 				assert.isNumber(itemsView.getRowIndexByID(attachment.id));
 				await itemsView.setFilter('advanced-search', null);
 			});

@@ -218,7 +218,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * computes the ranks and bar fractions the Relevance column reads (see
 	 * Zotero.BestMatch.Session#score()). An item is kept when it or
 	 * anything beneath it matched, so a strongly matching annotation keeps
-	 * its attachment and its paper in the results.
+	 * its attachment and its paper in the results. That holds whatever
+	 * supplies the query: a search's conditions define the scope, the
+	 * ranking what's shown of it.
 	 *
 	 * @param {Zotero.Item[]} items - Merged results from all selected rows
 	 * @return {Promise<Zotero.Item[]>} - The matching items
@@ -229,11 +231,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
 		let { query, engine } = queryRow.getBestMatchQuery();
 		let source = queryRow.getBestMatchSource();
-		// A best-match quick search shows only the items it can rank. With any
-		// search source, membership is defined by the selected rows' own
-		// searches, so keep unscoreable items -- they sort after the ranked
-		// ones
-		let keepUnscored = !!source;
 		// A search source returns the items its conditions describe, which
 		// are top-level; the ranking weighs what's beneath them too -- an
 		// attachment's text, a note, an annotation -- as it does the quick
@@ -283,10 +280,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				this._bestMatchSession = null;
 			}
 			this._bestMatchIndexState = await this._getBestMatchIndexState();
-			// A rank-only search's membership doesn't depend on scoring, so
-			// show its results unranked; anything else shows no results rather
-			// than an unranked scope
-			return keepUnscored ? items : [];
+			// A search's results are shown unranked; a quick search's scope
+			// shows nothing rather than everything
+			return source ? items : [];
 		}
 		// A cancellation that lands after the last derivation resolves
 		// score() normally, so check once more before building the view state
@@ -299,16 +295,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		// The session's ranks cover every row with a match anywhere beneath
 		// it, so they say which items stay in the results
-		let kept = [];
-		for (let item of items) {
-			if (!(item instanceof Zotero.Item) || !session.ranks.has(item.treeViewID)) {
-				if (keepUnscored) {
-					kept.push(item);
-				}
-				continue;
-			}
-			kept.push(item);
-		}
+		let kept = items.filter(item => item instanceof Zotero.Item
+			&& session.ranks.has(item.treeViewID));
 		let keptIDs = new Set(kept.map(item => item.treeViewID));
 		for (let item of descendants) {
 			if (session.ranks.has(item.treeViewID) && !keptIDs.has(item.treeViewID)) {
