@@ -7,6 +7,11 @@ APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 fx_app_name=Firefox.app
 
+# COMPONENTS_ONLY=1 skips the launcher (zotero.xz) and ChannelPrefs.framework (which needs the
+# signing keychain); BUILD_UPDATER=1 also packages updater.tar.xz
+COMPONENTS_ONLY=${COMPONENTS_ONLY:-0}
+BUILD_UPDATER=${BUILD_UPDATER:-0}
+
 # Get Mozilla source directory from command line
 if [ -z "${1:-}" ]; then
 	echo "Usage: $0 /path/to/firefox" >&2
@@ -51,9 +56,11 @@ mv x86_64 x64
 
 $mach python "$GECKO_PATH/toolkit/mozapps/installer/unify.py" x64/*.app aarch64/*.app
 
-cp x64/$fx_app_name/Contents/MacOS/firefox zotero
-xz zotero
-mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
+if [ $COMPONENTS_ONLY != 1 ]; then
+	cp x64/$fx_app_name/Contents/MacOS/firefox zotero
+	xz zotero
+	mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
+fi
 
 # Package custom Firefox components for fetch_xulrunner. Add XUL to this list if needed.
 # Upload the archive to ${custom_components_url}mac/ and set custom_components_hash_mac
@@ -75,19 +82,22 @@ echo "custom_components_hash_mac=\"$components_hash\""
 # Frameworks need to be signed, and we can't sign source builds, so store a signed copy with
 # 'default' replaced with 'source'. Deployed builds will then replace 'source' with
 # 'release'/'beta'/'dev'.
-rm -rf "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
-cp -R x64/$fx_app_name/Contents/Frameworks/ChannelPrefs.framework "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
-pushd "$APP_ROOT_DIR/mac"
-./set-channel-prefs-channel ChannelPrefs.framework/ChannelPrefs default source
-security -v unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/$KEYCHAIN.keychain-db
-/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" ChannelPrefs.framework
-/usr/bin/codesign -vvvv ChannelPrefs.framework
-tar cfvJ ChannelPrefs.framework.tar.xz ChannelPrefs.framework
-rm -rf ChannelPrefs.framework
-popd
+if [ $COMPONENTS_ONLY != 1 ]; then
+	rm -rf "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
+	cp -R x64/$fx_app_name/Contents/Frameworks/ChannelPrefs.framework "$APP_ROOT_DIR/mac/ChannelPrefs.framework"
+	pushd "$APP_ROOT_DIR/mac"
+	./set-channel-prefs-channel ChannelPrefs.framework/ChannelPrefs default source
+	security -v unlock-keychain -p "$KEYCHAIN_PASSWORD" ~/Library/Keychains/$KEYCHAIN.keychain-db
+	/usr/bin/codesign --force --options runtime --sign "$DEVELOPER_ID" ChannelPrefs.framework
+	/usr/bin/codesign -vvvv ChannelPrefs.framework
+	tar cfvJ ChannelPrefs.framework.tar.xz ChannelPrefs.framework
+	rm -rf ChannelPrefs.framework
+	popd
+fi
 
-# Uncomment to build updater
-#cd x64/$fx_app_name/Contents/MacOS/
-#"$APP_ROOT_DIR/mac/updater_renamer"
-#cat updater.app/Contents/Resources/English.lproj/InfoPlist.strings
-#tar cfvJ "$APP_ROOT_DIR/mac/updater.tar.xz" updater.app/
+if [ $BUILD_UPDATER == 1 ]; then
+	cd x64/$fx_app_name/Contents/MacOS/
+	"$APP_ROOT_DIR/mac/updater_renamer"
+	cat updater.app/Contents/Resources/English.lproj/InfoPlist.strings
+	tar cfvJ "$APP_ROOT_DIR/mac/updater.tar.xz" updater.app/
+fi
