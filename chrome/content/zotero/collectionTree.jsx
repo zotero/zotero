@@ -174,12 +174,17 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var libraryID = treeRow?.ref?.libraryID;
 		if (!libraryID) return true;
 
+		// +/- apply to the libraries of all selected rows, plus the focused row's library
+		let libraryIDs = this.getSelectedLibraryIDs();
+		if (!libraryIDs.includes(libraryID)) {
+			libraryIDs.push(libraryID);
+		}
 		if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
-			this.expandLibrary(libraryID, true);
+			this.expandLibrary(libraryIDs, true);
 		}
 		else if (event.key == '-' && !(event.shiftKey || event.ctrlKey
 				|| event.altKey || event.metaKey)) {
-			this.collapseLibrary(libraryID);
+			this.collapseLibrary(libraryIDs);
 		}
 		else if ((event.key == 'Backspace' && Zotero.isMac) || event.key == 'Delete') {
 			var deleteItems = event.metaKey || (!Zotero.isMac && event.shiftKey);
@@ -1192,22 +1197,29 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
-	 * @param {Integer} libraryID
+	 * @param {Integer|Integer[]} libraryIDs
 	 * @param {Boolean} [recursive=false] - Expand all collections and subcollections
 	 */
-	async expandLibrary(libraryID, recursive) {
-		var row = this._rowMap['L' + libraryID];
-		if (row === undefined) {
+	async expandLibrary(libraryIDs, recursive) {
+		if (!Array.isArray(libraryIDs)) {
+			libraryIDs = [libraryIDs];
+		}
+		libraryIDs = libraryIDs.filter(id => this._rowMap['L' + id] !== undefined);
+		if (!libraryIDs.length) {
 			return false;
 		}
-		if (!this.isContainerOpen(row)) {
-			await this.toggleOpenState(row);
-		}
 		
-		if (recursive) {
-			for (let i = row; i < this._rows.length && this.getRow(i).ref.libraryID == libraryID; i++) {
-				if (this.isContainer(i) && !this.isContainerOpen(i)) {
-					await this.toggleOpenState(i);
+		for (let libraryID of libraryIDs) {
+			let row = this._rowMap['L' + libraryID];
+			if (!this.isContainerOpen(row)) {
+				await this.toggleOpenState(row);
+			}
+			
+			if (recursive) {
+				for (let i = row; i < this._rows.length && this.getRow(i).ref.libraryID == libraryID; i++) {
+					if (this.isContainer(i) && !this.isContainerOpen(i)) {
+						await this.toggleOpenState(i);
+					}
 				}
 			}
 		}
@@ -1217,33 +1229,54 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return true;
 	}
 	
-	collapseLibrary(libraryID) {
-		var row = this._rowMap['L' + libraryID];
-		if (row === undefined) {
+	/**
+	 * Collapse libraries and all their collections, and select the collapsed libraries
+	 *
+	 * @param {Integer|Integer[]} libraryIDs
+	 */
+	collapseLibrary(libraryIDs) {
+		if (!Array.isArray(libraryIDs)) {
+			libraryIDs = [libraryIDs];
+		}
+		libraryIDs = libraryIDs.filter(id => this._rowMap['L' + id] !== undefined);
+		if (!libraryIDs.length) {
 			return false;
 		}
 		
 		var closed = [];
-		var found = false;
-		for (let i = this._rows.length - 1; i >= row; i--) {
-			let treeRow = this.getRow(i);
-			if (treeRow.ref.libraryID !== libraryID) {
-				// Once we've moved beyond the original library, stop looking
-				if (found) {
-					break;
-				}
-				continue;
+		for (let libraryID of libraryIDs) {
+			let row = this._rowMap['L' + libraryID];
+			let lastRow = row;
+			while (lastRow + 1 < this._rows.length
+					&& this.getRow(lastRow + 1).ref.libraryID === libraryID) {
+				lastRow++;
 			}
-			found = true;
-			
-			if (this.isContainer(i) && this.isContainerOpen(i)) {
-				closed.push(treeRow.id);
-				this._closeContainer(i);
+			// Close bottom-up, so that nested containers are closed (and recorded in `closed`)
+			// before closing their parent removes them from the tree
+			for (let i = lastRow; i >= row; i--) {
+				let treeRow = this.getRow(i);
+				if (this.isContainer(i) && this.isContainerOpen(i)) {
+					closed.push(treeRow.id);
+					this._closeContainer(i);
+				}
 			}
 		}
 		
-		// Select the collapsed library
-		this.selection.select(row);
+		// Select the collapsed libraries, keeping focus on the focused row's library if collapsed
+		var rows = libraryIDs.map(id => this._rowMap['L' + id]);
+		var focusedLibraryID = this.getRow(this.selection.focused)?.ref?.libraryID;
+		var focusedRow = libraryIDs.includes(focusedLibraryID)
+			? this._rowMap['L' + focusedLibraryID]
+			: rows[rows.length - 1];
+		this.selection.selectEventsSuppressed = true;
+		this.selection.clearSelection();
+		for (let row of rows) {
+			this.selection.toggleSelect(row);
+		}
+		this.selection.focused = focusedRow;
+		this.selection.pivot = focusedRow;
+		this.tree.scrollToRow(focusedRow);
+		this.selection.selectEventsSuppressed = false;
 		
 		// We have to manually delete closed rows from the container state object, because otherwise
 		// _saveOpenStates() wouldn't see any of the rows under the library (since the library is now

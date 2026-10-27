@@ -145,6 +145,41 @@ describe("Zotero.CollectionTree", function () {
 			cv.onSelect.removeListener(selectListener);
 		})
 
+		it("should expand/collapse all selected libraries with +/-", async function () {
+			let group = await createGroup();
+			let groupCollection = await createDataObject('collection', { libraryID: group.libraryID });
+			await createDataObject('collection', { libraryID: group.libraryID, parentID: groupCollection.id });
+			let userCollection = await createDataObject('collection');
+			await createDataObject('collection', { parentID: userCollection.id });
+			cv.collapseLibrary(userLibraryID);
+			cv.collapseLibrary(group.libraryID);
+			let userRow = cv.getRowIndexByID('L' + userLibraryID);
+			let groupRow = cv.getRowIndexByID(group.treeViewID);
+			assert.isFalse(cv.isContainerOpen(userRow));
+			assert.isFalse(cv.isContainerOpen(groupRow));
+			
+			// Select both libraries, with focus on the group
+			cv.selection.select(userRow);
+			cv.selection.toggleSelect(groupRow);
+			let keyEvent = key => ({ key, preventDefault: () => {}, stopPropagation: () => {} });
+			let selectedIDs = () => cv.getSelectedRows().map(row => row.id);
+			
+			cv.tree._onKeyDown(keyEvent('+'));
+			await waitForCallback(() => cv.getRowIndexByID(userCollection.treeViewID) !== false
+				&& cv.getRowIndexByID(groupCollection.treeViewID) !== false
+				&& cv.isContainerOpen(cv.getRowIndexByID(userCollection.treeViewID))
+				&& cv.isContainerOpen(cv.getRowIndexByID(groupCollection.treeViewID)));
+			assert.sameMembers(selectedIDs(), ['L' + userLibraryID, group.treeViewID]);
+			
+			cv.tree._onKeyDown(keyEvent('-'));
+			userRow = cv.getRowIndexByID('L' + userLibraryID);
+			groupRow = cv.getRowIndexByID(group.treeViewID);
+			assert.isFalse(cv.isContainerOpen(userRow));
+			assert.isFalse(cv.isContainerOpen(groupRow));
+			assert.sameMembers(selectedIDs(), ['L' + userLibraryID, group.treeViewID]);
+			assert.equal(cv.selection.focused, groupRow);
+		})
+
 		it("should preserve selection when focus is on a collapsed/expanded row", async function () {
 			let group = await createGroup();
 			let collection = await createDataObject('collection', { libraryID: group.libraryID });
