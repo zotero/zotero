@@ -221,20 +221,243 @@ index 000000000000..9efa3255c472
 +};
 +
 +}  // namespace
+diff --git a/mozglue/build/SpeechSynthesizerFlusher.cpp b/mozglue/build/SpeechSynthesizerFlusher.cpp
+new file mode 100644
+index 000000000000..d911e0d4b03b
+--- /dev/null
++++ b/mozglue/build/SpeechSynthesizerFlusher.cpp
+@@ -0,0 +1,215 @@
++/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
++/* vim: set ts=8 sts=2 et sw=2 tw=80: */
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++// Work around a leak in the macOS 27 system speech synthesizer.
++//
++// When an utterance is stopped mid-sentence, the synthesis job in the speech
++// extension process (MauiAUSP) stays blocked waiting to hand off audio that
++// will never be played. If the NSSpeechSynthesizer is then released, job
++// stays blocked forever and pins its voice model (~150-250 MB for premium
++// voices). OSXSpeechSynthesizerService creates and releases a synthesizer
++// for every utterance, so every speechSynthesis.cancel() call leaks.
++//
++// Starting another utterance on the same synthesizer and letting it finish
++// unblocks the job. So we swizzle NSSpeechSynthesizer to remember when it was
++// stopped, and when the delegate of a stopped synthesizer is cleared, we
++// keep it alive and have it speak a short silence, then release it once that
++// has finished.
++//
++// mozglue doesn't link against AppKit, so we use the Objective-C runtime
++// directly and install the swizzles once AppKit has been loaded.
++
++#include <dlfcn.h>
++#include <mach-o/dyld.h>
++#include <objc/message.h>
++#include <objc/runtime.h>
++#include <atomic>
++
++namespace {
++
++std::atomic<bool> sInstalled{false};
++
++// Associated object keys marking a synthesizer that was stopped and one
++// that we're keeping alive while it speaks the silence
++char sStoppedKey;
++char sFlushingKey;
++
++Class sSynthClass;
++// Delegate that releases a synthesizer once it has finished the silence
++id sFlushDelegate;
++
++IMP sOrigStopSpeaking;
++IMP sOrigStopSpeakingAtBoundary;
++IMP sOrigSetDelegate;
++
++void SetFlag(id aSelf, const void* aKey, bool aValue) {
++  // Any non-nil value works, and the class object never needs retaining
++  objc_setAssociatedObject(aSelf, aKey, aValue ? (id)sSynthClass : nil,
++                           OBJC_ASSOCIATION_ASSIGN);
++}
++
++bool GetFlag(id aSelf, const void* aKey) {
++  return objc_getAssociatedObject(aSelf, aKey);
++}
++
++void MarkStopped(id aSelf) { SetFlag(aSelf, &sStoppedKey, true); }
++
++void OrigSetDelegate(id aSelf, id aDelegate) {
++  reinterpret_cast<void (*)(id, SEL, id)>(sOrigSetDelegate)(
++      aSelf, sel_registerName("setDelegate:"), aDelegate);
++}
++
++void FinishFlush(id aSelf) {
++  SetFlag(aSelf, &sFlushingKey, false);
++  OrigSetDelegate(aSelf, nil);
++  reinterpret_cast<void (*)(id, SEL)>(objc_msgSend)(aSelf,
++                                                    sel_registerName("release"));
++}
++
++// -[FlushDelegate speechSynthesizer:didFinishSpeaking:]
++void FlushDidFinishSpeaking(id aSelf, SEL aCmd, id aSynth, BOOL aFinished) {
++  if (GetFlag(aSynth, &sFlushingKey)) {
++    FinishFlush(aSynth);
++  }
++}
++
++bool EnsureFlushDelegate() {
++  if (sFlushDelegate) {
++    return true;
++  }
++  const char* name = "MozSpeechSynthesizerFlushDelegate";
++  Class cls = objc_lookUpClass(name);
++  if (!cls) {
++    cls = objc_allocateClassPair(objc_lookUpClass("NSObject"), name, 0);
++    if (!cls) {
++      return false;
++    }
++    class_addMethod(cls, sel_registerName("speechSynthesizer:didFinishSpeaking:"),
++                    reinterpret_cast<IMP>(FlushDidFinishSpeaking), "v@:@c");
++    objc_registerClassPair(cls);
++  }
++  // Kept for the life of the process
++  sFlushDelegate = reinterpret_cast<id (*)(Class, SEL)>(objc_msgSend)(
++      cls, sel_registerName("new"));
++  return sFlushDelegate;
++}
++
++void Flush(id aSelf) {
++  if (!EnsureFlushDelegate()) {
++    return;
++  }
++
++  // Keep the synthesizer alive until the silence has finished
++  reinterpret_cast<id (*)(id, SEL)>(objc_msgSend)(aSelf,
++                                                  sel_registerName("retain"));
++  SetFlag(aSelf, &sFlushingKey, true);
++  OrigSetDelegate(aSelf, sFlushDelegate);
++
++  // [self setObject:@0.0f forProperty:NSSpeechVolumeProperty error:nil]
++  auto* volumeProperty =
++      static_cast<id*>(dlsym(RTLD_DEFAULT, "NSSpeechVolumeProperty"));
++  if (volumeProperty) {
++    id volume = reinterpret_cast<id (*)(Class, SEL, float)>(objc_msgSend)(
++        objc_lookUpClass("NSNumber"), sel_registerName("numberWithFloat:"),
++        0.0f);
++    reinterpret_cast<BOOL (*)(id, SEL, id, id, id*)>(objc_msgSend)(
++        aSelf, sel_registerName("setObject:forProperty:error:"), volume,
++        *volumeProperty, nullptr);
++  }
++
++  // [self startSpeakingString:@"[[slnc 1]]"]
++  id silence = reinterpret_cast<id (*)(id, SEL, const char*)>(objc_msgSend)(
++      reinterpret_cast<id (*)(Class, SEL)>(objc_msgSend)(
++          objc_lookUpClass("NSString"), sel_registerName("alloc")),
++      sel_registerName("initWithUTF8String:"), "[[slnc 1]]");
++  BOOL started = reinterpret_cast<BOOL (*)(id, SEL, id)>(objc_msgSend)(
++      aSelf, sel_registerName("startSpeakingString:"), silence);
++  reinterpret_cast<void (*)(id, SEL)>(objc_msgSend)(silence,
++                                                    sel_registerName("release"));
++  if (!started) {
++    FinishFlush(aSelf);
++  }
++}
++
++void StopSpeaking(id aSelf, SEL aCmd) {
++  reinterpret_cast<void (*)(id, SEL)>(sOrigStopSpeaking)(aSelf, aCmd);
++  MarkStopped(aSelf);
++}
++
++void StopSpeakingAtBoundary(id aSelf, SEL aCmd, long aBoundary) {
++  reinterpret_cast<void (*)(id, SEL, long)>(sOrigStopSpeakingAtBoundary)(
++      aSelf, aCmd, aBoundary);
++  MarkStopped(aSelf);
++}
++
++void SetDelegate(id aSelf, SEL aCmd, id aDelegate) {
++  if (GetFlag(aSelf, &sFlushingKey)) {
++    // The owner clearing the delegate again (e.g., right before releasing the
++    // synthesizer) mustn't cut the flush short
++    if (!aDelegate) {
++      return;
++    }
++    // Someone is using the synthesizer again, which unblocks the job too
++    FinishFlush(aSelf);
++  }
++
++  OrigSetDelegate(aSelf, aDelegate);
++  if (aDelegate || !GetFlag(aSelf, &sStoppedKey)) {
++    return;
++  }
++  SetFlag(aSelf, &sStoppedKey, false);
++
++  // Don't interrupt an utterance started after the stop. That would have
++  // unblocked the job anyway.
++  if (reinterpret_cast<BOOL (*)(id, SEL)>(objc_msgSend)(
++          aSelf, sel_registerName("isSpeaking"))) {
++    return;
++  }
++  Flush(aSelf);
++}
++
++IMP Swizzle(Class aClass, const char* aSelector, IMP aReplacement) {
++  Method method = class_getInstanceMethod(aClass, sel_registerName(aSelector));
++  return method ? method_setImplementation(method, aReplacement) : nullptr;
++}
++
++void MaybeInstall(const struct mach_header*, intptr_t) {
++  if (sInstalled) {
++    return;
++  }
++  // This runs while dyld is loading images, before their initializers have
++  // run, so only touch the runtime's metadata here -- no messages.
++  Class synthClass = objc_lookUpClass("NSSpeechSynthesizer");
++  if (!synthClass ||
++      !class_getInstanceMethod(synthClass, sel_registerName("stopSpeaking")) ||
++      !class_getInstanceMethod(synthClass,
++                               sel_registerName("stopSpeakingAtBoundary:")) ||
++      !class_getInstanceMethod(synthClass, sel_registerName("setDelegate:"))) {
++    return;
++  }
++  if (sInstalled.exchange(true)) {
++    return;
++  }
++
++  sSynthClass = synthClass;
++  sOrigStopSpeaking =
++      Swizzle(synthClass, "stopSpeaking", reinterpret_cast<IMP>(StopSpeaking));
++  sOrigStopSpeakingAtBoundary =
++      Swizzle(synthClass, "stopSpeakingAtBoundary:",
++              reinterpret_cast<IMP>(StopSpeakingAtBoundary));
++  sOrigSetDelegate =
++      Swizzle(synthClass, "setDelegate:", reinterpret_cast<IMP>(SetDelegate));
++}
++
++__attribute__((constructor)) void Init() {
++  // Only the speech synthesizer in macOS 27 leaks
++  if (__builtin_available(macOS 27, *)) {
++    // Called for every image already loaded and every image loaded later
++    _dyld_register_func_for_add_image(MaybeInstall);
++  }
++}
++
++}  // namespace
 diff --git a/mozglue/build/moz.build b/mozglue/build/moz.build
-index f8f01e999e54..111fe5af1b0d 100644
+index f8f01e999e54..06695499daa4 100644
 --- a/mozglue/build/moz.build
 +++ b/mozglue/build/moz.build
-@@ -41,6 +41,14 @@ if CONFIG["OS_TARGET"] == "WINNT":
+@@ -41,6 +41,16 @@ if CONFIG["OS_TARGET"] == "WINNT":
          "winmm.dll",
      ]
  
 +if CONFIG["OS_TARGET"] == "Darwin" and FORCE_SHARED_LIB:
 +    SOURCES += [
 +        "AudioQueueSanitizer.cpp",
++        "SpeechSynthesizerFlusher.cpp",
 +    ]
 +    OS_LIBS += [
 +        "-framework AudioToolbox",
++        "-lobjc",
 +    ]
 +
  if CONFIG["MOZ_WIDGET_TOOLKIT"]:
