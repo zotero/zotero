@@ -4,5 +4,5 @@
 -brand-product-name = Zotero
 -vendor-short-name = Zotero
 -app-name = Zotero
--subscription-name = Zotero Storage
+-subscription-name = Zotero
 trademarkInfo = Zotero is a trademark of the Corporation for Digital Scholarship.
