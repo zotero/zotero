@@ -102,7 +102,7 @@ module.exports = class {
 		if (!this._renderedRows.has(index)) return;
 		let oldElem = this._renderedRows.get(index);
 		let elem = this.renderItem(index, oldElem);
-		elem.style.top = this._getItemPosition(index) + "px";
+		elem.style.top = this.getRowPosition(index) + "px";
 		elem.style.position = "absolute";
 		if (elem == oldElem) return;
 		this.innerElem.replaceChild(elem, this._renderedRows.get(index));
@@ -138,7 +138,7 @@ module.exports = class {
 		for (let index = startIndex; index < stopIndex; index++) {
 			if (this._renderedRows.has(index)) continue;
 			let elem = renderItem(index);
-			elem.style.top = this._getItemPosition(index) + "px";
+			elem.style.top = this.getRowPosition(index) + "px";
 			elem.style.position = "absolute";
 			innerElem.appendChild(elem);
 			this._renderedRows.set(index, elem);
@@ -203,27 +203,18 @@ module.exports = class {
 	/**
 	 * Scroll the scrollbox to a specified item. No-op if already in view
 	 * @param {Integer} index
-	 * @param {Boolean} forceScrollToTop  If true, the row will be scrolled to the top of the scrollbox
-	 * even if it is below the current scroll window.
 	 * @param {Integer} topOffset  Amount of space reserved at the top of the scrollbox (e.g. for a
 	 * sticky section header that overlays the rows). When scrolling a row into view from above, the
 	 * row is positioned below this offset rather than flush with the top edge.
 	 */
-	scrollToRow(index, forceScrollToTop = false, topOffset = 0) {
+	scrollToRow(index, topOffset = 0) {
 		const { scrollOffset } = this;
 		const itemCount = this._getItemCount();
 		const height = this.getWindowHeight();
 
 		index = Math.max(0, Math.min(index, itemCount - 1));
-		let startPosition = this._getItemPosition(index);
-		let endPosition = this._getItemPosition(index + 1);
-		// If forceScrollToTop is set, always scroll to the start position even if the row is
-		// already visible. This is used when restoring scroll position, where we need an exact
-		// first-visible-row rather than just ensuring the row is within view.
-		if (forceScrollToTop) {
-			this.scrollTo(startPosition);
-			return;
-		}
+		let startPosition = this.getRowPosition(index);
+		let endPosition = this.getRowPosition(index + 1);
 		if (startPosition - topOffset < scrollOffset) {
 			this.scrollTo(startPosition - topOffset);
 		}
@@ -245,10 +236,24 @@ module.exports = class {
 		return Math.max(1, offsetIdx + Math.ceil(((this.scrollOffset + height + 1) - offset) / this.itemHeight)) - 1;
 	}
 	
-	_getItemPosition = (index) => {
+	/**
+	 * Return the position of the top of a row relative to the top of the list
+	 *
+	 * @param {Integer} index
+	 * @return {Integer}
+	 */
+	getRowPosition = (index) => {
 		const idx = this._binarySearchOffsets(this._rowOffsets, index);
 		const [offsetIdx, offset] = this._rowOffsets[idx];
 		return offset + (this.itemHeight * (index - offsetIdx));
+	};
+	
+	/**
+	 * @deprecated Use getRowPosition()
+	 */
+	_getItemPosition = (index) => {
+		Zotero.warn('windowed-list _getItemPosition() is deprecated -- use getRowPosition()');
+		return this.getRowPosition(index);
 	};
 	
 	_getRangeToRender() {
