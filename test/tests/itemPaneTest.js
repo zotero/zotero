@@ -152,7 +152,7 @@ describe("Item pane", function () {
 			assert.isTrue(doc.querySelector('item-pane-header .creator-year').hidden);
 
 			let bibEntry = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild.textContent;
-			assert.equal(bibEntry.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntry.trim(), 'Hyde, G. E. (n.d.). Birds—A primer of ornithology (teach yourself books).');
 		});
 
 		it("should update bib entry on item change when set to Bibliography Entry mode", async function () {
@@ -162,11 +162,11 @@ describe("Item pane", function () {
 			
 			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 			
-			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A primer of ornithology (teach yourself books).');
 			
 			item.setField('date', '1962-05-01');
 			await item.saveTx();
-			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (1962). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (1962). Birds—A primer of ornithology (teach yourself books).');
 			
 			item.setCreators([
 				{
@@ -176,7 +176,7 @@ describe("Item pane", function () {
 				}
 			]);
 			await item.saveTx();
-			assert.equal(bibEntryElem.textContent.trim(), 'Smith, J. (1962). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Smith, J. (1962). Birds—A primer of ornithology (teach yourself books).');
 			
 			item.setField('title', 'Birds');
 			await item.saveTx();
@@ -190,7 +190,7 @@ describe("Item pane", function () {
 
 			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 			
-			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A primer of ornithology (teach yourself books).');
 			
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/chicago-author-date');
 			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, George E. n.d. Birds - A Primer of Ornithology (Teach Yourself Books).');
@@ -203,10 +203,10 @@ describe("Item pane", function () {
 
 			let bibEntryElem = doc.querySelector('item-pane-header .bib-entry').shadowRoot.firstElementChild;
 
-			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (n.d.). Birds—A primer of ornithology (teach yourself books).');
 
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.locale', 'de-DE');
-			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (o. J.). Birds—A Primer of Ornithology (Teach Yourself Books).');
+			assert.equal(bibEntryElem.textContent.trim(), 'Hyde, G. E. (o. J.). Birds—A primer of ornithology (teach yourself books).');
 		});
 
 		it("should fall back to Title/Creator/Year when citation style is missing", async function () {

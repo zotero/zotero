@@ -749,6 +749,27 @@ Object.defineProperty(Zotero.Style.prototype, 'effectiveLocale', {
 });
 
 /**
+ * Check whether the short ID of this style, or of its parent style, matches a regexp
+ *
+ * @param {RegExp} re
+ * @return {Boolean}
+ */
+Zotero.Style.prototype._isStyleOrParentMatch = function (re) {
+	var styles = [this];
+	if (this.source) {
+		let parentStyle = Zotero.Styles.get(this.source);
+		if (parentStyle) {
+			styles.push(parentStyle);
+		}
+	}
+	return styles.some((style) => {
+		let shortIDMatches = style.styleID.match(/\/?([^/]+)$/);
+		return !!shortIDMatches && re.test(shortIDMatches[1]);
+	});
+};
+
+
+/**
  * Get a citeproc-js CSL.Engine instance
  * @param {String} locale Locale code
  * @param {String} [format] Output format one of [rtf, html, text]
@@ -772,11 +793,14 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 	format = format || 'text';
 	automaticJournalAbbreviations = !!automaticJournalAbbreviations;
 
+	let sentenceCaseTitles = !!Zotero.Prefs.get('cite.sentenceCaseAPATitles')
+		&& this._isStyleOrParentMatch(/^apa($|-)/);
+	
 	// We can cache the Engine instance if this is an installed style. The output
 	// format is excluded from the cache key because setOutputFormat() can switch
 	// it cheaply.
 	let cacheKey = cache && this.path
-		? JSON.stringify({ locale, automaticJournalAbbreviations })
+		? JSON.stringify({ locale, automaticJournalAbbreviations, sentenceCaseTitles })
 		: null;
 	if (cacheKey && this._cachedEngines.has(cacheKey)) {
 		let engine = this._cachedEngines.get(cacheKey);
@@ -855,7 +879,8 @@ Zotero.Style.prototype.getCiteProc = function (locale, format, options = {}) {
 		var citeproc = new Zotero.CiteProc.CSL.Engine(
 			new Zotero.Cite.System({
 				automaticJournalAbbreviations,
-				uppercaseSubtitles
+				uppercaseSubtitles,
+				sentenceCaseTitles
 			}),
 			xml,
 			locale,

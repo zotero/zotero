@@ -607,20 +607,88 @@ Zotero.Cite.getAbbreviation = new function () {
 };
 
 /**
+ * Check whether a title looks title-cased, so that a title already in sentence case, whose
+ * remaining capitals are probably proper nouns, can be left alone
+ *
+ * A title counts as title-cased if it's entirely uppercase (with at least two words of four or
+ * more letters) or if every word of at least four
+ * letters, other than the first word of the title or of a subtitle, starts with a capital,
+ * with at least two such words. Acronyms, words with inner capitals, and text in
+ * <span class="nocase"> are ignored.
+ *
+ * @param {String} title
+ * @return {Boolean}
+ */
+Zotero.Cite.isTitleCased = function (title) {
+	var text = title
+		.replace(/<span class="nocase">.*?<\/span>|<nc>.*?<\/nc>/gi, ' ')
+		.replace(/<[^>]+>/g, '');
+	if (!/\p{L}/u.test(text)) {
+		return false;
+	}
+	// All caps, unless it's only an acronym or two ('NASA', 'DNA RNA')
+	if (text === text.toUpperCase()) {
+		return (text.match(/\p{L}{4,}/gu) || []).length >= 2;
+	}
+	var words = [];
+	for (let segment of text.split(/[:?!.]\s+|\s+[–—]\s+/)) {
+		let segmentWords = segment.match(/\p{L}[\p{L}\p{M}'’-]*/gu) || [];
+		words.push(...segmentWords.slice(1));
+	}
+	words = words.filter(word => word.replace(/['’-]/g, '').length >= 4
+		// Acronyms
+		&& word !== word.toUpperCase()
+		// Inner capitals ('iPhone', 'McDonald')
+		&& !/.\p{Lu}/u.test(word.replace(/-\p{Lu}/gu, '-')));
+	return words.length >= 2 && words.every(word => /^\p{Lu}/u.test(word));
+};
+
+
+/**
+ * Convert title-cased titles of a CSL-JSON item to sentence case, as APA requires
+ *
+ * Only English items (or items with no language) are changed, and only the item title (and
+ * short title) and the book title of a chapter or entry. Other container titles, such as
+ * journal names, stay in title case.
+ *
+ * @param {Object} cslItem
+ */
+Zotero.Cite.sentenceCaseTitles = function (cslItem) {
+	if (cslItem.language && !/^en([-_]|$)|^english$/i.test(cslItem.language.trim())) {
+		return;
+	}
+	if (cslItem.title && Zotero.Cite.isTitleCased(cslItem.title)) {
+		cslItem.title = Zotero.Utilities.sentenceCase(cslItem.title);
+		if (cslItem['title-short']) {
+			cslItem['title-short'] = Zotero.Utilities.sentenceCase(cslItem['title-short']);
+		}
+	}
+	var bookContainerTypes = ['chapter', 'entry', 'entry-dictionary', 'entry-encyclopedia', 'paper-conference'];
+	if (bookContainerTypes.includes(cslItem.type)
+			&& cslItem['container-title']
+			&& Zotero.Cite.isTitleCased(cslItem['container-title'])) {
+		cslItem['container-title'] = Zotero.Utilities.sentenceCase(cslItem['container-title']);
+	}
+};
+
+
+/**
  * citeproc-js system object
  *
  * @class
  * @param {Object} options
  * @param {Boolean} [options.automaticJournalAbbreviations]
  * @param {Boolean} [options.uppercaseSubtitles]
+ * @param {Boolean} [options.sentenceCaseTitles] - Convert title-cased titles to sentence case
  */
-Zotero.Cite.System = function ({ automaticJournalAbbreviations, uppercaseSubtitles }) {
+Zotero.Cite.System = function ({ automaticJournalAbbreviations, uppercaseSubtitles, sentenceCaseTitles }) {
 	if (automaticJournalAbbreviations) {
 		this.getAbbreviation = Zotero.Cite.getAbbreviation;
 	}
 	if (uppercaseSubtitles) {
 		this.uppercase_subtitles = true;  
 	}
+	this._sentenceCaseTitles = !!sentenceCaseTitles;
 };
 
 Zotero.Cite.System.prototype = {
@@ -673,6 +741,10 @@ Zotero.Cite.System.prototype = {
 				delete cslItem.URL;
 				delete cslItem.accessed;
 			}
+		}
+		
+		if (this._sentenceCaseTitles) {
+			Zotero.Cite.sentenceCaseTitles(cslItem);
 		}
 		
 		return cslItem;

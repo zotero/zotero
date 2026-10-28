@@ -160,6 +160,118 @@ describe("Zotero.Cite", function () {
 		});
 	});
 	
+	describe("#isTitleCased()", function () {
+		it("should detect a title-cased title", function () {
+			assert.isTrue(Zotero.Cite.isTitleCased("The Effects of Climate Change on Coastal Cities"));
+		});
+		
+		it("should not treat a sentence-cased title with proper nouns as title-cased", function () {
+			assert.isFalse(Zotero.Cite.isTitleCased("Effects of climate change in Africa and Asia"));
+		});
+		
+		it("should not treat a title with fewer than two long words as title-cased", function () {
+			assert.isFalse(Zotero.Cite.isTitleCased("Introduction to Python"));
+		});
+		
+		it("should ignore acronyms and words with inner capitals", function () {
+			assert.isTrue(Zotero.Cite.isTitleCased("Using DNA Barcoding With iPhone Cameras"));
+			assert.isFalse(Zotero.Cite.isTitleCased("Using DNA barcoding with iPhone cameras"));
+		});
+		
+		it("should treat an all-caps title as title-cased unless it's only acronyms", function () {
+			assert.isTrue(Zotero.Cite.isTitleCased("THE EFFECTS OF STRESS ON MEMORY"));
+			assert.isFalse(Zotero.Cite.isTitleCased("NASA"));
+		});
+	});
+	
+	describe("#sentenceCaseTitles()", function () {
+		it("should convert a title-cased title and short title", function () {
+			var cslItem = {
+				type: 'article-journal',
+				title: 'The Effects of Climate Change on Coastal Cities: A Review of Recent Evidence',
+				'title-short': 'The Effects of Climate Change on Coastal Cities',
+				'container-title': 'Journal of Applied Psychology'
+			};
+			Zotero.Cite.sentenceCaseTitles(cslItem);
+			assert.equal(cslItem.title, 'The effects of climate change on coastal cities: a review of recent evidence');
+			assert.equal(cslItem['title-short'], 'The effects of climate change on coastal cities');
+			// Journal names stay in title case
+			assert.equal(cslItem['container-title'], 'Journal of Applied Psychology');
+		});
+		
+		it("should preserve nocase text", function () {
+			var cslItem = {
+				type: 'book',
+				title: 'A Study of <span class="nocase">Shakespeare</span> and His Contemporaries'
+			};
+			Zotero.Cite.sentenceCaseTitles(cslItem);
+			assert.equal(cslItem.title, 'A study of <span class="nocase">Shakespeare</span> and his contemporaries');
+		});
+		
+		it("should convert the book title of a chapter", function () {
+			var cslItem = {
+				type: 'chapter',
+				title: 'Memory',
+				'container-title': 'The Handbook of Cognitive Psychology Research'
+			};
+			Zotero.Cite.sentenceCaseTitles(cslItem);
+			assert.equal(cslItem['container-title'], 'The handbook of cognitive psychology research');
+		});
+		
+		it("should not change titles of non-English items", function () {
+			var cslItem = {
+				type: 'book',
+				title: 'Die Entwicklung der Wirtschaft in Deutschland',
+				language: 'de'
+			};
+			Zotero.Cite.sentenceCaseTitles(cslItem);
+			assert.equal(cslItem.title, 'Die Entwicklung der Wirtschaft in Deutschland');
+		});
+	});
+	
+	describe("APA sentence-case titles", function () {
+		async function makeBibliography(styleID) {
+			let item = new Zotero.Item;
+			item.fromJSON({
+				itemType: "book",
+				title: "The Effects of Climate Change on Coastal Cities: A Review of Recent Evidence",
+				creators: [{ creatorType: "author", firstName: "Jane", lastName: "Smith" }],
+				date: "2019"
+			});
+			await item.saveTx();
+			
+			let style = Zotero.Styles.get(styleID);
+			let cslEngine = style.getCiteProc('en-US');
+			return Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+		}
+		
+		afterEach(function () {
+			Zotero.Prefs.clear('cite.sentenceCaseAPATitles');
+		});
+		
+		it("should render a title-cased title in sentence case in APA", async function () {
+			assert.include(
+				await makeBibliography('http://www.zotero.org/styles/apa'),
+				'The effects of climate change on coastal cities: A review of recent evidence'
+			);
+		});
+		
+		it("should leave the title as stored when disabled", async function () {
+			Zotero.Prefs.set('cite.sentenceCaseAPATitles', false);
+			assert.include(
+				await makeBibliography('http://www.zotero.org/styles/apa'),
+				'The Effects of Climate Change on Coastal Cities: A Review of Recent Evidence'
+			);
+		});
+		
+		it("should leave the title as stored in non-APA styles", async function () {
+			assert.include(
+				await makeBibliography('http://www.zotero.org/styles/chicago-notes-bibliography'),
+				'The Effects of Climate Change on Coastal Cities: A Review of Recent Evidence'
+			);
+		});
+	});
+	
 	describe("previewCitationCluster()", function () {
 		before(async function () {
 			await Zotero.Styles.init();
