@@ -30,6 +30,7 @@
 // nsILoginManager.
 
 const KEYRING_KB_URL = 'https://www.zotero.org/support/kb/linux_keyring';
+const MIGRATE_ALERT_HIDE_DAYS = 30;
 
 Zotero.OSKeyStore = {
 	_prefix: 'oskv1:',
@@ -99,26 +100,41 @@ Zotero.OSKeyStore = {
 		return index == 0;
 	},
 
-	// Show a one-shot alert when migration of an existing legacy plaintext entry
-	// fails. The caller falls back to using the legacy value, so the user isn't
-	// blocked, but show an alert so the keychain issue can be reported and
-	// addressed before a future version drops the legacy fallback.
+	// Show an alert once per session when migration of an existing legacy plaintext entry
+	// fails, unless the user has hidden it recently. The caller falls back to using the
+	// legacy value, so the user isn't blocked, but show an alert so the keychain issue can
+	// be reported and addressed before a future version drops the legacy fallback.
 	alertMigrateFailed: function () {
 		if (this._migrateAlertShown) {
 			return;
 		}
 		this._migrateAlertShown = true;
+		let now = Math.floor(Date.now() / 1000);
+		let lastShown = Zotero.Prefs.get('sync.keyStoreMigrateAlertLastShown');
+		if (lastShown + MIGRATE_ALERT_HIDE_DAYS * 86400 > now) {
+			return;
+		}
 		let win = this._getParentWindow();
 		if (!win) {
 			return;
 		}
+		let checkbox = {};
 		let index = Zotero.Prompt.confirm({
 			window: win,
 			title: Zotero.getString('general-error'),
 			text: Zotero.getString('os-keystore-migrate-failed'),
 			button0: Zotero.Prompt.BUTTON_TITLE_OK,
-			button1: this._moreInfoLabel
+			button1: this._moreInfoLabel,
+			checkLabel: Zotero.getString(
+				'general.dontShowAgainFor',
+				MIGRATE_ALERT_HIDE_DAYS,
+				MIGRATE_ALERT_HIDE_DAYS
+			),
+			checkbox
 		});
+		if (checkbox.value) {
+			Zotero.Prefs.set('sync.keyStoreMigrateAlertLastShown', now);
+		}
 		if (index == 1) {
 			Zotero.launchURL(KEYRING_KB_URL);
 		}

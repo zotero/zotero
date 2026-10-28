@@ -165,6 +165,58 @@ describe("Zotero.Sync.Data.Local", function () {
 		})
 		
 		
+		it("should hide the keystore error for a legacy key for 30 days if the user chooses", async function () {
+			var apiKey = Zotero.Utilities.randomString(24);
+			var nsLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",
+				Components.interfaces.nsILoginInfo, "init");
+			await Services.logins.addLoginAsync(new nsLoginInfo(
+				Zotero.Sync.Data.Local._loginManagerHost,
+				null,
+				Zotero.Sync.Data.Local._loginManagerRealmLegacy,
+				'API Key',
+				apiKey,
+				'',
+				''
+			));
+			var encryptStub = sinon.stub(Zotero.OSKeyStore, "encrypt")
+				.rejects(keyStoreError());
+			var windowStub = sinon.stub(Zotero.OSKeyStore, "_getParentWindow").returns(window);
+			var promptStub = sinon.stub(Zotero.Prompt, "confirm").callsFake((options) => {
+				options.checkbox.value = true;
+				return 0;
+			});
+			// Stands in for a restart
+			var newSession = () => {
+				Zotero.Sync.Data.Local._mirroredAPIKey = false;
+				Zotero.OSKeyStore._migrateAlertShown = false;
+			};
+			try {
+				newSession();
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(promptStub.callCount, 1);
+				
+				newSession();
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(promptStub.callCount, 1);
+				
+				Zotero.Prefs.set(
+					'sync.keyStoreMigrateAlertLastShown',
+					Math.floor(Date.now() / 1000) - 31 * 86400
+				);
+				newSession();
+				assert.equal(await Zotero.Sync.Data.Local.getAPIKey(), apiKey);
+				assert.equal(promptStub.callCount, 2);
+			}
+			finally {
+				encryptStub.restore();
+				windowStub.restore();
+				promptStub.restore();
+				Zotero.Prefs.clear('sync.keyStoreMigrateAlertLastShown');
+				await Zotero.Sync.Data.Local.setAPIKey("");
+			}
+		})
+		
+		
 		it("should encrypt a key stored without encryption in a later session", async function () {
 			if (!Zotero.OSKeyStore.available) {
 				this.skip();
