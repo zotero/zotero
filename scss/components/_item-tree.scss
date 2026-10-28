@@ -464,9 +464,11 @@
 					}
 				}
 			}
-			.search-match-highlight {
-				@include search-match-highlight;
-			}
+		}
+
+		// The search's words, in a match row's quote or a row's text cells
+		.search-match-highlight {
+			@include search-match-highlight;
 		}
 
 		.cell:not(.hasAttachment) .item-icon {

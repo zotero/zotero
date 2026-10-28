@@ -213,6 +213,16 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
+	 * The active best-match search's words, for marking where they occur in
+	 * the rows' text cells (see Zotero.BestMatch.Session#highlightTerms)
+	 *
+	 * @returns {String[]|null}
+	 */
+	getHighlightTerms() {
+		return this._bestMatchSession?.highlightTerms ?? null;
+	}
+
+	/**
 	 * What each engine found in each row, for the Relevance column's bars,
 	 * computed alongside the ranks (see Zotero.BestMatch.Session#barFractions)
 	 *

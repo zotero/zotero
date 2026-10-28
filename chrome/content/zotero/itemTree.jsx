@@ -177,6 +177,17 @@ class ItemTreeRowProvider {
 		return ['hybrid'];
 	}
 
+	/**
+	 * The active best-match search's words, for marking where they occur in
+	 * the rows' text cells, or null when no search has words to mark.
+	 * Overridden by row providers that support best-match searches.
+	 *
+	 * @returns {String[]|null}
+	 */
+	getHighlightTerms() {
+		return null;
+	}
+
 	get includeTrashed() {
 		return this._includeTrashed;
 	}
@@ -2600,7 +2611,59 @@ var ItemTree = class ItemTree extends LibraryTree {
 			cell.classList.add('first-column');
 		}
 
+		// Where the active search's words occur in a field's text, as the
+		// item pane marks them. Match rows mark their own quotes.
+		let terms = this.rowProvider.getHighlightTerms();
+		if (terms && row.type != 'search-match'
+				&& (Zotero.ItemFields.getID(column.dataKey) || ['firstCreator', 'year'].includes(column.dataKey))) {
+			this._markSearchTerms(cell.querySelector('.cell-text') || cell, terms);
+		}
+
 		return cell;
+	}
+
+	// Wrap each place the terms occur in the node's text in a highlight
+	// span, across whatever markup the text is already split into
+	_markSearchTerms(node, terms) {
+		let ranges = Zotero.Lexical.findHighlightRanges(terms, node.textContent);
+		if (!ranges.length) {
+			return;
+		}
+		let walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+		let textNodes = [];
+		while (walker.nextNode()) {
+			textNodes.push(walker.currentNode);
+		}
+		let offset = 0;
+		for (let textNode of textNodes) {
+			let start = offset;
+			let end = offset + textNode.length;
+			offset = end;
+			// The ranges reaching into this node, clipped to it
+			let pieces = ranges
+				.filter(([from, to]) => to > start && from < end)
+				.map(([from, to]) => [Math.max(from, start) - start, Math.min(to, end) - start]);
+			if (!pieces.length) {
+				continue;
+			}
+			let text = textNode.data;
+			let fragment = document.createDocumentFragment();
+			let last = 0;
+			for (let [from, to] of pieces) {
+				if (from > last) {
+					fragment.append(text.slice(last, from));
+				}
+				let mark = document.createElement('span');
+				mark.className = 'search-match-highlight';
+				mark.textContent = text.slice(from, to);
+				fragment.append(mark);
+				last = to;
+			}
+			if (last < text.length) {
+				fragment.append(text.slice(last));
+			}
+			textNode.replaceWith(fragment);
+		}
 	}
 
 

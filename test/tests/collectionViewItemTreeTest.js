@@ -248,6 +248,18 @@ describe("CollectionViewItemTree", function () {
 					assert.deepEqual(itemsView._rows.map(row => row.id),
 						[full.id, partial.id, sparse.id]);
 					assert.equal(itemsView.getSortField(), 'relevance');
+					// The title cells mark where the query's words occur, as
+					// the item pane does; other cells carry no marks. Row
+					// painting is async, so poll (the test times out on failure).
+					let marks = () => [...itemsView.tree._jsWindow.getElementByIndex(0)
+						?.querySelectorAll('.cell.title .search-match-highlight') ?? []];
+					while (!marks().length) {
+						await Zotero.Promise.delay(10);
+					}
+					assert.deepEqual(marks().map(mark => mark.textContent), ['Lexint', 'owl', 'migration', 'patterns']);
+					let row0 = itemsView.tree._jsWindow.getElementByIndex(0);
+					assert.equal(row0.querySelector('.cell.title .cell-text').textContent, 'Lexint owl migration patterns');
+					assert.notOk(row0.querySelector('.cell.relevance .search-match-highlight'));
 					// The words track carries the lexical scores directly; the
 					// meaning track is empty without a model
 					let fractions = itemsView.rowProvider.getBestMatchBarFractions();
