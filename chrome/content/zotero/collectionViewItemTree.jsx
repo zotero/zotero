@@ -172,7 +172,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 	/**
 	 * Best-match ranks for the Relevance column while a best-match search is
-	 * active, from the session's last scoring pass
+	 * active, from the session's last scoring pass, by the measure the
+	 * Relevance sort follows (see getRelevanceSortEngine())
 	 *
 	 * @returns {Map} - treeViewID -> 1-based rank (1 = most similar)
 	 */
@@ -181,11 +182,41 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
-	 * Score fractions for the Relevance column's bars, computed alongside the
-	 * ranks (see Zotero.BestMatch.Session#barFractions), so the bars always
-	 * agree with the ranking
+	 * The measure the Relevance sort follows: 'hybrid', or 'lexical' or
+	 * 'semantic' for one engine's evidence alone (see
+	 * Zotero.BestMatch.Session#sortEngine). A new query starts on the
+	 * first measure its scoring offers.
 	 *
-	 * @returns {Map} - treeViewID -> 0-1 fraction for the bar
+	 * @returns {String}
+	 */
+	getRelevanceSortEngine() {
+		return this._bestMatchSession?.sortEngine ?? 'hybrid';
+	}
+
+	/**
+	 * @param {String} engine - One of getRelevanceSortEngines()
+	 */
+	setRelevanceSortEngine(engine) {
+		if (this._bestMatchSession) {
+			this._bestMatchSession.sortEngine = engine;
+		}
+	}
+
+	/**
+	 * The measures the active best-match search can sort by (see
+	 * Zotero.BestMatch.Session#sortEngines)
+	 *
+	 * @returns {String[]}
+	 */
+	getRelevanceSortEngines() {
+		return this._bestMatchSession?.sortEngines ?? ['hybrid'];
+	}
+
+	/**
+	 * What each engine found in each row, for the Relevance column's bars,
+	 * computed alongside the ranks (see Zotero.BestMatch.Session#barFractions)
+	 *
+	 * @returns {Map} - treeViewID -> { lexical, semantic } 0-1 fractions
 	 */
 	getBestMatchBarFractions() {
 		return this._bestMatchSession?.barFractions ?? new Map();

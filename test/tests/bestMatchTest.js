@@ -165,11 +165,13 @@ describe("Zotero.BestMatch", function () {
 				}
 			});
 
-			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+			let { scores, lexical, semantic } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
 			assert.deepEqual([...scores.entries()], [[1, 0.8], [2, 0.5]]);
-			// The engine that didn't rank shows matches in nothing
-			assert.equal(matches.semantic.size, 0);
-			assert.sameMembers([...matches.lexical.keys()], [1, 2]);
+			// The engine that didn't rank reports nothing
+			assert.equal(semantic.scores.size, 0);
+			assert.equal(semantic.previewable.size, 0);
+			assert.sameMembers([...lexical.matches.keys()], [1, 2]);
+			assert.deepEqual([...lexical.scores.entries()], [[1, 0.8], [2, 0.5]]);
 		});
 
 		it("should report which items each engine can show matches in", async function () {
@@ -185,11 +187,13 @@ describe("Zotero.BestMatch", function () {
 				previewableIDs: new Set([2])
 			}));
 
-			let { matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
+			let { lexical, semantic } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2, 3]);
 			// Every lexical match has excerpts to show...
-			assert.sameMembers([...matches.lexical.keys()], [1]);
-			// ...while a semantic match shows only through previewable chunks
-			assert.sameMembers([...matches.semantic], [2]);
+			assert.sameMembers([...lexical.matches.keys()], [1]);
+			// ...while a semantic match shows only through previewable chunks,
+			// though the engine scored more
+			assert.sameMembers([...semantic.scores.keys()], [2, 3]);
+			assert.sameMembers([...semantic.previewable], [2]);
 		});
 
 		it("should map either engine's cancellation to its own error", async function () {
@@ -315,12 +319,13 @@ describe("Zotero.BestMatch", function () {
 					previewableIDs: new Set([1, 2])
 				}));
 
-				let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
+				let { scores, lexical, semantic } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2]);
 				// Item 2 stays, on its lexical evidence alone
 				assert.closeTo(scores.get(2), rrf([0.9, 1]), 1e-12);
 				assert.closeTo(scores.get(1), rrf([0.8, 2], [0.9, 1]), 1e-12);
-				assert.sameMembers([...matches.lexical.keys()], [1, 2]);
-				assert.sameMembers([...matches.semantic], [1]);
+				assert.sameMembers([...lexical.matches.keys()], [1, 2]);
+				assert.sameMembers([...semantic.scores.keys()], [1]);
+				assert.sameMembers([...semantic.previewable], [1]);
 			});
 
 			it("should cut the tail when ranking with one engine too", async function () {
@@ -351,11 +356,11 @@ describe("Zotero.BestMatch", function () {
 			it("should rank lexically when asked for meaning without a model", async function () {
 				let lexical = sinon.stub().resolves(new Map([[1, 0.9]]));
 				stubEngines({ enabled: false, lexical });
-				let { scores, matches } = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2], { engine: 'semantic' });
+				let result = await Zotero.BestMatch.scoreItemIDs('owl', [1, 2], { engine: 'semantic' });
 				assert.isTrue(lexical.calledOnce);
-				assert.sameMembers([...scores.keys()], [1]);
-				assert.sameMembers([...matches.lexical.keys()], [1]);
-				assert.isEmpty([...matches.semantic]);
+				assert.sameMembers([...result.scores.keys()], [1]);
+				assert.sameMembers([...result.lexical.matches.keys()], [1]);
+				assert.isEmpty([...result.semantic.previewable]);
 			});
 		});
 	});
@@ -397,9 +402,13 @@ describe("Zotero.BestMatch", function () {
 		async function sessionFor({ lexical = true, semantic = true, engine = 'hybrid' } = {}) {
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores: new Map([[attachment.id, 0.9]]),
-				matches: {
-					lexical: new Set(lexical ? [attachment.id] : []),
-					semantic: new Set(semantic ? [attachment.id] : [])
+				lexical: {
+					scores: new Map(lexical ? [[attachment.id, 0.9]] : []),
+					matches: new Set(lexical ? [attachment.id] : [])
+				},
+				semantic: {
+					scores: new Map(semantic ? [[attachment.id, 0.9]] : []),
+					previewable: new Set(semantic ? [attachment.id] : [])
 				}
 			}));
 			let session = Zotero.BestMatch.createSession('owl', { engine });
@@ -798,13 +807,12 @@ describe("Zotero.BestMatch", function () {
 			att3 = await importFileAttachment('test.pdf');
 		});
 
+		// The scores stand in as the semantic engine's own measure
 		function stubScore(scores, lexicalIDs, semanticIDs) {
 			let stub = sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores,
-				matches: {
-					lexical: new Set(lexicalIDs || []),
-					semantic: new Set(semanticIDs || [])
-				}
+				lexical: { scores: new Map(), matches: new Set(lexicalIDs || []) },
+				semantic: { scores: new Map(scores), previewable: new Set(semanticIDs || []) }
 			});
 			stubs.push(stub);
 			return stub;
@@ -851,11 +859,81 @@ describe("Zotero.BestMatch", function () {
 			assert.equal(session.ranks.get(child.treeViewID), 1);
 			assert.equal(session.ranks.get(parent.treeViewID), 1);
 			assert.equal(session.ranks.get(att1.treeViewID), 2);
-			// The bar reports only the row's own score: an empty bar for a
-			// row that only inherited its rank
-			assert.equal(session.barFractions.get(child.treeViewID), 0.9);
-			assert.equal(session.barFractions.get(parent.treeViewID), 0);
-			assert.equal(session.barFractions.get(att1.treeViewID), 0.5);
+			// The bars report only what each engine found in the row itself:
+			// empty bars for a row that only inherited its rank
+			assert.deepEqual(session.barFractions.get(child.treeViewID), { lexical: 0, semantic: 0.9 });
+			assert.deepEqual(session.barFractions.get(parent.treeViewID), { lexical: 0, semantic: 0 });
+			assert.deepEqual(session.barFractions.get(att1.treeViewID), { lexical: 0, semantic: 0.5 });
+		});
+
+		it("should rank by either engine alone when both ranked, with what it found nothing in last", async function () {
+			let parent = await createDataObject('item');
+			let child = await importFileAttachment('test.pdf', { parentID: parent.id });
+			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores: new Map([[child.id, 0.9], [att1.id, 0.8], [att2.id, 0.4]]),
+				lexical: {
+					scores: new Map([[child.id, 0.7], [att2.id, 1]]),
+					matches: new Set([child.id, att2.id])
+				},
+				semantic: {
+					scores: new Map([[att1.id, 0.9]]),
+					previewable: new Set([att1.id])
+				}
+			}));
+			stubDerive(new Map());
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([child.id, att1.id, att2.id]);
+			assert.deepEqual(session.sortEngines, ['hybrid', 'lexical', 'semantic']);
+			// Hybrid until told otherwise
+			assert.equal(session.sortEngine, 'hybrid');
+			assert.equal(session.ranks.get(child.treeViewID), 1);
+			assert.equal(session.ranks.get(att1.treeViewID), 2);
+			assert.equal(session.ranks.get(att2.treeViewID), 3);
+			// By the words: the child's evidence lifts onto its parent, and the
+			// item the words found nothing in ranks last
+			let words = session.ranksBy('lexical');
+			assert.equal(words.get(att2.treeViewID), 1);
+			assert.equal(words.get(child.treeViewID), 2);
+			assert.equal(words.get(parent.treeViewID), 2);
+			assert.equal(words.get(att1.treeViewID), 3);
+			// By the meaning, the two it found nothing in tie last
+			let meaning = session.ranksBy('semantic');
+			assert.equal(meaning.get(att1.treeViewID), 1);
+			assert.equal(meaning.get(child.treeViewID), 2);
+			assert.equal(meaning.get(att2.treeViewID), 2);
+			// The selected measure is what ranks reports
+			session.sortEngine = 'semantic';
+			assert.equal(session.ranks.get(att1.treeViewID), 1);
+			assert.equal(session.ranks.get(child.treeViewID), 2);
+		});
+
+		it("should offer the one engine that ranked as the only measure", async function () {
+			stubScore(new Map([[att1.id, 0.9], [att2.id, 0.5]]), [], [att1.id, att2.id]);
+			stubDerive(new Map());
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id, att2.id]);
+			// The model alone ranked, so the order is its order, under its name
+			assert.deepEqual(session.sortEngines, ['semantic']);
+			assert.equal(session.sortEngine, 'semantic');
+			// A measure the pass can't rank by reads as, and ranks like, that one
+			session.sortEngine = 'lexical';
+			assert.equal(session.sortEngine, 'semantic');
+			assert.deepEqual([...session.ranksBy('lexical')], [...session.ranksBy('semantic')]);
+			assert.deepEqual([...session.ranksBy('hybrid')], [...session.ranksBy('semantic')]);
+			assert.equal(session.ranks.get(att1.treeViewID), 1);
+		});
+
+		it("should name the session's engine as the measure when nothing ranked", async function () {
+			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
+				scores: new Map(),
+				lexical: { scores: new Map(), matches: new Map() },
+				semantic: { scores: new Map(), previewable: new Set() }
+			}));
+			let session = Zotero.BestMatch.createSession('owl', { engine: 'lexical' });
+			await session.score([att1.id]);
+			assert.deepEqual(session.sortEngines, ['lexical']);
+			assert.equal(session.sortEngine, 'lexical');
+			assert.equal(session.ranks.size, 0);
 		});
 
 		it("should not derive after dispose", async function () {
@@ -931,11 +1009,13 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(scoreStub);
 			scoreStub.onFirstCall().resolves({
 				scores: new Map([[att1.id, 0.9], [att2.id, 0.8]]),
-				matches: { lexical: new Set([att1.id, att2.id]), semantic: new Set() }
+				lexical: { scores: new Map(), matches: new Set([att1.id, att2.id]) },
+				semantic: { scores: new Map(), previewable: new Set() }
 			});
 			scoreStub.onSecondCall().resolves({
 				scores: new Map([[att1.id, 0.9]]),
-				matches: { lexical: new Set([att1.id]), semantic: new Set() }
+				lexical: { scores: new Map(), matches: new Set([att1.id]) },
+				semantic: { scores: new Map(), previewable: new Set() }
 			});
 			let derive = stubDerive(new Map([
 				[att1.id, [{ source: 'title', text: 'owl', ranges: [], strength: 1 }]],
@@ -977,7 +1057,8 @@ describe("Zotero.BestMatch", function () {
 			let scores = new Map(atts.map((att, i) => [att.id, 1 - i / 100]));
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores,
-				matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+				lexical: { scores: new Map(), matches: new Set(scores.keys()) },
+				semantic: { scores: new Map(), previewable: new Set() }
 			}));
 			return scores;
 		}
@@ -1053,7 +1134,8 @@ describe("Zotero.BestMatch", function () {
 			scores.set(child.id, 0.01);
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
 				scores,
-				matches: { lexical: new Set(scores.keys()), semantic: new Set() }
+				lexical: { scores: new Map(), matches: new Set(scores.keys()) },
+				semantic: { scores: new Map(), previewable: new Set() }
 			}));
 			let { release, advanceTo } = stubDerive();
 			let session = Zotero.BestMatch.createSession('owl');

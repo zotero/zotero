@@ -338,6 +338,16 @@
 				fill: var(--fill-secondary);
 			}
 
+			// The Relevance header tints by the measure its sort follows, as
+			// the rows' bar tracks do
+			&.relevance-lexical .icon-css {
+				fill: var(--accent-yellow);
+			}
+
+			&.relevance-semantic .icon-css {
+				fill: var(--accent-blue);
+			}
+
 			padding: 0;
 		}
 

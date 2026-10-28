@@ -462,7 +462,14 @@ items-column-added-by = Added By
 items-column-modified-by = Modified By
 items-column-last-read = Last Read
 items-column-relevance = Relevance
+items-column-relevance-hybrid = Relevance: Words + Meaning
+items-column-relevance-lexical = Relevance: Words
+items-column-relevance-semantic = Relevance: Meaning
+items-sort-relevance-hybrid = Words + Meaning
+items-sort-relevance-lexical = Words
+items-sort-relevance-semantic = Meaning
 items-column-relevance-rank = Rank { $rank }
+items-column-relevance-rank-engines = Rank { $rank } · Words { $words }% · Meaning { $meaning }%
 
 items-best-match-indexing = Indexing in progress — { $indexed } of { $total } items indexed
 items-best-match-indexing-paused = Indexing is paused — { $indexed } of { $total } items indexed

@@ -392,30 +392,53 @@ const COLUMNS = [
 		// persisted settings are never applied
 		transient: true,
 		zoteroPersist: [],
-		// A bar showing the score's fraction of the model's display range.
-		// `data` is the rank, which drives the sort.
+		// Bars showing what each engine found in the row -- the words on one
+		// track, the meaning on the other -- or, for a row carrying its own
+		// relevance, one bar of it. `data` is the rank, which drives the sort.
 		renderCell(index, data, column, isFirstColumn, doc) {
 			let cell = doc.createElement('span');
 			cell.className = `cell ${column.className}`;
 			let row = this.getRow(index);
 			// Rows that carry their own relevance (e.g. a search-match row,
 			// showing the strength of the evidence it displays) report it
-			// themselves; every other row's bar comes from the view's scores
+			// themselves; every other row's bars come from the view's scores
 			let fraction = this.rowProvider.getBestMatchBarFractions().get(row.id)
 				?? row.getRelevanceFraction();
 			if (fraction !== null && fraction !== undefined) {
 				let bar = doc.createElement('span');
 				bar.className = 'relevance-bar';
-				let fill = doc.createElement('span');
-				fill.className = 'relevance-bar-fill';
-				fill.style.width = Math.round(fraction * 100) + '%';
-				bar.append(fill);
+				let fill = (parent, value) => {
+					let span = doc.createElement('span');
+					span.className = 'relevance-bar-fill';
+					span.style.width = Math.round(value * 100) + '%';
+					parent.append(span);
+				};
+				let engines = typeof fraction == 'object';
+				if (engines) {
+					bar.classList.add('dual');
+					for (let engine of ['lexical', 'semantic']) {
+						let track = doc.createElement('span');
+						track.className = 'relevance-bar-track ' + engine;
+						fill(track, fraction[engine]);
+						bar.append(track);
+					}
+				}
+				else {
+					fill(bar, fraction);
+				}
 				cell.append(bar);
 				// The rank reaches assistive technology via the row label; show
-				// it visually as a tooltip. Match rows carry no rank of their own.
+				// it visually as a tooltip, with what each engine found. Match
+				// rows carry no rank of their own.
 				if (data) {
-					doc.l10n.formatValue('items-column-relevance-rank', { rank: data })
-						.then(label => cell.title = label);
+					let label = engines
+						? doc.l10n.formatValue('items-column-relevance-rank-engines', {
+							rank: data,
+							words: Math.round(fraction.lexical * 100),
+							meaning: Math.round(fraction.semantic * 100)
+						})
+						: doc.l10n.formatValue('items-column-relevance-rank', { rank: data });
+					label.then(text => cell.title = text);
 				}
 			}
 			return cell;

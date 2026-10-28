@@ -117,6 +117,57 @@ Zotero.BestMatch = new function () {
 		return new Map([...matches].filter(([itemID]) => scores.has(itemID)));
 	}
 
+	// An engine's scores as 0-1 fractions for showing: the measure it reads
+	// on, held within the bar
+	function _clamped(scores, toFraction) {
+		return new Map([...scores].map(
+			([itemID, score]) => [itemID, Math.min(1, Math.max(0, toFraction(score)))]
+		));
+	}
+
+	// The lexical engine's result as the whole ranking (see scoreItemIDs()),
+	// its tail cut against its strongest match
+	function _lexicalOnly(lexical) {
+		let scores = _nearTop(lexical.scores, share => share);
+		return {
+			scores,
+			lexical: { scores: _clamped(scores, share => share), matches: _keep(lexical.matches, scores) },
+			semantic: { scores: new Map(), previewable: new Set() }
+		};
+	}
+
+	// Rank scored items, lifting each item's score onto its ancestors
+	// (annotation -> attachment -> top-level item) first, so an item's
+	// effective score -- and so its rank -- is the best match anywhere
+	// beneath it. Equal effective scores get equal ranks, so tied rows
+	// (including a child and its parent) order deterministically via the
+	// consumer's secondary sort fields.
+	function _rankScores(scores) {
+		let effectiveScores = new Map(scores);
+		for (let [itemID, score] of scores) {
+			let parentItemID = Zotero.Items.get(itemID)?.parentItemID;
+			while (parentItemID) {
+				let current = effectiveScores.get(parentItemID);
+				if (current === undefined || score > current) {
+					effectiveScores.set(parentItemID, score);
+				}
+				parentItemID = Zotero.Items.get(parentItemID)?.parentItemID;
+			}
+		}
+		let rankOfScore = new Map(
+			[...new Set(effectiveScores.values())].sort((a, b) => b - a)
+				.map((score, i) => [score, i + 1])
+		);
+		let ranks = new Map();
+		for (let [itemID, score] of effectiveScores) {
+			let item = Zotero.Items.get(itemID);
+			if (item) {
+				ranks.set(item.treeViewID, rankOfScore.get(score));
+			}
+		}
+		return { ranks, effectiveScores };
+	}
+
 	// Resolves the next time the main thread is idle, or after
 	// PREVIEW_IDLE_TIMEOUT regardless
 	function _idle() {
@@ -213,15 +264,16 @@ Zotero.BestMatch = new function () {
 	 *     no model is enabled or the query embeds as nothing
 	 * @param {Function} [options.shouldCancel] - Checked between scoring
 	 *     stages; return true to abandon scoring with a ScoringCancelledError
-	 * @return {Promise<Object>} - { scores, matches }: scores maps
-	 *     itemID -> score (0-1, higher is more relevant); matches says which
-	 *     items each engine can show match excerpts in (see
-	 *     getMatchingExcerpts()): `lexical` maps itemID -> where the words
-	 *     matched (see Zotero.Lexical.scoreItemIDs()), `semantic` is a Set
-	 *     of itemIDs. Every lexical match has excerpts to show; a semantic
-	 *     match does only when a previewable chunk carries it (see
-	 *     Zotero.Embeddings.scoreItemIDs()). An engine that didn't rank
-	 *     contributes an empty collection.
+	 * @return {Promise<Object>} - { scores, lexical, semantic }: scores maps
+	 *     itemID -> fused score (0-1, higher is more relevant) over every
+	 *     item kept. Each engine then reports its own part: `scores`, its
+	 *     0-1 measure of each item it kept, for showing what it
+	 *     contributed; and what it can show match excerpts in (see
+	 *     getMatchingExcerpts()) -- `lexical.matches` maps itemID -> where
+	 *     the words matched (see Zotero.Lexical.scoreItemIDs()), while
+	 *     `semantic.previewable` is the Set of its items a previewable
+	 *     chunk carries (see Zotero.Embeddings.scoreItemIDs()). An engine
+	 *     that didn't rank reports empty collections.
 	 * @throws {Zotero.BestMatch.ScoringCancelledError}
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, options = {}) {
@@ -247,20 +299,17 @@ Zotero.BestMatch = new function () {
 					scores: new Map([...fractions].map(
 						([itemID, fraction]) => [itemID, fraction / scale]
 					)),
-					matches: {
-						lexical: new Map(),
-						semantic: new Set([...semantic.previewableIDs].filter(id => kept.has(id)))
+					lexical: { scores: new Map(), matches: new Map() },
+					semantic: {
+						scores: _clamped(kept, _semanticFraction),
+						previewable: new Set([...semantic.previewableIDs].filter(id => kept.has(id)))
 					}
 				};
 			}
 			// A query the semantic engine can't embed ranks lexically alone
 			if (engine == 'lexical' || !semanticApplies) {
 				let lexical = await Zotero.Lexical.scoreItemIDs(queryText, itemIDs, options);
-				let scores = _nearTop(lexical.scores, share => share);
-				return {
-					scores,
-					matches: { lexical: _keep(lexical.matches, scores), semantic: new Set() }
-				};
+				return _lexicalOnly(lexical);
 			}
 			// Both engines score the same candidates concurrently. allSettled
 			// rather than all, so one engine's failure still leaves the
@@ -276,14 +325,7 @@ Zotero.BestMatch = new function () {
 				if (semantic.reason instanceof Zotero.Embeddings.IndexNotReadyError) {
 					Zotero.debug("Semantic index not ready -- ranking lexically: "
 						+ semantic.reason.message);
-					let scores = _nearTop(lexical.value.scores, share => share);
-					return {
-						scores,
-						matches: {
-							lexical: _keep(lexical.value.matches, scores),
-							semantic: new Set()
-						}
-					};
+					return _lexicalOnly(lexical.value);
 				}
 				throw semantic.reason;
 			}
@@ -293,9 +335,13 @@ Zotero.BestMatch = new function () {
 			let semanticScores = _nearTop(semantic.value.scores, _semanticFraction);
 			return {
 				scores: _fuse(lexicalScores, semanticScores),
-				matches: {
-					lexical: _keep(lexical.value.matches, lexicalScores),
-					semantic: new Set(
+				lexical: {
+					scores: _clamped(lexicalScores, share => share),
+					matches: _keep(lexical.value.matches, lexicalScores)
+				},
+				semantic: {
+					scores: _clamped(semanticScores, _semanticFraction),
+					previewable: new Set(
 						[...semantic.value.previewableIDs].filter(id => semanticScores.has(id))
 					)
 				}
@@ -375,16 +421,17 @@ Zotero.BestMatch = new function () {
 		 * @throws {Zotero.BestMatch.ScoringCancelledError}
 		 */
 		async score(itemIDs, options = {}) {
-			let { scores, matches } = await Zotero.BestMatch.scoreItemIDs(
+			let result = await Zotero.BestMatch.scoreItemIDs(
 				this._queryText, itemIDs, { ...options, engine: this._engine });
+			let { scores, lexical, semantic } = result;
 			if (this._disposed) {
 				return scores;
 			}
-			this._lexicalMatches = matches.lexical;
+			this._lexicalMatches = lexical.matches;
 			// The scoring terms are the same in every record that has them
-			this._lexicalTerms = [...matches.lexical.values()].find(record => record.terms)?.terms ?? null;
+			this._lexicalTerms = [...lexical.matches.values()].find(record => record.terms)?.terms ?? null;
 			let previews = new Map();
-			for (let itemID of new Set([...matches.lexical.keys(), ...matches.semantic])) {
+			for (let itemID of new Set([...lexical.matches.keys(), ...semantic.previewable])) {
 				if (!scores.has(itemID) || !_hasPreviews(itemID)) {
 					continue;
 				}
@@ -396,12 +443,12 @@ Zotero.BestMatch = new function () {
 				previews.set(itemID, {
 					state: 'pending',
 					entries: [],
-					lexical: matches.lexical.has(itemID),
-					semantic: matches.semantic.has(itemID)
+					lexical: lexical.matches.has(itemID),
+					semantic: semantic.previewable.has(itemID)
 				});
 			}
 			this._previews = previews;
-			this._rank(scores);
+			this._rank(result);
 			// Derive in the order rows appear on screen: an item's preview
 			// rows render under its top-level ancestor, which is ranked by
 			// the best match anywhere beneath it -- an item's own score can
@@ -480,62 +527,105 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * Ranks from this session's last scoring pass: 1-based, tied
-		 * effective scores share a rank, and every row with a match anywhere
-		 * beneath it is covered (see _rank()). Empty before the first pass.
+		 * Ranks from this session's last scoring pass by the sort measure
+		 * (see sortEngine): 1-based, tied effective scores share a rank, and
+		 * every row with a match anywhere beneath it is covered. Empty
+		 * before the first pass.
 		 *
 		 * @return {Map} - treeViewID -> rank (1 = most relevant)
 		 */
 		get ranks() {
-			return this._ranks ?? new Map();
+			return this.ranksBy(this.sortEngine);
 		}
 
 		/**
-		 * Score fractions for the relevance bars, keyed like ranks: each
-		 * row's own score alone, so a row that only inherited its rank from
-		 * a descendant shows its rank over an empty bar
+		 * The last pass's ranks by one measure: the hybrid (fused) scores, or
+		 * one engine's own evidence, where an item that engine found nothing
+		 * in (nor beneath) ranks last. A measure the pass can't rank by gives
+		 * the ranks of its first one (see sortEngines).
 		 *
-		 * @return {Map} - treeViewID -> 0-1 fraction
+		 * @param {String} engine - 'hybrid', 'lexical' or 'semantic'
+		 * @return {Map} - treeViewID -> rank (1 = most relevant)
+		 */
+		ranksBy(engine) {
+			return this._ranksBy?.[engine] ?? this._ranksBy?.[this.sortEngines[0]] ?? new Map();
+		}
+
+		/**
+		 * The measures the last pass can rank by, the default first: 'hybrid'
+		 * and each engine when both ranked; the one engine that did
+		 * otherwise, since its order is the whole order; the session's engine
+		 * when neither found anything
+		 *
+		 * @return {String[]}
+		 */
+		get sortEngines() {
+			return this._sortEngines ?? [this._engine];
+		}
+
+		/**
+		 * The measure ranks order by: the first of sortEngines unless set to
+		 * another the pass can rank by
+		 *
+		 * @type {String}
+		 */
+		get sortEngine() {
+			return this.sortEngines.includes(this._sortEngine) ? this._sortEngine : this.sortEngines[0];
+		}
+
+		set sortEngine(engine) {
+			this._sortEngine = engine;
+		}
+
+		/**
+		 * What each engine found in each row, for the relevance bars, keyed
+		 * like ranks: the row's own evidence alone, so a row that only
+		 * inherited its rank from a descendant shows its rank over empty
+		 * bars. An engine that didn't rank reads 0 everywhere.
+		 *
+		 * @return {Map} - treeViewID -> { lexical, semantic }, each a 0-1
+		 *     fraction
 		 */
 		get barFractions() {
 			return this._barFractions ?? new Map();
 		}
 
-		// Rank the scored items, lifting each item's score onto its ancestors
-		// (annotation -> attachment -> top-level item) first, so an item's
-		// effective score -- and so its rank -- is the best match anywhere
-		// beneath it. Equal effective scores get equal ranks, so tied rows
-		// (including a child and its parent) order deterministically via the
-		// consumer's secondary sort fields.
-		_rank(scores) {
-			let effectiveScores = new Map(scores);
-			for (let [itemID, score] of scores) {
-				let parentItemID = Zotero.Items.get(itemID)?.parentItemID;
-				while (parentItemID) {
-					let current = effectiveScores.get(parentItemID);
-					if (current === undefined || score > current) {
-						effectiveScores.set(parentItemID, score);
-					}
-					parentItemID = Zotero.Items.get(parentItemID)?.parentItemID;
+		// Rank the scored items by the fused scores and, when both engines
+		// ranked, by each engine's own evidence over the same items -- at 0
+		// where it found nothing, so those rank last together. When one
+		// engine ranked, the fused order is its order, under its name.
+		_rank({ scores, lexical, semantic }) {
+			let fused = _rankScores(scores);
+			let engines = { lexical, semantic };
+			let ranked = Object.keys(engines).filter(engine => engines[engine].scores.size > 0);
+			let ranksBy = {};
+			if (ranked.length == 2) {
+				ranksBy.hybrid = fused.ranks;
+				for (let engine of ranked) {
+					ranksBy[engine] = _rankScores(new Map(
+						[...scores.keys()].map(id => [id, engines[engine].scores.get(id) ?? 0])
+					)).ranks;
 				}
+				this._sortEngines = ['hybrid', ...ranked];
 			}
-			let rankOfScore = new Map(
-				[...new Set(effectiveScores.values())].sort((a, b) => b - a)
-					.map((score, i) => [score, i + 1])
-			);
-			let ranks = new Map();
+			else {
+				let engine = ranked[0] ?? this._engine;
+				ranksBy[engine] = fused.ranks;
+				this._sortEngines = [engine];
+			}
 			let fractions = new Map();
-			for (let [itemID, score] of effectiveScores) {
+			for (let itemID of fused.effectiveScores.keys()) {
 				let item = Zotero.Items.get(itemID);
-				if (!item) {
-					continue;
+				if (item) {
+					fractions.set(item.treeViewID, {
+						lexical: lexical.scores.get(itemID) ?? 0,
+						semantic: semantic.scores.get(itemID) ?? 0
+					});
 				}
-				ranks.set(item.treeViewID, rankOfScore.get(score));
-				fractions.set(item.treeViewID, scores.get(itemID) || 0);
 			}
-			this._ranks = ranks;
+			this._ranksBy = ranksBy;
 			this._barFractions = fractions;
-			this._effectiveScores = effectiveScores;
+			this._effectiveScores = fused.effectiveScores;
 		}
 
 		// The effective score of an item's top-level ancestor -- what places

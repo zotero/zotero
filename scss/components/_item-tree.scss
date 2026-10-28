@@ -219,7 +219,9 @@
 				}
 			}
 
-			// The similarity bar: the score's fraction of the model's display range
+			// The relevance bars: what each engine found in the row, the words
+			// on the upper track and the meaning on the lower, or one bar for
+			// a row carrying its own relevance
 			.cell.relevance {
 				align-items: center;
 
@@ -231,27 +233,73 @@
 					background: var(--fill-quarternary);
 					overflow: hidden;
 
+					&.dual {
+						display: flex;
+						flex-direction: column;
+						gap: 1px;
+						height: 7px;
+						border-radius: 0;
+						background: none;
+						overflow: visible;
+					}
+
+					.relevance-bar-track {
+						display: block;
+						flex: 1;
+						border-radius: 2px;
+						background: var(--fill-quarternary);
+						overflow: hidden;
+					}
+
 					.relevance-bar-fill {
 						display: block;
 						height: 100%;
 						background: var(--accent-blue);
 					}
 
-					// On a focused selected row the accent fill would vanish into
+					.relevance-bar-track.lexical .relevance-bar-fill {
+						background: var(--accent-yellow);
+					}
+
+					// On a focused selected row the accent fills would vanish into
 					// the accent selection background, so switch to white like
-					// .attachment-progress
+					// .attachment-progress, the words track a little dimmer
 					@include state(".row.selected") {
 						background: #ffffff33;
+
+						&.dual {
+							background: none;
+						}
+
+						.relevance-bar-track {
+							background: #ffffff33;
+						}
 
 						.relevance-bar-fill {
 							background: var(--accent-white);
 						}
 
+						.relevance-bar-track.lexical .relevance-bar-fill {
+							background: #ffffffb3;
+						}
+
 						@include state(".virtualized-table:not(:focus-within)") {
 							background: var(--fill-quinary);
 
+							&.dual {
+								background: none;
+							}
+
+							.relevance-bar-track {
+								background: var(--fill-quinary);
+							}
+
 							.relevance-bar-fill {
 								background: var(--accent-blue);
+							}
+
+							.relevance-bar-track.lexical .relevance-bar-fill {
+								background: var(--accent-yellow);
 							}
 						}
 					}

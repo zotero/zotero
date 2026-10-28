@@ -248,12 +248,32 @@ describe("CollectionViewItemTree", function () {
 					assert.deepEqual(itemsView._rows.map(row => row.id),
 						[full.id, partial.id, sparse.id]);
 					assert.equal(itemsView.getSortField(), 'relevance');
-					// The bars carry the lexical scores directly
+					// The words track carries the lexical scores directly; the
+					// meaning track is empty without a model
 					let fractions = itemsView.rowProvider.getBestMatchBarFractions();
-					assert.isAbove(fractions.get(full.id), fractions.get(partial.id));
-					assert.isAbove(fractions.get(partial.id), fractions.get(sparse.id));
-					assert.isAtMost(fractions.get(full.id), 1);
-					assert.isAbove(fractions.get(sparse.id), 0);
+					assert.isAbove(fractions.get(full.id).lexical, fractions.get(partial.id).lexical);
+					assert.isAbove(fractions.get(partial.id).lexical, fractions.get(sparse.id).lexical);
+					assert.isAtMost(fractions.get(full.id).lexical, 1);
+					assert.isAbove(fractions.get(sparse.id).lexical, 0);
+					assert.equal(fractions.get(full.id).semantic, 0);
+
+					// With one engine ranking there's one measure to sort by,
+					// named for that engine on the header: a header click and
+					// the sort menu leave the order alone
+					assert.deepEqual(itemsView.rowProvider.getRelevanceSortEngines(), ['lexical']);
+					let header = win.document.querySelector('.virtualized-table-header .cell.relevance');
+					assert.isTrue(header.classList.contains('relevance-lexical'));
+					assert.equal(header.querySelector('.label').getAttribute('title'), 'Relevance: Words');
+					let relevanceIndex = itemsView._getColumns().findIndex(c => c.dataKey == 'relevance');
+					await itemsView.tree._columns.toggleSort(relevanceIndex);
+					assert.deepEqual(itemsView._rows.map(row => row.id),
+						[full.id, partial.id, sparse.id]);
+					let menupopup = win.document.createXULElement('menupopup');
+					itemsView.buildSortMenu(menupopup);
+					let relevance = [...menupopup.children].filter(el => el.getAttribute('label').startsWith('Relevance'));
+					assert.lengthOf(relevance, 1);
+					assert.equal(relevance[0].localName, 'menuitem');
+					assert.equal(relevance[0].getAttribute('label'), 'Relevance: Words');
 				}
 				finally {
 					Zotero.Prefs.clear('search.bestMatchMargin');
@@ -341,12 +361,11 @@ describe("CollectionViewItemTree", function () {
 				// The Relevance cells show the ranks
 				assert.equal(itemsView.getCellText(0, 'relevance'), 1);
 				assert.equal(itemsView.getCellText(1, 'relevance'), 2);
-				// The bars carry the fused scores, so they agree with the
-				// ranking: with no lexical matches, a semantic match at rank
-				// 1 fuses to half its fraction, rank 2 to fraction * 61/124
+				// The bars carry what each engine found: the semantic
+				// fractions, and nothing on the words track
 				let barFractions = itemsView.rowProvider.getBestMatchBarFractions();
-				assert.closeTo(barFractions.get(itemB.id), 0.9 / 2, 1e-12);
-				assert.closeTo(barFractions.get(itemA.id), 0.5 * 61 / 124, 1e-12);
+				assert.deepEqual(barFractions.get(itemB.id), { lexical: 0, semantic: 0.9 });
+				assert.deepEqual(barFractions.get(itemA.id), { lexical: 0, semantic: 0.5 });
 				assert.isFalse(itemsView._getColumns().find(c => c.dataKey == 'relevance').hidden);
 				// The rendered header shows the column
 				assert.ok(win.document.querySelector('.virtualized-table-header .cell.relevance'));
@@ -367,8 +386,11 @@ describe("CollectionViewItemTree", function () {
 						+ ' visibleCols=' + itemsView.tree._columns.getAsArray().filter(c => !c.hidden).map(c => c.dataKey).join(',')
 						+ '\n');
 				}
-				assert.equal(win.getComputedStyle(bar).height, '6px');
-				assert.notEqual(bar.firstChild.style.width, '0%');
+				// Two tracks, the words above the meaning; the meaning track is
+				// the one filled here
+				assert.equal(win.getComputedStyle(bar).height, '7px');
+				assert.equal(bar.querySelector('.lexical .relevance-bar-fill').style.width, '0%');
+				assert.notEqual(bar.querySelector('.semantic .relevance-bar-fill').style.width, '0%');
 
 				// Clearing the search restores the previous sort and columns
 				await itemsView.setFilter('search', '');
@@ -417,14 +439,14 @@ describe("CollectionViewItemTree", function () {
 				assert.equal(ranks.get(attachment.id), 1);
 				assert.equal(ranks.get(item.id), 1);
 				assert.equal(ranks.get(other.id), 2);
-				// The bar reports only the row's own score: the annotation gets
-				// its match (fused: a rank-1 semantic match at half its
-				// fraction), the rows ranked by it get an empty bar
+				// The bars report only what each engine found in the row
+				// itself: the annotation gets its semantic match, the rows
+				// ranked by it get empty bars
 				let fractions = itemsView.rowProvider.getBestMatchBarFractions();
-				assert.closeTo(fractions.get(annotation.id), 0.45, 1e-12);
-				assert.equal(fractions.get(attachment.id), 0);
-				assert.equal(fractions.get(item.id), 0);
-				assert.closeTo(fractions.get(other.id), 0.5 * 61 / 124, 1e-12);
+				assert.deepEqual(fractions.get(annotation.id), { lexical: 0, semantic: 0.9 });
+				assert.deepEqual(fractions.get(attachment.id), { lexical: 0, semantic: 0 });
+				assert.deepEqual(fractions.get(item.id), { lexical: 0, semantic: 0 });
+				assert.deepEqual(fractions.get(other.id), { lexical: 0, semantic: 0.5 });
 
 				// The matched annotation's ancestors auto-expand, and its row
 				// renders a relevance bar of its own. Row painting is async, so
@@ -439,7 +461,8 @@ describe("CollectionViewItemTree", function () {
 						await Zotero.Promise.delay(10);
 					}
 				}
-				assert.equal(bar.firstChild.style.width, '45%');
+				assert.equal(bar.querySelector('.semantic .relevance-bar-fill').style.width, '90%');
+				assert.equal(bar.querySelector('.lexical .relevance-bar-fill').style.width, '0%');
 
 				// An annotation row's bar has to be the same width as every
 				// other row's. The tight annotation layout drops cell padding,
@@ -522,6 +545,109 @@ describe("CollectionViewItemTree", function () {
 					delete itemsView._columnPrefs.dateModified;
 					itemsView._columnsId = null;
 					itemsView._sortedColumn = null;
+				}
+			});
+
+			it("should sort the Relevance column by either engine alone from a header click or the sort menu", async function () {
+				// Ranking is under test, not membership: keep every match
+				Zotero.Prefs.set('search.bestMatchMargin', 100);
+				try {
+					let col = await createDataObject('collection');
+					let itemA = await createDataObject('item', { title: "enginesort A", collections: [col.id] });
+					let itemB = await createDataObject('item', { title: "enginesort B", collections: [col.id] });
+					let itemC = await createDataObject('item', { title: "enginesort C", collections: [col.id] });
+					// The words find B and C, the meaning A and B, so each
+					// measure orders the three differently
+					Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+						[[itemB.id, 1], [itemC.id, 0.6]].filter(([id]) => itemIDs.includes(id)))));
+					stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs').callsFake(scoreEnvelope(
+						async (query, itemIDs) => new Map(
+							[[itemA.id, 0.9], [itemB.id, 0.5]].filter(([id]) => itemIDs.includes(id)))
+					)));
+
+					await select(win, col);
+					itemsView = zp.itemsView;
+					await itemsView.setFilter('search', 'some query');
+					let order = () => itemsView._rows.map(row => row.id);
+					let engine = () => itemsView.rowProvider.getRelevanceSortEngine();
+					let relevanceIndex = () => itemsView._getColumns().findIndex(c => c.dataKey == 'relevance');
+					let header = () => win.document.querySelector('.virtualized-table-header .cell.relevance');
+					// Row painting and the header render are async, so poll
+					// (the test times out on failure)
+					let until = async (test) => {
+						while (!test()) {
+							await Zotero.Promise.delay(10);
+						}
+					};
+
+					// Hybrid by default: B, found by both, leads
+					assert.deepEqual(order(), [itemB.id, itemA.id, itemC.id]);
+					assert.deepEqual(itemsView.rowProvider.getRelevanceSortEngines(), ['hybrid', 'lexical', 'semantic']);
+					assert.equal(header().querySelector('.label').getAttribute('title'), 'Relevance: Words + Meaning');
+
+					// A header click sorts by the words alone; the item the words
+					// found nothing in ranks last. The header says and shows which.
+					await itemsView.tree._columns.toggleSort(relevanceIndex());
+					assert.equal(engine(), 'lexical');
+					assert.equal(itemsView.getSortField(), 'relevance');
+					assert.deepEqual(order(), [itemB.id, itemC.id, itemA.id]);
+					assert.equal(itemsView.getCellText(2, 'relevance'), 3);
+					await until(() => header()?.classList.contains('relevance-lexical'));
+					assert.equal(header().querySelector('.label').getAttribute('title'), 'Relevance: Words');
+
+					// The next click sorts by the meaning alone
+					await itemsView.tree._columns.toggleSort(relevanceIndex());
+					assert.equal(engine(), 'semantic');
+					assert.deepEqual(order(), [itemA.id, itemB.id, itemC.id]);
+					await until(() => header()?.classList.contains('relevance-semantic'));
+
+					// And the next returns to the hybrid order
+					await itemsView.tree._columns.toggleSort(relevanceIndex());
+					assert.equal(engine(), 'hybrid');
+					assert.deepEqual(order(), [itemB.id, itemA.id, itemC.id]);
+					await until(() => header() && !header().classList.contains('relevance-semantic'));
+
+					// The sort menu's Relevance entry is a menu of the measures,
+					// the current one checked, and picks one directly
+					let relevanceEntries = () => {
+						let menupopup = win.document.createXULElement('menupopup');
+						itemsView.buildSortMenu(menupopup);
+						let menu = [...menupopup.children].find(el => el.getAttribute('label') == 'Relevance');
+						assert.equal(menu.localName, 'menu');
+						return [...menu.querySelector('menupopup').children];
+					};
+					let entries = relevanceEntries();
+					assert.deepEqual(
+						entries.map(item => item.getAttribute('label')),
+						['Words', 'Meaning', 'Words + Meaning']
+					);
+					assert.deepEqual(
+						entries.filter(item => item.hasAttribute('checked')).map(item => item.getAttribute('label')),
+						['Words + Meaning']
+					);
+					entries.find(item => item.getAttribute('label') == 'Meaning')
+						.dispatchEvent(new Event('command'));
+					await until(() => engine() == 'semantic' && order()[0] == itemA.id);
+					assert.deepEqual(
+						relevanceEntries().filter(item => item.hasAttribute('checked')).map(item => item.getAttribute('label')),
+						['Meaning']
+					);
+
+					// Sorting by another column and coming back starts hybrid again
+					let titleIndex = itemsView._getColumns().findIndex(c => c.dataKey == 'title');
+					await itemsView.tree._columns.toggleSort(titleIndex);
+					assert.equal(itemsView.getSortField(), 'title');
+					await itemsView.tree._columns.toggleSort(relevanceIndex());
+					assert.equal(itemsView.getSortField(), 'relevance');
+					assert.equal(engine(), 'hybrid');
+					assert.deepEqual(order(), [itemB.id, itemA.id, itemC.id]);
+
+					// Clearing the search drops the measures with the ranking
+					await itemsView.setFilter('search', '');
+					assert.deepEqual(itemsView.rowProvider.getRelevanceSortEngines(), ['hybrid']);
+				}
+				finally {
+					Zotero.Prefs.clear('search.bestMatchMargin');
 				}
 			});
 

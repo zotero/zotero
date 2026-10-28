@@ -151,6 +151,32 @@ class ItemTreeRowProvider {
 		return new Map();
 	}
 
+	/**
+	 * The measure the Relevance sort follows while a best-match search is
+	 * active: 'hybrid', or 'lexical' or 'semantic' for one engine's evidence
+	 * alone -- the only one offered when only that engine ranked. Overridden
+	 * by row providers that support best-match searches.
+	 *
+	 * @returns {String}
+	 */
+	getRelevanceSortEngine() {
+		return 'hybrid';
+	}
+
+	/**
+	 * @param {String} _engine - One of getRelevanceSortEngines()
+	 */
+	setRelevanceSortEngine(_engine) {}
+
+	/**
+	 * The measures the active best-match search can sort by
+	 *
+	 * @returns {String[]}
+	 */
+	getRelevanceSortEngines() {
+		return ['hybrid'];
+	}
+
 	get includeTrashed() {
 		return this._includeTrashed;
 	}
@@ -2378,6 +2404,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._getColumns()
 			.filter(column => !column.hidden)
 			.forEach((column, i) => {
+				// When the search can sort the Relevance column by more than
+				// one measure, its entry is a menu of them
+				if (column.dataKey == 'relevance' && this.rowProvider.getRelevanceSortEngines().length > 1) {
+					this._buildRelevanceSortMenu(menupopup);
+					return;
+				}
 				let menuItem = document.createXULElement('menuitem');
 				menuItem.setAttribute('type', 'checkbox');
 				menuItem.toggleAttribute('checked', this.getSortField() == column.dataKey);
@@ -2387,6 +2419,43 @@ var ItemTree = class ItemTree extends LibraryTree {
 				});
 				menupopup.append(menuItem);
 			});
+	}
+
+	_buildRelevanceSortMenu(menupopup) {
+		let menu = document.createXULElement('menu');
+		menu.setAttribute('label', Zotero.getString('items-column-relevance'));
+		let popup = document.createXULElement('menupopup');
+		let sorted = this.getSortField() == 'relevance';
+		let current = this.rowProvider.getRelevanceSortEngine();
+		for (let engine of ['lexical', 'semantic', 'hybrid']) {
+			let menuItem = document.createXULElement('menuitem');
+			menuItem.setAttribute('type', 'checkbox');
+			menuItem.toggleAttribute('checked', sorted && engine == current);
+			menuItem.setAttribute('label', Zotero.getString('items-sort-relevance-' + engine));
+			menuItem.addEventListener('command', () => this.setRelevanceSort(engine));
+			popup.append(menuItem);
+		}
+		menu.append(popup);
+		menupopup.append(menu);
+	}
+
+	/**
+	 * Sort the Relevance column by one measure of the active best-match
+	 * search (see ItemTreeRowProvider#getRelevanceSortEngines())
+	 *
+	 * @param {String} engine - 'hybrid', 'lexical' or 'semantic'
+	 */
+	async setRelevanceSort(engine) {
+		this.rowProvider.setRelevanceSortEngine(engine);
+		// The cached ranks and the header follow the measure
+		this.invalidateRowCache(true);
+		this._columnsId = null;
+		this.selection.selectEventsSuppressed = true;
+		await this.sort();
+		this.forceUpdate(() => {
+			this.selection.selectEventsSuppressed = false;
+			this.tree.invalidate();
+		});
 	}
 
 	toggleSort(sortIndex, countVisible = false) {
@@ -2777,8 +2846,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// starting or clearing rebuilds the columns with or without the forced
 		// Relevance column below
 		const bestMatchSearch = this._isBestMatchSearchActive();
+		// The measure the forced Relevance sort follows shapes the column too
+		const sortEngine = bestMatchSearch ? this.rowProvider.getRelevanceSortEngine() : null;
 		const prefKey = this.id + '-' + this.viewType
-			+ (bestMatchSearch ? '-bestMatchSearch' : '');
+			+ (bestMatchSearch ? '-bestMatchSearch-' + sortEngine : '');
 		if (this._columnsId == prefKey) {
 			return this._columns;
 		}
@@ -2885,6 +2956,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				col.hidden = false;
 				col.sortDirection = -1;
+				// The header is named and tinted by the measure the sort follows
+				col.label = 'items-column-relevance-' + sortEngine;
+				col.className = 'relevance-' + sortEngine;
 				// Far right, so the bar lines up across item, note, attachment,
 				// and annotation rows -- annotation rows use a custom layout
 				// that puts their bar at the row's end
@@ -3078,6 +3152,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_handleColumnSort = async (index, sortDirection) => {
 		let columnSettings = this._getColumnPrefs();
 		let column = this._getColumn(index);
+		// Clicking the sorted Relevance column steps through the measures the
+		// search can sort by; returning to it from another column starts over
+		if (column.dataKey == 'relevance') {
+			let engines = this.rowProvider.getRelevanceSortEngines();
+			let current = this.rowProvider.getRelevanceSortEngine();
+			if (this._sortedColumn?.dataKey == 'relevance') {
+				await this.setRelevanceSort(engines[(engines.indexOf(current) + 1) % engines.length]);
+				return;
+			}
+			if (current != engines[0]) {
+				this.rowProvider.setRelevanceSortEngine(engines[0]);
+				this.invalidateRowCache(true);
+			}
+		}
 		if (column.dataKey == 'hasAttachment') {
 			Zotero.debug("Caching best attachment states");
 			if (!this._cachedBestAttachmentStates) {
