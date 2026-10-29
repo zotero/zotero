@@ -121,22 +121,17 @@
 		row-gap: 6px;
 	}
 	
-	#semantic-search-diagnostics-toggle {
-		align-self: flex-start;
-		margin-inline: 0;
-	}
-	
-	// Bars and figures share one label column
-	#semantic-search-progress,
-	#semantic-search-diagnostics {
+	#semantic-search-progress {
 		display: grid;
 		align-items: center;
 		column-gap: 12px;
 		row-gap: 4px;
-	}
-	
-	#semantic-search-progress {
 		grid-template-columns: max-content 1fr max-content;
+
+		// The grid would otherwise win over the hidden attribute
+		&[hidden] {
+			display: none;
+		}
 		
 		.semantic-search-progress-row {
 			display: contents;
@@ -150,21 +145,9 @@
 			width: 100%;
 		}
 	}
-	
-	#semantic-search-diagnostics {
-		grid-template-columns: max-content 1fr;
-		
-		&[hidden] {
-			display: none;
-		}
-		
-		label:nth-child(odd) {
-			color: var(--fill-secondary);
-		}
-		
-		label:nth-child(even) {
-			white-space: normal;
-		}
+
+	#semantic-search-rate {
+		color: var(--fill-secondary);
 	}
 }
 

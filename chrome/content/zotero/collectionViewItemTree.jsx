@@ -237,7 +237,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * banner above the items list. Null when there's no active best-match
 	 * search or every eligible item is indexed.
 	 *
-	 * @returns {Object|null} - { type: 'indexing'|'paused', indexed, total }
+	 * @returns {Object|null} - { type: 'indexing'|'paused'|'synced', indexed, total }
 	 */
 	getBestMatchIndexState() {
 		return this._bestMatchIndexState || null;
@@ -1530,9 +1530,10 @@ class CollectionViewItemTree extends ItemTree {
 
 	/**
 	 * While a best-match search runs against a partially built embeddings
-	 * index, show a banner above the items list with the indexing progress,
-	 * so incomplete results aren't mistaken for a complete ranking. The
-	 * counts are read when the search refreshes.
+	 * index, show a banner above the items list with how far along it is
+	 * -- indexing here, paused, or arriving by sync -- so incomplete results
+	 * aren't mistaken for a complete ranking. The counts are read when the
+	 * search refreshes.
 	 */
 	_renderTablePrologue() {
 		let state = this.rowProvider.getBestMatchIndexState();
@@ -1543,9 +1544,7 @@ class CollectionViewItemTree extends ItemTree {
 			<div
 				className="best-match-index-banner"
 				key="best-match-index-banner"
-				data-l10n-id={state.type == 'paused'
-					? 'items-best-match-indexing-paused'
-					: 'items-best-match-indexing'}
+				data-l10n-id={'items-best-match-' + state.type}
 				data-l10n-args={JSON.stringify({ indexed: state.indexed, total: state.total })}
 			/>
 		);

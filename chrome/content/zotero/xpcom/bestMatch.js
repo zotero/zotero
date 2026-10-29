@@ -205,7 +205,7 @@ Zotero.BestMatch = new function () {
 	 * eligible is indexed. Never throws -- the state is informational and
 	 * shouldn't break a search.
 	 *
-	 * @return {Promise<Object|null>} - { type: 'indexing'|'paused', indexed,
+	 * @return {Promise<Object|null>} - { type: 'indexing'|'paused'|'synced', indexed,
 	 *     total }, counted in items, attachments included
 	 */
 	this.getIndexState = async function () {
@@ -226,15 +226,14 @@ Zotero.BestMatch = new function () {
 			if (indexed >= total) {
 				return null;
 			}
-			// Only an explicit pause reports as paused. Anything else --
-			// between runs (startup, the pre-run debounce) or after an error
-			// (detailed in the preferences) -- reports as indexing, since the
-			// state explains the incomplete coverage, not the indexer.
-			return {
-				type: status.paused ? 'paused' : 'indexing',
-				indexed,
-				total
-			};
+			let type = 'indexing';
+			if (status.server) {
+				type = 'synced';
+			}
+			else if (status.paused) {
+				type = 'paused';
+			}
+			return { type, indexed, total };
 		}
 		catch (e) {
 			Zotero.logError(e);

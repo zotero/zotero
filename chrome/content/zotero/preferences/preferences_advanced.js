@@ -102,14 +102,6 @@ Zotero_Preferences.Advanced = {
 			this.openSemanticSearchEndpointDialog();
 		});
 
-		let diagnostics = document.getElementById('semantic-search-diagnostics');
-		let toggle = document.getElementById('semantic-search-diagnostics-toggle');
-		toggle.addEventListener('command', () => {
-			diagnostics.hidden = !diagnostics.hidden;
-			document.l10n.setAttributes(toggle, diagnostics.hidden
-				? 'preferences-advanced-semantic-search-diagnostics-show'
-				: 'preferences-advanced-semantic-search-diagnostics-hide');
-		});
 		// The endpoint's stored verdict is read lazily; have it in memory
 		// before the status line first renders
 		Zotero.Embeddings.Endpoint.load().then(() => {
@@ -125,18 +117,35 @@ Zotero_Preferences.Advanced = {
 	updateSemanticSearchUI: function (status) {
 		let statusBox = document.getElementById('semantic-search-status');
 		statusBox.hidden = !status.enabled;
-		this.updateSemanticSearchEndpointUI(status.endpoint, status.enabled);
+		// The endpoint, the bars and the rate all describe indexing here,
+		// which the server's embedding replaces
+		this.updateSemanticSearchEndpointUI(status.endpoint, status.enabled && !status.server);
 		if (!status.enabled) {
+			return;
+		}
+		let phaseLabel = document.getElementById('semantic-search-phase');
+		let resumeButton = document.getElementById('semantic-search-resume');
+		let stopButton = document.getElementById('semantic-search-stop');
+		let rateLabel = document.getElementById('semantic-search-rate');
+		document.getElementById('semantic-search-progress').hidden = status.server;
+		if (status.server) {
+			rateLabel.hidden = true;
+			resumeButton.hidden = true;
+			stopButton.hidden = true;
+			// One line: the data comes by sync, and this much of it is here
+			let done = status.items.done + status.attachments.done;
+			let total = status.items.total + status.attachments.total;
+			document.l10n.setAttributes(phaseLabel, status.syncing
+				? 'preferences-advanced-semantic-search-synced-downloading'
+				: 'preferences-advanced-semantic-search-synced', { done, total });
 			return;
 		}
 
 		// Phase / status message
-		let phaseLabel = document.getElementById('semantic-search-phase');
 		// Work a run can do: attachments rather than chunks, since the chunk
-		// counts cover only the documents cut here, and not the ones that
-		// come from the server, which a sync brings
+		// counts cover only the documents cut so far
 		let hasRemaining = status.items.done < status.items.total
-			|| status.attachments.done + status.attachments.awaiting < status.attachments.total;
+			|| status.attachments.done < status.attachments.total;
 		if (status.error) {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-error', { error: status.error });
 		}
@@ -169,35 +178,11 @@ Zotero_Preferences.Advanced = {
 				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-preparing');
 			}
 		}
-		// The rest are embedded here -- "here" being worth saying only
-		// when there's a server that might have done it, and whose refusals
-		// are the reason for some of it
 		else if (status.phase === 'indexing-documents') {
-			if (status.server && status.embedWork) {
-				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing-documents-locally', {
-					count: status.embedWork.own,
-					declined: status.embedWork.declined
-				});
-			}
-			else {
-				document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing-documents');
-			}
+			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing-documents');
 		}
 		else if (status.phase === 'indexing') {
 			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-indexing');
-		}
-		// A sync is bringing the server's rows, which move the attachment
-		// count as they land
-		else if (status.syncing && !status.indexing) {
-			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-downloading-documents', {
-				done: status.attachments.done,
-				total: status.attachments.total
-			});
-		}
-		// Between runs, with attachments still to come from the server on
-		// the next sync
-		else if (status.attachments.awaiting && !status.paused && !hasRemaining) {
-			document.l10n.setAttributes(phaseLabel, 'preferences-advanced-semantic-search-awaiting');
 		}
 		else {
 			document.l10n.setAttributes(phaseLabel,
@@ -206,16 +191,14 @@ Zotero_Preferences.Advanced = {
 					: 'preferences-advanced-semantic-search-idle');
 		}
 
-		// Offer a manual restart when enabled but not currently indexing or
-		// syncing and indexing is stopped, there's outstanding work, or the
-		// last run errored out
-		document.getElementById('semantic-search-resume').hidden
-			= status.indexing || status.syncing || !(status.error || status.paused || hasRemaining);
+		// Offer a manual restart when enabled but not currently indexing and
+		// indexing is stopped, there's outstanding work, or the last run
+		// errored out
+		resumeButton.hidden = status.indexing || !(status.error || status.paused || hasRemaining);
 
 		// Offer to stop indexing while it's running; a requested stop takes
 		// effect once the current batch finishes, so disable the button in
 		// the meantime
-		let stopButton = document.getElementById('semantic-search-stop');
 		stopButton.hidden = !status.indexing;
 		stopButton.disabled = !!status.stopping;
 
@@ -225,7 +208,25 @@ Zotero_Preferences.Advanced = {
 		this._updateSemanticSearchBar('items', status.items);
 		document.getElementById('semantic-search-attachments-row').hidden = !status.attachments.total;
 		this._updateSemanticSearchBar('attachments', status.attachments);
-		this._updateSemanticSearchDiagnostics(status);
+
+		// While documents are embedded, how fast and how long is left: the
+		// last two minutes' rate when there is one, the run's otherwise
+		let rate = status.diagnostics.window || status.diagnostics.run;
+		rateLabel.hidden = status.phase !== 'indexing-documents' || !rate;
+		if (!rateLabel.hidden) {
+			let eta = status.eta === null ? null : Math.max(0, Math.round(status.eta));
+			document.l10n.setAttributes(rateLabel,
+				eta === null
+					? 'preferences-advanced-semantic-search-rate'
+					: 'preferences-advanced-semantic-search-rate-eta',
+				{
+					rate: rate.chunksPerSecond.toLocaleString(undefined, {
+						maximumFractionDigits: 1, minimumFractionDigits: 1
+					}),
+					hours: eta === null ? 0 : Math.floor(eta / 3600),
+					minutes: eta === null ? 0 : Math.ceil(eta % 3600 / 60)
+				});
+		}
 	},
 
 
@@ -260,67 +261,6 @@ Zotero_Preferences.Advanced = {
 		window.openDialog('chrome://zotero/content/preferences/embeddingsEndpoint.xhtml',
 			'zotero-preferences-embeddingsEndpoint', 'chrome,modal,centerscreen', io);
 		this.updateSemanticSearchUI(Zotero.Embeddings.Indexing.getStatus());
-	},
-
-
-	// Key/value rows of pipeline diagnostics for developers, so the labels
-	// are plain English rather than localized
-	_updateSemanticSearchDiagnostics: function ({ items, chunks: indexed, diagnostics, eta }) {
-		let n = (value, digits = 0) => (value ?? 0).toLocaleString(undefined, {
-			maximumFractionDigits: digits, minimumFractionDigits: digits
-		});
-		let pct = value => Math.round((value || 0) * 100) + '%';
-		let mb = bytes => n(bytes / 1024 / 1024) + ' MB';
-		let speed = rate => `${n(rate.chunksPerSecond, 1)} chunks/s, ${n(rate.tokensPerSecond)} tokens/s`;
-		let bucketList = (buckets, total, unit) => buckets.map(({ from, to, count }) => {
-			let range = from === null ? `< ${n(to)}` : (to === null ? `≥ ${n(from)}` : `${n(from)}–${n(to - 1)}`);
-			return `${range}${unit}: ${n(count)} (${pct(total ? count / total : 0)})`;
-		}).join(' · ');
-		let proc = p => (p ? `${mb(p.memory)}${p.cpu === null ? '' : `, CPU ${p.cpu}%`}` : '—');
-		let duration = (seconds) => {
-			let h = Math.floor(seconds / 3600);
-			let m = Math.floor(seconds % 3600 / 60);
-			return h ? `${h} h ${m} m` : `${m} m ${Math.floor(seconds % 60)} s`;
-		};
-
-		let rows = [];
-		let { window, run, engine, processes, slice, chunks } = diagnostics;
-		rows.push(['Items indexed', `${n(items.done)} / ${n(items.total)}`]);
-		rows.push(['Chunks for local inference', `${n(indexed.done)} / ${n(indexed.total)}`]);
-		rows.push(['Local inference ETA', eta === null ? '—' : duration(eta)]);
-		rows.push(['Throughput (2 min)', window ? speed(window) : '—']);
-		rows.push(['Inference speed (run)', run ? speed(run) : '—']);
-		rows.push(['Padding efficiency', window || run
-			? `${window ? pct(window.paddingEfficiency) : '—'} (2 min), ${run ? pct(run.paddingEfficiency) : '—'} (run)`
-			: '—']);
-		rows.push(['Batches (run)', run
-			? `${n(run.batches)} · ${n(run.chunksPerBatch, 1)} chunks · ${n(run.tokensPerBatch)} tokens avg`
-			: '—']);
-		rows.push(['Token budget', `${n(diagnostics.tokenBudget)} · ${n(diagnostics.pressureEvents)} memory-pressure events`]);
-		rows.push(['Engine threads', `${engine.threads} of ${engine.optimalThreads}`
-			+ (engine.boosts.length ? ` (boost: ${engine.boosts.join(', ')})` : '')]);
-		rows.push(['Engine restarts (run)', `memory ${diagnostics.restarts.memory}, threads ${diagnostics.restarts.threads}`]);
-		rows.push(['Inference process', proc(processes?.inference)]);
-		rows.push(['Main process', proc(processes?.main)]);
-		rows.push(['Available memory', processes?.available ? mb(processes.available) : '—']);
-		rows.push(['Slice', slice ? `${n(slice.done)} / ${n(slice.total)} chunks` : '—']);
-		if (chunks) {
-			let { perDocument } = chunks;
-			rows.push(['Chunks per document', `${n(perDocument.count)} documents · mean ${n(perDocument.mean, 1)} · median ${n(perDocument.median)} · max ${n(perDocument.max)}`]);
-			rows.push(['Documents by chunks', bucketList(perDocument.buckets, perDocument.count, '')]);
-		}
-
-		let box = document.getElementById('semantic-search-diagnostics');
-		while (box.childElementCount < rows.length * 2) {
-			box.append(document.createXULElement('label'), document.createXULElement('label'));
-		}
-		while (box.childElementCount > rows.length * 2) {
-			box.lastElementChild.remove();
-		}
-		rows.forEach(([label, value], i) => {
-			box.children[i * 2].value = label;
-			box.children[i * 2 + 1].value = value;
-		});
 	},
 
 

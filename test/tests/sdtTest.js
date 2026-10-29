@@ -414,6 +414,45 @@ describe("Zotero.SDT", function () {
 		}
 	});
 
+	describe("AutoIndex", function () {
+		it("should extract a pack for every eligible attachment without one and leave the rest alone", async function () {
+			let missing = await importFileAttachment('test.pdf');
+			await OS.File.remove(getSDTCachePath(missing), { ignoreAbsent: true });
+			let cached = await importFileAttachment('test.pdf');
+			await writeTestSDTCache(cached);
+			let text = await importFileAttachment('test.txt');
+			let workerStub = stubStructuredDocumentTextWorker();
+			let asked = id => workerStub.args.some(args => args[0] == id);
+			Zotero.Prefs.set('sdt.autoExtract', true);
+			try {
+				await Zotero.SDT.AutoIndex.sweep();
+				assert.isTrue(await Zotero.SDT.isCached(missing.id));
+				assert.isTrue(asked(missing.id));
+				// A cached pack is a stat away and isn't read; a text file
+				// has no pack to make
+				assert.isFalse(asked(cached.id));
+				assert.isFalse(asked(text.id));
+
+				// Settled attachments aren't asked about again this session
+				workerStub.resetHistory();
+				await Zotero.SDT.AutoIndex.sweep();
+				assert.isFalse(workerStub.called);
+
+				// Turned off, a sweep extracts nothing
+				let later = await importFileAttachment('test.pdf');
+				await OS.File.remove(getSDTCachePath(later), { ignoreAbsent: true });
+				Zotero.Prefs.set('sdt.autoExtract', false);
+				await Zotero.SDT.AutoIndex.sweep();
+				assert.isFalse(await Zotero.SDT.isCached(later.id));
+				assert.isFalse(asked(later.id));
+			}
+			finally {
+				workerStub.restore();
+				Zotero.Prefs.set('sdt.autoExtract', false);
+			}
+		});
+	});
+
 	it("should return false from ensure() when generation fails", async function () {
 		let item = await importFileAttachment('test.pdf');
 		await OS.File.remove(getSDTCachePath(item), { ignoreAbsent: true });

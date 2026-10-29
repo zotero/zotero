@@ -104,22 +104,8 @@ preferences-advanced-semantic-search-downloading-progress = Downloading… { $pe
 preferences-advanced-semantic-search-preparing = Preparing documents…
 preferences-advanced-semantic-search-preparing-progress = Preparing documents… { $done } / { $total }
 preferences-advanced-semantic-search-indexing-documents = Indexing documents…
-preferences-advanced-semantic-search-downloading-documents = Downloading semantic data… { $done } / { $total }
-preferences-advanced-semantic-search-indexing-documents-locally =
-    { $declined ->
-        [0] Generating semantic data locally for { $count ->
-                [one] { $count } item
-               *[other] { $count } items
-            }…
-       *[other] Generating semantic data locally for { $count ->
-                [one] { $count } item
-               *[other] { $count } items
-            }… ({ $declined ->
-                [one] { $declined } not available
-               *[other] { $declined } not available
-            } from the server)
-    }
-preferences-advanced-semantic-search-awaiting = Semantic data will be downloaded on next sync
+preferences-advanced-semantic-search-synced = Semantic data is downloaded when you sync: { $done } of { $total } items received
+preferences-advanced-semantic-search-synced-downloading = Downloading semantic data… { $done } of { $total } items
 preferences-advanced-semantic-search-indexing = Indexing…
 preferences-advanced-semantic-search-stopping = Stopping…
 preferences-advanced-semantic-search-idle = Up to date
@@ -132,10 +118,12 @@ preferences-advanced-semantic-search-stop =
 preferences-advanced-semantic-search-items = Metadata, notes, annotations
 preferences-advanced-semantic-search-attachments = Attachments
 preferences-advanced-semantic-search-progress-value = { $percent }%
-preferences-advanced-semantic-search-diagnostics-show =
-    .label = Show Diagnostics
-preferences-advanced-semantic-search-diagnostics-hide =
-    .label = Hide Diagnostics
+preferences-advanced-semantic-search-rate = { $rate } pieces of text per second
+preferences-advanced-semantic-search-rate-eta =
+    { $hours ->
+        [0] { $rate } pieces of text per second, about { $minutes } min left
+       *[other] { $rate } pieces of text per second, about { $hours } h { $minutes } min left
+    }
 preferences-advanced-semantic-search-endpoint-configure =
     .label = Configure Endpoint…
 preferences-advanced-semantic-search-endpoint-off =
@@ -203,9 +191,6 @@ preferences-sync-data-syncing-heading = { -preferences-sync-data-syncing }
 preferences-sync-data-syncing-description = Log in with your { -app-name } account to sync your data between devices, collaborate with others, and more.
 preferences-sync-settings-heading = Sync
 preferences-sync-settings-intro = { -app-name } can sync your library data and files across devices. <label data-l10n-name="sync-link">Learn more</label>
-preferences-sync-semantic-data =
-    .label = Sync semantic search data
-    .tooltiptext = Download the semantic search data that { -app-name } generates for your files on its servers. Without it, { -app-name } generates it on this computer.
 preferences-sync-reset-heading = Sync Reset
 preferences-sync-fileSyncing-groups =
     .label = Sync attachment files in group libraries using { -app-name } Storage

@@ -9,7 +9,7 @@ describe("Zotero.Embeddings", function () {
 	var meanStub;
 
 	before(function () {
-		Zotero.Embeddings.Indexing.init();
+		Zotero.Embeddings.init();
 		testMean = testCalibrationMean();
 		// Stands in for a recorded model, which the test environment has no
 		// downloaded model to measure, for every test in the file: the real
@@ -158,6 +158,34 @@ describe("Zotero.Embeddings", function () {
 				// Built in the module's global, so not this scope's Float32Array
 				assert.equal(mean.constructor.name, 'Float32Array');
 				assert.equal(mean.length, dims);
+			}
+		});
+
+		it("should answer with the server's model or this computer's", function () {
+			let config = () => modelStub.wrappedMethod.call(Zotero.Embeddings);
+			let enabled = sinon.stub(Zotero.Sync.Runner, 'enabled').get(() => true);
+			try {
+				// A syncing account gets the server's embeddings
+				Zotero.Prefs.clear('embeddings.forceLocalIndexing');
+				assert.isTrue(Zotero.Embeddings.shouldSyncEmbeddings());
+				let synced = config();
+				Zotero.Prefs.set('embeddings.forceLocalIndexing', true);
+				assert.isFalse(Zotero.Embeddings.shouldSyncEmbeddings());
+				let local = config();
+				for (let model of [synced, local]) {
+					assert.isString(model.name);
+					assert.isNumber(model.dims);
+					assert.isNumber(model.storage.version);
+				}
+				// Without an account to sync with, everything is this computer's
+				Zotero.Prefs.clear('embeddings.forceLocalIndexing');
+				enabled.get(() => false);
+				assert.isFalse(Zotero.Embeddings.shouldSyncEmbeddings());
+				assert.strictEqual(config(), local);
+			}
+			finally {
+				enabled.restore();
+				Zotero.Prefs.clear('embeddings.forceLocalIndexing');
 			}
 		});
 	});
@@ -525,7 +553,7 @@ describe("Zotero.Embeddings", function () {
 	};
 
 	describe("Indexing of arrived rows", function () {
-		it("should keep rows that arrived before their file was read", async function () {
+		it("should leave rows that arrived before their file to the sync that adopts them", async function () {
 			this.timeout(60000);
 			let item = await importFileAttachment('test.pdf');
 			await store(item, 1, axis(0), { anchor: positionWorld.sampling.anchor });
@@ -536,12 +564,10 @@ describe("Zotero.Embeddings", function () {
 			];
 			try {
 				await indexArrivedRows();
-				// The document was read once, to confirm the rows were made
-				// from it, and the rows kept as its complete index. Counted
-				// for this item alone: indexing runs over every attachment
-				// the library holds.
-				assert.lengthOf(
-					Zotero.SDT.getItemChunks.args.filter(([itemID]) => itemID === item.id), 1);
+				// The rows are a complete index already, so the run neither
+				// reads the document nor cuts it again; recording them as
+				// the file's is the sync's job (see Sync.syncLibrary())
+				assert.isFalse(Zotero.SDT.getItemChunks.args.some(([itemID]) => itemID === item.id));
 				assert.equal(
 					await Zotero.DB.valueQueryAsync(
 						"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", item.id),
@@ -643,6 +669,82 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				sdtStubs.forEach(stub => stub.restore());
+			}
+		});
+	});
+
+	describe("#init()", function () {
+		it("should stop a run and wait for it before switching between the server's embeddings and this computer's", async function () {
+			let { Indexing } = Zotero.Embeddings;
+			// Nothing going: idle at once
+			await Indexing.whenIdle();
+			let release;
+			let running = new Promise((resolve) => {
+				release = resolve;
+			});
+			let stubs = [
+				sinon.stub(Indexing, 'stopIndexing'),
+				sinon.stub(Indexing, 'whenIdle').returns(running),
+				sinon.stub(Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'shutdownEngine').resolves(),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Sync.Runner, 'setSyncTimeout')
+			];
+			let until = async (test) => {
+				while (!test()) {
+					await Zotero.Promise.delay(10);
+				}
+			};
+			try {
+				Zotero.Prefs.set('embeddings.forceLocalIndexing', true);
+				// The run is told to stop at once, and nothing else happens
+				// until it's over
+				assert.isTrue(Indexing.stopIndexing.calledOnce);
+				await Zotero.Promise.delay(50);
+				assert.isFalse(Zotero.Embeddings.shutdownEngine.called);
+				assert.isFalse(Indexing.startIndexing.called);
+				release();
+				await until(() => Indexing.startIndexing.called);
+				assert.isTrue(Zotero.Embeddings.shutdownEngine.calledBefore(Indexing.startIndexing));
+				// The stop recorded a pause the switch didn't ask for, which
+				// is put back as it was (stopIndexing is stubbed here, so
+				// the pref reads as before the switch either way)
+				assert.isFalse(Zotero.Prefs.get('embeddings.indexingPaused'));
+
+				// An account linked or unlinked switches the same way
+				await Zotero.Notifier.trigger('modify', 'api-key', []);
+				await until(() => Indexing.stopIndexing.callCount == 2);
+				await until(() => Indexing.startIndexing.callCount == 2);
+
+				// Flipped back while the stubs still stand in
+				Zotero.Prefs.clear('embeddings.forceLocalIndexing');
+				await until(() => Indexing.startIndexing.callCount == 3);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+				Zotero.Prefs.clear('embeddings.forceLocalIndexing');
+			}
+		});
+
+		it("should turn extraction ahead of time on with semantic search", function () {
+			let stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Sync.Runner, 'setSyncTimeout')
+			];
+			Zotero.Prefs.set('sdt.autoExtract', false);
+			try {
+				Zotero.Prefs.set('search.bestMatch.enableSemantic', true);
+				assert.isTrue(Zotero.Prefs.get('sdt.autoExtract'));
+				// Turning semantic search off leaves extraction as it is
+				Zotero.Prefs.set('sdt.autoExtract', false);
+				Zotero.Prefs.set('search.bestMatch.enableSemantic', false);
+				assert.isFalse(Zotero.Prefs.get('sdt.autoExtract'));
+			}
+			finally {
+				Zotero.Prefs.clear('search.bestMatch.enableSemantic');
+				Zotero.Prefs.set('sdt.autoExtract', false);
+				stubs.forEach(stub => stub.restore());
 			}
 		});
 	});
@@ -1171,7 +1273,7 @@ describe("Zotero.Embeddings", function () {
 
 		it("should describe how to serve the model", function () {
 			let { command, url } = Zotero.Embeddings.Endpoint.getCommand();
-			assert.include(command, 'hotchpotch/bekko-embedding-v1-a25m-GGUF:F16');
+			assert.include(command, 'hotchpotch/bekko-embedding-v1-a8m-GGUF:F16');
 			assert.include(command, '--pooling mean');
 			assert.include(url, 'localhost');
 		});
@@ -1383,72 +1485,6 @@ describe("Zotero.Embeddings", function () {
 	});
 
 	describe("Sync", function () {
-		it("should leave to the server the stored files in a syncing Zotero Storage library", async function () {
-			let Sync = Zotero.Embeddings.Sync;
-			let Storage = Zotero.Sync.Storage.Local;
-			let stored = await importFileAttachment('test.pdf');
-			let linked = await Zotero.Attachments.linkFromFile({
-				file: OS.Path.join(getTestDataDirectory().path, 'test.pdf')
-			});
-			let syncState = sinon.stub(Zotero.Item.prototype, 'attachmentSyncState')
-				.get(() => Storage.SYNC_STATE_IN_SYNC);
-			let stubs = [
-				syncState,
-				sinon.stub(Sync, 'isAvailable').returns(true),
-				sinon.stub(Storage, 'getEnabledForLibrary').returns(true),
-				sinon.stub(Storage, 'getModeForLibrary').returns('zfs'),
-				sinon.stub(Zotero.Sync.Data.Local, 'filterSkippedLibraries')
-					.callsFake(libraries => libraries)
-			];
-			try {
-				assert.isTrue(Sync.isServersAttachment(stored));
-				// A linked file never goes up
-				assert.isFalse(Sync.isServersAttachment(linked));
-				// A file the server has but this client hasn't brought down
-				// is the server's; one still to go up is this client's
-				syncState.get(() => Storage.SYNC_STATE_TO_DOWNLOAD);
-				assert.isTrue(Sync.isServersAttachment(stored));
-				syncState.get(() => Storage.SYNC_STATE_TO_UPLOAD);
-				assert.isFalse(Sync.isServersAttachment(stored));
-				syncState.get(() => Storage.SYNC_STATE_IN_SYNC);
-				// Files kept anywhere but Zotero Storage never reach the server
-				Storage.getModeForLibrary.returns('webdav');
-				assert.isFalse(Sync.isServersAttachment(stored));
-				Storage.getModeForLibrary.returns('zfs');
-				Storage.getEnabledForLibrary.returns(false);
-				assert.isFalse(Sync.isServersAttachment(stored));
-				Storage.getEnabledForLibrary.returns(true);
-				// Nor do those of a library left out of syncing
-				Zotero.Sync.Data.Local.filterSkippedLibraries.callsFake(() => []);
-				assert.isFalse(Sync.isServersAttachment(stored));
-				Zotero.Sync.Data.Local.filterSkippedLibraries.callsFake(libraries => libraries);
-				// One the server declined is this client's
-				assert.isFalse(Sync.isServersAttachment(stored, { syncDeclined: Date.now() }));
-				// An active endpoint takes the server's place
-				let endpoint = sinon.stub(Zotero.Embeddings.Endpoint, 'isActive').returns(true);
-				try {
-					assert.isFalse(Sync.isServersAttachment(stored));
-				}
-				finally {
-					endpoint.restore();
-				}
-				// And nothing is the server's when sync can't run
-				Sync.isAvailable.returns(false);
-				assert.isFalse(Sync.isServersAttachment(stored));
-			}
-			finally {
-				stubs.forEach(stub => stub.restore());
-			}
-			// The override wins over a syncing account
-			Zotero.Prefs.set('embeddings.sync.enabled', false);
-			try {
-				assert.isFalse(Sync.isAvailable());
-			}
-			finally {
-				Zotero.Prefs.clear('embeddings.sync.enabled');
-			}
-		});
-
 		describe("fetching", function () {
 			var client;
 			var prepared = vector => Zotero.Embeddings.quantize(
@@ -1567,11 +1603,8 @@ describe("Zotero.Embeddings", function () {
 					getEmbedding: sinon.stub().resolves(false),
 					getEmbeddingVersions: sinon.stub().resolves(false)
 				};
-				let Storage = Zotero.Sync.Storage.Local;
 				stubs = [
-					sinon.stub(Zotero.Embeddings.Sync, 'isAvailable').returns(true),
-					sinon.stub(Storage, 'getEnabledForLibrary').returns(true),
-					sinon.stub(Storage, 'getModeForLibrary').returns('zfs'),
+					sinon.stub(Zotero.Embeddings, 'shouldSyncEmbeddings').returns(true),
 					sinon.stub(Zotero.Sync.Data.Local, 'filterSkippedLibraries')
 						.callsFake(libraries => libraries),
 					sinon.stub(Zotero.Embeddings, 'embedPassages')
@@ -1601,6 +1634,57 @@ describe("Zotero.Embeddings", function () {
 					"DELETE FROM embeddings.embeddingsMeta WHERE key LIKE ?", ['embeddingsVersion:%']);
 			});
 
+			it("should take the server's rows for items, notes and annotations as they come", async function () {
+				this.timeout(60000);
+				let { Sources } = Zotero.Embeddings.Indexing;
+				let item = await createDataObject('item', { title: 'Parent whose metadata the server embedded' });
+				let attachment = await importPDFAttachment(item);
+				let note = new Zotero.Item('note');
+				note.parentID = item.id;
+				note.setNote('<p>A note with several words about owls.</p>');
+				await note.saveTx();
+				let annotation = await createAnnotation('highlight', attachment, { comment: 'An owl note' });
+				// A linked URL has no text to index, however the server came by
+				// rows for it
+				let link = await Zotero.Attachments.linkFromURL({
+					url: 'https://example.com/owls', parentItemID: item.id, contentType: 'text/html'
+				});
+				// Rows of a text the server assembled and cut: no anchor, and a
+				// hash this client has nothing to check against
+				let served = (object, kind) => ({
+					...arrival(object, [axis(1)], `${kind}-text-hash`, 1, `${kind}/1/0/1`),
+					rows: [{ chunkIndex: 0, embedding: encode(axis(1)), anchor: null }]
+				});
+				serve({
+					[item.key]: served(item, 'item'),
+					[note.key]: served(note, 'note'),
+					[annotation.key]: served(annotation, 'annotation'),
+					[link.key]: served(link, 'snapshot')
+				});
+				let indexed = await Sources.countIndexedItems();
+				await fetch();
+				for (let object of [item, note, annotation]) {
+					assert.isTrue(askedFor(object.key));
+					assert.deepEqual(await stored(object.id), { chunks: 1, embedded: 1 });
+					assert.equal(await versionOf(object.id), 1);
+					assert.isNull(await syncState(object.id));
+					// No file, so no file key: nothing for adoption to do
+					assert.isNull(await Zotero.DB.valueQueryAsync(
+						"SELECT sourceKey FROM embeddings.itemIndexState WHERE itemID=?", object.id));
+				}
+				assert.equal(await Sources.countIndexedItems(), indexed + 3);
+				assert.isTrue(askedFor(link.key));
+				assert.isNull(await stored(link.id));
+
+				// Another sync adopts nothing and fetches nothing for them
+				let from = client.getEmbedding.callCount;
+				await fetch();
+				for (let object of [item, note, annotation]) {
+					assert.isFalse(askedFor(object.key, from));
+					assert.deepEqual(await stored(object.id), { chunks: 1, embedded: 1 });
+				}
+			});
+
 			it("should take the server's rows in place of embedding the attachment here", async function () {
 				this.timeout(60000);
 				let item = await createDataObject('item', { title: 'Parent of fetched attachment' });
@@ -1608,9 +1692,8 @@ describe("Zotero.Embeddings", function () {
 				serve({ [attachment.key]: arrival(attachment, [axis(1), axis(0)]) });
 				await fetch();
 				await run();
-				// Fetched by the sync, packed by the run; the rows that came
-				// are the attachment's index
-				assert.isTrue(Zotero.SDT.ensure.calledWith(attachment.id));
+				// Fetched by the sync; the rows that came are the
+				// attachment's index
 				assert.isTrue(askedFor(attachment.key));
 				assert.deepEqual(await stored(attachment.id), { chunks: 2, embedded: 2 });
 				assert.equal(await rowCount(attachment.id), 2);
@@ -1661,7 +1744,7 @@ describe("Zotero.Embeddings", function () {
 				assert.isFalse(Sources.isOutdatedExtractor(await extractorOf()));
 			});
 
-			it("should embed here an attachment whose rows can't be read, and take the others'", async function () {
+			it("should leave unindexed an attachment whose rows can't be read, and take the others'", async function () {
 				this.timeout(60000);
 				let unreadable = await importPDFAttachment(
 					await createDataObject('item', { title: 'Parent of attachment with unreadable rows' }));
@@ -1675,10 +1758,11 @@ describe("Zotero.Embeddings", function () {
 				});
 				await fetch();
 				await run();
-				// The one is declined and embedded here, the other's rows
-				// are taken
+				// The one is declined and stays unindexed -- nothing is
+				// embedded here -- the other's rows are taken
 				assert.isNotNull((await syncState(unreadable.id)).declined);
-				assert.deepEqual(await stored(unreadable.id), { chunks: 1, embedded: 1 });
+				assert.isNull(await stored(unreadable.id));
+				assert.isFalse(Zotero.Embeddings.embedPassages.called);
 				assert.equal(await versionOf(readable.id), 1);
 				assert.isNull(await syncState(readable.id));
 			});
@@ -1704,7 +1788,7 @@ describe("Zotero.Embeddings", function () {
 				}
 			});
 
-			it("should embed here an attachment whose vectors are too narrow or not finite", async function () {
+			it("should leave unindexed an attachment whose vectors are too narrow or not finite", async function () {
 				this.timeout(60000);
 				let narrow = await importPDFAttachment(
 					await createDataObject('item', { title: 'Parent of attachment with narrow rows' }));
@@ -1725,13 +1809,13 @@ describe("Zotero.Embeddings", function () {
 				for (let attachment of [narrow, infinite]) {
 					assert.isNotNull((await syncState(attachment.id)).declined);
 					assert.isNull(await versionOf(attachment.id));
-					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
+					assert.isNull(await stored(attachment.id));
 				}
 				assert.equal(await versionOf(good.id), 1);
 				assert.isNull(await syncState(good.id));
 			});
 
-			it("should embed here the attachments of an answer in an encoding it doesn't read", async function () {
+			it("should leave unindexed the attachments of an answer in an encoding it doesn't read", async function () {
 				this.timeout(60000);
 				let attachment = await importPDFAttachment(
 					await createDataObject('item', { title: 'Parent of attachment in another encoding' }));
@@ -1741,38 +1825,31 @@ describe("Zotero.Embeddings", function () {
 				assert.isTrue(askedFor(attachment.key));
 				assert.isNotNull((await syncState(attachment.id)).declined);
 				assert.isNull(await versionOf(attachment.id));
-				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
+				assert.isNull(await stored(attachment.id));
 			});
 
-			it("should embed an attachment here once the server declines it", async function () {
+			it("should leave an attachment the server declines until it lists it again", async function () {
 				this.timeout(60000);
 				let item = await createDataObject('item', { title: 'Parent of declined attachment' });
 				let attachment = await importPDFAttachment(item);
 				serve({ [attachment.key]: declined(attachment) });
 				await fetch();
-				// The status says which step is on, and why the attachment is
-				// embedded here
-				let seen = [];
-				let listener = status => seen.push({ phase: status.phase, work: status.embedWork });
-				Zotero.Embeddings.Indexing.addProgressListener(listener);
-				try {
-					await Zotero.Embeddings.Indexing.startIndexing();
-				}
-				finally {
-					Zotero.Embeddings.Indexing.removeProgressListener(listener);
-				}
-				// Declined by the sync, so embedded here by the run
+				// No run follows: with the server embedding, a start is a no-op
+				await Zotero.Embeddings.Indexing.startIndexing();
+				assert.isFalse(Zotero.Embeddings.Indexing.getStatus().indexing);
 				assert.isNotNull((await syncState(attachment.id)).declined);
-				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-				// Embedded here, this one among them
-				let local = seen.find(status => status.phase == 'indexing-documents');
-				assert.isAtLeast(local.work.own, 1);
-				assert.isAtLeast(local.work.declined, 1);
-				// Over, so the step's work is no longer reported
-				assert.isNull(Zotero.Embeddings.Indexing.getStatus().embedWork);
+				assert.isNull(await stored(attachment.id));
+				assert.isFalse(Zotero.Embeddings.embedPassages.called);
+				// Not awaited either: the server has said no
+				await Zotero.Embeddings.Indexing.refreshStatus();
+				let { awaiting } = Zotero.Embeddings.Indexing.getStatus().attachments;
+				let declinedCount = await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemIndexState WHERE syncDeclined IS NOT NULL");
+				assert.isAtLeast(declinedCount, 1);
+				assert.isAtMost(awaiting, await Zotero.Embeddings.Indexing.Sources.countEligibleAttachments() - declinedCount);
 
-				// Rows that come after all replace what was made here, and
-				// the refusal is forgotten
+				// Rows that come after all are taken, and the refusal is
+				// forgotten
 				assert.isTrue(await Zotero.Embeddings.Indexing.addChunks(attachment.id, {
 					modelVersion: 'test-model/1',
 					contentHash: 'sdt-test-hash',
@@ -1796,6 +1873,7 @@ describe("Zotero.Embeddings", function () {
 				assert.isFalse(askedFor(attachment.key));
 				assert.isNull(await stored(attachment.id));
 				assert.isNull(await syncState(attachment.id));
+				await Zotero.Embeddings.Indexing.refreshStatus();
 				assert.isAtLeast(Zotero.Embeddings.Indexing.getStatus().attachments.awaiting, 1);
 
 				// The next sync's look lists it, and the rows are fetched
@@ -1803,23 +1881,6 @@ describe("Zotero.Embeddings", function () {
 				await fetch();
 				assert.isTrue(askedFor(attachment.key));
 				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-			});
-
-			it("should stamp an attachment left to the server once it's been looked at", async function () {
-				this.timeout(60000);
-				let { Sources } = Zotero.Embeddings.Indexing;
-				let item = await createDataObject('item', { title: 'Parent of attachment stamped while awaited' });
-				let attachment = await importPDFAttachment(item);
-				serve({});
-				await fetch();
-				await run();
-				// Still outstanding, having no rows, but its state row carries
-				// the stamp the run saw it at, so the next run passes over its
-				// file
-				let page = await Sources.getOutstandingAttachments(0, 1000);
-				let entry = page.find(payload => payload.item.id == attachment.id);
-				assert.isOk(entry);
-				assert.equal(entry.record.clientDateModified, entry.clientDateModified);
 			});
 
 			it("should wait for an attachment the server listed but no longer has", async function () {
@@ -1835,10 +1896,11 @@ describe("Zotero.Embeddings", function () {
 				assert.isTrue(askedFor(attachment.key));
 				assert.isNull(await stored(attachment.id));
 				assert.isNull(await syncState(attachment.id));
+				await Zotero.Embeddings.Indexing.refreshStatus();
 				assert.isAtLeast(Zotero.Embeddings.Indexing.getStatus().attachments.awaiting, 1);
 			});
 
-			it("should embed an attachment here when the server's rows are from other content", async function () {
+			it("should leave unindexed an attachment whose server rows are from other content", async function () {
 				this.timeout(60000);
 				let item = await createDataObject('item', { title: 'Parent of attachment changed here' });
 				let attachment = await importPDFAttachment(item);
@@ -1847,11 +1909,11 @@ describe("Zotero.Embeddings", function () {
 				await fetch();
 				await run();
 				assert.isTrue(askedFor(attachment.key));
-				// Refused, so the server has nothing for the file as it is,
-				// and it's embedded here by the run
+				// Refused, so the server has nothing for the file as it is;
+				// nothing is embedded here, and the upload brings a new version
 				assert.isNotNull((await syncState(attachment.id)).declined);
-				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-				assert.isTrue(Zotero.Embeddings.embedPassages.called);
+				assert.isNull(await stored(attachment.id));
+				assert.isFalse(Zotero.Embeddings.embedPassages.called);
 			});
 
 			it("should ask again for a changed file the server declined", async function () {
@@ -1919,6 +1981,47 @@ describe("Zotero.Embeddings", function () {
 					let from = client.getEmbedding.callCount;
 					await fetch();
 					assert.isFalse(askedFor(attachment.key, from));
+
+					// The file arrives: the next sync adopts the rows as the
+					// file's, since they were made from its content, without
+					// asking the server again
+					delete attachment.getFilePathAsync;
+					from = client.getEmbedding.callCount;
+					await fetch();
+					assert.isFalse(askedFor(attachment.key, from));
+					assert.isNotNull(await Zotero.DB.valueQueryAsync(
+						"SELECT sourceKey FROM embeddings.itemIndexState WHERE itemID=?", attachment.id));
+					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
+					assert.equal(await versionOf(attachment.id), 1);
+					assert.isNull(await syncState(attachment.id));
+				}
+				finally {
+					delete attachment.getFilePathAsync;
+				}
+			});
+
+			it("should drop rows held for a file that arrives with other content", async function () {
+				this.timeout(60000);
+				let item = await createDataObject('item', { title: 'Parent of attachment arriving changed' });
+				let attachment = await importPDFAttachment(item);
+				Object.defineProperty(attachment, 'getFilePathAsync', {
+					value: async () => null,
+					configurable: true
+				});
+				try {
+					// Rows for another version of the file than the one that
+					// will arrive
+					serve({ [attachment.key]: arrival(attachment, [axis(1)], 'other-hash') });
+					await fetch();
+					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
+
+					// Nothing here was made from this file: the rows go, and
+					// the attachment is left to this client until the server
+					// lists a new version
+					delete attachment.getFilePathAsync;
+					await fetch();
+					assert.isNull(await stored(attachment.id));
+					assert.isNotNull((await syncState(attachment.id)).declined);
 				}
 				finally {
 					delete attachment.getFilePathAsync;
@@ -1927,13 +2030,10 @@ describe("Zotero.Embeddings", function () {
 
 			it("should forget rows cut from a file that's gone", async function () {
 				this.timeout(60000);
+				// This computer's to embed
+				Zotero.Embeddings.shouldSyncEmbeddings.returns(false);
 				let item = await createDataObject('item', { title: 'Parent of attachment whose file went' });
 				let attachment = await importPDFAttachment(item);
-				// This client's, so cut and embedded here
-				Object.defineProperty(attachment, 'attachmentSyncState', {
-					value: Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD,
-					configurable: true
-				});
 				try {
 					await Zotero.Embeddings.Indexing.startIndexing();
 					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
@@ -1945,7 +2045,6 @@ describe("Zotero.Embeddings", function () {
 					assert.isNull(await stored(attachment.id));
 				}
 				finally {
-					delete attachment.attachmentSyncState;
 					delete attachment.getFilePathAsync;
 				}
 			});
@@ -1970,15 +2069,14 @@ describe("Zotero.Embeddings", function () {
 				assert.isTrue(askedFor(attachment.key));
 				// Nothing recorded for it, and the version not recorded for
 				// the library, so the next look asks from the start again.
-				// The run neither cuts nor embeds it: the server's, as
-				// before. This client's own linked file is embedded
-				// regardless.
+				// Nothing is embedded here meanwhile, the linked file
+				// included: the server embeds for the account.
 				assert.isNull(await stored(attachment.id));
 				assert.isNull(await syncState(attachment.id));
 				assert.isNull(await Zotero.Embeddings.Indexing.Store.getSyncVersion(library.libraryID));
 				await run();
 				assert.isNull(await stored(attachment.id));
-				assert.deepEqual(await stored(linked.id), { chunks: 1, embedded: 1 });
+				assert.isNull(await stored(linked.id));
 
 				// The next sync's look lists it again, and this time the
 				// fetch goes through
@@ -2011,8 +2109,9 @@ describe("Zotero.Embeddings", function () {
 				await run();
 				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
 				assert.equal(await versionOf(attachment.id), 3);
-				// The linked file was embedded here
-				assert.deepEqual(await stored(linked.id), { chunks: 1, embedded: 1 });
+				// The linked file never reaches the server, and nothing is
+				// embedded here
+				assert.isNull(await stored(linked.id));
 				// The look, from the start, recorded the version
 				assert.isTrue(client.getEmbeddingVersions.calledWith(
 					library.libraryType, library.libraryTypeID, 'test-model/1', null));
@@ -2027,8 +2126,7 @@ describe("Zotero.Embeddings", function () {
 				// The server has embedded one of them anew: it's fetched again
 				// and its rows replaced. The other, at the version held,
 				// isn't. The linked file is asked for, since the server
-				// listed it, and the server's 404 leaves its rows as they
-				// are.
+				// listed it, and the server's 404 leaves it as it was.
 				serve({ [attachment.key]: arrival(attachment, [axis(0), axis(1)], 'sdt-test-hash', 7) });
 				changed(7, {
 					[attachment.key]: 7, [other.key]: 3, [linked.key]: 7
@@ -2046,7 +2144,7 @@ describe("Zotero.Embeddings", function () {
 				assert.isNull(await syncState(other.id));
 				assert.isNull(await syncState(linked.id));
 				assert.equal(await Store.getSyncVersion(library.libraryID), 7);
-				assert.deepEqual(await stored(linked.id), { chunks: 1, embedded: 1 });
+				assert.isNull(await stored(linked.id));
 
 				// The next look asks from the version recorded
 				changed(false);
@@ -2116,27 +2214,24 @@ describe("Zotero.Embeddings", function () {
 				assert.equal(await versionOf(attachment.id), 2);
 			});
 
-			it("should not ask the server while an endpoint is active", async function () {
+			it("should take the server's rows whatever endpoint is configured", async function () {
 				this.timeout(60000);
-				let item = await createDataObject('item', { title: 'Parent of attachment embedded at the endpoint' });
+				let item = await createDataObject('item', { title: 'Parent of attachment fetched beside an endpoint' });
 				let attachment = await importPDFAttachment(item);
 				serve({ [attachment.key]: arrival(attachment, [axis(1)]) });
-				changed(1, { [attachment.key]: 1 });
 				let endpoint = [
 					sinon.stub(Zotero.Embeddings.Endpoint, 'isActive').returns(true),
-					sinon.stub(Zotero.Embeddings.Endpoint, 'getActive').resolves({ url: 'http://localhost:1/' }),
-					sinon.stub(Zotero.Embeddings.Endpoint, 'recheck').resolves()
+					sinon.stub(Zotero.Embeddings.Endpoint, 'getActive').resolves({ url: 'http://localhost:1/' })
 				];
 				try {
 					await fetch();
 					await run();
-					// Embedded here, through the endpoint, without an ask
-					assert.isFalse(askedFor(attachment.key));
+					// An endpoint serves local indexing alone: the server is
+					// asked, its rows taken, and nothing embedded here
+					assert.isTrue(askedFor(attachment.key));
 					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-					assert.isTrue(Zotero.Embeddings.embedPassages.called);
-					assert.isFalse(Zotero.Embeddings.Indexing.getStatus().server);
-					// Nor is the server asked what changed
-					assert.isFalse(client.getEmbeddingVersions.called);
+					assert.isFalse(Zotero.Embeddings.embedPassages.called);
+					assert.isTrue(Zotero.Embeddings.Indexing.getStatus().server);
 					assert.isNull(await syncState(attachment.id));
 				}
 				finally {
@@ -2144,7 +2239,7 @@ describe("Zotero.Embeddings", function () {
 				}
 			});
 
-			it("should embed a file here while it's still to go up", async function () {
+			it("should leave a file still to go up to the server", async function () {
 				this.timeout(60000);
 				let item = await createDataObject('item', { title: 'Parent of attachment still to upload' });
 				let attachment = await importPDFAttachment(item);
@@ -2158,56 +2253,51 @@ describe("Zotero.Embeddings", function () {
 					await fetch();
 					await run();
 					// Fetched, since the server listed it, but refused for its
-					// content; this client's in any case, so cut and embedded
-					// here without waiting on anything
+					// content; nothing is embedded here, and the upload brings
+					// a new version
 					assert.isTrue(askedFor(attachment.key));
-					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-					assert.isTrue(Zotero.Embeddings.embedPassages.called);
-					assert.equal(await Zotero.DB.valueQueryAsync(
-						"SELECT contentHash FROM embeddings.itemIndexState WHERE itemID=?", attachment.id),
-					'sdt-test-hash');
+					assert.isNull(await stored(attachment.id));
+					assert.isFalse(Zotero.Embeddings.embedPassages.called);
+					assert.isNotNull((await syncState(attachment.id)).declined);
 				}
 				finally {
 					delete attachment.attachmentSyncState;
 				}
 			});
 
-			it("should do nothing for a library that isn't the server's", async function () {
+			it("should leave alone a library left out of syncing", async function () {
 				this.timeout(60000);
-				let Sync = Zotero.Embeddings.Sync;
-				let item = await createDataObject('item', { title: 'Parent of attachment in a WebDAV library' });
+				let item = await createDataObject('item', { title: 'Parent of attachment in a skipped library' });
 				let attachment = await importPDFAttachment(item);
 				serve({ [attachment.key]: arrival(attachment, [axis(1)]) });
-				Zotero.Sync.Storage.Local.getModeForLibrary.returns('webdav');
+				Zotero.Sync.Data.Local.filterSkippedLibraries.callsFake(() => []);
 				try {
-					assert.isFalse(Sync.isServersLibrary(library.libraryID));
+					// Its items never arrive here, so the server isn't asked
 					await fetch();
 					assert.isFalse(client.getEmbeddingVersions.called);
 					assert.isFalse(client.getEmbedding.called);
-					// Its attachments are this client's
+					// Nor is anything embedded here while the server embeds
+					// for the account
 					await run();
-					assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
-					assert.isTrue(Zotero.Embeddings.embedPassages.called);
+					assert.isNull(await stored(attachment.id));
+					assert.isFalse(Zotero.Embeddings.embedPassages.called);
 				}
 				finally {
-					Zotero.Sync.Storage.Local.getModeForLibrary.returns('zfs');
+					Zotero.Sync.Data.Local.filterSkippedLibraries.callsFake(libraries => libraries);
 				}
 			});
 
 			it("should hold the attachments while a sync runs and take them once it's over", async function () {
 				this.timeout(60000);
+				// This computer's to embed
+				Zotero.Embeddings.shouldSyncEmbeddings.returns(false);
 				let item = await createDataObject('item', { title: 'Parent of attachment held by a sync' });
 				let attachment = await importPDFAttachment(item);
-				// This client's, so cut and embedded here once the sync is over
-				Object.defineProperty(attachment, 'attachmentSyncState', {
-					value: Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD,
-					configurable: true
-				});
 				let syncing = sinon.stub(Zotero.Sync.Runner, 'syncInProgress').get(() => true);
 				try {
 					await Zotero.Embeddings.Indexing.startIndexing();
 					// The parent embedded, the attachment untouched
-					assert.isFalse(Zotero.SDT.ensure.calledWith(attachment.id));
+					assert.isFalse(Zotero.SDT.getItemChunks.calledWith(attachment.id));
 					assert.isNull(await stored(attachment.id));
 
 					// The sync ends: the run picks the attachments up on its own
@@ -2222,7 +2312,6 @@ describe("Zotero.Embeddings", function () {
 				}
 				finally {
 					syncing?.restore();
-					delete attachment.attachmentSyncState;
 				}
 			});
 
@@ -2230,15 +2319,15 @@ describe("Zotero.Embeddings", function () {
 				this.timeout(60000);
 				let item = await createDataObject('item', { title: 'Parent of attachment declined, then embedded' });
 				let attachment = await importPDFAttachment(item);
-				// Declined: embedded here
+				// Declined: unindexed
 				serve({ [attachment.key]: declined(attachment) });
 				await fetch();
 				await run();
 				assert.isNotNull((await syncState(attachment.id)).declined);
-				assert.deepEqual(await stored(attachment.id), { chunks: 1, embedded: 1 });
+				assert.isNull(await stored(attachment.id));
 
 				// The server now lists it among what changed: the refusal is
-				// forgotten, and its rows replace the ones made here
+				// forgotten, and its rows are taken
 				serve({ [attachment.key]: arrival(attachment, [axis(1), axis(0)], 'sdt-test-hash', 5) });
 				await fetch();
 				assert.isNull(await syncState(attachment.id));
@@ -2289,10 +2378,6 @@ describe("Zotero.Embeddings", function () {
 						: 'embed-item');
 					return passages.map(() => vector);
 				}),
-				sinon.stub(Zotero.SDT, 'ensure').callsFake(async () => {
-					events.push('extract');
-					return true;
-				}),
 				stubItemChunks(
 					sdtStructure([['', ['A section with enough words to be worth indexing.']]]))
 			];
@@ -2310,7 +2395,7 @@ describe("Zotero.Embeddings", function () {
 			let attachment = await importPDFAttachment(item);
 
 			await Zotero.Embeddings.Indexing.startIndexing();
-			assert.include(events, 'extract');
+			assert.isTrue(Zotero.SDT.getItemChunks.calledWith(attachment.id));
 			assert.include(events, 'embed-attachment');
 			assert.equal(await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(embedding) FROM embeddings.itemEmbeddings WHERE itemID=?", attachment.id), 1);
@@ -2382,7 +2467,7 @@ describe("Zotero.Embeddings", function () {
 			await Zotero.Notifier.trigger('modify', 'item', [item.id]);
 			await Zotero.Promise.delay(100);
 			assert.isFalse(Zotero.Embeddings.Indexing.getStatus().indexing);
-			assert.notInclude(events, 'extract');
+			assert.notInclude(events, 'embed-attachment');
 		});
 
 		// An item saved in the last few seconds is always looked at, so
@@ -2489,7 +2574,6 @@ describe("Zotero.Embeddings", function () {
 						"SELECT COUNT(embedding) FROM embeddings.itemEmbeddings WHERE itemID=?",
 						attachment.id), 1);
 				}
-				assert.equal(events.filter(event => event === 'extract').length, 3);
 				assert.isNull(Indexing.getStatus().error);
 			}
 			finally {
@@ -2568,10 +2652,11 @@ describe("Zotero.Embeddings", function () {
 			this.timeout(60000);
 			let item = await createDataObject('item', { title: 'Parent of attachment interrupted' });
 			await importPDFAttachment(item);
-			// A note arrives while the attachment is being extracted
+			// A note arrives while the attachment is being cut
 			let added = false;
-			Zotero.SDT.ensure.callsFake(async () => {
-				events.push('extract');
+			let cut = await Zotero.SDT.getItemChunks(0);
+			Zotero.SDT.getItemChunks.callsFake(async () => {
+				events.push('cut');
 				if (!added) {
 					added = true;
 					let note = new Zotero.Item('note');
@@ -2579,7 +2664,7 @@ describe("Zotero.Embeddings", function () {
 					note.setNote('<p>A note with several words about owls.</p>');
 					await note.saveTx();
 				}
-				return true;
+				return cut;
 			});
 
 			await Zotero.Embeddings.Indexing.startIndexing();
@@ -2587,9 +2672,9 @@ describe("Zotero.Embeddings", function () {
 			// brings the run back to the items between the pipeline's
 			// steps; the pipeline then starts over and finishes the
 			// attachment
-			assert.include(events, 'extract');
+			assert.include(events, 'cut');
 			assert.include(events, 'embed-attachment');
-			assert.isBelow(events.indexOf('extract'), events.lastIndexOf('embed-item'));
+			assert.isBelow(events.indexOf('cut'), events.lastIndexOf('embed-item'));
 			assert.isBelow(events.lastIndexOf('embed-item'), events.indexOf('embed-attachment'));
 			assert.isNull(Zotero.Embeddings.Indexing.getStatus().error);
 		});
@@ -3431,16 +3516,16 @@ describe("Zotero.Embeddings", function () {
 				"REPLACE INTO embeddings.embeddingsMeta (key, value) "
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
-			let extracted = () => Zotero.SDT.ensure.args
+			let cut = () => Zotero.SDT.getItemChunks.args
 				.filter(([itemID]) => itemID === item.id).length;
 			try {
 				await Zotero.Embeddings.Indexing.startIndexing();
-				let afterFirst = extracted();
+				let afterFirst = cut();
 				await Zotero.Embeddings.Indexing.startIndexing();
 				// Complete rows are left alone rather than counted again on
 				// every pass, which would read the document each time, for
 				// good
-				assert.equal(extracted(), afterFirst);
+				assert.equal(cut(), afterFirst);
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -3459,10 +3544,6 @@ describe("Zotero.Embeddings", function () {
 			let vector = new Float32Array(4).fill(0.5);
 			// What the run did, in order, as the steps themselves report it
 			let events = [];
-			let ensureStub = sinon.stub(Zotero.SDT, 'ensure').callsFake(async () => {
-				events.push('extract');
-				return true;
-			});
 			let itemChunksStub = stubItemChunks(
 				sdtStructure([['', ['A section with enough words to be worth indexing.']]]));
 			let stubs = [
@@ -3476,7 +3557,6 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				ensureStub,
 				itemChunksStub
 			];
 			let phases = [];
@@ -3488,13 +3568,10 @@ describe("Zotero.Embeddings", function () {
 			Zotero.Embeddings.Indexing.addProgressListener(onProgress);
 			try {				await Zotero.Embeddings.Indexing.startIndexing();
 
-				// Every item embeds before any document is extracted, and
-				// every document is extracted before any of them embeds
+				// Every item embeds before any document does
 				assert.include(events, 'embed-item');
 				assert.include(events, 'embed-attachment');
-				assert.isBelow(events.lastIndexOf('embed-item'), events.indexOf('extract'));
-				assert.isBelow(events.lastIndexOf('extract'), events.indexOf('embed-attachment'));
-				assert.isTrue(ensureStub.calledWith(attachment.id));
+				assert.isBelow(events.lastIndexOf('embed-item'), events.indexOf('embed-attachment'));
 				assert.isTrue(itemChunksStub.calledWith(attachment.id));
 				// And each step announces itself, in the same order
 				assert.deepEqual(
@@ -3507,13 +3584,14 @@ describe("Zotero.Embeddings", function () {
 				stubs.forEach(stub => stub.restore());			}
 		});
 
-		it("shouldn't prepare an attachment whose stored embedding is current", async function () {
+		it("shouldn't cut an attachment whose stored embedding is current", async function () {
 			this.timeout(60000);
 			let item = await createDataObject('item', { title: 'Parent of current attachment' });
 			let attachment = await importPDFAttachment(item);
 
 			let vector = new Float32Array(4).fill(0.5);
-			let ensureStub = sinon.stub(Zotero.SDT, 'ensure').resolves(true);
+			let itemChunksStub = stubItemChunks(
+				sdtStructure([['', ['A section with enough words to be worth indexing.']]]));
 			let stubs = [
 				sinon.stub(Zotero.Embeddings, 'embedPassages')
 					.callsFake(async texts => texts.map(() => vector)),
@@ -3521,18 +3599,16 @@ describe("Zotero.Embeddings", function () {
 				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 				sinon.stub(Zotero.Embeddings, 'isDownloaded').resolves(true),
 				sinon.stub(Zotero.Embeddings, 'download').resolves(),
-				ensureStub,
-				stubItemChunks(
-					sdtStructure([['', ['A section with enough words to be worth indexing.']]]))
+				itemChunksStub
 			];
 			try {				await Zotero.Embeddings.Indexing.startIndexing();
-				assert.isTrue(ensureStub.calledWith(attachment.id));
+				assert.isTrue(itemChunksStub.calledWith(attachment.id));
 
 				// A second pass finds the stored embedding current, so the
-				// attachment needs no pack
-				ensureStub.resetHistory();
+				// attachment isn't read again
+				itemChunksStub.resetHistory();
 				await Zotero.Embeddings.Indexing.startIndexing();
-				assert.isFalse(ensureStub.calledWith(attachment.id));
+				assert.isFalse(itemChunksStub.calledWith(attachment.id));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());			}

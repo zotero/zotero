@@ -624,3 +624,149 @@ Zotero.SDT = new function () {
 		return e?.name === 'PasswordException';
 	}
 };
+
+/**
+ * Zotero.SDT.AutoIndex -- extract sdt of every valid attachment.
+ */
+Zotero.SDT.AutoIndex = new function () {
+	// Debounce before a sweep starts, so a burst of saved attachments (an
+	// import, a sync) is taken in one
+	const KICK_DELAY = 3000;
+	// Before the first sweep of a session, out of the way of startup
+	const STARTUP_DELAY = 10000;
+
+	let _initialized = false;
+	let _sweeping = null;
+	let _kicked = false;
+	let _kickTimer = null;
+	// Attachments settled this session -- cached, or not extractable as
+	// they are -- until they're saved again
+	let _settled = new Set();
+
+	/**
+	 * Wire up the sweep: kicked by saved attachments and finished syncs,
+	 * and once at startup. Guarded so multiple windows don't double-register.
+	 */
+	this.init = function () {
+		if (_initialized) {
+			return;
+		}
+		_initialized = true;
+		Zotero.Prefs.registerObserver('sdt.autoExtract', () => this.kick());
+		Zotero.Notifier.registerObserver({
+			notify: (event, type, ids) => {
+				if (type == 'sync') {
+					if (event == 'finish') {
+						this.kick();
+					}
+					return;
+				}
+				if (event == 'add' || event == 'modify') {
+					// A saved attachment may have a new file, or its first
+					for (let id of ids) {
+						_settled.delete(id);
+					}
+					this.kick();
+				}
+			}
+		}, ['item', 'sync'], 'sdtAutoIndex');
+		this.kick(STARTUP_DELAY);
+	};
+
+	/**
+	 * Whether attachments are extracted ahead of time at all
+	 * @return {Boolean}
+	 */
+	this.isEnabled = function () {
+		return !!Zotero.Prefs.get('sdt.autoExtract');
+	};
+
+	/**
+	 * Start a sweep after a delay, which gathers a burst of kicks into one.
+	 * A kick during a sweep has it go again once it's over.
+	 *
+	 * @param {Number} [delay=KICK_DELAY] - Milliseconds
+	 */
+	this.kick = function (delay = KICK_DELAY) {
+		if (!this.isEnabled()) {
+			return;
+		}
+		if (_kickTimer) {
+			clearTimeout(_kickTimer);
+		}
+		_kickTimer = setTimeout(() => {
+			_kickTimer = null;
+			this.sweep();
+		}, delay);
+	};
+
+	/**
+	 * Sweep now: go over every eligible attachment and extract where no
+	 * pack is cached, until there's nothing left or the preference is
+	 * turned off. Returns the sweep already going when there is one.
+	 *
+	 * @return {Promise}
+	 */
+	this.sweep = function () {
+		if (_sweeping) {
+			_kicked = true;
+			return _sweeping;
+		}
+		_sweeping = _sweep()
+			.catch(e => Zotero.logError(e))
+			.finally(() => {
+				_sweeping = null;
+				if (_kicked) {
+					_kicked = false;
+					this.kick();
+				}
+			});
+		return _sweeping;
+	};
+
+	// The eligible attachments: PDFs and EPUBs with a file, imported or
+	// linked, and snapshots, in the user and group libraries. Ids only, so
+	// a whole library is a few hundred kilobytes at most.
+	async function _getEligibleIDs() {
+		let libraryIDs = Zotero.Libraries.getAll()
+			.filter(library => ['user', 'group'].includes(library.libraryType))
+			.map(library => library.libraryID);
+		return Zotero.DB.columnQueryAsync(
+			"SELECT itemID FROM itemAttachments IA JOIN items I USING (itemID) "
+				+ "WHERE ((IA.contentType IN ('application/pdf', 'application/epub+zip') "
+					+ "AND IA.linkMode!=" + Zotero.Attachments.LINK_MODE_LINKED_URL + ") "
+					+ "OR (IA.contentType='text/html' "
+						+ "AND IA.linkMode=" + Zotero.Attachments.LINK_MODE_IMPORTED_URL + ")) "
+				+ "AND I.libraryID IN (" + (libraryIDs.join(',') || 'NULL') + ") "
+				+ "ORDER BY I.itemID"
+		);
+	}
+
+	async function _sweep() {
+		let started = Date.now();
+		let extracted = 0;
+		for (let itemID of await _getEligibleIDs()) {
+			if (!Zotero.SDT.AutoIndex.isEnabled()) {
+				break;
+			}
+			if (_settled.has(itemID)) {
+				continue;
+			}
+			// A stat, so a settled library costs nothing to go over
+			if (!await Zotero.SDT.isCached(itemID)) {
+				// Whatever the outcome -- extracted, no file, password,
+				// failed -- the attachment is left alone until it's saved
+				// again, which brings a file or a new one
+				if (await Zotero.SDT.ensure(itemID)) {
+					extracted++;
+				}
+			}
+			_settled.add(itemID);
+		}
+		if (extracted) {
+			Zotero.debug(`SDT: sweep extracted ${extracted} `
+				+ Zotero.Utilities.pluralize(extracted, 'attachment')
+				+ ` in ${Math.round((Date.now() - started) / 1000)} s`);
+		}
+	}
+};

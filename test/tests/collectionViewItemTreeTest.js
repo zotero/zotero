@@ -1135,7 +1135,21 @@ describe("CollectionViewItemTree", function () {
 				});
 				await itemsView.setFilter('search', 'paused query');
 				banner = win.document.querySelector('.best-match-index-banner');
-				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-indexing-paused');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-paused');
+
+				// With the server embedding, the rows come by sync, whatever
+				// the pause flag says
+				Zotero.Embeddings.Indexing.getStatus.returns({
+					enabled: true,
+					indexing: false,
+					paused: true,
+					server: true,
+					items: { done: 700, total: 9000 },
+					attachments: { done: 52, total: 553, awaiting: 0 }
+				});
+				await itemsView.setFilter('search', 'synced query');
+				banner = win.document.querySelector('.best-match-index-banner');
+				assert.equal(banner.getAttribute('data-l10n-id'), 'items-best-match-synced');
 
 				// A complete index shows no banner
 				Zotero.Embeddings.Indexing.getStatus.returns({

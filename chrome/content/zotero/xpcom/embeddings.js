@@ -36,22 +36,25 @@ Zotero.Embeddings = new function () {
 	// The models
 	//
 	// Everything about the active model -- which one it is, what it expects,
-	// where its files come from -- is answered here.
+	// where its files come from -- is answered here. There is one model per
+	// mode (see shouldSyncEmbeddings()): the local mode's has to index a
+	// library on this computer, the synced mode's only embeds queries here.
 	//
 
-	// Every field is a fact read off the model's card or config, except the
-	// score band, which can only be learned by running it. That is measured
-	// with Calibration.record() and pasted in -- never fitted by hand -- and
-	// a `revision` bump means measuring again.
-	const MODEL = Object.freeze({
-		name: 'bekko-embedding-v1-a25m',
+	// The local mode's model: light enough to index a library on this
+	// computer. Every field is a fact read off the model's card or config,
+	// except the score band and the storage mean, which can only be learned
+	// by running it. Those are measured with Calibration.record() and pasted
+	// in -- never fitted by hand -- and a `revision` bump means measuring
+	// again.
+	const LOCAL_MODEL = Object.freeze({
+		name: 'bekko-embedding-v1-a8m',
 		// Bump when a change alters the vectors -- dtype, upstream weights,
 		// prefixes, pooling -- so that stored embeddings are detected as
-		// stale and reindexed. The server is asked for this identity, so a
-		// bump has it embed anew too.
+		// stale and reindexed
 		revision: 1,
 		// HF repo id, and the transformers.js pipeline id
-		modelId: 'hotchpotch/bekko-embedding-v1-a25m',
+		modelId: 'hotchpotch/bekko-embedding-v1-a8m',
 		// Weights variant. The repo's default artifact is onnx/model.onnx
 		// (fp32 layers, int8 embedding table); it has no model_quantized.onnx
 		dtype: 'fp32',
@@ -70,19 +73,40 @@ Zotero.Embeddings = new function () {
 		// to add, so we add it
 		leadingSpace: true,
 		// How the same model is served from llama.cpp
-		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
+		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a8m-GGUF', quant: 'F16' },
 		// The score band: the floor below which a result isn't shown, and the
-		// score at which the Relevance bar fills.
-		minScore: 0.40,
-		maxDisplayScore: 0.57
+		// score at which the Relevance bar fills. Measured 2026-10-29.
+		minScore: 0.36,
+		maxDisplayScore: 0.54,
+		// How its vectors are stored: quantized to int8, centered first on
+		// `mean` when one is given -- base64 float32, as Calibration.record()
+		// gives it for a model whose embeddings crowd around a shared
+		// direction. Bump `version` when either changes: every stored vector
+		// is then replaced and embedded again here.
+		storage: { version: 1, mean: null }
 	});
 
-	// How vectors are stored: quantized to int8, centered first on `mean`
-	// when one is given -- base64 float32, as Calibration.record() gives it
-	// for a model whose embeddings crowd around a shared direction. Bump
-	// `version` when either changes: every stored vector is then replaced,
-	// fetched again from the server and embedded again here.
-	const STORAGE_CONFIG = { version: 1, mean: null };
+	// The synced mode's model, which the server embeds with and this client
+	// embeds only queries with: the larger bekko, whose fields read as the
+	// local model's. The server is asked for its identity, so a `revision`
+	// bump has it embed anew too, and a change here clears the index and
+	// has it fetched again under the new model.
+	const REMOTE_MODEL = Object.freeze({
+		name: 'bekko-embedding-v1-a25m',
+		revision: 1,
+		modelId: 'hotchpotch/bekko-embedding-v1-a25m',
+		dtype: 'fp32',
+		pooling: 'mean',
+		queryPrefix: '',
+		passagePrefix: '',
+		maxTokens: 8192,
+		dims: 256,
+		leadingSpace: true,
+		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
+		minScore: 0.40,
+		maxDisplayScore: 0.57,
+		storage: { version: 1, mean: null }
+	});
 
 	// How the text of items, notes and annotations is assembled for
 	// embedding, by kind: bump one when its assembly changes, so what was
@@ -105,12 +129,23 @@ Zotero.Embeddings = new function () {
 	const MODEL_HUB_URL_TEMPLATE = '{model}/resolve/{revision}';
 
 	/**
-	 * The active model's facts, as MODEL records them: name, revision,
-	 * dims, prefixes, pooling, serving, and the score band.
+	 * Whether embeddings come from the server -- there's an account to sync
+	 * with, and local indexing isn't forced -- rather than being made on
+	 * this computer, through an endpoint when one is verified
+	 *
+	 * @return {Boolean}
+	 */
+	this.shouldSyncEmbeddings = function () {
+		return Zotero.Sync.Runner.enabled && !Zotero.Prefs.get('embeddings.forceLocalIndexing');
+	};
+
+	/**
+	 * The active mode's model: name, revision, dims, prefixes, pooling,
+	 * serving, the score band and how its vectors are stored.
 	 * @return {Object}
 	 */
 	this.getModelConfig = function () {
-		return MODEL;
+		return this.shouldSyncEmbeddings() ? REMOTE_MODEL : LOCAL_MODEL;
 	};
 
 	/**
@@ -132,6 +167,89 @@ Zotero.Embeddings = new function () {
 		return `${name}/${revision}`;
 	};
 
+	let _initialized = false;
+
+	/**
+	 * Wire up semantic search: embeddings start coming the way the mode
+	 * says when it's turned on or the mode changes, and at startup; the
+	 * indexer is wired up alongside. Guarded so multiple windows don't
+	 * double-register.
+	 */
+	this.init = function () {
+		if (_initialized) {
+			return;
+		}
+		_initialized = true;
+		this.Indexing.init();
+
+		// Turning semantic search on gets embeddings coming; turning it off
+		// stops the indexer and leaves everything stored where it is, so
+		// turning it back on resumes rather than rebuilds. Search previews
+		// read every document's structured text, so extracting it ahead of
+		// time goes on too.
+		Zotero.Prefs.registerObserver('search.bestMatch.enableSemantic', () => {
+			if (this.isEnabled()) {
+				Zotero.Prefs.set('sdt.autoExtract', true);
+				_start();
+			}
+			else {
+				this.Indexing.stopIndexing();
+			}
+		});
+
+		// Switching between the server's embeddings and this computer's --
+		// by the preference, or by an account being linked or unlinked --
+		// changes the model (see _switchMode())
+		Zotero.Prefs.registerObserver('embeddings.forceLocalIndexing', () => _switchMode());
+		Zotero.Notifier.registerObserver({
+			notify: () => _switchMode()
+		}, ['api-key'], 'embeddingsMode');
+
+		// Pick up at startup after a short delay, so we don't compete with
+		// window setup -- unless indexing was explicitly stopped, which a
+		// start would undo
+		if (this.isEnabled() && !this.Indexing.isPaused()) {
+			Zotero.Promise.delay(5000).then(() => {
+				if (this.isEnabled() && !this.Indexing.isPaused()) {
+					_start();
+				}
+			});
+		}
+	};
+
+	// The mode may have changed, and with it the model: a run going with
+	// the old one would write its vectors into an index the new one can't
+	// read, so it's stopped and waited out before the engine goes down.
+	// The next run or sync then clears an index stamped with the other
+	// model. Stopping records a pause, which the switch itself didn't ask
+	// for, so the pause is put back as it was.
+	async function _switchMode() {
+		if (!Zotero.Embeddings.isEnabled()) {
+			return;
+		}
+		let paused = Zotero.Embeddings.Indexing.isPaused();
+		Zotero.Embeddings.Indexing.stopIndexing();
+		await Zotero.Embeddings.Indexing.whenIdle();
+		await Zotero.Embeddings.shutdownEngine();
+		Zotero.Prefs.set('embeddings.indexingPaused', paused);
+		_start();
+	}
+
+	// Get embeddings coming the way the mode says: the server's by a sync,
+	// with the model fetched meanwhile so the first search needn't wait for
+	// it and its memory given back until then, or this computer's by a run
+	function _start() {
+		if (Zotero.Embeddings.shouldSyncEmbeddings()) {
+			Zotero.Sync.Runner.setSyncTimeout(1, false);
+			Zotero.Embeddings.download()
+				.then(() => Zotero.Embeddings.shutdownEngine())
+				.catch(e => Zotero.logError(e));
+		}
+		else {
+			Zotero.Embeddings.Indexing.startIndexing();
+		}
+	}
+
 	/**
 	 * Read one of the model's files (e.g. its tokenizer) from the runtime's
 	 * model cache, fetching it from the model hub if the runtime doesn't have
@@ -144,7 +262,7 @@ Zotero.Embeddings = new function () {
 		return Zotero.ML.getModelFile({
 			engineId: ENGINE_ID,
 			taskName: TASK_NAME,
-			modelId: MODEL.modelId,
+			modelId: this.getModelConfig().modelId,
 			file
 		});
 	};
@@ -386,8 +504,9 @@ Zotero.Embeddings = new function () {
 	};
 
 	async function _isModelDownloaded() {
+		let { modelId } = Zotero.Embeddings.getModelConfig();
 		let cached = await Zotero.ML.listModels({ taskName: TASK_NAME });
-		return cached.some(model => model.modelId === MODEL.modelId);
+		return cached.some(model => model.modelId === modelId);
 	}
 
 
@@ -403,15 +522,16 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise}
 	 */
 	this.download = async function (onProgress) {
+		let { name } = this.getModelConfig();
 		if (await this.isDownloaded()) {
-			Zotero.debug(`Embeddings: model '${MODEL.name}' already downloaded`);
+			Zotero.debug(`Embeddings: model '${name}' already downloaded`);
 			return;
 		}
 		if (!await _isModelDownloaded()) {
-			Zotero.debug(`Embeddings: downloading model '${MODEL.name}'`);
+			Zotero.debug(`Embeddings: downloading model '${name}'`);
 			// Creating the engine downloads whatever the runtime is missing
 			await _getEngine(onProgress);
-			Zotero.debug(`Embeddings: model '${MODEL.name}' downloaded`);
+			Zotero.debug(`Embeddings: model '${name}' downloaded`);
 		}
 		try {
 			await this.Static.download(onProgress);
@@ -476,19 +596,20 @@ Zotero.Embeddings = new function () {
 		}
 		if (!_engineReady) {
 			_engineReady = (async () => {
+				let model = Zotero.Embeddings.getModelConfig();
 				let numThreads = Zotero.Embeddings.getEngineThreads();
-				Zotero.debug(`Embeddings: creating engine for '${MODEL.modelId}' `
-					+ `(dtype ${MODEL.dtype}, pooling ${MODEL.pooling}, `
+				Zotero.debug(`Embeddings: creating engine for '${model.modelId}' `
+					+ `(dtype ${model.dtype}, pooling ${model.pooling}, `
 					+ `${numThreads} threads)`);
 				_engine = await Zotero.ML.createEngine({
 					engineId: ENGINE_ID,
 					taskName: TASK_NAME,
 					backend: 'onnx-native',
-					modelId: MODEL.modelId,
+					modelId: model.modelId,
 					modelRevision: 'main',
 					modelHubRootUrl: MODEL_HUB_ROOT_URL,
 					modelHubUrlTemplate: MODEL_HUB_URL_TEMPLATE,
-					dtype: MODEL.dtype,
+					dtype: model.dtype,
 					numThreads
 				}, onProgress);
 				_engineNumThreads = numThreads;
@@ -696,39 +817,40 @@ Zotero.Embeddings = new function () {
 	// Three numbers govern scoring, none of them on a model card: the mean
 	// its embeddings share, the score below which nothing is a match, and
 	// the score at which the Relevance bar fills. Measured once with
-	// Zotero.Embeddings.Calibration and recorded in MODEL.calibration.
+	// Zotero.Embeddings.Calibration and recorded in the model's config.
 	//
 
 	/**
-	 * The version of the form vectors are stored in. Rows stored under
-	 * another can't be compared with this one's, whatever model made them.
+	 * The version of the form the active model's vectors are stored in.
+	 * Rows stored under another can't be compared with this one's,
+	 * whatever model made them.
 	 *
 	 * @return {Number}
 	 */
 	this.getStorageVersion = function () {
-		return STORAGE_CONFIG.version;
+		return this.getModelConfig().storage.version;
 	};
 
-	// Decoded on first use
-	let _storageMean;
+	// Each model's mean, decoded on first use
+	let _storageMeans = new WeakMap();
 
 	/**
-	 * The mean stored vectors are centered on, or null when they're stored
-	 * as they come.
+	 * The mean the active model's stored vectors are centered on, or null
+	 * when they're stored as they come.
 	 *
 	 * @return {Float32Array|null}
 	 */
 	this.getStorageMean = function () {
-		if (_storageMean === undefined) {
-			if (STORAGE_CONFIG.mean) {
-				let bytes = Uint8Array.from(atob(STORAGE_CONFIG.mean), c => c.charCodeAt(0));
-				_storageMean = new Float32Array(bytes.buffer);
+		let model = this.getModelConfig();
+		if (!_storageMeans.has(model)) {
+			let mean = null;
+			if (model.storage.mean) {
+				let bytes = Uint8Array.from(atob(model.storage.mean), c => c.charCodeAt(0));
+				mean = new Float32Array(bytes.buffer);
 			}
-			else {
-				_storageMean = null;
-			}
+			_storageMeans.set(model, mean);
 		}
-		return _storageMean;
+		return _storageMeans.get(model);
 	};
 
 
@@ -755,13 +877,14 @@ Zotero.Embeddings = new function () {
 		if (!texts.length) {
 			return [];
 		}
+		let model = this.getModelConfig();
 		texts = texts.map(this.normalizeInput);
-		// The model's Metaspace tokenizer marks the first word with a space,
-		// which the runtime's tokenizer (transformers.js 3.5.1) adds only with
-		// the legacy add_prefix_space flag current tokenizer.json files omit.
+		// A Metaspace tokenizer marks the first word with a space, which the
+		// runtime's tokenizer (transformers.js 3.5.1) adds only with the
+		// legacy add_prefix_space flag current tokenizer.json files omit.
 		// Without it the vectors drift (cosine 0.83-0.95 for titles and
 		// queries, 0.99+ for chunks).
-		if (MODEL.leadingSpace) {
+		if (model.leadingSpace) {
 			texts = texts.map(text => ' ' + text);
 		}
 		let engine;
@@ -772,7 +895,7 @@ Zotero.Embeddings = new function () {
 			// of texts is a single argument
 			return engine.run({
 				args: [texts],
-				options: { pooling: MODEL.pooling }
+				options: { pooling: model.pooling }
 			});
 		};
 		let vectors;
@@ -863,7 +986,7 @@ Zotero.Embeddings = new function () {
 		}
 		// Cache the in-flight promise, so the concurrent per-row scoring
 		// passes of a multi-collection search share one embed
-		let promise = this.embed(MODEL.queryPrefix + text);
+		let promise = this.embed(this.getModelConfig().queryPrefix + text);
 		_queryCache = { modelVersion, text, promise };
 		// Don't cache a failed embed
 		promise.catch(() => {
@@ -885,7 +1008,7 @@ Zotero.Embeddings = new function () {
 	 * @return {Promise<Float32Array[]>}
 	 */
 	this.embedPassages = async function (texts) {
-		let passagePrefix = MODEL.passagePrefix;
+		let { passagePrefix } = this.getModelConfig();
 		texts = texts.map(text => passagePrefix + text);
 		let endpoint = await this.Endpoint.getActive();
 		if (!endpoint) {
@@ -1201,8 +1324,11 @@ Zotero.Embeddings = new function () {
  * Background indexing for semantic search: one run at a time indexes the
  * items saved since the index last looked at them, then takes every
  * eligible attachment through the pipeline. Starts and stops with the
- * search.bestMatch.enableSemantic preference. What a run is built on --
- * Sources, Progress, Store and Runtime -- is declared below it.
+ * search.bestMatch.enableSemantic preference, and runs only while this
+ * computer embeds for itself (see Zotero.Embeddings.shouldSyncEmbeddings()):
+ * with the server embedding, nothing here runs but the store and the
+ * status. What a run is built on -- Sources, Progress, Store and Runtime --
+ * is declared below it.
  */
 Zotero.Embeddings.Indexing = new function () {
 	//
@@ -1220,9 +1346,6 @@ Zotero.Embeddings.Indexing = new function () {
 	// to the items, and the run goes again before it's over
 	let _kicked = false;
 	let _kickTimer = null;
-	// Attachments whose pack a run of this session has made sure of, so
-	// that later runs don't check for it again
-	let _packed = new Set();
 	// How many chunks each attachment measured this session cuts into, until
 	// its rows are stored
 	let _measured = new Map();
@@ -1261,45 +1384,14 @@ Zotero.Embeddings.Indexing = new function () {
 	//
 
 	/**
-	 * Wire up the background indexer. Guarded so multiple windows don't
-	 * double-initialize.
+	 * Wire up the background indexer to what's saved and synced. Guarded so
+	 * multiple windows don't double-register.
 	 */
 	this.init = function () {
 		if (_initialized) {
 			return;
 		}
 		_initialized = true;
-
-		// Turning semantic search on indexes what's missing, and has the
-		// server's embeddings fetched by a sync; turning it off stops the
-		// indexer and leaves everything stored where it is, so turning it
-		// back on resumes rather than rebuilds.
-		Zotero.Prefs.registerObserver('search.bestMatch.enableSemantic', () => {
-			if (Zotero.Embeddings.isEnabled()) {
-				Zotero.Embeddings.Indexing.startIndexing();
-				if (Zotero.Embeddings.Sync.isAvailable()) {
-					Zotero.Sync.Runner.setSyncTimeout(1, false);
-				}
-			}
-			else {
-				Zotero.Embeddings.Indexing.stopIndexing();
-			}
-		});
-
-		// Turning syncing of the server's embeddings on has them fetched by
-		// a sync; turning it off leaves the attachments to the indexer, so
-		// a run goes over them
-		Zotero.Prefs.registerObserver('embeddings.sync.enabled', () => {
-			if (!Zotero.Embeddings.isEnabled()) {
-				return;
-			}
-			if (Zotero.Embeddings.Sync.isAvailable()) {
-				Zotero.Sync.Runner.setSyncTimeout(1, false);
-			}
-			else {
-				Zotero.Embeddings.Indexing.startIndexing();
-			}
-		});
 
 		Zotero.Notifier.registerObserver({
 			notify: async (event, type, ids) => {
@@ -1332,17 +1424,6 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 			}
 		}, ['item', 'sync'], 'embeddings');
-
-		// Resume indexing if semantic search is on and indexing wasn't
-		// explicitly stopped, after a short delay so we don't compete with
-		// window setup.
-		if (Zotero.Embeddings.isEnabled() && !this.isPaused()) {
-			Zotero.Promise.delay(5000).then(() => {
-				if (Zotero.Embeddings.isEnabled() && !Zotero.Embeddings.Indexing.isPaused()) {
-					Zotero.Embeddings.Indexing.startIndexing();
-				}
-			});
-		}
 	};
 
 	/**
@@ -1366,7 +1447,8 @@ Zotero.Embeddings.Indexing = new function () {
 	 *     stopped
 	 */
 	this.startIndexing = function () {
-		if (!Zotero.Embeddings.isEnabled()) {
+		// Nothing to index while the server embeds
+		if (!Zotero.Embeddings.isEnabled() || Zotero.Embeddings.shouldSyncEmbeddings()) {
 			return Promise.resolve();
 		}
 		Zotero.Prefs.set('embeddings.indexingPaused', false);
@@ -1405,10 +1487,21 @@ Zotero.Embeddings.Indexing = new function () {
 	};
 
 	/**
-	 * Take in an attachment's complete set of chunk rows from elsewhere,
-	 * replacing whatever is stored for it. Refused: fewer rows than `chunks`,
-	 * another model, malformed rows, and rows made from anything but the
-	 * file as it is here.
+	 * Resolves once no run is going: at once when none is, otherwise when
+	 * the current one is over, however it ends
+	 *
+	 * @return {Promise}
+	 */
+	this.whenIdle = function () {
+		return _indexing ? _indexingPromise.catch(() => {}) : Promise.resolve();
+	};
+
+	/**
+	 * Take in an item's complete set of chunk rows from elsewhere -- an
+	 * attachment's, or an item's, note's or annotation's -- replacing
+	 * whatever is stored for it. Refused: fewer rows than `chunks`, another
+	 * model, malformed rows, an attachment whose text can't be indexed, and
+	 * rows made from anything but the file as it is here.
 	 *
 	 * @param {Number} itemID
 	 * @param {Object} arrival
@@ -1439,7 +1532,7 @@ Zotero.Embeddings.Indexing = new function () {
 		// the other client indexed, which this one may never have touched.
 		// Not kept either, since nothing here is about to be shown.
 		let item = await Zotero.Items.getAsync(itemID, { noCache: true });
-		if (!item || !Sources.isIndexableAttachment(item)) {
+		if (!item || (item.isAttachment() && !Sources.isIndexableAttachment(item))) {
 			return false;
 		}
 		await Zotero.Embeddings.initDB();
@@ -1448,8 +1541,10 @@ Zotero.Embeddings.Indexing = new function () {
 		await _ensureIndexMatchesModel();
 		// Rows for the file as it was before it changed here would sit
 		// looking like the new file's index. Rows cut from the file's plain
-		// text derive from that text instead.
-		let sourceKey = await Sources.getAttachmentSourceKey(item);
+		// text derive from that text instead. An item, note or annotation
+		// has no file: its rows were made from the text the sender had, and
+		// are taken as they are.
+		let sourceKey = item.isAttachment() ? await Sources.getAttachmentSourceKey(item) : null;
 		if (sourceKey
 				&& contentHash !== await item.attachmentHash
 				&& contentHash !== await Sources.getAttachmentTextHash(item)) {
@@ -1461,8 +1556,8 @@ Zotero.Embeddings.Indexing = new function () {
 				await Store.insertRow(itemID, row.chunkIndex, row.embedding, row.anchor);
 			}
 			// Recorded under the file's key when there's a file; without one
-			// the rows still score, and cutting the attachment adopts them
-			// once it arrives
+			// the rows still score, and a sync adopts them once it arrives
+			// (see Sync.syncLibrary())
 			await Store.setSource(itemID, { sourceKey, contentHash, extractor, syncVersion: version });
 			await Store.clearSyncState(itemID);
 		});
@@ -1494,7 +1589,7 @@ Zotero.Embeddings.Indexing = new function () {
 
 	// Make sure the stored vectors are the active model's and stored the way
 	// this client stores them, as recorded in the meta table. On a mismatch
-	// -- a `revision` bump, or a STORAGE_CONFIG version bump -- everything
+	// -- another model or revision, or a storage version bump -- everything
 	// stored is cleared, and indexing and sync rebuild it. An index with no
 	// storage version recorded predates them, and is taken as stored this
 	// way.
@@ -1545,6 +1640,9 @@ Zotero.Embeddings.Indexing = new function () {
 	// into one. A run already going is told at once, so the attachment
 	// work gives way without waiting out the delay.
 	function _scheduleKick(delay = KICK_DELAY) {
+		if (Zotero.Embeddings.shouldSyncEmbeddings()) {
+			return;
+		}
 		if (_indexing && !_stopping) {
 			_kicked = true;
 			return;
@@ -1623,8 +1721,7 @@ Zotero.Embeddings.Indexing = new function () {
 			await Zotero.Embeddings.Endpoint.recheck();
 
 			Zotero.Embeddings.Indexing.Progress.clearDownload();
-			Zotero.debug('Embeddings: run starting -- '
-				+ (Zotero.Embeddings.Sync.isAvailable() ? 'with' : 'without') + ' the server');
+			Zotero.debug('Embeddings: run starting');
 			// One kind of work at a time, in a fixed order: the items, then
 			// the attachments through their pipeline. The items go first,
 			// and a kick brings the run back to them, so a just-edited item
@@ -1642,7 +1739,6 @@ Zotero.Embeddings.Indexing = new function () {
 				// index, so a run cut short resumes where it was, and one that
 				// gives way to a kick starts over once the items are seen to.
 				let finished = await _reconcileAttachments()
-					&& await _extractAttachments()
 					&& await _measureAttachments()
 					&& await _indexAttachments();
 				// Over, unless a kick landed meanwhile
@@ -1798,12 +1894,15 @@ Zotero.Embeddings.Indexing = new function () {
 	// everything stored when its file is gone or its file's content changed;
 	// one with the same content under a new file key keeps its rows. Rows
 	// cut by an outdated chunker stand until the index step replaces them.
+	// An attachment whose rows hold is stamped as seen, so a save that
+	// didn't touch its file isn't looked at again.
 	//
 	// @return {Promise<Boolean>} - Whether it got to the end
 	async function _reconcileAttachments() {
 		let { Store, Sources } = Zotero.Embeddings.Indexing;
 		return _forEachPage(async (page) => {
-			for (let { item, record } of page) {
+			let seen = [];
+			for (let { item, record, clientDateModified } of page) {
 				if (_shouldStop()) {
 					return false;
 				}
@@ -1812,6 +1911,7 @@ Zotero.Embeddings.Indexing = new function () {
 				}
 				let sourceKey = await Sources.getAttachmentSourceKey(item);
 				if (sourceKey === record.sourceKey) {
+					seen.push({ itemID: item.id, clientDateModified });
 					continue;
 				}
 				if (sourceKey && record.contentHash && await _hasContent(item, record.contentHash)) {
@@ -1819,13 +1919,15 @@ Zotero.Embeddings.Indexing = new function () {
 						sourceKey,
 						contentHash: record.contentHash,
 						extractor: record.extractor,
-						syncVersion: record.syncVersion
+						syncVersion: record.syncVersion,
+						clientDateModified
 					});
 				}
 				else {
 					await Store.deleteItems([item.id]);
 				}
 			}
+			await Store.stampItems(seen);
 			return true;
 		});
 	}
@@ -1838,82 +1940,6 @@ Zotero.Embeddings.Indexing = new function () {
 			|| contentHash === await Sources.getAttachmentTextHash(item);
 	}
 
-	// Extract: every attachment's text cached as a pack, the server's
-	// included, so no preview waits on an extraction; rows that arrived
-	// before their file are adopted. Only attachments not packed this
-	// session, looked at since saved, or due to be cut again are asked
-	// about, then stamped. The engine goes down first, since extraction
-	// competes with it for the same cores.
-	async function _extractAttachments() {
-		let { Sources, Store } = Zotero.Embeddings.Indexing;
-		let engineDown = false;
-		return _forEachPage(async (page) => {
-			let work = [];
-			let seen = [];
-			for (let payload of page) {
-				if (_shouldStop()) {
-					return false;
-				}
-				let { item, record, rows, stale, clientDateModified } = payload;
-				let adopt = rows > 0 && !record?.sourceKey;
-				let lookedAt = record?.clientDateModified === clientDateModified;
-				if (!adopt && (_packed.has(item.id) || (lookedAt && !stale))) {
-					seen.push({ itemID: item.id, clientDateModified });
-					continue;
-				}
-				let sourceKey = await Sources.getAttachmentSourceKey(item);
-				if (sourceKey && (adopt || stale || !await Zotero.SDT.isCached(item.id))) {
-					work.push({ ...payload, sourceKey, adopt });
-				}
-				else {
-					if (sourceKey) {
-						_packed.add(item.id);
-					}
-					seen.push({ itemID: item.id, clientDateModified });
-				}
-			}
-			await Store.stampItems(seen);
-			if (work.length && !engineDown) {
-				engineDown = true;
-				await Zotero.Embeddings.shutdownEngine();
-			}
-			return _forEachAttachment('preparing', work, async (payload) => {
-				if (await Zotero.SDT.ensure(payload.item.id)) {
-					_packed.add(payload.item.id);
-				}
-				if (payload.adopt) {
-					await _adoptRows(payload);
-				}
-				await Store.stampItems([{ itemID: payload.item.id, clientDateModified: payload.clientDateModified }]);
-			});
-		});
-	}
-
-	// Rows that arrived for a file this client didn't have: now that it
-	// does, they're recorded as the file's if they were made from the
-	// content it cuts to. Otherwise they're dropped and the attachment is
-	// left to this client, as rows refused for their content are.
-	async function _adoptRows({ item, sourceKey, record }) {
-		let { Store, Sources } = Zotero.Embeddings.Indexing;
-		let result = await Sources.getAttachmentChunks(item);
-		// Not known right now: the rows wait for a run that can cut the file
-		if (result?.failed) {
-			return;
-		}
-		if (result && record.contentHash && result.contentHash === record.contentHash) {
-			await Store.setSource(item.id, {
-				sourceKey,
-				contentHash: record.contentHash,
-				extractor: record.extractor,
-				syncVersion: record.syncVersion
-			});
-		}
-		else {
-			await Store.deleteItems([item.id]);
-			await Store.setSyncDeclined([item.id]);
-		}
-	}
-
 	// Measure: how many chunks the attachments to index here cut into, so
 	// the run knows its total before the engine comes up. Each is cut once
 	// until its rows are stored. Nothing else about the run depends on this
@@ -1922,7 +1948,7 @@ Zotero.Embeddings.Indexing = new function () {
 		let { Sources, Progress } = Zotero.Embeddings.Indexing;
 		let total = 0;
 		let finished = await _forEachPage(async (page) => {
-			let own = page.filter(payload => !_isServers(payload) && _wantsIndexing(payload));
+			let own = page.filter(_wantsIndexing);
 			return _forEachAttachment('preparing', own, async ({ item }) => {
 				let chunks = _measured.get(item.id);
 				if (chunks === undefined) {
@@ -1990,21 +2016,18 @@ Zotero.Embeddings.Indexing = new function () {
 			return true;
 		};
 		let finished = await _forEachPage(async (page) => {
-			let own = page.filter(payload => !_isServers(payload) && _wantsIndexing(payload));
+			let own = page.filter(_wantsIndexing);
 			if (!own.length) {
 				return true;
 			}
-			// Ones the server declined are this client's
-			let declined = own.filter(payload => payload.record?.syncDeclined).length;
 			let stale = own.filter(payload => payload.stale).length;
-			Zotero.debug(`Embeddings: page of ${_count(own.length, 'attachment')} to index here`
-				+ (declined ? `, ${declined} of them declined by the server` : '')
+			Zotero.debug(`Embeddings: page of ${_count(own.length, 'attachment')} to index`
 				+ (stale ? `, ${stale} of them cut by an outdated extractor` : ''));
 			if (!started) {
 				started = true;
-				Progress.setEmbedWork({});
+				Progress.setEmbedWork(0);
 			}
-			Progress.addEmbedWork({ own: own.length, declined });
+			Progress.addEmbedWork(own.length);
 			return _forEachAttachment('indexing-documents', own, async (payload) => {
 				pool.push(...await _chunkAttachment(payload));
 				if (pool.length >= EMBED_POOL_SIZE
@@ -2150,14 +2173,8 @@ Zotero.Embeddings.Indexing = new function () {
 		return true;
 	}
 
-	// Whether an attachment is the server's to answer for, rather than
-	// this client's to cut and embed
-	function _isServers({ item, record }) {
-		return Zotero.Embeddings.Sync.isServersAttachment(item, record);
-	}
-
-	// Whether an attachment wants indexing here: never cut here and with
-	// no rows from anywhere, or cut by an outdated chunker
+	// Whether an attachment wants indexing: never cut and with no rows
+	// from anywhere, or cut by an outdated chunker
 	function _wantsIndexing({ record, rows, stale }) {
 		return stale || (!record?.extractor && !rows);
 	}
@@ -2235,9 +2252,8 @@ Zotero.Embeddings.Indexing = new function () {
 			// A stop has been requested but the current batch is still finishing
 			stopping: _indexing && _stopping,
 			paused: this.isPaused(),
-			// Whether the server is in the picture at all, so the pane can
-			// say when work is done here instead
-			server: Zotero.Embeddings.Sync.isAvailable() && !Zotero.Embeddings.Endpoint.isActive(),
+			// Whether the server embeds, so the pane knows no run is coming
+			server: Zotero.Embeddings.shouldSyncEmbeddings(),
 			...Zotero.Embeddings.Indexing.Progress.getStatus(),
 			diagnostics: {
 				...Zotero.Embeddings.Diagnostics.getStatus(),
@@ -2498,13 +2514,12 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	//     stamp seen
 	this.getOutstandingAttachments = async function (afterID, limit) {
 		// An eligible attachment is outstanding with nothing recorded, no
-		// file key, rows cut here by an outdated extractor, or a save since
-		// the index last looked at it (or in the last few seconds). Rows the
-		// server cut are its to cut over, however outdated.
+		// file key, rows cut by an outdated extractor, or a save since the
+		// index last looked at it (or in the last few seconds)
 		let outdated = await this.getOutdatedExtractors();
 		let outstanding = "(S.itemID IS NULL OR S.sourceKey IS NULL "
 			+ (outdated.length
-				? "OR (S.syncVersion IS NULL AND S.extractor IN (" + outdated.map(() => '?').join(',') + ")) "
+				? "OR S.extractor IN (" + outdated.map(() => '?').join(',') + ") "
 				: "")
 			+ "OR S.clientDateModified IS NOT I.clientDateModified OR I.clientDateModified>=?)";
 		let rows = await Zotero.DB.queryAsync(
@@ -2541,7 +2556,7 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 					clientDateModified: row.stamp
 				},
 			rows: row.rowCount,
-			stale: row.syncVersion === null && outdated.includes(row.extractor)
+			stale: outdated.includes(row.extractor)
 		}));
 	};
 
@@ -2701,25 +2716,19 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		}
 	};
 
-	// How many attachments are the server's to embed and have no rows yet.
-	// Those are outstanding by definition, so this pages through the
-	// outstanding attachments, as countWithoutFiles() does.
+	// How many attachments the server has yet to embed: while it embeds,
+	// every eligible one without rows that it hasn't declined; none
+	// otherwise
 	this.countAwaitingServer = async function () {
-		let awaiting = 0;
-		let afterID = 0;
-		while (true) {
-			let page = await this.getOutstandingAttachments(
-				afterID, Zotero.Embeddings.Indexing.ATTACHMENT_PAGE_SIZE);
-			if (!page.length) {
-				return awaiting;
-			}
-			for (let { item, record, rows } of page) {
-				if (!rows && Zotero.Embeddings.Sync.isServersAttachment(item, record)) {
-					awaiting++;
-				}
-			}
-			afterID = page.at(-1).item.id;
+		if (!Zotero.Embeddings.shouldSyncEmbeddings()) {
+			return 0;
 		}
+		return Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM itemAttachments IA JOIN items I USING (itemID) "
+				+ "LEFT JOIN embeddings.itemIndexState S ON (S.itemID=I.itemID) "
+				+ "WHERE " + _eligibleAttachmentSQL() + " AND S.syncDeclined IS NULL "
+				+ "AND NOT EXISTS (SELECT 1 FROM embeddings.itemEmbeddings E WHERE E.itemID=I.itemID)"
+		);
 	};
 
 	/**
@@ -2862,14 +2871,13 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 
 	// The step a run is on: getting the model, the items, then the steps
 	// the attachments go through -- extracted and measured, then indexed
-	// here. Extracting and measuring are both 'preparing'.
+	// here. Measuring is 'preparing'.
 	// 'idle' | 'downloading' | 'indexing' | 'preparing' | 'indexing-documents'
 	let _phase = 'idle';
 	// The steps an attachment goes through. Documents in them aren't in the
 	// chunk counts until they've been measured.
 	const ATTACHMENT_PHASES = ['preparing', 'indexing-documents'];
-	// What the index step has before it: the attachments it indexes here,
-	// and how many of them the server declined
+	// How many attachments the index step has before it, null between runs
 	let _embedWork = null;
 	// Bytes of the model downloaded so far, while the phase is
 	// 'downloading'
@@ -2892,9 +2900,8 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 	// Whether a sync's embeddings step is under way
 	let _syncing = false;
 	// How far a step has got through the library's eligible attachments,
-	// files or not. Preparing leaves nothing behind that counting the index
-	// could see -- an extraction only fills a cache -- so the step reports
-	// it.
+	// files or not. Measuring leaves nothing behind that counting the
+	// index could see, so the step reports it.
 	let _sweep = { done: 0, total: 0 };
 	let _eligibleAttachments = 0;
 	let _listeners = new Set();
@@ -3011,21 +3018,17 @@ Zotero.Embeddings.Indexing.Progress = new function () {
 
 	// What the index step has before it
 	//
-	// @param {Object} work - { own, declined }
-	this.setEmbedWork = function ({ own = 0, declined = 0 }) {
-		_embedWork = { own, declined };
+	// @param {Number} count
+	this.setEmbedWork = function (count) {
+		_embedWork = count;
 	};
 
 	// More before the index step, as each page of it is read
 	//
-	// @param {Object} work - { own, declined }, each added to what's
-	//     counted
-	this.addEmbedWork = function ({ own = 0, declined = 0 }) {
-		if (_embedWork) {
-			_embedWork = {
-				own: _embedWork.own + own,
-				declined: _embedWork.declined + declined
-			};
+	// @param {Number} count
+	this.addEmbedWork = function (count) {
+		if (_embedWork !== null) {
+			_embedWork += count;
 		}
 	};
 
@@ -3280,6 +3283,23 @@ Zotero.Embeddings.Indexing.Store = new function () {
 		await Zotero.DB.queryAsync(
 			"REPLACE INTO embeddings.embeddingsMeta (key, value) VALUES (?, ?)",
 			['embeddingsVersion:' + libraryID, version]
+		);
+	};
+
+	// The state rows of a library's attachments that have rows but no file
+	// key: rows that arrived before their file
+	//
+	// @return {Promise<Object[]>} - As getIndexStates() gives them
+	this.getUnkeyedAttachments = async function (libraryID) {
+		return Zotero.DB.queryAsync(
+			"SELECT S.itemID, S.sourceKey, S.contentHash, S.extractor, S.clientDateModified, "
+				+ "S.syncVersion, S.syncDeclined "
+				+ "FROM embeddings.itemIndexState S "
+				+ "JOIN items I USING (itemID) "
+				+ "JOIN itemAttachments IA USING (itemID) "
+				+ "WHERE I.libraryID=? AND S.sourceKey IS NULL "
+				+ "AND EXISTS (SELECT 1 FROM embeddings.itemEmbeddings E WHERE E.itemID=S.itemID)",
+			[libraryID]
 		);
 	};
 
@@ -3870,8 +3890,8 @@ Zotero.Embeddings.Calibration = new function () {
 	};
 
 	/**
-	 * measure(), formatted for pasting: the band for MODEL's `calibration`
-	 * entry, and the mean for STORAGE_CONFIG when scored centered on it.
+	 * measure(), formatted for pasting into the model's config: its score
+	 * band, and its storage mean when scored centered on it.
 	 *
 	 * @param {Object} [options] - measure()'s
 	 * @return {Promise<Object>} - { calibration: { minScore,
@@ -4381,62 +4401,14 @@ Zotero.Embeddings.Endpoint = new function () {
 };
 
 /**
- * The server's part in indexing: which attachments it embeds, and fetching
- * the rows it made. Those attachments are neither cut nor embedded here
- * unless it declines them. It's used whenever the account syncs, which is
- * what puts the files where it can read them.
+ * The server's part in indexing: fetching the rows it made for a syncing
+ * account's items, notes, annotations and attachments, none of which are
+ * embedded here. One it declines, or whose rows this client can't take,
+ * stays unindexed until the server lists it again. Used whenever the
+ * account syncs, which is what puts the data where the server can read it.
  */
 Zotero.Embeddings.Sync = new function () {
-	// Whether the server can be embedding for this client at all: there's
-	// an account to sync with, and the sync pane's option for it is on
-	this.isAvailable = function () {
-		return Zotero.Prefs.get('embeddings.sync.enabled') && Zotero.Sync.Runner.enabled;
-	};
-
-	/**
-	 * Whether a library's attachments are the server's to embed: it syncs,
-	 * and its files go to Zotero Storage. Nothing is the server's while an
-	 * endpoint is active.
-	 *
-	 * @param {Integer} libraryID
-	 * @return {Boolean}
-	 */
-	this.isServersLibrary = function (libraryID) {
-		if (!this.isAvailable() || Zotero.Embeddings.Endpoint.isActive()) {
-			return false;
-		}
-		let library = Zotero.Libraries.get(libraryID);
-		if (!library || !Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
-			return false;
-		}
-		let Storage = Zotero.Sync.Storage.Local;
-		return Storage.getEnabledForLibrary(libraryID) && Storage.getModeForLibrary(libraryID) == 'zfs';
-	};
-
-	// Whether an attachment is the server's to embed rather than this
-	// client's: a stored file the server has (in sync or still to download)
-	// in a library that's the server's, that the server hasn't declined
-	//
-	// @param {Zotero.Item} item
-	// @param {Object} [record] - The item's entry from Store.getIndexStates()
-	// @return {Boolean}
-	this.isServersAttachment = function (item, record = null) {
-		if (!item.isStoredFileAttachment() || !this.isServersLibrary(item.libraryID)) {
-			return false;
-		}
-		let Storage = Zotero.Sync.Storage.Local;
-		let onServer = [
-			Storage.SYNC_STATE_IN_SYNC,
-			Storage.SYNC_STATE_TO_DOWNLOAD,
-			Storage.SYNC_STATE_FORCE_DOWNLOAD
-		];
-		if (!onServer.includes(item.attachmentSyncState)) {
-			return false;
-		}
-		return !record?.syncDeclined;
-	};
-
-	// Attachments fetched at once, as full-text sync fetches its items
+	// Items fetched at once, as full-text sync fetches its items
 	const CONCURRENT_REQUESTS = 8;
 	// How the server's vectors are read, by the dtype it reports with them.
 	// Each is the model's raw output, little-endian, which this client trims,
@@ -4473,11 +4445,14 @@ Zotero.Embeddings.Sync = new function () {
 	 * each, a few at a time. Rows that come are taken in through
 	 * Indexing.addChunks(), which is the judge of them: a decline, rows this
 	 * client can't read and rows made from other content leave the
-	 * attachment to this client; one the server no longer has waits for a
-	 * later look. The version is recorded last, so a sync that fails or
-	 * stops before the end asks from the same version again, and what it
-	 * did fetch is passed over then by the version held. Nothing is done
-	 * for a library that isn't the server's.
+	 * attachment unindexed; one the server no longer has waits for a later
+	 * look. Rows held for files that have since arrived -- the file
+	 * sync runs before this step -- are adopted first. The version is
+	 * recorded last, so a sync that fails or stops before the end asks
+	 * from the same version again, and what it did fetch is passed over
+	 * then by the version held. Nothing is done unless the server embeds
+	 * for this account (see Zotero.Embeddings.shouldSyncEmbeddings()), nor
+	 * for a library left out of syncing, whose items never arrive here.
 	 *
 	 * @param {Zotero.Sync.APIClient} client
 	 * @param {Integer} libraryID
@@ -4485,35 +4460,70 @@ Zotero.Embeddings.Sync = new function () {
 	 * @param {Function} [options.stopCheck] - Throws to stop the sync
 	 */
 	this.syncLibrary = async function (client, libraryID, { stopCheck = () => {} } = {}) {
-		// The endpoint's verdict is read before isServersLibrary() asks
-		// whether one is active
-		if (!Zotero.Embeddings.isEnabled() || await Zotero.Embeddings.Endpoint.getActive()
-				|| !this.isServersLibrary(libraryID)) {
+		let library = Zotero.Libraries.get(libraryID);
+		if (!Zotero.Embeddings.isEnabled() || !Zotero.Embeddings.shouldSyncEmbeddings()
+				|| !library || !Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
 			return;
 		}
 		await Zotero.Embeddings.initDB();
-		let changes = await _findChangedAttachments(client, libraryID);
+		await _adoptRows(libraryID);
+		stopCheck();
+		let changes = await _findChangedItems(client, libraryID);
 		if (!changes) {
 			return;
 		}
 		stopCheck();
-		await _fetchAttachments(client, libraryID, changes.items, stopCheck);
+		await _fetchItems(client, libraryID, changes.items, stopCheck);
 		if (changes.version) {
 			await Zotero.Embeddings.Indexing.Store.setSyncVersion(libraryID, changes.version);
 		}
 	};
 
+	// Rows that arrived for files this client didn't have: now that a file
+	// is here, its rows are recorded as the file's if they were made from
+	// its content. Otherwise they're dropped and the attachment stays
+	// unindexed, as one whose rows were refused for their content does:
+	// the server embedded another version of the file, and a new one
+	// follows its upload. A file still missing waits for a later sync.
+	async function _adoptRows(libraryID) {
+		let { Store, Sources } = Zotero.Embeddings.Indexing;
+		for (let record of await Store.getUnkeyedAttachments(libraryID)) {
+			let item = await Zotero.Items.getAsync(record.itemID, { noCache: true });
+			if (!item) {
+				continue;
+			}
+			let sourceKey = await Sources.getAttachmentSourceKey(item);
+			if (!sourceKey) {
+				continue;
+			}
+			let matches = record.contentHash === await item.attachmentHash
+				|| record.contentHash === await Sources.getAttachmentTextHash(item);
+			if (matches) {
+				await Store.setSource(item.id, {
+					sourceKey,
+					contentHash: record.contentHash,
+					extractor: record.extractor,
+					syncVersion: record.syncVersion
+				});
+			}
+			else {
+				await Store.deleteItems([item.id]);
+				await Store.setSyncDeclined([item.id]);
+			}
+		}
+	}
+
 	// Ask what changed since the version held: what the server lists as
-	// declined is left to this client; what it lists as embedded at a
-	// version other than the one held is to be fetched. A key with no item
-	// here yet -- one that landed on the server after this sync's data step
-	// -- holds the version back, so the next look lists it again once the
-	// item has arrived.
+	// declined is recorded as such; what it lists as embedded at a version
+	// other than the one held is to be fetched, whatever kind of item it
+	// is. A key with no item here yet -- one that landed on the server
+	// after this sync's data step -- holds the version back, so the next
+	// look lists it again once the item has arrived.
 	//
 	// @return {Promise<Object|null>} - { version, items }, the items to
 	//     fetch and the version to record (null while a key is passed over),
 	//     or null when nothing has changed
-	async function _findChangedAttachments(client, libraryID) {
+	async function _findChangedItems(client, libraryID) {
 		let Store = Zotero.Embeddings.Indexing.Store;
 		let library = Zotero.Libraries.get(libraryID);
 		let model = Zotero.Embeddings.getModelVersion();
@@ -4542,9 +4552,8 @@ Zotero.Embeddings.Sync = new function () {
 		return { version: missing ? null : version, items: toFetch };
 	}
 
-	// Fetch the rows of the given attachments, one request each, a few at
-	// a time
-	async function _fetchAttachments(client, libraryID, items, stopCheck) {
+	// Fetch the rows of the given items, one request each, a few at a time
+	async function _fetchItems(client, libraryID, items, stopCheck) {
 		let Store = Zotero.Embeddings.Indexing.Store;
 		let library = Zotero.Libraries.get(libraryID);
 		let model = Zotero.Embeddings.getModelVersion();

@@ -121,16 +121,19 @@ pref("extensions.zotero.fulltext.textMaxLength", 500000);
 pref("extensions.zotero.fulltext.pdfMaxPages", 100);
 pref("extensions.zotero.search.useLeftBound", true);
 
+// Extract the structured text of every PDF, EPUB and snapshot ahead of
+// anything asking for it (see Zotero.SDT.AutoIndex)
+pref("extensions.zotero.sdt.autoExtract", false);
+
 // Set when the user stops indexing or turns semantic search off; nothing is indexed until indexing is started again
 pref("extensions.zotero.embeddings.indexingPaused", false);
 // An OpenAI-style /v1/embeddings URL to send indexing to, used only once
 // verified to serve the active model (see Zotero.Embeddings.Endpoint)
 pref("extensions.zotero.embeddings.endpoint", "");
-// Whether attachments kept in Zotero Storage are left for the server to
-// embed, their rows fetched as indexing reaches them. Not shown in the UI:
-// an override for testing, since a syncing account uses the server as a
-// matter of course.
-pref("extensions.zotero.embeddings.sync.enabled", true);
+// Embed everything on this computer even with an account to sync with,
+// whose server would otherwise embed for it. Each way has its own model
+// (see Zotero.Embeddings.shouldSyncEmbeddings()). Not shown in the UI.
+pref("extensions.zotero.embeddings.forceLocalIndexing", false);
 
 // Notes
 pref("extensions.zotero.note.fontFamily", "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif");

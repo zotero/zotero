@@ -185,7 +185,43 @@ describe("Advanced Preferences", function () {
 				win.close();
 				Zotero.Prefs.clear('search.bestMatch.enableSemantic');
 				Zotero.Prefs.clear('embeddings.indexingPaused');
+				Zotero.Prefs.clear('sdt.autoExtract');
 				stub.restore();
+			}
+		});
+
+		it("should show one line in place of the bars while the server embeds", async function () {
+			var stubs = [
+				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Embeddings, 'shouldSyncEmbeddings').returns(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Sync.Runner, 'setSyncTimeout')
+			];
+			var win = await loadPrefPane('advanced');
+			try {
+				var statusBox = win.document.getElementById('semantic-search-status');
+				Zotero.Prefs.set('search.bestMatch.enableSemantic', true);
+				while (statusBox.hidden) {
+					await Zotero.Promise.delay(10);
+				}
+				// No run to show or control: the data comes by sync. The
+				// bars' grid must not win over the hidden attribute.
+				let progress = win.document.getElementById('semantic-search-progress');
+				assert.isTrue(progress.hidden);
+				assert.equal(win.getComputedStyle(progress).display, 'none');
+				assert.isTrue(win.document.getElementById('semantic-search-rate').hidden);
+				assert.isTrue(win.document.getElementById('semantic-search-resume').hidden);
+				assert.isTrue(win.document.getElementById('semantic-search-stop').hidden);
+				assert.equal(
+					win.document.getElementById('semantic-search-phase').getAttribute('data-l10n-id'),
+					'preferences-advanced-semantic-search-synced'
+				);
+			}
+			finally {
+				win.close();
+				Zotero.Prefs.clear('search.bestMatch.enableSemantic');
+				Zotero.Prefs.clear('sdt.autoExtract');
+				stubs.forEach(stub => stub.restore());
 			}
 		});
 	})

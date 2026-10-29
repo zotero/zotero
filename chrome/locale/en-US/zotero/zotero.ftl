@@ -472,7 +472,8 @@ items-column-relevance-rank = Rank { $rank }
 items-column-relevance-rank-engines = Rank { $rank } · Words { $words }% · Meaning { $meaning }%
 
 items-best-match-indexing = Indexing in progress — { $indexed } of { $total } items indexed
-items-best-match-indexing-paused = Indexing is paused — { $indexed } of { $total } items indexed
+items-best-match-paused = Indexing is paused — { $indexed } of { $total } items indexed
+items-best-match-synced = Semantic data is downloaded when you sync — { $indexed } of { $total } items received
 # $page (String) - a page label, e.g. "12" or "ix"
 items-search-match-page = p. { $page }
 

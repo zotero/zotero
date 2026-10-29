@@ -226,7 +226,7 @@ Zotero.Streamer_Module.prototype = {
 	 *     with delay in milliseconds
 	 */
 	_onEmbeddingsNotification: function (data) {
-		if (!Zotero.Embeddings.isEnabled() || !Zotero.Embeddings.Sync.isAvailable()) {
+		if (!Zotero.Embeddings.isEnabled() || !Zotero.Embeddings.shouldSyncEmbeddings()) {
 			return;
 		}
 		let library = data.library && Zotero.URI.getPathLibrary(data.library);
