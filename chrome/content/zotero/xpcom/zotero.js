@@ -326,8 +326,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 						);
 						// Revert to home directory
 						if (index == 0) {
-							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
-							Zotero.Utilities.Internal.quit(true);
+							Zotero.Utilities.Internal.quit(await Zotero.DataDirectory.setToDefault());
 							return;
 						}
 						// Locate data directory
@@ -351,8 +350,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 						);
 						// Revert to home directory
 						if (index == 1) {
-							Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
-							Zotero.Utilities.Internal.quit(true);
+							Zotero.Utilities.Internal.quit(await Zotero.DataDirectory.setToDefault());
 							return;
 						}
 						// Locate data directory
@@ -1028,8 +1026,7 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			button1: Zotero.getString('general.quit'),
 		});
 		if (index == 0) {
-			Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
-			Zotero.Utilities.Internal.quit(true);
+			Zotero.Utilities.Internal.quit(await Zotero.DataDirectory.setToDefault());
 		}
 	}
 

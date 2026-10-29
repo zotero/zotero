@@ -260,8 +260,7 @@ Zotero.DataDirectory = {
 						null, {}
 					);
 					if (index == 0) {
-						Zotero.DataDirectory.set(Zotero.DataDirectory.defaultDir);
-						Zotero.Utilities.Internal.quit(true);
+						Zotero.Utilities.Internal.quit(await Zotero.DataDirectory.setToDefault());
 					}
 					else if (index == 1) {
 						Zotero.Utilities.Internal.quit();
@@ -298,6 +297,21 @@ Zotero.DataDirectory = {
 		Zotero.Prefs.set('useDataDir', true);
 		
 		return path != origPath;
+	},
+	
+	
+	/**
+	 * Switch to the default data directory if it can be written to, or show an error if not
+	 *
+	 * @return {Promise<Boolean>} - True if the data directory was set to the default location
+	 */
+	setToDefault: async function () {
+		var dir = this.defaultDir;
+		if (!await this._checkWriteAccess(dir)) {
+			return false;
+		}
+		this.set(dir);
+		return true;
 	},
 	
 	

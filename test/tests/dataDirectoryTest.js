@@ -194,6 +194,47 @@ describe("Zotero.DataDirectory", function () {
 		});
 	});
 	
+	describe("#setToDefault()", function () {
+		var parentDir, defaultDir, defaultDirStub;
+		
+		beforeEach(async function () {
+			parentDir = await getTempDirectory();
+			defaultDir = PathUtils.join(parentDir, 'Zotero');
+			defaultDirStub = sinon.stub(Zotero.DataDirectory, 'defaultDir').get(() => defaultDir);
+		});
+		
+		afterEach(async function () {
+			defaultDirStub.restore();
+			await IOUtils.setPermissions(parentDir, 0o755);
+		});
+		
+		it("should set the data directory to the default location", async function () {
+			assert.isTrue(await Zotero.DataDirectory.setToDefault());
+			assert.isTrue(stubs.setDataDir.calledOnceWith(defaultDir));
+			assert.deepEqual(await IOUtils.getChildren(defaultDir), []);
+		});
+		
+		it("should show an error and leave the data directory unchanged if the default location isn't writable", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			}
+			
+			var promptService = Services.prompt;
+			var alertStub = sinon.stub();
+			Services.prompt = { alert: alertStub };
+			await IOUtils.setPermissions(parentDir, 0o555);
+			try {
+				assert.isFalse(await Zotero.DataDirectory.setToDefault());
+				assert.isTrue(alertStub.calledOnce);
+				assert.include(alertStub.firstCall.args[2], defaultDir);
+				assert.isFalse(stubs.setDataDir.called);
+			}
+			finally {
+				Services.prompt = promptService;
+			}
+		});
+	});
+	
 	describe("#choose()", function () {
 		it("should show an error and leave the data directory unchanged if the default location isn't writable", async function () {
 			if (Zotero.isWin) {
