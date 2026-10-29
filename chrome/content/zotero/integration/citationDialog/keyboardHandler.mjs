@@ -36,6 +36,18 @@ export class CitationDialogKeyboardHandler {
 		return this.doc.getElementById(id);
 	}
 
+	_getBubbleInputForFocus() {
+		let headInput = this._id("narrative-head-input");
+		if (!headInput.hidden && !headInput.getAllBubbles().length) {
+			return headInput;
+		}
+		return this._id("bubble-input");
+	}
+
+	_isInBubbleInput(node) {
+		return !!node.closest?.("bubble-input");
+	}
+
 	// main keydown listener that will call more specific handlers
 	// until the event is handled
 	handleKeydown(event) {
@@ -76,7 +88,7 @@ export class CitationDialogKeyboardHandler {
 			}
 			// otherwise, focus bubble-input
 			else {
-				this._id("bubble-input").focus();
+				this._getBubbleInputForFocus().focus();
 			}
 			event.stopPropagation();
 			event.preventDefault();
@@ -111,7 +123,7 @@ export class CitationDialogKeyboardHandler {
 		}
 		else if (event.key == "f" && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
 			handled = true;
-			this._id("bubble-input").focus();
+			this._getBubbleInputForFocus().focus();
 		}
 		if (handled) {
 			event.preventDefault();
@@ -129,7 +141,7 @@ export class CitationDialogKeyboardHandler {
 		}
 		// arrow down from bubble input in library mode will focus the current item, if any
 		// or navigate into the suggested items group. If the suggested items are empty, focus items table below
-		else if (!this._id("library-layout").hidden && event.key == "ArrowDown" && this._id("bubble-input").contains(event.target) && noModifiers) {
+		else if (!this._id("library-layout").hidden && event.key == "ArrowDown" && this._isInBubbleInput(event.target) && noModifiers) {
 			let group = this.doc.querySelector("#library-layout [data-arrow-nav]");
 			let current = group.querySelector(".selected.current[tabindex]");
 			if (current) {
@@ -148,7 +160,7 @@ export class CitationDialogKeyboardHandler {
 			this._focusItemTree({ selectIfEmpty: true });
 		}
 		// arrow up/down from bubble-input in list mode will move selection in the items list
-		else if (!this._id("list-layout").hidden && (event.key == "ArrowDown" || event.key == "ArrowUp") && this._id("bubble-input").contains(event.target) && onlyShiftModifierPossible) {
+		else if (!this._id("list-layout").hidden && (event.key == "ArrowDown" || event.key == "ArrowUp") && this._isInBubbleInput(event.target) && onlyShiftModifierPossible) {
 			let group = this.doc.querySelector("#list-layout [data-arrow-nav]");
 			let current = group.querySelector(".current");
 			let firstRow = group.querySelector('[data-arrow-nav-enabled="true"][tabindex]');
@@ -168,7 +180,7 @@ export class CitationDialogKeyboardHandler {
 		}
 		// arrowUp from the first item will refocus bubbleInput
 		else if (event.key == "ArrowUp" && this._shouldRefocusBubbleInputOnArrowUp() && noModifiers) {
-			this._id("bubble-input").refocusInput();
+			this._getBubbleInputForFocus().refocusInput();
 			handled = true;
 		}
 		// handle focus and selection movement within bubble-input and item groups
