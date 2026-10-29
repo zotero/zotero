@@ -194,6 +194,35 @@ describe("Zotero.DataDirectory", function () {
 		});
 	});
 	
+	describe("#choose()", function () {
+		it("should show an error and leave the data directory unchanged if the default location isn't writable", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			}
+			
+			var parentDir = await getTempDirectory();
+			var defaultDir = PathUtils.join(parentDir, 'Zotero');
+			var defaultDirStub = sinon.stub(Zotero.DataDirectory, 'defaultDir').get(() => defaultDir);
+			var promptService = Services.prompt;
+			var alertStub = sinon.stub();
+			var confirmStub = sinon.stub();
+			Services.prompt = { alert: alertStub, confirmEx: confirmStub };
+			await IOUtils.setPermissions(parentDir, 0o555);
+			try {
+				assert.isFalse(await Zotero.DataDirectory.choose(false, true));
+				assert.isTrue(alertStub.calledOnce);
+				assert.include(alertStub.firstCall.args[2], defaultDir);
+				assert.isFalse(confirmStub.called);
+				assert.isFalse(stubs.setDataDir.called);
+			}
+			finally {
+				Services.prompt = promptService;
+				defaultDirStub.restore();
+				await IOUtils.setPermissions(parentDir, 0o755);
+			}
+		});
+	});
+	
 	describe("#checkForMigration()", function () {
 		let fileMoveStub;
 		
