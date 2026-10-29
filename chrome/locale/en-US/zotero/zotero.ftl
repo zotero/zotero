@@ -155,6 +155,8 @@ menu-view-columns-move-left =
     .label = Move Column Left
 menu-view-columns-move-right =
     .label = Move Column Right
+menu-view-auto-hide-menu-bar =
+    .label = Show Menu Bar on Hover
 menu-view-hide-context-annotation-rows =
     .label = Hide Non-Matching Annotations
 
