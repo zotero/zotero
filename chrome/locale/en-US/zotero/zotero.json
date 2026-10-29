@@ -116,6 +116,9 @@
 	"general-delete": {
 		"string": "Delete"
 	},
+	"general-hide": {
+		"string": "Hide"
+	},
 	"general-insert": {
 		"string": "Insert"
 	},
@@ -2526,7 +2529,7 @@
 		"string": "Add more time"
 	},
 	"reader-read-aloud-quota-exceeded-message": {
-		"string": "<add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with {tier, select, standard {Standard Voices} local {Local Voices}}."
+		"string": "<add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with {tier, select, standard {Standard voices} local {local voices}}."
 	},
 	"reader-read-aloud-error-unknown": {
 		"string": "An unknown error occurred."
@@ -2535,7 +2538,7 @@
 		"string": "Unable to connect to the Read Aloud service. Please check your internet connection."
 	},
 	"reader-read-aloud-error-daily-limit-exceeded": {
-		"string": "You have exceeded your daily limit for { app-name } Voices."
+		"string": "You’ve reached your daily limit for { app-name } Voices. You can continue reading with local voices until the limit resets at { time }."
 	},
 	"reader-read-aloud-retry": {
 		"string": "Retry"
@@ -2604,7 +2607,7 @@
 		"string": "No voices available"
 	},
 	"reader-read-aloud-first-run-no-voices-for-language": {
-		"string": "{ tier } Voices do not support { language }."
+		"string": "{ tier } voices do not support { language }."
 	},
 	"reader-read-aloud-region": {
 		"string": "Region"
