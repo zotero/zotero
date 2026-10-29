@@ -353,6 +353,23 @@ describe("Zotero.FullText", function () {
 			assert.notInclude(await contentSearch(item, 'instancemismatch'), item.id);
 		});
 
+		it("should rebuild the index when the meta table is missing", async function () {
+			let item = await createTextAttachment("missingmeta content");
+			assert.include(await contentSearch(item, 'missingmeta'), item.id);
+			// Simulate a current-version index without its meta table
+			await Zotero.DB.queryAsync("DROP TABLE ftindex.fulltextIndexMeta");
+			await Zotero.DB.vacuum({ force: true });
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT value FROM ftindex.fulltextIndexMeta WHERE key='localUserKey'"
+				),
+				Zotero.Users.getLocalUserKey()
+			);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM ftindex.fulltextIndexState"), 0
+			);
+		});
+
 		describe("Note indexing", function () {
 			async function createNote(noteText) {
 				let item = new Zotero.Item('note');

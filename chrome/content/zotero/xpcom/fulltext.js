@@ -138,10 +138,14 @@ Zotero.Fulltext = Zotero.FullText = new function () {
 			let localUserKey = Zotero.Users.getLocalUserKey();
 			let version = await Zotero.DB.valueQueryAsync("PRAGMA ftindex.user_version");
 			let indexedUserKey = version >= _indexDBVersion
+					// Rebuild an index missing its meta table
+					&& await Zotero.DB.tableExists('fulltextIndexMeta', 'ftindex')
 				? await Zotero.DB.valueQueryAsync(
 					"SELECT value FROM ftindex.fulltextIndexMeta WHERE key='localUserKey'")
 				: false;
 			if (version < _indexDBVersion || indexedUserKey != localUserKey) {
+				// Clear the version first so that an interrupted rebuild is redone on the next run
+				await Zotero.DB.queryAsync("PRAGMA ftindex.user_version = 0");
 				// Drop any existing tables so a stale or mismatched index is rebuilt from scratch
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContent");
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS ftindex.fulltextContentCJK");
