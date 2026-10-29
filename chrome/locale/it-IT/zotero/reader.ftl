@@ -252,7 +252,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Ampia sc
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Supporto multilingue
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Il testo sorgente è elaborato da fornitori esterni di sintesi vocale (TTS)
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = I piani di abbonamento { -subscription-name } includono dei tetti mensili per la voce Premium
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Richiedi crediti per minuti aggiuntivi durante la beta
 reader-read-aloud-sample-text = Io sono la voce locale { $name }
 reader-read-aloud-voices-none-available = Nessuna voce disponibile
 reader-read-aloud-first-run-no-voices-for-language = Le voci { $tier } non includono la lingua { $language }.

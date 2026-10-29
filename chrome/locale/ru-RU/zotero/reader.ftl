@@ -255,7 +255,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Широ
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Многоязычная поддержка
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Исходный текст обрабатывается внешними провайдерами преобразования текста в речь
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } планы включают ежемесячные минуты Premium Voice
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Запросите кредиты на дополнительные минуты во время беты
 reader-read-aloud-sample-text = Я — локальный голос { $name }
 reader-read-aloud-voices-none-available = Голосов нет.
 reader-read-aloud-first-run-no-voices-for-language = { $tier } Голоса не поддерживают { $language }.

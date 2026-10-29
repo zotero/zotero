@@ -222,8 +222,8 @@ reader-read-aloud-done-button = { general-done }
 reader-read-aloud-add-more-time = Mehr Zeit hinzufügen
 reader-read-aloud-quota-exceeded-message =
     <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
-        [standard] Standard Voices
-       *[local] Local Voices
+        [standard] Standard voices
+       *[local] local voices
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Ein unbekannter Fehler ist aufgetreten.
@@ -249,7 +249,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Große S
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Mehrsprachigkeits-Unterstützung
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Der Ausgangstext wird von externen Text-to-Speech-Anbietern verarbeitet
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name }-Abonnements enthalten monatliche Kontingente für Premiumstimmen.
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Während der Beta Credits für zusätzliche Minuten beantragen
 reader-read-aloud-sample-text = Ich bin die lokale Sprache  { $name }
 reader-read-aloud-voices-none-available = Keine Stimmen verfügbar
 reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices unterstützt { $language } nicht.

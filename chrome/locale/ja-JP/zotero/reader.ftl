@@ -246,7 +246,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = 幅広�
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = 多言語サポートあり
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = ソーステキストは外部のテキスト読み上げプロバイダーによって処理される
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } プランには毎月プレミアム音声の利用分数が含まれる
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = ベータ期間中は追加分数のクレジットをリクエスト可能
 reader-read-aloud-sample-text = 私はローカル音声 { $name } です
 reader-read-aloud-voices-none-available = 利用可能な音声がありません
 reader-read-aloud-first-run-no-voices-for-language = { $tier } 音声は { $language } に対応していません。

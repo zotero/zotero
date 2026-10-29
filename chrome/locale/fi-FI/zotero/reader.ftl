@@ -249,7 +249,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Laaja ki
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Monikielinen tuki
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Ulkoinen teksti ääneksi -palvelu käsittelee lähdetekstiäsi
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } tilaukset sisältävät Premium-ääneenlukupalvelun minuutteja
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Pyydä lisälukuminuutteja varten krediittejä betatestausvaiheen aikana
 reader-read-aloud-sample-text = Olen paikallinen ääni { $name }
 reader-read-aloud-voices-none-available = Ei ääniä saatavilla
 reader-read-aloud-first-run-no-voices-for-language = { $tier } lukuääni ei tue kieltä { $language }.

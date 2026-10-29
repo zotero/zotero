@@ -249,7 +249,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Bredt sp
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Flerspråklig støtte
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Kildeteksten behandles av eksterne tekst-til-tale-leverandører
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name }-abonnementene inkluderer månedlige minutter med premium stemme
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Be om kreditt for ekstra minutter under betatestingen
 reader-read-aloud-sample-text = Jeg er den lokale stemmen { $name }
 reader-read-aloud-voices-none-available = Ingen stemmer tilgjengelig
 reader-read-aloud-first-run-no-voices-for-language = { $tier } stemmer støtter ikke { $language }.

@@ -228,8 +228,8 @@ reader-read-aloud-done-button = { general-done }
 reader-read-aloud-add-more-time = Dodaj więcej czasu
 reader-read-aloud-quota-exceeded-message =
     <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
-        [standard] Standard Voices
-       *[local] Local Voices
+        [standard] Standard voices
+       *[local] local voices
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = Wystąpił nieznany błąd.
@@ -254,8 +254,7 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Wymaga 
 reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Szeroki wybór języka
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Wsparcie wielu języków
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
-reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } subscriptions include hours of Premium Voice listening each month
 reader-read-aloud-sample-text = Jestem głosem lokalnym { $name }
 reader-read-aloud-voices-none-available = Brak dostępnych głosów
 reader-read-aloud-first-run-no-voices-for-language = { $tier } Głosy nie obsługują { $language }.

@@ -246,7 +246,6 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = 广泛�
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = 多语言支持
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = 源文本由外部文本转语音供应商处理
 reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } 计划包含每月高级语音时长
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = 在 Beta 测试期间申请额外时长
 reader-read-aloud-sample-text = 我是本地声音 { $name }
 reader-read-aloud-voices-none-available = 没有声音可用
 reader-read-aloud-first-run-no-voices-for-language = { $tier } 声音不支持 { $language }。

@@ -222,13 +222,13 @@ reader-read-aloud-done-button = { general-done }
 reader-read-aloud-add-more-time = Add more time
 reader-read-aloud-quota-exceeded-message =
     <add-more-time>{ reader-read-aloud-add-more-time }</add-more-time> or continue reading with { $tier ->
-        [standard] Standard Voices
-       *[local] Local Voices
+        [standard] Standard voices
+       *[local] local voices
     }.
 reader-read-aloud-error = { general-error }
 reader-read-aloud-error-unknown = அறியப்படாத பிழை ஏற்பட்டது.
 reader-read-aloud-error-network = Unable to connect to the Read Aloud service. Please check your internet connection.
-reader-read-aloud-error-daily-limit-exceeded = You have exceeded your daily limit for { -app-name } Voices.
+reader-read-aloud-error-daily-limit-exceeded = You’ve reached your daily limit for { -app-name } Voices. You can continue reading with local voices until the limit resets at { $time }.
 reader-read-aloud-retry = Retry
 reader-read-aloud-first-run-title = Choose your preferred Read Aloud voice:
 reader-read-aloud-first-run-voice-tier-local-bullet-os-provided = Voices provided by your operating system
@@ -248,11 +248,10 @@ reader-read-aloud-first-run-voice-tier-premium-bullet-account-required = Require
 reader-read-aloud-first-run-voice-tier-premium-bullet-broad-languages = Broad language selection
 reader-read-aloud-first-run-voice-tier-premium-bullet-multilingual = Multilingual support
 reader-read-aloud-first-run-voice-tier-premium-bullet-external-processing = Source text is processed by external text-to-speech providers
-reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } plans include monthly Premium Voice minutes
-reader-read-aloud-first-run-voice-tier-premium-bullet-beta-credits = Request credits for additional minutes during beta
+reader-read-aloud-first-run-voice-tier-premium-bullet-subscription-minutes = { -subscription-name } subscriptions include hours of Premium Voice listening each month
 reader-read-aloud-sample-text = I am the local voice { $name }
 reader-read-aloud-voices-none-available = No voices available
-reader-read-aloud-first-run-no-voices-for-language = { $tier } Voices do not support { $language }.
+reader-read-aloud-first-run-no-voices-for-language = { $tier } voices do not support { $language }.
 reader-read-aloud-region = Region
 reader-read-aloud-region-auto = தானியங்கி
 reader-read-aloud-annotation-popup-move = Move annotation by sentence
