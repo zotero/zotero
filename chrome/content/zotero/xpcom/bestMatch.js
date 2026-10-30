@@ -739,10 +739,10 @@ Zotero.BestMatch = new function () {
 
 		/**
 		 * Every passage explaining why an item matched this session's query,
-		 * strongest first: the chunks the model matched, or else the item's
-		 * text cut the same way. Only the engines that matched the item are
-		 * asked. The strongest MAX_QUOTED_PASSAGES also carry a `snippet`, the
-		 * one line that best shows the query.
+		 * strongest first: the item's passages the model matched and the ones
+		 * that say the query's words. Only the engines that matched the item
+		 * are asked. The strongest MAX_QUOTED_PASSAGES also carry a `snippet`,
+		 * the one line that best shows the query.
 		 *
 		 * @param {Number} itemID
 		 * @return {Promise<Object[]>} - Entries with `text`, `ranges` and
@@ -771,16 +771,16 @@ Zotero.BestMatch = new function () {
 			for (let i = 0; i < passages.length; i++) {
 				let passage = passages[i];
 				let share = lexical ? lexical[i] : 0;
-				// A passage the model never weighed has only its words to
+				// A passage the model didn't match has only its words to
 				// recommend it, so one that says nothing of the query isn't a
 				// match at all
-				if (passage.score === undefined && !share) {
+				let weighed = passage.score != null;
+				if (!weighed && !share) {
 					continue;
 				}
 				// Over the engines that spoke for this item, so a strength is
 				// the same 0-1 fraction whether one weighed the passage or
 				// both did
-				let weighed = passage.score !== undefined;
 				let semanticWeight = weighed ? SEMANTIC_WEIGHT : 0;
 				let lexicalWeight = lexical ? LEXICAL_WEIGHT : 0;
 				let fraction = weighed ? Zotero.Embeddings.getScoreFraction(passage.score) : 0;
@@ -799,38 +799,36 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * The passages of an item to weigh against the query: the chunks the
-		 * model matched, or else the item's text cut into chunks -- along its
-		 * structure where it's been extracted, which knows where each passage
-		 * sits, and flat otherwise.
+		 * The passages of an item to weigh against the query: the index's
+		 * chunks of it, scored by the model where it matched the item, so the
+		 * engines weigh the same passages; or, for an item the index doesn't
+		 * hold, its text cut into chunks -- along its structure where it's
+		 * been extracted, which knows where each passage sits, and flat
+		 * otherwise.
 		 *
 		 * @param {Number} itemID
 		 * @return {Promise<Object[]>} - Passages, each with `text`, location
-		 *     fields where known, and a `score` from the model
+		 *     fields where known, and a `score` where the model matched it
 		 */
 		async _getPassages(itemID) {
-			let queryText = this._queryText;
-			if (this._semanticApplies(itemID)) {
-				try {
-					let chunks = await Zotero.Embeddings.getMatchingChunks(
-						queryText, itemID, { limit: Infinity });
-					// Only fulltext chunks carry their own text; item-level
-					// matches have nothing to excerpt
-					chunks = chunks.filter(chunk => chunk.text);
-					if (chunks.length) {
-						return chunks;
-					}
-				}
-				catch (e) {
-					if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
-						throw e;
-					}
+			let passages = [];
+			try {
+				let chunks = await Zotero.Embeddings.getIndexedChunks(itemID, {
+					queryText: this._semanticApplies(itemID) ? this._queryText : null
+				});
+				// A chunk whose source no longer reads back has no text to
+				// show
+				passages = chunks.filter(chunk => chunk.text);
+			}
+			catch (e) {
+				if (!(e instanceof Zotero.Embeddings.IndexNotReadyError)) {
+					throw e;
 				}
 			}
-			if (!this._lexicalApplies(itemID)) {
-				return [];
+			if (!passages.length && this._lexicalApplies(itemID)) {
+				passages = await this._cutPassages(itemID);
 			}
-			return this._cutPassages(itemID);
+			return passages;
 		}
 
 		// Cut an item's text into passages the size the index's are: along its

@@ -782,8 +782,8 @@ describe("Zotero.Embeddings", function () {
 		});
 	});
 
-	describe("#getMatchingChunks()", function () {
-		it("should return an item's matching chunks with their locations, best first", async function () {
+	describe("#getIndexedChunks()", function () {
+		it("should return every chunk of an item in document order, scoring those above the floor", async function () {
 			this.timeout(60000);
 			let item = await importFileAttachment('test.pdf');
 			// A weak match, a strong match, and a chunk below the floor
@@ -791,7 +791,7 @@ describe("Zotero.Embeddings", function () {
 			mixed[1] += 1;
 			await store(item, 0, mixed, { anchor: positionWorld.intro.anchor });
 			await store(item, 1, axis(0), { anchor: positionWorld.sampling.anchor });
-			await store(item, 2, axis(2), { anchor: positionWorld.references.anchor });
+			await store(item, 2, axis(2), { anchor: positionWorld.intro.anchor });
 
 			let query = axis(0, 0.9);
 			query[1] += 0.1;
@@ -806,25 +806,28 @@ describe("Zotero.Embeddings", function () {
 					sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 					sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(query)
 				);
-				let chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id);
-				// The chunk below the model's floor isn't a match
-				assert.lengthOf(chunks, 2);
-				// Best chunk first, its text re-derived from its stored
-				// anchor in the document
-				assert.equal(chunks[0].chunkIndex, 1);
-				assert.equal(chunks[0].text, 'The sampling\ntext');
-				assert.equal(chunks[0].outlinePath, 'Methods > Sampling');
-				assert.equal(chunks[0].pageLabel, '7');
-				assert.deepEqual(chunks[0].position, positionWorld.sampling.position);
-				assert.equal(chunks[1].chunkIndex, 0);
-				assert.equal(chunks[1].text, 'The introduction\ntext');
-				assert.isNull(chunks[1].pageLabel);
-				assert.isAbove(chunks[0].score, chunks[1].score);
-				// The limit caps how many come back
-				let limited = await Zotero.Embeddings.getMatchingChunks('anything', item.id,
-					{ limit: 1 });
-				assert.lengthOf(limited, 1);
-				assert.equal(limited[0].chunkIndex, 1);
+				let chunks = await Zotero.Embeddings.getIndexedChunks(item.id, { queryText: 'anything' });
+				// Every chunk, as the document orders them, each read back
+				// from its anchor
+				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [0, 1, 2]);
+				assert.equal(chunks[1].text, 'The sampling\ntext');
+				assert.equal(chunks[1].outlinePath, 'Methods > Sampling');
+				assert.equal(chunks[1].pageLabel, '7');
+				assert.deepEqual(chunks[1].position, positionWorld.sampling.position);
+				assert.equal(chunks[2].text, 'The introduction\ntext');
+				// Scored where the model matched, null where it didn't
+				assert.isAbove(chunks[1].score, chunks[0].score);
+				assert.isAbove(chunks[0].score, 0);
+				assert.isNull(chunks[2].score);
+
+				// Without a query, the same chunks and no scores, the model
+				// never asked
+				Zotero.Embeddings.embedQuery.resetHistory();
+				chunks = await Zotero.Embeddings.getIndexedChunks(item.id);
+				assert.isFalse(Zotero.Embeddings.embedQuery.called);
+				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [0, 1, 2]);
+				assert.equal(chunks[1].text, 'The sampling\ntext');
+				assert.isTrue(chunks.every(chunk => chunk.score === null));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -834,35 +837,19 @@ describe("Zotero.Embeddings", function () {
 		it("should leave out chunks in a reference list", async function () {
 			this.timeout(60000);
 			let item = await importFileAttachment('test.pdf');
-			// The reference list matches best, the sampling section after it
 			await store(item, 0, axis(0), { anchor: positionWorld.references.anchor });
-			await store(item, 1, axis(0, 0.8), { anchor: positionWorld.sampling.anchor });
-			let referencesPath = positionWorld.references.outlinePath;
+			await store(item, 1, axis(1), { anchor: positionWorld.sampling.anchor });
 			let stubs = [
 				stubStructure(),
 				stubReadAnchors()
 			];
 			try {
 				await indexArrivedRows();
-				stubs.push(
-					sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
-					sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
-					sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
-				);
-				// Skipped, and not counted toward the limit
-				let chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id, { limit: 1 });
+				stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+				let chunks = await Zotero.Embeddings.getIndexedChunks(item.id);
 				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [1]);
-				// As is one under another heading, titled another way
-				positionWorld.references.outlinePath = 'Back matter > Literature Cited:';
-				chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id);
-				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [1]);
-				// A heading that only mentions references isn't one
-				positionWorld.references.outlinePath = 'Sources of law';
-				chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id);
-				assert.deepEqual(chunks.map(chunk => chunk.chunkIndex), [0, 1]);
 			}
 			finally {
-				positionWorld.references.outlinePath = referencesPath;
 				stubs.forEach(stub => stub.restore());
 			}
 		});
@@ -880,16 +867,17 @@ describe("Zotero.Embeddings", function () {
 				await indexArrivedRows();
 
 				// The chunk still matches -- its vector is intact -- but the
-				// preview can't be shown, since the place it was embedded
-				// from is gone, and nothing is read back for it
+				// place it was embedded from is gone, so nothing is read back
+				// for it
 				stubs.push(
 					sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
 					sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
 					sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0, 0.9))
 				);
-				let chunks = await Zotero.Embeddings.getMatchingChunks('anything', item.id);
+				let chunks = await Zotero.Embeddings.getIndexedChunks(item.id, { queryText: 'anything' });
 				assert.lengthOf(chunks, 1);
 				assert.equal(chunks[0].chunkIndex, 0);
+				assert.isAbove(chunks[0].score, 0);
 				assert.isNull(chunks[0].text);
 				assert.isNull(chunks[0].outlinePath);
 				assert.isNull(chunks[0].pageLabel);
@@ -897,6 +885,19 @@ describe("Zotero.Embeddings", function () {
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
+			}
+		});
+
+		it("should return nothing for an item the index doesn't hold, or while disabled", async function () {
+			let item = await importFileAttachment('test.pdf');
+			let stub = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true);
+			try {
+				assert.isEmpty(await Zotero.Embeddings.getIndexedChunks(item.id));
+				stub.returns(false);
+				assert.isEmpty(await Zotero.Embeddings.getIndexedChunks(item.id));
+			}
+			finally {
+				stub.restore();
 			}
 		});
 	});
@@ -3140,7 +3141,7 @@ describe("Zotero.Embeddings", function () {
 					"REPLACE INTO embeddings.embeddingsMeta (key, value) "
 						+ "VALUES ('modelVersion', 'test-model/1')"
 				);
-				let chunks = await Zotero.Embeddings.getMatchingChunks('owls', attachment.id);
+				let chunks = await Zotero.Embeddings.getIndexedChunks(attachment.id, { queryText: 'owls' });
 				assert.lengthOf(chunks, 1);
 				assert.deepEqual(Zotero.SDT.readAnchors.firstCall.args[1], [anchor]);
 				assert.include(chunks[0].text, 'Owls migrate south');
@@ -3871,7 +3872,7 @@ describe("Zotero.Embeddings", function () {
 					"REPLACE INTO embeddings.embeddingsMeta (key, value) "
 						+ "VALUES ('modelVersion', 'test-model/1')"
 				);
-				let chunks = await Zotero.Embeddings.getMatchingChunks('owls', attachment.id);
+				let chunks = await Zotero.Embeddings.getIndexedChunks(attachment.id, { queryText: 'owls' });
 				assert.lengthOf(chunks, 1);
 				assert.equal(chunks[0].text,
 					'A plain paragraph of text about owl migration routes.');

@@ -1175,53 +1175,71 @@ Zotero.Embeddings = new function () {
 	};
 
 	/**
-	 * The chunks of an item most similar to a query, above the model's
-	 * floor, each with where in the item it came from. No chunk text is
-	 * stored, so it's re-derived from the chunk's anchor or the plain text it
-	 * was cut from; a chunk that no longer reads back comes with null text and
-	 * location. For other item types those fields are null. A chunk in a
-	 * section headed as a reference list is left out.
+	 * Every chunk of an item in the index, in document order, each with
+	 * where in the item it came from and its text re-derived from its anchor
+	 * or the plain text it was cut from, since no chunk text is stored; a
+	 * chunk that no longer reads back comes with null text and location.
+	 * Given a query, each chunk also carries its `score` against it when
+	 * that clears the model's floor, and null otherwise; without one every
+	 * score is null and no model is consulted. A chunk in a section headed
+	 * as a reference list is left out.
 	 *
-	 * @param {String} queryText
 	 * @param {Number} itemID
 	 * @param {Object} [options]
-	 * @param {Number} [options.limit=3] - Most chunks to return; Infinity
-	 *     for every chunk above the floor
+	 * @param {String} [options.queryText] - The query to score the chunks
+	 *     against
 	 * @return {Promise<Object[]>} - [{ chunkIndex, score, text, outlinePath,
-	 *     pageLabel, position }], best first, then in document order
+	 *     pageLabel, position }]
 	 */
-	this.getMatchingChunks = async function (queryText, itemID, { limit = 3 } = {}) {
+	this.getIndexedChunks = async function (itemID, { queryText = null } = {}) {
 		if (!this.isEnabled()) {
 			return [];
 		}
-		let { minScore } = await _requireReadyIndex();
-		let query = this.prepare(await this.embedQuery(queryText));
-		let scoring = _scoreExpression(query);
-		// Where each chunk sits, and its score; the vector itself stays in SQL
-		let scored = await Zotero.DB.queryAsync(
-			"SELECT * FROM ("
-				+ "SELECT chunkIndex, anchor, " + scoring.sql + " AS score "
-				+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL"
-				+ ") WHERE score >= ? ORDER BY score DESC, chunkIndex",
-			[...scoring.params, itemID, minScore]
-		);
-		// A chunk's heading is only known once it's read back, so chunks are
-		// read in batches until enough outside reference lists are found
+		let rows;
+		if (queryText) {
+			let { minScore } = await _requireReadyIndex();
+			let query = this.prepare(await this.embedQuery(queryText));
+			let scoring = _scoreExpression(query);
+			let scored = await Zotero.DB.queryAsync(
+				"SELECT chunkIndex, anchor, " + scoring.sql + " AS score "
+					+ "FROM embeddings.itemEmbeddings WHERE itemID=? AND embedding IS NOT NULL "
+					+ "ORDER BY chunkIndex",
+				[...scoring.params, itemID]
+			);
+			rows = scored.map(row => ({
+				chunkIndex: row.chunkIndex,
+				anchor: row.anchor,
+				score: row.score >= minScore ? row.score : null
+			}));
+		}
+		else {
+			await this.initDB();
+			let stored = await Zotero.DB.queryAsync(
+				"SELECT chunkIndex, anchor FROM embeddings.itemEmbeddings "
+					+ "WHERE itemID=? AND embedding IS NOT NULL ORDER BY chunkIndex",
+				[itemID]
+			);
+			rows = stored.map(row => ({ chunkIndex: row.chunkIndex, anchor: row.anchor, score: null }));
+		}
+		if (!rows.length) {
+			return [];
+		}
+		let sources = await _loadChunkSources(itemID, rows);
 		let chunks = [];
-		let batchSize = Math.max(1, Number.isFinite(limit) ? limit : scored.length);
-		for (let i = 0; i < scored.length && chunks.length < limit; i += batchSize) {
-			let batch = scored.slice(i, i + batchSize);
-			let sources = await _loadChunkSources(itemID, batch);
-			for (let j = 0; j < batch.length; j++) {
-				// In a reference list when any heading over it names one
-				let headings = sources[j].outlinePath?.split(' > ') || [];
-				if (!headings.some(heading => Zotero.Utilities.Internal.isLikelyReference(heading))) {
-					chunks.push(Object.assign(_describeChunk(batch[j], sources[j]), { score: batch[j].score }));
-				}
+		for (let i = 0; i < rows.length; i++) {
+			if (!_inReferenceList(sources[i])) {
+				chunks.push(Object.assign(_describeChunk(rows[i], sources[i]), { score: rows[i].score }));
 			}
 		}
-		return chunks.slice(0, limit);
+		return chunks;
 	};
+
+	// Whether a chunk's source sits in a reference list: any heading over
+	// it names one
+	function _inReferenceList(source) {
+		let headings = source.outlinePath?.split(' > ') || [];
+		return headings.some(heading => Zotero.Utilities.Internal.isLikelyReference(heading));
+	}
 
 	// One chunk as callers see it: its place in the item's order, with the
 	// text and location re-derived from its source

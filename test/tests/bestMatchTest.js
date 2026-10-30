@@ -418,7 +418,7 @@ describe("Zotero.BestMatch", function () {
 
 		it("should cut an unindexed item into passages of its own text", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false));
-			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks');
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([]);
 			stubs.push(chunksStub);
 			stubs.push(sinon.stub(Zotero.SDT, 'getItemChunks').resolves({ ok: false, reason: 'not-cached' }));
 			let text = 'A paragraph about owls.\n\n' + 'Filler about nothing. '.repeat(200)
@@ -428,8 +428,9 @@ describe("Zotero.BestMatch", function () {
 
 			let session = await sessionFor();
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
-			// The model was never asked about an item it hasn't indexed
-			assert.isFalse(chunksStub.called);
+			// The index was asked for the item's passages, but the model was
+			// never asked about an item it hasn't indexed
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null }));
 			// Only the passages that say the query come back, each a piece of
 			// the item's text -- joined with the chunker's own separators --
 			// with the query located in it
@@ -481,7 +482,7 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			let lead = 'Nothing of interest here. '.repeat(30);
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
 				{ text: lead + 'And here the owl appears at last.', score: 0.6, position: 1 },
 				// A chunk whose source drifted has no text to quote
 				{ text: null, score: 0.9 }
@@ -509,7 +510,7 @@ describe("Zotero.BestMatch", function () {
 		async function quoteOf(text, pick) {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([{ text, score: 0.6 }]));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([{ text, score: 0.6 }]));
 			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[[0, 3]]]));
 			let pickStub = sinon.stub(Zotero.Lexical, 'pickQuote').resolves(pick);
 			stubs.push(pickStub);
@@ -564,7 +565,7 @@ describe("Zotero.BestMatch", function () {
 		async function meantQuoteOf(text) {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([{ text, score: 0.6 }]));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([{ text, score: 0.6 }]));
 			let session = await sessionFor({ engine: 'semantic' });
 			// Scoring derived the preview already; count this derivation alone
 			staticStub.resetHistory();
@@ -612,7 +613,7 @@ describe("Zotero.BestMatch", function () {
 		it("should weigh saying the query against merely resembling it", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
 				{ text: 'a passage the model likes but that never says the word', score: 0.9 },
 				{ text: 'a passage about the owl itself', score: 0.5 }
 			]));
@@ -632,7 +633,7 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			let lexicalStub = sinon.stub(Zotero.Lexical, 'getMatchingExcerpts');
 			stubs.push(lexicalStub);
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
 				{ text: 'the owl chunk', score: 0.6 }
 			]));
 			stubs.push(sinon.stub(Zotero.Lexical, 'findMatchRanges').resolves([[]]));
@@ -648,19 +649,55 @@ describe("Zotero.BestMatch", function () {
 
 		it("should skip the semantic engine for an item that didn't match it", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
-			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks');
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([]);
 			stubs.push(chunksStub);
 			cutInto(['a passage naming the owl']);
 
 			// Scoring recorded a lexical match only, so the query is never
-			// embedded for it -- its text is cut instead
+			// embedded for it -- and with nothing indexed, its text is cut
 			let session = await sessionFor({ semantic: false });
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
-			assert.isFalse(chunksStub.called);
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null }));
 			assert.lengthOf(excerpts, 1);
 			assert.equal(excerpts[0].text, 'a passage naming the owl');
 			// Nothing weighed it but its words
 			assert.isUndefined(excerpts[0].score);
+		});
+
+		it("should weigh the index's own passages with both engines", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			// The index holds the item: its chunks are the passages, the
+			// model's score on the ones it matched, null on the rest
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
+				{ chunkIndex: 0, text: 'a passage the model likes', score: 0.6, pageLabel: '3' },
+				{ chunkIndex: 1, text: 'a passage saying nothing of the sort', score: null, pageLabel: '9' },
+				{ chunkIndex: 2, text: 'a passage below the floor that says the owl', score: null, pageLabel: '14' }
+			]);
+			stubs.push(chunksStub);
+			let cutStub = sinon.stub(Zotero.SDT, 'getItemChunks');
+			stubs.push(cutStub);
+
+			let session = await sessionFor();
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+			// Scored against the query, since the model matched the item,
+			// and never cut again
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: 'owl' }));
+			assert.isFalse(cutStub.called);
+			let byText = Object.fromEntries(excerpts.map(excerpt => [excerpt.text, excerpt]));
+			// Matched by the model alone: weighed by the model alone
+			let liked = byText['a passage the model likes'];
+			assert.closeTo(liked.strength, 0.7 * 0.6, 1e-9);
+			assert.equal(liked.pageLabel, '3');
+			// Below the model's floor but saying the query: kept on the
+			// lexical engine's word alone, where the index places it
+			let said = byText['a passage below the floor that says the owl'];
+			assert.isNull(said.score);
+			assert.isAbove(said.strength, 0);
+			assert.isNotEmpty(said.ranges);
+			assert.equal(said.pageLabel, '14');
+			// Saying nothing, matched by nothing: not a match
+			assert.lengthOf(excerpts, 2);
 		});
 
 		it("should keep the lexical engine out of a pinned semantic session's quotes", async function () {
@@ -668,7 +705,7 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			let head = 'A first paragraph that never mentions the bird at all. '.repeat(5);
 			let tail = 'A second paragraph where the owl is finally named outright. '.repeat(5);
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
 				{ text: head + '\n\n' + tail, score: 0.6 }
 			]));
 			let rangesStub = sinon.stub(Zotero.Lexical, 'findMatchRanges');
@@ -696,7 +733,7 @@ describe("Zotero.BestMatch", function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
 			let scores = [0.9, 0.8, 0.7, 0.6, 0.5];
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves(
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves(
 				scores.map((score, i) => ({ text: `Passage number ${i} of the document.`, score }))
 			));
 
@@ -729,7 +766,7 @@ describe("Zotero.BestMatch", function () {
 				+ 'budget for a quoted line, taken whole anyway, since half a '
 				+ 'sentence would read as a truncation rather than as a passage.';
 			let fourth = 'A fourth sentence that lies beyond the filled line.';
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
 				{ text: [first, second, third, fourth].join(' '), score: 0.6 }
 			]));
 
@@ -767,18 +804,22 @@ describe("Zotero.BestMatch", function () {
 			assert.closeTo(excerpt.strength, 0.8, 1e-9);
 		});
 
-		it("should cut an item's text when the model shows nothing", async function () {
+		it("should cut an item's text when the index doesn't hold it", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
 			cutInto(['a passage naming the owl', 'a passage naming nothing']);
 
-			// No chunk cleared the model's floor
-			let chunksStub = sinon.stub(Zotero.Embeddings, 'getMatchingChunks').resolves([]);
+			// Nothing of the item in the index
+			let chunksStub = sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([]);
 			stubs.push(chunksStub);
 			let session = await sessionFor();
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			// Only the passage that says the query is a match
 			assert.lengthOf(excerpts, 1);
 			assert.equal(excerpts[0].text, 'a passage naming the owl');
+
+			// Chunks whose sources no longer read back: same fallback
+			chunksStub.resolves([{ text: null, score: 0.9 }]);
+			assert.lengthOf(await session.getMatchingExcerpts(attachment.id), 1);
 
 			// The semantic index isn't ready: same fallback
 			chunksStub.rejects(new Zotero.Embeddings.IndexNotReadyError('test'));
@@ -787,7 +828,7 @@ describe("Zotero.BestMatch", function () {
 
 		it("should rethrow an unexpected semantic failure", async function () {
 			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
-			stubs.push(sinon.stub(Zotero.Embeddings, 'getMatchingChunks')
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks')
 				.rejects(new Error('model exploded')));
 
 			let session = await sessionFor();
