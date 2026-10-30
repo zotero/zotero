@@ -526,15 +526,15 @@ Zotero.BestMatch = new function () {
 		}
 
 		/**
-		 * Ranks from this session's last scoring pass by the sort measure
-		 * (see sortEngine): 1-based, tied effective scores share a rank, and
+		 * Ranks from this session's last scoring pass by its first measure
+		 * (see sortEngines): 1-based, tied effective scores share a rank, and
 		 * every row with a match anywhere beneath it is covered. Empty
 		 * before the first pass.
 		 *
 		 * @return {Map} - treeViewID -> rank (1 = most relevant)
 		 */
 		get ranks() {
-			return this.ranksBy(this.sortEngine);
+			return this.ranksBy(this.sortEngines[0]);
 		}
 
 		/**
@@ -560,20 +560,6 @@ Zotero.BestMatch = new function () {
 		 */
 		get sortEngines() {
 			return this._sortEngines ?? [this._engine];
-		}
-
-		/**
-		 * The measure ranks order by: the first of sortEngines unless set to
-		 * another the pass can rank by
-		 *
-		 * @type {String}
-		 */
-		get sortEngine() {
-			return this.sortEngines.includes(this._sortEngine) ? this._sortEngine : this.sortEngines[0];
-		}
-
-		set sortEngine(engine) {
-			this._sortEngine = engine;
 		}
 
 		/**

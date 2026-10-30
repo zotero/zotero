@@ -759,18 +759,24 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 	}
 
 	/**
-	 * Two lines: where the passage is, and the line of it worth reading.
-	 * Neither wraps, so every match row is the same height and the tree can
-	 * tell what that height is without measuring (see
+	 * Two lines: where the passage is, and the line of it worth reading --
+	 * or the line alone, for a passage that doesn't know where it sits.
+	 * Neither wraps, so a match row's height follows from which lines it
+	 * has and the tree can tell it without measuring (see
 	 * ItemTree#_getSearchMatchRowHeight()).
 	 */
 	renderPrimaryCell(index, data, column) {
 		let span = document.createElement('span');
 		span.className = `cell ${column.className} primary`;
 
-		let locationSpan = document.createElement('span');
-		locationSpan.className = 'search-match-location';
-		locationSpan.textContent = this.getLocationLabel();
+		let lines = [];
+		let location = this.getLocationLabel();
+		if (location) {
+			let locationSpan = document.createElement('span');
+			locationSpan.className = 'search-match-location';
+			locationSpan.textContent = location;
+			lines.push(locationSpan);
+		}
 
 		let textSpan = document.createElement('span');
 		textSpan.className = 'cell-text';
@@ -789,8 +795,9 @@ class SearchMatchItemTreeRow extends ItemTreeRow {
 		if (last < text.length) {
 			textSpan.append(text.slice(last));
 		}
+		lines.push(textSpan);
 
-		span.append(this._renderLines(locationSpan, textSpan));
+		span.append(this._renderLines(...lines));
 		return span;
 	}
 }

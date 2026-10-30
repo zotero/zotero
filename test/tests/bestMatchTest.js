@@ -925,8 +925,7 @@ describe("Zotero.BestMatch", function () {
 			let session = Zotero.BestMatch.createSession('owl');
 			await session.score([child.id, att1.id, att2.id]);
 			assert.deepEqual(session.sortEngines, ['hybrid', 'lexical', 'semantic']);
-			// Hybrid until told otherwise
-			assert.equal(session.sortEngine, 'hybrid');
+			// Ranks by the first measure, the hybrid order
 			assert.equal(session.ranks.get(child.treeViewID), 1);
 			assert.equal(session.ranks.get(att1.treeViewID), 2);
 			assert.equal(session.ranks.get(att2.treeViewID), 3);
@@ -942,10 +941,7 @@ describe("Zotero.BestMatch", function () {
 			assert.equal(meaning.get(att1.treeViewID), 1);
 			assert.equal(meaning.get(child.treeViewID), 2);
 			assert.equal(meaning.get(att2.treeViewID), 2);
-			// The selected measure is what ranks reports
-			session.sortEngine = 'semantic';
-			assert.equal(session.ranks.get(att1.treeViewID), 1);
-			assert.equal(session.ranks.get(child.treeViewID), 2);
+			assert.deepEqual([...session.ranksBy('hybrid')], [...session.ranks]);
 		});
 
 		it("should offer the one engine that ranked as the only measure", async function () {
@@ -955,10 +951,7 @@ describe("Zotero.BestMatch", function () {
 			await session.score([att1.id, att2.id]);
 			// The model alone ranked, so the order is its order, under its name
 			assert.deepEqual(session.sortEngines, ['semantic']);
-			assert.equal(session.sortEngine, 'semantic');
-			// A measure the pass can't rank by reads as, and ranks like, that one
-			session.sortEngine = 'lexical';
-			assert.equal(session.sortEngine, 'semantic');
+			// A measure the pass can't rank by ranks like that one
 			assert.deepEqual([...session.ranksBy('lexical')], [...session.ranksBy('semantic')]);
 			assert.deepEqual([...session.ranksBy('hybrid')], [...session.ranksBy('semantic')]);
 			assert.equal(session.ranks.get(att1.treeViewID), 1);
@@ -973,7 +966,6 @@ describe("Zotero.BestMatch", function () {
 			let session = Zotero.BestMatch.createSession('owl', { engine: 'lexical' });
 			await session.score([att1.id]);
 			assert.deepEqual(session.sortEngines, ['lexical']);
-			assert.equal(session.sortEngine, 'lexical');
 			assert.equal(session.ranks.size, 0);
 		});
 

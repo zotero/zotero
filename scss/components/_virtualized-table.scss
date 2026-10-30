@@ -338,14 +338,22 @@
 				fill: var(--fill-secondary);
 			}
 
-			// The Relevance header tints by the measure its sort follows, as
-			// the rows' bar tracks do
-			&.relevance-lexical .icon-css {
-				fill: var(--accent-yellow);
+			// The Relevance header shows the measure its sort follows, as
+			// the rows' bar tracks color by it. The icons are colored in
+			// their own right, in a version per color scheme.
+			@each $engine in hybrid, lexical, semantic {
+				&.relevance-#{$engine} .icon-relevance {
+					@include color-scheme using ($scheme) {
+						background: url('chrome://zotero/skin/16/#{$scheme}/relevance-#{$engine}.svg') content-box no-repeat;
+					}
+				}
 			}
 
-			&.relevance-semantic .icon-css {
-				fill: var(--accent-blue);
+			// Sorted by another column, the icon still names the measure a
+			// click returns to, but in grey
+			&:not(.sorted) .icon-relevance {
+				filter: grayscale(1);
+				opacity: 0.6;
 			}
 
 			padding: 0;

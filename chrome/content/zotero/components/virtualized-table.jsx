@@ -1326,7 +1326,7 @@ class VirtualizedTable extends React.Component {
 				sortIndicator = <CSSIcon name="sort-indicator" className={"icon-8 sort-indicator " + (column.sortDirection === 1 ? "ascending" : "descending")} />;
 			}
 			const className = cx("cell", column.className, { dragging: this.state.draggingColumn == index },
-				{ "cell-icon": !!column.iconLabel });
+				{ "cell-icon": !!column.iconLabel, sorted: !!column.sortDirection });
 			return (<Draggable
 				onDragStart={this._handleColumnDragStart.bind(this, index)}
 				onDrag={this._handleColumnDrag}

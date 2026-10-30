@@ -1082,6 +1082,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemsPaneMessage = null;
 		
 		this._columnsId = null;
+		// Whether another column's sort was chosen over the Relevance sort a
+		// best-match search forces, so a column rebuild keeps it
+		this._bestMatchSortOverridden = false;
 		this._sortContextReadyPromise = Zotero.Promise.resolve();
 
 		// Initial deferred to be resolved on componentDidMount()
@@ -1327,10 +1330,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	/**
-	 * A search-match row shows two lines -- where its passage is, and the
-	 * line of it worth reading -- so it stands a line taller than the rows
-	 * around it. Neither line wraps, so the height is the same for every one
-	 * of them and can be told without measuring anything.
+	 * A search-match row that knows where its passage sits shows two lines
+	 * -- the place, and the line of the passage worth reading -- so it
+	 * stands a line taller than the rows around it. Neither line wraps, so
+	 * the height is the same for every one of them and can be told without
+	 * measuring anything.
 	 *
 	 * @return {Number}
 	 */
@@ -1344,23 +1348,28 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	/**
-	 * Tell the table which rows are taller than the rest.
+	 * Tell the table which rows are taller than the rest: the search-match
+	 * rows with a place to name. One whose passage knows neither heading nor
+	 * page, as a document with no structured text gives, shows its one line
+	 * at the ordinary height.
 	 *
 	 * The heights are keyed by row index, so they mean something different
 	 * after every insertion, removal and sort -- which is why this runs from
 	 * handleRowModelUpdate(), where all of those end up, rather than from the
 	 * places that change rows.
+	 *
+	 * @return {Boolean} - Whether any rows were set taller
 	 */
 	_updateSearchMatchRowHeights() {
 		if (!this.tree?._jsWindow) {
-			return;
+			return false;
 		}
 		let height = null;
 		let heights = [];
 		let indexes = [];
 		for (let i = 0, count = this.getRowCount(); i < count; i++) {
-			let type = this.getRow(i)?.type;
-			if (type == 'search-match') {
+			let row = this.getRow(i);
+			if (row?.type == 'search-match' && row.getLocationLabel()) {
 				height ??= this._getSearchMatchRowHeight();
 				heights.push([i, height]);
 				indexes.push(i);
@@ -1371,10 +1380,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// way the view was moving for nothing.
 		let signature = height + '|' + indexes.join(',');
 		if (signature === this._searchMatchRowHeights) {
-			return;
+			return false;
 		}
 		this._searchMatchRowHeights = signature;
 		this.tree.updateCustomRowHeights(heights);
+		return heights.length > 0;
+	}
+
+	updateFontSize() {
+		super.updateFontSize();
+		this._searchMatchRowHeights = null;
+		if (this._updateSearchMatchRowHeights()) {
+			this.tree.invalidate();
+		}
 	}
 
 	/**
@@ -2458,11 +2476,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	async setRelevanceSort(engine) {
 		this.rowProvider.setRelevanceSortEngine(engine);
+		this._bestMatchSortOverridden = false;
 		// The cached ranks and the header follow the measure
 		this.invalidateRowCache(true);
 		this._columnsId = null;
 		this.selection.selectEventsSuppressed = true;
+		// A re-ranked list reads from the top: nothing is kept selected for
+		// the view to follow
+		this.selection.clearSelection();
 		await this.sort();
+		this._treebox?.scrollTo(0);
 		this.forceUpdate(() => {
 			this.selection.selectEventsSuppressed = false;
 			this.tree.invalidate();
@@ -2919,8 +2942,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// The Relevance sort is forced only while a best-match search is
 		// active, so don't carry it into a rebuild without one
-		if (!bestMatchSearch && this._sortedColumn?.dataKey == 'relevance') {
-			this._sortedColumn = null;
+		if (!bestMatchSearch) {
+			this._bestMatchSortOverridden = false;
+			if (this._sortedColumn?.dataKey == 'relevance') {
+				this._sortedColumn = null;
+			}
 		}
 
 		this._columnsId = prefKey;
@@ -3011,14 +3037,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let col = this._columns.find(c => c.dataKey === 'relevance');
 			if (col) {
 				// The forced sort replaces the persisted one, whose column
-				// would otherwise keep showing its sort indicator
-				for (let other of this._columns) {
-					if (other !== col) {
-						delete other.sortDirection;
+				// would otherwise keep showing its sort indicator -- unless
+				// another column's sort was chosen during this search, which
+				// the rebuild above restored
+				if (!this._bestMatchSortOverridden) {
+					for (let other of this._columns) {
+						if (other !== col) {
+							delete other.sortDirection;
+						}
 					}
+					col.sortDirection = -1;
+					this._sortedColumn = col;
 				}
 				col.hidden = false;
-				col.sortDirection = -1;
 				// The header is named and tinted by the measure the sort follows
 				col.label = 'items-column-relevance-' + sortEngine;
 				col.className = 'relevance-' + sortEngine;
@@ -3026,7 +3057,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// and annotation rows -- annotation rows use a custom layout
 				// that puts their bar at the row's end
 				col.ordinal = Math.max(...this._columns.map(c => c.ordinal ?? 0)) + 1;
-				this._sortedColumn = col;
 			}
 		}
 
@@ -3216,18 +3246,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let columnSettings = this._getColumnPrefs();
 		let column = this._getColumn(index);
 		// Clicking the sorted Relevance column steps through the measures the
-		// search can sort by; returning to it from another column starts over
-		if (column.dataKey == 'relevance') {
+		// search can sort by; returning to it from another column returns to
+		// the measure it left
+		if (column.dataKey == 'relevance' && this._sortedColumn?.dataKey == 'relevance') {
 			let engines = this.rowProvider.getRelevanceSortEngines();
 			let current = this.rowProvider.getRelevanceSortEngine();
-			if (this._sortedColumn?.dataKey == 'relevance') {
-				await this.setRelevanceSort(engines[(engines.indexOf(current) + 1) % engines.length]);
-				return;
-			}
-			if (current != engines[0]) {
-				this.rowProvider.setRelevanceSortEngine(engines[0]);
-				this.invalidateRowCache(true);
-			}
+			await this.setRelevanceSort(engines[(engines.indexOf(current) + 1) % engines.length]);
+			return;
+		}
+		if (this._isBestMatchSearchActive()) {
+			this._bestMatchSortOverridden = column.dataKey != 'relevance';
 		}
 		if (column.dataKey == 'hasAttachment') {
 			Zotero.debug("Caching best attachment states");

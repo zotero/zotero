@@ -236,8 +236,8 @@
 					&.dual {
 						display: flex;
 						flex-direction: column;
-						gap: 1px;
-						height: 7px;
+						gap: 2px;
+						height: 10px;
 						border-radius: 0;
 						background: none;
 						overflow: visible;
@@ -258,7 +258,7 @@
 					}
 
 					.relevance-bar-track.lexical .relevance-bar-fill {
-						background: var(--accent-yellow);
+						background: var(--accent-green);
 					}
 
 					// On a focused selected row the accent fills would vanish into
@@ -299,7 +299,7 @@
 							}
 
 							.relevance-bar-track.lexical .relevance-bar-fill {
-								background: var(--accent-yellow);
+								background: var(--accent-green);
 							}
 						}
 					}
@@ -429,10 +429,10 @@
 				font-size: $font-size-small;
 				flex: 1 1 auto;
 			}
-			// Location above quote, beside the indent and twisty the tree adds
-			// to the first cell. The row's height is set from JS for exactly
-			// these two lines (ItemTree#_getSearchMatchRowHeight()), so
-			// neither may wrap.
+			// Location above quote, or the quote alone, beside the indent and
+			// twisty the tree adds to the first cell. The row's height is set
+			// from JS for exactly these lines
+			// (ItemTree#_getSearchMatchRowHeight()), so none may wrap.
 			.search-match-lines {
 				display: flex;
 				flex-direction: column;

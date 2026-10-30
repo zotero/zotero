@@ -400,7 +400,7 @@ describe("CollectionViewItemTree", function () {
 				}
 				// Two tracks, the words above the meaning; the meaning track is
 				// the one filled here
-				assert.equal(win.getComputedStyle(bar).height, '7px');
+				assert.equal(win.getComputedStyle(bar).height, '10px');
 				assert.equal(bar.querySelector('.lexical .relevance-bar-fill').style.width, '0%');
 				assert.notEqual(bar.querySelector('.semantic .relevance-bar-fill').style.width, '0%');
 
@@ -579,6 +579,9 @@ describe("CollectionViewItemTree", function () {
 
 					await select(win, col);
 					itemsView = zp.itemsView;
+					// The measure outlives queries, so start from the default
+					// whatever an earlier test left
+					itemsView.rowProvider.setRelevanceSortEngine('hybrid');
 					await itemsView.setFilter('search', 'some query');
 					let order = () => itemsView._rows.map(row => row.id);
 					let engine = () => itemsView.rowProvider.getRelevanceSortEngine();
@@ -645,14 +648,28 @@ describe("CollectionViewItemTree", function () {
 						['Meaning']
 					);
 
-					// Sorting by another column and coming back starts hybrid again
+					// An edited query keeps the measure it was read by
+					await itemsView.setFilter('search', 'some query edited');
+					assert.equal(engine(), 'semantic');
+					assert.deepEqual(order(), [itemA.id, itemB.id, itemC.id]);
+
+					// Sorting by another column greys the Relevance header, which
+					// keeps naming the measure; coming back returns to it
+					assert.isTrue(header().classList.contains('sorted'));
 					let titleIndex = itemsView._getColumns().findIndex(c => c.dataKey == 'title');
 					await itemsView.tree._columns.toggleSort(titleIndex);
 					assert.equal(itemsView.getSortField(), 'title');
+					// A column rebuild keeps the chosen sort rather than forcing
+					// the Relevance sort back
+					itemsView._columnsId = null;
+					assert.equal(itemsView.getSortField(), 'title');
+					await until(() => header() && !header().classList.contains('sorted'));
+					assert.isTrue(header().classList.contains('relevance-semantic'));
 					await itemsView.tree._columns.toggleSort(relevanceIndex());
 					assert.equal(itemsView.getSortField(), 'relevance');
-					assert.equal(engine(), 'hybrid');
-					assert.deepEqual(order(), [itemB.id, itemA.id, itemC.id]);
+					assert.equal(engine(), 'semantic');
+					assert.deepEqual(order(), [itemA.id, itemB.id, itemC.id]);
+					await until(() => header()?.classList.contains('sorted'));
 
 					// Clearing the search drops the measures with the ranking
 					await itemsView.setFilter('search', '');
@@ -857,6 +874,135 @@ describe("CollectionViewItemTree", function () {
 				let line = id => itemsView.getRow(itemsView.getRowIndexByID(id)).getQuotedLine().text;
 				assert.equal(line('SM' + attachment.id + '-0'), 'Second sentence here…');
 				assert.equal(line('SM' + attachment.id + '-1'), '…and more text follows.');
+			});
+
+			it("should show a match row at the ordinary height when its passage has no place to name", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchplace A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					// From structured text: a page to name
+					{ key: 0, text: 'matchplace owls on a page', ranges: [], strength: 1,
+						snippet: { start: 0, end: 25 }, pageLabel: '3' },
+					// From flat text, as a snapshot gives: no heading, no page
+					{ key: 1, text: 'matchplace owls nowhere', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 23 } }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let placed = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				let unplaced = itemsView.getRowIndexByID('SM' + attachment.id + '-1');
+				// The placed row shows its page above the quote, a line taller
+				// than the rows around it; the unplaced one shows the quote
+				// alone at the ordinary height
+				let tall = itemsView.tree._jsWindow.customRowHeights.map(([index]) => index);
+				assert.include(tall, placed);
+				assert.notInclude(tall, unplaced);
+				let location = index => itemsView.tree._jsWindow.getElementByIndex(index)
+					.querySelector('.search-match-location');
+				assert.equal(location(placed).textContent, 'p. 3');
+				assert.isNull(location(unplaced));
+			});
+
+			it("should keep match rows a line taller across a density change", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchdense A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'matchdense owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 15 }, pageLabel: '3' },
+					{ key: 1, text: 'matchdense owls again', ranges: [], strength: 0.5,
+						snippet: { start: 0, end: 21 }, pageLabel: '5' }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let matchRow = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				let jsWindow = itemsView.tree._jsWindow;
+				let tallRows = () => new Map(jsWindow.customRowHeights);
+				let before = tallRows().get(matchRow);
+				assert.isAbove(before, itemsView.tree._rowHeight);
+				// The rows as drawn: the match row at its height, and the row
+				// after it placed below it rather than over it
+				let drawn = (index) => {
+					let elem = jsWindow.getElementByIndex(index);
+					return { height: elem.style.height, top: elem.style.top };
+				};
+				let assertDrawnRight = () => {
+					assert.equal(drawn(matchRow).height, tallRows().get(matchRow) + 'px');
+					assert.equal(drawn(matchRow).top, jsWindow._getItemPosition(matchRow) + 'px');
+					assert.equal(drawn(matchRow + 1).top, jsWindow._getItemPosition(matchRow + 1) + 'px');
+				};
+				assertDrawnRight();
+
+				let density = Zotero.Prefs.get('uiDensity');
+				try {
+					// The table's own update drops the custom heights it was
+					// given and draws the rows without them; the tree sets
+					// them again, at the new density's height, and redraws
+					Zotero.Prefs.set('uiDensity', density == 'compact' ? 'comfortable' : 'compact');
+					itemsView.updateFontSize();
+					let changed = tallRows().get(matchRow);
+					assert.isAbove(changed, itemsView.tree._rowHeight);
+					assert.notEqual(changed, before);
+					assertDrawnRight();
+
+					// And back, to the height it started with
+					Zotero.Prefs.set('uiDensity', density);
+					itemsView.updateFontSize();
+					assert.equal(tallRows().get(matchRow), before);
+					assertDrawnRight();
+				}
+				finally {
+					Zotero.Prefs.set('uiDensity', density);
+					itemsView.updateFontSize();
+				}
+			});
+
+			it("should drop the selection and show the top on a sort measure change or a new query", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "matchreset A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				stubs.push(sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ key: 0, text: 'matchreset owls', ranges: [], strength: 1,
+						snippet: { start: 0, end: 15 } }
+				]));
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+
+				let matchRow = () => itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				itemsView.selection.select(matchRow());
+				assert.isTrue(itemsView.selection.isSelected(matchRow()));
+
+				// The same chunk would be reselected and scrolled to after a
+				// re-sort; instead nothing is
+				await itemsView.setRelevanceSort('lexical');
+				assert.equal(itemsView.selection.count, 0);
+				assert.equal(itemsView.tree._jsWindow.scrollOffset, 0);
+
+				// Nor after a new query, however late its previews arrive
+				itemsView.selection.select(matchRow());
+				await itemsView.setFilter('search', 'another query');
+				assert.equal(itemsView.selection.count, 0);
+				assert.isEmpty(itemsView._cachedSelection);
+				assert.isNull(itemsView._cachedScrollPosition);
+				assert.equal(itemsView.tree._jsWindow.scrollOffset, 0);
 			});
 
 			it("should mark the quoted line in a selected match row's passage", async function () {

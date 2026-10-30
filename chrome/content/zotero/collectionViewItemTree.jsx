@@ -120,6 +120,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// Bumped when a filter changes, so an in-flight best-match scoring
 		// pass for a superseded query can stop (see _applyBestMatch())
 		this._bestMatchGeneration = 0;
+		// The measure asked for the Relevance sort, kept across queries
+		this._relevanceSortEngine = 'hybrid';
 	}
 
 	/**
@@ -178,28 +180,27 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * @returns {Map} - treeViewID -> 1-based rank (1 = most similar)
 	 */
 	getBestMatchRanks() {
-		return this._bestMatchSession?.ranks ?? new Map();
+		return this._bestMatchSession?.ranksBy(this.getRelevanceSortEngine()) ?? new Map();
 	}
 
 	/**
 	 * The measure the Relevance sort follows: 'hybrid', or 'lexical' or
-	 * 'semantic' for one engine's evidence alone (see
-	 * Zotero.BestMatch.Session#sortEngine). A new query starts on the
-	 * first measure its scoring offers.
+	 * 'semantic' for one engine's evidence alone. The measure asked for,
+	 * which outlives the query it was asked during, while the current
+	 * search can sort by it; the first it can sort by otherwise.
 	 *
 	 * @returns {String}
 	 */
 	getRelevanceSortEngine() {
-		return this._bestMatchSession?.sortEngine ?? 'hybrid';
+		let engines = this.getRelevanceSortEngines();
+		return engines.includes(this._relevanceSortEngine) ? this._relevanceSortEngine : engines[0];
 	}
 
 	/**
 	 * @param {String} engine - One of getRelevanceSortEngines()
 	 */
 	setRelevanceSortEngine(engine) {
-		if (this._bestMatchSession) {
-			this._bestMatchSession.sortEngine = engine;
-		}
+		this._relevanceSortEngine = engine;
 	}
 
 	/**
@@ -301,6 +302,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			session = Zotero.BestMatch.createSession(query, { engine });
 			session.onPreviewsFilled = itemIDs => this._showFilledPreviews(session, itemIDs);
 			this._bestMatchSession = session;
+			// New results are read from the top, so nothing of the old ones
+			// is kept for a later update to select or scroll back to
+			this.itemTree.selection.clearSelection();
+			this.itemTree._cachedSelection = [];
+			this.itemTree._cachedScrollPosition = null;
 		}
 		try {
 			// Scoring derives the best-scored items' previews before it
