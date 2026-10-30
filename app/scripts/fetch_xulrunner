@@ -440,6 +440,11 @@ function modify_omni {
 	replace_line 'let \{ BrowserAddonUI \} = windowRoot.window;' '' $file
 	replace_line 'await BrowserAddonUI.promptRemoveExtension' 'promptRemoveExtension' $file
 
+	# Show the back button in the updates views, since there's no sidebar to get back to the plugin list
+	replace_line 'viewType !== "detail" && viewType !== "shortcuts";' \
+		'viewType !== "detail" \&\& viewType !== "shortcuts" \&\& viewType !== "updates";' \
+		chrome/toolkit/content/mozapps/extensions/components/addon-page-header.mjs
+
 	# Customize empty-list message
 	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
         var p = document.createElement("p");

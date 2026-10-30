@@ -815,6 +815,16 @@ const ZoteroStandalone = new function () {
 	};
 	
 	
+	this.openAddonsWindow = function () {
+		// Always open the plugin list, since the sidebar for switching views is hidden
+		Services.prefs.clearUserPref('extensions.ui.lastCategory');
+		Zotero.openInViewer(
+			'chrome://mozapps/content/extensions/aboutaddons.html',
+			{ onLoad: this.updateAddonsPane }
+		);
+	};
+	
+	
 	this.updateAddonsPane = function (doc) {
 		//var rootWindow = doc.ownerGlobal.windowRoot.ownerGlobal;
 		
