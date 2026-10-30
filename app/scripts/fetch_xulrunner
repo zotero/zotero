@@ -398,9 +398,11 @@ function modify_omni {
 	# Hide the search bar and the whole sidebar, since we only ever show plugins and the main pane
 	# is already headed "Manage Your Plugins"
 	echo '.main-search, #sidebar { display: none; }' >> $file
-	# Center the content in the window now that it isn't offset by the sidebar
-	echo '#full { grid-template-columns: 1fr; }' >> $file
-	echo '#content { max-width: calc(var(--page-main-content-width) + var(--main-margin-start)); margin-inline: auto; }' >> $file
+	# Center the content in a fixed-width column, with the same margin on both sides, so that it
+	# doesn't shrink to fit the current view, and widen it from the default to fill the window
+	echo ':root { --page-main-content-width: 900px; }' >> $file
+	echo '#full { grid-template-columns: minmax(0, calc(var(--page-main-content-width) + 2 * var(--main-margin-start))); justify-content: center; }' >> $file
+	echo '#content { padding-inline-end: var(--main-margin-start); }' >> $file
 	echo '.main-heading { margin-top: 2em; }' >> $file
 	# Hide Details/Permissions tabs in addon details so we only show details
 	echo 'addon-details > button-group { display: none !important; }' >> $file
