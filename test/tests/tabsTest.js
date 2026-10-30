@@ -272,6 +272,74 @@ describe("Zotero_Tabs", function() {
 			assert.sameMembers(zp.getSelectedItems(true), [item1.id]);
 		});
 		
+		describe("Actions that wait while another tab is selected", function () {
+			var viewA, tabB;
+			
+			beforeEach(async function () {
+				viewA = zp.libraryView;
+				({ id: tabB } = await addLibraryTab({ collections: ['C' + collection2.id] }));
+				tabs.select(viewA.tabID);
+			});
+			
+			/**
+			 * Run an action that saves, selecting tab B while its transaction waits its turn
+			 */
+			async function runWhileTabBSelected(action) {
+				let held = Zotero.Promise.defer();
+				let transaction = Zotero.DB.executeTransaction(async () => {
+					await held.promise;
+				});
+				let promise = action();
+				tabs.select(tabB);
+				held.resolve();
+				await transaction;
+				return promise;
+			}
+			
+			it("should create a new item in the tab it was started from", async function () {
+				let blur = Zotero.Promise.defer();
+				let stub = sinon.stub(viewA.itemPane, 'handleBlur').returns(blur.promise);
+				try {
+					let promise = zp.newItem(Zotero.ItemTypes.getID('book'));
+					tabs.select(tabB);
+					blur.resolve();
+					let item = await promise;
+					assert.isTrue(item.inCollection(collection1.id));
+					assert.equal(tabs.selectedID, viewA.tabID);
+					assert.sameMembers(viewA.itemsView.getSelectedItems(true), [item.id]);
+				}
+				finally {
+					stub.restore();
+				}
+			});
+			
+			it("should add a duplicate to the collections of the tab it was started from", async function () {
+				await viewA.itemsView.selectItem(item1.id);
+				let duplicate = await runWhileTabBSelected(() => zp.duplicateSelectedItem());
+				assert.isTrue(duplicate.inCollection(collection1.id));
+			});
+			
+			it("should restore the items selected in the tab it was started from", async function () {
+				let trashed = await createDataObject('item', { deleted: true });
+				await selectTrash(win);
+				await viewA.itemsView.selectItem(trashed.id);
+				await runWhileTabBSelected(() => zp.restoreSelectedItems());
+				assert.isFalse(trashed.deleted);
+			});
+			
+			it("should import from the clipboard into the tab it was started from", async function () {
+				Zotero.Utilities.Internal.copyTextToClipboard(
+					"@article{tab_test_nodate,\n	title = {Tab Import},\n}"
+				);
+				let addPromise = waitForItemEvent('add');
+				let promise = win.Zotero_File_Interface.importFromClipboard();
+				tabs.select(tabB);
+				await promise;
+				let item = Zotero.Items.get((await addPromise)[0]);
+				assert.isTrue(item.inCollection(collection1.id));
+			});
+		});
+		
 		it("should open the current collections in a new tab", async function () {
 			zp.newLibraryTab();
 			let view = await waitForLibraryView(tabs.selectedID);

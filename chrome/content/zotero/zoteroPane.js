@@ -181,8 +181,13 @@ var ZoteroPane = new function () {
 	this.getCollectionTreeRows = function () {
 		return this.libraryView?.getCollectionTreeRows() || [];
 	};
-	// The view members and the methods below are the surface of the library view,
-	// delegated to the active view
+	// These view properties and the methods below forward to the window's active library view,
+	// resolving it at each access. Async code that should stay in the view it started in must
+	// capture the view before awaiting and use it throughout:
+	//
+	//   let libraryView = this.libraryView;
+	//   await ...;
+	//   libraryView.itemsView.selectItems(ids);
 	for (let member of ['collectionsView', 'itemsView', 'itemPane', 'tagSelector']) {
 		this.__defineGetter__(member, function () {
 			return this.libraryView?.[member] ?? null;
@@ -1443,6 +1448,7 @@ var ZoteroPane = new function () {
 	 * Option/Alt (Mac/Linux) press
 	 */
 	this._setHighlightedRowsCallback = async function () {
+		let libraryView = this.libraryView;
 		var objects = this.getSelectedObjects();
 		
 		// If no items or an unreasonable number, don't try
@@ -1472,8 +1478,8 @@ var ZoteroPane = new function () {
 		if (allInPublications) {
 			treeViewIDs.push("P" + Zotero.Libraries.userLibraryID);
 		}
-		if (treeViewIDs.length) {
-			await this.collectionsView.setHighlightedRows(treeViewIDs);
+		if (treeViewIDs.length && libraryView?.isConnected) {
+			await libraryView.collectionsView.setHighlightedRows(treeViewIDs);
 		}
 	};
 	
@@ -1627,6 +1633,9 @@ var ZoteroPane = new function () {
 	 * _data_ is an optional object with field:value for itemData
 	 */
 	this.newItem = async function (typeID, data, row, manual) {
+		// The item goes in the view the action started in, even if another tab is selected by the
+		// time the item can be saved
+		let libraryView = this.libraryView;
 		// Shouldn't be reachable with multiple libraries selected (toolbar is disabled),
 		// but just in case
 		let rows = this.getCollectionTreeRows();
@@ -1647,7 +1656,7 @@ var ZoteroPane = new function () {
 		await this.itemPane.handleBlur();
 		
 		if (row !== undefined && row !== null) {
-			var collectionTreeRow = this.collectionsView.getRow(row);
+			var collectionTreeRow = libraryView.collectionsView.getRow(row);
 			var libraryID = collectionTreeRow.ref.libraryID;
 		}
 		else {
@@ -1671,25 +1680,29 @@ var ZoteroPane = new function () {
 			}
 		});
 		
-		// Expand the item pane if it's closed
-		if (this.itemPane.hasAttribute("collapsed")) {
-			this.itemPane.removeAttribute("collapsed");
+		if (libraryView?.isConnected) {
+			// Expand the item pane if it's closed
+			if (libraryView.itemPane.hasAttribute("collapsed")) {
+				libraryView.itemPane.removeAttribute("collapsed");
+			}
+			
+			//set to Info tab
+			libraryView.getElement('zotero-view-item').selectedIndex = 0;
 		}
 		
-		//set to Info tab
-		this.libraryView.getElement('zotero-view-item').selectedIndex = 0;
-		
 		// Ensure item is visible
-		await this.selectItem(itemID);
+		await this.selectItems([itemID], { libraryView });
 
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
-			let itemBox = ZoteroPane.itemPane.querySelector("info-box");
-			// Make sure the item box is opened
-			itemBox.open = true;
-			// Focus the title field
-			itemBox.getTitleField().focus();
+			if (libraryView?.isConnected) {
+				let itemBox = libraryView.itemPane.querySelector("info-box");
+				// Make sure the item box is opened
+				itemBox.open = true;
+				// Focus the title field
+				itemBox.getTitleField().focus();
+			}
 		}
 		
 		return Zotero.Items.getAsync(itemID);
@@ -2107,6 +2120,7 @@ var ZoteroPane = new function () {
 	 * @return {Promise}
 	 */
 	this.reindexItem = async function () {
+		let libraryView = this.libraryView;
 		var items = this.getSelectedItems();
 		if (!items) {
 			return;
@@ -2119,7 +2133,9 @@ var ZoteroPane = new function () {
 		}
 		
 		await Zotero.FullText.indexItems(itemIDs, { complete: true });
-		await this.libraryView.getElement('zotero-attachment-box').updateItemIndexedState();
+		if (libraryView?.isConnected) {
+			await libraryView.getElement('zotero-attachment-box').updateItemIndexedState();
+		}
 	};
 	
 	
@@ -2134,6 +2150,10 @@ var ZoteroPane = new function () {
 		}
 		
 		var item = self.getSelectedItems()[0];
+		// The duplicate goes in the view the action started in, even if another tab is selected
+		// by the time it can be saved
+		let libraryView = self.libraryView;
+		let collectionTreeRows = self.getCollectionTreeRows();
 		if (item.isNote()
 			&& !((await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)))
 			&& !Zotero.Notes.promptToIgnoreMissingImage()) {
@@ -2147,7 +2167,7 @@ var ZoteroPane = new function () {
 			// If in collections, add new item to all selected collections
 			// that the original item belongs to
 			if (newItem.isTopLevelItem()) {
-				let collectionIDs = self.getCollectionTreeRows()
+				let collectionIDs = collectionTreeRows
 					.filter(r => r.isCollection() && item.inCollection(r.ref.id))
 					.map(r => r.ref.id);
 				if (collectionIDs.length) {
@@ -2173,7 +2193,7 @@ var ZoteroPane = new function () {
 			}
 		});
 		
-		await self.selectItem(newItem.id);
+		await self.selectItems([newItem.id], { libraryView });
 		
 		return newItem;
 	};
@@ -2188,6 +2208,7 @@ var ZoteroPane = new function () {
 		let authorCreatorType = Zotero.CreatorTypes.getID('author');
 		let bookAuthorCreatorType = Zotero.CreatorTypes.getID('bookAuthor');
 		
+		let libraryView = this.libraryView;
 		let original = this.getSelectedItems()[0];
 		let duplicate = await this.duplicateSelectedItem();
 		if (!duplicate) return null;
@@ -2240,7 +2261,9 @@ var ZoteroPane = new function () {
 		await original.saveTx({ skipDateModifiedUpdate: true });
 		await duplicate.saveTx();
 		
-		ZoteroPane.itemPane.querySelector("info-box").getTitleField().focus();
+		if (libraryView?.isConnected) {
+			libraryView.itemPane.querySelector("info-box").getTitleField().focus();
+		}
 		return duplicate;
 	};
 	
@@ -2595,6 +2618,8 @@ var ZoteroPane = new function () {
 	 * @return {Promise}
 	 */
 	this.restoreSelectedItems = async function () {
+		// The rows to restore from, which the transaction reads once it runs
+		let itemsView = this.itemsView;
 		let selectedObjects = this.getSelectedObjects();
 		if (!selectedObjects.length) {
 			return;
@@ -2615,14 +2640,14 @@ var ZoteroPane = new function () {
 			}
 			Zotero.UndoHistory.stageAction(undoAction, { count: selectedObjects.length });
 
-			for (let row = 0; row < this.itemsView.rowCount; row++) {
+			for (let row = 0; row < itemsView.rowCount; row++) {
 				// Only look at top-level items
-				if (this.itemsView.getLevel(row) !== 0
-						|| !this.itemsView.getRow(row).isObjectRow) {
+				if (itemsView.getLevel(row) !== 0
+						|| !itemsView.getRow(row).isObjectRow) {
 					continue;
 				}
 
-				let parent = this.itemsView.getRow(row).ref;
+				let parent = itemsView.getRow(row).ref;
 				let childIDs = [];
 				let subcollections = [];
 				if (parent instanceof Zotero.Collection) {
@@ -2759,16 +2784,17 @@ var ZoteroPane = new function () {
 	// Copy a collection (by default, the selected one) into another collection or library.
 	// Partially, a replication of drag-drop mechanism from CollectionTree.onDrop.
 	this.copyCollection = async (target, selected = this.getSelectedCollections()[0]) => {
+		let collectionsView = this.collectionsView;
 		if (!selected) return;
 
 		let targetTreeRowID = `L${target.libraryID}`;
 		if (target instanceof Zotero.Collection) {
 			targetTreeRowID = `C${target.id}`;
 			// Make sure the row is actually visible
-			await ZoteroPane.collectionsView.expandToCollection(target.id);
+			await collectionsView.expandToCollection(target.id);
 		}
-		let targetTreeRowIndex = ZoteroPane.collectionsView.getRowIndexByID(targetTreeRowID);
-		let targetTreeRow = ZoteroPane.collectionsView.getRow(targetTreeRowIndex);
+		let targetTreeRowIndex = collectionsView.getRowIndexByID(targetTreeRowID);
+		let targetTreeRow = collectionsView.getRow(targetTreeRowIndex);
 		let copyOptions = {
 			tags: Zotero.Prefs.get('groups.copyTags'),
 			childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
@@ -2776,7 +2802,7 @@ var ZoteroPane = new function () {
 			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
 			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
 		};
-		ZoteroPane.collectionsView.executeCollectionCopy({
+		collectionsView.executeCollectionCopy({
 			collection: selected,
 			targetCollectionID: target instanceof Zotero.Collection ? target.id : null,
 			targetLibraryID: target.libraryID,
@@ -3127,7 +3153,7 @@ var ZoteroPane = new function () {
 			Zotero.warn("ZoteroPane.selectItems() now takes an 'options' object -- update your code");
 			options = { inLibraryRoot: options };
 		}
-		let { inLibraryRoot, noTabSwitch, noWindowRestore } = options;
+		let { inLibraryRoot, noTabSwitch, noWindowRestore, libraryView } = options;
 		if (!itemIDs.length) {
 			return false;
 		}
@@ -3142,8 +3168,11 @@ var ZoteroPane = new function () {
 			window.restore();
 		}
 		
-		// Show the items in a tab that's already showing their library, if there is one
-		var view = await this.openLibraryViewForLibrary(items[0].libraryID);
+		// Show the items in the given view, or else in a tab that's already showing their library,
+		// if there is one
+		var view = libraryView?.isConnected
+			? libraryView
+			: await this.openLibraryViewForLibrary(items[0].libraryID);
 		if (!view) {
 			return false;
 		}
@@ -4819,6 +4848,7 @@ var ZoteroPane = new function () {
 	 *     popup mode (where a note isn't created immediately), or false if library isn't editable
 	 */
 	this.newNote = async function (popup, parentKey, text, citeURI) {
+		let libraryView = this.libraryView;
 		// Shouldn't be reachable with multiple libraries selected (toolbar is disabled),
 		// but just in case
 		let rows = this.getCollectionTreeRows();
@@ -4865,9 +4895,11 @@ var ZoteroPane = new function () {
 			}
 		});
 		
-		await this.selectItem(itemID);
+		await this.selectItems([itemID], { libraryView });
 		
-		this.libraryView.getElement('zotero-note-editor').focus();
+		if (libraryView?.isConnected) {
+			libraryView.getElement('zotero-note-editor').focus();
+		}
 		
 		return itemID;
 	};
@@ -4909,6 +4941,7 @@ var ZoteroPane = new function () {
 		text = '<blockquote' + (uri ? ' cite="' + uri + '"' : '') + '>'
 			+ Zotero.Utilities.text2html(text) + "</blockquote>";
 		
+		let libraryView = this.libraryView;
 		var items = this.getSelectedItems();
 		
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
@@ -4917,8 +4950,9 @@ var ZoteroPane = new function () {
 			items[0].setNote(note + text);
 			await items[0].saveTx();
 			
-			var noteElem = this.libraryView.getElement('zotero-note-editor');
-			noteElem.focus();
+			if (libraryView?.isConnected) {
+				libraryView.getElement('zotero-note-editor').focus();
+			}
 			return true;
 		}
 		
@@ -5278,6 +5312,7 @@ var ZoteroPane = new function () {
 	
 	this.viewItems = async function (items, event, options = {}) {
 		let { noLocateOnMissing } = options;
+		let collectionsView = this.collectionsView;
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			if (item.isRegularItem()) {
@@ -5315,7 +5350,7 @@ var ZoteroPane = new function () {
 				}
 			}
 			else if (item.isNote()) {
-				if (!this.collectionsView.editable) {
+				if (!collectionsView.editable) {
 					continue;
 				}
 				let openInWindow = event?.shiftKey || options.forceAlternateWindowBehavior;
@@ -6725,6 +6760,7 @@ var ZoteroPane = new function () {
 		itemReadTimeout = setTimeout(async () => {
 			itemReadTimeout = null;
 			
+			let libraryView = this.libraryView;
 			// Check to make sure we're still on the same item
 			var items = this.getSelectedItems();
 			if (items.length != 1 || items[0].id != feedItemID) {
@@ -6739,7 +6775,9 @@ var ZoteroPane = new function () {
 			}
 			
 			await feedItem.toggleRead(true);
-			this.itemPane.setReadLabel(true);
+			if (libraryView?.isConnected) {
+				libraryView.itemPane.setReadLabel(true);
+			}
 		}, FEED_READ_TIMEOUT);
 	};
 	

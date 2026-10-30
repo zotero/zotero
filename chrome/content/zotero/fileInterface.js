@@ -542,6 +542,7 @@ var Zotero_File_Interface = new function () {
 	 * Imports from clipboard
 	 */
 	this.importFromClipboard = async function () {
+		let libraryView = ZoteroPane.libraryView;
 		var str = Zotero.Utilities.Internal.getClipboard("text/plain");
 		if(!str) {
 			var ps = Services.prompt;
@@ -556,20 +557,21 @@ var Zotero_File_Interface = new function () {
 		translation.setString(str);
 	
 		try {
-			if (!ZoteroPane.collectionsView.editable) {
-				await ZoteroPane.collectionsView.selectLibrary();
+			if (!libraryView.collectionsView.editable) {
+				await libraryView.collectionsView.selectLibrary();
 			}
 		} catch(e) {}
 		
 		await _finishImport({
 			translation,
-			createNewCollection: false
+			createNewCollection: false,
+			libraryView
 		});
 		
 		// Select imported items
 		try {
-			if (translation.newItems) {
-				ZoteroPane.itemsView.selectItems(translation.newItems.map(item => item.id));
+			if (translation.newItems && libraryView?.isConnected) {
+				libraryView.itemsView.selectItems(translation.newItems.map(item => item.id));
 			}
 		}
 		catch (e) {
@@ -623,13 +625,16 @@ var Zotero_File_Interface = new function () {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		var importCollections = [];
 		try {
-			let zp = Zotero.getActiveZoteroPane();
-			libraryID = zp.getSelectedLibraryIDs()[0];
+			// The view the import started in, or else the active one
+			let collectionsView = options.libraryView?.isConnected
+				? options.libraryView.collectionsView
+				: Zotero.getActiveZoteroPane().collectionsView;
+			libraryID = collectionsView.getSelectedLibraryIDs()[0];
 			if (addToLibraryRoot) {
-				await zp.collectionsView.selectLibrary(libraryID);
+				await collectionsView.selectLibrary(libraryID);
 			}
 			else if (!createNewCollection) {
-				importCollections = zp.getSelectedCollections();
+				importCollections = collectionsView.getSelectedCollections();
 			}
 		}
 		catch (e) {
