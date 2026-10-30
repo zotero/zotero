@@ -76,7 +76,7 @@ Zotero.Embeddings = new function () {
 		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a8m-GGUF', quant: 'F16' },
 		// The score band: the floor below which a result isn't shown, and the
 		// score at which the Relevance bar fills. Measured 2026-10-29.
-		minScore: 0.36,
+		minScore: 0.34,
 		maxDisplayScore: 0.54,
 		// How its vectors are stored: quantized to int8, centered first on
 		// `mean` when one is given -- base64 float32, as Calibration.record()
@@ -103,7 +103,7 @@ Zotero.Embeddings = new function () {
 		dims: 256,
 		leadingSpace: true,
 		serving: { gguf: 'hotchpotch/bekko-embedding-v1-a25m-GGUF', quant: 'F16' },
-		minScore: 0.40,
+		minScore: 0.27,
 		maxDisplayScore: 0.57,
 		storage: { version: 1, mean: null }
 	});
@@ -206,11 +206,14 @@ Zotero.Embeddings = new function () {
 		}, ['api-key'], 'embeddingsMode');
 
 		// Pick up at startup after a short delay, so we don't compete with
-		// window setup -- unless indexing was explicitly stopped, which a
-		// start would undo
-		if (this.isEnabled() && !this.Indexing.isPaused()) {
+		// window setup -- unless indexing on this computer was explicitly
+		// stopped, which a start would undo. The server's embeddings aren't
+		// what was stopped, so that mode starts regardless.
+		let starts = () => this.isEnabled()
+			&& (this.shouldSyncEmbeddings() || !this.Indexing.isPaused());
+		if (starts()) {
 			Zotero.Promise.delay(5000).then(() => {
-				if (this.isEnabled() && !this.Indexing.isPaused()) {
+				if (starts()) {
 					_start();
 				}
 			});
@@ -240,7 +243,12 @@ Zotero.Embeddings = new function () {
 	// it and its memory given back until then, or this computer's by a run
 	function _start() {
 		if (Zotero.Embeddings.shouldSyncEmbeddings()) {
-			Zotero.Sync.Runner.setSyncTimeout(1, false);
+			// Rows left by another model would be read as this one's until
+			// the server's arrive, so they go first, and the sync is asked
+			// for once the index is the active model's
+			Zotero.Embeddings.Indexing.ensureIndexMatchesModel()
+				.then(() => Zotero.Sync.Runner.setSyncTimeout(1, false))
+				.catch(e => Zotero.logError(e));
 			Zotero.Embeddings.download()
 				.then(() => Zotero.Embeddings.shutdownEngine())
 				.catch(e => Zotero.logError(e));
@@ -1605,12 +1613,21 @@ Zotero.Embeddings.Indexing = new function () {
 		return true;
 	}
 
-	// Make sure the stored vectors are the active model's and stored the way
-	// this client stores them, as recorded in the meta table. On a mismatch
-	// -- another model or revision, or a storage version bump -- everything
-	// stored is cleared, and indexing and sync rebuild it. An index with no
-	// storage version recorded predates them, and is taken as stored this
-	// way.
+	/**
+	 * Make sure the stored vectors are the active model's and stored the way
+	 * this client stores them, as recorded in the meta table. On a mismatch
+	 * -- another model or revision, or a storage version bump -- everything
+	 * stored is cleared, and indexing and sync rebuild it. An index with no
+	 * storage version recorded predates them, and is taken as stored this
+	 * way.
+	 *
+	 * @return {Promise}
+	 */
+	this.ensureIndexMatchesModel = async function () {
+		await Zotero.Embeddings.initDB();
+		await _ensureIndexMatchesModel();
+	};
+
 	async function _ensureIndexMatchesModel() {
 		let Store = Zotero.Embeddings.Indexing.Store;
 		let model = Zotero.Embeddings.getModelVersion();
@@ -3794,20 +3811,19 @@ Zotero.Embeddings.Diagnostics = new function () {
 /**
  * Zotero.Embeddings.Calibration -- a model's scoring numbers, measured over
  * triples of a query, a passage that answers it, and a near miss: the mean of
- * the passages, the floor at a percentile of near-miss scores, and the bar's
- * ceiling at one of passage scores. Run record() by hand when the model or
- * its revision changes.
+ * the passages, and the floor and the bar's ceiling at two percentiles of the
+ * passage scores, the near misses saying how well the model tells the two
+ * apart. Run record() by hand when the model or its revision changes.
  */
 Zotero.Embeddings.Calibration = new function () {
-	// Where the score floor goes, as a percentile of the near-miss scores --
-	// what this model gives a query against same-field text that doesn't
-	// answer it. At 0.95 one near miss in twenty still clears the floor;
-	// raising it cuts more of them, and more weak-but-real matches along
-	// with them.
-	const MISS_PERCENTILE = 0.95;
-	// Where the Relevance bar fills, as a percentile of the passage scores,
-	// each query against the passage that answers it. At 0.5 a full bar means
-	// "as good as this model's typical real match".
+	// Where the score floor goes, as a percentile of the passage scores, each
+	// query against the passage that answers it: how low a real match can
+	// score with this model. Below it a result is not worth showing; above
+	// it, what to show is a question of standing against the other results,
+	// not of the floor. At 0.05 one real match in twenty is lost.
+	const FLOOR_PERCENTILE = 0.05;
+	// Where the Relevance bar fills, as a percentile of the same scores. At
+	// 0.5 a full bar means "as good as this model's typical real match".
 	const MATCH_PERCENTILE = 0.5;
 	// Texts per engine call while calibrating, matching the indexer's largest
 	// batch
@@ -3845,8 +3861,8 @@ Zotero.Embeddings.Calibration = new function () {
 
 	/**
 	 * Run the active model over its corpus and derive its numbers: the two
-	 * ends of the score band, read off the distributions of matched and
-	 * near-miss scores, and the mean of the passage embeddings. The mean's
+	 * ends of the score band, read off the distribution of matched scores,
+	 * and the mean of the passage embeddings. The mean's
 	 * length says whether vectors want centering on it: near 1 for a model
 	 * whose embeddings crowd around a shared direction, which centering
 	 * pulls apart, well below for one that spreads them out.
@@ -3891,18 +3907,22 @@ Zotero.Embeddings.Calibration = new function () {
 		);
 		let matched = scores(passages);
 		let missed = scores(nearMisses);
-		let minScore = _percentile(missed, MISS_PERCENTILE);
+		let minScore = _percentile(matched, FLOOR_PERCENTILE);
 		let maxDisplayScore = _percentile(matched, MATCH_PERCENTILE);
+		// The near misses say how the model tells answers from same-field
+		// text that doesn't answer: how many it rates at least as high as the
+		// passage, and how many the floor lets through
 		let inverted = matched.filter((score, i) => score <= missed[i]).length;
+		let admitted = missed.filter(score => score >= minScore).length;
 		Zotero.debug(`Embeddings: ${inverted} of ${triples.length} near misses `
-			+ `score at least as high as their passage`);
-		// A model that rates its matches no higher than near misses can't rank
-		// anything, and every score it produced would clamp to a full or empty
-		// bar. Better to fail loudly than to index with it.
-		if (maxDisplayScore <= minScore) {
+			+ `score at least as high as their passage; ${admitted} clear the floor`);
+		// A model that rates its matches no higher than its near misses can't
+		// rank anything. Better to fail loudly than to index with it.
+		let missMedian = _percentile(missed, 0.5);
+		if (maxDisplayScore <= missMedian) {
 			throw new Error(`Model '${Zotero.Embeddings.getModelConfig().name}' scores matched text `
 				+ `(${maxDisplayScore.toFixed(4)}) no higher than near misses `
-				+ `(${minScore.toFixed(4)}) -- it can't rank search results`);
+				+ `(${missMedian.toFixed(4)}) -- it can't rank search results`);
 		}
 		return { mean, meanLength, minScore, maxDisplayScore };
 	};
@@ -4483,7 +4503,9 @@ Zotero.Embeddings.Sync = new function () {
 				|| !library || !Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
 			return;
 		}
-		await Zotero.Embeddings.initDB();
+		// Rows adopted or fetched into an index left by another model would
+		// be taken for its own
+		await Zotero.Embeddings.Indexing.ensureIndexMatchesModel();
 		await _adoptRows(libraryID);
 		stopCheck();
 		let changes = await _findChangedItems(client, libraryID);

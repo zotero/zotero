@@ -727,6 +727,39 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should clear an index left by another model before asking for the server's embeddings", async function () {
+			this.timeout(60000);
+			let { Indexing } = Zotero.Embeddings;
+			let { Store } = Indexing;
+			let item = await importFileAttachment('test.pdf');
+			await Zotero.Embeddings.initDB();
+			await store(item, 0, axis(0));
+			await Store.setIndexedModelVersion('some-other-model/1');
+			let stubs = [
+				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+				sinon.stub(Zotero.Embeddings, 'shouldSyncEmbeddings').returns(true),
+				sinon.stub(Zotero.Embeddings, 'download').resolves(),
+				sinon.stub(Zotero.Embeddings, 'shutdownEngine').resolves(),
+				sinon.stub(Indexing, 'startIndexing').resolves(),
+				sinon.stub(Zotero.Sync.Runner, 'setSyncTimeout')
+			];
+			try {
+				// A switch into the synced mode starts it
+				await Zotero.Notifier.trigger('modify', 'api-key', []);
+				while (!Zotero.Sync.Runner.setSyncTimeout.called) {
+					await Zotero.Promise.delay(10);
+				}
+				// The other model's rows are gone and the index is stamped as
+				// this model's by the time the sync is asked for
+				assert.equal(await Store.getIndexedModelVersion(), Zotero.Embeddings.getModelVersion());
+				assert.equal(await Zotero.DB.valueQueryAsync(
+					"SELECT COUNT(*) FROM embeddings.itemEmbeddings WHERE itemID=?", item.id), 0);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
 		it("should turn extraction ahead of time on with semantic search", function () {
 			let stubs = [
 				sinon.stub(Zotero.Embeddings.Indexing, 'startIndexing').resolves(),
@@ -1160,8 +1193,8 @@ describe("Zotero.Embeddings", function () {
 			for (let triple of corpus()) {
 				assert.isString(triple.passage, triple.query);
 				assert.isString(triple.nearMiss, triple.query);
-				// The floor measured on near misses has to gate chunks of the
-				// passages' length, so a near miss can't be a short paraphrase
+				// The near misses are weighed against chunks of the passages'
+				// length, so a near miss can't be a short paraphrase
 				assert.isAtLeast(triple.nearMiss.length, triple.passage.length / 2, triple.query);
 			}
 		});
