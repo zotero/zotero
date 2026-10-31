@@ -622,10 +622,25 @@ describe("Zotero.BestMatch", function () {
 			let session = await sessionFor();
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.lengthOf(excerpts, 2);
-			// 0.7 * 0.5 + 0.3 * 1 beats 0.7 * 0.9 + 0.3 * 0
+			// Each passage is as strong as its better explanation: saying
+			// the whole query beats resembling it closely
 			assert.include(excerpts[0].text, 'the owl itself');
-			assert.closeTo(excerpts[0].strength, 0.7 * 0.5 + 0.3, 1e-9);
-			assert.closeTo(excerpts[1].strength, 0.7 * 0.9, 1e-9);
+			assert.closeTo(excerpts[0].strength, 1, 1e-9);
+			assert.closeTo(excerpts[1].strength, 0.9, 1e-9);
+		});
+
+		it("should drop passages far below the item's strongest", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getScoreFraction').callsFake(score => score));
+			stubs.push(sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([
+				{ text: 'the strongest passage about the owl', score: 0.9 },
+				{ text: 'a passage nearly as strong', score: 0.5 },
+				{ text: 'a passage far weaker', score: 0.4 }
+			]));
+
+			let session = await sessionFor({ lexical: false });
+			let excerpts = await session.getMatchingExcerpts(attachment.id);
+			assert.deepEqual(excerpts.map(excerpt => excerpt.strength), [0.9, 0.5]);
 		});
 
 		it("should skip the lexical engine for an item that didn't match it", async function () {
@@ -685,9 +700,9 @@ describe("Zotero.BestMatch", function () {
 			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: 'owl' }));
 			assert.isFalse(cutStub.called);
 			let byText = Object.fromEntries(excerpts.map(excerpt => [excerpt.text, excerpt]));
-			// Matched by the model alone: weighed by the model alone
+			// Matched by the model alone: as strong as the model's score
 			let liked = byText['a passage the model likes'];
-			assert.closeTo(liked.strength, 0.7 * 0.6, 1e-9);
+			assert.closeTo(liked.strength, 0.6, 1e-9);
 			assert.equal(liked.pageLabel, '3');
 			// Below the model's floor but saying the query: kept on the
 			// lexical engine's word alone, where the index places it

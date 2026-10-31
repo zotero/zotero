@@ -43,8 +43,9 @@ Zotero.BestMatch = new function () {
 	// model's reading leads: it is the calibrated signal, and it chose which
 	// passages are worth showing. Saying the query's own words lifts a
 	// passage above an equally similar one that only paraphrases them.
-	const SEMANTIC_WEIGHT = 0.7;
-	const LEXICAL_WEIGHT = 0.3;
+	// Passages of an item weaker than this fraction below its strongest
+	// aren't shown
+	const PASSAGE_MARGIN = 0.5;
 	// About a line: what a passage is quoted down to for a one-line preview
 	const SNIPPET_CHARS = 150;
 	// A sentence longer than this is quoted as a line of its words rather
@@ -726,9 +727,11 @@ Zotero.BestMatch = new function () {
 		/**
 		 * Every passage explaining why an item matched this session's query,
 		 * strongest first: the item's passages the model matched and the ones
-		 * that say the query's words. Only the engines that matched the item
-		 * are asked. The strongest MAX_QUOTED_PASSAGES also carry a `snippet`,
-		 * the one line that best shows the query.
+		 * that say the query's words, each as strong as its better
+		 * explanation, and none far weaker than the strongest. Only the
+		 * engines that matched the item are asked. The strongest
+		 * MAX_QUOTED_PASSAGES also carry a `snippet`, the one line that best
+		 * shows the query.
 		 *
 		 * @param {Number} itemID
 		 * @return {Promise<Object[]>} - Entries with `text`, `ranges` and
@@ -757,27 +760,22 @@ Zotero.BestMatch = new function () {
 			for (let i = 0; i < passages.length; i++) {
 				let passage = passages[i];
 				let share = lexical ? lexical[i] : 0;
-				// A passage the model didn't match has only its words to
-				// recommend it, so one that says nothing of the query isn't a
-				// match at all
-				let weighed = passage.score != null;
-				if (!weighed && !share) {
+				// A passage is as strong as its better explanation: the
+				// model's score on its band, unclamped so the strongest keep
+				// their order, or the share of the query the passage says
+				let fraction = typeof passage.score == 'number'
+					? Zotero.Embeddings.getScoreFraction(passage.score, { clamped: false })
+					: 0;
+				let strength = Math.max(fraction, share);
+				if (strength <= 0) {
 					continue;
 				}
-				// Over the engines that spoke for this item, so a strength is
-				// the same 0-1 fraction whether one weighed the passage or
-				// both did
-				let semanticWeight = weighed ? SEMANTIC_WEIGHT : 0;
-				let lexicalWeight = lexical ? LEXICAL_WEIGHT : 0;
-				let fraction = weighed ? Zotero.Embeddings.getScoreFraction(passage.score) : 0;
-				entries.push({
-					...passage,
-					ranges: ranges[i],
-					strength: (semanticWeight * fraction + lexicalWeight * share)
-						/ (semanticWeight + lexicalWeight)
-				});
+				entries.push({ ...passage, ranges: ranges[i], strength });
 			}
 			entries.sort((a, b) => b.strength - a.strength);
+			// Passages far below the item's best don't explain its match
+			let cutoff = (entries[0]?.strength ?? 0) * (1 - PASSAGE_MARGIN);
+			entries = entries.filter(entry => entry.strength >= cutoff);
 			// Only the strongest few passages are shown as rows in the tree,
 			// so only they get a line chosen to quote
 			await this._pickSnippets(entries.slice(0, MAX_QUOTED_PASSAGES));
