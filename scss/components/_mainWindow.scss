@@ -1,11 +1,11 @@
 :is(panel) {
 	&::part(content) {
-		--panel-background: var(--material-toolbar);
+		--panel-background-color: var(--material-toolbar);
 	}
 
 	&#autoscroller {
 		&::part(content) {
-			--panel-background: inherit;
+			--panel-background-color: inherit;
 		}
 	}
 }

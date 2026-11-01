@@ -4,7 +4,7 @@ panel[is=tabs-menu-panel] {
 	--panel-padding: 8px;
 
 	&::part(content) {
-		--panel-background: var(--material-sidepane);
+		--panel-background-color: var(--material-sidepane);
 	}
 
 	& #zotero-tabs-menu-wrapper {
