@@ -140,6 +140,8 @@ async function onLoad() {
 		if (accepted) return;
 		Zotero.debug("Citation Dialog: io loaded cited data");
 		await SearchHandler.refreshCitedItems();
+		// Replace the loading message with the actual preview before refreshing the list
+		await CitationPreview.render();
 		currentLayout.refreshItemsList({ retainItemsState: true });
 		if (_id("keepSorted").checked) {
 			IOManager._resortItems();
@@ -2089,6 +2091,7 @@ const CitationPreview = {
 		if (isEmpty) {
 			_id("citation-preview-content").innerHTML = "";
 			_id("citation-preview-error").hidden = true;
+			_id("citation-preview-loading").hidden = true;
 		}
 		// The toggle button is hidden when there's no preview and is restored to its last
 		// state when the preview pane appears
@@ -2104,6 +2107,14 @@ const CitationPreview = {
 		if (!DIALOG_STATE.isCitingItems()) return;
 		if (!CitationDataManager.items.length) return;
 		if (!io.preview) return;
+		// io.preview() waits for all cited data to be loaded, so show a loading
+		// message until then. The preview is rendered once ioReadyPromise resolves.
+		if (!ioIsReady) {
+			_id("citation-preview-content").hidden = true;
+			_id("citation-preview-error").hidden = true;
+			_id("citation-preview-loading").hidden = false;
+			return;
+		}
 
 		CitationDataManager.updateCitationObject();
 		let html;
@@ -2118,6 +2129,7 @@ const CitationPreview = {
 		// Re-check after the await in case the user cleared items
 		if (!CitationDataManager.items.length) return;
 		let errored = html === undefined;
+		_id("citation-preview-loading").hidden = true;
 		_id("citation-preview-content").hidden = errored;
 		_id("citation-preview-error").hidden = !errored;
 		_id("citation-preview-content").innerHTML = errored ? "" : html;
