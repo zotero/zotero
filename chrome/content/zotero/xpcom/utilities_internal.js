@@ -3279,10 +3279,8 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 
 	// If at least one file is a non-web-link attachment and can be found,
 	// enable dragging to file system
-	let files = items
-		.filter(item => item.isAttachment())
-		.map(item => item.getFilePath())
-		.filter(path => path);
+	let fileAttachments = items.filter(item => item.isAttachment() && item.getFilePath());
+	let files = fileAttachments.map(item => item.getFilePath());
 
 	if (files.length) {
 		if (Zotero.isWin) {
@@ -3335,6 +3333,13 @@ Zotero.Utilities.Internal.onDragItems = function (event, itemIDs, dragImage = ev
 				() => Zotero.TempFileDragDataProvider.onDragEnd(),
 				{ once: true }
 			);
+		}
+
+		// Leave file attachments out of the Quick Copy text, since Word and Outlook on Windows
+		// take text over a file
+		items = items.filter(item => !fileAttachments.includes(item));
+		if (!items.length) {
+			return;
 		}
 	}
 

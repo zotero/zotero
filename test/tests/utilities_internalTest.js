@@ -619,6 +619,39 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 	});
 
+	describe("#onDragItems()", function () {
+		function drag(itemIDs) {
+			let dataTransfer = new DataTransfer();
+			Zotero.Utilities.Internal.onDragItems(
+				{ dataTransfer, currentTarget: document.documentElement },
+				itemIDs
+			);
+			return dataTransfer;
+		}
+
+		it("shouldn't offer Quick Copy text when dragging only file attachments", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+			let types = Array.from(drag([attachment.id]).types);
+			assert.include(types, 'Files');
+			assert.notInclude(types, 'text/plain');
+			assert.notInclude(types, 'text/html');
+		});
+
+		it("should offer Quick Copy text for only the parent when dragging an attachment along with its parent", async function () {
+			let item = await createDataObject('item', { title: 'Parent Title' });
+			let attachment = await importFileAttachment('test.pdf', {
+				parentID: item.id,
+				title: 'Attachment Title'
+			});
+			let dataTransfer = drag([item.id, attachment.id]);
+			assert.include(Array.from(dataTransfer.types), 'Files');
+			let text = dataTransfer.getData('text/plain');
+			assert.include(text, 'Parent Title');
+			assert.notInclude(text, 'Attachment Title');
+		});
+	});
+
 	describe("#renderItemTitle()", function () {
 		function renderToElement(title) {
 			let elem = new DOMParser().parseFromString('<div></div>', 'text/html')
