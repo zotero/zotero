@@ -587,7 +587,7 @@
 				font-size: 1.1rem;
 			}
 
-			#citation-preview-error {
+			#citation-preview-error, #citation-preview-loading {
 				padding-top: 2px;
 				color: var(--fill-secondary);
 				font-family: $font-family-base;

@@ -51,6 +51,7 @@ integration-citationDialog-lib-message-annotations = { $search ->
 }
 integration-citationDialog-settings-keepSorted = Keep sources sorted
 integration-citationDialog-preview-error = Preview unavailable
+integration-citationDialog-preview-loading = Loading preview…
 integration-citationDialog-btn-displayPreview =
     .title = Display citation preview
 integration-citationDialog-btn-settings =
