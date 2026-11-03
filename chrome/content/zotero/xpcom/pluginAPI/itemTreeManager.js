@@ -203,6 +203,14 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			// htmlLabel and renderCell content is an SVG URL shown as
 			// an image (see resolveSVGImageURL)
 			let unprivileged = !lazy.PluginSandbox.isPrivileged(option.pluginID);
+			if (unprivileged && option.type !== undefined) {
+				this._log("'type' is reserved for built-in columns and is ignored", "warn");
+				delete option.type;
+			}
+			if (unprivileged && option.iconLabel !== undefined) {
+				this._log("'iconLabel' only available for privileged plugins. Use 'iconPath' or an SVG URL in 'htmlLabel' instead", "warn");
+				delete option.iconLabel;
+			}
 			if (unprivileged && option.htmlLabel !== undefined) {
 				let imageURL = resolveSVGImageURL(option.pluginID, option.htmlLabel);
 				if (imageURL) {

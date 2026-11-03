@@ -277,3 +277,50 @@ describe("Zotero.ItemTreeManager", function () {
 		}
 	});
 });
+
+describe("ItemTree unprivileged option boundary", function () {
+	var plugin = usePluginSandbox();
+
+	beforeEach(function () {
+		plugin.load(["default", "itemTree"]);
+	});
+
+	afterEach(async function () {
+		await Zotero.ItemTreeManager._columnManager._unregisterByPluginID(plugin.id);
+	});
+
+	it("should drop the built-in column type from an unprivileged plugin", function () {
+		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
+			dataKey: "sandbox-html-type-unprivileged",
+			label: "HTML Type",
+			type: "html",
+			dataProvider: () => '<img src="invalid://x" onerror="window.__pluginPwned = 1">',
+		}));
+		let option = Zotero.ItemTreeManager._columnManager._optionsCache[dataKey];
+		assert.isUndefined(option.type, "unprivileged plugins cannot select a built-in renderer");
+	});
+
+	it("should drop a React iconLabel from an unprivileged plugin", function () {
+		let dataKey = plugin.run(() => {
+			let iconLabel = {
+				$$typeof: Symbol.for("react.element"),
+				type: "span",
+				key: null,
+				ref: null,
+				props: {
+					dangerouslySetInnerHTML: { __html: "plugin markup" },
+				},
+				_owner: null,
+				_store: {},
+			};
+			return Zotero.ItemTreeManager.registerColumn({
+				dataKey: "sandbox-iconlabel-unprivileged",
+				label: "Unprivileged Icon Label",
+				dataProvider: () => "",
+				iconLabel,
+			});
+		});
+		let option = Zotero.ItemTreeManager._columnManager._optionsCache[dataKey];
+		assert.isUndefined(option.iconLabel, "unprivileged plugins cannot provide React elements");
+	});
+});
