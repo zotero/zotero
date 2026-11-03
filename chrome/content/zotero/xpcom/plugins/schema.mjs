@@ -120,9 +120,9 @@ const PERMISSION_SCHEMAS = {
 				objectTypes: true,
 				operationNames: true,
 			},
-			Notifier: {
-				registerObserver: "FromScopeCallable",
-				unregisterObserver: true,
+			NotifierManager: {
+				registerObserver: "CustomParserCallable",
+				unregisterObserver: "CustomParserCallable",
 			},
 		},
 	},
