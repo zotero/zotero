@@ -206,7 +206,7 @@
 			let option = this._optionsCache[mainKey];
 			if (option?._menuKey
 					&& Zotero.MenuManager._menuManager._optionsCache[option._menuKey]) {
-				Zotero.MenuManager.unregisterMenu(option._menuKey);
+				Zotero.MenuManager.unregisterMenu(option._menuKey, option.pluginID);
 			}
 			return super._remove(mainKey);
 		}
