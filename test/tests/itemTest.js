@@ -1,6 +1,47 @@
 "use strict";
 
 describe("Zotero.Item", function () {
+	describe("#getItemTypeIconName()", function () {
+		it("should use the snapshot icon for imported-URL HTML attachments", function () {
+			let item = new Zotero.Item('attachment');
+			item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+			item.attachmentContentType = 'text/html';
+			assert.equal(item.getItemTypeIconName(), 'attachmentSnapshot');
+		});
+		
+		for (let contentType of ['audio/mpeg', 'text/plain']) {
+			it(`should use the file icon for imported-URL ${contentType} attachments`, function () {
+				let item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				item.attachmentContentType = contentType;
+				assert.equal(item.getItemTypeIconName(), 'attachmentFile');
+			});
+		}
+		
+		it("should use the file icon for imported files, including HTML", function () {
+			for (let contentType of ['audio/mpeg', 'text/html']) {
+				let item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_FILE;
+				item.attachmentContentType = contentType;
+				assert.equal(item.getItemTypeIconName(), 'attachmentFile');
+			}
+		});
+		
+		for (let [contentType, icon] of [
+			['application/pdf', 'attachmentPDF'],
+			['application/epub+zip', 'attachmentEPUB'],
+			['image/png', 'attachmentImage'],
+			['video/mp4', 'attachmentVideo']
+		]) {
+			it(`should preserve the ${icon} icon for imported-URL ${contentType} attachments`, function () {
+				let item = new Zotero.Item('attachment');
+				item.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+				item.attachmentContentType = contentType;
+				assert.equal(item.getItemTypeIconName(), icon);
+			});
+		}
+	});
+	
 	describe("#getField()", function () {
 		it("should return an empty string for valid unset fields on unsaved items", function () {
 			var item = new Zotero.Item('book');

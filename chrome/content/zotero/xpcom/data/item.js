@@ -5116,7 +5116,7 @@ Zotero.Item.prototype.getItemTypeIconName = function (skipLinkMode = false) {
 			itemType += "Link";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-			itemType += "Snapshot";
+			itemType += this.isSnapshotAttachment() ? "Snapshot" : "File";
 		}
 		else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
 			itemType += "WebLink";
