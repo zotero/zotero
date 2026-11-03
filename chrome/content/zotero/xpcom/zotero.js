@@ -1290,6 +1290,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * Launch a URL externally, the best way we can
 	 */
 	this.launchURL = function (url) {
+		if (typeof url !== 'string') {
+			throw new TypeError('URL must be a string');
+		}
 		if (!Zotero.Utilities.isHTTPURL(url)) {
 			if (Zotero.Utilities.isHTTPURL(url, true)) {
 				if (!url.startsWith('x-apple.systempreferences:')) {
