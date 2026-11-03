@@ -35,6 +35,11 @@ const CHROME_GLOBAL = Cu.getGlobalForObject({});
 
 const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
 
+const lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+});
+
 // Only chrome may register a facade. A property on a plugin object is forgeable.
 const originalRefs = new WeakMap();
 
@@ -163,6 +168,13 @@ const VarCheck = {
 
 	setOriginalRef(v, getOriginal) {
 		originalRefs.set(Cu.waiveXrays(v), getOriginal);
+	},
+
+	ensureActiveScope(scope) {
+		let pluginID = scope?.PLUGIN_ID;
+		if (pluginID && lazy.PluginSandbox.getScope(pluginID) !== scope) {
+			throw new Error(`Plugin ${pluginID} is not loaded`);
+		}
 	},
 
 	getOriginalOrSelf(v) {
@@ -545,6 +557,7 @@ const ScopeUtils = {
 			let t = trace && PluginTrace.start();
 			let failure;
 			try {
+				VarCheck.ensureActiveScope(scope);
 				args = args.map(arg => Cu.waiveXrays(arg));
 				let instance = Reflect.construct(Constructor, args);
 				if (typeof returnParser === "function") {
@@ -581,12 +594,15 @@ const ScopeUtils = {
 			let t = trace && PluginTrace.start();
 			let failure;
 			try {
+				VarCheck.ensureActiveScope(scope);
 				args = args.map(arg => Cu.waiveXrays(arg));
 				if (typeof argParser === "function") {
 					args = argParser(args);
 					// argParser returning null signals the call should be blocked
 					if (args === null) return undefined;
 				}
+				// Argument accessors can reenter chrome and reload/unload the plugin.
+				VarCheck.ensureActiveScope(scope);
 				let actualThisArg = thisArgRef ? thisArgRef.deref() : thisArg;
 				if (thisArgRef && !actualThisArg) {
 					VarCheck.throwPropError("access", "this", "object has been garbage collected");
@@ -912,6 +928,7 @@ const ScopeUtils = {
 		}
 
 		function derefOrThrow(op, prop) {
+			VarCheck.ensureActiveScope(scope);
 			let inst = instanceRef.deref();
 			if (!inst) {
 				VarCheck.throwPropError(op, prop, "object has been garbage collected");
