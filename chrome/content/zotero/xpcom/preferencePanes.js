@@ -214,6 +214,13 @@
 				src = await Zotero.Plugins.resolveURI(options.pluginID, options.src);
 			}
 
+			let image = options.image && (embedded
+				? lazy.PluginProtocol.resolveImageURL(options.pluginID, options.image)
+				: await Zotero.Plugins.resolveURI(options.pluginID, options.image));
+			if (embedded && image === null) {
+				Zotero.warn(`Plugin ${options.pluginID}: ignoring pane image outside its allowed resources`);
+			}
+
 			// For unprivileged plugins, onLoad is a sandbox hook: wrap it so its
 			// `{ paneID, page }` payload is marshalled into the plugin scope
 			let onLoad = typeof options.onLoad === 'function' ? options.onLoad : null;
@@ -226,8 +233,7 @@
 				pluginID: options.pluginID,
 				parent: options.parent,
 				rawLabel: options.label || (await Zotero.Plugins.getName(options.pluginID)),
-				image: options.image && (await Zotero.Plugins.resolveURI(options.pluginID, options.image))
-					|| (await Zotero.Plugins.getIconURI(options.pluginID, 24)),
+				image: image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
 				src,
 				scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
