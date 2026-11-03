@@ -35,7 +35,7 @@ import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.m
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
-import { PluginWorkers } from "chrome://zotero/content/xpcom/plugins/workers.mjs";
+import { PluginDOM } from "chrome://zotero/content/xpcom/plugins/dom.mjs";
 import { PluginNetwork } from "chrome://zotero/content/xpcom/plugins/network.mjs";
 import { setupConsole, setupInstanceProxy, setupHTTP, setupProgressWindow, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
@@ -113,7 +113,7 @@ function unloadScope(id) {
 	scopes.delete(id);
 	PluginProtocol.unregister(id);
 	PluginFileAccess.unregister(id);
-	PluginWorkers.unregister(id);
+	PluginDOM.unregister(id);
 	// Delay nuke to allow any pending operations to complete
 	setTimeout(() => {
 		Cu.nukeSandbox(scope);
@@ -254,7 +254,6 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 				"atob",
 				"btoa",
 				"Blob",
-				"DOMParser",
 				"Event",
 				"fetch",
 				"MessageChannel",
@@ -341,8 +340,8 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 		setupProgressWindow(scope);
 	}
 
-	// Worker comes from a document of the plugin's origin, as its pages do
-	PluginWorkers.setup(scope);
+	// Window-dependent constructors come from a document of the plugin's origin, as its pages do
+	PluginDOM.setup(scope);
 
 	if (permissions.includes("preferences")) {
 		setupPreferences(scope);

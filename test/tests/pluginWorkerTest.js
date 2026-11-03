@@ -1,6 +1,6 @@
 describe("Plugin Worker", function () {
 	var plugin = usePluginSandbox();
-	var { PluginWorkers } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/workers.mjs");
+	var { PluginDOM } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/dom.mjs");
 	var dir, root;
 
 	before(async function () {
@@ -212,7 +212,7 @@ try { importScripts("https://example.com/x.js"); out.importRemote = "allowed"; }
 			worker.onmessage = resolve;
 			worker.postMessage(1);
 		}));
-		let doc = PluginWorkers._hosts.get(plugin.id).browser.docShell.domWindow.document;
+		let doc = PluginDOM._hosts.get(plugin.id).browser.docShell.domWindow.document;
 		assert.equal(doc.nodePrincipal.origin, "moz-extension://" + plugin.uuid);
 		assert.equal(doc.baseURI, "moz-extension://" + plugin.uuid + "/");
 		assert.equal(doc.policyContainer.csp.policyCount, 2);
@@ -230,7 +230,7 @@ try { importScripts("https://example.com/x.js"); out.importRemote = "allowed"; }
 			worker.onmessage = () => resolve();
 			worker.postMessage(1);
 		})).then(() => {
-			let { Worker } = PluginWorkers._hosts.get(plugin.id);
+			let { Worker } = PluginDOM._hosts.get(plugin.id);
 			return new Worker("echo.js");
 		});
 		let replies = 0;
@@ -238,7 +238,7 @@ try { importScripts("https://example.com/x.js"); out.importRemote = "allowed"; }
 		worker.postMessage(1);
 		await waitForCallback(() => replies === 1, 20, 2);
 		plugin.unload();
-		assert.isFalse(PluginWorkers._hosts.has(plugin.id));
+		assert.isFalse(PluginDOM._hosts.has(plugin.id));
 		worker.postMessage(2);
 		await Zotero.Promise.delay(200);
 		assert.equal(replies, 1);
