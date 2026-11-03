@@ -84,6 +84,14 @@ const ScopeVariables = {
 			return undefined;
 		}
 
+		if (VarCheck.isPromise(value)) {
+			return ScopeUtils.ensurePromiseVarInScope(value, scope);
+		}
+
+		if (VarCheck.isXPCOMObject(value)) {
+			return Cu.cloneInto({}, scope);
+		}
+
 		if (!_seen) _seen = new Map();
 		if (_seen.has(value)) return _seen.get(value);
 
