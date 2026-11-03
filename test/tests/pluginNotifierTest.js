@@ -1,5 +1,6 @@
-describe("Plugin Zotero.Notifier", function () {
+describe("Plugin Zotero.NotifierManager", function () {
 	var plugin = usePluginSandbox();
+	var other = usePluginSandbox({ id: "other-notifier-plugin@zotero.org" });
 
 	// A chrome observer at a lower priority (higher number) than the plugin's, so once it resolves the
 	// plugin's observer has run
@@ -24,16 +25,68 @@ describe("Plugin Zotero.Notifier", function () {
 		plugin.load(["default", "dataRead", "dataWrite"]);
 	});
 
-	afterEach(function () {
-		// Clean up any leftover observers
-		try {
-			let id = plugin.eval("typeof _observerID !== 'undefined' && _observerID");
-			if (id) {
-				Zotero.Notifier.unregisterObserver(id);
-			}
+	afterEach(async function () {
+		await Zotero.NotifierManager._manager._unregisterByPluginID(plugin.id);
+		await Zotero.NotifierManager._manager._unregisterByPluginID(other.id);
+	});
+
+	it("should remove only the shutting-down plugin's observers", async function () {
+		other.load(["default", "dataRead"]);
+		function register(sandbox) {
+			return sandbox.run(() => {
+				globalThis.calls = 0;
+				return Zotero.NotifierManager.registerObserver({
+					observerID: "shutdown-test",
+					types: ["item"],
+					onNotify() {
+						globalThis.calls++;
+					},
+				});
+			});
 		}
-		// eslint-disable-next-line no-unused-vars
-		catch (e) {}
+		let ownID = register(plugin);
+		let otherID = register(other);
+		assert.isString(ownID);
+		assert.isString(otherID);
+		assert.notEqual(ownID, otherID);
+		let calls = 0;
+		let coreID = Zotero.Notifier.registerObserver({
+			notify() {
+				calls++;
+			},
+		}, ["item"]);
+		try {
+			// The same cleanup the shared manager invokes on plugin shutdown.
+			assert.deepEqual(await Zotero.NotifierManager._manager._unregisterByPluginID(plugin.id), [ownID]);
+			await Zotero.Notifier.trigger("modify", "item", []);
+			assert.equal(plugin.eval("calls"), 0);
+			assert.equal(other.eval("calls"), 1);
+			assert.equal(calls, 1);
+		}
+		finally {
+			Zotero.Notifier.unregisterObserver(coreID);
+		}
+	});
+
+	it("should reject invalid and duplicate registrations", function () {
+		assert.isFalse(plugin.run(() => Zotero.NotifierManager.registerObserver({ observerID: "missing-notify" })));
+		assert.isFalse(plugin.run(() => Zotero.NotifierManager.registerObserver({
+			observerID: "invalid-types", types: [1], onNotify() {},
+		})));
+		let register = () => Zotero.NotifierManager.registerObserver({ observerID: "duplicate", onNotify() {} });
+		assert.isString(plugin.run(register));
+		assert.isFalse(plugin.run(register));
+	});
+
+	it("should discard the cache entry if notifier registration fails", function () {
+		assert.throws(() => plugin.run(() => Zotero.NotifierManager.registerObserver({
+			observerID: "retry-registration", types: ["invalid-type"], onNotify() {},
+		})));
+		let id = plugin.run(() => Zotero.NotifierManager.registerObserver({
+			observerID: "retry-registration", types: ["item"], onNotify() {},
+		}));
+		assert.isString(id);
+		assert.isTrue(plugin.run(id => Zotero.NotifierManager.unregisterObserver(id), id));
 	});
 
 	it("should receive notifications when an item is added", async function () {
@@ -42,18 +95,16 @@ describe("Plugin Zotero.Notifier", function () {
 				var _notifyType = null;
 				var _notifyFirstID = null;
 				var _notifyIDsLength = null;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids, extraData) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids, extraData }) {
 							_notifyEvent = event;
 							_notifyType = type;
 							_notifyIDsLength = ids.length;
 							_notifyFirstID = ids[0];
-						}
-					},
-					['item'],
-					'test-sandbox-add'
-				);
+						},
+						types: ['item'],
+						observerID: "test-sandbox-add",
+				});
 			`);
 
 		let promise = waitForNotify(['item']);
@@ -67,8 +118,52 @@ describe("Plugin Zotero.Notifier", function () {
 		assert.isAbove(plugin.eval("_notifyIDsLength"), 0, "ids should have length");
 		assert.equal(plugin.eval("_notifyFirstID"), item.id, "ids should contain the item ID");
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 		await item.eraseTx();
+	});
+
+	it("should not unregister an observer owned by chrome", async function () {
+		let calls = 0;
+		let id = Zotero.Notifier.registerObserver({
+			notify() {
+				calls++;
+			},
+		}, ["item"], "ownership-victim");
+		try {
+			plugin.run(id => Zotero.NotifierManager.unregisterObserver(id), id);
+			await Zotero.Notifier.trigger("modify", "item", []);
+			assert.equal(calls, 1);
+		}
+		finally {
+			Zotero.Notifier.unregisterObserver(id);
+		}
+	});
+
+	it("should not let a plugin spoof ownership when registering or unregistering", async function () {
+		other.load(["default", "dataRead"]);
+		let id = other.run((pluginID) => {
+			globalThis.calls = 0;
+			return Zotero.NotifierManager.registerObserver({
+				observerID: "other-plugin",
+				pluginID,
+				types: ["item"],
+				priority: 100,
+				onNotify() {
+					globalThis.calls++;
+				},
+			});
+		}, plugin.id);
+		try {
+			plugin.run((id, otherID) => Zotero.NotifierManager.unregisterObserver(id, otherID), id, other.id);
+			await Zotero.Notifier.trigger("modify", "item", []);
+			assert.equal(other.eval("calls"), 1);
+			other.run(id => Zotero.NotifierManager.unregisterObserver(id), id);
+			await Zotero.Notifier.trigger("modify", "item", []);
+			assert.equal(other.eval("calls"), 1);
+		}
+		finally {
+			Zotero.NotifierManager.unregisterObserver(id);
+		}
 	});
 
 	it("should receive notifications when an item is modified", async function () {
@@ -78,17 +173,15 @@ describe("Plugin Zotero.Notifier", function () {
 
 		plugin.eval(`
 				var _modifyFirstID = null;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids }) {
 							if (event === 'modify') {
 								_modifyFirstID = ids[0];
 							}
-						}
-					},
-					['item'],
-					'test-sandbox-modify'
-				);
+						},
+						types: ['item'],
+						observerID: "test-sandbox-modify",
+				});
 			`);
 
 		let promise = waitForNotify(['item']);
@@ -98,7 +191,7 @@ describe("Plugin Zotero.Notifier", function () {
 
 		assert.equal(plugin.eval("_modifyFirstID"), item.id, "Should have received modify event with item ID");
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 		await item.eraseTx();
 	});
 
@@ -109,17 +202,15 @@ describe("Plugin Zotero.Notifier", function () {
 
 		plugin.eval(`
 				var _trashFirstID = null;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids }) {
 							if (event === 'trash') {
 								_trashFirstID = ids[0];
 							}
-						}
-					},
-					['item'],
-					'test-sandbox-trash'
-				);
+						},
+						types: ['item'],
+						observerID: "test-sandbox-trash",
+				});
 			`);
 
 		let promise = waitForNotify(['item']);
@@ -129,22 +220,20 @@ describe("Plugin Zotero.Notifier", function () {
 
 		assert.equal(plugin.eval("_trashFirstID"), item.id, "Should have received trash event with item ID");
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 		await item.eraseTx();
 	});
 
 	it("should only receive notifications for subscribed types", async function () {
 		plugin.eval(`
 				var _collectionNotified = false;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids }) {
 							_collectionNotified = true;
-						}
-					},
-					['collection'],
-					'test-sandbox-type-filter'
-				);
+						},
+						types: ['collection'],
+						observerID: "test-sandbox-type-filter",
+				});
 			`);
 
 		// Create an item -- should NOT trigger the collection observer
@@ -165,7 +254,7 @@ describe("Plugin Zotero.Notifier", function () {
 
 		assert.isTrue(plugin.eval("_collectionNotified"), "Collection add should trigger collection observer");
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 		await item.eraseTx();
 		await collection.eraseTx();
 	});
@@ -173,15 +262,13 @@ describe("Plugin Zotero.Notifier", function () {
 	it("should not receive notifications after unregistering", async function () {
 		plugin.eval(`
 				var _postUnregCount = 0;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids }) {
 							_postUnregCount++;
-						}
-					},
-					['item'],
-					'test-sandbox-unreg'
-				);
+						},
+						types: ['item'],
+						observerID: "test-sandbox-unreg",
+				});
 			`);
 
 		// Create an item -- should trigger
@@ -192,7 +279,7 @@ describe("Plugin Zotero.Notifier", function () {
 		let countBefore = plugin.eval("_postUnregCount");
 		assert.isAbove(countBefore, 0);
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 		plugin.eval("_postUnregCount = 0");
 
 		// Create another item -- should NOT trigger
@@ -211,17 +298,15 @@ describe("Plugin Zotero.Notifier", function () {
 	it("should receive extraData in notifications", async function () {
 		plugin.eval(`
 				var _deleteExtra = null;
-				var _observerID = Zotero.Notifier.registerObserver(
-					{
-						notify: function(event, type, ids, extraData) {
+				var _observerID = Zotero.NotifierManager.registerObserver({
+						onNotify: function({ event, type, ids, extraData }) {
 							if (event === 'delete') {
 								_deleteExtra = extraData;
 							}
-						}
-					},
-					['item'],
-					'test-sandbox-extra'
-				);
+						},
+						types: ['item'],
+						observerID: "test-sandbox-extra",
+				});
 			`);
 
 		let item = new Zotero.Item('book');
@@ -240,6 +325,6 @@ describe("Plugin Zotero.Notifier", function () {
 		let hasItemID = plugin.eval(`!!_deleteExtra[${itemID}]`);
 		assert.ok(hasItemID, "extraData should contain deleted item ID");
 
-		plugin.eval("Zotero.Notifier.unregisterObserver(_observerID)");
+		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
 	});
 });
