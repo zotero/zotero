@@ -5,8 +5,35 @@ describe("Zotero.PreferencePanes", function () {
 
 	var tmpDir;
 
-	function loadPrefPaneTestScope() {
-		plugin.load(["default", "preferencePane"], { resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
+	function loadPrefPaneTestScope({ origins = [], permissions = ["default", "preferencePane"] } = {}) {
+		plugin.load(permissions, { origins, resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
+	}
+
+	// The page's navigation guard was registered first, so it has run when this resolves.
+	function attemptNavigation(browser, url) {
+		let progress = browser.browsingContext.webProgress;
+		let observed = new Promise((resolve) => {
+			let listener = {
+				onStateChange(webProgress, request, flags) {
+					if (!webProgress.isTopLevel || !(flags & Ci.nsIWebProgressListener.STATE_START)) return;
+					let uri;
+					try {
+						let channel = request.QueryInterface(Ci.nsIChannel);
+						uri = channel.originalURI || channel.URI;
+					}
+					catch {
+						return;
+					}
+					if (uri.spec !== url) return;
+					progress.removeProgressListener(listener);
+					resolve();
+				},
+				QueryInterface: ChromeUtils.generateQI(["nsIWebProgressListener", "nsISupportsWeakReference"]),
+			};
+			progress.addProgressListener(listener, Ci.nsIWebProgress.NOTIFY_STATE_ALL);
+		});
+		browser.contentWindow.location.href = url;
+		return observed;
 	}
 
 	// The plugin registers a pane on its own page
@@ -138,35 +165,86 @@ describe("Zotero.PreferencePanes", function () {
 		}
 	});
 
-	it("should block navigation away from the pane page and open web URLs externally", async function () {
+	it("should block external navigation without userPrompt", async function () {
+		let stub = sinon.stub(Zotero, "launchURL");
 		loadPrefPaneTestScope();
 		let paneID = await registerTestPane();
-		let stub = sinon.stub(Zotero, "launchURL");
 		let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
 		try {
 			await win.Zotero_Preferences.waitForFirstPaneLoad();
 			let browser = win.document.querySelector(".pane-container.embedded browser");
 			let src = Zotero.Plugins.getBaseURI(plugin.id) + "prefs.html";
-			browser.contentWindow.location.href = "https://example.com/";
-			for (let i = 0; i < 100 && !stub.called; i++) {
-				await Zotero.Promise.delay(20);
-			}
-			assert.isTrue(stub.calledWith("https://example.com/"),
-				"web URL should open in the system browser");
+			await attemptNavigation(browser, "https://example.com/");
+			assert.isFalse(stub.called, "external navigation requires userPrompt");
 			assert.equal(browser.currentURI.specIgnoringRef, src, "browser should stay on the plugin page");
 
 			// The pane is single-page -- other pages within the plugin are blocked too
-			browser.contentWindow.location.href = Zotero.Plugins.getBaseURI(plugin.id) + "other.html";
-			for (let i = 0; i < 15; i++) {
-				await Zotero.Promise.delay(20);
-			}
+			await attemptNavigation(browser, Zotero.Plugins.getBaseURI(plugin.id) + "other.html");
 			assert.equal(browser.currentURI.specIgnoringRef, src,
 				"browser should not navigate to other plugin pages");
-			assert.isTrue(stub.calledOnce, "non-web navigation should not open the system browser");
+			assert.isFalse(stub.called, "non-web navigation should not open the system browser");
 		}
 		finally {
 			stub.restore();
 			win.close();
+		}
+	});
+
+	it("should block external navigation with host_permissions alone", async function () {
+		let stub = sinon.stub(Zotero, "launchURL");
+		loadPrefPaneTestScope({ origins: ["*://example.com/*"] });
+		let paneID = await registerTestPane();
+		let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+		try {
+			await win.Zotero_Preferences.waitForFirstPaneLoad();
+			let browser = win.document.querySelector(".pane-container.embedded browser");
+			let src = Zotero.Plugins.getBaseURI(plugin.id) + "prefs.html";
+			await attemptNavigation(browser, "https://example.com/");
+			assert.isFalse(stub.called);
+			assert.equal(browser.currentURI.specIgnoringRef, src, "browser should stay on the plugin page");
+		}
+		finally {
+			stub.restore();
+			win.close();
+		}
+	});
+
+	it("should open external navigation with userPrompt", async function () {
+		let stub = sinon.stub(Zotero, "launchURL");
+		loadPrefPaneTestScope({ permissions: ["default", "preferencePane", "userPrompt"] });
+		let paneID = await registerTestPane();
+		let win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", { pane: paneID });
+		try {
+			await win.Zotero_Preferences.waitForFirstPaneLoad();
+			let browser = win.document.querySelector(".pane-container.embedded browser");
+			let src = Zotero.Plugins.getBaseURI(plugin.id) + "prefs.html";
+			await attemptNavigation(browser, "https://example.com/");
+			assert.isTrue(stub.calledOnceWithExactly("https://example.com/"));
+			assert.equal(browser.currentURI.specIgnoringRef, src, "browser should stay on the plugin page");
+		}
+		finally {
+			stub.restore();
+			win.close();
+		}
+	});
+
+	it("should restrict embedded pane images to host_permissions", async function () {
+		let externalImage = "https://example.com/icon.svg";
+
+		let iconStub = sinon.stub(Zotero.Plugins, "getIconURI").resolves(null);
+		try {
+			loadPrefPaneTestScope();
+			let paneID = await registerTestPane({ image: externalImage });
+			let pane = Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID);
+			assert.notEqual(pane.image, externalImage, "an external image needs host_permissions");
+
+			loadPrefPaneTestScope({ origins: ["*://example.com/*"] });
+			paneID = await registerTestPane({ image: externalImage });
+			pane = Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID);
+			assert.equal(pane.image, externalImage);
+		}
+		finally {
+			iconStub.restore();
 		}
 	});
 
