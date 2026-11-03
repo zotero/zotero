@@ -106,6 +106,9 @@ const PluginPrefs = {
 		return {
 			// The full name: relative to the branch, or as given once allowed when global
 			resolve(key, global) {
+				if (typeof key !== "string") {
+					throw new TypeError("Preference name must be a string");
+				}
 				if (!global) {
 					return branch + key;
 				}
@@ -114,7 +117,7 @@ const PluginPrefs = {
 			},
 			// A branch to reset must be given, allowed and clear of reserved subtrees
 			checkReset(resetBranch) {
-				if (!resetBranch) {
+				if (typeof resetBranch !== "string" || !resetBranch) {
 					throw new Error('Permission denied: cannot reset entire preference branch.');
 				}
 				check(resetBranch);
