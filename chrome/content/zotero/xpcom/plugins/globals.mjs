@@ -90,26 +90,24 @@ function setupHTTP(scope) {
 
 	let HTTP = Cu.createObjectIn(scope);
 
-	for (let name of ["request", "processDocuments"]) {
-		HTTP[name] = ScopeUtils.ensureCallableInScope(
-			Zotero.HTTP[name], Zotero.HTTP, scope, {
-				mutable: true,
-				argParser: (args) => {
-					// Rebuild the sandbox options before injecting trusted fields. An
-					// in-place write could be discarded by an accessor or Proxy trap.
-					if (!args[2] || typeof args[2] !== "object") {
-						args[2] = {};
-					}
-					ScopeVariables.injectTrustedOptions(args, 2, {
-						createXMLHttpRequest: createXHR,
-						noMock: true,
-					});
-					return args;
-				},
-				trace: { pluginID, path: `Zotero.HTTP.${name}` },
-			}
-		);
-	}
+	HTTP.request = ScopeUtils.ensureCallableInScope(
+		Zotero.HTTP.request, Zotero.HTTP, scope, {
+			mutable: true,
+			argParser: (args) => {
+				// Rebuild the sandbox options before injecting trusted fields. An
+				// in-place write could be discarded by an accessor or Proxy trap.
+				if (!args[2] || typeof args[2] !== "object") {
+					args[2] = {};
+				}
+				ScopeVariables.injectTrustedOptions(args, 2, {
+					createXMLHttpRequest: createXHR,
+					noMock: true,
+				});
+				return args;
+			},
+			trace: { pluginID, path: "Zotero.HTTP.request" },
+		}
+	);
 
 	Object.defineProperty(scope.Zotero, "HTTP", {
 		value: HTTP,
