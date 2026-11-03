@@ -307,6 +307,30 @@ describe("Zotero.ShortcutManager", function () {
 		assert.exists(Zotero.ShortcutManager._shortcutManager._optionsCache[shortcutID]);
 	});
 
+	it("should reject registration IDs that change during ownership checks", function () {
+		other.load(["default", "shortcut"]);
+		let otherID = other.run(() => Zotero.ShortcutManager.registerShortcut({
+			shortcutID: "coercion-victim", key: "U", modifiers: ["accel", "alt"],
+			target: "mainWindow", onCommand: () => {},
+		}));
+		let ownID = plugin.run(() => Zotero.ShortcutManager.registerShortcut({
+			shortcutID: "coercion-owned", key: "U", modifiers: ["accel", "alt"],
+			target: "mainWindow", onCommand: () => {},
+		}));
+		assert.isString(otherID);
+		assert.isString(ownID);
+		assert.isFalse(plugin.run((ownID, otherID) => {
+			let calls = 0;
+			return Zotero.ShortcutManager.unregisterShortcut({
+				toString() {
+					return ++calls === 1 ? ownID : otherID;
+				},
+			});
+		}, ownID, otherID));
+		assert.exists(Zotero.ShortcutManager._shortcutManager._optionsCache[ownID]);
+		assert.exists(Zotero.ShortcutManager._shortcutManager._optionsCache[otherID]);
+	});
+
 	it("should not be exposed without the shortcut permission", function () {
 		plugin.load(["default"]);
 		assert.equal(plugin.run(() => typeof Zotero.ShortcutManager), "undefined");
