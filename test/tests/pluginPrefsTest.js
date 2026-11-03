@@ -156,6 +156,23 @@ describe("Plugin Zotero.Prefs", function () {
 	});
 
 	describe("access control", function () {
+		it("should reject an object masquerading as a preference name", function () {
+			plugin.load(["default", "preferences"], { prefPermissions: ["extensions.zotero.allowed."] });
+			let fullKey = "extensions.zotero.test.sandbox.paramHijack";
+			try {
+				assert.throws(() => plugin.eval(`
+						Zotero.Prefs.set({
+							startsWith() { return true; },
+							toString() { return ${JSON.stringify(fullKey)}; },
+						}, 'unauthorized', true)
+					`));
+				assert.isUndefined(Zotero.Prefs.get(fullKey, true));
+			}
+			finally {
+				Zotero.Prefs.clear(fullKey, true);
+			}
+		});
+
 		it("should deny global=true for prefs not matching pref_permissions", function () {
 			plugin.load(["default", "preferences"], { prefPermissions: ["extensions.zotero.myPlugin."] });
 			assert.throws(() => plugin.eval("Zotero.Prefs.get('extensions.zotero.fontSize', true)"),

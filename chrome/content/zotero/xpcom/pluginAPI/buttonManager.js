@@ -793,7 +793,7 @@
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.ButtonManager.registerButton,
 		({ pluginID, args }) => {
-			lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+			lazy.ScopeVariables.injectTrustedOptions(args, 0, { pluginID });
 		}
 	);
 	lazy.ScopeVariables.setCustomParser(

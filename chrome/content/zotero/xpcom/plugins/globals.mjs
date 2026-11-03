@@ -95,12 +95,15 @@ function setupHTTP(scope) {
 			Zotero.HTTP[name], Zotero.HTTP, scope, {
 				mutable: true,
 				argParser: (args) => {
-					// Inject sandbox XHR factory into options
+					// Rebuild the sandbox options before injecting trusted fields. An
+					// in-place write could be discarded by an accessor or Proxy trap.
 					if (!args[2] || typeof args[2] !== "object") {
 						args[2] = {};
 					}
-					args[2].createXMLHttpRequest = createXHR;
-					args[2].noMock = true;
+					ScopeVariables.injectTrustedOptions(args, 2, {
+						createXMLHttpRequest: createXHR,
+						noMock: true,
+					});
 					return args;
 				},
 				trace: { pluginID, path: `Zotero.HTTP.${name}` },
