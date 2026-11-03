@@ -300,6 +300,17 @@ describe("ItemTree unprivileged option boundary", function () {
 		assert.isUndefined(option.type, "unprivileged plugins cannot select a built-in renderer");
 	});
 
+	it("should not inherit unsupported options through __proto__", function () {
+		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
+			dataKey: "sandbox-proto-type",
+			label: "Proto Type",
+			dataProvider: () => "",
+			["__proto__"]: { type: "html" },
+		}));
+		let column = Zotero.ItemTreeManager.getCustomColumns().find(c => c.dataKey === dataKey);
+		assert.isUndefined(column.type, "a __proto__ option must not select a built-in renderer");
+	});
+
 	it("should drop a React iconLabel from an unprivileged plugin", function () {
 		let dataKey = plugin.run(() => {
 			let iconLabel = {
@@ -322,5 +333,22 @@ describe("ItemTree unprivileged option boundary", function () {
 		});
 		let option = Zotero.ItemTreeManager._columnManager._optionsCache[dataKey];
 		assert.isUndefined(option.iconLabel, "unprivileged plugins cannot provide React elements");
+	});
+
+	it("should reject option accessors before subclass validation reads them", function () {
+		let result = plugin.run(() => {
+			let called = false;
+			let key = Zotero.ItemTreeManager.registerColumn({
+				get dataKey() {
+					called = true;
+					return "getter-column";
+				},
+				label: "Getter column",
+				dataProvider: () => "",
+			});
+			return { key, called };
+		});
+		assert.isFalse(result.key);
+		assert.isFalse(result.called);
 	});
 });

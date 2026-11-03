@@ -48,7 +48,9 @@ function usePluginSandbox({ id = "test-sandbox@zotero.org", name = "Test Sandbox
 		 * @param {...*} args
 		 */
 		run(fn, ...args) {
-			let result = this.eval(`(${fn}).apply(null, ${JSON.stringify(args)})`);
+			// JSON data must not become object-literal syntax, where __proto__ changes the prototype.
+			let argsJSON = JSON.stringify(args);
+			let result = this.eval(`(${fn}).apply(null, JSON.parse(${JSON.stringify(argsJSON)}))`);
 			let plain = value => ScopeUtils.toPlainData(value);
 			return typeof result?.then === "function" ? result.then(plain) : plain(result);
 		},

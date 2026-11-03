@@ -115,11 +115,45 @@ describe("RequestAPIBase", function () {
 		assert.include(error.message, "Unknown param 'nope'");
 	});
 
-	it("should treat a prototype name as an unknown param", async function () {
-		await requestError(query("echo", { constructor: 1 }), codes.INVALID_PARAMS);
-		let error = await requestError(plugin.run(() => TestAPI.query("echo", JSON.parse('{ "__proto__": { "value": 1 } }'))),
-			codes.INVALID_PARAMS);
-		assert.include(error.message, "Unknown param '__proto__'");
+	it("should validate every entry of a structured array", function () {
+		let schema = { rows: { type: "array", children: { label: "string" } } };
+		let result = api._validateParams({ rows: [1, { label: "Valid second entry" }] }, schema);
+		assert.isFalse(result.valid);
+	});
+
+	it("should discard reserved keys at every level of incoming params", async function () {
+		let reserved = JSON.parse('{"__proto__":{"polluted":true},"constructor":{},"prototype":{}}');
+		let params = { ...reserved, value: { ...reserved, label: "Data", rows: [{ ...reserved, label: "Row" }] } };
+		let result = (await requestResult(query("echo", params))).params;
+		assert.deepEqual(result, {
+			pluginID: plugin.id,
+			value: { label: "Data", rows: [{ label: "Row" }] },
+		});
+	});
+
+	it("should reject executable data without running its accessors or serialization hooks", async function () {
+		let result = await plugin.run(async () => {
+			let called = false;
+			let getter = await TestAPI.query("echo", {
+				get value() {
+					called = true;
+					return "Unexpected";
+				},
+			});
+			let serializer = await TestAPI.query("echo", {
+				value: {
+					toJSON() {
+						called = true;
+						return "Unexpected";
+					},
+				},
+			});
+			return { getter, serializer, called };
+		});
+		assert.isFalse(result.getter.success, JSON.stringify(result));
+		assert.equal(result.getter.error.code, codes.INVALID_PARAMS);
+		assert.equal(result.serializer.error.code, codes.INVALID_PARAMS);
+		assert.isFalse(result.called);
 	});
 
 	it("should resolve an undefined result to an empty object", async function () {

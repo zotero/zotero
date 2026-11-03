@@ -35,7 +35,7 @@
 	class ItemPaneCustomSection extends ItemPaneSectionElementBase {
 		_hooks = {};
 
-		_sectionButtons = {};
+		_sectionButtons = Object.create(null);
 
 		_pluginID = null;
 

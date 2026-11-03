@@ -1,5 +1,6 @@
 describe("Plugin Sandbox", function () {
 	var plugin = usePluginSandbox();
+	var copySource = usePluginSandbox({ id: "copy-source@zotero.org" });
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 	var { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
@@ -284,6 +285,12 @@ describe("Plugin Sandbox", function () {
 
 				assert.strictEqual(ScopeVariables.fromScope(plugin.eval("probe"), plugin.id), target);
 
+				if (name === "forwarding proxy") {
+					let prototype = Object.getPrototypeOf(target);
+					assert.isFalse(plugin.eval('Reflect.set(probe, "__proto__", { injected: true })'));
+					assert.strictEqual(Object.getPrototypeOf(target), prototype);
+					assert.isUndefined(target.injected);
+				}
 				if (name !== "plain object") {
 					plugin.eval("probe.label = 'updated'");
 					assert.equal(target.label, "updated");
@@ -305,7 +312,108 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("Incoming plugin data", function () {
+		beforeEach(function () {
+			plugin.load(["default"]);
+		});
+
+		it("should detach records and discard hidden and inherited properties", function () {
+			let value = Cu.waiveXrays(plugin.eval(`(() => {
+				Object.prototype.inherited = true;
+				let value = { nested: { label: "Original" } };
+				Object.defineProperty(value, "hidden", { get() { throw new Error("Hidden getter"); } });
+				value[Symbol.toStringTag] = "Window";
+				return value;
+			})()`));
+			let copy = ScopeVariables.fromScope(value, plugin.id);
+			assert.isNull(Object.getPrototypeOf(copy));
+			assert.isNull(Object.getPrototypeOf(copy.nested));
+			assert.sameMembers(Object.keys(copy), ["nested"]);
+			assert.lengthOf(Object.getOwnPropertySymbols(copy), 0);
+			value.nested.label = "Changed";
+			assert.equal(copy.nested.label, "Original");
+		});
+
+		it("should discard reserved keys without inspecting their values", function () {
+			let value = plugin.eval(`Object.defineProperties({ label: "Data" }, {
+				["__proto__"]: { enumerable: true, get() { throw new Error("Prototype getter ran"); } },
+				constructor: { enumerable: true, get() { throw new Error("Constructor getter ran"); } },
+				prototype: { enumerable: true, get() { throw new Error("Prototype value getter ran"); } },
+			})`);
+			let copy = ScopeUtils.copyPluginData(value);
+			assert.isNull(Object.getPrototypeOf(copy));
+			assert.deepEqual(copy, { label: "Data" });
+		});
+
+		it("should detach proxies without invoking their property getters", function () {
+			let value = Cu.waiveXrays(plugin.eval(`new Proxy({ nested: { label: "Original" } }, {
+				get() { throw new Error("Proxy getter ran"); },
+			})`));
+			let copy = ScopeUtils.copyPluginData(value);
+			assert.isNull(Object.getPrototypeOf(copy));
+			assert.deepEqual(copy, { nested: { label: "Original" } });
+			Object.getOwnPropertyDescriptor(value, "nested").value.label = "Changed";
+			assert.equal(copy.nested.label, "Original");
+		});
+
+		it("should copy array indices without calling iterators or array methods", function () {
+			let value = plugin.eval(`Object.assign([1, { label: "Two" }], {
+				map() { throw new Error("Map ran"); },
+				[Symbol.iterator]() { throw new Error("Iterator ran"); },
+			})`);
+			assert.deepEqual(ScopeUtils.copyPluginData(value), [1, { label: "Two" }]);
+			let getter = plugin.eval(`Object.defineProperty([1], "0", {
+				get() { throw new Error("Index getter ran"); },
+			})`);
+			assert.throws(() => ScopeUtils.copyPluginData(getter), /Accessor/);
+		});
+
+		it("should copy bytes without reading shadowed buffer properties", function () {
+			let value = Cu.waiveXrays(plugin.eval(`Object.defineProperty(new Uint8Array([1, 2]), "buffer", {
+				get() { throw new Error("Buffer getter ran"); },
+			})`));
+			let copy = ScopeUtils.copyPluginData(value);
+			assert.deepEqual(Array.from(copy), [1, 2]);
+			value[0] = 3;
+			assert.equal(copy[0], 1);
+		});
+
+		it("should reject unsupported instances and cyclic data", function () {
+			assert.throws(() => ScopeUtils.copyPluginData(plugin.eval("new Date()")), /plain object/);
+			assert.throws(() => ScopeUtils.copyPluginData(plugin.eval("new (class Custom { constructor() { this.value = 1; } })()")), /plain object/);
+			let cyclic = plugin.eval("(() => { let value = {}; value.self = value; return value; })()");
+			assert.throws(() => ScopeUtils.copyPluginData(cyclic), /cyclic/);
+		});
+
+		it("should copy known data mirrors without unwrapping API facades", function () {
+			let data = ScopeVariables.toScope({ label: "Data" }, plugin.id);
+			assert.deepEqual(ScopeUtils.copyPluginData(data), { label: "Data" });
+			let api = ScopeVariables.createAllowlistMirrorObject(
+				{ visible: "Visible", secret: "Secret" }, { visible: true }, plugin.id, { strong: true });
+			assert.throws(() => ScopeUtils.copyPluginData(api), /Accessor/);
+		});
+
+		it("should gate callback results without invoking getters or custom then methods", async function () {
+			let getter = plugin.eval(`() => ({ get value() { throw new Error("Result getter ran"); } })`);
+			assert.throws(() => ScopeVariables.fromScope(getter, plugin.id)(), /Accessor/);
+			let asyncHook = plugin.eval(`() => Object.assign(Promise.resolve({ label: "Resolved" }), {
+				then() { throw new Error("Custom then ran"); },
+			})`);
+			assert.deepEqual(await ScopeVariables.fromScope(asyncHook, plugin.id)(), { label: "Resolved" });
+		});
+	});
+
 	describe("Chrome DOM boundary", function () {
+		it("should copy arrays without calling source-defined map methods", function () {
+			plugin.load(["default"]);
+			copySource.load(["default"]);
+			let value = Cu.waiveXrays(copySource.eval(`Object.assign([1, 2], {
+				map() { throw new Error("Source map must not run"); },
+			})`));
+			assert.deepEqual(Array.from(ScopeVariables.toScope(value, plugin.id)), [1, 2]);
+			assert.deepEqual(Array.from(ScopeUtils.ensurePromiseVarInScope(value, plugin.scope)), [1, 2]);
+		});
+
 		it("should parse HTML and XML within the plugin's origin", function () {
 			plugin.load(["default"]);
 			let result = plugin.run(() => {
@@ -327,7 +435,7 @@ describe("Plugin Sandbox", function () {
 			assert.equal(doc.nodePrincipal.origin, "moz-extension://" + plugin.uuid);
 		});
 
-		it("should preserve an own __proto__ property as data when wrapping callbacks", function () {
+		it("should discard an own __proto__ property when wrapping callbacks", function () {
 			plugin.load(["default"]);
 			let value = plugin.eval(`Object.defineProperty({
 				hook: node => node === undefined,
@@ -337,11 +445,7 @@ describe("Plugin Sandbox", function () {
 			})`);
 			let wrapped = ScopeVariables.fromScope(Cu.waiveXrays(value), plugin.id);
 			assert.isUndefined(wrapped.injected);
-			let descriptor = Object.getOwnPropertyDescriptor(wrapped, "__proto__");
-			assert.isTrue(descriptor.value.injected);
-			assert.isTrue(descriptor.writable);
-			assert.isTrue(descriptor.enumerable);
-			assert.isTrue(descriptor.configurable);
+			assert.isFalse(Object.hasOwn(wrapped, "__proto__"));
 			assert.isTrue(wrapped.hook(document.documentElement));
 		});
 
