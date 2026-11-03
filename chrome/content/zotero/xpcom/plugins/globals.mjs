@@ -103,6 +103,21 @@ function setupHTTP(scope) {
 					createXMLHttpRequest: createXHR,
 					noMock: true,
 				});
+				args[2] = ScopeUtils.copyPluginData(args[2], {
+					mapFunction: fn => (fn === createXHR ? fn : ScopeVariables.fromScope(fn, pluginID)),
+					mapObject: (value) => {
+						if (Cu.getClassName(value, true) === "Blob") return value;
+						if (Cu.getClassName(value, true) === "Headers") {
+							let proto = Object.getPrototypeOf(Zotero.HTTP.CasePreservingHeaders.prototype);
+							let headers = Object.create(null);
+							proto.forEach.call(value, (entry, key) => {
+								headers[key] = entry;
+							});
+							return headers;
+						}
+						throw new TypeError("Unsupported HTTP option object");
+					},
+				});
 				return args;
 			},
 			trace: { pluginID, path: "Zotero.HTTP.request" },

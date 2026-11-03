@@ -28,14 +28,14 @@
  * change set creates
  */
 function isIDRef(value) {
-	if (Number.isInteger(value) || Zotero.Utilities.isValidObjectKey(value)) {
+	if (Number.isInteger(value) || (typeof value === "string" && Zotero.Utilities.isValidObjectKey(value))) {
 		return true;
 	}
 	if (value === null || typeof value !== "object") {
 		return false;
 	}
 	return (typeof value.ref === "string" && !!value.ref)
-		|| (Zotero.Utilities.isValidObjectKey(value.key)
+		|| (typeof value.key === "string" && Zotero.Utilities.isValidObjectKey(value.key)
 			&& (value.libraryID === undefined || Number.isInteger(value.libraryID)));
 }
 

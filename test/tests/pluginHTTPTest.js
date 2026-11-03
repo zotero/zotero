@@ -90,6 +90,39 @@ describe("Plugin Zotero.HTTP", function () {
 		}
 	});
 
+	it("should accept native headers without calling their overridden iterator", async function () {
+		let source = endpoints.register("GET", () => [200, { "X-Native-Header": "copied" }, ""]);
+		let received;
+		let target = endpoints.register("GET", ({ headers }) => {
+			received = headers;
+			return 204;
+		});
+		await plugin.run(async (source, target) => {
+			let headers = (await fetch(source)).headers;
+			headers[Symbol.iterator] = () => {
+				throw new Error("Header iterator ran");
+			};
+			headers.entries = () => {
+				throw new Error("Header entries ran");
+			};
+			await Zotero.HTTP.request("GET", target, { headers });
+		}, source, target);
+		assert.equal(received["x-native-header"], "copied");
+	});
+
+	it("should keep native blobs usable as request bodies", async function () {
+		let url = endpoints.register("POST", ({ data }) => [200, "application/json", JSON.stringify(data)]);
+		let result = await plugin.run(async (url) => {
+			let response = await Zotero.HTTP.request("POST", url, {
+				body: new Blob(['{"message":"Blob body"}'], { type: "application/json" }),
+				headers: { "Content-Type": "application/json" },
+				responseType: "json",
+			});
+			return response.response;
+		}, url);
+		assert.equal(result.message, "Blob body");
+	});
+
 	it("should handle JSON response type", async function () {
 		let url = endpoints.register("GET", function () {
 			return [200, "application/json", JSON.stringify({ key: "value", num: 42 })];

@@ -5,6 +5,7 @@ ChromeUtils.defineESModuleGetters(globalThis, {
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
 	PluginTrace: "chrome://zotero/content/xpcom/plugins/trace.mjs",
+	ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 });
 
 // Chrome-side hub for an embedded plugin page: relays page messages (via
@@ -70,7 +71,7 @@ export class ZoteroEmbeddedPluginPageParent extends JSWindowActorParent {
 			if (typeof params !== "object" || Array.isArray(params)) {
 				throw new Error("params must be a plain object");
 			}
-			return await handler(params);
+			return await handler(lazy.ScopeUtils.copyPluginData(params));
 		}
 		catch (e) {
 			failure = e;

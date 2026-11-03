@@ -30,6 +30,7 @@ const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
 	PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+	ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	Zotero: "chrome://zotero/content/zotero.mjs",
 });
 
@@ -42,6 +43,8 @@ class ManagerAPIBase extends PluginAPIBase {
 	_optionsCache = {};
 
 	_lastUpdateID = "";
+
+	_privilegedOptionNames = [];
 
 	/**
 	 * @type {PluginAPIConfig}
@@ -60,7 +63,7 @@ class ManagerAPIBase extends PluginAPIBase {
 	}
 
 	get options() {
-		return Object.values(this._optionsCache).map(opt => Object.assign({}, opt));
+		return Object.values(this._optionsCache).map(opt => ({ ...opt }));
 	}
 
 	get data() {
@@ -115,6 +118,26 @@ class ManagerAPIBase extends PluginAPIBase {
 	 * @returns {string | false} - The mainKey of the added option, or false if the option is invalid
 	 */
 	_add(option) {
+		let pluginID = this._getOptionPluginID(option);
+		if (!lazy.PluginSandbox.isPrivileged(pluginID)) {
+			let scope = lazy.PluginSandbox.getScope(pluginID);
+			if (!scope) return false;
+			try {
+				for (let key of this._privilegedOptionNames) {
+					if (Object.hasOwn(option, key)) this._log(`'${key}' only available for privileged plugins and is ignored`, "warn");
+				}
+				// Detach before subclass validation can read the options. Managers wrap hooks after validation.
+				option = lazy.ScopeUtils.copyPluginData(option, {
+					mapFunction: fn => fn,
+					skipKeys: this._privilegedOptionNames,
+				});
+				if (lazy.PluginSandbox.getScope(pluginID) !== scope) return false;
+			}
+			catch (e) {
+				this._log(`Invalid options: ${e.message}`, "warn");
+				return false;
+			}
+		}
 		option = this._validate(option);
 		if (option === false) {
 			return false;
