@@ -228,7 +228,13 @@ const ScopeVariables = {
 				if (wrappedVal !== val) {
 					hasWrapped = true;
 				}
-				wrapped[key] = wrappedVal;
+				// Preserve keys such as __proto__ as data instead of invoking inherited setters.
+				Object.defineProperty(wrapped, key, {
+					value: wrappedVal,
+					writable: true,
+					enumerable: true,
+					configurable: true,
+				});
 			}
 			if (hasWrapped) {
 				return wrapped;
