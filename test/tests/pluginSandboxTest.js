@@ -340,6 +340,23 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("Access control", function () {
+		it("should reject non-string external URLs before checking their scheme", function () {
+			plugin.load(["default", "userPrompt"]);
+			// Stop before an external application could be opened even if the guard regresses.
+			let check = sinon.stub(Zotero.Utilities, "isHTTPURL").throws(new Error("scheme check reached"));
+			try {
+				assert.throws(() => plugin.eval(`Zotero.launchURL({
+					toString() { return 'https://www.zotero.org/'; },
+				})`));
+				assert.isFalse(check.called);
+				assert.throws(() => plugin.eval("Zotero.launchURL('https://www.zotero.org/')"));
+				assert.isTrue(check.calledOnce);
+			}
+			finally {
+				check.restore();
+			}
+		});
+
 		it("should not expose unlisted Zotero properties", function () {
 			plugin.load(["default"]);
 			// These are internal properties not in the schema
