@@ -27,8 +27,6 @@
 import { SchemaKey, IMPLIED_PERMISSIONS, PERMISSION_SCHEMAS } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
 
-const ORIGINAL_REF_KEY = "__zoteroOriginalRef__";
-
 const CUSTOM_PARSER_KEY = "__zoteroCustomParser__";
 
 const INSTANCE_PROXY_FACTORY = "__zoteroInstanceProxyFactory__";
@@ -36,6 +34,9 @@ const INSTANCE_PROXY_FACTORY = "__zoteroInstanceProxyFactory__";
 const CHROME_GLOBAL = Cu.getGlobalForObject({});
 
 const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
+
+// Only chrome may register a facade. A property on a plugin object is forgeable.
+const originalRefs = new WeakMap();
 
 /**
  * Cache the facades per instance - scope - rule to avoid duplication
@@ -153,11 +154,15 @@ const VarCheck = {
 	},
 
 	hasOriginalRef(v) {
-		return this.isObjectLike(v) && typeof Cu.waiveXrays(v)[ORIGINAL_REF_KEY] === "function";
+		return this.isObjectLike(v) && originalRefs.has(Cu.waiveXrays(v));
 	},
 
 	getOriginalRef(v) {
-		return Cu.waiveXrays(v)[ORIGINAL_REF_KEY]();
+		return originalRefs.get(Cu.waiveXrays(v))?.();
+	},
+
+	setOriginalRef(v, getOriginal) {
+		originalRefs.set(Cu.waiveXrays(v), getOriginal);
 	},
 
 	getOriginalOrSelf(v) {
@@ -948,12 +953,9 @@ const ScopeUtils = {
 			return holder.f;
 		}
 
-		let origRef = () => instanceRef.deref();
-
 		let traps = Cu.createObjectIn(scope);
 
 		Cu.exportFunction((_facade, prop) => {
-			if (prop === ORIGINAL_REF_KEY) return origRef;
 			// Never expose symbols or `then` (so the facade isn't taken for a thenable).
 			if (typeof prop === "symbol" || prop === "then") return undefined;
 			let category = categories.get(prop);
@@ -979,12 +981,11 @@ const ScopeUtils = {
 		}, traps, { defineAs: "set" });
 
 		Cu.exportFunction((_facade, prop) => {
-			return prop === ORIGINAL_REF_KEY || categories.has(prop);
+			return categories.has(prop);
 		}, traps, { defineAs: "has" });
 
 		Cu.exportFunction(() => {
 			let keys = Array.from(categories.keys());
-			keys.push(ORIGINAL_REF_KEY);
 			return Cu.cloneInto(keys, scope);
 		}, traps, { defineAs: "ownKeys" });
 
@@ -993,11 +994,6 @@ const ScopeUtils = {
 			// target has no such key; deletion and redefinition are still blocked
 			// by the deleteProperty/defineProperty traps. Reads go through the get
 			// trap, so the descriptor carries no value.
-			if (prop === ORIGINAL_REF_KEY) {
-				let d = Cu.createObjectIn(scope);
-				d.enumerable = false; d.configurable = true; d.writable = false; d.value = origRef;
-				return d;
-			}
 			let category = categories.get(prop);
 			if (!category) return undefined;
 			let d = Cu.createObjectIn(scope);
@@ -1009,14 +1005,14 @@ const ScopeUtils = {
 		}, traps, { defineAs: "getOwnPropertyDescriptor" });
 
 		Cu.exportFunction((_facade, prop) => {
-			// Exposed members and the original-ref key cannot be deleted.
-			return !(categories.has(prop) || prop === ORIGINAL_REF_KEY);
+			return !categories.has(prop);
 		}, traps, { defineAs: "deleteProperty" });
 
 		// Properties cannot be added or redefined.
 		Cu.exportFunction(() => false, traps, { defineAs: "defineProperty" });
 
 		let facade = ScopeUtils.buildInstanceProxy(scope, traps);
+		VarCheck.setOriginalRef(facade, () => instanceRef.deref());
 
 		if (variantMap) {
 			variantMap[variantMode] = facade;
@@ -1028,7 +1024,7 @@ const ScopeUtils = {
 	 * Create a forwarding Proxy in the sandbox that delegates all property
 	 * access to a chrome-side object.  The real object stays in chrome;
 	 * the sandbox gets a Proxy whose traps are exported functions.
-	 * Carries ORIGINAL_REF_KEY so _ensureVarInScope passes it through.
+	 * Registered as a facade so _ensureVarInScope passes it through.
 	 */
 	ensureForwardingProxyInScope(target, scope, { mutable = false } = {}) {
 		if (VarCheck.isInScope(target, scope)) {
@@ -1040,7 +1036,6 @@ const ScopeUtils = {
 		Cu.exportFunction(function (_facade, prop) {
 			if (typeof prop === "symbol") return undefined;
 			if (prop === "then") return undefined;
-			if (prop === ORIGINAL_REF_KEY) return traps._origRef;
 			let value;
 			try {
 				value = Reflect.get(target, prop);
@@ -1060,7 +1055,6 @@ const ScopeUtils = {
 
 		Cu.exportFunction(function (_facade, prop) {
 			if (typeof prop === "symbol") return false;
-			if (prop === ORIGINAL_REF_KEY) return true;
 			try {
 				return Reflect.has(target, prop);
 			}
@@ -1082,16 +1076,14 @@ const ScopeUtils = {
 			}
 		}, traps, { defineAs: "set" });
 
-		Cu.exportFunction(function () {
-			return target;
-		}, traps, { defineAs: "_origRef" });
-
 		let makeProxy = Cu.evalInSandbox(
 			`(function(t) { return new Proxy({}, { get: t.get, has: t.has, set: t.set }); })`,
 			scope
 		);
-		return makeProxy(traps);
+		let facade = makeProxy(traps);
+		VarCheck.setOriginalRef(facade, () => target);
+		return facade;
 	},
 };
 
-export { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY };
+export { VarCheck, ScopeUtils, CUSTOM_PARSER_KEY, INSTANCE_PROXY_FACTORY };
