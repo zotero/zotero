@@ -92,6 +92,9 @@ class ManagerAPIBase extends PluginAPIBase {
 	 * @returns {boolean} - True if the option was successfully unregistered
 	 */
 	unregister(mainKey, callerPluginID) {
+		if (typeof mainKey !== "string") {
+			return false;
+		}
 		let option = this._optionsCache[mainKey];
 		if (callerPluginID && option
 				&& this._getOptionPluginID(option) !== callerPluginID) {
