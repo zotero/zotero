@@ -270,6 +270,7 @@
 						Zotero.MenuManager.updateMenuPopup(subPopup, option._menuTarget, {
 							event,
 							getContext,
+							pluginID: option.pluginID,
 						});
 					});
 				}
@@ -444,6 +445,7 @@
 							Zotero.MenuManager.updateMenuPopup(popup, option._menuTarget, {
 								event,
 								getContext: () => this._getContext(reader),
+								pluginID: option.pluginID,
 							});
 						});
 					});
@@ -778,7 +780,10 @@
 			if (!option._menuTarget) {
 				return;
 			}
-			Zotero.MenuManager.updateMenuPopup(popupElem, option._menuTarget, args);
+			Zotero.MenuManager.updateMenuPopup(popupElem, option._menuTarget, {
+				...args,
+				pluginID: option.pluginID,
+			});
 		},
 
 		updateOverflowPopup(popupElem, options, args) {
