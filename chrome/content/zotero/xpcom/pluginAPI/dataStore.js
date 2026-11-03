@@ -38,6 +38,7 @@
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginFileAccess: "chrome://zotero/content/xpcom/plugins/fileAccess.mjs",
 		PathIdentity: "chrome://zotero/content/xpcom/plugins/filePath.mjs",
+		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		FileIO: "chrome://zotero/content/xpcom/plugins/fileIO.mjs",
 	});
 
@@ -846,8 +847,9 @@
 						...lazy.DataParams.feedSettings,
 						url: lazy.Params.nonEmptyString,
 					},
-					handler: ({ libraryType: _type, name, ...settings }) => {
+					handler: ({ libraryType: _type, name, ...settings }, ctx) => {
 						this._requireNewFeedURL(settings.url);
+						this._requireFeedHost(settings.url, ctx);
 						return new Zotero.Feed(
 							Object.fromEntries([["name", name], ...Object.entries(settings).filter(([, value]) => value !== undefined)])
 						);
@@ -871,8 +873,9 @@
 					},
 					setFeed: {
 						params: lazy.DataParams.feedSettings,
-						check: (library, { url }) => feedOnly("have feed settings")(library)
-							|| (url !== undefined && this._requireNewFeedURL(url, library.libraryID)),
+						check: (library, { url }, ctx) => feedOnly("have feed settings")(library)
+							|| (url !== undefined && this._requireNewFeedURL(url, library.libraryID))
+							|| (url !== undefined && url !== library.url && this._requireFeedHost(url, ctx)),
 						apply: (library, settings) => {
 							for (let setting of Object.keys(lazy.DataParams.feedSettings)) {
 								if (settings[setting] !== undefined) {
@@ -884,7 +887,10 @@
 					refreshFeed: {
 						needsID: true,
 						check: feedOnly("can be refreshed"),
-						apply: library => library.updateFeed(),
+						apply: (library, _params, ctx) => {
+							this._requireFeedHost(library.url, ctx);
+							return library.updateFeed();
+						},
 					},
 					clearExpiredFeedItems: {
 						needsID: true,
@@ -992,6 +998,32 @@
 			let existing = Zotero.Feeds.existsByURL(url) && Zotero.Feeds.getByURL(url);
 			if (existing && existing.libraryID !== libraryID) {
 				this._throw(lazy.StoreAPIBase.errorCodes.INVALID_PARAMS, `A feed for ${url} already exists`);
+			}
+		}
+
+		/**
+		 * A feed fetched by chrome must be on an origin the calling plugin may contact
+		 * @param {string} url
+		 * @param {import("chrome://zotero/content/xpcom/pluginAPI/storeAPIBase.mjs").StoreCommitContext} ctx
+		 */
+		_requireFeedHost(url, ctx) {
+			if (!ctx?.pluginID || ctx.privileged) {
+				return;
+			}
+			let uri;
+			try {
+				uri = Services.io.newURI(url);
+			}
+			catch {
+				return;
+			}
+			// The feed itself only accepts HTTP(S), so let core refuse anything else
+			if (!/^https?$/.test(uri.scheme)) {
+				return;
+			}
+			if (!lazy.PluginProtocol.canAccessURI(uri.spec, ctx.pluginID)) {
+				this._throw(lazy.StoreAPIBase.errorCodes.PERMISSION_DENIED,
+					`Feed URL ${url} is not in host_permissions`);
 			}
 		}
 

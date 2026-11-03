@@ -644,6 +644,59 @@ describe("Zotero.DataStore", function () {
 			}
 		});
 
+		it("should require host_permissions to create a feed, change its URL or refresh it", async function () {
+			let url = "https://example.com/feed.rss";
+			let error = await requestError(
+				commit(url => CS.library({ libraryType: "feed", name: "Distant Feed", url }), url),
+				codes.PERMISSION_DENIED
+			);
+			assert.include(error.message, "host_permissions");
+
+			let feed = await createFeed();
+			try {
+				let originalURL = feed.url;
+				await requestError(
+					commit((libraryID, url) => CS.library(libraryID).setFeed({ url }), feed.libraryID, url),
+					codes.PERMISSION_DENIED
+				);
+				assert.equal(feed.url, originalURL);
+				error = await requestError(
+					commit(libraryID => CS.library(libraryID).refreshFeed(), feed.libraryID),
+					codes.PERMISSION_DENIED
+				);
+				assert.include(error.message, "host_permissions");
+			}
+			finally {
+				await feed.eraseTx();
+			}
+		});
+
+		it("should allow changing a feed to a permitted host and refreshing it", async function () {
+			plugin.load(["default", "dataRead", "dataWrite"], { origins: ["https://example.com/*"] });
+			plugin.eval("var CS = Zotero.DataStore.ChangeSet");
+			let { objects: [{ id }] } = await requestResult(commit(() => CS.library({
+				libraryType: "feed", name: "Allowed Feed", url: "https://example.com/feed.rss",
+			})));
+			let feed = Zotero.Feeds.get(id);
+			let refreshedURL;
+			let update = sinon.stub(feed, "updateFeed").callsFake(async () => {
+				refreshedURL = feed.url;
+			});
+			try {
+				// The user may have an existing feed on a host this plugin cannot contact.
+				feed.url = "https://old.example.org/feed.rss";
+				await feed.saveTx();
+				await requestResult(commit(libraryID => CS.library(libraryID)
+					.setFeed({ url: "https://example.com/other.rss" }).refreshFeed(), id));
+				assert.equal(refreshedURL, "https://example.com/other.rss");
+				assert.isTrue(update.calledOnce);
+			}
+			finally {
+				update.restore();
+				await feed.eraseTx();
+			}
+		});
+
 		// A library entry runs after the store transaction, so a failed save has to be undone in memory by hand
 		it("should drop a feed's unsaved settings when its save fails", async function () {
 			let feed = await createFeed();
