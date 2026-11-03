@@ -36,6 +36,7 @@ import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAcce
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
 import { PluginDOM } from "chrome://zotero/content/xpcom/plugins/dom.mjs";
+import { PluginTimers } from "chrome://zotero/content/xpcom/plugins/timers.mjs";
 import { PluginNetwork } from "chrome://zotero/content/xpcom/plugins/network.mjs";
 import { setupConsole, setupInstanceProxy, setupHTTP, setupProgressWindow, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
@@ -113,6 +114,7 @@ function unloadScope(id) {
 	scopes.delete(id);
 	PluginProtocol.unregister(id);
 	PluginFileAccess.unregister(id);
+	PluginTimers.unregister(id);
 	PluginDOM.unregister(id);
 	// Delay nuke to allow any pending operations to complete
 	setTimeout(() => {
@@ -286,12 +288,6 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	);
 
 	let funcToExport = {
-		setTimeout,
-		clearTimeout,
-		setInterval,
-		clearInterval,
-		requestIdleCallback,
-		cancelIdleCallback,
 		isDeadWrapper: obj => Cu.isDeadWrapper(VarCheck.getOriginalOrSelf(obj)),
 	};
 	for (let key in funcToExport) {
@@ -318,6 +314,7 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	scopes.set(addon.id, scope);
 
+	PluginTimers.setup(scope);
 	setupInstanceProxy(scope);
 
 	let schema = VarCheck.getPermissionSchema(permissions);
