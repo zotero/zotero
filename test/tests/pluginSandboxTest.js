@@ -467,6 +467,26 @@ describe("Plugin Sandbox", function () {
 			assert.isFalse(VarCheck.hasOriginalRef(value));
 		});
 
+		it("should block XPCOM objects crossing into the sandbox", function () {
+			plugin.load(["default"]);
+			let uri = Services.io.newURI("https://example.com/");
+			let wrapped = ScopeVariables.toScope(uri, plugin.id);
+			plugin.scope._xpcom = wrapped;
+			assert.isTrue(plugin.eval("Object.keys(_xpcom).length === 0"));
+			assert.isTrue(plugin.eval("typeof _xpcom.spec === 'undefined'"));
+		});
+
+		it("should scope chrome promises and their resolved values", async function () {
+			plugin.load(["default"]);
+			let promise = Promise.resolve(Services.io.newURI("https://example.com/"));
+			plugin.scope._promise = ScopeVariables.toScope(promise, plugin.id);
+			let result = await plugin.eval(`_promise.then(value => ({
+				keys: Object.keys(value).length,
+				spec: typeof value.spec,
+			}))`);
+			assert.deepEqual(result, { keys: 0, spec: "undefined" });
+		});
+
 		it("should block chrome windows and DOM nodes crossing into the sandbox", function () {
 			plugin.load(["default"]);
 			// The test runner's own window is a chrome window like any other
