@@ -424,10 +424,17 @@ const ScopeVariables = {
 						}
 
 						if (VarCheck.isObjectLike(value)) {
-							// Block Window/DOM objects to prevent
-							// privilege escalation through nested properties
-							if (VarCheck.isWindowObject(value) || VarCheck.isDOMNode(value)) {
+							// Block Window/DOM/XPCOM/Data objects, including ones nested inside a mirrored
+							// class instance; recursion through a schema must not bypass these.
+							if (Event.isInstance(value)
+									|| VarCheck.isWindowObject(value)
+									|| VarCheck.isDOMNode(value)
+									|| VarCheck.isDataObject(value)
+									|| VarCheck.isXPCOMObject(value)) {
 								return undefined;
+							}
+							if (VarCheck.isPromise(value)) {
+								return ScopeUtils.ensurePromiseVarInScope(value, scope, { mutable });
 							}
 
 							let nextSchemaNode = VarCheck.nextSchema(schemaNode, prop);
