@@ -94,7 +94,7 @@ const ScopeVariables = {
 				cloneFunctions: true,
 			});
 			_seen.set(value, arr);
-			arr.push(...value.map((v, i) => ScopeVariables.toScope(v, pluginID, { path: path && `${path}[${i}]`, _seen })));
+			arr.push(...Array.from(value, (v, i) => ScopeVariables.toScope(v, pluginID, { path: path && `${path}[${i}]`, _seen })));
 			return arr;
 		}
 
@@ -121,7 +121,7 @@ const ScopeVariables = {
 					});
 				}
 			}
-			VarCheck.setOriginalRef(wrapped, () => value);
+			VarCheck.setOriginalRef(wrapped, () => value, { data: true });
 			return wrapped;
 		}
 
@@ -136,22 +136,20 @@ const ScopeVariables = {
 
 	/**
 	 * Wrap a variable from the plugin scope to be used in the host scope
-	 * Wraps functions and plain objects with function properties.
+	 * Wraps functions and detaches data objects, even when they contain no callbacks.
 	 *
 	 * - Functions:
 	 *   1. All arguments are wrapped using `toScope` before passing to the plugin function
 	 *   2. The plugin function is called with wrapped arguments
 	 *
-	 * - Plain objects:
-	 *   1. Function properties are recursively wrapped using `fromScope`
-	 *   2. Non-function properties are copied as-is
+	 * - Data objects: copied through the incoming data gate, with callbacks wrapped recursively
 	 *
 	 * @param {any} value - The value from plugin scope to wrap
 	 * @param {string} pluginID - The plugin ID for scope restrictions
 	 * @param {Object} [options] - Options for wrapping
 	 * @returns {any} - Wrapped value safe for use in the host scope
 	 */
-	fromScope(value, pluginID, { trace = null, _seen = null } = {}) {
+	fromScope(value, pluginID, { trace = null } = {}) {
 		if (!pluginID || PluginSandbox.isPrivileged(pluginID)) {
 			return value;
 		}
@@ -188,7 +186,21 @@ const ScopeVariables = {
 				try {
 					// Arguments cross into the plugin scope, traced under the hook's path
 					let wrappedArgs = args.map(arg => ScopeVariables.toScope(arg, pluginID, { path: hookPath }));
-					return Reflect.apply(value, this, wrappedArgs);
+					let result = Reflect.apply(value, this, wrappedArgs);
+					if (VarCheck.isObject(result) && Cu.getClassName(result, true) === "Promise") {
+						// Use the native method, not a plugin-supplied then().
+						return new Promise((resolve, reject) => {
+							Promise.prototype.then.call(result, (resolved) => {
+								try {
+									resolve(ScopeUtils.copyPluginData(resolved));
+								}
+								catch (e) {
+									reject(e);
+								}
+							}, reject);
+						});
+					}
+					return ScopeUtils.copyPluginData(result);
 				}
 				catch (e) {
 					failure = e;
@@ -204,44 +216,9 @@ const ScopeVariables = {
 			return wrapper;
 		}
 
-		if (!_seen) _seen = new Map();
-		if (_seen.has(value)) return _seen.get(value);
-
-		// Recursively unwrap array elements. Register in _seen before
-		// recursing so self-referential values can't recurse forever
-		if (Array.isArray(value)) {
-			let arr = [];
-			_seen.set(value, arr);
-			for (let v of Array.from(value)) {
-				arr.push(ScopeVariables.fromScope(v, pluginID, { trace, _seen }));
-			}
-			return arr;
-		}
-
-		if (VarCheck.isPlainObject(value)) {
-			let hasWrapped = false;
-			let wrapped = {};
-			_seen.set(value, wrapped);
-			for (let key of Object.keys(value)) {
-				let val = value[key];
-				let wrappedVal = ScopeVariables.fromScope(val, pluginID, { trace, _seen });
-				if (wrappedVal !== val) {
-					hasWrapped = true;
-				}
-				// Preserve keys such as __proto__ as data instead of invoking inherited setters.
-				Object.defineProperty(wrapped, key, {
-					value: wrappedVal,
-					writable: true,
-					enumerable: true,
-					configurable: true,
-				});
-			}
-			if (hasWrapped) {
-				return wrapped;
-			}
-		}
-
-		return value;
+		return ScopeUtils.copyPluginData(value, {
+			mapFunction: fn => ScopeVariables.fromScope(fn, pluginID, { trace }),
+		});
 	},
 
 	/**
@@ -270,15 +247,10 @@ const ScopeVariables = {
 			return;
 		}
 		let trustedKeys = new Set(Object.keys(values));
-		let copy = {};
-		for (let k of Object.keys(original)) {
-			if (trustedKeys.has(k)) continue;
-			Object.defineProperty(copy, k, {
-				value: original[k],
-				enumerable: true,
-				writable: true,
-				configurable: true,
-			});
+		let copy = Object.create(null);
+		for (let [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(original))) {
+			if (!descriptor.enumerable || trustedKeys.has(key)) continue;
+			Object.defineProperty(copy, key, descriptor);
 		}
 		Object.assign(copy, values);
 		args[index] = copy;
@@ -301,6 +273,8 @@ const ScopeVariables = {
 			return ScopeUtils.ensureCallableInScope(func, thisArg, scope, { trace });
 		}
 		return ScopeUtils.ensureCallableInScope(func, thisArg, scope, {
+			// The API parser owns conversion. Generic rescoping would evaluate accessors first.
+			skipArgRescoping: true,
 			argParser: (args) => {
 				ensureLoaded();
 				parser({ pluginID, thisArg, args });

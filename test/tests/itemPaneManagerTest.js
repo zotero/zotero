@@ -265,6 +265,29 @@ describe("Zotero.ItemPaneManager", function () {
 			}), options);
 		}
 
+		it("should store a prototype-like button type as an ordinary dictionary key", function () {
+			loadSectionPlugin();
+			let paneID = plugin.run(() => Zotero.ItemPaneManager.registerSection({
+				paneID: "prototype-button-section",
+				src: "section.html",
+				header: { l10nID: "example-item-pane-header", icon: "chrome://zotero/skin/16/universal/empty.png" },
+				sidenav: { l10nID: "example-item-pane-header", icon: "chrome://zotero/skin/16/universal/empty.png" },
+				onRender() {},
+				sectionButtons: [{
+					type: "__proto__",
+					icon: "chrome://zotero/skin/16/universal/empty.png",
+					onClick() {},
+				}],
+			}));
+			assert.isString(paneID);
+			let section = win.document.createXULElement("item-pane-custom-section");
+			let button = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID].sectionButtons[0];
+			section.registerSectionButton(button);
+			assert.isNull(Object.getPrototypeOf(section._sectionButtons));
+			assert.deepEqual(Object.keys(section._sectionButtons), ["__proto__"]);
+			assert.equal(Object.getOwnPropertyDescriptor(section._sectionButtons, "__proto__").value.icon, button.icon);
+		});
+
 		it("should drop bodyXHTML and require a page within the plugin as src", function () {
 			loadSectionPlugin();
 			assert.isFalse(plugin.run(() => Zotero.ItemPaneManager.registerSection({

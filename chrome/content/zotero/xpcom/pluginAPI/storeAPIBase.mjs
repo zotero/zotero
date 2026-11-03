@@ -167,6 +167,7 @@ import { PluginRequestError } from "chrome://zotero/content/xpcom/plugins/apiErr
 
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
+	ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 	Zotero: "chrome://zotero/content/zotero.mjs",
 	VarCheck: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 });
@@ -276,17 +277,29 @@ class StoreAPIBase extends RequestAPIBase {
 	 * merge them, as they are instances of its classes
 	 */
 	_toPlainParams(name, params, context) {
-		if ((name === "commit" || name === "validate") && Array.isArray(params?.changes)) {
+		let changes = params && Object.getOwnPropertyDescriptor(Cu.waiveXrays(params), "changes");
+		if ((name === "commit" || name === "validate") && Array.isArray(changes?.value)) {
 			let Zotero = context.scope ? Cu.waiveXrays(context.scope).Zotero : lazy.Zotero;
 			let { ChangeSet } = Zotero[this._config.apiName];
 			try {
-				params = { ...Cu.waiveXrays(params), changes: ChangeSet.of(...params.changes) };
+				let descriptors = Object.getOwnPropertyDescriptors(Cu.waiveXrays(changes.value));
+				let editors = Array.from({ length: descriptors.length.value }, (_, i) => {
+					let descriptor = descriptors[i];
+					if (!descriptor || !Object.hasOwn(descriptor, "value")) {
+						throw new TypeError("Expected an array of editors");
+					}
+					return descriptor.value;
+				});
+				let properties = Object.getOwnPropertyDescriptors(Cu.waiveXrays(params));
+				properties.changes = { value: ChangeSet.of(...editors), enumerable: true, configurable: true };
+				let copy = Object.defineProperties(Object.create(null), properties);
+				params = copy;
 			}
 			catch (e) {
 				this._throw(StoreAPIBase.errorCodes.INVALID_PARAMS, `Invalid change set: ${e?.message ?? e}`);
 			}
 		}
-		return super._toPlainParams(name, params, context);
+		return super._toPlainParams(name, params, context, { mapObject: lazy.ScopeUtils.changeSetToPlain });
 	}
 
 	_defineObjectType(type, def) {
