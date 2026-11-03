@@ -243,7 +243,87 @@ describe("Plugin Sandbox", function () {
 		});
 	});
 
+	describe("Facade compatibility", function () {
+		var { VarCheck } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+		let factories = {
+			"plain object": target => ScopeVariables.toScope(target, plugin.id),
+			"allowlist mirror": target => ScopeVariables.createAllowlistMirrorObject(
+				target, { label: true, readLabel: true }, plugin.id, { frozen: false, strong: true }),
+			"class instance": target => ScopeUtils._ensureInstanceInScope(target, plugin.scope, { mutable: true }),
+			"forwarding proxy": target => ScopeUtils.ensureForwardingProxyInScope(target, plugin.scope, { mutable: true }),
+		};
+
+		for (let [name, create] of Object.entries(factories)) {
+			it(`should preserve ${name} identity and unwrapping across compartments`, function () {
+				plugin.load(["default"]);
+				let target = { label: "original", readLabel: () => "original" };
+				if (name === "class instance") {
+					target = new class {
+						label = "original";
+
+						readLabel() {
+							return this.label;
+						}
+					};
+				}
+				let facade = create(target);
+				plugin.scope.probe = facade;
+				plugin.scope.echoProbe = ScopeUtils.ensureCallableInScope((value) => {
+					assert.strictEqual(ScopeVariables.fromScope(value, plugin.id), target);
+					return value;
+				}, null, plugin.scope);
+
+				assert.equal(plugin.eval("probe.label"), "original");
+				assert.equal(plugin.eval("probe.readLabel()"), "original");
+				assert.isTrue(plugin.eval("echoProbe(probe) === probe"));
+				assert.strictEqual(ScopeVariables.toScope(facade, plugin.id), facade);
+				assert.strictEqual(VarCheck.getOriginalOrSelf(facade), target);
+				assert.strictEqual(VarCheck.getOriginalOrSelf(Cu.waiveXrays(facade)), target);
+				assert.strictEqual(VarCheck.getOriginalOrSelf(Cu.unwaiveXrays(facade)), target);
+				assert.isFalse(plugin.eval("isDeadWrapper(probe)"));
+
+				assert.strictEqual(ScopeVariables.fromScope(plugin.eval("probe"), plugin.id), target);
+
+				if (name !== "plain object") {
+					plugin.eval("probe.label = 'updated'");
+					assert.equal(target.label, "updated");
+				}
+				if (name === "class instance") {
+					assert.strictEqual(create(target), facade, "the cached facade retains its identity");
+					assert.equal(plugin.eval("probe.readLabel()"), "updated");
+				}
+			});
+		}
+
+		it("should recover a wrapped callback's original identity", function () {
+			plugin.load(["default"]);
+			let callback = plugin.eval("value => value + 1");
+			let wrapped = ScopeVariables.fromScope(callback, plugin.id);
+			assert.equal(wrapped(4), 5);
+			assert.strictEqual(VarCheck.getOriginalOrSelf(wrapped), callback);
+			assert.strictEqual(ScopeVariables.fromScope(wrapped, plugin.id), callback);
+		});
+	});
+
 	describe("Chrome DOM boundary", function () {
+		it("should not trust a plugin's original-reference property when wrapping hooks", function () {
+			plugin.load(["default"]);
+			let hook = plugin.eval(`Object.assign(function (node) { return node === undefined; }, {
+				__zoteroOriginalRef__: () => function () { return 'forged'; },
+			})`);
+			let wrapped = ScopeVariables.fromScope(hook, plugin.id);
+			assert.isTrue(wrapped(document.documentElement));
+		});
+
+		it("should not evaluate original-reference accessors supplied by plugins", function () {
+			plugin.load(["default"]);
+			let value = plugin.eval(`({
+				get __zoteroOriginalRef__() { throw new Error('forged reference getter'); },
+			})`);
+			var { VarCheck } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
+			assert.isFalse(VarCheck.hasOriginalRef(value));
+		});
+
 		it("should block chrome windows and DOM nodes crossing into the sandbox", function () {
 			plugin.load(["default"]);
 			// The test runner's own window is a chrome window like any other
