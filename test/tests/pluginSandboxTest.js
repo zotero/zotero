@@ -306,6 +306,27 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("Chrome DOM boundary", function () {
+		it("should parse HTML and XML within the plugin's origin", function () {
+			plugin.load(["default"]);
+			let result = plugin.run(() => {
+				let parser = new DOMParser();
+				let html = parser.parseFromString("<title>Parsed</title><p>Text</p>", "text/html");
+				let xml = parser.parseFromString('<root><child value="ok"/></root>', "application/xml");
+				return {
+					title: html.title,
+					text: html.querySelector("p").textContent,
+					xml: xml.querySelector("child").getAttribute("value"),
+					window: html.defaultView,
+				};
+			});
+			assert.equal(result.title, "Parsed");
+			assert.equal(result.text, "Text");
+			assert.equal(result.xml, "ok");
+			assert.isNull(result.window);
+			let doc = plugin.eval('new DOMParser().parseFromString("<p>Text</p>", "text/html")');
+			assert.equal(doc.nodePrincipal.origin, "moz-extension://" + plugin.uuid);
+		});
+
 		it("should preserve an own __proto__ property as data when wrapping callbacks", function () {
 			plugin.load(["default"]);
 			let value = plugin.eval(`Object.defineProperty({
