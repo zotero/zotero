@@ -126,6 +126,32 @@ const PREFS_METHODS = {
 };
 
 /**
+ * Set up plugin progress windows with string-only descriptions rendered as literal text.
+ * @param {Object} scope - The sandbox scope
+ */
+function setupProgressWindow(scope) {
+	function PluginProgressWindow(options) {
+		let progress = new Zotero.ProgressWindow(options);
+		let addLines = progress.addLines.bind(progress);
+		progress.addDescription = (text) => {
+			if (typeof text !== "string") {
+				throw new TypeError("Description must be a string");
+			}
+			addLines(text, null);
+		};
+		return progress;
+	}
+	Object.defineProperty(scope.Zotero, "ProgressWindow", {
+		value: ScopeUtils.ensureConstructableInScope(PluginProgressWindow, scope, {
+			trace: { pluginID: scope.PLUGIN_ID, path: "Zotero.ProgressWindow" },
+		}),
+		enumerable: true,
+		configurable: false,
+		writable: false,
+	});
+}
+
+/**
  * Set up Zotero.Prefs on the plugin scope with access control.
  *
  * The "preferences" permission exposes the Zotero.Prefs API.
@@ -349,4 +375,4 @@ function setupFileStore(scope) {
 	));
 }
 
-export { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };
+export { setupConsole, setupInstanceProxy, setupHTTP, setupProgressWindow, setupPreferences, setupFilePicker, setupDataStore, setupFileStore };

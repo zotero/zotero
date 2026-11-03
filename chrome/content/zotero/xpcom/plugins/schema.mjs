@@ -274,7 +274,7 @@ const PERMISSION_SCHEMAS = {
 	},
 	userPrompt: {
 		Zotero: {
-			ProgressWindow: "Constructor",
+			// ProgressWindow is set up by setupProgressWindow() with text-only descriptions.
 			Prompt: true,
 			alert: true,
 			// These hand the user's attention to another application, so they are not in the default
