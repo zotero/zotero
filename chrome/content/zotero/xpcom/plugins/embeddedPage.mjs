@@ -25,6 +25,11 @@
 
 import { PluginPageChannel } from "chrome://zotero/content/xpcom/plugins/pageChannel.mjs";
 
+const lazy = {};
+ChromeUtils.defineESModuleGetters(lazy, {
+	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
+});
+
 // https://searchfox.org/mozilla-central/source/dom/base/nsSandboxFlags.h
 const SANDBOXED_AUXILIARY_NAVIGATION = 0x2;
 const SANDBOXED_TOPLEVEL_NAVIGATION = 0x4;
@@ -292,7 +297,10 @@ export async function loadPluginPageInBrowser(browser, src, { onWindowCreated, r
 				}
 				request.cancel(Cr.NS_BINDING_ABORTED);
 				if (/^https?$/.test(uri.scheme)) {
-					Zotero.launchURL(uri.spec);
+					let scope = lazy.PluginSandbox.getScope(pluginID);
+					if (scope) {
+						Cu.waiveXrays(scope).Zotero.launchURL?.(uri.spec);
+					}
 				}
 			}
 			else if ((stateFlags & Ci.nsIWebProgressListener.STATE_STOP)
