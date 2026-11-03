@@ -86,10 +86,11 @@ describe("PluginTrace", function () {
 
 		it("should trace hooks passed via fromScope (Notifier)", async function () {
 			let observerID = plugin.eval(`
-					var _observerID = Zotero.Notifier.registerObserver(
-						{ notify: function testHook() {} },
-						['item']
-					);
+					var _observerID = Zotero.NotifierManager.registerObserver({
+						observerID: "trace-test",
+						onNotify: function testHook() {},
+						types: ['item'],
+					});
 					_observerID;
 				`);
 			// Trigger the observer -- trigger is async
@@ -98,7 +99,7 @@ describe("PluginTrace", function () {
 			assert.ok(line, "Should have a [hook] trace. All traces: " + JSON.stringify(traceLines));
 			assert.include(line, plugin.id);
 
-			Zotero.Notifier.unregisterObserver(observerID);
+			Zotero.NotifierManager.unregisterObserver(observerID);
 		});
 	});
 
