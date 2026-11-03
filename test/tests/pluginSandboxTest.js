@@ -553,4 +553,39 @@ describe("Plugin Sandbox", function () {
 			assert.isUndefined(wrapped());
 		});
 	});
+
+	describe("Progress window boundary", function () {
+		it("should render description markup literally as text", async function () {
+			plugin.load(["default", "userPrompt"]);
+			let text = '<a href="javascript:void(0)" onmouseover="void(0)" style="color:red">unsafe</a>'
+				+ '<a href="https://www.zotero.org/" tooltiptext="safe">safe</a>';
+			let opened = waitForWindow("chrome://zotero/content/progressWindow.xhtml");
+			plugin.eval("var progress = new Zotero.ProgressWindow()");
+			plugin.run((text) => {
+				globalThis.progress.addDescription(text);
+				globalThis.progress.show();
+			}, text);
+			let win = await opened;
+			try {
+				let description = win.document.querySelector('#zotero-progress-text-box description');
+				assert.equal(description.textContent, text);
+				assert.lengthOf(description.children, 0);
+			}
+			finally {
+				plugin.eval("progress.close()");
+			}
+		});
+
+		it("should reject invalid descriptions without coercing them", function () {
+			plugin.load(["default", "userPrompt"]);
+			plugin.eval("var progress = new Zotero.ProgressWindow(); var coerced = false");
+			assert.throws(() => plugin.eval(`progress.addDescription({
+				toString() { coerced = true; return 'description'; },
+			})`));
+			assert.isFalse(plugin.eval("coerced"));
+			for (let value of [null, 1, true, ['text'], [{ text: 'Link', href: 'https://www.zotero.org/' }]]) {
+				assert.throws(() => plugin.run(value => globalThis.progress.addDescription(value), value));
+			}
+		});
+	});
 });
