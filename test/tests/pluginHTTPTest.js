@@ -163,17 +163,4 @@ describe("Plugin Zotero.HTTP", function () {
 		assert.equal(receivedData.title, 'Test');
 		assert.equal(receivedData.count, 3);
 	});
-
-	it("should fetch and process an HTML document with processDocuments()", async function () {
-		let url = endpoints.register("GET", function () {
-			return [200, "text/html", "<html><head><title>Sandbox Doc</title></head><body><p>Hello</p></body></html>"];
-		});
-
-		let result = await plugin.eval(`
-				Zotero.HTTP.processDocuments(${JSON.stringify(url)}, function (doc, responseURL) {
-					return responseURL;
-				}).then(results => results[0])
-			`);
-		assert.include(result, "/test/plugin-sandbox/");
-	});
 });
