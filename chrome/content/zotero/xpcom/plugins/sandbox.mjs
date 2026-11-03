@@ -37,7 +37,7 @@ import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
 import { PluginWorkers } from "chrome://zotero/content/xpcom/plugins/workers.mjs";
 import { PluginNetwork } from "chrome://zotero/content/xpcom/plugins/network.mjs";
-import { setupConsole, setupInstanceProxy, setupHTTP, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
+import { setupConsole, setupInstanceProxy, setupHTTP, setupProgressWindow, setupPreferences, setupFilePicker, setupDataStore, setupFileStore } from "chrome://zotero/content/xpcom/plugins/globals.mjs";
 
 const SANDBOX_NUKE_DELAY_MS = 10000;
 
@@ -336,6 +336,10 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 
 	// PluginNetwork bounds the sandbox principal's requests to host_permissions
 	setupHTTP(scope);
+
+	if (permissions.includes("userPrompt")) {
+		setupProgressWindow(scope);
+	}
 
 	// Worker comes from a document of the plugin's origin, as its pages do
 	PluginWorkers.setup(scope);
