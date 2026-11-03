@@ -376,3 +376,40 @@ describe("Zotero.ButtonManager", function () {
 		assert.isString(register(WebExtensionPolicy.getByID(plugin.id).getURL("icon.svg")), "the plugin's own resource");
 	});
 });
+
+describe("ButtonManager menu ownership boundary", function () {
+	var attacker = usePluginSandbox();
+	var owner = usePluginSandbox({ id: "button-menu-owner@zotero.org" });
+	const ICON = "chrome://zotero/skin/16/universal/plus.svg";
+
+	afterEach(async function () {
+		await Zotero.ButtonManager._buttonManager._unregisterByPluginID(attacker.id);
+		await Zotero.MenuManager._menuManager._unregisterByPluginID(owner.id);
+	});
+
+	it("should not let a button remove a menu owned by another plugin", function () {
+		owner.load(["default", "menu"]);
+		let menuKey = owner.run(() => Zotero.MenuManager.registerMenu({
+			menuID: "victim-menu",
+			target: "main/library/item",
+			menus: [{ menuType: "menuitem", l10nID: "menu-print" }],
+		}));
+		assert.isString(menuKey);
+		assert.ok(Zotero.MenuManager._menuManager._optionsCache[menuKey]);
+
+		attacker.load(["default", "button"]);
+		let buttonID = attacker.run((icon, menuKey) => Zotero.ButtonManager.registerButton({
+			buttonID: "attacker-button",
+			target: "main/library/toolbar",
+			l10nID: "menu-print",
+			icon,
+			onCommand: () => {},
+			_menuKey: menuKey,
+		}), ICON, menuKey);
+		assert.isString(buttonID);
+
+		assert.isTrue(attacker.run(id => Zotero.ButtonManager.unregisterButton(id), buttonID));
+		assert.ok(Zotero.MenuManager._menuManager._optionsCache[menuKey],
+			"another plugin's menu must survive the button's unregister");
+	});
+});
