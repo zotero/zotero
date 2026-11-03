@@ -1098,6 +1098,11 @@ mac-word-plugin-install-dont-ask-again-button =
 mac-word-plugin-install-folder-dialog-title = Install the plugin in the Word startup folder
 mac-word-plugin-install-folder-dialog-button = Install
 mac-word-plugin-install-wrong-folder-selected = The suggested folder must be selected. Please try again without choosing a different folder.
+mac-word-plugin-install-folder-missing =
+    { $source ->
+        [settings] Word hasn’t finished setting up its startup folder. Open Word once, and then try again.
+       *[other] Word hasn’t finished setting up its startup folder. Open Word once, and then install the Word plugin from the Cite pane of the { -app-name } settings.
+    }
 
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
