@@ -55,6 +55,41 @@ describe("Plugin Zotero.HTTP", function () {
 		assert.equal(receivedHeaders['X-Custom-Header'], 'sandbox-test-value');
 	});
 
+	it("should not let accessors override internal request options", async function () {
+		plugin.unload();
+		let request = Zotero.HTTP.request;
+		let receivedOptions;
+		try {
+			Zotero.HTTP.request = async function (_method, _url, options) {
+				receivedOptions = options;
+				return { status: 204 };
+			};
+			plugin.load(["default"], { origins: ["*://127.0.0.1/*"] });
+
+			let status = await plugin.eval(`
+					Zotero.HTTP.request('GET', 'http://127.0.0.1/', Object.defineProperties({}, {
+						createXMLHttpRequest: {
+							enumerable: true,
+							get() { throw new Error('untrusted createXMLHttpRequest getter ran'); },
+							set() {},
+						},
+						noMock: {
+							enumerable: true,
+							get() { throw new Error('untrusted noMock getter ran'); },
+							set() {},
+						},
+					})).then(req => req.status)
+				`);
+
+			assert.equal(status, 204);
+			assert.isFunction(receivedOptions.createXMLHttpRequest);
+			assert.isTrue(receivedOptions.noMock);
+		}
+		finally {
+			Zotero.HTTP.request = request;
+		}
+	});
+
 	it("should handle JSON response type", async function () {
 		let url = endpoints.register("GET", function () {
 			return [200, "application/json", JSON.stringify({ key: "value", num: 42 })];

@@ -394,7 +394,7 @@
 	};
 
 	let injectRegister = ({ pluginID, args }) => {
-		lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+		lazy.ScopeVariables.injectTrustedOptions(args, 0, { pluginID });
 	};
 	let injectUnregister = ({ pluginID, args }) => {
 		args[1] = pluginID;

@@ -256,25 +256,31 @@ const ScopeVariables = {
 	},
 
 	/**
-	 * Enforce a trusted property on a parser arg by rebuilding it as a fresh chrome
-	 * object -- an in-place write can be dropped by a plugin accessor or Proxy trap.
+	 * Enforce trusted properties on a parser arg in one copy. All trusted keys are
+	 * skipped while reading the untrusted object, so their getters never run and
+	 * their setters cannot discard the trusted values.
 	 *
 	 * @param {Array} args - The parser's args array (mutated in place)
 	 * @param {number} index - Index of the option object in args
-	 * @param {string} key - Property to enforce
-	 * @param {*} value - Trusted value to assign
+	 * @param {Object} values - Trusted properties to assign
 	 */
-	assignTrustedArg(args, index, key, value) {
+	injectTrustedOptions(args, index, values) {
 		let original = args[index];
 		if (!VarCheck.isObject(original)) {
 			return;
 		}
+		let trustedKeys = new Set(Object.keys(values));
 		let copy = {};
 		for (let k of Object.keys(original)) {
-			if (k === key) continue;
-			copy[k] = original[k];
+			if (trustedKeys.has(k)) continue;
+			Object.defineProperty(copy, k, {
+				value: original[k],
+				enumerable: true,
+				writable: true,
+				configurable: true,
+			});
 		}
-		copy[key] = value;
+		Object.assign(copy, values);
 		args[index] = copy;
 	},
 

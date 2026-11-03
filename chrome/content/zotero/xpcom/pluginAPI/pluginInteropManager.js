@@ -143,7 +143,7 @@
 	lazy.ScopeVariables.setCustomParser(
 		Zotero.PluginInteropManager.register,
 		({ pluginID, args }) => {
-			lazy.ScopeVariables.assignTrustedArg(args, 0, "pluginID", pluginID);
+			lazy.ScopeVariables.injectTrustedOptions(args, 0, { pluginID });
 		}
 	);
 	lazy.ScopeVariables.setCustomParser(
