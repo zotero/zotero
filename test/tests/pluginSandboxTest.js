@@ -487,6 +487,19 @@ describe("Plugin Sandbox", function () {
 			assert.deepEqual(result, { keys: 0, spec: "undefined" });
 		});
 
+		it("should block privileged objects nested inside a mirrored instance", function () {
+			plugin.load(["default"]);
+			class Host {
+				constructor(uri) {
+					this.uri = uri;
+				}
+			}
+			plugin.scope._host = ScopeVariables.toScope(
+				new Host(Services.io.newURI("https://example.com/")), plugin.id
+			);
+			assert.isTrue(plugin.eval("typeof _host.uri === 'undefined'"));
+		});
+
 		it("should block chrome windows and DOM nodes crossing into the sandbox", function () {
 			plugin.load(["default"]);
 			// The test runner's own window is a chrome window like any other
