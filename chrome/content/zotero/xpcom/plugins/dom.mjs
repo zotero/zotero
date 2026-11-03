@@ -33,20 +33,21 @@ const SANDBOXED_TOPLEVEL_NAVIGATION = 0x4;
 const SANDBOXED_TOPLEVEL_NAVIGATION_USER_ACTIVATION = 0x20000;
 
 /**
- * Web Workers for unprivileged plugins: the sandbox's `Worker` is that of a document Zotero conjures under
- * the plugin's origin and CSP, so a worker carries the plugin's principal and nothing of chrome
+ * Window-dependent APIs for unprivileged plugins, taken from a document under the plugin's origin and CSP.
+ * A sandbox global alone cannot construct DOMParser under a content principal: Gecko requires a window.
  */
-const PluginWorkers = {
-	// pluginID -> { browser, Worker }
+const PluginDOM = {
+	// pluginID -> { browser, Worker, DOMParser }
 	_hosts: new Map(),
 
 	/**
-	 * Define `Worker` on an unprivileged scope, resolved on first use
+	 * Define document-backed constructors on an unprivileged scope, resolved on first use
 	 * @param {object} scope
 	 */
 	setup(scope) {
 		let pluginID = scope.PLUGIN_ID;
 		ChromeUtils.defineLazyGetter(scope, "Worker", () => this._host(pluginID).Worker);
+		ChromeUtils.defineLazyGetter(scope, "DOMParser", () => this._host(pluginID).DOMParser);
 	},
 
 	/**
@@ -96,10 +97,10 @@ const PluginWorkers = {
 		win.addEventListener("error", (event) => {
 			Zotero.logError(`Plugin ${pluginID} worker: ${event.message} (${event.filename}:${event.lineno})`);
 		});
-		host = { browser, Worker: win.Worker };
+		host = { browser, Worker: win.Worker, DOMParser: win.DOMParser };
 		this._hosts.set(pluginID, host);
 		return host;
 	},
 };
 
-export { PluginWorkers };
+export { PluginDOM };
