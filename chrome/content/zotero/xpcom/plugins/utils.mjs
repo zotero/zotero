@@ -35,6 +35,8 @@ const CHROME_GLOBAL = Cu.getGlobalForObject({});
 
 const CHANGE_SET_BASE_URL = "chrome://zotero/content/xpcom/plugins/changeSetBase.js";
 
+const PLUGIN_DATA_RESERVED_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
 	PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
@@ -42,6 +44,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
 
 // Only chrome may register a facade. A property on a plugin object is forgeable.
 const originalRefs = new WeakMap();
+const changeSetSerializers = new WeakMap();
 
 /**
  * Cache the facades per instance - scope - rule to avoid duplication
@@ -163,11 +166,16 @@ const VarCheck = {
 	},
 
 	getOriginalRef(v) {
-		return originalRefs.get(Cu.waiveXrays(v))?.();
+		return originalRefs.get(Cu.waiveXrays(v))?.getOriginal();
 	},
 
-	setOriginalRef(v, getOriginal) {
-		originalRefs.set(Cu.waiveXrays(v), getOriginal);
+	getOriginalData(v) {
+		let ref = originalRefs.get(Cu.waiveXrays(v));
+		return ref?.data ? ref.getOriginal() : undefined;
+	},
+
+	setOriginalRef(v, getOriginal, { data = false } = {}) {
+		originalRefs.set(Cu.waiveXrays(v), { getOriginal, data });
 	},
 
 	ensureActiveScope(scope) {
@@ -528,7 +536,23 @@ const ScopeUtils = {
 		for (let script of [CHANGE_SET_BASE_URL, url]) {
 			Services.scriptloader.loadSubScript(script, holder);
 		}
+		let base = Cu.waiveXrays(holder).ChangeSetBase;
+		for (let Class of [base.ChangesBase, base.ChangeSet, base.ObjectHandle]) {
+			let proto = Cu.waiveXrays(Class.prototype);
+			changeSetSerializers.set(proto, proto.toPlain);
+		}
 		return holder;
+	},
+
+	// Only the store builders loaded above may serialize an instance at the data boundary.
+	changeSetToPlain(value) {
+		let proto = Object.getPrototypeOf(Cu.waiveXrays(value));
+		while (proto) {
+			let serialize = changeSetSerializers.get(proto);
+			if (serialize) return Reflect.apply(serialize, value, []);
+			proto = Object.getPrototypeOf(proto);
+		}
+		throw new TypeError("Expected a change set, editor or handle");
 	},
 
 	/**
@@ -714,6 +738,87 @@ const ScopeUtils = {
 		return ScopeUtils._toPlainData(value, into);
 	},
 
+	/**
+	 * Detach incoming plugin data without invoking accessors, serialization hooks or iterators.
+	 * Only enumerable own data properties cross; prototype keys are discarded and records have no
+	 * prototype. Callers may explicitly adapt callbacks or supported instances.
+	 * @param {*} value
+	 * @param {object} [options]
+	 * @param {function} [options.mapFunction] - Wrap an explicitly supported callback
+	 * @param {function} [options.mapObject] - Serialize a supported instance, or return it unchanged as an approved handle
+	 * @param {string[]} [options.skipKeys] - Root options the API ignores, omitted without reading their values
+	 * @returns {*}
+	 */
+	copyPluginData(value, options = {}) {
+		return ScopeUtils._copyPluginData(value, options, new Set(), options.skipKeys ?? []);
+	},
+
+	_copyPluginData(value, options, ancestors, skipKeys = []) {
+		switch (typeof value) {
+			case "undefined":
+			case "string":
+			case "boolean":
+				return value;
+			case "number":
+				return Number.isFinite(value) ? value : null;
+			case "object":
+				if (value === null) return null;
+				break;
+			default:
+				if (typeof value === "function" && options.mapFunction) return options.mapFunction(value);
+				throw new TypeError(`${typeof value} is not plugin data`);
+		}
+
+		// A plain-data mirror made by chrome has lazy getters; inspect its known source instead.
+		value = Cu.waiveXrays(VarCheck.getOriginalData(value) ?? value);
+		if (VarCheck.isBytes(value)) {
+			// Native cloning ignores custom properties, including shadowed buffer/offset getters.
+			return ScopeUtils._bytesInto(Cu.cloneInto(value, CHROME_GLOBAL), CHROME_GLOBAL);
+		}
+		if (ancestors.has(value)) throw new TypeError("cyclic plugin data");
+		ancestors.add(value);
+		try {
+			if (Array.isArray(value)) {
+				let descriptors = Object.getOwnPropertyDescriptors(value);
+				let result = [];
+				for (let i = 0; i < descriptors.length.value; i++) {
+					if (skipKeys.includes(String(i))) continue;
+					let entry = ScopeUtils._pluginDataValue(descriptors, i);
+					result.push(ScopeUtils._copyPluginData(entry, options, ancestors) ?? null);
+				}
+				return result;
+			}
+
+			let proto = Object.getPrototypeOf(value);
+			if (proto !== null && Cu.unwaiveXrays(proto) !== VarCheck._getObjectPrototype(value)) {
+				if (!options.mapObject) throw new TypeError("Expected a plain object or array");
+				let mapped = options.mapObject(value);
+				return mapped === value ? mapped : ScopeUtils._copyPluginData(mapped, options, ancestors);
+			}
+
+			let descriptors = Object.getOwnPropertyDescriptors(value);
+			let result = Object.create(null);
+			for (let key of Object.keys(descriptors)) {
+				if (PLUGIN_DATA_RESERVED_KEYS.has(key) || skipKeys.includes(key)) continue;
+				let entry = ScopeUtils._pluginDataValue(descriptors, key);
+				let copied = ScopeUtils._copyPluginData(entry, options, ancestors);
+				if (copied !== undefined) result[key] = copied;
+			}
+			return result;
+		}
+		finally {
+			ancestors.delete(value);
+		}
+	},
+
+	// Inspect the descriptor instead of reading the property, so accessors never run.
+	_pluginDataValue(descriptors, key) {
+		let descriptor = Object.hasOwn(descriptors, key) ? descriptors[key] : undefined;
+		if (!descriptor?.enumerable) return undefined;
+		if (!Object.hasOwn(descriptor, "value")) throw new TypeError(`Accessor '${key}' is not plugin data`);
+		return descriptor.value;
+	},
+
 	// The bytes of any view, or a whole buffer, as a Uint8Array of `into`: a view over the same bytes when
 	// they are already in that compartment, a copy when they come from another
 	_bytesInto(value, into) {
@@ -819,7 +924,7 @@ const ScopeUtils = {
 				wrapReflectors: true,
 				cloneFunctions: true,
 			});
-			arr.push(...value.map(v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable, instanceSchema })));
+			arr.push(...Array.from(value, v => ScopeUtils.ensurePromiseVarInScope(v, scope, { mutable, instanceSchema })));
 			return arr;
 		}
 
@@ -1085,6 +1190,8 @@ const ScopeUtils = {
 			if (!mutable) {
 				VarCheck.throwPropError("set", prop);
 			}
+			// Do not invoke Object.prototype's setter through a mutable forwarding facade.
+			if (prop === "__proto__" && !Object.hasOwn(target, prop)) return false;
 			try {
 				return Reflect.set(target, prop, Cu.waiveXrays(value));
 			}

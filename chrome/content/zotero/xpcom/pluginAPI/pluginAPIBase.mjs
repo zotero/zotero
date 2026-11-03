@@ -104,10 +104,8 @@ class PluginAPIBase {
 	 * @returns {{obj?: object, valid: boolean, reason?: string}} - The validated object if valid, else why not
 	 */
 	_validateObject(obj, typeDef, path = "") {
-		// A copy of the own properties; through Object.assign, a __proto__ key would set the prototype
-		obj = Object.fromEntries(Object.entries(obj ?? {}));
-
 		try {
+			obj = Object.assign(Object.create(null), obj);
 			for (let key of Object.keys(typeDef)) {
 				let val = obj[key];
 				let requirement = typeDef[key];
@@ -166,8 +164,11 @@ class PluginAPIBase {
 								throw new Error(`Option ${fullPath}[${bad}] must be ${requirement.children}, got ${typeof val[bad]}`);
 							}
 						}
-						else if (val.length > 0 && typeof val[0] == "object") {
+						else {
 							for (let i = 0; i < val.length; i++) {
+								if (val[i] === null || typeof val[i] !== "object" || Array.isArray(val[i])) {
+									throw new Error(`Option ${fullPath}[${i}] must be an object`);
+								}
 								let result = this._validateObject(val[i], requirement.children, `${path}.${key}[${i}].`);
 								if (!result.valid) {
 									// The detailed error message is already logged

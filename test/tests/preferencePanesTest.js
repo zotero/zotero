@@ -87,7 +87,9 @@ describe("Zotero.PreferencePanes", function () {
 			label: "Embedded Pane",
 			image: "chrome://zotero/skin/20/universal/cog.svg",
 			src: "prefs.html",
-			scripts: ["pane-script.js"],
+			get scripts() {
+				throw new Error("Ignored scripts option must not be read");
+			},
 			stylesheets: ["style.css"],
 			l10nFiles: ["pane.ftl"],
 			onLoad: () => {},

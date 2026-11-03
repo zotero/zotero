@@ -225,26 +225,32 @@ class RequestAPIBase extends PluginAPIBase {
 	}
 
 	/**
-	 * Detach params from the caller's compartment; functions and getters are read once or dropped
+	 * Detach data params from the caller's compartment without invoking plugin hooks or getters
 	 * @param {string} name
 	 * @param {object} params
-	 * @param {RequestCaller} [_context] - For a subclass that reads params in the caller's terms first
+	 * @param {RequestCaller} [context] - For a subclass that reads params in the caller's terms first
+	 * @param {object} [options] - Explicit adapters supported by a subclass
 	 */
-	_toPlainParams(name, params, _context) {
+	_toPlainParams(name, params, context, options) {
 		if (params === undefined || params === null) {
 			return {};
 		}
 		if (!lazy.VarCheck.isObject(params)) {
 			this._throw(RequestAPIBase.errorCodes.INVALID_PARAMS, `Params for '${name}' must be an object`);
 		}
+		let plain;
 		try {
-			return lazy.ScopeUtils.toPlainData(params);
+			plain = lazy.ScopeUtils.copyPluginData(params, options);
 		}
 		catch (e) {
 			this._throw(RequestAPIBase.errorCodes.INVALID_PARAMS,
 				`Params for '${name}' must be plain data: ${e.message}`);
 		}
-		return {};
+		// Proxy traps and explicit adapters can reenter chrome while the snapshot is made.
+		if (context?.scope && lazy.PluginSandbox.getScope(context.pluginID) !== context.scope) {
+			this._throw(RequestAPIBase.errorCodes.PERMISSION_DENIED, "Plugin was unloaded while copying params");
+		}
+		return plain;
 	}
 
 	/**

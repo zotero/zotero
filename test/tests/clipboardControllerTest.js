@@ -58,6 +58,37 @@ describe("Zotero.ClipboardController", function () {
 		}
 	});
 
+	it("should not write after its caller is replaced while copying params", async function () {
+		// Simulate scope replacement during a modal prompt; this tests stale caller state, not a UI race.
+		let prompt = sinon.stub(Zotero.Prompt, "confirm").callsFake(() => {
+			plugin.load(["default"]);
+			return 0;
+		});
+		let permissionsAtWrite;
+		let writer = sinon.stub(Zotero.Utilities.Internal, "copyToClipboard").callsFake(() => {
+			permissionsAtWrite = Array.from(plugin.scope.PERMISSIONS);
+		});
+		try {
+			plugin.load(["default", "clipboardWrite", "userPrompt"]);
+			let result = await plugin.run(() => Zotero.ClipboardController.command("write", {
+				data: new Proxy({ "text/plain": "Stale request" }, {
+					ownKeys(target) {
+						Zotero.Prompt.confirm({ title: "Continue", text: "Continue writing?", button0: "OK" });
+						return Reflect.ownKeys(target);
+					},
+				}),
+			}));
+			assert.isFalse(writer.called, `Clipboard written with permissions: ${JSON.stringify(permissionsAtWrite)}`);
+			assert.isTrue(prompt.called);
+			assert.deepEqual(Array.from(plugin.scope.PERMISSIONS), ["default"]);
+			assert.equal(result.error.code, Zotero.ClipboardController.errorCodes.PERMISSION_DENIED);
+		}
+		finally {
+			prompt.restore();
+			writer.restore();
+		}
+	});
+
 	// A paste, even into the plugin's own page, hands over the file on the clipboard
 	it("should place only a file the plugin may read", async function () {
 		plugin.load(["default", "clipboardRead", "clipboardWrite"]);

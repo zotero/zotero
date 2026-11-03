@@ -27,6 +27,7 @@
 const lazy = {};
 ChromeUtils.defineESModuleGetters(lazy, {
 	ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+	ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 });
 
 function _getActor(element) {
@@ -115,7 +116,7 @@ const PluginPageChannel = {
 				return false;
 			}
 			try {
-				actor.send(data);
+				actor.send(lazy.ScopeUtils.copyPluginData(data));
 				return true;
 			}
 			catch (e) {

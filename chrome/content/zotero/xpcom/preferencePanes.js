@@ -28,6 +28,7 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
+		ScopeUtils: "chrome://zotero/content/xpcom/plugins/utils.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 	});
 
@@ -197,10 +198,10 @@
 						`Plugin ${options.pluginID}: ${dropped.map(o => `'${o}'`).join(', ')} only available for privileged plugins. `
 						+ 'Load scripts, stylesheets, and localization from the page at src instead.'
 					);
-					options.scripts = [];
-					options.stylesheets = [];
-					options.l10nFiles = [];
 				}
+				options.scripts = [];
+				options.stylesheets = [];
+				options.l10nFiles = [];
 			}
 
 			let src;
@@ -308,6 +309,10 @@
 
 	lazy.ScopeVariables.setCustomParser(Zotero.PreferencePanes.register, ({ pluginID, args }) => {
 		lazy.ScopeVariables.injectTrustedOptions(args, 0, { pluginID });
+		args[0] = lazy.ScopeUtils.copyPluginData(args[0], {
+			mapFunction: fn => fn,
+			skipKeys: ["scripts", "stylesheets", "l10nFiles"],
+		});
 	});
 	lazy.ScopeVariables.setCustomParser(Zotero.PreferencePanes.unregister, ({ pluginID, args }) => {
 		args[1] = pluginID;
