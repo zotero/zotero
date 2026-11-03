@@ -24,7 +24,7 @@
 */
 
 
-import { VarCheck, ScopeUtils, ORIGINAL_REF_KEY, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
+import { VarCheck, ScopeUtils, CUSTOM_PARSER_KEY } from "chrome://zotero/content/xpcom/plugins/utils.mjs";
 import { SchemaKey } from "chrome://zotero/content/xpcom/plugins/schema.mjs";
 import { PluginSandbox } from "chrome://zotero/content/xpcom/plugins/sandbox.mjs";
 import { PluginTrace } from "chrome://zotero/content/xpcom/plugins/trace.mjs";
@@ -121,12 +121,7 @@ const ScopeVariables = {
 					});
 				}
 			}
-			Object.defineProperty(wrapped, ORIGINAL_REF_KEY, {
-				value: () => value,
-				enumerable: false,
-				configurable: false,
-				writable: false,
-			});
+			VarCheck.setOriginalRef(wrapped, () => value);
 			return wrapped;
 		}
 
@@ -199,14 +194,9 @@ const ScopeVariables = {
 					PluginTrace.end(t, pluginID, "hook", hookPath, failure);
 				}
 			};
-			// Store the original function ref on the wrapper so callers can
+			// Register the original function ref in chrome so callers can
 			// match wrapped handlers back to their originals (e.g. for unregister)
-			Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
-				value: () => value,
-				enumerable: false,
-				configurable: false,
-				writable: false,
-			});
+			VarCheck.setOriginalRef(wrapper, () => value);
 			return wrapper;
 		}
 
@@ -492,14 +482,9 @@ const ScopeVariables = {
 				});
 			}
 
-			// Store a reference to the original object for unwrapping in fromScope,
+			// Register the original object in chrome for unwrapping in fromScope,
 			// so that wrappers are detected and not recursed into
-			Object.defineProperty(wrapper, ORIGINAL_REF_KEY, {
-				value: () => objRef.deref(),
-				enumerable: false,
-				configurable: false,
-				writable: false,
-			});
+			VarCheck.setOriginalRef(wrapper, () => objRef.deref());
 
 			return wrapper;
 		}
