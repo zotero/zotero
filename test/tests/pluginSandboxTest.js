@@ -306,6 +306,24 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("Chrome DOM boundary", function () {
+		it("should preserve an own __proto__ property as data when wrapping callbacks", function () {
+			plugin.load(["default"]);
+			let value = plugin.eval(`Object.defineProperty({
+				hook: node => node === undefined,
+			}, "__proto__", {
+				value: { injected: true },
+				enumerable: true,
+			})`);
+			let wrapped = ScopeVariables.fromScope(Cu.waiveXrays(value), plugin.id);
+			assert.isUndefined(wrapped.injected);
+			let descriptor = Object.getOwnPropertyDescriptor(wrapped, "__proto__");
+			assert.isTrue(descriptor.value.injected);
+			assert.isTrue(descriptor.writable);
+			assert.isTrue(descriptor.enumerable);
+			assert.isTrue(descriptor.configurable);
+			assert.isTrue(wrapped.hook(document.documentElement));
+		});
+
 		it("should not trust a plugin's original-reference property when wrapping hooks", function () {
 			plugin.load(["default"]);
 			let hook = plugin.eval(`Object.assign(function (node) { return node === undefined; }, {
