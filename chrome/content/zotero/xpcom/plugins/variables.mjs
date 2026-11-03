@@ -168,9 +168,13 @@ const ScopeVariables = {
 
 		if (typeof value === "function") {
 			let funcName = value.name || "anonymous";
+			let scope = PluginSandbox.getScope(pluginID);
 			let hookPath = trace ? `${trace.path}:${funcName}` : funcName;
 			let unloaded = false;
 			let wrapper = function (...args) {
+				if (PluginSandbox.getScope(pluginID) !== scope) {
+					return undefined;
+				}
 				// A hook the plugin left behind falls silent once its sandbox is nuked, instead of throwing
 				if (Cu.isDeadWrapper(value)) {
 					if (!unloaded) {

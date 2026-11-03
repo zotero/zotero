@@ -476,6 +476,31 @@ describe("Plugin Sandbox", function () {
 	});
 
 	describe("After unload", function () {
+		it("should revoke a retained preferences API when permissions are removed", function () {
+			plugin.load(["default", "preferences"]);
+			let oldScope = plugin.scope;
+			plugin.eval("var retainedGet = Zotero.Prefs.get");
+			plugin.load(["default"]);
+			assert.throws(() => plugin.eval("retainedGet('revocationProbe')", oldScope));
+			assert.throws(() => plugin.eval("Zotero.Prefs.get('revocationProbe')", oldScope));
+		});
+
+		it("should revoke retained constructors and instance methods after reload", function () {
+			plugin.load(["default", "userPrompt"]);
+			let oldScope = plugin.scope;
+			plugin.eval("var retainedConstructor = Zotero.ProgressWindow; var retainedWindow = new retainedConstructor()");
+			plugin.load(["default"]);
+			assert.throws(() => plugin.eval("new retainedConstructor()", oldScope));
+			assert.throws(() => plugin.eval("retainedWindow.changeHeadline('Revoked')", oldScope));
+		});
+
+		it("should stop invoking a hook from a replaced sandbox", function () {
+			plugin.load(["default"]);
+			let hook = ScopeVariables.fromScope(plugin.eval("() => 'old hook ran'"), plugin.id);
+			plugin.load(["default"]);
+			assert.isUndefined(hook());
+		});
+
 		function isColumnRegistered(dataKey) {
 			return Object.keys(Zotero.ItemTreeManager._columnManager._optionsCache).some(key => key.includes(dataKey));
 		}
