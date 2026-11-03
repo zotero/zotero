@@ -122,11 +122,11 @@ describe("Plugin network access", function () {
 			return wins.at(-1).document.getElementById("plugin-browser");
 		}
 
-		async function openPage(origins, body, script, contentSecurityPolicy) {
+		async function openPage(origins, body, script, contentSecurityPolicy, permissions = ["default", "window"]) {
 			await FileIO.writeUTF8(PathUtils.join(dir, "page.html"),
 				`<!DOCTYPE html><html><body>${body}<script src="page.js"></script></body></html>`);
 			await FileIO.writeUTF8(PathUtils.join(dir, "page.js"), script);
-			load(origins, ["default", "window"], contentSecurityPolicy);
+			load(origins, permissions, contentSecurityPolicy);
 			// Resolves once the page has loaded, its images and frames included
 			await plugin.eval(OPEN_PAGE);
 			return getPageBrowser().contentWindow.wrappedJSObject;
@@ -151,20 +151,25 @@ describe("Plugin network access", function () {
 			}
 		});
 
-		it("should not open a page's navigation to a host outside host_permissions in the browser", async function () {
+		it("should require userPrompt for external page navigation, regardless of host_permissions", async function () {
 			let stub = sinon.stub(Zotero, "launchURL");
 			try {
-				for (let [origins, opened] of [[[], false], [LOCAL_ORIGINS, true]]) {
+				for (let [origins, permissions, opened] of [
+					[[], ["default", "window"], false],
+					[LOCAL_ORIGINS, ["default", "window"], false],
+					[LOCAL_ORIGINS, ["default", "window", "userPrompt"], true],
+				]) {
 					stub.resetHistory();
 					let endpoint = countingEndpoint();
 					// A blocked navigation throws
-					let win = await openPage(origins, "", `window.navigateAway = () => { try { location.href = ${JSON.stringify(endpoint.url)}; } catch {} };\n`);
+					let win = await openPage(origins, "", `window.navigateAway = () => { try { location.href = ${JSON.stringify(endpoint.url)}; } catch {} };\n`, undefined, permissions);
 					// From the page's own script, as a link or a redirecting script would
 					win.navigateAway();
 					for (let i = 0; i < 25 && !stub.called; i++) {
 						await Zotero.Promise.delay(20);
 					}
-					assert.equal(stub.calledWith(endpoint.url), opened);
+					assert.equal(stub.calledWith(endpoint.url), opened,
+						JSON.stringify({ origins, permissions, url: endpoint.url, calls: stub.args }));
 					assert.equal(endpoint.hits, 0);
 					await plugin.eval("Zotero.WindowController.command('closeWindow', { windowID: _win.windowID })");
 				}
