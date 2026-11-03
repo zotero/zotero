@@ -8,6 +8,7 @@ describe("Plugin network access", function () {
 
 	before(async function () {
 		dir = await getTempDirectory();
+		await FileIO.writeUTF8(PathUtils.join(dir, "private.txt"), "private fixture content");
 		await FileIO.writeUTF8(PathUtils.join(dir, "fetch.js"),
 			"onmessage = e => fetch(e.data, { mode: 'no-cors' }).then(() => postMessage('sent'), () => postMessage('blocked'));\n");
 	});
@@ -62,6 +63,56 @@ describe("Plugin network access", function () {
 		load([...LOCAL_ORIGINS, "*://localhost/*"]);
 		assert.equal(await fetchStatus(redirectURL), "sent");
 		assert.equal(target.hits, 1);
+	});
+
+	it("should not turn host_permissions into local file access", async function () {
+		load(["<all_urls>", "file:///*"]);
+		let url = PathUtils.toFileURI(PathUtils.join(dir, "private.txt"));
+		let result = await plugin.run(async (url) => {
+			let fetched;
+			try {
+				fetched = await (await fetch(url)).text();
+			}
+			catch {
+				fetched = "blocked";
+			}
+			let requested = await new Promise((resolve) => {
+				let xhr = new XMLHttpRequest({ mozSystem: true });
+				xhr.onload = () => resolve(xhr.responseText);
+				xhr.onerror = () => resolve("blocked");
+				try {
+					xhr.open("GET", url);
+					xhr.send();
+				}
+				catch {
+					resolve("blocked");
+				}
+			});
+			let xml = new DOMParser().parseFromString(
+				'<!DOCTYPE root [<!ENTITY external SYSTEM "' + url + '">]><root>&external;</root>', "application/xml",
+			);
+			return { fetched, requested, xml: xml.documentElement.textContent };
+		}, url);
+		assert.equal(result.fetched, "blocked");
+		assert.equal(result.requested, "blocked");
+		assert.notInclude(result.xml, "private fixture content");
+	});
+
+	it("should bound native XMLHttpRequest to host_permissions", async function () {
+		let request = url => new Promise((resolve) => {
+			let xhr = new XMLHttpRequest({ mozSystem: true });
+			xhr.onload = () => resolve("sent");
+			xhr.onerror = () => resolve("blocked");
+			xhr.open("GET", url);
+			xhr.send();
+		});
+		let endpoint = countingEndpoint();
+		load();
+		assert.equal(await plugin.run(request, endpoint.url), "blocked");
+		assert.equal(endpoint.hits, 0);
+		load(LOCAL_ORIGINS);
+		assert.equal(await plugin.run(request, endpoint.url), "sent");
+		assert.equal(endpoint.hits, 1);
 	});
 
 	it("should bound Zotero.HTTP to host_permissions", async function () {
