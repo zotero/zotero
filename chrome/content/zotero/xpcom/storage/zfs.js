@@ -190,13 +190,13 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 			catch (e) {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					// If S3 connection is interrupted, delay and retry
+					// If the connection is interrupted, delay and retry
 					if (e.xmlhttp?.status == 0 || e.status == 0) {
 						if (++this._s3ConsecutiveFailures
 								< this._maxS3ConsecutiveFailures) {
 							let libraryKey = item.libraryKey;
-							let msg = "S3 returned 0 for " + libraryKey
-								+ " -- retrying download";
+							let msg = `Request to ${this._getHost(e.url)} returned 0 for `
+								+ `${libraryKey} -- retrying download`;
 							Zotero.logError(msg);
 							if (this._s3Backoff < this._maxS3Backoff) {
 								this._s3Backoff *= 2;
@@ -212,7 +212,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 						}
 
 						Zotero.debug(this._s3ConsecutiveFailures
-							+ " consecutive S3 failures -- aborting", 1);
+							+ " consecutive download failures -- aborting", 1);
 						this._s3ConsecutiveFailures = 0;
 					}
 				}
@@ -322,6 +322,16 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			libraryTypeID: library.libraryTypeID,
 			target
 		};
+	},
+	
+	
+	_getHost: function (url) {
+		try {
+			return new URL(url).host;
+		}
+		catch (_e) {
+			return "unknown host";
+		}
 	},
 	
 	
@@ -665,14 +675,14 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					|| (e.status == 400 && e.xmlhttp.responseText.indexOf(timeoutMessage) != -1)) {
 				if (this._s3ConsecutiveFailures >= this._maxS3ConsecutiveFailures) {
 					Zotero.debug(this._s3ConsecutiveFailures
-						+ " consecutive S3 failures -- aborting", 1);
+						+ " consecutive upload failures -- aborting", 1);
 					this._s3ConsecutiveFailures = 0;
 					let e = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
 					throw new Error(e);
 				}
 				else {
-					let msg = "S3 returned " + e.status + " (" + item.libraryKey + ") "
-						+ "-- retrying upload"
+					let msg = `Request to ${this._getHost(e.url)} returned ${e.status} `
+						+ `for ${item.libraryKey} -- retrying upload`;
 					Zotero.logError(msg);
 					Zotero.debug(e.xmlhttp.responseText, 1);
 					if (this._s3Backoff < this._maxS3Backoff) {
