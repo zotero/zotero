@@ -62,7 +62,7 @@ RETRIES=0
 while getopts "bcd:e:fg:hp:r:s:tx:" opt; do
 	case $opt in
         b)
-        	Z_ARGS="$Z_ARGS -ZoteroSkipBundledFiles"
+        	Z_ARGS="$Z_ARGS -skip-bundled-files"
         	;;
 		c)
 			Z_ARGS="$Z_ARGS -jsconsole -noquit"
@@ -75,7 +75,7 @@ while getopts "bcd:e:fg:hp:r:s:tx:" opt; do
 			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
 				usage
 			fi
-			Z_ARGS="$Z_ARGS -stopAtTestFile $OPTARG"
+			Z_ARGS="$Z_ARGS -stop-at-test-file $OPTARG"
 			;;
 		f)
 			Z_ARGS="$Z_ARGS -bail"
@@ -99,10 +99,10 @@ while getopts "bcd:e:fg:hp:r:s:tx:" opt; do
 			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
 				usage
 			fi
-			Z_ARGS="$Z_ARGS -startAtTestFile $OPTARG"
+			Z_ARGS="$Z_ARGS -start-at-test-file $OPTARG"
 			;;
 		t)
-			Z_ARGS="$Z_ARGS -makeTestData"
+			Z_ARGS="$Z_ARGS -make-test-data"
 			;;
 		x)
 			Z_EXECUTABLE="$OPTARG"
@@ -166,7 +166,7 @@ user_pref("extensions.zoteroOpenOfficeIntegration.skipInstallation", true);
 EOF
 
 if [ -n "$CI" ]; then
-	Z_ARGS="$Z_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 15000"
+	Z_ARGS="$Z_ARGS -automated-test -test-timeout 15000"
 else
 	Z_ARGS="$Z_ARGS -jsconsole"
 fi
@@ -195,7 +195,7 @@ ZOTERO_TEST=1 "$ROOT_DIR/app/scripts/dir_build"
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" \
-    -test "$TESTS" -grep "$GREP" -retries "$RETRIES" -ZoteroTest $Z_ARGS
+    -test "$TESTS" -grep "$GREP" -retries "$RETRIES" $Z_ARGS
 
 # Check for success
 test -e "$PROFILE/success"

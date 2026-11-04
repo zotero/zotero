@@ -6,12 +6,36 @@ if (cmdLine.state != Ci.nsICommandLine.STATE_INITIAL_LAUNCH) {
 	cmdLine.preventDefault = true;
 }
 
+// Handle a flag, accepting a deprecated name and recording its use so that Zotero.init() can log a
+// warning once debug output is available
+function handleFlag(name, deprecatedName) {
+	if (cmdLine.handleFlag(name, false)) {
+		return true;
+	}
+	if (deprecatedName && cmdLine.handleFlag(deprecatedName, false)) {
+		CommandLineOptions.deprecatedFlags.push([deprecatedName, name]);
+		return true;
+	}
+	return false;
+}
+
+function handleFlagWithParam(name, deprecatedName) {
+	let value = cmdLine.handleFlagWithParam(name, false);
+	if (value === null && deprecatedName) {
+		value = cmdLine.handleFlagWithParam(deprecatedName, false);
+		if (value !== null) {
+			CommandLineOptions.deprecatedFlags.push([deprecatedName, name]);
+		}
+	}
+	return value;
+}
+
 // Force debug output to window
-if (cmdLine.handleFlag("ZoteroDebug", false)) {
+if (handleFlag("debug", "ZoteroDebug")) {
 	CommandLineOptions.forceDebugLog = 2;
 }
 // Force debug output to text console
-else if (cmdLine.handleFlag("ZoteroDebugText", false)) {
+else if (handleFlag("debug-text", "ZoteroDebugText")) {
 	CommandLineOptions.forceDebugLog = 1;
 }
 // Pressing Ctrl-C via the terminal is interpreted as a crash, and after three crashes
@@ -30,32 +54,33 @@ if (CommandLineOptions.url) {
 }
 
 var processTestOptions = false;
-if (cmdLine.handleFlag("ZoteroTest", false)) {
+// -test runs the specified test files, or all tests if empty
+if (cmdLine.findFlag("test", false) != -1) {
 	CommandLineOptions.test = true;
 	processTestOptions = true;
 }
-if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
+if (handleFlag("automated-test", "ZoteroAutomatedTest")) {
 	CommandLineOptions.automatedTest = true;
 }
-if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
+if (handleFlag("skip-bundled-files", "ZoteroSkipBundledFiles")) {
 	CommandLineOptions.skipBundledFiles = true;
 }
-if (cmdLine.handleFlag("skipFeedUpdates", false)) {
+if (handleFlag("skip-feed-updates")) {
 	CommandLineOptions.skipFeedUpdates = true;
 }
 
 if (processTestOptions) {
 	TestOptions.tests = cmdLine.handleFlagWithParam("test", false);
 	TestOptions.noquit = cmdLine.handleFlag("noquit", false);
-	TestOptions.makeTestData = cmdLine.handleFlag("makeTestData", false);
+	TestOptions.makeTestData = cmdLine.handleFlag("make-test-data", false);
 	TestOptions.noquit = !TestOptions.makeTestData && TestOptions.noquit;
 	TestOptions.runTests = !TestOptions.makeTestData;
 	TestOptions.bail = cmdLine.handleFlag("bail", false);
-	TestOptions.startAt = cmdLine.handleFlagWithParam("startAtTestFile", false);
-	TestOptions.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
+	TestOptions.startAt = cmdLine.handleFlagWithParam("start-at-test-file", false);
+	TestOptions.stopAt = cmdLine.handleFlagWithParam("stop-at-test-file", false);
 	TestOptions.shard = cmdLine.handleFlagWithParam("shard", false);
 	TestOptions.grep = cmdLine.handleFlagWithParam("grep", false);
-	TestOptions.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
+	TestOptions.timeout = handleFlagWithParam("test-timeout", "ZoteroTestTimeout");
 	TestOptions.retries = cmdLine.handleFlagWithParam("retries", false) || 0;
 	
 	Services.ww.openWindow(

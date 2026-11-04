@@ -9,6 +9,7 @@ export var CommandLineOptions = {
 	skipFeedUpdates: false,
 	file: false,
 	url: false,
+	deprecatedFlags: [],
 };
 
 export var TestOptions = {

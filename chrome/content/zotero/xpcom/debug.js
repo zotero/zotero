@@ -40,14 +40,14 @@ Zotero.Debug = new function () {
 	 *
 	 *   - via the debug.log pref in the client or connector
 	 *   - by enabling debug output logging from the Help menu
-	 *   - by passing -ZoteroDebug or -ZoteroDebugText on the command line
+	 *   - by passing -debug or -debug-text on the command line
 	 *
-	 * In the client, debug.log and -ZoteroDebugText enable logging via the terminal, while -ZoteroDebug
+	 * In the client, debug.log and -debug-text enable logging via the terminal, while -debug
 	 * enables logging via an in-app HTML-based window.
 	 *
 	 * @param {Integer} [forceDebugLog = 0] - Force output even if pref disabled
-	 *    2: window (-ZoteroDebug)
-	 *    1: text console (-ZoteroDebugText)
+	 *    2: window (-debug)
+	 *    1: text console (-debug-text)
 	 *    0: disabled
 	 */
 	this.init = function (forceDebugLog = 0) {

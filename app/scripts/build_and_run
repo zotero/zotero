@@ -71,7 +71,7 @@ fi
 
 PARAMS=""
 if [ $SKIP_BUNDLED_FILES -eq 1 ]; then
-	PARAMS="$PARAMS -ZoteroSkipBundledFiles"
+	PARAMS="$PARAMS -skip-bundled-files"
 fi
 if [ $DEBUGGER -eq 1 ]; then
 	PARAMS="$PARAMS -jsdebugger"
@@ -95,4 +95,4 @@ else
 fi
 
 echo
-"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -ZoteroDebugText $PARAMS "$@"
+"$APP_ROOT_DIR/staging/$command" "${profile_args[@]}" -debug-text $PARAMS "$@"

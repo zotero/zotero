@@ -264,6 +264,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		await Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
+		for (let [deprecatedName, name] of options?.deprecatedFlags || []) {
+			Zotero.warn(`-${deprecatedName} is deprecated -- use -${name} instead`);
+		}
+		
 		// Make sure that Zotero isn't running as root
 		if (!Zotero.isWin) _checkRoot();
 		
