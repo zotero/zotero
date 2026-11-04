@@ -69,6 +69,10 @@ Zotero.Sync.Storage.Request = function (options) {
 }
 
 
+// Promises for the results of running downloads, keyed by request name
+Zotero.Sync.Storage.Request._runningDownloads = new Map();
+
+
 Zotero.Sync.Storage.Request.prototype.setMaxSize = function (size) {
 	this._maxSize = size;
 };
@@ -194,10 +198,37 @@ Zotero.Sync.Storage.Request.prototype.start = async function () {
 	//
 	// The main sync logic is triggered here.
 	try {
-		var results = await Promise.all(this._onStart.map(f => f(this)));
+		// Wait for a running download of this file instead of starting another, and use its
+		// result if it got the file
+		var runningDownloads = Zotero.Sync.Storage.Request._runningDownloads;
+		if (this.type == 'download') {
+			let running;
+			while ((running = runningDownloads.get(this.name))) {
+				Zotero.debug(`Waiting for running download of ${this.name}`);
+				let runningResult = await running;
+				if (runningResult?.localChanges) {
+					return runningResult;
+				}
+			}
+		}
 		
-		var result = new Zotero.Sync.Storage.Result;
-		result.updateFromResults(results);
+		var promise = (async () => {
+			var results = await Promise.all(this._onStart.map(f => f(this)));
+			var result = new Zotero.Sync.Storage.Result;
+			result.updateFromResults(results);
+			return result;
+		})();
+		if (this.type == 'download') {
+			let tracked = promise
+				.catch(() => null)
+				.finally(() => {
+					if (runningDownloads.get(this.name) === tracked) {
+						runningDownloads.delete(this.name);
+					}
+				});
+			runningDownloads.set(this.name, tracked);
+		}
+		var result = await promise;
 		
 		Zotero.debug(this.Type + " request " + this.name + " finished");
 		
