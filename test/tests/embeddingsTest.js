@@ -921,6 +921,33 @@ describe("Zotero.Embeddings", function () {
 			}
 		});
 
+		it("should leave anchored chunks without text, extracting nothing, when no structure is cached", async function () {
+			this.timeout(60000);
+			let item = await importFileAttachment('test.pdf');
+			await store(item, 0, axis(0), { anchor: positionWorld.sampling.anchor });
+			let stubs = [stubStructure()];
+			try {
+				await indexArrivedRows();
+				// No pack in the cache
+				stubs.push(
+					sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
+					sinon.spy(Zotero.PDFWorker, 'getStructuredDocumentText')
+				);
+				let readSpy = sinon.spy(Zotero.SDT, 'readAnchors');
+				stubs.push(readSpy);
+				await IOUtils.remove(PathUtils.join(Zotero.Attachments.getStorageDirectory(item).path,
+					'.zotero-sdt-cache'), { ignoreAbsent: true });
+				let chunks = await Zotero.Embeddings.getIndexedChunks(item.id);
+				assert.lengthOf(chunks, 1);
+				assert.isNull(chunks[0].text);
+				assert.isTrue(readSpy.calledWithMatch(item.id, sinon.match.any, { cachedOnly: true }));
+				assert.isFalse(Zotero.PDFWorker.getStructuredDocumentText.called);
+			}
+			finally {
+				stubs.forEach(stub => stub.restore());
+			}
+		});
+
 		it("should return nothing for an item the index doesn't hold, or while disabled", async function () {
 			let item = await importFileAttachment('test.pdf');
 			let stub = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true);

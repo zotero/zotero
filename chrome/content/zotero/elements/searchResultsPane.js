@@ -27,9 +27,8 @@
 
 {
 	// The pane shown when what's selected is search matches rather than
-	// items: a card per selected passage (see
-	// Zotero.BestMatch.Session#getPreviews()), grouped under the attachment
-	// each came from.
+	// items: a search-results-box per attachment the selected passages came
+	// from, showing just those passages.
 	//
 	// A passage isn't an item, so nothing an item pane says about one -- its
 	// fields, its attachments, its tags -- has anything to describe. What
@@ -53,14 +52,6 @@
 
 		init() {
 			this._body = this.querySelector('.body');
-			// Double-click, or Enter on a focused card, opens the attachment
-			// at the passage
-			this._body.addEventListener('dblclick', this._handleActivate);
-			this._body.addEventListener('keydown', (event) => {
-				if (event.key == 'Enter') {
-					this._handleActivate(event);
-				}
-			});
 		}
 
 		render() {
@@ -79,25 +70,20 @@
 
 			for (let [itemID, entries] of byItem) {
 				let item = Zotero.Items.get(itemID);
-				let section = document.createXULElement('collapsible-section');
-				section.dataset.l10nId = 'section-search-results';
-				section.dataset.pane = `search-results-${itemID}`;
-				section.summary = item ? item.getDisplayTitle() : '';
-				document.l10n.setArgs(section, { count: entries.length });
-
-				let body = document.createElement('div');
-				body.className = 'body';
-				section.append(body);
-				this._body.append(section);
-
-				for (let entry of entries) {
-					let row = document.createXULElement('search-result-row');
-					// Shown for the row it quotes, so that line is marked
-					row.highlightSnippet = true;
-					row.result = entry;
-					row.dataset.itemId = itemID;
-					body.append(row);
+				if (!item) {
+					continue;
 				}
+				let box = document.createXULElement('search-results-box');
+				box.item = item;
+				box.entries = entries;
+				// Shown for the rows they quote, so those lines are marked
+				box.highlightSnippet = true;
+				this._body.append(box);
+				// Named, since it stands among other items' boxes; a box here
+				// is there to be read, not folded away
+				box.summary = item.getDisplayTitle();
+				box.collapsible = false;
+				box.asyncRender().catch(e => Zotero.logError(e));
 			}
 		}
 
@@ -112,20 +98,6 @@
 				});
 			}
 		}
-
-		// Open the activated card's attachment at its passage
-		_handleActivate = (event) => {
-			let row = event.target.closest('search-result-row');
-			// The Show More toggle isn't an activation
-			if (!row || event.target.closest('.show-more')) {
-				return;
-			}
-			if (typeof ZoteroPane == 'undefined') {
-				return;
-			}
-			ZoteroPane.viewSearchMatch(parseInt(row.dataset.itemId), row.result, event)
-				.catch(e => Zotero.logError(e));
-		};
 	}
 
 	customElements.define("search-results-pane", SearchResultsPane);

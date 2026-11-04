@@ -1196,10 +1196,15 @@ Zotero.Embeddings = new function () {
 	 * @param {Object} [options]
 	 * @param {String} [options.queryText] - The query to score the chunks
 	 *     against
+	 * @param {Boolean} [options.isPriority=true] - Read anchored chunks ahead
+	 *     of what's queued in the document worker
 	 * @return {Promise<Object[]>} - [{ chunkIndex, score, text, outlinePath,
-	 *     pageLabel, position }]
+	 *     pageLabel, position, anchor, annotations }], the anchor the
+	 *     chunk's place in the file as the chunker gives it, null for a
+	 *     plain-text chunk, and the annotations the attachment's on the
+	 *     chunk's text, as Zotero.SDT.readAnchors() gives them
 	 */
-	this.getIndexedChunks = async function (itemID, { queryText = null } = {}) {
+	this.getIndexedChunks = async function (itemID, { queryText = null, isPriority = true } = {}) {
 		if (!this.isEnabled()) {
 			return [];
 		}
@@ -1232,7 +1237,7 @@ Zotero.Embeddings = new function () {
 		if (!rows.length) {
 			return [];
 		}
-		let sources = await _loadChunkSources(itemID, rows);
+		let sources = await _loadChunkSources(itemID, rows, { isPriority });
 		let chunks = [];
 		for (let i = 0; i < rows.length; i++) {
 			if (!_inReferenceList(sources[i])) {
@@ -1257,7 +1262,9 @@ Zotero.Embeddings = new function () {
 			text: source.text,
 			outlinePath: source.outlinePath,
 			pageLabel: source.pageLabel,
-			position: source.position
+			position: source.position,
+			anchor: source.anchor,
+			annotations: source.annotations
 		};
 	}
 
@@ -1266,24 +1273,27 @@ Zotero.Embeddings = new function () {
 	// by cutting the attachment's plain text again
 	//
 	// @return {Promise<Object[]>} - One { text, outlinePath, pageLabel,
-	//     position } per row, in order; `position` is the one the reader
-	//     navigates to, the first of the chunk's
-	async function _loadChunkSources(itemID, rows) {
+	//     position, anchor, annotations } per row, in order; `position` is
+	//     the one the reader navigates to, the first of the chunk's
+	async function _loadChunkSources(itemID, rows, { isPriority }) {
 		let sources = rows.map(() => ({
 			text: null,
 			outlinePath: null,
 			pageLabel: null,
-			position: null
+			position: null,
+			anchor: null,
+			annotations: []
 		}));
 		let structured = [];
 		let plain = [];
 		for (let i = 0; i < rows.length; i++) {
 			let anchor = rows[i].anchor ? Zotero.Embeddings.Indexing.expandAnchor(rows[i].anchor) : null;
+			sources[i].anchor = anchor;
 			let entry = { index: i, chunkIndex: rows[i].chunkIndex, anchor };
 			(anchor ? structured : plain).push(entry);
 		}
 		if (structured.length) {
-			await _loadStructuredChunkSources(itemID, structured, sources);
+			await _loadStructuredChunkSources(itemID, structured, sources, { isPriority });
 		}
 		if (plain.length) {
 			await _loadPlainChunkSources(itemID, plain, sources);
@@ -1319,14 +1329,15 @@ Zotero.Embeddings = new function () {
 	}
 
 	// The structured-text case of _loadChunkSources(): the chunks' anchors
-	// read back from the pack, each with the reader positions of its text
-	async function _loadStructuredChunkSources(itemID, entries, sources) {
-		// isPriority: re-deriving a preview is user-initiated, and can
-		// involve extraction when the cached pack is gone
+	// read back from the pack, each with the reader position of its text
+	// and the annotations on it. Only a pack already extracted is read,
+	// extracting being left to SDT.AutoIndex; without one, the chunks have
+	// no text.
+	async function _loadStructuredChunkSources(itemID, entries, sources, { isPriority }) {
 		let result = await Zotero.SDT.readAnchors(
 			itemID,
 			entries.map(entry => entry.anchor),
-			{ isPriority: true }
+			{ isPriority, cachedOnly: true }
 		);
 		if (!result.ok) {
 			return;
@@ -1338,7 +1349,8 @@ Zotero.Embeddings = new function () {
 					text: found.text,
 					outlinePath: found.outlinePath || null,
 					pageLabel: found.pageLabel,
-					position: found.position || null
+					position: found.position || null,
+					annotations: found.annotations
 				});
 			}
 		}

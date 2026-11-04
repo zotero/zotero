@@ -41,6 +41,7 @@ const { ZOTERO_CONFIG } = ChromeUtils.importESModule('resource://zotero/config.m
 
 const CHILD_INDENT = 16;
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
+const SCROLL_REST_DELAY = 100;
 
 // Migrate unsuffixed `<id>` keys back to `<id>-default`. Earlier 10.0 betas dropped the `-default`
 // suffix from main-library tree IDs, stranding 9.0.x prefs and breaking version switching.
@@ -916,7 +917,7 @@ class ItemTreeRowProvider {
 	sort(itemIDs) {
 		this.itemTree._cacheState();
 		this._sort(itemIDs);
-		this.runListeners('update', true, { restoreSelection: true });
+		return this.runListeners('update', true, { restoreSelection: true });
 	}
 
 	/**
@@ -1051,6 +1052,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._dropRow = null;
 		this._rowCache = {};
 		
+		// Fired once scrolling rests, so listeners can act on the rows it
+		// brought into view
+		this.onScroll = this.createEventBinding('scroll');
+		this._handleScroll = Zotero.Utilities.debounce(
+			() => this.runListeners('scroll'), SCROLL_REST_DELAY);
 		this.rowProvider = new ItemTreeRowProvider(this);
 		this._renderCtx = {
 			renderCell: (...args) => this._renderCell(...args),
@@ -1654,7 +1660,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				getRowCount: () => this.rowProvider.getRowCount(),
 				id: this.id,
 				ref: ref => this.tree = ref,
-				treeboxRef: ref => this._treebox = ref,
+				treeboxRef: (ref) => {
+					this._treebox = ref;
+					ref?.targetElement.addEventListener('scroll', this._handleScroll, { passive: true });
+				},
 				renderItem: this._renderItem.bind(this),
 				prologue,
 				hide: showMessage,

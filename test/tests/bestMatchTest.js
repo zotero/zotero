@@ -430,7 +430,7 @@ describe("Zotero.BestMatch", function () {
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			// The index was asked for the item's passages, but the model was
 			// never asked about an item it hasn't indexed
-			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null }));
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null, isPriority: true }));
 			// Only the passages that say the query come back, each a piece of
 			// the item's text -- joined with the chunker's own separators --
 			// with the query located in it
@@ -444,6 +444,19 @@ describe("Zotero.BestMatch", function () {
 				assert.isAtLeast(excerpt.snippet.start, 0);
 				assert.isAtMost(excerpt.snippet.end, excerpt.text.length);
 			}
+		});
+
+		it("should read an item's text behind queued worker jobs when asked to", async function () {
+			stubs.push(sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true));
+			let indexedStub = sinon.stub(Zotero.Embeddings, 'getIndexedChunks').resolves([]);
+			let cutStub = sinon.stub(Zotero.SDT, 'getItemChunks').resolves({ ok: false, reason: 'not-cached' });
+			stubs.push(indexedStub, cutStub);
+			stubs.push(sinon.stub(Zotero.Items, 'getAsync').resolves({ attachmentText: Promise.resolve('') }));
+
+			let session = await sessionFor();
+			await session.getMatchingExcerpts(attachment.id, { isPriority: false });
+			assert.isTrue(indexedStub.calledWithMatch(attachment.id, { isPriority: false }));
+			assert.isTrue(cutStub.calledWithMatch(attachment.id, { isPriority: false }));
 		});
 
 		it("should cut an unindexed item along its structure, each passage opening where it sits", async function () {
@@ -470,9 +483,10 @@ describe("Zotero.BestMatch", function () {
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.lengthOf(excerpts, 1);
 			// Cut off this thread, from structure already extracted, each
-			// passage placed for the reader to open it at
+			// passage placed for the reader to open it at and marked with
+			// the annotations on it
 			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id,
-				{ cachedOnly: true, isPriority: true, positions: true }));
+				{ cachedOnly: true, isPriority: true, annotations: true }));
 			assert.equal(excerpts[0].text, 'An owl hunts at night.');
 			assert.deepEqual(excerpts[0].position, { pageIndex: 3, rects: [[10, 20, 300, 40]] });
 			assert.equal(excerpts[0].pageLabel, '4');
@@ -672,7 +686,7 @@ describe("Zotero.BestMatch", function () {
 			// embedded for it -- and with nothing indexed, its text is cut
 			let session = await sessionFor({ semantic: false });
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
-			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null }));
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: null, isPriority: true }));
 			assert.lengthOf(excerpts, 1);
 			assert.equal(excerpts[0].text, 'a passage naming the owl');
 			// Nothing weighed it but its words
@@ -697,7 +711,7 @@ describe("Zotero.BestMatch", function () {
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			// Scored against the query, since the model matched the item,
 			// and never cut again
-			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: 'owl' }));
+			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id, { queryText: 'owl', isPriority: true }));
 			assert.isFalse(cutStub.called);
 			let byText = Object.fromEntries(excerpts.map(excerpt => [excerpt.text, excerpt]));
 			// Matched by the model alone: as strong as the model's score
@@ -1085,9 +1099,9 @@ describe("Zotero.BestMatch", function () {
 
 	});
 
-	describe("Session background previews", function () {
-		// More matches than score() derives before resolving, so the rest go
-		// to the background pass
+	describe("Session requested previews", function () {
+		// More matches than score() derives before resolving, so the rest
+		// wait to be asked for
 		const PRELOADED = Zotero.BestMatch.PRELOADED_MATCH_PREVIEWS;
 		var atts;
 
@@ -1099,8 +1113,8 @@ describe("Zotero.BestMatch", function () {
 			}
 		});
 
-		// Scores descending in creation order, so the background pass covers
-		// the last three
+		// Scores descending in creation order, so the last three are left
+		// pending
 		function stubScore() {
 			let scores = new Map(atts.map((att, i) => [att.id, 1 - i / 100]));
 			stubs.push(sinon.stub(Zotero.BestMatch, 'scoreItemIDs').resolves({
@@ -1136,40 +1150,68 @@ describe("Zotero.BestMatch", function () {
 			};
 		}
 
-		it("should derive the best-scored previews before resolving and the rest after", async function () {
+		it("should derive the best-scored previews before resolving and the rest only when asked", async function () {
 			stubScore();
 			let { stub, release, advanceTo } = stubDerive();
 			let reported = [];
 			let session = Zotero.BestMatch.createSession('owl');
 			session.onPreviewsFilled = itemIDs => reported.push(...itemIDs);
 			let scored = session.score(atts.map(att => att.id));
-			// Only the previews score() waits for are let through, so its
-			// resolution can't have depended on the one left in flight
-			await advanceTo(PRELOADED + 1);
+			await advanceTo(PRELOADED);
+			release();
 			await scored;
 
 			// Settled by the time score() resolves
 			for (let att of atts.slice(0, PRELOADED)) {
 				assert.equal(session.getPreviews(att.id).state, 'filled');
 			}
+			// Nothing else is derived until it's asked for
+			await Zotero.Promise.delay(50);
+			assert.equal(stub.callCount, PRELOADED);
 			for (let att of atts.slice(PRELOADED)) {
 				assert.equal(session.getPreviews(att.id).state, 'pending');
 			}
-			// Nothing reported for what score() derived itself
 			assert.isEmpty(reported);
 
+			// Asked for, they derive behind what's queued in the document
+			// worker
+			let rest = atts.slice(PRELOADED).map(att => att.id);
+			session.request(rest);
 			let settled = false;
 			session.previewsSettled.then(() => settled = true);
 			while (!settled) {
 				release();
 				await Zotero.Promise.delay(0);
 			}
-			await session.previewsSettled;
 			assert.equal(stub.callCount, atts.length);
-			for (let att of atts.slice(PRELOADED)) {
-				assert.equal(session.getPreviews(att.id).state, 'filled');
+			assert.isTrue(stub.args.slice(PRELOADED).every(args => args[1]?.isPriority === false));
+			for (let id of rest) {
+				assert.equal(session.getPreviews(id).state, 'filled');
 			}
-			assert.sameMembers(reported, atts.slice(PRELOADED).map(att => att.id));
+			assert.sameMembers(reported, rest);
+		});
+
+		it("should derive the newest request first", async function () {
+			stubScore();
+			let { stub, release, advanceTo } = stubDerive();
+			let session = Zotero.BestMatch.createSession('owl');
+			let scored = session.score(atts.map(att => att.id));
+			await advanceTo(PRELOADED);
+			release();
+			await scored;
+
+			let [a, b, c] = atts.slice(PRELOADED).map(att => att.id);
+			// The first is taken at once; the second waits behind it
+			session.request([a, b]);
+			// What's in view now, before what was a moment ago
+			session.request([c]);
+			let settled = false;
+			session.previewsSettled.then(() => settled = true);
+			while (!settled) {
+				release();
+				await Zotero.Promise.delay(0);
+			}
+			assert.deepEqual(stub.args.slice(PRELOADED).map(args => args[0]), [a, c, b]);
 		});
 
 		it("should preload previews by where rows appear, not by items' own scores", async function () {
@@ -1188,7 +1230,8 @@ describe("Zotero.BestMatch", function () {
 			let { release, advanceTo } = stubDerive();
 			let session = Zotero.BestMatch.createSession('owl');
 			let scored = session.score([...scores.keys()]);
-			await advanceTo(PRELOADED + 1);
+			await advanceTo(PRELOADED);
+			release();
 			await scored;
 
 			assert.equal(session.getPreviews(child.id).state, 'filled');
@@ -1196,17 +1239,21 @@ describe("Zotero.BestMatch", function () {
 			assert.equal(session.getPreviews(atts[atts.length - 1].id).state, 'pending');
 
 			session.dispose();
-			release();
 		});
 
-		it("should stop the background pass when the session is disposed", async function () {
+		it("should stop deriving requested previews when the session is disposed", async function () {
 			stubScore();
 			let { stub, release, advanceTo } = stubDerive();
 			let session = Zotero.BestMatch.createSession('owl');
 			let scored = session.score(atts.map(att => att.id));
-			await advanceTo(PRELOADED + 1);
+			await advanceTo(PRELOADED);
+			release();
 			await scored;
 
+			session.request(atts.slice(PRELOADED).map(att => att.id));
+			while (stub.callCount < PRELOADED + 1) {
+				await Zotero.Promise.delay(0);
+			}
 			session.dispose();
 			release();
 			await session.previewsSettled;

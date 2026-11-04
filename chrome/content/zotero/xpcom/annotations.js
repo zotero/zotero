@@ -344,6 +344,70 @@ Zotero.Annotations = new function () {
 	};
 
 	/**
+	 * Annotate text selected within an anchored chunk of an attachment's
+	 * text, as Zotero.SDT.getItemChunks() cuts it: a highlight or underline
+	 * over the selected words, saved as annotation items of the attachment,
+	 * one per stretch of the selection that sits together in the document,
+	 * as a selection across a caption makes two. Made from the attachment's
+	 * structured text, with the file read for what it alone doesn't give.
+	 * PDF attachments only so far.
+	 *
+	 * @param {Integer} itemID
+	 * @param {Object} anchor - The chunk's anchor
+	 * @param {Integer} start - Offsets into the chunk's text
+	 * @param {Integer} end
+	 * @param {Object} [options]
+	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
+	 * @param {String} [options.color] - Hex color, the reader's default when omitted
+	 * @returns {Promise<Object>} - { ok: true, items } with the saved
+	 *     annotation items, or { ok: false, reason }: Zotero.SDT.getPack()'s
+	 *     reasons, 'unsupported' for an attachment not annotated this way,
+	 *     'unresolved' when the selection isn't found in the document, or
+	 *     'failed' when the worker couldn't annotate it
+	 */
+	this.createFromSelection = async function (itemID, anchor, start, end, { type = 'highlight', color } = {}) {
+		let item = await Zotero.Items.getAsync(itemID);
+		// Until the worker annotates EPUBs and snapshots as well
+		if (!item || !item.isPDFAttachment()) {
+			return { ok: false, reason: 'unsupported' };
+		}
+		let result = await Zotero.SDT.getPack(itemID, { isPriority: true });
+		if (!result.ok) {
+			return { ok: false, reason: result.reason };
+		}
+		let made;
+		try {
+			made = await Zotero.PDFWorker.createAnnotations(itemID, result.bytes, {
+				anchor,
+				start,
+				end,
+				type,
+				color: color || this.DEFAULT_COLOR,
+				isPriority: true,
+			});
+		}
+		catch {
+			// Logged by the worker manager
+			return { ok: false, reason: 'failed' };
+		}
+		if (!made?.annotations.length) {
+			return { ok: false, reason: 'unresolved' };
+		}
+		let items = [];
+		let notifierQueue = new Zotero.Notifier.Queue();
+		try {
+			for (let annotation of made.annotations) {
+				annotation.key = Zotero.DataObjectUtilities.generateKey();
+				items.push(await this.saveFromJSON(item, annotation, { notifierQueue }));
+			}
+		}
+		finally {
+			await Zotero.Notifier.commit(notifierQueue);
+		}
+		return { ok: true, items };
+	};
+
+	/**
 	 * Return the distinct authors of annotations in a library, for the Annotation Author
 	 * search condition's value menu
 	 *

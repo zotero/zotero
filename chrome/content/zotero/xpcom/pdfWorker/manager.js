@@ -717,11 +717,14 @@ class PDFWorker {
 	 * @param {ArrayBuffer} buf - The pack, as getStructuredDocumentText() returns it
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority]
-	 * @param {Boolean} [options.positions] - Give each chunk the reader
-	 *     `positions` its anchor resolves to
-	 * @returns {Promise<Object>} - { chunks, sourceHash, chunkerVersion }
+	 * @param {Object[]} [options.positions] - Reader positions to find
+	 *     within each chunk's text
+	 * @returns {Promise<Object>} - { chunks, sourceHash, chunkerVersion },
+	 *     each chunk with `positions`, the reader positions its anchor
+	 *     resolves to, and `overlaps`, per given position the { start, end }
+	 *     ranges of its text covered or null
 	 */
-	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = false } = {}) {
+	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = [] } = {}) {
 		return this._enqueue(async () => {
 			try {
 				var result = await this._query('sdt.getChunks', { buf, positions }, [buf]);
@@ -734,6 +737,59 @@ class PDFWorker {
 	}
 
 	/**
+	 * Annotate text selected within an anchored chunk of an attachment: the
+	 * annotations the selection makes, in the reader's form, ready to save.
+	 * Located through the structured text pack, made from the file. The
+	 * pack buffer is transferred to the worker, so the caller's copy is
+	 * detached.
+	 *
+	 * @param {Integer} itemID - The attachment
+	 * @param {ArrayBuffer} buf - Its pack, as getStructuredDocumentText() returns it
+	 * @param {Object} options
+	 * @param {Object} options.anchor - The chunk's anchor, as getStructuredDocumentTextChunks() gives it
+	 * @param {Integer} options.start - The selection's offsets into the chunk's text
+	 * @param {Integer} options.end
+	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
+	 * @param {String} [options.color] - The annotation color
+	 * @param {String} [options.password] - The PDF's, when it's encrypted
+	 * @param {Boolean} [options.isPriority]
+	 * @returns {Promise<Object|null>} - { text, annotations }: the selected
+	 *     text and its annotations in the reader's form, each with type,
+	 *     color, text, comment, tags, position, sortIndex and pageLabel;
+	 *     null when the selection doesn't resolve or the file is missing
+	 */
+	async createAnnotations(itemID, buf, { isPriority = false, ...options } = {}) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+			if (!(attachment.isPDFAttachment()
+					|| attachment.isEPUBAttachment()
+					|| attachment.isSnapshotAttachment())) {
+				throw new Error('Item must be a PDF, EPUB, or snapshot attachment');
+			}
+			let path = await attachment.getFilePathAsync();
+			if (!path) {
+				return null;
+			}
+			let fileSize = (await IOUtils.stat(path)).size;
+			if (fileSize > Math.pow(2, 31) - 1) {
+				throw new Error(`The file "${path}" is too large`);
+			}
+			let fileBuf = await IOUtils.read(path);
+			fileBuf = new Uint8Array(fileBuf).buffer;
+
+			let t = new Date();
+			try {
+				var result = await this._query('createAnnotations', { packBuf: buf, fileBuf, ...options }, [buf, fileBuf]);
+			}
+			catch (e) {
+				this._throwWorkerError('createAnnotations', e, { anchor: options.anchor });
+			}
+			Zotero.debug(`Annotated a chunk selection of item ${attachment.libraryKey} in ${new Date() - t} ms`);
+			return result;
+		}, !!isPriority);
+	}
+
+	/**
 	 * Read chunk anchors back from a structured document text pack. The
 	 * buffer is transferred to the worker, so the caller's copy is detached.
 	 *
@@ -741,13 +797,17 @@ class PDFWorker {
 	 * @param {Object[]} anchors - A chunk's `anchor` per entry
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority]
+	 * @param {Object[]} [options.positions] - Reader positions to find
+	 *     within each chunk's text
 	 * @returns {Promise<Object[]>} - Per anchor, { text, outlinePath,
-	 *     pageLabel, positions } or null where it doesn't resolve
+	 *     pageLabel, positions, overlaps } or null where it doesn't
+	 *     resolve; `overlaps` per given position, the ranges of the text
+	 *     it covers or null
 	 */
-	async readStructuredDocumentTextAnchors(buf, anchors, { isPriority = false } = {}) {
+	async readStructuredDocumentTextAnchors(buf, anchors, { isPriority = false, positions = [] } = {}) {
 		return this._enqueue(async () => {
 			try {
-				var result = await this._query('sdt.readAnchors', { buf, anchors }, [buf]);
+				var result = await this._query('sdt.readAnchors', { buf, anchors, positions }, [buf]);
 			}
 			catch (e) {
 				this._throwWorkerError('sdt.readAnchors', e);

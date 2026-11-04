@@ -98,6 +98,9 @@ preferences-advanced-semantic-search-enabled =
     .label = Enabled
 preferences-advanced-semantic-search-disabled =
     .label = Disabled
+preferences-advanced-sdt-status = Document structure:
+preferences-advanced-sdt-status-value = { $settled } of { $total } attachments processed
+preferences-advanced-sdt-status-off = Not extracted in the background
 preferences-advanced-best-match-margin = Quality cutoff below top (%):
 preferences-advanced-best-match-margin-description = At 30%, results scoring up to 30% below the best one are kept; 100% keeps every result, 0 drops everything but the top match.preferences-advanced-semantic-search-downloading = Downloading…
 preferences-advanced-semantic-search-downloading-progress = Downloading… { $percent }%

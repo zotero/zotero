@@ -44,9 +44,12 @@ search-result-row {
 		}
 	}
 
-	// A passage's paragraph breaks are kept
+	// A passage's paragraph breaks are kept, and its text can be selected,
+	// which the window otherwise disallows, to annotate it
 	.body .quote {
 		white-space: pre-line;
+		user-select: text;
+		cursor: text;
 	}
 
 	&.expanded .body .quote {
@@ -58,10 +61,195 @@ search-result-row {
 		@include search-match-highlight;
 	}
 
+	// The attachment's annotations over the passage, in their own colors:
+	// a highlight as a wash behind the words, an underline beneath them
+	.body .quote .annotation.highlight {
+		background: color-mix(in srgb, var(--annotation-color) 35%, transparent);
+	}
+
+	.body .quote .annotation.underline {
+		border-bottom: 2px solid var(--annotation-color);
+	}
+
 	// The line the tree row quotes, in the primary color against the
 	// quote's secondary
 	.body .quote .snippet {
 		color: var(--fill-primary);
+	}
+
+	// The popup over selected text, after the reader's: the annotation colors
+	// in a row, the highlight/underline choice as a pill with the active tool
+	// raised, and the tags of the annotation to make
+	.selection-popup {
+		--pointer-size: 8px;
+
+		// The panel is only the floating window: the card is drawn by the
+		// body, leaving a band for the pointer the card aims at the caret
+		&::part(content) {
+			padding: 0;
+			border: 0;
+			background: transparent;
+			box-shadow: none;
+			overflow: visible;
+		}
+
+		.head {
+			padding: 4px 0;
+			border-bottom: none;
+		}
+
+		tags-box .body {
+			padding-inline: 4px;
+		}
+
+		.popup-body {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			// A set width, the color row's plus the padding as in the reader's
+			// popup, so the tag rows added can't widen the popup
+			width: 206px;
+			box-sizing: border-box;
+			padding: 8px;
+			background: var(--material-toolbar);
+			border: 1px solid var(--color-panedivider);
+			border-radius: 6px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+			// The pointer: a border-colored triangle with the background's
+			// drawn over it, at the caret's x
+			&::before, &::after {
+				content: "";
+				position: absolute;
+				left: var(--pointer-x, 50%);
+				transform: translateX(-50%);
+				border: var(--pointer-size) solid transparent;
+			}
+		}
+
+		&.pointer-top .popup-body {
+			margin-top: var(--pointer-size);
+
+			&::before, &::after {
+				border-top-width: 0;
+			}
+
+			&::before {
+				top: calc(-1 * var(--pointer-size) - 2px);
+				border-bottom-color: var(--color-panedivider);
+			}
+
+			&::after {
+				top: calc(-1 * var(--pointer-size) - 1px);
+				border-bottom-color: var(--material-toolbar);
+			}
+		}
+
+		&.pointer-bottom .popup-body {
+			margin-bottom: var(--pointer-size);
+
+			&::before, &::after {
+				border-bottom-width: 0;
+			}
+
+			&::before {
+				bottom: calc(-1 * var(--pointer-size) - 2px);
+				border-top-color: var(--color-panedivider);
+			}
+
+			&::after {
+				bottom: calc(-1 * var(--pointer-size) - 1px);
+				border-top-color: var(--material-toolbar);
+			}
+		}
+
+		// The swatches spread over the row, the first and last at its edges
+		.colors {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		// The editor of the annotation's tags, which the popup grows down to hold
+		.tags-editor {
+			min-width: 0;
+			width: 100%;
+		}
+
+		// The reader's color buttons: a 14px swatch in a 20px button that
+		// tints when hovered or pressed
+		.color-button {
+			appearance: none;
+			width: 20px;
+			height: 20px;
+			padding: 3px;
+			border: 0;
+			border-radius: 5px;
+			background: none;
+
+			&:hover {
+				background: var(--fill-quinary);
+			}
+
+			&:active {
+				background: var(--fill-quarternary);
+			}
+
+			&::before {
+				content: "";
+				display: block;
+				width: 14px;
+				height: 14px;
+				border-radius: 2px;
+				background: var(--color);
+				box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+			}
+		}
+
+		.tool-toggle {
+			display: flex;
+			padding: 1px;
+			height: 22px;
+			border-radius: 6px;
+			background: var(--fill-quinary);
+
+			button {
+				appearance: none;
+				flex: 1;
+				height: 20px;
+				padding: 0;
+				border: 0.5px solid transparent;
+				border-radius: 6px;
+				background: none;
+				color: var(--fill-secondary);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+
+				&::before {
+					content: "";
+					width: 16px;
+					height: 16px;
+					-moz-context-properties: fill;
+					fill: currentColor;
+					background: no-repeat center;
+				}
+
+				&.highlight::before {
+					background-image: icon-url("16/universal/annotate-highlight.svg");
+				}
+
+				&.underline::before {
+					background-image: icon-url("16/universal/annotate-underline.svg");
+				}
+
+				&.active {
+					background: var(--material-background);
+					border-color: var(--fill-senary);
+					color: var(--fill-primary);
+				}
+			}
+		}
 	}
 
 	.show-more {

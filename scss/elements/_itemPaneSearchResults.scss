@@ -27,17 +27,7 @@ search-results-pane {
 		stroke: var(--accent-gold);
 	}
 
-	collapsible-section > .body {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-
-		@include comfortable {
-			gap: 8px;
-		}
-	}
-
-	collapsible-section:not(:last-child) {
+	search-results-box:not(:last-child) {
 		border-bottom: 1px solid var(--fill-quinary);
 	}
 

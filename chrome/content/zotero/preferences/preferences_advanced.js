@@ -84,8 +84,15 @@ Zotero_Preferences.Advanced = {
 			}
 		);
 
+		// Background extraction of document structure, which passages are
+		// cut from
+		this._sdtStatusListener = status => this.updateSDTStatusUI(status);
+		Zotero.SDT.AutoIndex.addListener(this._sdtStatusListener);
+		Zotero.SDT.AutoIndex.refreshStatus();
+
 		document.getElementById('zotero-prefpane-advanced').addEventListener('unload', () => {
 			Zotero.Embeddings.Indexing.removeProgressListener(this._semanticSearchListener);
+			Zotero.SDT.AutoIndex.removeListener(this._sdtStatusListener);
 			Zotero.Embeddings.setThreadBoost('prefs-open', false);
 			Zotero.Prefs.unregisterObserver(enablePrefObserverID);
 		});
@@ -113,6 +120,21 @@ Zotero_Preferences.Advanced = {
 		Zotero.Embeddings.Indexing.refreshStatus();
 	},
 
+
+	updateSDTStatusUI: function ({ enabled, settled, total }) {
+		let row = document.getElementById('sdt-status-row');
+		row.hidden = total === null;
+		if (row.hidden) {
+			return;
+		}
+		let value = document.getElementById('sdt-status-value');
+		if (enabled) {
+			document.l10n.setAttributes(value, 'preferences-advanced-sdt-status-value', { settled, total });
+		}
+		else {
+			document.l10n.setAttributes(value, 'preferences-advanced-sdt-status-off');
+		}
+	},
 
 	updateSemanticSearchUI: function (status) {
 		let statusBox = document.getElementById('semantic-search-status');

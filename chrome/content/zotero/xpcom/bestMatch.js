@@ -58,21 +58,17 @@ Zotero.BestMatch = new function () {
 	// they're read whole rather than quoted, which needs no line chosen.
 	const MAX_QUOTED_PASSAGES = 3;
 	// Previews derived before scoring resolves, in screen order: enough to
-	// cover the top of the results. The rest follow in the background, since
-	// reading every matched item's text takes far longer than the ranking.
+	// cover the top of the results. The rest are derived only when asked
+	// for (see Session#request()), since reading every matched item's text
+	// takes far longer than the ranking.
 	const PRELOADED_MATCH_PREVIEWS = 10;
-	// How long background-derived previews accumulate before the consumer
-	// hears about them, so a pass redraws the view about twice a second
+	// Items past the ones in view whose previews are derived with them, so
+	// scrolling reaches rows already filled
+	const PREVIEW_LOOKAHEAD = 20;
+	// How long requested previews accumulate before the consumer hears
+	// about them, so filling redraws the view about twice a second rather
+	// than once per item
 	const PREVIEW_BATCH_INTERVAL = 500;
-	// How long a background derivation waits for an idle main thread before
-	// running anyway
-	const PREVIEW_IDLE_TIMEOUT = 1000;
-	// How long the pass rests after deriving a preview, as a multiple of what
-	// that preview cost. Deriving reads the item's text; run flat out, that
-	// work lands inside the frames of whatever the user is doing and
-	// scrolling stutters.
-	const PREVIEW_PAUSE_RATIO = 3;
-	const PREVIEW_MAX_PAUSE = 250;
 	// A query with more lexical terms than this is a passage, not a list of
 	// words: what the lexical engine makes of it is noise, so a hybrid
 	// ranking leaves it to the semantic engine alone
@@ -167,13 +163,6 @@ Zotero.BestMatch = new function () {
 			}
 		}
 		return { ranks, effectiveScores };
-	}
-
-	// Resolves the next time the main thread is idle, or after
-	// PREVIEW_IDLE_TIMEOUT regardless
-	function _idle() {
-		return new Promise(resolve => requestIdleCallback(
-			resolve, { timeout: PREVIEW_IDLE_TIMEOUT }));
 	}
 
 	/**
@@ -361,10 +350,10 @@ Zotero.BestMatch = new function () {
 	 * previews explaining its matches.
 	 *
 	 * score() ranks candidates and derives the first few previews on screen
-	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive in the
-	 * background, in the same order and paced to stay out of the user's way
-	 * (see PREVIEW_PAUSE_RATIO), reported through onPreviewsFilled and
-	 * awaitable through previewsSettled. An item's entries hold both
+	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive when
+	 * request() asks for them, newest request first, reported through
+	 * onPreviewsFilled and awaitable through previewsSettled. An item's
+	 * entries hold both
 	 * engines' evidence, merged, deduplicated and ordered by strength (see
 	 * getMatchingExcerpts()). A re-score keeps previews already derived;
 	 * fill() re-derives ones invalidate() dropped back to pending. A
@@ -382,9 +371,10 @@ Zotero.BestMatch = new function () {
 			this._lexicalMatches = new Map();
 			this._lexicalTerms = null;
 			this._disposed = false;
-			// Bumped per background pass, so a re-score abandons the last one
-			this._derivation = 0;
-			this._previewsSettled = Promise.resolve();
+			// Items asked for by request() and not derived yet, next first,
+			// and the run deriving them while there are any
+			this._requested = [];
+			this._deriving = null;
 			// Set by a consumer showing previews as they arrive: called with
 			// the itemIDs filled since the last call (see
 			// PREVIEW_BATCH_INTERVAL), never for what score() derived itself
@@ -408,9 +398,8 @@ Zotero.BestMatch = new function () {
 		 * matched keep their settled previews -- a re-score doesn't re-derive
 		 * kept text -- and items no longer matched lose theirs.
 		 *
-		 * The previews past PRELOADED_MATCH_PREVIEWS derive after this
-		 * resolves (see onPreviewsFilled, previewsSettled). Ranks and
-		 * barFractions are complete either way -- neither depends on a
+		 * The other previews derive only when request() asks for them. Ranks
+		 * and barFractions are complete either way -- neither depends on a
 		 * preview.
 		 *
 		 * @param {Number[]} itemIDs - Candidate item IDs to score
@@ -467,28 +456,52 @@ Zotero.BestMatch = new function () {
 				}
 				await this._derive(itemID);
 			}
-			this._previewsSettled = this._deriveRest(
-				pending.slice(PRELOADED_MATCH_PREVIEWS));
 			return scores;
 		}
 
 		/**
-		 * Resolves once the previews score() didn't wait for have derived, or
-		 * once the session is disposed
+		 * Queue the pending previews of the items in view and of the
+		 * PREVIEW_LOOKAHEAD items after them, reported in batches through
+		 * onPreviewsFilled. A newer request goes first, so what's on screen
+		 * now comes before what was a moment ago. Derived behind queued
+		 * document-worker jobs.
+		 *
+		 * @param {Number[]} itemIDs - Items in the order they're shown, from
+		 *     the first in view
+		 * @param {Object} [options]
+		 * @param {Number} [options.visible] - How many of them are in view;
+		 *     all of them by default
+		 */
+		request(itemIDs, { visible = itemIDs.length } = {}) {
+			if (this._disposed) {
+				return;
+			}
+			let wanted = itemIDs.slice(0, visible + PREVIEW_LOOKAHEAD)
+				.filter(id => this._previews.get(id)?.state == 'pending');
+			let ahead = new Set(wanted);
+			this._requested = [...wanted, ...this._requested.filter(id => !ahead.has(id))];
+			if (this._requested.length && !this._deriving) {
+				this._deriving = this._deriveRequested()
+					.catch(e => Zotero.logError(e))
+					.finally(() => {
+						this._deriving = null;
+					});
+			}
+		}
+
+		/**
+		 * Resolves once every requested preview has derived, or once the
+		 * session is disposed
 		 *
 		 * @return {Promise}
 		 */
 		get previewsSettled() {
-			return this._previewsSettled;
+			return this._deriving ?? Promise.resolve();
 		}
 
-		// Derive the previews score() left behind, in screen order (see
-		// score()), reporting them in batches (see onPreviewsFilled). Left
-		// unawaited by score(), so a consumer draws the ranking while the
-		// explanations behind it fill in. A newer pass -- another score() --
-		// or dispose() abandons this one.
-		async _deriveRest(itemIDs) {
-			let derivation = ++this._derivation;
+		// Derive requested previews until none are left, reporting them in
+		// batches (see onPreviewsFilled)
+		async _deriveRequested() {
 			let filled = [];
 			let reportedAt = Date.now();
 			let report = () => {
@@ -506,15 +519,17 @@ Zotero.BestMatch = new function () {
 					Zotero.logError(e);
 				}
 			};
-			for (let itemID of itemIDs) {
-				await _idle();
-				if (this._disposed || derivation !== this._derivation) {
+			while (this._requested.length) {
+				if (this._disposed) {
 					return;
 				}
-				let started = Date.now();
-				await this._derive(itemID);
-				await Zotero.Promise.delay(Math.min(PREVIEW_MAX_PAUSE,
-					(Date.now() - started) * PREVIEW_PAUSE_RATIO));
+				let itemID = this._requested.shift();
+				// Derived since it was asked for, as by fill()
+				if (this._previews.get(itemID)?.state != 'pending') {
+					continue;
+				}
+				// Behind what the user is waiting on in the document worker
+				await this._derive(itemID, { isPriority: false });
 				// A preview that derived nothing has no rows to redraw
 				if (this._previews.get(itemID)?.state == 'filled') {
 					filled.push(itemID);
@@ -705,13 +720,13 @@ Zotero.BestMatch = new function () {
 		// deriving (see invalidate()) is left to its next derivation. A
 		// derivation that failed would fail again, so it settles for showing
 		// nothing rather than being retried.
-		async _derive(itemID) {
+		async _derive(itemID, { isPriority = true } = {}) {
 			let preview = this._previews.get(itemID);
 			if (!preview || preview.state != 'pending') {
 				return;
 			}
 			try {
-				let entries = await this.getMatchingExcerpts(itemID);
+				let entries = await this.getMatchingExcerpts(itemID, { isPriority });
 				if (this._disposed || this._previews.get(itemID) != preview) {
 					return;
 				}
@@ -734,14 +749,17 @@ Zotero.BestMatch = new function () {
 		 * shows the query.
 		 *
 		 * @param {Number} itemID
+		 * @param {Object} [options]
+		 * @param {Boolean} [options.isPriority=true] - Read the item's text
+		 *     ahead of what's queued in the document worker
 		 * @return {Promise<Object[]>} - Entries with `text`, `ranges` and
 		 *     `strength`, plus location fields where the passage knows them,
 		 *     strongest first; the first MAX_QUOTED_PASSAGES also have
 		 *     `snippet`
 		 */
-		async getMatchingExcerpts(itemID) {
+		async getMatchingExcerpts(itemID, { isPriority = true } = {}) {
 			let queryText = this._queryText;
-			let passages = await this._getPassages(itemID);
+			let passages = await this._getPassages(itemID, { isPriority });
 			if (!passages.length) {
 				return [];
 			}
@@ -794,14 +812,16 @@ Zotero.BestMatch = new function () {
 		 * @return {Promise<Object[]>} - Passages, each with `text`, location
 		 *     fields where known, and a `score` where the model matched it
 		 */
-		async _getPassages(itemID) {
+		async _getPassages(itemID, { isPriority }) {
 			let passages = [];
 			try {
 				let chunks = await Zotero.Embeddings.getIndexedChunks(itemID, {
-					queryText: this._semanticApplies(itemID) ? this._queryText : null
+					queryText: this._semanticApplies(itemID) ? this._queryText : null,
+					isPriority
 				});
-				// A chunk whose source no longer reads back has no text to
-				// show
+				// A chunk whose source no longer reads back, or whose
+				// structure isn't extracted, has no text to show; an item
+				// left with none is cut from its full text below
 				passages = chunks.filter(chunk => chunk.text);
 			}
 			catch (e) {
@@ -810,24 +830,25 @@ Zotero.BestMatch = new function () {
 				}
 			}
 			if (!passages.length && this._lexicalApplies(itemID)) {
-				passages = await this._cutPassages(itemID);
+				passages = await this._cutPassages(itemID, { isPriority });
 			}
 			return passages;
 		}
 
 		// Cut an item's text into passages the size the index's are: along its
 		// outline where it has structured text, so each passage knows its
-		// section, page and position, and along its flat text where it doesn't
-		async _cutPassages(itemID) {
+		// section, page, position and the annotations on it, and along its
+		// flat text where it doesn't
+		async _cutPassages(itemID, { isPriority }) {
 			let item = await Zotero.Items.getAsync(itemID);
 			if (!item) {
 				return [];
 			}
 			// Only structure already extracted: generating it costs seconds,
 			// which is not a price a preview may charge. Cut and placed in the
-			// document worker, ahead of what's queued there.
+			// document worker.
 			let cut = await Zotero.SDT.getItemChunks(itemID,
-				{ cachedOnly: true, isPriority: true, positions: true });
+				{ cachedOnly: true, isPriority, annotations: true });
 			if (cut.ok && cut.chunks.length) {
 				return cut.chunks;
 			}

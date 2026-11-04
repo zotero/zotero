@@ -89,7 +89,7 @@ describe("Zotero.SDT", function () {
 		});
 		await writeTestSDTCache(item, bytes);
 
-		let { chunks } = await Zotero.SDT.getItemChunks(item.id, { positions: true });
+		let { chunks } = await Zotero.SDT.getItemChunks(item.id);
 		assert.lengthOf(chunks, 2);
 		// Each chunk is anchored on its own page
 		assert.deepEqual(chunks.map(chunk => chunk.anchor.pageRects.map(rect => rect[0])), [[0], [1]]);
@@ -426,10 +426,10 @@ describe("Zotero.SDT", function () {
 			Zotero.Prefs.set('sdt.autoExtract', true);
 			try {
 				await Zotero.SDT.AutoIndex.sweep();
-				assert.isTrue(await Zotero.SDT.isCached(missing.id));
+				assert.isTrue(await Zotero.SDT.isCurrent(missing.id));
 				assert.isTrue(asked(missing.id));
-				// A cached pack is a stat away and isn't read; a text file
-				// has no pack to make
+				// A current pack is left as it is; a text file has no pack
+				// to make
 				assert.isFalse(asked(cached.id));
 				assert.isFalse(asked(text.id));
 
@@ -443,7 +443,7 @@ describe("Zotero.SDT", function () {
 				await OS.File.remove(getSDTCachePath(later), { ignoreAbsent: true });
 				Zotero.Prefs.set('sdt.autoExtract', false);
 				await Zotero.SDT.AutoIndex.sweep();
-				assert.isFalse(await Zotero.SDT.isCached(later.id));
+				assert.isFalse(await Zotero.SDT.isCurrent(later.id));
 				assert.isFalse(asked(later.id));
 			}
 			finally {
@@ -451,6 +451,39 @@ describe("Zotero.SDT", function () {
 				Zotero.Prefs.set('sdt.autoExtract', false);
 			}
 		});
+
+		it("should extract again a pack an older extraction made", async function () {
+			let stale = await importFileAttachment('test.pdf');
+			await writeTestSDTCache(stale, getStaleProcessorVersionSDTPackBytes());
+			assert.isFalse(await Zotero.SDT.isCurrent(stale.id));
+			let workerStub = stubStructuredDocumentTextWorker();
+			Zotero.Prefs.set('sdt.autoExtract', true);
+			try {
+				await Zotero.SDT.AutoIndex.sweep();
+				assert.isTrue(workerStub.args.some(args => args[0] == stale.id));
+				assert.isTrue(await Zotero.SDT.isCurrent(stale.id));
+				assert.deepEqual(await IOUtils.read(getSDTCachePath(stale)), getTestSDTPackBytes());
+			}
+			finally {
+				workerStub.restore();
+				Zotero.Prefs.set('sdt.autoExtract', false);
+			}
+		});
+	});
+
+	it("should tell a pack the current extraction made from one it didn't, or none", async function () {
+		let item = await importFileAttachment('test.pdf');
+		await OS.File.remove(getSDTCachePath(item), { ignoreAbsent: true });
+		assert.isFalse(await Zotero.SDT.isCurrent(item.id));
+		await writeTestSDTCache(item);
+		assert.isTrue(await Zotero.SDT.isCurrent(item.id));
+		await writeTestSDTCache(item, getStaleProcessorVersionSDTPackBytes());
+		assert.isFalse(await Zotero.SDT.isCurrent(item.id));
+		// Not a pack at all
+		await IOUtils.writeUTF8(getSDTCachePath(item), 'garbage');
+		assert.isFalse(await Zotero.SDT.isCurrent(item.id));
+		let text = await importFileAttachment('test.txt');
+		assert.isFalse(await Zotero.SDT.isCurrent(text.id));
 	});
 
 	it("should return false from ensure() when generation fails", async function () {
@@ -510,13 +543,10 @@ describe("Zotero.SDT", function () {
 			assert.include(chunks[1].text, 'We tracked forty owls');
 			assert.deepEqual(chunks.map(chunk => chunk.outlinePath), ['Introduction', 'Methods']);
 			assert.deepEqual(chunks.map(chunk => chunk.anchor.pageRects.map(rect => rect[0])), [[0], [1]]);
-			assert.isFalse('position' in chunks[0]);
-
-			// Asked for, each chunk also carries the position it opens at
-			result = await Zotero.SDT.getItemChunks(item.id, { positions: true });
-			assert.isTrue(result.ok);
-			assert.deepEqual(result.chunks.map(chunk => chunk.position.pageIndex), [0, 1]);
-			assert.isFalse('positions' in result.chunks[0]);
+			// Each chunk carries the position it opens at, and no more
+			assert.deepEqual(chunks.map(chunk => chunk.position.pageIndex), [0, 1]);
+			assert.isFalse('positions' in chunks[0]);
+			assert.isFalse('overlaps' in chunks[0]);
 		}
 		finally {
 			spy.restore();

@@ -122,6 +122,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		this._bestMatchGeneration = 0;
 		// The measure asked for the Relevance sort, kept across queries
 		this._relevanceSortEngine = 'hybrid';
+		itemTree.onScroll.addListener(() => this._requestMatchPreviews());
 	}
 
 	/**
@@ -310,7 +311,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		}
 		try {
 			// Scoring derives the best-scored items' previews before it
-			// resolves; the rest arrive through onPreviewsFilled above
+			// resolves; the rest are asked for as their rows come into view
+			// (see _requestMatchPreviews()) and arrive through
+			// onPreviewsFilled above
 			await session.score(candidateIDs, {
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
@@ -368,28 +371,97 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (this._bestMatchSession !== session) {
 			return;
 		}
-		let shown = [];
-		for (let itemID of itemIDs) {
-			// Looked up per item, since reopening one shifts the rows below it
-			let item = Zotero.Items.get(itemID);
-			let index = item ? this._rowMap[item.treeViewID] : undefined;
-			if (index === undefined || !this.isContainer(index)) {
-				continue;
-			}
-			if (this.isContainerOpen(index)) {
-				this._toggleOpenState(index);
-			}
-			this._toggleOpenState(index);
-			shown.push(itemID);
-		}
+		console.trace("!!");
+		let rowOf = itemID => this._rowMap[Zotero.Items.get(itemID)?.treeViewID];
+		let shown = itemIDs.filter((itemID) => {
+			let index = rowOf(itemID);
+			return index !== undefined && this.isContainer(index);
+		});
 		// Redrawing is the expensive part, so a batch with no rows in the
 		// tree (under a collapsed parent, say) costs nothing
 		if (!shown.length) {
 			return;
 		}
+		// Where the view is now, with the rows as they are: what an earlier
+		// notification saved may be from before the user scrolled
+		this.itemTree._cacheState();
+		for (let itemID of shown) {
+			// Looked up per item, since reopening one shifts the rows below it
+			let index = rowOf(itemID);
+			if (this.isContainerOpen(index)) {
+				this._toggleOpenState(index);
+			}
+			this._toggleOpenState(index);
+		}
 		// The twisty appears with the preview, so the rows redraw too
 		this.itemTree.invalidateRowCache(shown);
 		this.runListeners('update', true, { restoreSelection: true, restoreScroll: true });
+	}
+
+	// The rows a sort brings into view ask for their previews too
+	async sort(itemIDs) {
+		await super.sort(itemIDs);
+		this._requestMatchPreviews();
+	}
+
+	/**
+	 * Ask the active best-match search for the previews of the items from
+	 * the first row in view down, in the order they're drawn, saying how
+	 * many are in view (see Zotero.BestMatch.Session#request()). Match rows
+	 * aren't items and aren't counted.
+	 */
+	_requestMatchPreviews() {
+		let session = this._bestMatchSession;
+		let list = this.itemTree._treebox;
+		if (!session || !list) {
+			return;
+		}
+		let last = list.getLastVisibleRow();
+		let itemIDs = [];
+		let visible = 0;
+		for (let i = list.getFirstVisibleRow(); i < this.getRowCount(); i++) {
+			let ref = this.getRow(i)?.ref;
+			if (!(ref instanceof Zotero.Item)) {
+				continue;
+			}
+			if (i <= last) {
+				visible++;
+			}
+			itemIDs.push(ref.id);
+		}
+		session.request(itemIDs, { visible });
+	}
+
+	/**
+	 * Redraw changed items' rows where they are, their previews derived
+	 * again (see Zotero.BestMatch.Session#invalidate()) and the match rows
+	 * of an open item rebuilt from them. Nothing is ranked or sorted again,
+	 * and nothing opened or closed.
+	 *
+	 * @param {Number[]} itemIDs
+	 */
+	async _redrawChangedMatches(itemIDs) {
+		// Kept, so a new query arriving while deriving is noticed
+		let session = this._bestMatchSession;
+		let shown = itemIDs.filter(itemID => this._rowMap[itemID] !== undefined);
+		if (!shown.length) {
+			return;
+		}
+		await session.fill(shown);
+		if (this._bestMatchSession !== session) {
+			return;
+		}
+		// Where the view is now, after deriving, with the rows as they are
+		this.itemTree._cacheState();
+		for (let itemID of shown) {
+			// Looked up per item, since rebuilding one's rows shifts those below
+			let index = this._rowMap[itemID];
+			if (index !== undefined && this.isContainerOpen(index)) {
+				this._refreshContainer(index);
+			}
+		}
+		this.itemTree.invalidateRowCache(shown);
+		await this.runListeners('update', true, { restoreSelection: true, restoreScroll: true });
 	}
 
 	/**
@@ -939,6 +1011,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			}
 			this.runListeners('update', true, options);
 			await this.itemTree.waitForLoad();
+			// The rows in view past the ones scoring derived
+			this._requestMatchPreviews();
 			this.itemTree.runListeners('refresh');
 		}
 		catch (e) {
@@ -990,6 +1064,18 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// every other item's derived text.
 		if (type == 'item' && ['modify', 'refresh'].includes(action) && this._bestMatchSession) {
 			this._bestMatchSession.invalidate(ids.map(id => parseInt(id)));
+		}
+
+		// A best-match search keeps its ranking until the next query: scoring
+		// every candidate again for one change costs seconds and reorders
+		// the rows under the user. A changed item is redrawn in place with
+		// its preview derived again; an added one waits for the next search.
+		if (type == 'item' && ['add', 'modify', 'refresh'].includes(action)
+				&& this._bestMatchSession && collectionTreeRows.some(rowIsBestMatchSearch)) {
+			if (action != 'add') {
+				await this._redrawChangedMatches(ids.map(id => parseInt(id)));
+			}
+			return;
 		}
 
 		var initialRowCount = this.getRowCount();
@@ -1045,15 +1131,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (items.length == 0) return;
 		}
 
-		if (action == 'refresh' && type == 'item' && this._bestMatchSession
-				&& ids.some(id => this._bestMatchSession.getPreviews(parseInt(id)))) {
-			// The invalidation above reset these items' previews, and only a
-			// scoring pass derives previews, so re-run the search
-			this.itemTree.invalidateRowCache(ids);
-			refresh = true;
-			madeChanges = true;
-		}
-		else if (action == 'refresh') {
+		if (action == 'refresh') {
 			// Clear row display cache and invalidate rows for refreshed items
 			let rowsToInvalidate = [];
 			for (let id of ids) {

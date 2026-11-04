@@ -843,7 +843,7 @@ describe("CollectionViewItemTree", function () {
 				assert.lengthOf(itemsView.getSelectedSearchMatches(), 2);
 				assert.equal(zp.itemPane.mode, 'search-results');
 				assert.lengthOf(pane.querySelectorAll('search-result-row'), 2);
-				assert.lengthOf(pane.querySelectorAll('collapsible-section'), 1);
+				assert.lengthOf(pane.querySelectorAll('search-results-box'), 1);
 
 				// A selection holding anything that isn't a passage names none
 				itemsView.selection.clearSelection();
@@ -1193,7 +1193,6 @@ describe("CollectionViewItemTree", function () {
 						}
 						return [{ source: 'content', text: 'backfill owls', ranges: [], strength: 1 }];
 					}));
-
 				await select(win, col);
 				itemsView = zp.itemsView;
 				await itemsView.setFilter('search', 'some query');
@@ -1211,6 +1210,48 @@ describe("CollectionViewItemTree", function () {
 				assert.notStrictEqual(matchRow, false);
 				assert.equal(itemsView.getParentIndex(matchRow),
 					itemsView.getRowIndexByID(last.id));
+			});
+
+			it("should derive previews for the rows in view and the ones below, then as they're scrolled to", async function () {
+				this.timeout(180000);
+				let col = await createDataObject('collection');
+				// More matched attachments than the view and the lookahead hold
+				let attachments = [];
+				for (let i = 0; i < 70; i++) {
+					attachments.push(await importFileAttachment('test.pdf', { collections: [col.id] }));
+				}
+				let ids = attachments.map(att => att.id);
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					ids.filter(id => itemIDs.includes(id)).map((id, i) => [id, 0.9 - i / 1000]))));
+				stubs.push(sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map())));
+				let excerptsStub = sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts')
+					.resolves([{ source: 'content', text: 'lookahead owls', ranges: [], strength: 1 }]);
+				stubs.push(excerptsStub);
+
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				await itemsView.bestMatchSession.previewsSettled;
+				let derivedIDs = () => new Set(excerptsStub.args.map(args => args[0]));
+
+				// The rows in view and the lookahead below them, and nothing
+				// further down
+				let list = itemsView.tree._jsWindow;
+				let lastVisible = itemsView.getRow(list.getLastVisibleRow()).ref;
+				assert.isTrue(derivedIDs().has(lastVisible.itemID ?? lastVisible.id));
+				let last = attachments[attachments.length - 1];
+				assert.isFalse(derivedIDs().has(last.id));
+				assert.equal(itemsView.bestMatchSession.getPreviews(last.id).state, 'pending');
+
+				// Scrolled to, the rest are asked for
+				list.scrollTo(list.targetElement.scrollHeight);
+				while (itemsView.bestMatchSession.getPreviews(last.id).state == 'pending') {
+					await Zotero.Promise.delay(50);
+				}
+				await itemsView.bestMatchSession.previewsSettled;
+				assert.isTrue(derivedIDs().has(last.id));
+				assert.notStrictEqual(itemsView.getRowIndexByID('SM' + last.id + '-0'), false);
 			});
 
 			it("should show no match rows when derivation finds nothing to show", async function () {
@@ -1425,6 +1466,48 @@ describe("CollectionViewItemTree", function () {
 				assert.notInclude(itemsView._rows.map(row => row.id), plain.id);
 				assert.isNumber(itemsView.getRowIndexByID(attachment.id));
 				await itemsView.setFilter('advanced-search', null);
+			});
+
+			it("should redraw a changed item in place, keeping the ranking and the selection", async function () {
+				let col = await createDataObject('collection');
+				let item = await createDataObject('item', { title: "inplace A", collections: [col.id] });
+				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+				Zotero.Lexical.scoreItemIDs.callsFake(lexicalEnvelope(async (query, itemIDs) => new Map(
+					itemIDs.includes(attachment.id) ? [[attachment.id, 0.8]] : [])));
+				let scoreStub = sinon.stub(Zotero.Embeddings, 'scoreItemIDs')
+					.callsFake(scoreEnvelope(new Map()));
+				stubs.push(scoreStub);
+				let excerptsStub = sinon.stub(Zotero.BestMatch.Session.prototype, 'getMatchingExcerpts').resolves([
+					{ text: 'first owls', ranges: [], strength: 1, snippet: { start: 0, end: 10 } },
+					{ text: 'second owls', ranges: [], strength: 0.5, snippet: { start: 0, end: 11 } }
+				]);
+				stubs.push(excerptsStub);
+				await select(win, col);
+				itemsView = zp.itemsView;
+				await itemsView.setFilter('search', 'some query');
+				let rows = itemsView._rows.map(row => row.id);
+				itemsView.selection.select(itemsView.getRowIndexByID('SM' + attachment.id + '-1'));
+				scoreStub.resetHistory();
+
+				// An added child, such as an annotation made from a passage,
+				// waits for the next search
+				let annotation = await createAnnotation('highlight', attachment);
+				await Zotero.Notifier.trigger('add', 'item', [annotation.id]);
+				assert.isFalse(scoreStub.called);
+				assert.deepEqual(itemsView._rows.map(row => row.id), rows);
+				assert.equal(itemsView.getSelectedSearchMatches()[0]?.entry.text, 'second owls');
+
+				// A modified one keeps its place, with its preview derived again
+				excerptsStub.resolves([
+					{ text: 'first owls, edited', ranges: [], strength: 1, snippet: { start: 0, end: 18 } },
+					{ text: 'second owls', ranges: [], strength: 0.5, snippet: { start: 0, end: 11 } }
+				]);
+				await Zotero.Notifier.trigger('modify', 'item', [attachment.id, item.id]);
+				assert.isFalse(scoreStub.called);
+				assert.deepEqual(itemsView._rows.map(row => row.id), rows);
+				let first = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
+				assert.equal(itemsView.getRow(first).ref.entry.text, 'first owls, edited');
+				assert.equal(itemsView.getSelectedSearchMatches()[0]?.entry.text, 'second owls');
 			});
 
 			it("shouldn't rerank on a refresh", async function () {

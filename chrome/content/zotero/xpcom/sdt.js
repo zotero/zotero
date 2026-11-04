@@ -145,19 +145,43 @@ Zotero.SDT = new function () {
 	};
 
 	/**
-	 * Whether a pack is cached for an attachment, by the cache file's
-	 * presence alone -- nothing read or validated, for deciding cheaply
-	 * whether to extract ahead of time
+	 * Whether an attachment's cached pack was made by the extraction this
+	 * module does now: the same pack format, schema major version and
+	 * processor. Only the pack's front matter and metadata are read, and
+	 * not the attachment, so a pack made from an earlier file still counts.
 	 *
 	 * @param {Integer} itemID
-	 * @returns {Promise<Boolean>}
+	 * @returns {Promise<Boolean>} - False also when there's no readable pack
 	 */
-	this.isCached = async function (itemID) {
+	this.isCurrent = async function (itemID) {
 		let item = await Zotero.Items.getAsync(itemID, { noCache: true });
-		if (!item || !item.isAttachment() || !_getProcessorType(item)) {
+		let processorType = item && item.isAttachment() && _getProcessorType(item);
+		let expected = processorType && _getModule() && await _getDocumentWorkerMetadata();
+		if (!expected) {
 			return false;
 		}
-		return IOUtils.exists(_getCachePath(item));
+		let path = _getCachePath(item);
+		try {
+			let { size } = await IOUtils.stat(path);
+			let reader = await _getModule().openStructuredDocumentTextPack({
+				byteLength: size,
+				read: async (offset, length) => {
+					let bytes = await IOUtils.read(path, { offset, maxBytes: length });
+					return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+				}
+			}, { inflate: b => require('pako').inflateRaw(b) });
+			let { header } = reader;
+			let { processor } = await reader.getMetadata();
+			return header.packVersion === expected.SDT_PACK_VERSION
+				&& _getSchemaMajorVersion(header.schemaVersion)
+					=== _getSchemaMajorVersion(expected.SDT_SCHEMA_VERSION)
+				&& processor?.type === processorType
+				&& processor?.version === expected.SDT_PROCESSOR_VERSIONS[processorType];
+		}
+		catch {
+			// Missing, or not a pack this module can open
+			return false;
+		}
 	};
 
 	/**
@@ -165,29 +189,33 @@ Zotero.SDT = new function () {
 	 * the document worker so that neither inflating the pack nor cutting it
 	 * blocks this thread. Each carries its plain `text`, the `embedText`
 	 * with outline context woven in, its estimated `tokens`, `outlinePath`,
-	 * `pageLabel` and `anchor` -- where in the file its text is, null when
-	 * the document has no geometry for it.
+	 * `pageLabel`, `anchor` -- where in the file its text is, null when the
+	 * document has no geometry for it -- and `position`, the reader
+	 * position it opens at, null when the anchor doesn't resolve.
 	 *
 	 * @param {Integer} itemID
 	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
 	 *     the cut at the front of the worker queue too
-	 * @param {Boolean} [options.positions] - Give each chunk the reader
-	 *     `position` its anchor opens at: the first of the positions its
-	 *     text is shown at, null when the anchor doesn't resolve
+	 * @param {Boolean} [options.annotations] - Give each chunk the
+	 *     attachment's `annotations` on its text, as readAnchors() does
 	 * @returns {Promise<Object>} - { ok: true, chunks, contentHash }, the
 	 *     hash being the source file's as the pack records it, or
 	 *     { ok: false, reason }: getPack()'s reasons, or 'cut-failed' when
 	 *     the pack is there but the worker couldn't cut it
 	 */
-	this.getItemChunks = async function (itemID, { positions = false, ...options } = {}) {
+	this.getItemChunks = async function (itemID, { annotations = false, ...options } = {}) {
 		let result = await this.getPack(itemID, options);
 		if (!result.ok) {
 			return { ok: false, reason: result.reason };
 		}
+		let marks = annotations ? _getTextAnnotations(itemID) : [];
 		let cut;
 		try {
 			cut = await Zotero.PDFWorker.getStructuredDocumentTextChunks(
-				result.bytes, { isPriority: options.isPriority, positions });
+				result.bytes, {
+					isPriority: options.isPriority,
+					positions: marks.map(mark => mark.position)
+				});
 		}
 		catch {
 			// Logged by the worker manager
@@ -201,7 +229,15 @@ Zotero.SDT = new function () {
 				+ `doesn't match the bundled chunker's ${version}`));
 			return { ok: false, reason: 'cut-failed' };
 		}
-		let chunks = positions ? cut.chunks.map(_withFirstPosition) : cut.chunks;
+		let chunks = cut.chunks.map((chunk) => {
+			if (annotations) {
+				chunk = _withAnnotations(chunk, marks);
+			}
+			else {
+				delete chunk.overlaps;
+			}
+			return _withFirstPosition(chunk);
+		});
 		return { ok: true, chunks, contentHash: cut.sourceHash };
 	};
 
@@ -228,8 +264,11 @@ Zotero.SDT = new function () {
 	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
 	 *     the read at the front of the worker queue too
 	 * @returns {Promise<Object>} { ok: true, chunks: [{ text, outlinePath,
-	 *     pageLabel, position } | null] }, `position` the reader position
-	 *     the chunk opens at, or { ok: false, reason }: getPack()'s
+	 *     pageLabel, position, annotations } | null] }, `position` the
+	 *     reader position the chunk opens at and `annotations` the
+	 *     attachment's highlights and underlines on its text, each
+	 *     { key, type, color, comment, ranges } with the { start, end }
+	 *     ranges of `text` it covers; or { ok: false, reason }: getPack()'s
 	 *     reasons, or 'failed' when the worker couldn't read the pack
 	 */
 	this.readAnchors = async function (itemID, anchors, options = {}) {
@@ -237,10 +276,17 @@ Zotero.SDT = new function () {
 		if (!result.ok) {
 			return { ok: false, reason: result.reason };
 		}
+		let marks = _getTextAnnotations(itemID);
 		try {
 			let chunks = await Zotero.PDFWorker.readStructuredDocumentTextAnchors(
-				result.bytes, anchors, { isPriority: options.isPriority });
-			return { ok: true, chunks: chunks.map(chunk => chunk && _withFirstPosition(chunk)) };
+				result.bytes, anchors, {
+					isPriority: options.isPriority,
+					positions: marks.map(mark => mark.position)
+				});
+			return {
+				ok: true,
+				chunks: chunks.map(chunk => chunk && _withFirstPosition(_withAnnotations(chunk, marks)))
+			};
 		}
 		catch {
 			// Logged by the worker manager
@@ -307,6 +353,36 @@ Zotero.SDT = new function () {
 	// the reader opens at
 	function _withFirstPosition({ positions, ...chunk }) {
 		return { ...chunk, position: positions?.[0] || null };
+	}
+
+	// The attachment's annotations that mark a stretch of its text, with
+	// their reader positions parsed
+	function _getTextAnnotations(itemID) {
+		let item = Zotero.Items.get(itemID);
+		if (!item?.isAttachment()) {
+			return [];
+		}
+		return item.getAnnotations()
+			.filter(annotation => ['highlight', 'underline'].includes(annotation.annotationType))
+			.map(annotation => ({
+				key: annotation.key,
+				type: annotation.annotationType,
+				color: annotation.annotationColor,
+				comment: annotation.annotationComment,
+				position: JSON.parse(annotation.annotationPosition)
+			}));
+	}
+
+	// The marks that cover some of the chunk's text, each with the ranges
+	// the worker found for its position, in place of the ranges
+	function _withAnnotations({ overlaps, ...chunk }, marks) {
+		let annotations = [];
+		marks.forEach(({ key, type, color, comment }, i) => {
+			if (overlaps?.[i]) {
+				annotations.push({ key, type, color, comment, ranges: overlaps[i] });
+			}
+		});
+		return { ...chunk, annotations };
 	}
 
 	async function _readValidCache({ sourceHash, cachePath, processorType }, options) {
@@ -639,9 +715,16 @@ Zotero.SDT.AutoIndex = new function () {
 	let _sweeping = null;
 	let _kicked = false;
 	let _kickTimer = null;
+	// While a sweep runs, how often listeners hear of its progress
+	const NOTIFY_INTERVAL = 500;
+
 	// Attachments settled this session -- cached, or not extractable as
 	// they are -- until they're saved again
 	let _settled = new Set();
+	// Eligible attachments as the last count found them, null before one
+	let _total = null;
+	let _listeners = new Set();
+	let _notifiedAt = 0;
 
 	/**
 	 * Wire up the sweep: kicked by saved attachments and finished syncs,
@@ -652,7 +735,10 @@ Zotero.SDT.AutoIndex = new function () {
 			return;
 		}
 		_initialized = true;
-		Zotero.Prefs.registerObserver('sdt.autoExtract', () => this.kick());
+		Zotero.Prefs.registerObserver('sdt.autoExtract', () => {
+			_notify();
+			this.kick();
+		});
 		Zotero.Notifier.registerObserver({
 			notify: (event, type, ids) => {
 				if (type == 'sync') {
@@ -701,9 +787,65 @@ Zotero.SDT.AutoIndex = new function () {
 	};
 
 	/**
+	 * @return {Object} - { enabled, sweeping, settled, total }: the
+	 *     attachments settled this session out of the eligible ones, `total`
+	 *     null until they're first counted
+	 */
+	this.getStatus = function () {
+		return {
+			enabled: this.isEnabled(),
+			sweeping: !!_sweeping,
+			settled: _settled.size,
+			total: _total
+		};
+	};
+
+	/**
+	 * Count the eligible attachments, if not counted yet, and notify
+	 * listeners
+	 *
+	 * @return {Promise<Object>} - The status, as getStatus() gives it
+	 */
+	this.refreshStatus = async function () {
+		if (_total === null) {
+			_total = (await _getEligibleIDs()).length;
+		}
+		_notify();
+		return this.getStatus();
+	};
+
+	/**
+	 * @param {Function} fn - Called with the status, as getStatus() gives it,
+	 *     when a sweep starts, as it goes and when it ends
+	 */
+	this.addListener = function (fn) {
+		_listeners.add(fn);
+	};
+
+	this.removeListener = function (fn) {
+		_listeners.delete(fn);
+	};
+
+	/**
+	 * Go over every eligible attachment again now, including those already
+	 * settled this session, as after their caches were cleared
+	 *
+	 * @return {Promise} - The sweep, as sweep() gives it
+	 */
+	this.restart = function () {
+		_settled.clear();
+		_notify();
+		if (_kickTimer) {
+			clearTimeout(_kickTimer);
+			_kickTimer = null;
+		}
+		return this.sweep();
+	};
+
+	/**
 	 * Sweep now: go over every eligible attachment and extract where no
-	 * pack is cached, until there's nothing left or the preference is
-	 * turned off. Returns the sweep already going when there is one.
+	 * current pack is cached, until there's nothing left or the preference
+	 * is turned off. Returns the sweep already going when there is one.
 	 *
 	 * @return {Promise}
 	 */
@@ -716,6 +858,7 @@ Zotero.SDT.AutoIndex = new function () {
 			.catch(e => Zotero.logError(e))
 			.finally(() => {
 				_sweeping = null;
+				_notify();
 				if (_kicked) {
 					_kicked = false;
 					this.kick();
@@ -742,18 +885,38 @@ Zotero.SDT.AutoIndex = new function () {
 		);
 	}
 
+	function _notify() {
+		_notifiedAt = Date.now();
+		let status = Zotero.SDT.AutoIndex.getStatus();
+		for (let fn of _listeners) {
+			try {
+				fn(status);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+	}
+
 	async function _sweep() {
 		let started = Date.now();
 		let extracted = 0;
-		for (let itemID of await _getEligibleIDs()) {
+		let eligibleIDs = await _getEligibleIDs();
+		// Attachments gone since, or no longer eligible, don't count
+		let eligible = new Set(eligibleIDs);
+		_settled = new Set([..._settled].filter(id => eligible.has(id)));
+		_total = eligibleIDs.length;
+		_notify();
+		for (let itemID of eligibleIDs) {
 			if (!Zotero.SDT.AutoIndex.isEnabled()) {
 				break;
 			}
 			if (_settled.has(itemID)) {
 				continue;
 			}
-			// A stat, so a settled library costs nothing to go over
-			if (!await Zotero.SDT.isCached(itemID)) {
+			// The pack's first bytes, so a settled library costs little to
+			// go over; one an older extraction made is made again
+			if (!await Zotero.SDT.isCurrent(itemID)) {
 				// Whatever the outcome -- extracted, no file, password,
 				// failed -- the attachment is left alone until it's saved
 				// again, which brings a file or a new one
@@ -762,6 +925,9 @@ Zotero.SDT.AutoIndex = new function () {
 				}
 			}
 			_settled.add(itemID);
+			if (Date.now() - _notifiedAt >= NOTIFY_INTERVAL) {
+				_notify();
+			}
 		}
 		if (extracted) {
 			Zotero.debug(`SDT: sweep extracted ${extracted} `
