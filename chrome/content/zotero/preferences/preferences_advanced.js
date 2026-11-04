@@ -136,12 +136,27 @@ Zotero_Preferences.Advanced = {
 		}
 	},
 
+	// While the server embeds, name the libraries left out of syncing, which
+	// it can't embed for
+	updateUnsyncedLibrariesUI: function (shown) {
+		let hint = document.getElementById('semantic-search-unsynced');
+		let names = shown
+			? Zotero.Embeddings.Indexing.Sources.getUnsyncedLibraries().map(library => library.name)
+			: [];
+		hint.hidden = !names.length;
+		if (names.length) {
+			let libraries = new Intl.ListFormat(Zotero.locale, { type: 'conjunction' }).format(names);
+			document.l10n.setAttributes(hint, 'preferences-advanced-semantic-search-unsynced', { libraries });
+		}
+	},
+
 	updateSemanticSearchUI: function (status) {
 		let statusBox = document.getElementById('semantic-search-status');
 		statusBox.hidden = !status.enabled;
 		// The endpoint, the bars and the rate all describe indexing here,
 		// which the server's embedding replaces
 		this.updateSemanticSearchEndpointUI(status.endpoint, status.enabled && !status.server);
+		this.updateUnsyncedLibrariesUI(status.enabled && status.server);
 		if (!status.enabled) {
 			return;
 		}

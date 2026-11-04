@@ -2544,12 +2544,10 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 	// and items I: stored or linked PDFs and EPUBs, and snapshots (which
 	// are always stored), in the libraries indexed
 	function _eligibleAttachmentSQL() {
-		let libraryIDs = Zotero.Embeddings.Indexing.Sources.getIndexableLibraries()
-			.map(library => library.libraryID);
 		return "((IA.contentType IN ('application/pdf', 'application/epub+zip') "
 				+ "AND IA.linkMode!=" + Zotero.Attachments.LINK_MODE_LINKED_URL + ") "
 			+ "OR (IA.contentType='text/html' AND IA.linkMode=" + Zotero.Attachments.LINK_MODE_IMPORTED_URL + ")) "
-			+ "AND I.libraryID IN (" + (libraryIDs.join(',') || 'NULL') + ")";
+			+ "AND I.libraryID IN (" + _indexableLibrariesSQL() + ")";
 	}
 
 	// One page of the outstanding attachments: at most `limit` with an id
@@ -2618,15 +2616,16 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		);
 	};
 
-	// Indexed items, notes and annotations, an item's chunks counting as one
-	// item, less those an outdated extractor cut
+	// Indexed items, notes and annotations in the indexable libraries, an
+	// item's chunks counting as one item, less those an outdated extractor
+	// cut
 	this.countIndexedItems = async function () {
 		let outdated = await this.getOutdatedExtractors();
 		return Zotero.DB.valueQueryAsync(
 			"SELECT COUNT(DISTINCT E.itemID) FROM embeddings.itemEmbeddings E "
 				+ "JOIN items I USING (itemID) "
 				+ "LEFT JOIN embeddings.itemIndexState S USING (itemID) "
-				+ "WHERE I.itemTypeID!=?"
+				+ "WHERE I.itemTypeID!=? AND I.libraryID IN (" + _indexableLibrariesSQL() + ")"
 				+ (outdated.length
 					? " AND (S.extractor IS NULL OR S.extractor NOT IN ("
 						+ outdated.map(() => '?').join(',') + "))"
@@ -2635,25 +2634,48 @@ Zotero.Embeddings.Indexing.Sources = new function () {
 		);
 	};
 
-	// How many attachments with a file here have every chunk embedded,
-	// whoever embedded it, less those an outdated extractor cut here
+	// How many attachments in the indexable libraries with a file here have
+	// every chunk embedded, whoever embedded it, less those an outdated
+	// extractor cut here
 	this.countFinishedAttachments = async function () {
 		let outdated = await this.getOutdatedExtractors();
 		return Zotero.DB.valueQueryAsync(
-			"SELECT COUNT(*) FROM embeddings.itemIndexState WHERE sourceKey IS NOT NULL"
+			"SELECT COUNT(*) FROM embeddings.itemIndexState S JOIN items I USING (itemID) "
+				+ "WHERE S.sourceKey IS NOT NULL AND I.libraryID IN (" + _indexableLibrariesSQL() + ")"
 				+ (outdated.length
-					? " AND (syncVersion IS NOT NULL OR extractor IS NULL OR extractor NOT IN ("
+					? " AND (S.syncVersion IS NOT NULL OR S.extractor IS NULL OR S.extractor NOT IN ("
 						+ outdated.map(() => '?').join(',') + "))"
 					: ""),
 			outdated
 		);
 	};
 
-	// The libraries whose items are indexed at all
+	// The libraries whose items are indexed at all: with the server
+	// embedding, only those that sync, since the server never sees the rest
 	this.getIndexableLibraries = function () {
-		return Zotero.Libraries.getAll()
+		let libraries = Zotero.Libraries.getAll()
 			.filter(library => ['user', 'group'].includes(library.libraryType));
+		return Zotero.Embeddings.shouldSyncEmbeddings()
+			? Zotero.Sync.Data.Local.filterSkippedLibraries(libraries)
+			: libraries;
 	};
+
+	// The libraries the server can't embed for, being left out of syncing,
+	// while it embeds; none otherwise
+	this.getUnsyncedLibraries = function () {
+		if (!Zotero.Embeddings.shouldSyncEmbeddings()) {
+			return [];
+		}
+		let indexable = new Set(this.getIndexableLibraries());
+		return Zotero.Libraries.getAll()
+			.filter(library => ['user', 'group'].includes(library.libraryType) && !indexable.has(library));
+	};
+
+	// The indexable libraries' IDs as an SQL list
+	function _indexableLibrariesSQL() {
+		return Zotero.Embeddings.Indexing.Sources.getIndexableLibraries()
+			.map(library => library.libraryID).join(',') || 'NULL';
+	}
 
 	// Whether an item is an attachment whose full text can be indexed --
 	// the types Zotero.SDT can extract structured text from

@@ -1695,6 +1695,32 @@ describe("Zotero.Embeddings", function () {
 					"DELETE FROM embeddings.embeddingsMeta WHERE key LIKE ?", ['embeddingsVersion:%']);
 			});
 
+			it("should leave a library out of syncing out of the counts, and name it", async function () {
+				this.timeout(60000);
+				let item = await createDataObject('item', { title: 'Item in a library left out of syncing' });
+				await importPDFAttachment(item);
+				let { Sources } = Zotero.Embeddings.Indexing;
+				assert.isAbove(await Sources.countEligibleAttachments(), 0);
+				assert.include(await Sources.getEligibleItemIDs(), item.id);
+				assert.isAbove(await Sources.countAwaitingServer(), 0);
+				assert.isEmpty(Sources.getUnsyncedLibraries());
+
+				// The server never sees it, so nothing of it is counted
+				Zotero.Sync.Data.Local.filterSkippedLibraries.callsFake(
+					libraries => libraries.filter(other => other.libraryID != library.libraryID));
+				assert.equal(await Sources.countEligibleAttachments(), 0);
+				assert.notInclude(await Sources.getEligibleItemIDs(), item.id);
+				assert.equal(await Sources.countAwaitingServer(), 0);
+				assert.equal(await Sources.countFinishedAttachments(), 0);
+				assert.equal(await Sources.countIndexedItems(), 0);
+				assert.include(Sources.getUnsyncedLibraries(), library);
+
+				// Indexed here, every library is
+				Zotero.Embeddings.shouldSyncEmbeddings.returns(false);
+				assert.isAbove(await Sources.countEligibleAttachments(), 0);
+				assert.isEmpty(Sources.getUnsyncedLibraries());
+			});
+
 			it("should take the server's rows for items, notes and annotations as they come", async function () {
 				this.timeout(60000);
 				let { Sources } = Zotero.Embeddings.Indexing;
