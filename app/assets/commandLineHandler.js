@@ -38,10 +38,15 @@ if (handleFlag("debug", "ZoteroDebug")) {
 else if (handleFlag("debug-text", "ZoteroDebugText")) {
 	CommandLineOptions.forceDebugLog = 1;
 }
-// Pressing Ctrl-C via the terminal is interpreted as a crash, and after three crashes
-// Firefox starts up in automatic safe mode (troubleshooting mode). To avoid this, we clear the crash
-// counter when using one of the debug-logging flags, which generally imply terminal usage.
-if (CommandLineOptions.forceDebugLog) {
+// Write debug output to a file
+CommandLineOptions.debugFile = cmdLine.handleFlagWithParam("debug-file", false);
+if (CommandLineOptions.debugFile) {
+	CommandLineOptions.debugFile = cmdLine.resolveFile(CommandLineOptions.debugFile).path;
+}
+// Pressing Ctrl-C via the terminal or ending a hung process is interpreted as a crash, and after
+// three crashes Firefox starts up in automatic safe mode (troubleshooting mode). To avoid this, we
+// clear the crash counter when using one of the debug-logging flags.
+if (CommandLineOptions.forceDebugLog || CommandLineOptions.debugFile) {
 	Services.prefs.getBranch("toolkit.startup.").clearUserPref("recent_crashes");
 }
 

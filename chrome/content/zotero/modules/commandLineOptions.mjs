@@ -2,6 +2,7 @@
 
 export var CommandLineOptions = {
 	forceDebugLog: 0,
+	debugFile: false,
 	forceDataDir: false,
 	test: false,
 	automatedTest: false,

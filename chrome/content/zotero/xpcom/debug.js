@@ -32,6 +32,7 @@ Zotero.Debug = new function () {
 	var _consoleViewerQueue = [];
 	var _consoleViewerListener;
 	var _listeners = [];
+	var _fileStream;
 	
 	/**
 	 * Initialize debug logging
@@ -40,17 +41,18 @@ Zotero.Debug = new function () {
 	 *
 	 *   - via the debug.log pref in the client or connector
 	 *   - by enabling debug output logging from the Help menu
-	 *   - by passing -debug or -debug-text on the command line
+	 *   - by passing -debug, -debug-text, or -debug-file on the command line
 	 *
-	 * In the client, debug.log and -debug-text enable logging via the terminal, while -debug
-	 * enables logging via an in-app HTML-based window.
+	 * In the client, debug.log and -debug-text enable logging via the terminal, -debug
+	 * enables logging via an in-app HTML-based window, and -debug-file enables logging to a file.
 	 *
 	 * @param {Integer} [forceDebugLog = 0] - Force output even if pref disabled
 	 *    2: window (-debug)
 	 *    1: text console (-debug-text)
 	 *    0: disabled
+	 * @param {String} [filePath] - Path of a file to write output to (-debug-file)
 	 */
-	this.init = function (forceDebugLog = 0) {
+	this.init = function (forceDebugLog = 0, filePath) {
 		_console = Zotero.Prefs.get('debug.log') || forceDebugLog == 1;
 		_consoleViewer = forceDebugLog == 2;
 		// When logging to the text console from the client on Mac/Linux, colorize output
@@ -66,6 +68,14 @@ Zotero.Debug = new function () {
 		}
 		_level = Zotero.Prefs.get('debug.level');
 		_stackTrace = Zotero.Prefs.get('debug.stackTrace');
+		
+		if (_fileStream) {
+			_fileStream.close();
+			_fileStream = null;
+		}
+		if (filePath) {
+			_openFile(filePath);
+		}
 		
 		this.storing = _store;
 		this.updateEnabled();
@@ -141,7 +151,7 @@ Zotero.Debug = new function () {
 			message += '\n' + this.stackToString(stack);
 		}
 		
-		if (_console || _consoleViewer || _listeners.length) {
+		if (_console || _consoleViewer || _fileStream || _listeners.length) {
 			var output = '(' + level + ')' + deltaStr + ': ' + message;
 			if (Zotero.isFx && !Zotero.isBookmarklet) {
 				// Text console
@@ -149,11 +159,22 @@ Zotero.Debug = new function () {
 					dump("zotero" + output + "\n\n");
 				}
 				
-				// Remove ANSI color codes for the viewer and listeners. We could replace this with
-				// HTML for the viewer, but it's probably unnecessarily distracting/alarming to show
-				// the red. Devs who care about times should just use a terminal.
+				// Remove ANSI color codes for the file, viewer, and listeners. We could replace this
+				// with HTML for the viewer, but it's probably unnecessarily distracting/alarming to
+				// show the red. Devs who care about times should just use a terminal.
 				if (slowPrefix) {
 					output = output.replace(slowPrefix, '').replace(slowSuffix, '');
+				}
+				
+				// File
+				if (_fileStream) {
+					try {
+						_fileStream.writeString(output + "\n\n");
+					}
+					catch (e) {
+						_fileStream = null;
+						Components.utils.reportError(e);
+					}
 				}
 				
 				// Console window
@@ -274,8 +295,25 @@ Zotero.Debug = new function () {
 	
 	
 	this.updateEnabled = function () {
-		this.enabled = _console || _consoleViewer || _store || _listeners.length;
+		this.enabled = _console || _consoleViewer || _fileStream || _store || _listeners.length;
 	};
+	
+	
+	function _openFile(path) {
+		try {
+			let stream = Cc["@mozilla.org/network/file-output-stream;1"]
+				.createInstance(Ci.nsIFileOutputStream);
+			// PR_WRONLY | PR_CREATE_FILE | PR_TRUNCATE
+			stream.init(Zotero.File.pathToFile(path), 0x02 | 0x08 | 0x20, 0o644, 0);
+			_fileStream = Cc["@mozilla.org/intl/converter-output-stream;1"]
+				.createInstance(Ci.nsIConverterOutputStream);
+			_fileStream.init(stream, "UTF-8");
+		}
+		catch (e) {
+			_fileStream = null;
+			Components.utils.reportError(e);
+		}
+	}
 	
 	
 	this.count = function () {
