@@ -85,7 +85,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			libraryID: options.libraryID || Zotero.Libraries.userLibraryID,
 			controller: new Zotero.Sync.Storage.Mode.ZFS({
 				apiClient: client,
-				maxS3ConsecutiveFailures: 2
+				retryDelay: 0
 			}),
 			background: options.background,
 			stopOnError
@@ -277,6 +277,99 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(library.storageDownloadNeeded);
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
+		
+		it("should retry a dropped download once", async function () {
+			var { engine } = await setup();
+			
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			server.respondWith(function (req) {
+				if (req.method == "GET"
+						&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": "1441252524905",
+						"Zotero-File-MD5": Zotero.Utilities.Internal.md5(text),
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + s3Path,
+					}, "");
+				}
+			});
+			var downloadSpy = sinon.spy(Zotero.HTTP, 'download');
+			httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						// Drop connections without a response during the first attempt
+						if (downloadSpy.callCount < 2) {
+							response.seizePower();
+							response.finish();
+							return;
+						}
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+			try {
+				await engine.start();
+			}
+			finally {
+				downloadSpy.restore();
+			}
+			
+			assert.equal(downloadSpy.callCount, 2);
+			var contents = await Zotero.File.getContentsAsync(await item.getFilePathAsync());
+			assert.equal(contents, text);
+		});
+		
+		it("should fail if a retried download is also dropped", async function () {
+			var { engine } = await setup();
+			
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			server.respondWith(function (req) {
+				if (req.method == "GET"
+						&& req.url == baseURL + `users/1/items/${item.key}/file`) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": "1441252524905",
+						"Zotero-File-MD5": Zotero.Utilities.Internal.md5("x"),
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + s3Path,
+					}, "");
+				}
+			});
+			httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.seizePower();
+						response.finish();
+					}
+				}
+			);
+			var downloadSpy = sinon.spy(Zotero.HTTP, 'download');
+			try {
+				var e = await getPromiseError(engine.start());
+			}
+			finally {
+				downloadSpy.restore();
+			}
+			
+			assert.equal(e.message, Zotero.Sync.Storage.defaultError);
+			assert.equal(downloadSpy.callCount, 2);
+			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+		});
 		
 		it("should download a file marked for download even with no remote storage changes", async function () {
 			var { engine, client, caller } = await setup();

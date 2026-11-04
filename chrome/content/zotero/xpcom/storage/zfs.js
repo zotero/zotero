@@ -30,12 +30,7 @@ if (!Zotero.Sync.Storage.Mode) {
 Zotero.Sync.Storage.Mode.ZFS = function (options) {
 	this.options = options;
 	this.apiClient = options.apiClient;
-	
-	this._s3Backoff = 1;
-	this._s3ConsecutiveFailures = 0;
-	this._maxS3Backoff = 60;
-	this._maxS3ConsecutiveFailures = options.maxS3ConsecutiveFailures !== undefined
-		? options.maxS3ConsecutiveFailures : 5;
+	this.retryDelay = options.retryDelay !== undefined ? options.retryDelay : 2000;
 };
 Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	mode: "zfs",
@@ -53,7 +48,12 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	 * @param {Zotero.Sync.Storage.Request} request
 	 * @return {Promise<Zotero.Sync.Storage.Result>}
 	 */
-	downloadFile: async function (request) {
+	downloadFile: function (request) {
+		return this._downloadFile(request, false);
+	},
+	
+	
+	_downloadFile: async function (request, isRetry) {
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
 		if (!item) {
 			throw new Error("Item '" + request.name + "' not found");
@@ -82,6 +82,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		return new Promise(async (resolve, reject) => {
 			var resultOptions = {};
+			var currentURL = uri;
 			try {
 				// Step 1: Request file metadata from the API
 				//
@@ -162,6 +163,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 
 				// Step 2: Download the file from storage
+				currentURL = fileURL;
 				let displayURL = fileURL.replace(/(\w:\/\/[^/]+\/).*/, '$1[...]');
 				await Zotero.HTTP.download(
 					fileURL,
@@ -185,36 +187,30 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 
 				Zotero.debug("Finished download of " + destPath);
+				if (isRetry) {
+					Zotero.logError(`Download of ${item.libraryKey} from `
+						+ `${this._getHost(currentURL)} succeeded after retry`);
+				}
 
 				resolve(await Zotero.Sync.Storage.Local.processDownload(requestData));
 			}
 			catch (e) {
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					// If the connection is interrupted, delay and retry
-					if (e.xmlhttp?.status == 0 || e.status == 0) {
-						if (++this._s3ConsecutiveFailures
-								< this._maxS3ConsecutiveFailures) {
-							let libraryKey = item.libraryKey;
-							let msg = `Request to ${this._getHost(e.url)} returned 0 for `
-								+ `${libraryKey} -- retrying download`;
-							Zotero.logError(msg);
-							if (this._s3Backoff < this._maxS3Backoff) {
-								this._s3Backoff *= 2;
-							}
-							Zotero.debug("Delaying " + libraryKey
-								+ " download for "
-								+ this._s3Backoff + " seconds", 2);
-							Zotero.Promise.delay(this._s3Backoff * 1000)
-							.then(function () {
-								resolve(this.downloadFile(request));
-							}.bind(this));
-							return;
-						}
-
-						Zotero.debug(this._s3ConsecutiveFailures
-							+ " consecutive download failures -- aborting", 1);
-						this._s3ConsecutiveFailures = 0;
+				// If the connection fails, retry once
+				let timedOut = e instanceof Zotero.HTTP.TimeoutException;
+				if (!isRetry
+						&& (timedOut
+							|| (e instanceof Zotero.HTTP.UnexpectedStatusException
+								&& (e.xmlhttp?.status == 0 || e.status == 0)))) {
+					Zotero.logError(`Request to ${this._getHost(currentURL)} `
+						+ (timedOut ? "timed out" : "returned 0")
+						+ ` for ${item.libraryKey} -- retrying download`);
+					await Zotero.Promise.delay(this.retryDelay);
+					if (request.isFinished()) {
+						resolve(new Zotero.Sync.Storage.Result);
+						return;
 					}
+					resolve(this._downloadFile(request, true));
+					return;
 				}
 				Zotero.logError(e);
 				reject(new Error(Zotero.Sync.Storage.defaultError));
@@ -619,7 +615,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	/**
 	 * Given parameters from authorization, upload file to S3
 	 */
-	_uploadFile: async function (request, item, params) {
+	_uploadFile: async function (request, item, params, isRetry = false) {
 		if (request.isFinished()) {
 			Zotero.debug("Upload request " + request.name + " is no longer running after getting "
 				+ "upload parameters");
@@ -673,27 +669,16 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				+ "written to within the timeout period.";
 			if (e.status == 0
 					|| (e.status == 400 && e.xmlhttp.responseText.indexOf(timeoutMessage) != -1)) {
-				if (this._s3ConsecutiveFailures >= this._maxS3ConsecutiveFailures) {
-					Zotero.debug(this._s3ConsecutiveFailures
-						+ " consecutive upload failures -- aborting", 1);
-					this._s3ConsecutiveFailures = 0;
+				if (isRetry) {
 					let e = Zotero.getString('sync.storage.error.zfs.restart', Zotero.appName);
 					throw new Error(e);
 				}
-				else {
-					let msg = `Request to ${this._getHost(e.url)} returned ${e.status} `
-						+ `for ${item.libraryKey} -- retrying upload`;
-					Zotero.logError(msg);
-					Zotero.debug(e.xmlhttp.responseText, 1);
-					if (this._s3Backoff < this._maxS3Backoff) {
-						this._s3Backoff *= 2;
-					}
-					this._s3ConsecutiveFailures++;
-					Zotero.debug("Delaying " + item.libraryKey + " upload for "
-						+ this._s3Backoff + " seconds", 2);
-					await Zotero.Promise.delay(this._s3Backoff * 1000);
-					return this._uploadFile(request, item, params);
-				}
+				let msg = `Request to ${this._getHost(e.url)} returned ${e.status} `
+					+ `for ${item.libraryKey} -- retrying upload`;
+				Zotero.logError(msg);
+				Zotero.debug(e.xmlhttp.responseText, 1);
+				await Zotero.Promise.delay(this.retryDelay);
+				return this._uploadFile(request, item, params, true);
 			}
 			else if (e.status == 500) {
 				// TODO: localize
@@ -724,13 +709,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		Zotero.debug("Upload of attachment " + item.key + " finished with status code " + req.status);
 		Zotero.debug(req.responseText);
-		
-		// Decrease backoff delay on successful upload
-		if (this._s3Backoff > 1) {
-			this._s3Backoff /= 2;
-		}
-		// And reset consecutive failures
-		this._s3ConsecutiveFailures = 0;
 		
 		var requestParams = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
 		var uri = this.apiClient.buildRequestURI(requestParams);
