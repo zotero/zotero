@@ -237,5 +237,20 @@ describe("Zotero.Feeds", function () {
 			
 			Zotero.Feeds.scheduleNextFeedCheck.restore();
 		});
+
+		it("doesn't schedule a feed check if skipFeedUpdates is set", async function () {
+			await clearFeeds();
+			await createFeed({ refreshInterval: 1 });
+
+			Zotero.Feeds._nextFeedCheckDelay = null;
+			Zotero.skipFeedUpdates = true;
+			try {
+				await Zotero.Feeds.scheduleNextFeedCheck();
+			}
+			finally {
+				Zotero.skipFeedUpdates = false;
+			}
+			assert.isNull(Zotero.Feeds._nextFeedCheckDelay);
+		});
 	})
 })

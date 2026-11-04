@@ -216,7 +216,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 				'openPane',
 				'test',
 				'automatedTest',
-				'skipBundledFiles'
+				'skipBundledFiles',
+				'skipFeedUpdates'
 			];
 			opts.filter(opt => options[opt]).forEach(opt => this[opt] = true);
 			

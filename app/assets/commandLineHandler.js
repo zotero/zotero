@@ -40,6 +40,9 @@ if (cmdLine.handleFlag("ZoteroAutomatedTest", false)) {
 if (cmdLine.handleFlag("ZoteroSkipBundledFiles", false)) {
 	CommandLineOptions.skipBundledFiles = true;
 }
+if (cmdLine.handleFlag("skipFeedUpdates", false)) {
+	CommandLineOptions.skipFeedUpdates = true;
+}
 
 if (processTestOptions) {
 	TestOptions.tests = cmdLine.handleFlagWithParam("test", false);

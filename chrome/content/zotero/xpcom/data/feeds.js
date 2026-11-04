@@ -57,7 +57,7 @@ Zotero.Feeds = new function () {
 				notify: async function (event) {
 					if (event == 'finish') {
 						// Don't update during tests, since the database will have been closed
-						if (Zotero.test) return;
+						if (Zotero.test || Zotero.skipFeedUpdates) return;
 						
 						if (_initPromise) {
 							await _initPromise;
@@ -324,6 +324,10 @@ Zotero.Feeds = new function () {
 		// Don't schedule if already updating, since another check is scheduled at the end, or if
 		// paused
 		if (_updating || _paused) {
+			return;
+		}
+		if (Zotero.skipFeedUpdates) {
+			Zotero.debug("Skipping automatic feed updates");
 			return;
 		}
 		
