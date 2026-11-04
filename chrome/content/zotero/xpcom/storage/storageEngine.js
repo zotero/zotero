@@ -80,6 +80,11 @@ Zotero.Sync.Storage.Engine = function (options) {
 	}.bind(this))
 	
 	this.maxCheckAge = 10800; // maximum age in seconds for upload modification check (3 hours)
+	
+	// Stop a queue after this many requests in a row fail, since the storage host is likely
+	// unreachable
+	this.maxConsecutiveFailures = 5;
+	this._consecutiveFailures = { download: 0, upload: 0 };
 }
 
 Zotero.Sync.Storage.Engine.prototype.start = async function () {
@@ -363,7 +368,7 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = async function (item) {
 		type = 'download';
 		fn = 'downloadFile';
 	}
-	this.queues[type].add(() => {
+	this.queues[type].add(async () => {
 		var request = new Zotero.Sync.Storage.Request({
 			type,
 			engine: this,
@@ -375,7 +380,19 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = async function (item) {
 				this.onProgress(this.numRequests - this.requestsRemaining, this.numRequests);
 			}
 		});
-		return request.start();
+		try {
+			let result = await request.start();
+			this._consecutiveFailures[type] = 0;
+			return result;
+		}
+		catch (e) {
+			if (++this._consecutiveFailures[type] == this.maxConsecutiveFailures) {
+				Zotero.logError(`${this.maxConsecutiveFailures} consecutive file ${type}s failed `
+					+ `for ${this.library.name} -- skipping remaining ${type}s`);
+				this.queues[type].stop();
+			}
+			throw e;
+		}
 	});
 	this.numRequests++;
 	this.requestsRemaining++;

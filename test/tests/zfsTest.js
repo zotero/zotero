@@ -371,6 +371,59 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
 		});
 		
+		it("should skip remaining downloads after consecutive failures", async function () {
+			Zotero.Prefs.set('sync.storage.maxDownloads', 1);
+			try {
+				var { engine } = await setup({ stopOnError: false });
+			}
+			finally {
+				Zotero.Prefs.clear('sync.storage.maxDownloads');
+			}
+			
+			var items = [];
+			for (let i = 0; i < engine.maxConsecutiveFailures + 2; i++) {
+				let item = new Zotero.Item("attachment");
+				item.attachmentLinkMode = 'imported_file';
+				item.attachmentPath = 'storage:test.txt';
+				item.attachmentSyncState = "to_download";
+				await item.saveTx();
+				items.push(item);
+				httpd.registerPathHandler(
+					`/pretend-s3/${item.key}`,
+					{
+						handle: function (request, response) {
+							response.seizePower();
+							response.finish();
+						}
+					}
+				);
+			}
+			server.respondWith(function (req) {
+				let matches = req.url.match(/\/users\/1\/items\/([A-Z0-9]{8})\/file$/);
+				if (req.method == "GET" && matches) {
+					req.respond(302, {
+						"Zotero-File-Modification-Time": "1441252524905",
+						"Zotero-File-MD5": Zotero.Utilities.Internal.md5("x"),
+						"Zotero-File-Compressed": "No",
+						"Location": baseURL + `pretend-s3/${matches[1]}`,
+					}, "");
+				}
+			});
+			var downloadSpy = sinon.spy(Zotero.HTTP, 'download');
+			try {
+				await engine.start();
+			}
+			finally {
+				downloadSpy.restore();
+			}
+			
+			// Each failed file is tried twice
+			assert.equal(downloadSpy.callCount, engine.maxConsecutiveFailures * 2);
+			for (let item of items) {
+				assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD);
+			}
+		});
+		
 		it("should download a file marked for download even with no remote storage changes", async function () {
 			var { engine, client, caller } = await setup();
 			
