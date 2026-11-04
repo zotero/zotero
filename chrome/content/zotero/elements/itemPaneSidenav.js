@@ -50,6 +50,14 @@
 					role="tab">
 				</html:div>
 			</html:div>
+			<html:div class="pin-wrapper highlight-similar-active">
+				<html:div class="btn"
+					data-l10n-id="sidenav-similar"
+					data-pane="context-similar"
+					tabindex="0"
+					role="tab">
+				</html:div>
+			</html:div>
 
 			<html:div class="divider"/>
 			
@@ -81,6 +89,8 @@
 		
 		_contextNotesPane = null;
 
+		_contextSimilarPane = null;
+
 		_contextMenuTarget = null;
 
 		_draggedWrapper = null;
@@ -90,7 +100,7 @@
 		_prefObserverID = null;
 
 		get observedAttributes() {
-			return ["no-context-notes"];
+			return ["no-context-notes", "no-context-similar"];
 		}
 
 		attributeChangedCallback() {
@@ -117,7 +127,7 @@
 			// Otherwise, buttons for panes from the previous container would linger.
 			if (val) {
 				for (let button of this.querySelectorAll('.btn[data-pane]')) {
-					if (button.dataset.pane === 'context-notes') continue;
+					if (['context-notes', 'context-similar'].includes(button.dataset.pane)) continue;
 					button.parentElement.hidden = true;
 				}
 			}
@@ -146,6 +156,26 @@
 			else {
 				this.setAttribute("no-context-notes", "true");
 			}
+		}
+
+		// The pane of content similar to the reader's selected text, a sibling
+		// of the notes pane in the context pane's deck
+		get contextSimilarPane() {
+			return this._contextSimilarPane;
+		}
+
+		set contextSimilarPane(val) {
+			if (this._contextSimilarPane == val) return;
+			this._contextSimilarPane = val;
+			this.render();
+		}
+
+		get contextSimilarPaneEnabled() {
+			return !!this._contextSimilarPane && !this.hasAttribute("no-context-similar");
+		}
+
+		set contextSimilarPaneEnabled(val) {
+			this.toggleAttribute("no-context-similar", !val);
 		}
 		
 		get pinnedPane() {
@@ -188,6 +218,27 @@
 			this.render();
 		}
 
+		get _contextSimilarPaneVisible() {
+			return !!this._contextSimilarPane
+				&& !this._collapsed
+				&& this._contextSimilarPane.parentElement.selectedPanel == this._contextSimilarPane;
+		}
+
+		// Shown the way the notes pane is, in the same deck
+		set _contextSimilarPaneVisible(val) {
+			if (!this._contextSimilarPane) return;
+			let deck = this._contextSimilarPane.parentElement;
+			if (val) {
+				deck.selectedPanel = this._contextSimilarPane;
+				this._collapsed = false;
+				this._contextSimilarPane.update();
+			}
+			else {
+				deck.selectedPanel = Array.from(deck.children).find(child => child.contains(this._container));
+			}
+			this.render();
+		}
+
 		get _wrappers() {
 			return Array.from(this._buttonContainer.querySelectorAll('.pin-wrapper'));
 		}
@@ -201,7 +252,7 @@
 			if (!this.container?.supportsPinning) {
 				return false;
 			}
-			if (['context-notes', 'context-all-notes', 'context-item-notes'].includes(id)) {
+			if (['context-notes', 'context-all-notes', 'context-item-notes', 'context-similar'].includes(id)) {
 				return false;
 			}
 			// The first button in the group is not pinnable
@@ -372,6 +423,7 @@
 			}
 
 			let contextNotesPaneVisible = this._contextNotesPaneVisible;
+			let contextSimilarPaneVisible = this._contextSimilarPaneVisible;
 			let pinnedPane = this.pinnedPane;
 			for (let button of this.querySelectorAll('.btn[data-pane]')) {
 				let pane = button.dataset.pane;
@@ -379,20 +431,27 @@
 				if (this._contextNotesPane) {
 					button.removeAttribute('disabled');
 				}
-				
+
 				if (pane == 'context-notes') {
 					let hidden = !this.contextNotesPaneEnabled;
 					let selected = contextNotesPaneVisible;
-					
+
 					button.parentElement.hidden = hidden;
 					button.parentElement.previousElementSibling.hidden = hidden; // Divider
-					
+
 					button.setAttribute('aria-selected', selected);
-					
+
 					continue;
 				}
-				
-				button.closest("[role='tab']").setAttribute('aria-selected', !contextNotesPaneVisible);
+
+				if (pane == 'context-similar') {
+					button.parentElement.hidden = !this.contextSimilarPaneEnabled;
+					button.setAttribute('aria-selected', contextSimilarPaneVisible);
+					continue;
+				}
+
+				button.closest("[role='tab']").setAttribute('aria-selected',
+					!contextNotesPaneVisible && !contextSimilarPaneVisible);
 				// No need to set `hidden` here, since it's updated by ItemDetails#_handlePaneStatus
 				// Set .pinned on the container, for pin styling
 				button.parentElement.classList.toggle('pinned', pane == pinnedPane);
@@ -413,8 +472,9 @@
 			}
 			
 			this.querySelector('.highlight-notes-active').classList.toggle('highlight', contextNotesPaneVisible);
+			this.querySelector('.highlight-similar-active').classList.toggle('highlight', contextSimilarPaneVisible);
 			this.querySelector('.highlight-notes-inactive').classList.toggle('highlight',
-				this._contextNotesPane && !contextNotesPaneVisible);
+				this._contextNotesPane && !contextNotesPaneVisible && !contextSimilarPaneVisible);
 
 			// Update the pane order
 			this.container.initPaneOrder(this.getPersistedOrder());
@@ -734,9 +794,11 @@
 			}
 			if ([" ", "Enter"].includes(event.key)) {
 				// Only handles buttons that change which itemPane deck is visible
-				if (!(event.target == this._buttonContainer || event.target.closest(".highlight-notes-active"))) return;
+				if (!(event.target == this._buttonContainer
+					|| event.target.closest(".highlight-notes-active, .highlight-similar-active"))) return;
 				// Click the first itemPane button in a group to switch from notes to item details pane
-				if (event.target === this._buttonContainer && this._contextNotesPaneVisible) {
+				if (event.target === this._buttonContainer
+						&& (this._contextNotesPaneVisible || this._contextSimilarPaneVisible)) {
 					let firstBtn = event.target.querySelector(".btn");
 					let clickEvent = new MouseEvent('click', {
 						bubbles: true,
@@ -749,6 +811,9 @@
 					// If notes are visible, tab into them
 					if (this._contextNotesPaneVisible) {
 						Services.focus.moveFocus(window, this.contextNotesPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+					}
+					else if (this._contextSimilarPaneVisible) {
+						Services.focus.moveFocus(window, this.contextSimilarPane, Services.focus.MOVEFOCUS_FORWARD, 0);
 					}
 					// Tab into the pinned section if it exists
 					else if (this.pinnedPane) {
@@ -802,6 +867,12 @@
 					}
 					this._contextNotesPaneVisible = true;
 					break;
+				case "context-similar":
+					if (event.button !== 0) {
+						return;
+					}
+					this._contextSimilarPaneVisible = true;
+					break;
 				default: {
 					if (event.button !== 0) {
 						return;
@@ -812,6 +883,10 @@
 						case 1:
 							if (this._contextNotesPane && this._contextNotesPaneVisible) {
 								this._contextNotesPaneVisible = false;
+								scrollType = 'instant';
+							}
+							else if (this._contextSimilarPaneVisible) {
+								this._contextSimilarPaneVisible = false;
 								scrollType = 'instant';
 							}
 							// Call scrolling before expanding the pane to avoid flickering

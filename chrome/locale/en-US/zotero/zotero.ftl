@@ -739,6 +739,8 @@ sidenav-attachments =
     .tooltiptext = { pane-attachments }
 sidenav-notes =
     .tooltiptext = { pane-notes }
+sidenav-similar =
+    .tooltiptext = Similar Content
 sidenav-note-info =
     .tooltiptext = { pane-note-info }
 sidenav-attachment-info =
@@ -792,6 +794,11 @@ context-notes-search =
     .placeholder = Search Notes
 context-notes-return-button =
     .aria-label = { general-go-back }
+
+similar-context-empty = Content in your library similar to the text you select in the document will appear here.
+similar-context-searching = Searching…
+similar-context-none = No similar content found in this library.
+similar-context-unavailable = Similar content needs semantic search to be turned on and its index to be ready.
 
 new-collection = New Collection…
 menu-new-collection =

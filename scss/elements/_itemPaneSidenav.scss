@@ -107,6 +107,14 @@ item-pane-sidenav {
 			fill: map.get($item-pane-sections, "notes");
 			stroke: map.get($item-pane-sections, "notes");
 		}
+
+		// Similar content pane button: the search magnifier, as the item
+		// pane's search results use
+		&[data-pane="context-similar"] {
+			background-image: url("chrome://zotero/skin/20/universal/magnifier.svg");
+			fill: var(--accent-gold);
+			stroke: var(--accent-gold);
+		}
 		
 		&[data-action="locate"], &[data-action="toggle-pane"] {
 			color: var(--fill-secondary);

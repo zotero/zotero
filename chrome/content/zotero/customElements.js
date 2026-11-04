@@ -82,6 +82,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemTreeMe
 		['context-notes-list', 'chrome://zotero/content/elements/contextNotesList.js'],
 		['note-row', 'chrome://zotero/content/elements/noteRow.js'],
 		['notes-context', 'chrome://zotero/content/elements/notesContext.js'],
+		['similar-context', 'chrome://zotero/content/elements/similarContext.js'],
 		['libraries-collections-box', 'chrome://zotero/content/elements/librariesCollectionsBox.js'],
 		['autocomplete-textarea', 'chrome://zotero/content/elements/autocompleteTextArea.js'],
 		['bubble-input', 'chrome://zotero/content/elements/bubbleInput.js'],

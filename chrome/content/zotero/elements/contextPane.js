@@ -34,6 +34,7 @@
 			<deck id="zotero-context-pane-deck" flex="1" selectedIndex="0">
 				<deck id="zotero-context-pane-item-deck"></deck>
 				<deck id="zotero-context-pane-notes-deck" class="notes-pane-deck" flex="1"></deck>
+				<similar-context id="zotero-context-pane-similar"/>
 			</deck>
 		`);
 
@@ -45,19 +46,21 @@
 			this._sidenav = sidenav;
 			// TODO: decouple sidenav and contextPane
 			sidenav.contextNotesPane = this._notesPaneDeck;
+			sidenav.contextSimilarPane = this._similarPane;
 		}
 
 		get mode() {
-			return ["item", "notes"][this._panesDeck.getAttribute('selectedIndex')];
+			return ["item", "notes", "similar"][this._panesDeck.getAttribute('selectedIndex')];
 		}
 
 		set mode(mode) {
 			let modeMap = {
 				item: "0",
 				notes: "1",
+				similar: "2",
 			};
 			if (!(mode in modeMap)) {
-				throw new Error(`ContextPane.mode must be one of ["item", "notes"], but got ${mode}`);
+				throw new Error(`ContextPane.mode must be one of ["item", "notes", "similar"], but got ${mode}`);
 			}
 			this._panesDeck.selectedIndex = modeMap[mode];
 		}
@@ -92,6 +95,8 @@
 			if (prevState === "true" && (!newState || newState === "false")) {
 				let itemContext = this._getItemContext(Zotero_Tabs.selectedID);
 				itemContext?.render();
+				// The selection made while it was closed
+				this._similarPane.update();
 			}
 		}
 
@@ -101,6 +106,8 @@
 			this._itemPaneDeck = this.querySelector('#zotero-context-pane-item-deck');
 			// Notes pane deck
 			this._notesPaneDeck = this.querySelector('#zotero-context-pane-notes-deck');
+			// Content similar to the reader's selected text
+			this._similarPane = this.querySelector('#zotero-context-pane-similar');
 
 			this._notifierIDs = [
 				Zotero.Notifier.registerObserver(this, ['item'], 'contextPane'),
@@ -224,6 +231,7 @@
 				else {
 					this._disableNotesContext();
 				}
+				this._setupSimilarContext(tabID, tabType);
 				_contextPaneSplitter.removeAttribute('hidden');
 
 				_contextPane.toggleAttribute('collapsed', _contextPaneSplitter.getAttribute('state') == 'collapsed');
@@ -257,6 +265,20 @@
 
 		_disableNotesContext() {
 			this.sidenav.contextNotesPaneEnabled = false;
+		}
+
+		// Similar content follows a reader tab's selection; other tabs have
+		// none, so the pane goes back to the item when one is selected
+		_setupSimilarContext(tabID, tabType) {
+			let enabled = tabType == 'reader';
+			this.sidenav.contextSimilarPaneEnabled = enabled;
+			if (enabled) {
+				this._similarPane.tabID = tabID;
+			}
+			else if (this.mode == 'similar') {
+				this.mode = 'item';
+				this.sidenav.render();
+			}
 		}
 
 		_getCurrentNotesContext() {
@@ -369,6 +391,10 @@
 				}
 				else if (this.mode == "notes") {
 					return this._getCurrentNotesContext().focus();
+				}
+				else if (this.mode == "similar") {
+					Services.focus.moveFocus(window, this._similarPane, Services.focus.MOVEFOCUS_FORWARD, 0);
+					return true;
 				}
 			}
 			return false;

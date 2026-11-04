@@ -2,7 +2,8 @@ context-pane {
     -moz-box-orient: vertical;
 
     #zotero-context-pane-item-deck,
-    #zotero-context-pane-notes-deck {
+    #zotero-context-pane-notes-deck,
+    #zotero-context-pane-similar {
         position: absolute;
         height: 100%;
         width: 100%;
@@ -11,5 +12,108 @@ context-pane {
     .zotero-context-notes-list {
         min-width: 0;
         min-height: 0;
+    }
+}
+
+// Content similar to the reader's selected text: a message until there are
+// results, then the results' cards, scrolling within the pane
+similar-context {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    .similar-context-message {
+        padding: 24px 16px;
+        color: var(--fill-secondary);
+        text-align: center;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    .similar-context-results {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0 8px;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    // A document's matches: its title beside its type's icon, wrapping as
+    // it needs; its creator and year beside a bar of how relevant it is;
+    // then its cards
+    .similar-context-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-block: 8px;
+
+        &:not(:last-child) {
+            border-bottom: 1px solid var(--fill-quinary);
+        }
+
+        .head {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+
+            .icon-item-type {
+                flex: 0 0 auto;
+                margin-top: 1px;
+            }
+
+            .title {
+                flex: 1;
+                min-width: 0;
+                font-weight: 600;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-inline-start: 22px;
+            color: var(--fill-secondary);
+
+            .creator-year {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            // The tree's Relevance bar, small
+            .relevance-bar {
+                flex: 0 0 48px;
+                height: 4px;
+                border-radius: 2px;
+                background: var(--fill-quarternary);
+                overflow: hidden;
+            }
+
+            .relevance-bar-fill {
+                display: block;
+                height: 100%;
+                background: var(--accent-blue);
+            }
+        }
+
+        .rows {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+
+            @include comfortable {
+                gap: 8px;
+            }
+        }
     }
 }

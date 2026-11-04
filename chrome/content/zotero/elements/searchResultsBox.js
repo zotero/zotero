@@ -94,14 +94,6 @@
 			// The header's count placeholder needs a value before the first
 			// async render fills in the real one
 			this._section.setCount(0);
-			// Double-click (or Enter on a focused card) opens the attachment
-			// at the chunk
-			this._body.addEventListener('dblclick', this._handleActivate);
-			this._body.addEventListener('keydown', (event) => {
-				if (event.key == 'Enter') {
-					this._handleActivate(event);
-				}
-			});
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'searchResultsBox');
 		}
 
@@ -125,21 +117,20 @@
 			this._refreshAnnotations().catch(e => Zotero.logError(e));
 		}
 
+		// Read the item's annotations over every card's passage at once --
+		// one read of the attachment -- and hand each card its own
 		async _refreshAnnotations() {
 			let item = this.item;
 			let rows = [...this._body.querySelectorAll('search-result-row')];
-			if (!item || !rows.length) {
-				return;
-			}
 			let anchors = rows.map(row => row.result?.anchor ?? null);
-			if (!anchors.some(Boolean)) {
+			if (!item || !anchors.some(Boolean)) {
 				return;
 			}
 			let read = await Zotero.SDT.readAnchors(item.id, anchors, { isPriority: true });
 			if (!read.ok || this.item !== item) {
 				return;
 			}
-			rows.forEach((row, i) => row.setAnnotations(read.chunks[i]));
+			rows.forEach((row, i) => row.isConnected && row.setAnnotations(read.chunks[i]));
 		}
 
 		get _itemsView() {
@@ -209,20 +200,6 @@
 			}
 			return preview?.state == 'filled' ? preview.entries : [];
 		}
-
-		// Open the activated card's attachment at its passage
-		_handleActivate = (event) => {
-			let row = event.target.closest('search-result-row');
-			// The Show More toggle isn't an activation
-			if (!row || !this.item || event.target.closest('.show-more')) {
-				return;
-			}
-			if (typeof ZoteroPane == 'undefined') {
-				return;
-			}
-			ZoteroPane.viewSearchMatch(this.item.id, row.result, event)
-				.catch(e => Zotero.logError(e));
-		};
 
 		_updateHidden() {
 			// As a section, visible only during a best-match search;

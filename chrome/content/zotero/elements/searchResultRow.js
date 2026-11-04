@@ -98,6 +98,14 @@
 				event.stopPropagation();
 				this._toggleExpanded();
 			});
+			// Double-click, or Enter on the focused card, opens the attachment
+			// at the passage
+			this.addEventListener('dblclick', this._handleActivate);
+			this.addEventListener('keydown', (event) => {
+				if (event.key == 'Enter') {
+					this._handleActivate(event);
+				}
+			});
 			this._initSelectionPopup();
 			this._quote.addEventListener('mouseup', this._handleQuoteMouseUp);
 			this.render();
@@ -429,6 +437,17 @@
 				node.append(piece);
 			}
 		}
+
+		// Open the card's attachment at its passage -- not from the Show More
+		// toggle or the selection popup
+		_handleActivate = (event) => {
+			if (event.target.closest('.show-more, panel') || !this.itemID
+					|| typeof ZoteroPane == 'undefined') {
+				return;
+			}
+			ZoteroPane.viewSearchMatch(this.itemID, this._result, event)
+				.catch(e => Zotero.logError(e));
+		};
 
 		// Show the attachment's annotations over the passage as they are
 		// now, from the chunk Zotero.SDT.readAnchors() reads for it. Left
