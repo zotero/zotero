@@ -72,6 +72,50 @@ describe("Zotero.LibraryTree", function() {
 		});
 	});
 	
+	describe("#onDragStart()", function () {
+		function startDrag(view, row) {
+			let rowEl = view.tree.getRowElement(row);
+			rowEl.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0 }));
+			let dataTransfer = new win.DataTransfer();
+			rowEl.dispatchEvent(new win.DragEvent('dragstart', { bubbles: true, dataTransfer }));
+			return { rowEl, dataTransfer };
+		}
+		
+		it("should select an unselected draggable row on click", async function () {
+			var collection = await createDataObject('collection');
+			var rowEl = cv.tree.getRowElement(cv.getRowIndexByID("C" + collection.id));
+			rowEl.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0 }));
+			assert.equal(zp.getCollectionTreeRows()[0].id, "L" + Zotero.Libraries.userLibraryID);
+			rowEl.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true, button: 0 }));
+			assert.equal(zp.getCollectionTreeRows()[0].id, "C" + collection.id);
+		});
+		
+		it("should drag an unselected item without selecting it", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item');
+			await zp.selectItem(item1.id);
+			var view = zp.itemsView;
+			
+			var { rowEl, dataTransfer } = startDrag(view, view.getRowIndexByID(item2.id));
+			assert.sameMembers(zp.getSelectedItems(true), [item1.id]);
+			assert.equal(dataTransfer.getData('zotero/item'), item2.id);
+			assert.isTrue(rowEl.classList.contains('target'));
+			
+			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
+			assert.isFalse(rowEl.classList.contains('target'));
+		});
+		
+		it("should drag an unselected collection without selecting it", async function () {
+			var collection = await createDataObject('collection');
+			var row = cv.getRowIndexByID("C" + collection.id);
+			
+			var { rowEl, dataTransfer } = startDrag(cv, row);
+			assert.equal(zp.getCollectionTreeRows()[0].id, "L" + Zotero.Libraries.userLibraryID);
+			assert.equal(dataTransfer.getData('zotero/collection'), collection.id);
+			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
+		});
+	});
+	
 	describe("#_clearDropIndicator()", function () {
 		// The tests send no further drag events after the drag over, as when a drag ends outside
 		// the window without the tree receiving a dragleave, drop, or dragend

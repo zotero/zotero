@@ -459,7 +459,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 		// Drag-and-drop stuff
 		if (this.props.dragAndDrop) {
-			div.setAttribute('draggable', treeRow != this._editing);
+			div.setAttribute('draggable', treeRow != this._editing
+				&& (treeRow.isCollection() || treeRow.isSearch()));
 		}
 		if (!oldDiv) {
 			if (this.props.dragAndDrop) {
@@ -1593,8 +1594,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			event.dataTransfer.effectAllowed = 'copyMove';
 		}
 		
-		let rows = this.getSelectedRows();
-		// Ignore drag if all selected rows aren't the same type
+		let rows = this._dragIndices.map(i => this.getRow(i));
+		// Ignore drag if all dragged rows aren't the same type
 		if (!rows.every(o => o.type == rows[0].type)) {
 			return;
 		}
@@ -2410,6 +2411,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						await droppedCollection.save({ undoAction: 'undo-action-move-collection' });
 					}
 				});
+				// Reveal the moved collections in their new location
+				for (let droppedCollection of droppedCollections) {
+					await this.expandToCollection(droppedCollection.id);
+				}
 			}
 		}
 		else if (dataType == 'zotero/item') {

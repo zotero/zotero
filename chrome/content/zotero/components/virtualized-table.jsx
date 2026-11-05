@@ -406,6 +406,7 @@ class VirtualizedTable extends React.Component {
 		this.isHeaderMouseUp = true;
 		
 		this._isMouseDrag = false;
+		this._targetIndex = null;
 
 		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " ", "PageUp", "PageDown"]);
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
@@ -829,8 +830,11 @@ class VirtualizedTable extends React.Component {
 	
 	_handleMouseDown = async (e, index) => {
 		const modifierClick = e.shiftKey || e.ctrlKey || e.metaKey;
-		// All modifier clicks handled in mouseUp per mozilla itemtree convention
-		if (!modifierClick && !this.selection.isSelected(index)) {
+		// All modifier clicks handled in mouseUp per mozilla itemtree convention. A plain click
+		// on an unselected draggable row is also handled in mouseUp, so that dragging the row
+		// doesn't select it.
+		let draggable = e.button == 0 && e.currentTarget.draggable;
+		if (!modifierClick && !draggable && !this.selection.isSelected(index)) {
 			this._onSelection(index, false, false);
 		}
 		this.focus();
@@ -1283,7 +1287,25 @@ class VirtualizedTable extends React.Component {
 		else {
 			node.removeAttribute('aria-selected');
 		}
+		node.classList.toggle('target', index === this._targetIndex);
 		return node;
+	}
+	
+	/**
+	 * Mark a row that an action applies to without the row being selected (e.g., a dragged
+	 * row or the row a context menu was opened on)
+	 *
+	 * @param {Number|null} index
+	 */
+	setTargetRow(index) {
+		let previous = this._targetIndex;
+		this._targetIndex = index;
+		if (previous !== null) {
+			this.invalidateRow(previous);
+		}
+		if (index !== null) {
+			this.invalidateRow(index);
+		}
 	}
 
 	_renderHeaderCells = () => {
