@@ -25,21 +25,69 @@ describe("Zotero.ItemTreeManager", function () {
 	});
 
 	// Show the column in the main tree and wait for its header
-	async function showColumn(dataKey) {
-		itemsView._columnPrefs[dataKey] = { dataKey, hidden: false };
-		let columns = itemsView._getColumns();
+	async function showColumn(dataKey, targetWin = win) {
+		let view = targetWin.ZoteroPane.itemsView;
+		view._columnPrefs[dataKey] = { dataKey, hidden: false };
+		let columns = view._getColumns();
 		let index = columns.findIndex(column => column.dataKey === dataKey);
 		if (index === -1 || !columns[index].hidden) {
 			return;
 		}
-		itemsView.tree._columns.toggleHidden(index);
+		view.tree._columns.toggleHidden(index);
 		await waitForCallback(
-			() => !!doc.querySelector(`#zotero-items-tree .virtualized-table-header .cell.${CSS.escape(dataKey)}`),
+			() => !!targetWin.document.querySelector(`#zotero-items-tree .virtualized-table-header .cell.${CSS.escape(dataKey)}`),
 			100, 3);
 	}
 
 	function selectedCell(dataKey) {
 		return doc.querySelector(`#zotero-items-tree .row.selected .${CSS.escape(dataKey)}`);
+	}
+
+	async function registerAsyncColumn(item, key = "async-cell") {
+		await ZoteroPane.selectItem(item.id);
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
+		let dataKey = plugin.run((itemID, key) => {
+			globalThis.renders = [];
+			globalThis.providerCalls = 0;
+			return Zotero.ItemTreeManager.registerColumn({
+				dataKey: key,
+				label: "Async Cell",
+				dataProvider: ({ itemID }) => {
+					globalThis.providerCalls++;
+					return String(itemID);
+				},
+				renderCell: (index, data) => {
+					if (data !== String(itemID)) return "";
+					let resolve, reject;
+					let promise = new Promise((res, rej) => {
+						resolve = res;
+						reject = rej;
+					});
+					renders.push({ promise, resolve, reject });
+					return promise;
+				},
+			});
+		}, item.id, key);
+		await refreshed;
+		await showColumn(dataKey);
+		await waitForCallback(() => plugin.eval("renders.length > 0"));
+		return dataKey;
+	}
+
+	function svgURL(text) {
+		return 'data:image/svg+xml,' + encodeURIComponent(
+			`<svg xmlns="http://www.w3.org/2000/svg"><text>${text}</text></svg>`);
+	}
+
+	async function finishRender(index, value, reject = false) {
+		await plugin.run((index, value, reject) => {
+			let request = renders[index];
+			if (reject) request.reject(new Error(value));
+			else request.resolve(value);
+			return request.promise.catch(() => {});
+		}, index, value, reject);
+		// Let the host's Promise handlers finish before checking an ignored result.
+		await Zotero.Promise.delay(0);
 	}
 
 	it("should register a column whose dataProvider answers for an item", async function () {
@@ -76,6 +124,144 @@ describe("Zotero.ItemTreeManager", function () {
 		assert.equal(selectedCell(dataKey).textContent, String(item.id));
 	});
 
+	it("should display an async SVG without recomputing data or changing row order", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		assert.equal(selectedCell(dataKey).textContent, String(item.id));
+		let calls = plugin.eval("providerCalls");
+		let order = itemsView._rows.map(row => row.id);
+		let url = svgURL("loaded");
+		await finishRender(plugin.eval("renders.length - 1"), url);
+		let image = selectedCell(dataKey).querySelector("img");
+		assert.equal(image.src, url);
+		assert.equal(image.alt, String(item.id));
+		assert.equal(plugin.eval("providerCalls"), calls);
+		assert.deepEqual(itemsView._rows.map(row => row.id), order);
+	});
+
+	it("should preserve first-column decorations when an async SVG arrives", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item, "first-column-async");
+		itemsView._columnPrefs[dataKey] = { dataKey, hidden: false, ordinal: -1 };
+		await itemsView._resetColumns();
+		itemsView.tree.invalidate();
+		let cell = selectedCell(dataKey);
+		assert.isTrue(cell.classList.contains("first-column"));
+		assert.exists(cell.querySelector(".cell-icon"));
+		let url = svgURL("loaded");
+		await finishRender(plugin.eval("renders.length - 1"), url);
+		cell = selectedCell(dataKey);
+		assert.isTrue(cell.classList.contains("first-column"));
+		assert.lengthOf(cell.querySelectorAll(".cell-icon"), 1);
+		assert.equal(cell.querySelector(".cell-text img").src, url);
+	});
+
+	it("should display an immediately resolved async renderer", async function () {
+		let item = await createDataObject("item");
+		await ZoteroPane.selectItem(item.id);
+		let url = svgURL("immediate");
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
+		let dataKey = plugin.run(url => Zotero.ItemTreeManager.registerColumn({
+			dataKey: "immediate-svg",
+			label: "Immediate SVG",
+			dataProvider: ({ itemID }) => String(itemID),
+			renderCell: async () => url,
+		}), url);
+		await refreshed;
+		await showColumn(dataKey);
+		await waitForCallback(() => !!selectedCell(dataKey)?.querySelector("img"));
+		assert.equal(selectedCell(dataKey).querySelector("img").src, url);
+	});
+
+	it("should keep the cell text when an async renderer rejects", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let errors = sinon.spy(Zotero, "logError");
+		try {
+			await finishRender(plugin.eval("renders.length - 1"), "Render failed", true);
+			assert.equal(selectedCell(dataKey).textContent, String(item.id));
+			assert.isTrue(errors.calledOnce);
+			assert.equal(errors.firstCall.args[0].message, "Render failed");
+		}
+		finally {
+			errors.restore();
+		}
+	});
+
+	it("should validate an asynchronously returned SVG URL", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		await finishRender(plugin.eval("renders.length - 1"), "https://example.com/untrusted.svg");
+		assert.equal(selectedCell(dataKey).textContent, String(item.id));
+		assert.equal(selectedCell(dataKey).childElementCount, 0);
+	});
+
+	it("should ignore an older renderer after the same row is rendered again", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let old = plugin.eval("renders.length - 1");
+		itemsView.tree.invalidateRow(itemsView.getRowIndexByID(item.id));
+		let current = plugin.eval("renders.length - 1");
+		assert.isAbove(current, old);
+		await finishRender(old, svgURL("old"));
+		assert.equal(selectedCell(dataKey).textContent, String(item.id));
+		let url = svgURL("current");
+		await finishRender(current, url);
+		assert.equal(selectedCell(dataKey).querySelector("img").src, url);
+	});
+
+	it("should ignore pending render output after its item data is invalidated", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let old = plugin.eval("renders.length - 1");
+		itemsView.invalidateRowCache([item.id]);
+		await finishRender(old, svgURL("outdated"));
+		assert.equal(selectedCell(dataKey).textContent, String(item.id));
+		itemsView.tree.invalidateRow(itemsView.getRowIndexByID(item.id));
+		let url = svgURL("fresh");
+		await finishRender(plugin.eval("renders.length - 1"), url);
+		assert.equal(selectedCell(dataKey).querySelector("img").src, url);
+	});
+
+	it("should ignore an async renderer after its column is unregistered", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let request = plugin.eval("renders.length - 1");
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
+		plugin.run(key => Zotero.ItemTreeManager.unregisterColumn(key), dataKey);
+		await refreshed;
+		await finishRender(request, svgURL("removed"));
+		assert.notExists(selectedCell(dataKey));
+	});
+
+	it("should ignore an async renderer after its plugin is unloaded", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let request = plugin.eval("renders.length - 1");
+		plugin.unload();
+		await finishRender(request, svgURL("unloaded"));
+		assert.equal(selectedCell(dataKey).textContent, String(item.id));
+	});
+
+	it("should complete async renders of the same item in two windows", async function () {
+		let item = await createDataObject("item");
+		let dataKey = await registerAsyncColumn(item);
+		let secondWin = await loadZoteroPane();
+		try {
+			await secondWin.ZoteroPane.selectItem(item.id);
+			await showColumn(dataKey, secondWin);
+			let url = svgURL("shared");
+			let count = plugin.eval("renders.length");
+			for (let index = 0; index < count; index++) await finishRender(index, url);
+			assert.equal(selectedCell(dataKey).querySelector("img").src, url);
+			let cell = secondWin.document.querySelector(`#zotero-items-tree .row.selected .${CSS.escape(dataKey)}`);
+			assert.equal(cell.querySelector("img").src, url);
+		}
+		finally {
+			secondWin.close();
+		}
+	});
+
 	it("should let a privileged plugin build the cell in renderCell", async function () {
 		plugin.load(["*"]);
 		plugin.expose("report", log.report);
@@ -87,9 +273,9 @@ describe("Zotero.ItemTreeManager", function () {
 			pluginID: PLUGIN_ID,
 			dataKey: "api-test-render",
 			label: "APITest",
-			dataProvider: (_item, _dataKey, { itemID }) => {
+			dataProvider: (item) => {
 				report("dataProvider");
-				return String(itemID);
+				return String(item.id);
 			},
 			renderCell: (index, data, column, isFirstColumn, doc) => {
 				let cell = doc.createElement("span");
