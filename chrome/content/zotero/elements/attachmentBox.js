@@ -58,7 +58,7 @@
 							<html:div class="meta-data"><editable-text id="accessed" aria-labelledby="accessed-label" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="pagesRow" class="meta-row">
-							<html:div class="meta-label"><html:label id="pages-label" class="key" data-l10n-id="attachment-info-pages"/></html:div>
+							<html:div class="meta-label"><html:label id="pages-label" class="key" data-l10n-id="attachment-info-page-count"/></html:div>
 							<html:div class="meta-data"><editable-text id="pages" aria-labelledby="pages-label" nowrap="true" tight="true" readonly="true"/></html:div>
 						</html:div>
 						<html:div id="dateModifiedRow" class="meta-row" hidden="true" >
