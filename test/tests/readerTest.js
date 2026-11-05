@@ -214,6 +214,35 @@ describe("Reader", function () {
 			}
 		}
 
+		describe("#getReaders()", function () {
+			it("should return open readers and find them by item ID", async function () {
+				let attachment = await importFileAttachment('test.pdf');
+				let reader = await Zotero.Reader.open(attachment.id);
+				assert.include(Zotero.Reader.getReaders(), reader);
+				assert.sameMembers(Zotero.Reader.getByItemID(attachment.id), [reader]);
+
+				// Returned array should be a copy
+				Zotero.Reader.getReaders().length = 0;
+				assert.include(Zotero.Reader.getReaders(), reader);
+
+				win.Zotero_Tabs.close(reader.tabID);
+				await waitForCallback(() => reader._isTabClosed, 10, 5);
+				assert.notInclude(Zotero.Reader.getReaders(), reader);
+				assert.lengthOf(Zotero.Reader.getByItemID(attachment.id), 0);
+			});
+		});
+
+		describe("#getCurrentPageIndex()", function () {
+			it("should return the page index of the primary view", async function () {
+				let attachment = await importFileAttachment('test.pdf');
+				let reader = await Zotero.Reader.open(attachment.id);
+				await reader._initPromise;
+				await waitForCallback(() => reader.getCurrentPageIndex() !== null, 50, 10);
+				assert.strictEqual(reader.getCurrentPageIndex(), 0);
+				win.Zotero_Tabs.close(reader.tabID);
+			});
+		});
+
 		it('should reopen a reader whose tab closes during a notifier transaction', async function () {
 			let reader, reopenedReader;
 			let title = Zotero.Promise.defer();
