@@ -1779,6 +1779,12 @@ Zotero.Schema = new function () {
 				url += '&m=' + mode;
 			}
 			
+			// Report versions from a mismatched build detected at startup
+			var buildMismatch = Zotero.Prefs.get('buildMismatch');
+			if (buildMismatch) {
+				url += '&mismatch=' + encodeURIComponent(buildMismatch);
+			}
+			
 			// Send list of installed styles
 			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
@@ -1807,6 +1813,9 @@ Zotero.Schema = new function () {
 						errorDelayIntervals: [5000]
 					}
 				);
+				if (buildMismatch) {
+					Zotero.Prefs.clear('buildMismatch');
+				}
 				updated = await _handleRepositoryResponse(xmlhttp, mode);
 			}
 			catch (e) {

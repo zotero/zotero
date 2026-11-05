@@ -1140,6 +1140,8 @@ plugins-blocked-plugin =
 
 data-dir-unsupported-storage = This can happen if the { -app-name } data directory is in a cloud storage folder (OneDrive, Dropbox, etc.) or on a network share.
 
+startup-error-incomplete-update = A { -app-name } update wasn’t installed completely. Download and reinstall { -app-name } from { $domain }.
+
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
 
 os-keystore-save-failed =

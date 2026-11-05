@@ -525,7 +525,10 @@ if [ -z "$VERSION" ]; then
 	echo "Version number not found in version file"
 	exit 1
 fi
-rm version
+# Record the version in the code and in a separate resource file, so the app can detect code from
+# one build running with resources from another
+perl -pi -e "s/\{\{BUILD_VERSION}}/$VERSION/" chrome/content/zotero/xpcom/zotero.js
+mv version resource/version
 
 echo
 echo "Version: $VERSION"

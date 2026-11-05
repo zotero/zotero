@@ -151,6 +151,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	this.hiDPISuffix = "";
 	
 	var _startupErrorHandler;
+	// Replaced with the version at build time
+	var _buildVersion = "{{BUILD_VERSION}}";
 	var _localizedStringBundle;
 	
 	var _locked = false;
@@ -267,6 +269,10 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		if (!Zotero.isWin) _checkRoot();
 		
 		if (!_checkExecutableLocation()) {
+			return;
+		}
+		
+		if (!_checkBuildVersion()) {
 			return;
 		}
 		
@@ -2145,6 +2151,87 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		
 		return true;
 	}
+	
+	/**
+	 * Make sure the code, the bundled resources, and application.ini are from the same build
+	 *
+	 * If an update was applied incompletely, code from the previous version can run with the new
+	 * version's resources. On a mismatch, invalidate caches and restart, and if the mismatch
+	 * remains, show an error. The versions before and after the restart are sent with the next
+	 * repository check.
+	 *
+	 * @return {Boolean} - False if startup should stop
+	 */
+	function _checkBuildVersion() {
+		// Not a packaged build
+		if (_buildVersion.startsWith('{{')) {
+			return true;
+		}
+		
+		var resourceVersion = null;
+		try {
+			resourceVersion = Zotero.File.getResource('resource://zotero/version').trim();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		var versions = {
+			js: _buildVersion,
+			resources: resourceVersion,
+			app: Zotero.version
+		};
+		
+		var mismatch = null;
+		try {
+			mismatch = JSON.parse(Zotero.Prefs.get('buildMismatch') || 'null');
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		
+		var [action, newMismatch] = Zotero.getBuildMismatchStartupAction(versions, mismatch);
+		if (newMismatch) {
+			Zotero.Prefs.set('buildMismatch', JSON.stringify(newMismatch));
+		}
+		if (action == 'continue') {
+			return true;
+		}
+		Zotero.logError("Build version mismatch: " + JSON.stringify(versions));
+		if (action == 'restart') {
+			Services.appinfo.invalidateCachesOnRestart();
+			Zotero.Utilities.Internal.quit(true);
+			return false;
+		}
+		Zotero.startupError = Zotero.ftl.formatValueSync(
+			'startup-error-incomplete-update', { domain: ZOTERO_CONFIG.DOMAIN_NAME }
+		);
+		return false;
+	}
+	
+	/**
+	 * Decide what to do about the build versions found at startup
+	 *
+	 * @param {Object} versions - { js, resources, app }
+	 * @param {Object|null} mismatch - Stored record of a previous mismatch
+	 * @return {Array} - Action ('continue', 'restart', or 'error') and a new mismatch record to
+	 *     store, or null to leave the stored record as is
+	 */
+	this.getBuildMismatchStartupAction = function (versions, mismatch) {
+		var matches = versions.js == versions.resources && versions.js == versions.app;
+		
+		// First startup after restarting for a mismatch
+		if (mismatch && mismatch.before && !mismatch.after) {
+			return [matches ? 'continue' : 'error', { ...mismatch, after: versions }];
+		}
+		if (matches) {
+			return ['continue', null];
+		}
+		// Already restarted for this mismatch
+		if (mismatch?.after && JSON.stringify(mismatch.after) == JSON.stringify(versions)) {
+			return ['error', null];
+		}
+		return ['restart', { before: versions }];
+	};
 	
 	/**
 	 * Observer for console messages
