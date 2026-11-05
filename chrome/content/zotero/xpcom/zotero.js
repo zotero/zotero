@@ -2390,7 +2390,7 @@ Zotero.DragDrop = {
 			dragData.data = ids;
 		}
 		else {
-			if (dt.types.includes('application/x-moz-file')) {
+			if (dt.types.includes('Files')) {
 				dragData.dataType = 'application/x-moz-file';
 				var files = [];
 				for (var i = 0; i < len; i++) {

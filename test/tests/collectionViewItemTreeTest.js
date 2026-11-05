@@ -2208,7 +2208,7 @@ describe("CollectionViewItemTree", function () {
 			var event = { dataTransfer };
 			// On macOS, ItemTree checks modifier keys, not just the dropEffect
 			if (Zotero.isMac
-					&& dataTransfer.types.includes('application/x-moz-file')) {
+					&& dataTransfer.types.includes('Files')) {
 				switch (dataTransfer.dropEffect) {
 					case 'link':
 						event.metaKey = true;
@@ -2363,7 +2363,7 @@ describe("CollectionViewItemTree", function () {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2379,6 +2379,36 @@ describe("CollectionViewItemTree", function () {
 				((await Zotero.File.getBinaryContentsAsync(path))),
 				((await Zotero.File.getBinaryContentsAsync(file)))
 			);
+		});
+		
+		it("should create top-level attachments for multiple dragged files", async function () {
+			var files = ['test.png', 'test.pdf'].map((name) => {
+				let file = getTestDataDirectory();
+				file.append(name);
+				return file;
+			});
+			
+			var promise = waitForItemEvent('add');
+			// A multi-file drag from the macOS Finder, which also includes a file URL
+			drop(0, -1, {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['text/x-moz-url', 'Files'],
+				mozItemCount: files.length,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file') {
+						return files[i];
+					}
+				},
+				getData: function (type) {
+					if (type == 'text/x-moz-url') {
+						return Zotero.File.pathToFileURI(files[0].path) + '\n' + files[0].leafName;
+					}
+				}
+			});
+			var items = Zotero.Items.get(await promise);
+			
+			assert.sameMembers(items.map(item => item.attachmentFilename), ['test.png', 'test.pdf']);
 		});
 		
 		it("should add a dragged file to all selected collections", async function () {
@@ -2401,7 +2431,7 @@ describe("CollectionViewItemTree", function () {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2436,7 +2466,7 @@ describe("CollectionViewItemTree", function () {
 			var fileDataTransfer = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2471,7 +2501,7 @@ describe("CollectionViewItemTree", function () {
 			var fileDataTransfer = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2588,7 +2618,7 @@ describe("CollectionViewItemTree", function () {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2644,7 +2674,7 @@ describe("CollectionViewItemTree", function () {
 			drop(0, -1, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozGetDataAt: function (type) {
 					if (type == 'application/x-moz-file') {
 						return file;
@@ -2683,7 +2713,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2724,7 +2754,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'link',
 				effectAllowed: 'link',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2765,7 +2795,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'link',
 				effectAllowed: 'link',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2798,7 +2828,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2834,7 +2864,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2866,7 +2896,7 @@ describe("CollectionViewItemTree", function () {
 			drop(parentRow, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 2,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i <= 1) {
@@ -2903,7 +2933,7 @@ describe("CollectionViewItemTree", function () {
 			let dataTransfer = {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
@@ -2939,7 +2969,7 @@ describe("CollectionViewItemTree", function () {
 			drop(itemIndex, 0, {
 				dropEffect: 'copy',
 				effectAllowed: 'copy',
-				types: ['application/x-moz-file'],
+				types: ['Files'],
 				mozItemCount: 1,
 				mozGetDataAt: function (type, i) {
 					if (type == 'application/x-moz-file' && i == 0) {
