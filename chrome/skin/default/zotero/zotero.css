@@ -51,10 +51,6 @@ groupbox > label > h2, groupbox > * > label > h2 {
   margin-bottom: 1em;
 }
 
-#zotero-note-window {
-	padding-bottom: 4px;
-}
-
 #zotero-captcha-description {
 	max-width: 300px;
 	padding-bottom: 4px;

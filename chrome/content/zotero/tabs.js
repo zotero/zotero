@@ -226,10 +226,10 @@ var Zotero_Tabs = new function () {
 				this.close(tab.id, { skipHistory: true, skipFocus: true });
 				Zotero.openMainWindow({ readerTabState: { title, ...data }, geometry });
 			},
-			note: async (tab, _tabIndex) => {
-				Zotero_Tabs.close(tab.id);
-				let { itemID } = tab.data;
-				await Zotero.Notes.open(itemID, null, { openInWindow: true, window });
+			note: async (tab, _tabIndex, { geometry } = {}) => {
+				let { title, data } = this.tabHooks.transfer.note(tab);
+				this.close(tab.id, { skipHistory: true, skipFocus: true });
+				Zotero.openMainWindow({ noteTabState: { title, ...data }, geometry });
 			}
 		},
 		// The data another window needs to recreate the tab, in the form restoreState() takes

@@ -247,6 +247,7 @@ var ZoteroPane = new function () {
 	var _initialOtherLibraryTabs = [];
 	// The reader tab this window was opened for, if any
 	var _initialReaderTabState = null;
+	var _initialNoteTabState = null;
 	var _initialMovedTab = null;
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
@@ -623,6 +624,10 @@ var ZoteroPane = new function () {
 			_initialReaderTabState = args.readerTabState;
 			return;
 		}
+		if (args.noteTabState) {
+			_initialNoteTabState = args.noteTabState;
+			return;
+		}
 		if (args.movedTab) {
 			_initialMovedTab = args.movedTab;
 			return;
@@ -930,6 +935,15 @@ var ZoteroPane = new function () {
 					type: 'reader-unloaded',
 					title: title || '',
 					data: { itemID, primaryViewState, secondViewState },
+					select: true
+				});
+			}
+			else if (_initialNoteTabState) {
+				let { itemID, title } = _initialNoteTabState;
+				Zotero_Tabs.add({
+					type: 'note-unloaded',
+					title: title || '',
+					data: { itemID },
 					select: true
 				});
 			}

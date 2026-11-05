@@ -91,6 +91,26 @@ describe("Note Editor", function () {
 			assert.equal(editorWindow.getDataSync(false).html, noteBeforeCrash);
 		});
 
+		it("should open a note in a new main window whose only tab is the note", async function () {
+			let editorInstance = await openEditor({ openInWindow: true });
+			let noteWin = editorInstance._window;
+			try {
+				assert.notEqual(noteWin, win);
+				assert.include(Zotero.getMainWindows(), noteWin);
+				assert.equal(noteWin.Zotero_Tabs.numTabs, 1);
+				assert.equal(noteWin.Zotero_Tabs.selectedID, editorInstance.tabID);
+				
+				// Opening it in a new window again goes to that tab
+				let windowCount = Zotero.getMainWindows().length;
+				let reopened = await Zotero.Notes.open(editorInstance.itemID, null, { openInWindow: true });
+				assert.equal(reopened, editorInstance);
+				assert.lengthOf(Zotero.getMainWindows(), windowCount);
+			}
+			finally {
+				noteWin.close();
+			}
+		});
+		
 		it("should dispatch history commands in a separate note window", async function () {
 			let editorInstance = await openEditor({ openInWindow: true });
 			let iframeWindow = editorInstance._iframeWindow;
