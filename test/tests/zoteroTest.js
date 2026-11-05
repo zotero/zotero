@@ -1,6 +1,31 @@
 "use strict";
 
 describe("Zotero", function() {
+	describe("#showZoteroPaneProgressMeter()", function () {
+		var win;
+
+		before(async function () {
+			win = await loadZoteroPane();
+		});
+
+		afterEach(function () {
+			Zotero.hideZoteroPaneOverlays();
+		});
+
+		it("should keep a long message and the meter inside the progress box", function () {
+			Zotero.showZoteroPaneProgressMeter(
+				"Data directory migration in progress… The database is being updated and can't be used until the migration is complete."
+			);
+			let doc = win.document;
+			let box = doc.getElementById('zotero-pane-progress-box').getBoundingClientRect();
+			let label = doc.getElementById('zotero-pane-progress-label').getBoundingClientRect();
+			let meter = doc.getElementById('zotero-pane-progressmeter').getBoundingClientRect();
+			assert.isAtMost(label.right, box.right);
+			assert.isAtMost(meter.right, box.right);
+			assert.isAtMost(meter.bottom, box.bottom);
+		});
+	});
+
 	describe("#restoreZoteroPaneProgressMeter()", function () {
 		// A token captures the current display state, so taking one and immediately
 		// restoring it reads the state without changing it
