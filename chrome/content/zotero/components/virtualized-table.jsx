@@ -544,7 +544,10 @@ class VirtualizedTable extends React.Component {
 		
 		onFocus: PropTypes.func,
 
+		// Called with (event, x, y, index), where index is the right-clicked row, if any
 		onItemContextMenu: PropTypes.func,
+		// Don't select a right-clicked row (call setTargetRow() to mark it instead)
+		skipContextMenuSelection: PropTypes.bool,
 		customRowHeights: PropTypes.array,
 		getRowHeight: PropTypes.func,
 	};
@@ -832,9 +835,10 @@ class VirtualizedTable extends React.Component {
 		const modifierClick = e.shiftKey || e.ctrlKey || e.metaKey;
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention. A plain click
 		// on an unselected draggable row is also handled in mouseUp, so that dragging the row
-		// doesn't select it.
+		// doesn't select it, and a right-click is handled in contextmenu.
 		let draggable = e.button == 0 && e.currentTarget.draggable;
-		if (!modifierClick && !draggable && !this.selection.isSelected(index)) {
+		let contextClick = e.button == 2 && this.props.skipContextMenuSelection;
+		if (!modifierClick && !draggable && !contextClick && !this.selection.isSelected(index)) {
 			this._onSelection(index, false, false);
 		}
 		this.focus();
@@ -853,10 +857,10 @@ class VirtualizedTable extends React.Component {
 			// Do not hijack context menu on inputs, fixes #5374
 			return;
 		}
-		if (!this.selection.isSelected(index)) {
+		if (!this.selection.isSelected(index) && !this.props.skipContextMenuSelection) {
 			this._onSelection(index, false, false);
 		}
-		this.props.onItemContextMenu(e, e.screenX, e.screenY);
+		this.props.onItemContextMenu(e, e.screenX, e.screenY, index);
 		this.focus();
 	}
 	

@@ -1518,13 +1518,13 @@ var ZoteroPane = new function () {
 	}
 	
 	
-	this.newCollection = async function (parentKey = null) {
-		if (!this.canEditLibrary()) {
+	this.newCollection = async function (parentKey = null, libraryID = null) {
+		if (libraryID === null ? !this.canEditLibrary() : !Zotero.Libraries.get(libraryID).editable) {
 			this.displayCannotEditLibraryMessage();
 			return null;
 		}
 		
-		var libraryID = this.getSelectedLibraryIDs()[0];
+		libraryID ??= this.getSelectedLibraryIDs()[0];
 		
 		// Get a unique "Untitled" name for this level in the collection hierarchy
 		var collections;
@@ -2761,8 +2761,8 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.deleteSelectedCollection = async function (deleteItems) {
-		var collectionTreeRows = this.getCollectionTreeRows();
+	this.deleteSelectedCollection = async function (deleteItems, collectionTreeRows) {
+		collectionTreeRows ??= this.getCollectionTreeRows();
 		if (!collectionTreeRows.length) {
 			return;
 		}
@@ -2798,7 +2798,7 @@ var ZoteroPane = new function () {
 			return;
 		}
 		
-		if (!this.canEdit() && !collectionTreeRows[0].isFeedsOrFeed()) {
+		if (!collectionTreeRows[0].editable && !collectionTreeRows[0].isFeedsOrFeed()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -2854,12 +2854,11 @@ var ZoteroPane = new function () {
 			"", "", "", {}
 		);
 		if (index == 0) {
-			return this.collectionsView.deleteSelection(deleteItems);
+			return this.collectionsView.deleteSelection(deleteItems, collectionTreeRows);
 		}
 	}
 
-	this.clearAllLastRead = async function () {
-		let collectionTreeRows = this.getCollectionTreeRows();
+	this.clearAllLastRead = async function (collectionTreeRows = this.getCollectionTreeRows()) {
 		if (collectionTreeRows.length != 1 || !collectionTreeRows[0].isRecentlyRead()) {
 			return;
 		}
@@ -2971,9 +2970,7 @@ var ZoteroPane = new function () {
 	/**
 	 * @return {Promise}
 	 */
-	this.emptyTrash = async function () {
-		var libraryID = this.getSelectedLibraryIDs()[0];
-		
+	this.emptyTrash = async function (libraryID = this.getSelectedLibraryIDs()[0]) {
 		var result = Services.prompt.confirm(
 			null,
 			"",
@@ -3007,14 +3004,13 @@ var ZoteroPane = new function () {
 	
 	
 	// Currently only works on searches
-	this.duplicateSelectedCollection = async function () {
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
+	this.duplicateSelectedCollection = async function (rows = this.getCollectionTreeRows()) {
+		var row = rows[0];
+		if (!row) {
 			return;
 		}
-
-		var row = this.getCollectionTreeRows()[0];
-		if (!row) {
+		if (!row.editable) {
+			this.displayCannotEditLibraryMessage();
 			return;
 		}
 		
@@ -3024,27 +3020,26 @@ var ZoteroPane = new function () {
 	};
 	
 	
-	this.editSelectedCollection = async function () {
-		if (!this.canEdit()) {
+	this.editSelectedCollection = async function (rows = this.getCollectionTreeRows()) {
+		var row = rows[0];
+		if (!row) {
+			return;
+		}
+		if (!row.editable) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-
-		var row = this.getCollectionTreeRows()[0];
-		if (row) {
-			if (row.isCollection()) {
-				this.collectionsView.startEditing(row);
-			}
-			else {
-				this.setSavedSearchEditorState('open');
-			}
+		if (row.isCollection()) {
+			this.collectionsView.startEditing(row);
+		}
+		else {
+			this.setSavedSearchEditorState('open');
 		}
 	};
 
-	// Move selected collection to specified target collection or library.
-	// Target has to be in the same library as the currently selected collection.
-	this.moveCollection = async (target) => {
-		let selected = this.getSelectedCollections()[0];
+	// Move a collection (by default, the selected one) to specified target collection or library.
+	// Target has to be in the same library as the collection.
+	this.moveCollection = async (target, selected = this.getSelectedCollections()[0]) => {
 		if (!selected) return;
 
 		if (target.libraryID !== selected.libraryID) {
@@ -3060,10 +3055,9 @@ var ZoteroPane = new function () {
 		await selected.saveTx({ undoAction: 'undo-action-move-collection' });
 	};
 
-	// Copy selected collection into another collection or library.
+	// Copy a collection (by default, the selected one) into another collection or library.
 	// Partially, a replication of drag-drop mechanism from CollectionTree.onDrop.
-	this.copyCollection = async (target) => {
-		let selected = this.getSelectedCollections()[0];
+	this.copyCollection = async (target, selected = this.getSelectedCollections()[0]) => {
 		if (!selected) return;
 
 		let targetTreeRowID = `L${target.libraryID}`;
@@ -3094,8 +3088,7 @@ var ZoteroPane = new function () {
 		await Zotero.FeedItems.toggleReadByID(this.getSelectedItems(true));
 	};
 
-	this.markFeedRead = async function () {
-		var rows = this.getCollectionTreeRows();
+	this.markFeedRead = async function (rows = this.getCollectionTreeRows()) {
 		if (!rows.length) return;
 
 		let feeds = rows.some(row => row.isFeeds()) ? Zotero.Feeds.getAll() : rows.map(row => row.ref);
@@ -3106,8 +3099,7 @@ var ZoteroPane = new function () {
 	};
 
 	
-	this.editSelectedFeed = async function () {
-		var rows = this.getCollectionTreeRows();
+	this.editSelectedFeed = async function (rows = this.getCollectionTreeRows()) {
 		if (!rows.length) return;
 		var row = rows[0];
 		
@@ -3129,11 +3121,13 @@ var ZoteroPane = new function () {
 		feed.cleanupReadAfter = data.cleanupReadAfter;
 		feed.cleanupUnreadAfter = data.cleanupUnreadAfter;
 		await feed.saveTx();
-		Zotero_Tabs.rename("zotero-pane", feed.name);
+		if (this.getCollectionTreeRows().includes(row)) {
+			Zotero_Tabs.rename("zotero-pane", feed.name);
+		}
 	};
 	
-	this.refreshFeed = function () {
-		var row = this.getCollectionTreeRows()[0];
+	this.refreshFeed = function (rows = this.getCollectionTreeRows()) {
+		var row = rows[0];
 		if (!row) return;
 		
 		let feed = row.ref;
@@ -3729,8 +3723,14 @@ var ZoteroPane = new function () {
 	/**
 	 * Show context menu once it's ready
 	 */
-	this.onCollectionsContextMenuOpen = async function (event, x, y) {
-		await ZoteroPane.buildCollectionContextMenu();
+	this.onCollectionsContextMenuOpen = async function (event, x, y, index) {
+		// A right-click on an unselected row applies to that row without selecting it
+		let rows;
+		if (index !== undefined && !this.collectionsView.selection.isSelected(index)) {
+			rows = [this.collectionsView.getRow(index)];
+			this.collectionsView.tree.setTargetRow(index);
+		}
+		await ZoteroPane.buildCollectionContextMenu(rows);
 		x = x || event.screenX;
 		y = y || event.screenY;
 		// TEMP: Quick fix for https://forums.zotero.org/discussion/105103/
@@ -3761,12 +3761,33 @@ var ZoteroPane = new function () {
 	};
 	
 	
+	this.onCollectionsContextMenuHidden = function (event) {
+		if (event.target.id == 'zotero-collectionmenu') {
+			this.collectionsView.tree.setTargetRow(null);
+		}
+	};
+	
+	
 	this.onCollectionContextMenuSelect = function (event) {
 		event.stopPropagation();
 		var o = _collectionContextMenuOptions.find(o => o.id == event.target.id)
 		if (o?.oncommand) {
-			o.oncommand();
+			o.oncommand(_collectionContextMenuRows);
 		}
+	};
+	
+	
+	// Rows the collection context menu was last built for
+	var _collectionContextMenuRows = [];
+	
+	// Select the context menu rows if they aren't selected, for commands that act on the items
+	// in the items list
+	var selectCollectionContextMenuRows = async (rows) => {
+		if (this.getCollectionTreeRows().includes(rows[0])) {
+			return;
+		}
+		await this.collectionsView.selectByID(rows[0].id);
+		await this.itemsView.waitForLoad();
 	};
 	
 	
@@ -3779,9 +3800,9 @@ var ZoteroPane = new function () {
 		{
 			id: "sync",
 			label: Zotero.getString('sync.sync'),
-			oncommand: () => {
+			oncommand: (rows) => {
 				Zotero.Sync.Runner.sync({
-					libraries: [this.getSelectedLibraryIDs()[0]],
+					libraries: [rows[0].ref.libraryID],
 				});
 			}
 		},
@@ -3790,54 +3811,60 @@ var ZoteroPane = new function () {
 		},
 		{
 			id: "newCollection",
-			command: "cmd_zotero_newCollection"
+			oncommand: rows => this.newCollection(null, rows[0].ref.libraryID)
 		},
 		{
 			id: "newSubcollection",
-			oncommand: () => {
-				this.newCollection(this.getSelectedCollections()[0].key);
+			oncommand: (rows) => {
+				this.newCollection(rows[0].ref.key, rows[0].ref.libraryID);
 			}
 		},
 		{
 			id: "refreshFeed",
-			oncommand: () => this.refreshFeed()
+			oncommand: rows => this.refreshFeed(rows)
 		},
 		{
 			id: "sep2",
 		},
 		{
 			id: "showDuplicates",
-			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryIDs()[0], 'duplicates', true, true);
+			oncommand: (rows) => {
+				this.setVirtual(rows[0].ref.libraryID, 'duplicates', true, true);
 			}
 		},
 		{
 			id: "showUnfiled",
-			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryIDs()[0], 'unfiled', true, true);
+			oncommand: (rows) => {
+				this.setVirtual(rows[0].ref.libraryID, 'unfiled', true, true);
 			}
 		},
 		{
 			id: "showRecentlyRead",
-			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryIDs()[0], 'recentlyRead', true, true);
+			oncommand: (rows) => {
+				this.setVirtual(rows[0].ref.libraryID, 'recentlyRead', true, true);
 			}
 		},
 		{
 			id: "showRetracted",
-			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryIDs()[0], 'retracted', true, true);
+			oncommand: (rows) => {
+				this.setVirtual(rows[0].ref.libraryID, 'retracted', true, true);
 			}
 		},
 		{
 			id: "showPublications",
-			oncommand: () => {
-				this.setVirtual(this.getSelectedLibraryIDs()[0], 'publications', true, true);
+			oncommand: (rows) => {
+				this.setVirtual(rows[0].ref.libraryID, 'publications', true, true);
 			}
 		},
 		{
 			id: "editSelectedCollection",
-			oncommand: () => this.editSelectedCollection()
+			oncommand: async (rows) => {
+				// The saved search editor edits the selected search
+				if (rows[0].isSearch()) {
+					await selectCollectionContextMenuRows(rows);
+				}
+				this.editSelectedCollection(rows);
+			}
 		},
 		{
 			id: "moveCollection",
@@ -3847,59 +3874,68 @@ var ZoteroPane = new function () {
 		},
 		{
 			id: "duplicate",
-			oncommand: () => this.duplicateSelectedCollection()
+			oncommand: rows => this.duplicateSelectedCollection(rows)
 		},
 		{
 			id: "markReadFeed",
-			oncommand: () => this.markFeedRead()
+			oncommand: rows => this.markFeedRead(rows)
 		},
 		{
 			id: "editSelectedFeed",
-			oncommand: () => this.editSelectedFeed()
+			oncommand: rows => this.editSelectedFeed(rows)
 		},
 		{
 			id: 'addFeed'
 		},
 		{
 			id: "deleteCollection",
-			oncommand: () => this.deleteSelectedCollection()
+			oncommand: rows => this.deleteSelectedCollection(false, rows)
 		},
 		{
 			id: "clearAllLastRead",
-			oncommand: () => this.clearAllLastRead()
+			oncommand: rows => this.clearAllLastRead(rows)
 		},
 		{
 			id: "deleteCollectionAndItems",
-			oncommand: () => this.deleteSelectedCollection(true)
+			oncommand: rows => this.deleteSelectedCollection(true, rows)
 		},
 		{
 			id: "sep3",
 		},
 		{
 			id: "exportCollection",
-			oncommand: () => Zotero_File_Interface.exportCollection()
+			oncommand: async (rows) => {
+				await selectCollectionContextMenuRows(rows);
+				Zotero_File_Interface.exportCollection();
+			}
 		},
 		{
 			id: "createBibCollection",
-			oncommand: () => Zotero_File_Interface.bibliographyFromCollection()
+			oncommand: async (rows) => {
+				await selectCollectionContextMenuRows(rows);
+				Zotero_File_Interface.bibliographyFromCollection();
+			}
 		},
 		{
 			id: "exportFile",
-			oncommand: () => Zotero_File_Interface.exportFile()
+			oncommand: rows => Zotero_File_Interface.exportFile(rows[0].ref.libraryID)
 		},
 		{
 			id: "loadReport",
-			oncommand: () => Zotero_Report_Interface.loadCollectionReport()
+			oncommand: async (rows) => {
+				await selectCollectionContextMenuRows(rows);
+				Zotero_Report_Interface.loadCollectionReport();
+			}
 		},
 		{
 			id: "emptyTrash",
-			oncommand: () => this.emptyTrash()
+			oncommand: rows => this.emptyTrash(rows[0].ref.libraryID)
 		},
 		{
 			id: "removeLibrary",
 			label: Zotero.getString('pane.collections.menu.remove.library'),
-			oncommand: () => {
-				let library = Zotero.Libraries.get(this.getSelectedLibraryIDs()[0]);
+			oncommand: (rows) => {
+				let library = Zotero.Libraries.get(rows[0].ref.libraryID);
 				let ps = Services.prompt;
 				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
@@ -3919,15 +3955,21 @@ var ZoteroPane = new function () {
 		},
 	];
 	
-	this.buildCollectionContextMenu = async function () {
-		var libraryID = this.getSelectedLibraryIDs()[0];
+	/**
+	 * @param {CollectionTreeRow[]} [collectionTreeRows] - Rows the menu applies to, if not the
+	 *     selected rows
+	 */
+	this.buildCollectionContextMenu = async function (collectionTreeRows) {
 		var options = _collectionContextMenuOptions;
 		
-		var collectionTreeRows = this.getCollectionTreeRows();
+		var isSelection = !collectionTreeRows;
+		collectionTreeRows ??= this.getCollectionTreeRows();
 		// This can happen if selection is changing during delayed second call below
 		if (!collectionTreeRows.length) {
 			return;
 		}
+		_collectionContextMenuRows = collectionTreeRows;
+		var libraryID = collectionTreeRows[0].ref.libraryID;
 		let libraryIDs = new Set(collectionTreeRows.map(o => o.ref.libraryID));
 		let multipleLibraries = libraryIDs.size > 1;
 		
@@ -3935,7 +3977,7 @@ var ZoteroPane = new function () {
 		// and the new collection's items are still loading, so continue menu after loading is
 		// done. This causes some menu items (e.g., export/createBib/loadReport) to appear gray
 		// in the menu at first and then turn black once there are items
-		if (!collectionTreeRows[0].isHeader() && !this.itemsView.initialized) {
+		if (isSelection && !collectionTreeRows[0].isHeader() && !this.itemsView.initialized) {
 			await this.itemsView.waitForLoad();
 		}
 		
@@ -3979,7 +4021,19 @@ var ZoteroPane = new function () {
 				'loadReport'
 			];
 			
-			if (!this.itemsView.rowCount) {
+			// The items list shows the selected rows' items, so check an unselected collection
+			// directly
+			let hasItems;
+			if (isSelection) {
+				hasItems = !!this.itemsView.rowCount;
+			}
+			else {
+				let collection = collectionTreeRows[0].ref;
+				hasItems = !!(Zotero.Prefs.get('recursiveCollections')
+					? collection.getDescendents(false, 'item', false)
+					: collection.getChildItems(true)).length;
+			}
+			if (!hasItems) {
 				disable = ['createBibCollection', 'loadReport'];
 				
 				// If no items in any of the collections' subcollections either, disable export
@@ -4065,7 +4119,8 @@ var ZoteroPane = new function () {
 				show.push('editSelectedCollection', 'duplicate');
 			}
 			
-			if (!this.itemsView.rowCount) {
+			// An unselected search's items aren't known without running it
+			if (isSelection && !this.itemsView.rowCount) {
 				disable.push('exportCollection', 'createBibCollection', 'loadReport');
 			}
 			
@@ -4180,6 +4235,7 @@ var ZoteroPane = new function () {
 				&& !collectionTreeRows[0].isUnfiled()
 				&& !collectionTreeRows[0].isRetracted()) {
 			disable.push(
+				'newCollection',
 				'newSubcollection',
 				'editSelectedCollection',
 				'duplicate',
@@ -4190,7 +4246,8 @@ var ZoteroPane = new function () {
 		
 		// If within non-editable group or trash it empty, disable Empty Trash
 		if (collectionTreeRows[0].isTrash()) {
-			if ((collectionTreeRows[0].isWithinGroup() && !collectionTreeRows[0].isWithinEditableGroup()) || !this.itemsView.rowCount) {
+			if ((collectionTreeRows[0].isWithinGroup() && !collectionTreeRows[0].isWithinEditableGroup())
+					|| (isSelection && !this.itemsView.rowCount)) {
 				disable.push('emptyTrash');
 			}
 		}
@@ -4800,17 +4857,17 @@ var ZoteroPane = new function () {
 		let popup = event.target;
 		popup.replaceChildren();
 
-		let selected = this.getSelectedCollections();
+		let selected = _collectionContextMenuRows.map(row => row.ref);
 
 		// Add current library at the top to be able to move collections into it
-		let library = Zotero.Libraries.get(ZoteroPane.getSelectedLibraryIDs()[0]);
+		let library = Zotero.Libraries.get(selected[0].libraryID);
 		let libraryMenuItem = document.createXULElement("menuitem");
 		libraryMenuItem.setAttribute("label", library.name);
 		libraryMenuItem.setAttribute("image", library.treeViewImage);
 		libraryMenuItem.setAttribute("value", library.treeViewID);
 		libraryMenuItem.addEventListener("command", (event) => {
 			if (event.target.tagName == 'menuitem') {
-				this.moveCollection(library);
+				this.moveCollection(library, selected[0]);
 				event.stopPropagation();
 			}
 		});
@@ -4821,7 +4878,7 @@ var ZoteroPane = new function () {
 		popup.appendChild(document.createXULElement("menuseparator"));
 		
 		// Build menus for each top-level collection of this library
-		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryIDs()[0]);
+		let collections = Zotero.Collections.getByLibrary(library.libraryID);
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -4829,7 +4886,7 @@ var ZoteroPane = new function () {
 				null,
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
-						this.moveCollection(collection);
+						this.moveCollection(collection, selected[0]);
 						event.stopPropagation();
 					}
 				},
@@ -4852,7 +4909,7 @@ var ZoteroPane = new function () {
 		if (event.target !== event.currentTarget) return;
 		let popup = document.getElementById("zotero-copy-collection-popup");
 		popup.replaceChildren();
-		let selected = this.getSelectedCollections()[0];
+		let selected = _collectionContextMenuRows[0].ref;
 
 		// Fetch all libraries
 		let topLevelEntries = Zotero.Libraries.getAll().filter(lib => !(lib instanceof Zotero.Feed));
@@ -4895,7 +4952,7 @@ var ZoteroPane = new function () {
 			myLibraryMenuItem.classList.add('menuitem-iconic');
 			myLibraryMenuItem.addEventListener("command", (event) => {
 				if (event.target.tagName == 'menuitem') {
-					this.copyCollection(myLibrary);
+					this.copyCollection(myLibrary, selected);
 					event.stopPropagation();
 				}
 			});
@@ -4914,7 +4971,7 @@ var ZoteroPane = new function () {
 				null,
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
-						this.copyCollection(collection);
+						this.copyCollection(collection, selected);
 						event.stopPropagation();
 					}
 				},

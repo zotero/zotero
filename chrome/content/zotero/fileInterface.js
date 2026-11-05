@@ -189,9 +189,9 @@ var Zotero_File_Interface = new function () {
 	 *
 	 * @return {Promise}
 	 */
-	this.exportFile = async function () {
+	this.exportFile = async function (libraryID = ZoteroPane_Local.getSelectedLibraryIDs()[0]) {
 		var exporter = new Zotero_File_Exporter();
-		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryIDs()[0];
+		exporter.libraryID = libraryID;
 		if (exporter.libraryID === undefined) {
 			throw new Error('No library selected');
 		}

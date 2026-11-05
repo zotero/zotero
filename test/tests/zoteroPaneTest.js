@@ -1134,6 +1134,39 @@ describe("ZoteroPane", function () {
 
 			await group.eraseTx();
 		});
+		
+		it("should apply to a right-clicked unselected row without selecting it", async function () {
+			let c1 = await createDataObject('collection');
+			let c2 = await createDataObject('collection');
+			await selectCollectionRows(["C" + c1.id]);
+			let cv = zp.collectionsView;
+			let menu = win.document.getElementById('zotero-collectionmenu');
+			let rowEl = cv.tree.getRowElement(cv.getRowIndexByID("C" + c2.id));
+			
+			let shown = new Promise(resolve => menu.addEventListener('popupshown', resolve, { once: true }));
+			rowEl.dispatchEvent(new win.MouseEvent('contextmenu', { bubbles: true, button: 2 }));
+			await shown;
+			assert.equal(zp.getCollectionTreeRows()[0].ref, c1);
+			assert.isTrue(rowEl.classList.contains('target'));
+			
+			let promptService = win.Services.prompt;
+			win.Services.prompt = { confirmEx: () => 0 };
+			try {
+				let hidden = new Promise(resolve => menu.addEventListener('popuphidden', resolve, { once: true }));
+				// Wait for the trash refresh, which comes after the collection is trashed and
+				// reloads the tree
+				let refreshed = waitForNotifierEvent('refresh', 'trash');
+				menu.activateItem(win.document.getElementById('deleteCollection'));
+				await Promise.all([hidden, refreshed]);
+			}
+			finally {
+				win.Services.prompt = promptService;
+			}
+			assert.isTrue(c2.deleted);
+			assert.isFalse(c1.deleted);
+			assert.equal(zp.getCollectionTreeRows()[0].ref, c1);
+			assert.isNull(cv.domEl.querySelector('.row.target'));
+		});
 	});
 
 	describe("#buildAddItemToCollectionMenu()", function () {
@@ -2248,6 +2281,7 @@ describe("ZoteroPane", function () {
 
 			// Right click on the selected collection
 			await zp.collectionsView.selectByID("C" + collectionChild.id);
+			await zp.buildCollectionContextMenu();
 			zp.buildCopyCollectionMenu({});
 
 			// Delay for menus to get disabled
@@ -2258,6 +2292,7 @@ describe("ZoteroPane", function () {
 
 			// Right click on the parent of the copies collection
 			await zp.collectionsView.selectByID("C" + collection.id);
+			await zp.buildCollectionContextMenu();
 			zp.buildCopyCollectionMenu({});
 			// Delay for menus to get disabled
 			await Zotero.Promise.delay();

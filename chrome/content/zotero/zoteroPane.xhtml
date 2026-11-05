@@ -930,7 +930,8 @@
 	<popupset>
 		<!-- Library -->
 		<menupopup id="zotero-collectionmenu"
-				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
+				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)"
+				onpopuphidden="ZoteroPane.onCollectionsContextMenuHidden(event)">
 			<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 			<menuitem class="zotero-menuitem-sync"/>
 			<menuseparator/>

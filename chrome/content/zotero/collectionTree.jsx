@@ -303,7 +303,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		treeRow.ref.name = treeRow.editingName;
 		delete treeRow.editingName;
 		await treeRow.ref.saveTx({ undoAction: 'undo-action-rename-collection' });
-		window.Zotero_Tabs.rename("zotero-pane", treeRow.ref.name);
+		if (this.getSelectedRows().includes(treeRow)) {
+			window.Zotero_Tabs.rename("zotero-pane", treeRow.ref.name);
+		}
 	}
 	
 	startEditing = (treeRow) => {
@@ -513,6 +515,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				requireSelection: true,
 
 				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
+				// A context menu on an unselected row applies to that row without selecting it
+				skipContextMenuSelection: true,
 
 				onKeyDown: this.handleKeyDown,
 				onActivate: (...args) => (this.props.onActivate ? this.props.onActivate(...args) : this.handleActivate(...args)),
@@ -1363,10 +1367,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * Deletes the selected collection and optionally items within it
 	 *
 	 * @param deleteItems[boolean] Whether items contained in the collection should be removed
+	 * @param {CollectionTreeRow[]} [treeRows] - Rows to delete instead of the selected rows
 	 * @returns {Promise<void>}
 	 */
-	async deleteSelection(deleteItems) {
-		let treeRows = this.getSelectedRows();
+	async deleteSelection(deleteItems, treeRows = this.getSelectedRows()) {
 		// Feeds must be erased outside a transaction since Feed.erase()
 		// starts its own transaction internally
 		let feeds = treeRows.filter(r => r.isFeed());
