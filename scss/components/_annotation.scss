@@ -1,42 +1,57 @@
+// Styled after the item pane's annotation rows (elements/_annotationRow.scss)
 .AnnotationBox {
+	// Sizes relative to the 13px base, so they follow Zotero's font size setting
 	.title {
 		font-weight: 600;
-		font-size: 12px;
+		font-size: calc(12em / 13);
 		margin: 5px;
 	}
-	
+
+	// Theme colors rather than a fixed white box, which left dark-theme text unreadable
 	.container {
 		display: flex;
 		flex-direction: column;
 		margin: 5px;
-		border: 1px solid #d7dad7;
+		border: 1px solid var(--fill-quinary);
 		border-radius: 5px;
-		background: white;
-		
+		background: var(--material-background);
+		color: var(--fill-primary);
+
 		.header {
+			display: flex;
+			align-items: center;
+			gap: 4px;
 			font-weight: 600;
-			font-size: 11px;
-			margin-top: 4px;
-			border-bottom: 1px solid #d7dad7;
-			padding: 0 8px 3px;
+			border-bottom: 1px solid var(--fill-quinary);
+			padding: 4px 8px;
+
+			.icon {
+				width: 16px;
+				height: 16px;
+				-moz-context-properties: fill;
+				fill: var(--annotation-color, var(--fill-secondary));
+			}
 		}
-		
+
 		.text, .image-placeholder, .comment {
-			margin-left: 8px;
-			margin-right: 8px;
-			margin-bottom: 4px;
+			overflow-wrap: anywhere;
 		}
-		
-		.text, .image-placeholder {
-			margin-top: 8px;
-		}
-		
+
+		// Unlike the item pane's rows, the quote keeps the primary text color: it's what the
+		// user has to read to choose a version
 		.text {
-			padding-left: 7px;
+			margin: 5px 8px;
+			padding-inline-start: 6px;
+			border-inline-start: 2px solid var(--annotation-color, var(--fill-secondary));
 		}
-		
+
+		.image-placeholder {
+			margin: 5px 8px;
+			color: var(--fill-secondary);
+		}
+
 		.comment {
-			margin-top: 4px;
+			padding: 3px 8px 5px;
 		}
 	}
 }
