@@ -199,7 +199,7 @@ describe("Plugin hook payloads", function () {
 	});
 
 	// So it can move hook by hook to the new payloads before dropping its privileges
-	it("should pass a privileged plugin the new payloads alongside its deprecated live ones", async function () {
+	it("should preserve privileged hooks' live objects", async function () {
 		plugin.load(["*"]);
 		plugin.expose("report", log.report);
 		log.expect("dataProvider");
@@ -211,8 +211,8 @@ describe("Plugin hook payloads", function () {
 				pluginID: PLUGIN_ID,
 				dataKey: "privileged-col",
 				label: "Privileged Column",
-				dataProvider: (arg, key, context) => {
-					report("dataProvider", { live: arg instanceof Zotero.Item, itemID: context.itemID, title: context.getItem().data.title });
+				dataProvider: (arg) => {
+					report("dataProvider", { live: arg instanceof Zotero.Item, itemID: arg.id, title: arg.getField("title") });
 					return "test";
 				},
 			}),

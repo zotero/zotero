@@ -65,7 +65,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	/**
 	 * @typedef {object} ItemTreeColumnContext
 	 * @property {number} itemID - The row's item
-	 * @property {SyncItemGetter} getItem - A cell answers synchronously, so this is how a column reads data
+	 * @property {SyncItemGetter} getItem - Read-only snapshots, valid only while dataProvider runs.
 	 */
 
 	/**
@@ -73,8 +73,11 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	 * @param {Zotero.Item | ItemTreeColumnContext} item - An `ItemTreeColumnContext` for unprivileged
 	 * 		plugins. The live item privileged plugins get is @deprecated
 	 * @param {string} dataKey - The dataKey of the column
-	 * @param {ItemTreeColumnContext} context - The same context, passed to every plugin
+	 * @param {ItemTreeColumnContext} context - The same context, passed to unprivileged plugins only
 	 * @returns {string} - The data to display in the column
+	 *
+	 * Must return synchronously, since the text is also used for sorting. Use getItem() to read
+	 * loaded item data with dataRead; it returns null when the item is unavailable.
 	 */
 
 	/**
@@ -85,11 +88,13 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 	 * @param {boolean} isFirstColumn - true if this is the first column
 	 * @param {Document} doc - The document of the item tree. Not passed to unprivileged plugins,
 	 * 		whose renderCell returns an SVG URL instead of an element
-	 * @returns {HTMLElement | string} - The cell element, or for unprivileged plugins an SVG URL
+	 * @returns {HTMLElement | string | Promise<string>} - A synchronous cell element for privileged plugins,
+	 * 		or an SVG URL (synchronously or as a Promise) for unprivileged plugins
 	 * 		(a `data:image/svg+xml` URL or a plugin .svg URL) shown as an image filling the
 	 * 		cell. Size via the root <svg>: width/height for a fixed size, only a viewBox to
 	 * 		scale to the cell, neither to stretch to it. Anything else falls back to the
-	 * 		plain cell data.
+	 * 		plain cell data. A Promise displays the cell data until it resolves. Async output is
+	 * 		presentation only and does not change sorting; stale results are ignored.
 	 */
 
 
@@ -201,14 +206,18 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 			}
 			option.showInColumnPicker = option.showInColumnPicker === undefined ? true : option.showInColumnPicker;
 
-			// Unprivileged plugins can't build free-form markup or DOM.
-			// htmlLabel and renderCell content is an SVG URL shown as
-			// an image (see resolveSVGImageURL)
-			let unprivileged = !lazy.PluginSandbox.isPrivileged(option.pluginID);
-			if (unprivileged && option.htmlLabel !== undefined) {
-				let imageURL = resolveSVGImageURL(option.pluginID, option.htmlLabel);
+			if (lazy.PluginSandbox.isPrivileged(option.pluginID)) {
+				return option;
+			}
+			return this._convertUnprivileged(option);
+		}
+
+		// Sandboxed hooks receive snapshots and return SVG URLs instead of DOM.
+		_convertUnprivileged(option) {
+			let pluginID = option.pluginID;
+			if (option.htmlLabel !== undefined) {
+				let imageURL = resolveSVGImageURL(pluginID, option.htmlLabel);
 				if (imageURL) {
-					// Marker object rendered as <img> by virtualized-table
 					option.htmlLabel = { svgSrc: imageURL };
 				}
 				else {
@@ -217,48 +226,84 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 				}
 			}
 
-			if (unprivileged && option.renderCell) {
-				// The plugin returns an SVG URL; the cell is built chrome-side
-				let getSVG = lazy.ScopeVariables.fromScope(option.renderCell, option.pluginID);
-				let pluginID = option.pluginID;
-				option.renderCell = function (index, data, column, isFirstColumn, doc) {
-					let cell = doc.createElement("span");
-					cell.className = `cell ${column.className}`;
-					let imageURL = resolveSVGImageURL(pluginID, getSVG(index, data, column, isFirstColumn));
-					if (imageURL) {
-						let img = doc.createElement("img");
-						img.className = "cell-svg";
-						img.src = imageURL;
-						img.alt = data === undefined || data === null ? "" : String(data);
-						cell.appendChild(img);
-					}
-					else if (data !== undefined && data !== null) {
-						cell.textContent = data;
-					}
-					return cell;
-				};
+			if (option.renderCell) {
+				let render = lazy.ScopeVariables.fromScope(option.renderCell, pluginID);
+				option.renderCell = this._wrapRenderCell(option, render);
 			}
-
 			if (option.dataProvider) {
-				let provider = lazy.ScopeVariables.fromScope(option.dataProvider, option.pluginID);
-				let pluginID = option.pluginID;
-				// A cell answers synchronously, so `getItem` replaces the live item, and rides along as the
-				// third argument since a privileged plugin's first stays the live item
-				provider = ((wrapped, item, dataKey) => {
-					let context = {
-						itemID: item.id,
-						getItem: Zotero.DataStore.itemGetter(item.id, pluginID),
-					};
-					try {
-						return wrapped(unprivileged ? context : item, dataKey, context);
-					}
-					finally {
-						context.getItem.expire?.();
-					}
-				}).bind(null, provider);
-				option.dataProvider = provider;
+				let provider = lazy.ScopeVariables.fromScope(option.dataProvider, pluginID);
+				option.dataProvider = this._wrapDataProvider(provider, pluginID);
 			}
 			return option;
+		}
+
+		_createSVGCell(pluginID, value, data, column, doc) {
+			let cell = doc.createElement("span");
+			cell.className = `cell ${column.className}`;
+			let imageURL = resolveSVGImageURL(pluginID, value);
+			if (imageURL) {
+				let img = doc.createElement("img");
+				img.className = "cell-svg";
+				img.src = imageURL;
+				img.alt = data === undefined || data === null ? "" : String(data);
+				cell.appendChild(img);
+			}
+			else if (data !== undefined && data !== null) {
+				cell.textContent = data;
+			}
+			return cell;
+		}
+
+		_wrapRenderCell(option, render) {
+			let pluginID = option.pluginID;
+			let scope = lazy.PluginSandbox.getScope(pluginID);
+			let isCurrent = () => this._optionsCache[option.dataKey] === option
+				&& lazy.PluginSandbox.getScope(pluginID) === scope;
+			let createCell = (value, data, column, doc) => this._createSVGCell(pluginID, value, data, column, doc);
+			return function (index, data, column, isFirstColumn, doc) {
+				let result = render(index, data, column, isFirstColumn);
+				if (!result || typeof result.then !== "function") {
+					return createCell(result, data, column, doc);
+				}
+				let cell = createCell(null, data, column, doc);
+				// Give the core a stable text container so its first-column icon stays intact.
+				if (isFirstColumn) {
+					let text = doc.createElement("span");
+					text.className = "cell-text";
+					text.append(...cell.childNodes);
+					cell.append(text);
+				}
+				let viewRef = new WeakRef(this);
+				let row = this.getRow(index);
+				let rowRef = new WeakRef(row);
+				let cellRef = new WeakRef(cell);
+				let rowID = row.id;
+				let rowData = this._rowCache[rowID];
+				Promise.resolve(result).then((value) => {
+					let view = viewRef.deref();
+					let placeholder = cellRef.deref();
+					if (!isCurrent() || !placeholder?.isConnected || !view || view._uninitialized
+							|| view.getRow(index) !== rowRef.deref() || view._rowCache[rowID] !== rowData) return;
+					let target = isFirstColumn ? placeholder.querySelector(".cell-text") : placeholder;
+					if (!target) return;
+					let resolved = createCell(value, data, column, placeholder.ownerDocument);
+					target.replaceChildren(...resolved.childNodes);
+				}).catch(error => Zotero.logError(error));
+				return cell;
+			};
+		}
+
+		_wrapDataProvider(provider, pluginID) {
+			return (item, dataKey) => {
+				let getItem = Zotero.DataStore.itemGetter(item.id, pluginID);
+				let context = { itemID: item.id, getItem };
+				try {
+					return provider(context, dataKey, context);
+				}
+				finally {
+					getItem.expire();
+				}
+			};
 		}
 
 		_validate(option) {
@@ -396,8 +441,7 @@ import { COLUMNS } from 'zotero/itemTreeColumns';
 		},
 
 		/**
-		 * Refresh the columns in the item tree, re-running every `dataProvider`. A column shows a value
-		 * `dataProvider` can't compute synchronously by caching the async result and then refreshing
+		 * Refresh all columns in the item tree, re-running every `dataProvider`.
 		 * @returns {void}
 		 */
 		refreshColumns() {

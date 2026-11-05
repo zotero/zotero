@@ -2374,15 +2374,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 
-	_renderCell(index, data, column, isFirstColumn, parentElement) {
+	_renderCell(index, data, column, isFirstColumn) {
 		const row = this.getRow(index);
 		let cell;
 
 		if (column.renderCell) {
 			try {
 				// Pass document to renderCell so that it can create elements
-				// Pass parentElement to restrict plugin API access
-				cell = column.renderCell.apply(this, [index, data, column, isFirstColumn, document, parentElement]);
+				cell = column.renderCell.apply(this, [index, data, column, isFirstColumn, document]);
 				if (!(cell instanceof window.Element)) {
 					cell = null;
 					throw new Error('renderCell must return an Element');
