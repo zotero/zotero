@@ -63,6 +63,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/windowControls.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/browserWindowShim.js", this);
 		
@@ -90,6 +91,10 @@
 	</script>
 	
 	<commandset id="mainCommandSet">
+		<command id="cmd_toggleFullScreen" disabled="true"
+			oncommand="ZoteroWindowControls.toggleFullScreen(event)"/>
+		<command id="cmd_toggleMenuBarAutoHide" disabled="true"
+			oncommand="ZoteroWindowControls.toggleMenuBarAutoHide()"/>
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="ZoteroPane.handleClose(event)"/>
@@ -151,6 +156,8 @@
 	</keyset>
 
 	<keyset id="mainKeyset">
+		<key id="key_toggleFullScreen" keycode="VK_F5" reserved="true"
+			command="cmd_toggleFullScreen" disabled="true"/>
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_quitApplication"
 			key="&quitApplicationCmdMac.key;"
@@ -446,6 +453,13 @@
 							accesskey="&viewMenu.accesskey;">
 						<menupopup id="menu_viewPopup"
 									onpopupshowing="ZoteroStandalone.onViewMenuOpen(event)">
+							<menuitem class="window-controls-menuitem" hidden="true"
+								type="checkbox" autocheck="false" data-l10n-id="menu-view-full-screen"
+								command="cmd_toggleFullScreen" key="key_toggleFullScreen"/>
+							<menuitem class="window-controls-menuitem" hidden="true"
+								type="checkbox" autocheck="false" data-l10n-id="menu-view-auto-hide-menu-bar"
+								command="cmd_toggleMenuBarAutoHide"/>
+							<menuseparator class="window-controls-menuitem" hidden="true"/>
 							<menuitem
 								id="view-menuitem-hand-tool"
 								class="menu-type-reader pdf"
@@ -873,7 +887,7 @@
 				aria-hidden="true"
 				/>
 			<toolbarbutton class="titlebar-button titlebar-restore"
-				oncommand="window.fullScreen ? BrowserFullScreen() : window.restore();"
+				oncommand="window.fullScreen ? window.fullScreen = false : window.restore();"
 				data-l10n-id="browser-window-restore-down-button"
 				aria-hidden="true"
 				/>
@@ -928,6 +942,12 @@
 	<tooltip id="dynamic-tooltip" onpopupshowing="ZoteroPane.setDynamicTooltip(event)"></tooltip>
 	<!-- Global popupset for all context menus -->
 	<popupset>
+		<menupopup id="window-controls-context-menu">
+			<menuitem type="checkbox" autocheck="false" data-l10n-id="menu-view-full-screen"
+				command="cmd_toggleFullScreen" key="key_toggleFullScreen"/>
+			<menuitem type="checkbox" autocheck="false" data-l10n-id="menu-view-auto-hide-menu-bar"
+				command="cmd_toggleMenuBarAutoHide"/>
+		</menupopup>
 		<!-- Library -->
 		<menupopup id="zotero-collectionmenu"
 				oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">

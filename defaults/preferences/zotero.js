@@ -268,3 +268,4 @@ pref("dom.fetch.allow_force_allowed_dtd", true);
 // Translators are evaluated in the parent process with the system principal
 pref("security.allow_eval_with_system_principal", true);
 pref("security.allow_eval_in_parent_process", true);
+pref("extensions.zotero.ui.autoHideMenuBar", false);
