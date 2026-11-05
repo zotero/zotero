@@ -48,6 +48,8 @@ export class CitationDialogKeyboardHandler {
 	// capturing keydown listener to handle keypresses regardless of if they are handled by
 	// lower-level components
 	captureKeydown(event) {
+		// Page suggestion popup takes priority over all other keyboard handling.
+		if (this._handlePageSuggestionKeydown(event)) return;
 		let cmdOrCtrl = Zotero.isMac ? event.metaKey : event.ctrlKey;
 		// Cmd/Ctrl-Enter will always accept the dialog regardless of the target
 		if (event.key == "Enter" && cmdOrCtrl) {
@@ -81,6 +83,52 @@ export class CitationDialogKeyboardHandler {
 			event.stopPropagation();
 			event.preventDefault();
 		}
+	}
+
+	// Handle keypresses while the page suggestion popup is opened. ArrowDown highlights
+	// the suggestion and Enter then adds it as a locator. Escape dismisses the popup
+	// without closing the dialog, so a second Escape is needed to close it.
+	// Any other keypress dismisses the popup but is otherwise handled as usual.
+	// @returns {Boolean} true if the keypress was handled and should not propagate
+	_handlePageSuggestionKeydown(event) {
+		let panel = this._id("page-suggestion");
+		if (!["open", "showing"].includes(panel.state)) return false;
+		let option = this._id("page-suggestion-option");
+		let highlighted = option.classList.contains("highlighted");
+		let noModifiers = !['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
+		let handled = true;
+		if (event.key == "ArrowDown" && !highlighted && noModifiers) {
+			this._highlightPageSuggestion(true);
+		}
+		else if (event.key == "ArrowUp" && highlighted && noModifiers) {
+			this._highlightPageSuggestion(false);
+		}
+		// Enter with a modifier is left alone, so that e.g. Cmd/Ctrl-Enter still accepts the dialog
+		else if (event.key == "Enter" && highlighted && noModifiers) {
+			option.click();
+		}
+		else if (event.key == "Escape") {
+			panel.hidePopup();
+		}
+		else {
+			handled = false;
+			// Modifiers on their own are not a keypress one can dismiss the popup with
+			if (!["Shift", "Control", "Alt", "Meta"].includes(event.key)) {
+				panel.hidePopup();
+			}
+		}
+		if (handled) {
+			event.stopPropagation();
+			event.preventDefault();
+		}
+		return handled;
+	}
+
+	_highlightPageSuggestion(highlighted) {
+		this.doc.dispatchEvent(new CustomEvent("page-suggestion-highlight", {
+			bubbles: true,
+			detail: { highlighted }
+		}));
 	}
 
 	_handleTopLevelKeydown(event) {

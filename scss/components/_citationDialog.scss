@@ -720,6 +720,7 @@
 	#popups {
 		panel {
 			padding: 0;
+			background: var(--material-background);
 			.popup {
 				padding: 14px 16px;
 			}
@@ -731,6 +732,29 @@
 			height: 100%;
 			background-color: rgba(0, 0, 0, 0.1);
 			z-index: 1000;
+		}
+		#page-suggestion {
+			--panel-padding: 4px;
+			// Without this, the background and its corners are drawn natively,
+			// so the corner radius below has nothing to round
+			appearance: none;
+			border-radius: 5px;
+			@media (-moz-platform: macos) {
+				border: var(--material-border);
+			}	
+			#page-suggestion-option {
+				height: 18px;
+				line-height: 16px;
+				cursor: default;
+				padding: 0 4px;
+				&:hover {
+					background-color: var(--accent-blue30);
+				}
+				// highlighted via arrow navigation, since the popup never takes focus
+				&.highlighted {
+					background-color: var(--accent-blue30);
+				}
+			}
 		}
 		#settings-popup {
 			top: 35px;
