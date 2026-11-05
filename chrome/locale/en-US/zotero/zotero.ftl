@@ -1201,6 +1201,8 @@ data-dir-not-writable = { -app-name } can’t write to { $path }.
 data-dir-use-default-location = You may be able to fix this by using the default location in your home folder instead. If your { -app-name } data is in the current location, move it to the recommended location before selecting “{ $button }”.
 data-dir-check-parent-write-access = Make sure you have write access to { $path } and that security software isn’t preventing { -app-name } from writing to the disk.
 
+startup-error-incomplete-update = A { -app-name } update wasn’t installed completely. Download and reinstall { -app-name } from { $domain }.
+
 login-manager-reset = { -app-name } was unable to read your saved login information, so it has been reset. Please log in again in the { preferences-pane-account } pane of the { -app-name } settings.
 
 login-manager-open-profile-directory = Open Profile Directory

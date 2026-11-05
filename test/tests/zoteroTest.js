@@ -1,6 +1,40 @@
 "use strict";
 
 describe("Zotero", function() {
+	describe("#getBuildMismatchStartupAction()", function () {
+		var matching = { js: '10.0.9', resources: '10.0.9', app: '10.0.9' };
+		var mismatched = { js: '10.0.8', resources: '10.0.9', app: '10.0.8' };
+		
+		it("should restart on a new mismatch and record the versions", function () {
+			assert.deepEqual(
+				Zotero.getBuildMismatchStartupAction(mismatched, null),
+				['restart', { before: mismatched }]
+			);
+		});
+		
+		it("should continue if a restart resolved the mismatch and record the versions", function () {
+			assert.deepEqual(
+				Zotero.getBuildMismatchStartupAction(matching, { before: mismatched }),
+				['continue', { before: mismatched, after: matching }]
+			);
+		});
+		
+		it("should show an error if a restart didn't resolve the mismatch", function () {
+			var stillMismatched = { js: '10.0.9', resources: '10.0.9', app: '10.0.8' };
+			assert.deepEqual(
+				Zotero.getBuildMismatchStartupAction(stillMismatched, { before: mismatched }),
+				['error', { before: mismatched, after: stillMismatched }]
+			);
+			// Later startups show the error again without restarting
+			assert.deepEqual(
+				Zotero.getBuildMismatchStartupAction(
+					stillMismatched, { before: mismatched, after: stillMismatched }
+				),
+				['error', null]
+			);
+		});
+	});
+	
 	describe("#restoreZoteroPaneProgressMeter()", function () {
 		// A token captures the current display state, so taking one and immediately
 		// restoring it reads the state without changing it

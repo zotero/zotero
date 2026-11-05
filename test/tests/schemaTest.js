@@ -507,6 +507,38 @@ describe("Zotero.Schema", function () {
 				spy.restore();
 			});
 		});
+		
+		describe("Build version mismatch", function () {
+			before(async function () {
+				// We need bundled files
+				await resetDB({
+					thisArg: this
+				});
+			});
+			
+			it("should send a recorded mismatch with the next check and then clear it", async function () {
+				var mismatch = JSON.stringify({
+					before: { js: '10.0.8', resources: '10.0.9', app: '10.0.8' },
+					after: { js: '10.0.9', resources: '10.0.9', app: '10.0.9' }
+				});
+				Zotero.Prefs.set('buildMismatch', mismatch);
+				var stub = sinon.stub(Zotero.HTTP, 'request').resolves({
+					status: 200,
+					responseXML: new DOMParser().parseFromString(
+						'<xml><currentTime>1630219842</currentTime></xml>', 'application/xml'
+					)
+				});
+				try {
+					await Zotero.Schema.updateFromRepository(Zotero.Schema.REPO_UPDATE_MANUAL);
+					assert.include(stub.lastCall.args[1], '&mismatch=' + encodeURIComponent(mismatch));
+					assert.notOk(Zotero.Prefs.get('buildMismatch'));
+				}
+				finally {
+					stub.restore();
+					Zotero.Prefs.clear('buildMismatch');
+				}
+			});
+		});
 	});
 	
 	
