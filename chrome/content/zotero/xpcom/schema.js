@@ -3671,10 +3671,11 @@ Zotero.Schema = new function () {
 				}
 			}
 			
-			else if (i == 130) {
-				// Replaces steps 122-129 (added in Zotero 7, 9, and 10), checking for each change
+			else if (i == 131) {
+				// Replaces steps 122-130 (added in Zotero 7, 9, and 10), checking for each change
 				// before making it, since a transaction timeout could have rolled back some of those
-				// steps after the database was marked as upgraded
+				// steps after the database was marked as upgraded, and an incompletely applied update
+				// could skip step 130 while still marking the database as upgraded
 				
 				await _updateCompatibility(9);
 				
@@ -3725,15 +3726,18 @@ Zotero.Schema = new function () {
 				// Don't overwrite the freed pages, which makes dropping a large index much slower.
 				// The words are also in the full-text cache files and will be rewritten into
 				// fulltext.sqlite.
-				await Zotero.DB.queryAsync("PRAGMA secure_delete=false");
-				try {
-					await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextItemWords");
-					await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextWords");
+				if (await Zotero.DB.tableExists('fulltextItemWords')
+						|| await Zotero.DB.tableExists('fulltextWords')) {
+					await Zotero.DB.queryAsync("PRAGMA secure_delete=false");
+					try {
+						await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextItemWords");
+						await Zotero.DB.queryAsync("DROP TABLE IF EXISTS fulltextWords");
+					}
+					finally {
+						await Zotero.DB.queryAsync("PRAGMA secure_delete=true");
+					}
+					Zotero.Prefs.clear('vacuum.lastTime');
 				}
-				finally {
-					await Zotero.DB.queryAsync("PRAGMA secure_delete=true");
-				}
-				Zotero.Prefs.clear('vacuum.lastTime');
 				if (await Zotero.DB.columnExists('savedSearchConditions', 'required')) {
 					await Zotero.DB.queryAsync("ALTER TABLE savedSearchConditions RENAME TO savedSearchConditionsOld");
 					await Zotero.DB.queryAsync("CREATE TABLE savedSearchConditions (\n    savedSearchID INT NOT NULL,\n    searchConditionID INT NOT NULL,\n    condition TEXT NOT NULL,\n    operator TEXT,\n    value TEXT,\n    PRIMARY KEY (savedSearchID, searchConditionID),\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
