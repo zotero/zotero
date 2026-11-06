@@ -1931,6 +1931,22 @@ describe("Advanced Search", function () {
 				assert.equal(scopeCond.operator, 'annotation');
 			});
 
+			it("should offer and serialize the best-match query at any result level", function () {
+				var s = new Zotero.Search();
+				s.libraryID = Zotero.Libraries.userLibraryID;
+				s.addCondition('resultLevel', 'attachment');
+				s.addCondition('bestMatch', 'semantic', 'some query');
+				s.addCondition('title', 'contains', 'foo');
+				pane.search = s;
+
+				assert.isFalse(searchBox.rootGroup.bestMatchRow.hidden);
+				assert.equal(searchBox.rootGroup.bestMatch, 'some query');
+
+				searchBox.updateSearch();
+				assert.deepEqual(searchBox.search.getBestMatchQuery(),
+					{ query: 'some query', engine: 'semantic' });
+			});
+
 			it("should render and serialize a nested group result level", function () {
 				var s = new Zotero.Search();
 				s.libraryID = Zotero.Libraries.userLibraryID;

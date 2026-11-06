@@ -310,9 +310,9 @@
 			if (group.resultLevel && group.resultLevel != 'any') {
 				flat.push({ condition: 'resultLevel', operator: group.resultLevel, value: null });
 			}
-			// The best-match query is a root-level modifier, offered only for
-			// top-level item results; the operator is the engine
-			if (isRoot && group.bestMatch && group.resultLevel == 'item') {
+			// The best-match query is a root-level modifier; the operator is
+			// the engine
+			if (isRoot && group.bestMatch) {
 				flat.push({
 					condition: 'bestMatch',
 					operator: group.bestMatchEngine,
@@ -552,10 +552,10 @@
 			this.addEventListener('command', (event) => {
 				if (this.resultLevelControl && this.resultLevelControl.contains(event.target)) {
 					this._resultLevel = this.resultLevelControl.value || 'any';
-					this.updateBestMatchRow();
 				}
 			});
-			this.updateBestMatchRow();
+			// The best-match field is a root-level modifier
+			this.bestMatchRow.hidden = !this.isRoot;
 			// At init the group has no nested groups yet, so these resolve to its own
 			// caption buttons
 			this.addConditionButton = this.querySelector('.add-condition');
@@ -617,7 +617,6 @@
 
 		set bestMatch(val) {
 			this.bestMatchInput.value = val || '';
-			this.updateBestMatchRow();
 		}
 
 		/**
@@ -632,12 +631,6 @@
 			this.bestMatchEngineMenu.value = val || 'hybrid';
 		}
 
-		// The best-match field is a root-level modifier, offered for
-		// top-level item results
-		updateBestMatchRow() {
-			this.bestMatchRow.hidden = !this.isRoot || this.resultLevel != 'item';
-		}
-
 		set resultLevel(val) {
 			this._resultLevel = val || 'any';
 			// Reflect to the active control if it currently offers a matching option; the
@@ -646,7 +639,6 @@
 			if (popup && [...popup.children].some(item => item.value == this._resultLevel)) {
 				this.resultLevelControl.value = this._resultLevel;
 			}
-			this.updateBestMatchRow();
 		}
 
 		// Build the nested-group binding menu ("... in the same attachment"), shown when

@@ -176,6 +176,41 @@ describe("Tag Selector", function () {
 		assert.sameMembers(tags, [tag]);
 	});
 	
+	it("should show only tags of the items a best-match search kept", async function () {
+		var stub = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(false);
+		Zotero.Prefs.set('search.quicksearch-mode', 'bestMatch');
+		try {
+			// Unrelated items, so the query's words separate documents in
+			// this corpus and the match earns a score
+			for (let i = 0; i < 6; i++) {
+				await createDataObject('item', { title: `unrelated filler number ${i}` });
+			}
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			var matched = createUnsavedDataObject('item',
+				{ title: 'Tagbm owl migration', collections: [collection.id] });
+			matched.setTags(['kept']);
+			await matched.saveTx();
+			var other = createUnsavedDataObject('item',
+				{ title: 'Something else entirely', collections: [collection.id] });
+			other.setTags(['dropped']);
+			var promise = waitForTagSelector(win);
+			await other.saveTx();
+			await promise;
+			assert.sameMembers(getRegularTags(), ['kept', 'dropped']);
+
+			promise = waitForTagSelector(win);
+			await win.ZoteroPane.itemsView.setFilter('search', 'tagbm owl migration');
+			await promise;
+			assert.sameMembers(getRegularTags(), ['kept']);
+		}
+		finally {
+			Zotero.Prefs.set('search.quicksearch-mode', 'fields');
+			await win.ZoteroPane.itemsView.setFilter('search', '');
+			stub.restore();
+		}
+	});
+
 	describe("#handleSearch()", function () {
 		it("should filter to tags matching the search", async function () {
 			var collection = await createDataObject('collection');

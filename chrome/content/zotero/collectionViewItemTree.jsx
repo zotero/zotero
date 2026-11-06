@@ -185,6 +185,20 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	}
 
 	/**
+	 * The items a best-match search kept, shown as results rather than as
+	 * context, or null when no best-match search is active
+	 *
+	 * @returns {Number[]|null}
+	 */
+	getBestMatchItemIDs() {
+		if (!this._bestMatchSession) {
+			return null;
+		}
+		// Trashed collections and searches have string IDs
+		return [...this._searchItemIDs].filter(id => typeof id == 'number');
+	}
+
+	/**
 	 * The measure the Relevance sort follows: 'hybrid', or 'lexical' or
 	 * 'semantic' for one engine's evidence alone. The measure asked for,
 	 * which outlives the query it was asked during, while the current
@@ -274,8 +288,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
 		let { query, engine } = queryRow.getBestMatchQuery();
 		let source = queryRow.getBestMatchSource();
-		// A search source returns the items its conditions describe, which
-		// are top-level; the ranking weighs what's beneath them too -- an
+		// A search source returns the items its conditions describe; the
+		// ranking weighs what's beneath them too -- an
 		// attachment's text, a note, an annotation -- as it does the quick
 		// search's whole scope. So the descendants join the candidates, and
 		// the ones that match join the results.
@@ -371,7 +385,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		if (this._bestMatchSession !== session) {
 			return;
 		}
-		console.trace("!!");
 		let rowOf = itemID => this._rowMap[Zotero.Items.get(itemID)?.treeViewID];
 		let shown = itemIDs.filter((itemID) => {
 			let index = rowOf(itemID);
@@ -1560,6 +1573,8 @@ class CollectionViewItemTree extends ItemTree {
 	isFeedsOrFeed() { return ['feed', 'feeds'].includes(this.viewMode); }
 
 	get collectionTreeRows() { return this.rowProvider.collectionTreeRows; }
+
+	getBestMatchItemIDs() { return this.rowProvider.getBestMatchItemIDs(); }
 
 	get visibilityGroup() {
 		return this.collectionTreeRows[0]?.visibilityGroup ?? 'default';

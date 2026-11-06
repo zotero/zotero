@@ -133,12 +133,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	 */
 	async _safeGetTags(...args) {
 		try {
-			let rows = this.collectionTreeRows || [];
-			// A single row uses its own cached temp table directly; multiple rows are
-			// combined into one temp table and query to avoid a per-row query
-			let tags = rows.length == 1
-				? await rows[0].getTags(...args)
-				: await Zotero.CollectionTreeRow.getTagsAcrossRows(rows, ...args);
+			// The rows' results, or only the items the view kept of them
+			let tags = this.itemIDs
+				? await Zotero.CollectionTreeRow.getTagsWithin(this.itemIDs, ...args)
+				: await Zotero.CollectionTreeRow.getTagsAcrossRows(this.collectionTreeRows || [], ...args);
 			// Multiple rows (collections, or collections across libraries) can return
 			// the same tag, so dedupe by name and type
 			return this._dedupeTags(tags);
@@ -213,11 +211,14 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	// Update trigger #1 (triggered by ZoteroPane)
-	async onItemViewChanged({ collectionTreeRows, libraryID }) {
+	async onItemViewChanged({ collectionTreeRows, libraryID, itemIDs = null }) {
 		Zotero.debug('Updating tag selector from current view');
 
 		var prevLibraryIDs = this.libraryIDs;
 		this.collectionTreeRows = collectionTreeRows;
+		// The items the view kept of the rows' results, as a best-match
+		// ranking does, or null when it shows them all
+		this.itemIDs = itemIDs;
 		this.libraryIDs = this._getSelectedLibraryIDs(collectionTreeRows, libraryID);
 		this.libraryID = this.libraryIDs[0];
 

@@ -1783,7 +1783,9 @@ var ZoteroPane = new function () {
 			}
 			ZoteroPane_Local.tagSelector.onItemViewChanged({
 				libraryID: collectionTreeRows[0].ref && collectionTreeRows[0].ref.libraryID,
-				collectionTreeRows
+				collectionTreeRows,
+				// A best-match search shows only the items it kept
+				itemIDs: this.itemsView?.getBestMatchItemIDs() ?? null
 			});
 		}
 	};

@@ -566,10 +566,11 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 
 
 /**
- * Returns all the tags used by items across multiple rows' views
+ * Returns all the tags used by items across rows' views
  *
- * Combines the rows' search results into a single temporary table and runs one tag
- * query, rather than creating a temp table and running a separate query per row.
+ * A single row queries its own cached temp table. Multiple rows' search results
+ * are combined into one temporary table and queried once, rather than creating
+ * a temp table and running a separate query per row.
  *
  * @param {Zotero.CollectionTreeRow[]} rows
  * @param {Number[]} [types]
@@ -582,6 +583,9 @@ Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs
 	if (!tagRows.length) {
 		return [];
 	}
+	if (tagRows.length == 1) {
+		return tagRows[0].getTags(types, tagIDs);
+	}
 	// Combine the rows' search results into a single set of item IDs
 	var itemIDs = new Set();
 	for (let ids of await Promise.all(tagRows.map(row => row.getSearchResults(false)))) {
@@ -589,7 +593,20 @@ Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs
 			itemIDs.add(id);
 		}
 	}
-	var tmpTable = await Zotero.Search.idsToTempTable([...itemIDs]);
+	return Zotero.CollectionTreeRow.getTagsWithin([...itemIDs], types, tagIDs);
+};
+
+
+/**
+ * Returns all the tags used by the given items
+ *
+ * @param {Number[]} itemIDs
+ * @param {Number[]} [types]
+ * @param {Number[]} [tagIDs]
+ * @return {Promise<Object[]>}
+ */
+Zotero.CollectionTreeRow.getTagsWithin = async function (itemIDs, types, tagIDs) {
+	var tmpTable = await Zotero.Search.idsToTempTable(itemIDs);
 	try {
 		return await Zotero.Tags.getAllWithin({ tmpTable, types, tagIDs });
 	}
