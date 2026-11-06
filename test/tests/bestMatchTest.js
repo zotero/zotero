@@ -1097,6 +1097,30 @@ describe("Zotero.BestMatch", function () {
 			assert.isNull(session.getPreviews(att2.id));
 		});
 
+		it("should derive again what a re-score invalidated, leaving new matches to be asked for", async function () {
+			stubEngines({
+				enabled: false,
+				lexical: async (query, itemIDs) => new Map(itemIDs.map(id => [id, 0.5]))
+			});
+			let derive = stubDerive(new Map([
+				[att1.id, [{ source: 'title', text: 'owl', ranges: [], strength: 1 }]],
+				[att2.id, [{ source: 'title', text: 'two', ranges: [], strength: 1 }]]
+			]));
+			let session = Zotero.BestMatch.createSession('owl');
+			await session.score([att1.id]);
+			assert.equal(derive.callCount, 1);
+			// A changed item's preview is derived again before resolving...
+			session.invalidate([att1.id]);
+			await session.score([att1.id, att2.id]);
+			assert.equal(session.getPreviews(att1.id).state, 'filled');
+			assert.deepEqual(derive.args.map(args => args[0]), [att1.id, att1.id]);
+			// ...while a new match waits to be asked for
+			assert.equal(session.getPreviews(att2.id).state, 'pending');
+			session.request([att2.id]);
+			await session.previewsSettled;
+			assert.equal(session.getPreviews(att2.id).state, 'filled');
+		});
+
 	});
 
 	describe("Session requested previews", function () {

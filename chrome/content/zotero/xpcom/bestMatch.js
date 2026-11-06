@@ -349,20 +349,23 @@ Zotero.BestMatch = new function () {
 	 * A best-match search session: one query's scoring pass plus the
 	 * previews explaining its matches.
 	 *
-	 * score() ranks candidates and derives the first few previews on screen
-	 * (PRELOADED_MATCH_PREVIEWS) before it resolves. The rest derive when
-	 * request() asks for them, newest request first, reported through
-	 * onPreviewsFilled and awaitable through previewsSettled. An item's
-	 * entries hold both
-	 * engines' evidence, merged, deduplicated and ordered by strength (see
-	 * getMatchingExcerpts()). A re-score keeps previews already derived;
-	 * fill() re-derives ones invalidate() dropped back to pending. A
-	 * disposed session derives nothing.
+	 * score() ranks candidates and, the first time, derives the first few
+	 * previews on screen (PRELOADED_MATCH_PREVIEWS) before it resolves. The
+	 * rest derive when request() asks for them, newest request first,
+	 * reported through onPreviewsFilled and awaitable through
+	 * previewsSettled. An item's entries hold both engines' evidence,
+	 * merged, deduplicated and ordered by strength (see
+	 * getMatchingExcerpts()). A re-score keeps previews already derived and
+	 * derives again the ones invalidate() dropped. A disposed session
+	 * derives nothing.
 	 */
 	this.Session = class {
 		constructor(queryText, { engine = 'hybrid' } = {}) {
 			this._queryText = queryText;
 			this._engine = engine;
+			// Items whose derived preview invalidate() dropped, derived again
+			// by the next score()
+			this._stale = new Set();
 			this._previews = new Map();
 			this._effectiveScores = new Map();
 			// Where the lexical engine matched each item, from the last
@@ -393,14 +396,16 @@ Zotero.BestMatch = new function () {
 		/**
 		 * Score candidates for this session's query (see
 		 * Zotero.BestMatch.scoreItemIDs()), rebuild the preview set from the
-		 * engines' match sets, recompute ranks and barFractions, and derive
-		 * the first pending previews on screen before resolving. Items still
-		 * matched keep their settled previews -- a re-score doesn't re-derive
-		 * kept text -- and items no longer matched lose theirs.
+		 * engines' match sets, and recompute ranks and barFractions. Items
+		 * still matched keep their settled previews -- a re-score doesn't
+		 * re-derive kept text -- and items no longer matched lose theirs.
 		 *
-		 * The other previews derive only when request() asks for them. Ranks
-		 * and barFractions are complete either way -- neither depends on a
-		 * preview.
+		 * The first pass derives the first pending previews on screen
+		 * before resolving; a later pass derives again only the previews
+		 * invalidate() dropped, so a changed row keeps showing its matches.
+		 * The other previews derive only when request() asks for them.
+		 * Ranks and barFractions are complete either way -- neither depends
+		 * on a preview.
 		 *
 		 * @param {Number[]} itemIDs - Candidate item IDs to score
 		 * @param {Object} [options] - Passed through to scoreItemIDs()
@@ -410,6 +415,7 @@ Zotero.BestMatch = new function () {
 		 * @throws {Zotero.BestMatch.ScoringCancelledError}
 		 */
 		async score(itemIDs, options = {}) {
+			let first = !this._ranksBy;
 			let result = await Zotero.BestMatch.scoreItemIDs(
 				this._queryText, itemIDs, { ...options, engine: this._engine });
 			let { scores, lexical, semantic } = result;
@@ -447,7 +453,11 @@ Zotero.BestMatch = new function () {
 				.map(id => [id, this._topLevelScore(id), this._effectiveScores.get(id) ?? 0])
 				.sort((a, b) => (b[1] - a[1]) || (b[2] - a[2]) || (a[0] - b[0]))
 				.map(([id]) => id);
-			for (let itemID of pending.slice(0, PRELOADED_MATCH_PREVIEWS)) {
+			let preload = first
+				? pending.slice(0, PRELOADED_MATCH_PREVIEWS)
+				: pending.filter(id => this._stale.has(id));
+			this._stale.clear();
+			for (let itemID of preload) {
 				if (this._disposed) {
 					return scores;
 				}
@@ -686,7 +696,8 @@ Zotero.BestMatch = new function () {
 
 		/**
 		 * Drop the given items' previews back to pending, for items whose
-		 * content changed and made derived text stale
+		 * content changed and made derived text stale; the next score()
+		 * derives the dropped ones again before resolving
 		 *
 		 * @param {Number[]} itemIDs
 		 */
@@ -695,6 +706,9 @@ Zotero.BestMatch = new function () {
 				let preview = this._previews.get(itemID);
 				if (!preview) {
 					continue;
+				}
+				if (preview.state == 'filled') {
+					this._stale.add(itemID);
 				}
 				// A fresh object, so a derivation of the old one that's still
 				// in flight can't settle it (see _derive())

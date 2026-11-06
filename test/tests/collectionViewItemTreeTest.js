@@ -1468,7 +1468,7 @@ describe("CollectionViewItemTree", function () {
 				await itemsView.setFilter('advanced-search', null);
 			});
 
-			it("should redraw a changed item in place, keeping the ranking and the selection", async function () {
+			it("should rerun the search for a changed top-level item but not for a changed child", async function () {
 				let col = await createDataObject('collection');
 				let item = await createDataObject('item', { title: "inplace A", collections: [col.id] });
 				let attachment = await importFileAttachment('test.pdf', { parentID: item.id });
@@ -1490,20 +1490,37 @@ describe("CollectionViewItemTree", function () {
 				scoreStub.resetHistory();
 
 				// An added child, such as an annotation made from a passage,
-				// waits for the next search
-				let annotation = await createAnnotation('highlight', attachment);
-				await Zotero.Notifier.trigger('add', 'item', [annotation.id]);
+				// leaves the results as they are. Saved as annotations are,
+				// without selecting the new item, which would clear the search
+				// to show it
+				let annotation = new Zotero.Item('annotation');
+				annotation.libraryID = attachment.libraryID;
+				annotation.parentID = attachment.id;
+				annotation.annotationType = 'highlight';
+				annotation.annotationText = 'owls';
+				annotation.annotationColor = '#ffd400';
+				annotation.annotationSortIndex = '00001|000001|00000';
+				annotation.annotationPosition = JSON.stringify({ pageIndex: 0, rects: [[0, 0, 10, 10]] });
+				await annotation.saveTx({ skipSelect: true });
+				await itemsView._refreshPromise;
 				assert.isFalse(scoreStub.called);
 				assert.deepEqual(itemsView._rows.map(row => row.id), rows);
 				assert.equal(itemsView.getSelectedSearchMatches()[0]?.entry.text, 'second owls');
+				// So does a changed child, as when its tags are edited
+				await Zotero.Notifier.trigger('modify', 'item', [annotation.id]);
+				assert.isFalse(scoreStub.called);
+				assert.deepEqual(itemsView._rows.map(row => row.id), rows);
 
-				// A modified one keeps its place, with its preview derived again
+				// A modified top-level item reruns the search as in any other
+				// search mode, with its preview derived again
 				excerptsStub.resolves([
 					{ text: 'first owls, edited', ranges: [], strength: 1, snippet: { start: 0, end: 18 } },
 					{ text: 'second owls', ranges: [], strength: 0.5, snippet: { start: 0, end: 11 } }
 				]);
+				scoreStub.resetHistory();
 				await Zotero.Notifier.trigger('modify', 'item', [attachment.id, item.id]);
-				assert.isFalse(scoreStub.called);
+				await itemsView._refreshPromise;
+				assert.isTrue(scoreStub.called);
 				assert.deepEqual(itemsView._rows.map(row => row.id), rows);
 				let first = itemsView.getRowIndexByID('SM' + attachment.id + '-0');
 				assert.equal(itemsView.getRow(first).ref.entry.text, 'first owls, edited');

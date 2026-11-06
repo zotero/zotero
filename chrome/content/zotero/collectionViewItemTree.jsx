@@ -324,10 +324,11 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this.itemTree._cachedScrollPosition = null;
 		}
 		try {
-			// Scoring derives the best-scored items' previews before it
-			// resolves; the rest are asked for as their rows come into view
-			// (see _requestMatchPreviews()) and arrive through
-			// onPreviewsFilled above
+			// A new query's scoring derives the best-scored items' previews
+			// before it resolves, a re-score only the ones it invalidated;
+			// the rest are asked for as their rows come into view (see
+			// _requestMatchPreviews()) and arrive through onPreviewsFilled
+			// above
 			await session.score(candidateIDs, {
 				// A newer filter (e.g. more typed search text) makes this
 				// query obsolete -- stop scoring and let its refresh take over
@@ -1079,12 +1080,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			this._bestMatchSession.invalidate(ids.map(id => parseInt(id)));
 		}
 
-		// A best-match search keeps its ranking until the next query: scoring
-		// every candidate again for one change costs seconds and reorders
-		// the rows under the user. A changed item is redrawn in place with
-		// its preview derived again; an added one waits for the next search.
+		// A changed child -- an annotation, a note, an attachment under an
+		// item -- doesn't rerun the search: its parent's place in the results
+		// stays, so the rows stay put under the user, as while annotating
+		// from a match row. A changed one is redrawn in place; an added one
+		// is seen by the next search.
 		if (type == 'item' && ['add', 'modify', 'refresh'].includes(action)
-				&& this._bestMatchSession && collectionTreeRows.some(rowIsBestMatchSearch)) {
+				&& this._bestMatchSession && collectionTreeRows.some(rowIsBestMatchSearch)
+				&& ids.every(id => Zotero.Items.get(id)?.isTopLevelItem() === false)) {
 			if (action != 'add') {
 				await this._redrawChangedMatches(ids.map(id => parseInt(id)));
 			}
@@ -1187,6 +1190,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			if (rowsToInvalidate) {
 				await this.runListeners('update', rowsToInvalidate);
 			}
+			// Previews dropped above are derived again for the rows in view
+			this._requestMatchPreviews();
 			return;
 		}
 
