@@ -37,6 +37,8 @@
 		cursor: default;
 		background: url(resource://content-accessible/close-12.svg) no-repeat center/contain;
 		background-size: unset;
+		-moz-context-properties: fill;
+		fill: var(--fill-primary);
 	}
 }
 
