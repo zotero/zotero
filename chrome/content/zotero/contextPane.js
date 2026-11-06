@@ -175,6 +175,9 @@ var ZoteroContextPane = new function () {
 			_contextPaneSplitterStacked.setAttribute('state', this.collapsed ? 'collapsed' : 'open');
 		}
 		
+		// The splitter state can be restored after a tab is selected
+		_contextPane.toggleAttribute('collapsed', this.collapsed);
+		
 		var height = null;
 		if (_isStacked()) {
 			height = 0;

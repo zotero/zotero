@@ -1784,7 +1784,9 @@ class ReaderInstance {
 	_getReadAloudRemoteInterface(targetWindow) {
 		if (!this._window) return null;
 		// Wrap return values in child window Promises to avoid permissions errors
-		let audioCache = this._window.caches.open('read-aloud');
+		// The cache is opened from whichever window the reader is in when it's used, since the
+		// reader can move to another window
+		let openAudioCache = () => this._window.caches.open('read-aloud');
 		return {
 			getVoices: () => {
 				return new targetWindow.Promise(async (resolve) => {
@@ -1795,7 +1797,7 @@ class ReaderInstance {
 					// Prune cache entries with outdated versions once per session,
 					// after the voices (and their current cache versions) are known
 					if (!readAloudCachePruned && result.voices) {
-						this._pruneReadAloudCache(audioCache, result.voices);
+						this._pruneReadAloudCache(openAudioCache(), result.voices);
 					}
 				});
 			},
@@ -1805,7 +1807,7 @@ class ReaderInstance {
 					let cacheURL = this._getReadAloudCacheURL(segment, voice);
 					let cache;
 					try {
-						cache = await audioCache;
+						cache = await openAudioCache();
 						let cached = await cache.match(cacheURL);
 						if (cached) {
 							// Word-level timestamps are cached in a response header
@@ -2025,27 +2027,11 @@ class ReaderTab extends ReaderInstance {
 			this._tabContainer = container;
 		}
 
-		this._iframe = this._window.document.createXULElement('browser');
-		this._iframe.setAttribute('class', 'reader');
-		this._iframe.setAttribute('flex', '1');
-		this._iframe.setAttribute('type', 'content');
-		this._iframe.setAttribute('transparent', 'true');
+		this._iframe = this._createBrowser();
 		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
-		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
-		// Derive the initial docShell activity here, because tabs opened in
-		// the background, unlike deselected tabs, don't go through a tab
-		// 'select' notification
-		this._updateDocShellActivity();
-		
-		this._popupset = this._window.document.createXULElement('popupset');
-		this._tabContainer.appendChild(this._popupset);
-		
 		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
-		this._window.addEventListener('pointerdown', this._handlePointerDown);
-		this._window.addEventListener('pointerup', this._handlePointerUp);
-
-		this._iframe.setAttribute('tooltip', 'html-tooltip');
+		this._attachToWindow();
 
 		this._onToggleSidebarCallback = (open) => {
 			if (open) {
@@ -2073,23 +2059,111 @@ class ReaderTab extends ReaderInstance {
 			location: options.location,
 			secondViewState: options.secondViewState
 		}).then(() => {
-			this._tabContainer.addEventListener('tab-bottom-placeholder-resize', (event) => {
-				this.setBottomPlaceholderHeight(event.detail.height);
-			});
-
-			this._tabContainer.addEventListener('tab-context-pane-toggle', (event) => {
-				this.setContextPaneOpen(event.detail.open);
-			});
-
-			this._tabContainer.addEventListener('tab-selection-change', (event) => {
-				if (event.detail.selected) {
-					this._updateLayout();
-				}
-			});
+			this._addTabContainerListeners();
 			if (select) {
 				this._updateLayout();
 			}
 		});
+	}
+
+	/**
+	 * Create the reader's <browser> in its tab container
+	 *
+	 * @return {XULElement}
+	 */
+	_createBrowser() {
+		let browser = this._window.document.createXULElement('browser');
+		browser.setAttribute('class', 'reader');
+		browser.setAttribute('flex', '1');
+		browser.setAttribute('type', 'content');
+		browser.setAttribute('transparent', 'true');
+		browser.setAttribute('tooltip', 'html-tooltip');
+		this._tabContainer.appendChild(browser);
+		return browser;
+	}
+
+	/**
+	 * Set up what the reader needs from the window its tab is in, when it's created and when
+	 * it's moved to another window. _detachFromWindow() undoes it.
+	 */
+	_attachToWindow() {
+		// Derive the docShell activity here, because tabs opened in the background, unlike
+		// deselected tabs, don't go through a tab 'select' notification
+		this._updateDocShellActivity();
+		this._popupset = this._window.document.createXULElement('popupset');
+		this._tabContainer.appendChild(this._popupset);
+		this._window.addEventListener('pointerdown', this._handlePointerDown);
+		this._window.addEventListener('pointerup', this._handlePointerUp);
+	}
+
+	_detachFromWindow() {
+		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.removeEventListener('pointerdown', this._handlePointerDown);
+		this._window.removeEventListener('pointerup', this._handlePointerUp);
+		this._pointerDownWindow = null;
+	}
+
+	_addTabContainerListeners() {
+		this._tabContainer.addEventListener('tab-bottom-placeholder-resize', (event) => {
+			this.setBottomPlaceholderHeight(event.detail.height);
+		});
+		this._tabContainer.addEventListener('tab-context-pane-toggle', (event) => {
+			this.setContextPaneOpen(event.detail.open);
+		});
+		this._tabContainer.addEventListener('tab-selection-change', (event) => {
+			if (event.detail.selected) {
+				this._updateLayout();
+			}
+		});
+	}
+
+	/**
+	 * Whether the reader has loaded far enough to move to another window with its document
+	 *
+	 * @return {Boolean}
+	 */
+	canMoveToWindow() {
+		return !!(this._internalReader && this._iframeWindow && !this._isTabClosed);
+	}
+
+	/**
+	 * Move the reader into a new tab in another main window, keeping its document -- the
+	 * page, selection, find bar, undo history, and Read Aloud playback -- by swapping it into
+	 * a <browser> there. The caller closes the old tab.
+	 *
+	 * @param {ChromeWindow} targetWindow
+	 * @param {Integer} [index]
+	 * @return {String} - The id of the new tab
+	 */
+	moveToWindow(targetWindow, index) {
+		let { tab } = this._window.Zotero_Tabs._getTab(this.tabID);
+		let { id, container } = targetWindow.Zotero_Tabs.add({
+			type: 'reader',
+			title: tab.title,
+			index,
+			data: JSON.parse(JSON.stringify(tab.data)),
+			onClose: this._handleTabClose,
+			select: false
+		});
+		this._hideReadAloudGuidance();
+		this._detachFromWindow();
+		// The old tab closing is no longer this reader's closing
+		tab.onClose = null;
+		let oldBrowser = this._iframe;
+		this._window = targetWindow;
+		this._tabContainer = container;
+		this.tabID = id;
+		this._iframe = this._createBrowser();
+		this._iframe.swapFrameLoaders(oldBrowser);
+		oldBrowser.removeEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
+		this._iframe.addEventListener('contextmenu', this._handleReaderTextboxContextMenuOpen);
+		this._attachToWindow();
+		this._addTabContainerListeners();
+		if (this._readAloudStatus) {
+			targetWindow.Zotero_Tabs.setAudioStatus(id, this._readAloudStatus);
+		}
+		targetWindow.Zotero_Tabs.select(id);
+		return id;
 	}
 
 	_handleTabClose = () => {
@@ -2102,18 +2176,13 @@ class ReaderTab extends ReaderInstance {
 
 	uninit() {
 		if (this._window) {
-			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
-			this._window.removeEventListener('pointerdown', this._handlePointerDown);
-			this._window.removeEventListener('pointerup', this._handlePointerUp);
+			this._detachFromWindow();
 		}
-		this._pointerDownWindow = null;
 		super.uninit();
 	}
 	
 	close() {
-		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
-		this._window.removeEventListener('pointerdown', this._handlePointerDown);
-		this._window.removeEventListener('pointerup', this._handlePointerUp);
+		this._detachFromWindow();
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
 		}
@@ -2202,6 +2271,7 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	_setReadAloudStatus(status) {
+		this._readAloudStatus = status;
 		this._readAloudPlaying = status.active && !status.paused;
 		// Wake up the docShell even if this tab is in the background,
 		// so event-loop tasks run immediately. Without this, playing

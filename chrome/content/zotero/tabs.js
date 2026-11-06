@@ -217,6 +217,11 @@ var Zotero_Tabs = new function () {
 				Zotero.openMainWindow({ libraryTabState: data.state, geometry });
 			},
 			reader: async (tab, _tabIndex, { geometry } = {}) => {
+				// A loaded reader is moved into the new window with its document once it opens
+				if (Zotero.Reader.getByTabID(tab.id)?.canMoveToWindow()) {
+					Zotero.openMainWindow({ movedTab: { windowID: this._windowID, tabID: tab.id }, geometry });
+					return;
+				}
 				let { title, data } = this.tabHooks.transfer.reader(tab);
 				this.close(tab.id, { skipHistory: true, skipFocus: true });
 				Zotero.openMainWindow({ readerTabState: { title, ...data }, geometry });
@@ -1195,7 +1200,8 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Move a tab to another window, where it's recreated from a snapshot of its state
+	 * Move a tab to another window. A loaded reader keeps its document, and other tabs are
+	 * recreated there from a snapshot of their state.
 	 *
 	 * @param {String} id
 	 * @param {Window} targetWindow - Another main window
@@ -1212,8 +1218,16 @@ var Zotero_Tabs = new function () {
 		if (!this._hasHook(tabContentType, 'transfer')) {
 			return null;
 		}
-		let entry = this._getHook(tabContentType, 'transfer')(tab);
-		let newID = await targetWindow.Zotero_Tabs.addTransferredTab(entry, index);
+		let newID;
+		// A loaded reader moves with its document, and other tabs are recreated from their data
+		let reader = tabContentType == 'reader' ? Zotero.Reader.getByTabID(id) : null;
+		if (reader?.canMoveToWindow()) {
+			newID = reader.moveToWindow(targetWindow, index);
+		}
+		else {
+			let entry = this._getHook(tabContentType, 'transfer')(tab);
+			newID = await targetWindow.Zotero_Tabs.addTransferredTab(entry, index);
+		}
 		if (!newID) {
 			return null;
 		}

@@ -840,11 +840,14 @@ describe("Zotero_Tabs", function() {
 		it("should move a reader tab to a new window with no library view", async function () {
 			let attachment = await importPDFAttachment(otherItem);
 			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
-			let { tab, tabIndex } = win2.Zotero_Tabs._getTab(reader.tabID);
+			await reader._initPromise;
+			let sourceTabID = reader.tabID;
+			let { tab, tabIndex } = win2.Zotero_Tabs._getTab(sourceTabID);
 			let openWindows = Zotero.getMainWindows();
+			let wasCollapsed = win2.ZoteroContextPane.collapsed;
+			win2.ZoteroContextPane.collapsed = false;
 			await win2.Zotero_Tabs.tabHooks.moveToNewWindow.reader(tab, tabIndex);
-			assert.isUndefined(win2.Zotero_Tabs._getTab(reader.tabID).tab);
-			
+
 			let newWin;
 			try {
 				await waitForCallback(
@@ -853,10 +856,18 @@ describe("Zotero_Tabs", function() {
 					100,
 					20
 				);
+				await waitForCallback(() => !win2.Zotero_Tabs._getTab(sourceTabID).tab, 50, 20);
 				assert.isNull(newWin.ZoteroPane.libraryView);
 				assert.equal(newWin.Zotero_Tabs.parseTabType().tabContentType, 'reader');
+				// The reader itself moves, rather than a new one being opened for the item
+				assert.equal(Zotero.Reader.getByTabID(newWin.Zotero_Tabs.selectedID), reader);
+				// The context pane is open, as in the window it came from
+				assert.isAbove(
+					newWin.document.getElementById('zotero-context-pane').getBoundingClientRect().width, 0
+				);
 			}
 			finally {
+				win2.ZoteroContextPane.collapsed = wasCollapsed;
 				newWin?.close();
 			}
 		});
@@ -974,20 +985,44 @@ describe("Zotero_Tabs", function() {
 			let attachment = await importPDFAttachment(otherItem);
 			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
 			await reader._initPromise;
-			let newID = await tabs.moveToWindow(reader.tabID, win2);
+			let sourceTabID = reader.tabID;
+			let readerWindow = reader._iframeWindow;
+			readerWindow.wrappedJSObject.movedReaderMarker = 'moved';
+			let newID = await tabs.moveToWindow(sourceTabID, win2);
 			try {
-				assert.isUndefined(tabs._getTab(reader.tabID).tab);
+				assert.isUndefined(tabs._getTab(sourceTabID).tab);
 				assert.equal(win2.Zotero_Tabs.selectedID, newID);
-				await win2.Zotero_Tabs.getLoadPromise(newID);
-				let movedReader = Zotero.Reader.getByTabID(newID);
-				assert.equal(movedReader.itemID, attachment.id);
-				assert.equal(movedReader._window, win2);
+				// The reader and its document move, rather than being reopened
+				assert.equal(Zotero.Reader.getByTabID(newID), reader);
+				assert.equal(reader._window, win2);
+				assert.equal(reader._iframeWindow, readerWindow);
+				assert.equal(reader._iframe.contentWindow.wrappedJSObject.movedReaderMarker, 'moved');
 			}
 			finally {
 				if (win2.Zotero_Tabs._getTab(newID).tab) {
 					win2.Zotero_Tabs.close(newID);
 				}
 			}
+		});
+		
+		it("should keep a moved reader working after its old window closes", async function () {
+			let win3 = await loadZoteroPane();
+			let attachment = await importPDFAttachment(otherItem);
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win3 });
+			await reader._initPromise;
+			let newID = await win3.Zotero_Tabs.moveToWindow(reader.tabID, win2);
+			win3.close();
+			try {
+				// Switching away and back lays the reader out in its new window
+				win2.Zotero_Tabs.select(zp2.libraryView.tabID);
+				win2.Zotero_Tabs.select(newID);
+				await reader.navigate({ pageIndex: 0 });
+				assert.isFalse(win2.document.getElementById('zotero-context-splitter').hasAttribute('hidden'));
+			}
+			finally {
+				win2.Zotero_Tabs.close(newID);
+			}
+			await waitForCallback(() => !Zotero.Reader._readers.includes(reader), 50, 20);
 		});
 		
 		it("should keep a moved reader's position when another reader saved a different one", async function () {

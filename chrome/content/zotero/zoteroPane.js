@@ -247,6 +247,7 @@ var ZoteroPane = new function () {
 	var _initialOtherLibraryTabs = [];
 	// The reader tab this window was opened for, if any
 	var _initialReaderTabState = null;
+	var _initialMovedTab = null;
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
 	// When this window was last activated, for ordering saved window states
@@ -622,6 +623,10 @@ var ZoteroPane = new function () {
 			_initialReaderTabState = args.readerTabState;
 			return;
 		}
+		if (args.movedTab) {
+			_initialMovedTab = args.movedTab;
+			return;
+		}
 		if (args.sessionState) {
 			_sessionPaneState = args.sessionState;
 			restoreWindowGeometry(_sessionPaneState.geometry);
@@ -927,6 +932,21 @@ var ZoteroPane = new function () {
 					data: { itemID, primaryViewState, secondViewState },
 					select: true
 				});
+			}
+			else if (_initialMovedTab) {
+				let { windowID, tabID } = _initialMovedTab;
+				let sourceWindow = Zotero.getMainWindows()
+					.find(win => win.Zotero_Tabs?.windowID === windowID);
+				Promise.resolve(sourceWindow?.Zotero_Tabs.moveToWindow(tabID, window))
+					.catch((e) => {
+						Zotero.logError(e);
+					})
+					.then((newID) => {
+						// The tab was closed or its window went away before this window opened
+						if (!newID) {
+							openInitialLibraryTab();
+						}
+					});
 			}
 			else {
 				openInitialLibraryTab();

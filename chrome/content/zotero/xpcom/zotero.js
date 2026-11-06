@@ -1164,6 +1164,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 *     in the background after the one for libraryTabState
 	 * @param {Object} [args.readerTabState] - { itemID, primaryViewState, secondViewState, title }
 	 *     for a window whose only tab is a reader tab
+	 * @param {Object} [args.movedTab] - { windowID, tabID } of a tab in another window to move
+	 *     into this one as its only tab
 	 * @param {Object} [args.geometry] - { screenX, screenY, width, height } to open the window at
 	 * @return {ChromeWindow}
 	 */
