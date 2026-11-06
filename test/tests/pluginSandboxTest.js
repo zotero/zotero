@@ -4,44 +4,47 @@ describe("Plugin Sandbox", function () {
 	var { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
 	var { ScopeUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/utils.mjs");
 	var { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
-	var { get: getName, list: listNames, forget: forgetName } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/names.mjs").PluginNames;
+	var { PluginInfo } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/info.mjs");
 
-	describe("Plugin name persistence", function () {
-		const PLUGIN_NAME_PREF = "extensions.zotero.pluginNames." + plugin.uuid;
-
+	describe("Plugin metadata persistence", function () {
 		afterEach(function () {
-			Zotero.Prefs.clear(PLUGIN_NAME_PREF, true);
+			PluginInfo.forget(plugin.uuid);
 		});
 
-		it("records the plugin name on load, keyed by UUID", function () {
+		it("records the plugin's name and type together on load, keyed by UUID", function () {
 			plugin.load(["default"]);
-			assert.equal(getName(plugin.uuid), "Test Sandbox Plugin");
+			let info = { name: "Test Sandbox Plugin", legacy: false };
+			assert.deepEqual(PluginInfo.get(plugin.uuid), info);
+			assert.deepEqual(JSON.parse(Zotero.Prefs.get("extensions.zotero.pluginInfo." + plugin.uuid, true)), info);
 		});
 
-		it("the recorded name survives unloading the plugin", function () {
+		it("retains the metadata after unloading the plugin", function () {
 			plugin.load(["default"]);
 			PluginSandbox.unloadScope(plugin.id);
-			// Name still recoverable -- chrome UI can show it for orphan dirs
-			assert.equal(getName(plugin.uuid), "Test Sandbox Plugin");
+			assert.deepEqual(PluginInfo.get(plugin.uuid), { name: "Test Sandbox Plugin", legacy: false });
 		});
 
-		it("listNames includes the loaded plugin", function () {
+		it("updates the recorded name and type when the plugin reloads", function () {
 			plugin.load(["default"]);
-			let names = listNames();
-			let entry = names.find(n => n.uuid === plugin.uuid);
-			assert.ok(entry, "loaded plugin should appear in the recorded list");
-			assert.equal(entry.name, "Test Sandbox Plugin");
+			plugin.load(["*"], { name: "Renamed Plugin" });
+			assert.deepEqual(PluginInfo.get(plugin.uuid), { name: "Renamed Plugin", legacy: true });
+		});
+
+		it("lists the loaded plugin's UUID and metadata", function () {
+			plugin.load(["default"]);
+			let entry = PluginInfo.list().find(info => info.uuid === plugin.uuid);
+			assert.deepEqual(entry, { uuid: plugin.uuid, name: "Test Sandbox Plugin", legacy: false });
 		});
 
 		it("returns null for unknown UUIDs", function () {
-			assert.isNull(getName("00000000-0000-0000-0000-000000000000"));
+			assert.isNull(PluginInfo.get("00000000-0000-0000-0000-000000000000"));
 		});
 
-		it("forgetName removes the entry", function () {
+		it("forgets the plugin's metadata", function () {
 			plugin.load(["default"]);
-			assert.equal(getName(plugin.uuid), "Test Sandbox Plugin");
-			forgetName(plugin.uuid);
-			assert.isNull(getName(plugin.uuid));
+			PluginInfo.forget(plugin.uuid);
+			assert.isNull(PluginInfo.get(plugin.uuid));
+			assert.isFalse(PluginInfo.list().some(info => info.uuid === plugin.uuid));
 		});
 	});
 

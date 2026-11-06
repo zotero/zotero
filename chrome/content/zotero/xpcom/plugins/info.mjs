@@ -27,26 +27,34 @@
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 
 
-const PREF_PREFIX = "extensions.zotero.pluginNames.";
+const PREF_PREFIX = "extensions.zotero.pluginInfo.";
 
-const PluginNames = {
-	record(pluginID, name) {
-		if (!pluginID || typeof name !== "string" || !name) return;
+const PluginInfo = {
+	record(pluginID, info) {
+		if (!pluginID || typeof info?.name !== "string" || !info.name) return;
 		let uuid = PluginUUID.getByID(pluginID);
-		Zotero.Prefs.set(PREF_PREFIX + uuid, name, true);
+		Zotero.Prefs.set(PREF_PREFIX + uuid, JSON.stringify(info), true);
 	},
 
 	get(uuid) {
 		if (!uuid) return null;
-		return Zotero.Prefs.get(PREF_PREFIX + uuid, true) || null;
+		let value = Zotero.Prefs.get(PREF_PREFIX + uuid, true);
+		if (!value) return null;
+		try {
+			return JSON.parse(value);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
 	},
 
 	list() {
 		let uuids = Services.prefs.getBranch(PREF_PREFIX).getChildList("");
 		let out = [];
 		for (let uuid of uuids) {
-			let name = Zotero.Prefs.get(PREF_PREFIX + uuid, true);
-			if (name) out.push({ uuid, name });
+			let info = this.get(uuid);
+			if (info) out.push({ uuid, ...info });
 		}
 		return out;
 	},
@@ -56,4 +64,4 @@ const PluginNames = {
 	},
 };
 
-export { PluginNames };
+export { PluginInfo };

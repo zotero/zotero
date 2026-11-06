@@ -1,0 +1,71 @@
+// Use the same controls, materials and selection colors as the other Settings panes.
+#zotero-prefpane-plugin-data,
+#zotero-subpane-plugin-data-edit-content {
+	.plugin-data-table-container {
+		height: 180px;
+		flex: none;
+		border: var(--material-panedivider);
+		border-radius: 3px;
+		overflow: hidden;
+	}
+
+	#plugin-data-list-container {
+		height: 280px;
+	}
+
+	.virtualized-table .row:not(.selected) {
+		&.odd {
+			background-color: var(--material-stripe);
+		}
+		&.even {
+			background-color: var(--material-background);
+		}
+	}
+
+	.virtualized-table .row.legacy-plugin {
+		color: var(--fill-secondary);
+	}
+
+	#plugin-data-capabilities {
+		margin: 0;
+		padding-inline-start: 20px;
+
+		li + li {
+			margin-top: 4px;
+		}
+	}
+
+	.plugin-data-actions {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		margin-top: 6px;
+		flex-wrap: wrap;
+
+		> button:not(:last-child) {
+			margin-inline-end: 6px;
+		}
+	}
+
+	.plugin-data-path,
+	.plugin-data-status {
+		color: var(--fill-secondary);
+	}
+
+	.plugin-data-path {
+		user-select: text;
+		overflow-wrap: anywhere;
+	}
+
+	.plugin-data-status {
+		margin-bottom: 12px;
+	}
+
+	.pref-modified {
+		font-weight: 600;
+	}
+
+	[hidden] {
+		display: none;
+	}
+}
