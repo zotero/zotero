@@ -163,15 +163,30 @@ quick-search-textbox {
 	}
 }
 
-#zotero-tb-search-spinner {
-	margin: 0 8px;
-	// make sure the spinner always occupies space
-	display: inline;
-	visibility: hidden;
+quick-search-textbox[searching] {
+	:is(search-textbox)::part(search-sign),
+	:is(search-textbox)::part(search-icon) {
+		@include color-scheme using ($color) {
+			@include svgicon-menu("loading", $color, "16");
+		}
+		// Spin around the glyph center: 5px padding + 16px width / 2
+		transform-origin: 13px 13px;
+		animation: rotating 0.5s steps(12) infinite;
+	}
+
+	:is(search-textbox):-moz-locale-dir(rtl)::part(search-sign),
+	:is(search-textbox):-moz-locale-dir(rtl)::part(search-icon) {
+		translate: 13px 0;
+	}
 }
 
 #search-deck {
 	width: 100%;
+	// A XUL <deck> lays out as a grid with a content-sized track, which can
+	// outgrow the deck when the quick-search internals' intrinsic width
+	// (locale/font-dependent) exceeds the field width, pushing the trailing
+	// buttons out. Clamp the track to the deck's width so the input compresses.
+	grid-template-columns: minmax(0, 100%);
 }
 
 #search-wrapper {

@@ -77,11 +77,15 @@ var ZoteroPane = new function () {
 	 */
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
+
+		Zotero.WindowResourceManager.applyAllToWindow(window, "mainWindow");
 		
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown);
 		// Keydown handling that captures events. E.g. tab navigation
 		document.addEventListener('keydown', ZoteroPane.captureKeyDown, true);
+		// Bubble-phase dispatch of registered shortcuts (e.g. from plugins)
+		Zotero.Shortcuts.applyToWindow(window, "mainWindow");
 		// focusout, unlike blur, bubbles up to document level
 		// so handleBlur gets triggered when any field, not just the document, looses focus
 		document.addEventListener('focusout', ZoteroPane.handleBlur);
@@ -260,11 +264,41 @@ var ZoteroPane = new function () {
 		titleBar.addEventListener("keydown", (event) => {
 			let cmdOrCtrlOnly = e => (Zotero.isMac ? (e.metaKey && !e.ctrlKey) : e.ctrlKey) && !e.shiftKey && !e.altKey;
 
+			// Custom plugin buttons before the tabs menu button, keyed by class
+			// since their ids are dynamic. Collapsed buttons are skipped; the
+			// overflow button is hidden unless some are collapsed
+			let customButtonActions = {
+				ArrowNext: () => {
+					let next = event.target.nextElementSibling;
+					while (next?.hidden) {
+						next = next.nextElementSibling;
+					}
+					return next || document.getElementById('zotero-tb-tabs-menu');
+				},
+				ArrowPrevious: () => {
+					let prev = event.target.previousElementSibling;
+					while (prev?.hidden) {
+						prev = prev.previousElementSibling;
+					}
+					return prev;
+				},
+				Tab: () => document.getElementById('zotero-tb-sync-error'),
+				ShiftTab: () => {
+					Zotero_Tabs.moveFocus("current");
+				},
+			};
+
 			// Mapping of target ids and possible key presses to desired focus outcomes
 			let actionsMap = {
+				'zotero-custom-button': customButtonActions,
+				'zotero-custom-button-overflow': customButtonActions,
 				'zotero-tb-tabs-menu': {
 					ArrowNext: () => null,
-					ArrowPrevious: () => null,
+					ArrowPrevious: () => {
+						let buttons = document.querySelectorAll(
+							'#zotero-titlebar-custom-buttons > toolbarbutton:not([hidden])');
+						return buttons.length ? buttons[buttons.length - 1] : null;
+					},
 					Tab: () => document.getElementById('zotero-tb-sync-error'),
 					ShiftTab: () => {
 						Zotero_Tabs.moveFocus("current");
@@ -367,7 +401,30 @@ var ZoteroPane = new function () {
 		});
 
 		itemTreeToolbar.addEventListener("keydown", (event) => {
+			// Custom plugin buttons between the New Note button and the search box,
+			// keyed by class since their ids are dynamic. Collapsed buttons are
+			// skipped; the overflow button is hidden unless some are collapsed.
+			let customButtonActions = {
+				ArrowNext: () => {
+					let next = event.target.nextElementSibling;
+					while (next?.hidden) {
+						next = next.nextElementSibling;
+					}
+					return next;
+				},
+				ArrowPrevious: () => {
+					let prev = event.target.previousElementSibling;
+					while (prev?.hidden) {
+						prev = prev.previousElementSibling;
+					}
+					return prev || document.getElementById("zotero-tb-note-add");
+				},
+				Tab: () => document.getElementById("zotero-tb-search").focus(),
+				ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
+			};
 			let actionsMap = {
+				'zotero-custom-button': customButtonActions,
+				'zotero-custom-button-overflow': customButtonActions,
 				'zotero-tb-add': {
 					ArrowNext: () => document.getElementById("zotero-tb-lookup"),
 					ArrowPrevious: () => null,
@@ -397,7 +454,8 @@ var ZoteroPane = new function () {
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
 				},
 				'zotero-tb-note-add': {
-					ArrowNext: () => null,
+					ArrowNext: () => document.querySelector(
+						"#zotero-tb-custom-buttons > toolbarbutton:not([hidden])"),
 					ArrowPrevious: () => document.getElementById("zotero-tb-attachment-add"),
 					Tab: () => document.getElementById("zotero-tb-search").focus(),
 					ShiftTab: () => document.getElementById('zotero-tb-collections-search').click()
@@ -587,9 +645,7 @@ var ZoteroPane = new function () {
 		ZoteroPane.progressWindow = new Zotero.ProgressWindow({ window });
 		
 		ZoteroPane.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-		
-		Zotero.Keys.windowInit(document);
-		
+
 		if (Zotero.restoreFromServer) {
 			Zotero.restoreFromServer = false;
 			
@@ -796,6 +852,8 @@ var ZoteroPane = new function () {
 		}
 		
 		this.uninitContainers();
+		
+		Zotero.Shortcuts.removeFromWindow(window);
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 		
@@ -1307,120 +1365,102 @@ var ZoteroPane = new function () {
 				return;
 			}
 		}
-		
-		var command = Zotero.Keys.getCommand(event.key);
-		if (!command) {
-			return;
-		}
-
-		// Ignore modifiers other than Ctrl-Shift/Cmd-Shift
-		if (!((Zotero.isMac ? event.metaKey : event.ctrlKey) && event.shiftKey)) {
-			return;
-		}
-		
+	}
+	
+	
+	// Run a pref-driven shortcut command, dispatched by Zotero.Shortcuts from the
+	// registrations made in Zotero.Shortcuts.init(). Returns false to decline,
+	// letting the keystroke propagate
+	this.handleShortcutCommand = function (command, event) {
 		Zotero.debug('Keyboard shortcut: ' + command);
 		
-		// Errors don't seem to make it out otherwise
-		try {
-			switch (command) {
-				case 'library':
-					document.getElementById(ZoteroPane.collectionsView.id).focus();
-					break;
-				case 'quicksearch':
-					document.getElementById('zotero-tb-search-textbox').select();
-					break;
-				case 'newItem':
-					(async function () {
-						// Default to most recent item type from here or the New Type menu,
-						// or fall back to 'book'
-						var mru = Zotero.Prefs.get('newItemTypeMRU');
-						var type = mru ? mru.split(',')[0] : 'book';
-						await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
-						let itemBox = document.getElementById('zotero-editpane-info-box');
-						// Ensure itemBox is opened
-						itemBox.open = true;
-						var menu = itemBox.itemTypeMenu;
-						// If the new item's type is changed immediately, update the MRU
-						var handleTypeChange = function () {
-							this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.getAttribute('value')));
-							itemBox.removeHandler('itemtypechange', handleTypeChange);
-						}.bind(this);
-						// Don't update the MRU on subsequent opens of the item type menu
-						var removeTypeChangeHandler = function () {
-							itemBox.removeHandler('itemtypechange', handleTypeChange);
-							itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
-						};
-						itemBox.addHandler('itemtypechange', handleTypeChange);
-						itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
-						
-						Services.focus.setFocus(menu, Services.focus.FLAG_SHOWRING);
-						itemBox.itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
-					}.bind(this)());
-					break;
-				case 'newNote':
-					// If a regular item is selected, use that as the parent.
-					// If a child item is selected, use its parent as the parent.
-					// Otherwise create a standalone note.
-					var parentKey = false;
-					var items = ZoteroPane_Local.getSelectedItems();
-					if (items.length == 1) {
-						if (items[0].isRegularItem()) {
-							parentKey = items[0].key;
-						}
-						else {
-							parentKey = items[0].parentItemKey;
-						}
+		switch (command) {
+			case 'library':
+				document.getElementById(this.collectionsView.id).focus();
+				break;
+			case 'quicksearch':
+				document.getElementById('zotero-tb-search-textbox').select();
+				break;
+			case 'newItem':
+				(async function () {
+					// Default to most recent item type from here or the New Type menu,
+					// or fall back to 'book'
+					var mru = Zotero.Prefs.get('newItemTypeMRU');
+					var type = mru ? mru.split(',')[0] : 'book';
+					await ZoteroPane.newItem(Zotero.ItemTypes.getID(type));
+					let itemBox = document.getElementById('zotero-editpane-info-box');
+					// Ensure itemBox is opened
+					itemBox.open = true;
+					var menu = itemBox.itemTypeMenu;
+					// If the new item's type is changed immediately, update the MRU
+					var handleTypeChange = function () {
+						this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(menu.getAttribute('value')));
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+					}.bind(this);
+					// Don't update the MRU on subsequent opens of the item type menu
+					var removeTypeChangeHandler = function () {
+						itemBox.removeHandler('itemtypechange', handleTypeChange);
+						itemBox.itemTypeMenu.firstChild.removeEventListener('popuphiding', removeTypeChangeHandler);
+					};
+					itemBox.addHandler('itemtypechange', handleTypeChange);
+					itemBox.itemTypeMenu.firstChild.addEventListener('popuphiding', removeTypeChangeHandler);
+					
+					Services.focus.setFocus(menu, Services.focus.FLAG_SHOWRING);
+					itemBox.itemTypeMenu.menupopup.openPopup(menu, "before_start", 0, 0);
+				}.bind(this)());
+				break;
+			case 'newNote':
+				// If a regular item is selected, use that as the parent.
+				// If a child item is selected, use its parent as the parent.
+				// Otherwise create a standalone note.
+				var parentKey = false;
+				var items = ZoteroPane_Local.getSelectedItems();
+				if (items.length == 1) {
+					if (items[0].isRegularItem()) {
+						parentKey = items[0].key;
 					}
-					// Use key that's not the modifier as the popup toggle
-					ZoteroPane_Local.newNote(event.altKey, parentKey);
-					break;
-				case 'sync':
-					Zotero.Sync.Runner.sync();
-					break;
-				case 'saveToZotero':
-					var collectionTreeRows = this.getCollectionTreeRows();
-					if (collectionTreeRows[0].isFeedsOrFeed()) {
-						this.itemPane.translateSelectedItems();
-					} else {
-						Zotero.debug(command + ' does not do anything in non-feed views')
+					else {
+						parentKey = items[0].parentItemKey;
 					}
-					break;
-				case 'toggleAllRead':
-					var collectionTreeRows = this.getCollectionTreeRows();
-					if (collectionTreeRows[0].isFeed()) {
-						this.markFeedRead();
-					}
-					break;
-				case 'toggleRead': {
-					// Toggle read/unread
-					let rows = this.getCollectionTreeRows();
-					if (!rows.some(row => row.isFeedsOrFeed())) return;
-					this.toggleSelectedItemsRead();
-					if (itemReadTimeout) {
-						clearTimeout(itemReadTimeout);
-						itemReadTimeout = null;
-					}
-					break;
 				}
-				
-				// Handled by <key>s in standalone.js, pointing to <command>s in zoteroPane.xul,
-				// which are enabled or disabled by this.updateQuickCopyCommands(), called by
-				// this.itemSelected()
-				case 'copySelectedItemCitationsToClipboard':
-				case 'copySelectedItemsToClipboard':
-					return;
-				
-				default:
-					throw new Error('Command "' + command + '" not found in ZoteroPane_Local.handleKeyPress()');
+				// Use key that's not the modifier as the popup toggle
+				ZoteroPane_Local.newNote(event.altKey, parentKey);
+				break;
+			case 'sync':
+				Zotero.Sync.Runner.sync();
+				break;
+			case 'saveToZotero':
+				var collectionTreeRows = this.getCollectionTreeRows();
+				if (collectionTreeRows[0].isFeedsOrFeed()) {
+					this.itemPane.translateSelectedItems();
+				} else {
+					Zotero.debug(command + ' does not do anything in non-feed views')
+				}
+				break;
+			case 'toggleAllRead':
+				var collectionTreeRows = this.getCollectionTreeRows();
+				if (collectionTreeRows[0].isFeed()) {
+					this.markFeedRead();
+				}
+				break;
+			case 'toggleRead': {
+				// Toggle read/unread
+				let rows = this.getCollectionTreeRows();
+				if (!rows.some(row => row.isFeedsOrFeed())) return false;
+				this.toggleSelectedItemsRead();
+				if (itemReadTimeout) {
+					clearTimeout(itemReadTimeout);
+					itemReadTimeout = null;
+				}
+				break;
 			}
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Components.utils.reportError(e);
+			
+			default:
+				throw new Error('Command "' + command + '" not found in ZoteroPane.handleShortcutCommand()');
 		}
 		
-		event.preventDefault();
-	}
+		return true;
+	};
 	
 	
 	/*
@@ -2336,7 +2376,13 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
-					items,
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -2363,7 +2409,13 @@ var ZoteroPane = new function () {
 			{
 				event,
 				getContext: () => ({
-					items,
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -3259,9 +3311,8 @@ var ZoteroPane = new function () {
 		if (!runAdvanced && Zotero.SearchQuery.hasOpenQuote(searchVal)) {
 			return;
 		}
-		var spinner = document.getElementById('zotero-tb-search-spinner');
-		spinner.setAttribute("status", "animate");
-		spinner.style.visibility = 'visible';
+		// Spin the search box's magnifier icon while the search is running
+		search.toggleAttribute("searching", true);
 		// A query with conditions in it ("by:smith crispr") filters by those
 		// and matches whatever text is left over the way the current mode
 		// does; anything else is text to search for, as typed
@@ -3288,8 +3339,7 @@ var ZoteroPane = new function () {
 			await this.itemsView.setFilter('search',
 				Zotero.SearchQuery.parse(searchVal).text);
 		}
-		spinner.style.removeProperty("visibility");
-		spinner.removeAttribute("status");
+		search.removeAttribute("searching");
 	};
 	
 	
@@ -4222,7 +4272,17 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
-					collectionTreeRows,
+					get libraryIDs() {
+						return [...new Set(collectionTreeRows.map(row => row.ref?.libraryID)
+							.filter(id => id !== undefined))];
+					},
+					get collectionIDs() {
+						return collectionTreeRows.filter(row => row.isCollection?.()).map(row => row.ref.id);
+					},
+					// @deprecated Privileged plugins only
+					get collectionTreeRows() {
+						return collectionTreeRows;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",
@@ -4782,8 +4842,24 @@ var ZoteroPane = new function () {
 							"collectionTreeRows");
 						return collectionTreeRows[0];
 					},
-					collectionTreeRows,
-					items,
+					get libraryIDs() {
+						return [...new Set(collectionTreeRows.map(row => row.ref?.libraryID)
+							.filter(id => id !== undefined))];
+					},
+					get collectionIDs() {
+						return collectionTreeRows.filter(row => row.isCollection?.()).map(row => row.ref.id);
+					},
+					get itemIDs() {
+						return items.map(item => item.id);
+					},
+					// @deprecated Privileged plugins only
+					get collectionTreeRows() {
+						return collectionTreeRows;
+					},
+					// @deprecated Privileged plugins only
+					get items() {
+						return items;
+					},
 					tabType: "library",
 					tabSubType: undefined,
 					tabID: "zotero-pane",

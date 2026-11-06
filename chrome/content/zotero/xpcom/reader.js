@@ -26,6 +26,7 @@
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
+const { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",
@@ -202,10 +203,6 @@ class ReaderInstance {
 		}
 		this._customEventHandler = (event) => {
 			let data = event.detail.wrappedJSObject;
-			let append = data.append;
-			data.append = (...args) => {
-				append(...Components.utils.cloneInto(args, this._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
-			};
 			data.reader = this;
 			Zotero.Reader._dispatchEvent(data);
 		};
@@ -1969,7 +1966,7 @@ class ReaderTab extends ReaderInstance {
 		this._showContextPaneToggle = true;
 		this._readAloudPlaying = false;
 		this._pointerDownWindow = null;
-		this._window = Services.wm.getMostRecentWindow('navigator:browser');
+		this._window = options.mainWindow || Services.wm.getMostRecentWindow('navigator:browser');
 		let existingTabID = options.tabID;
 		let select = !options.background;
 		// If an unloaded tab for this item already exists, load the reader in it.
@@ -2240,6 +2237,8 @@ class ReaderWindow extends ReaderInstance {
 				this._window.reader = this;
 				this._iframe = this._window.document.getElementById('reader');
 				this._iframe.docShell.windowDraggingAllowed = true;
+				Zotero.WindowResourceManager.applyAllToWindow(this._window, "readerWindow");
+				Zotero.Shortcuts.applyToWindow(this._window, "readerWindow");
 			}
 
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
@@ -2265,6 +2264,7 @@ class ReaderWindow extends ReaderInstance {
 
 	close() {
 		this.uninit();
+		Zotero.Shortcuts.removeFromWindow(this._window);
 		this._window.close();
 		this._onClose();
 	}
@@ -2391,11 +2391,20 @@ class ReaderWindow extends ReaderInstance {
 			tabType,
 			tabSubType,
 			tabID: undefined,
-			getContext: () => ({
-				items: this._item ? [this._item] : [],
-				tabType,
-				tabSubType,
-			})
+			getContext: () => {
+				let item = this._item;
+				return {
+					get itemIDs() {
+						return item ? [item.id] : [];
+					},
+					// @deprecated Privileged plugins only
+					get items() {
+						return item ? [item] : [];
+					},
+					tabType,
+					tabSubType,
+				};
+			}
 		});
 	};
 }
@@ -2701,9 +2710,29 @@ class Reader {
 	}
 
 	_dispatchEvent(event) {
+		try {
+			Zotero.ReaderManager._handleEvent(event);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		// Legacy raw-event API (privileged plugins only)
+		let wrappedEventCache = new Map();
 		for (let listener of this._registeredListeners) {
 			if (listener.type === event.type) {
-				listener.handler(event);
+				let wrappedEvent = wrappedEventCache.get(listener.pluginID);
+				if (!wrappedEvent) {
+					let dispatchedEvent = Object.assign({}, event);
+					dispatchedEvent.append = (...args) => {
+						args = ScopeVariables.fromScope(args, listener.pluginID);
+						event.append(...args);
+					};
+
+					wrappedEvent = ScopeVariables.toScope(dispatchedEvent, listener.pluginID);
+					wrappedEventCache.set(listener.pluginID, wrappedEvent);
+				}
+				listener.handler(wrappedEvent);
 			}
 		}
 	}
@@ -2729,9 +2758,12 @@ class Reader {
 	 */
 
 	/**
+	 * Register a low-level reader event listener. Available to privileged plugins
+	 * only; unprivileged plugins use `Zotero.ReaderManager` instead.
+	 *
 	 * @param {ReaderEventType} type - Event type
 	 * @param {ReaderEventHandler} handler - Event handler
-	 * @param {string} [pluginID] - Plugin ID
+	 * @param {string} pluginID - Plugin ID
 	 * @returns {void}
 	 *
 	 * @example
@@ -2770,7 +2802,7 @@ class Reader {
 	 * }, 'my-plugin@my-namespace.com');
 	 * ```
 	 */
-	registerEventListener(type, handler, pluginID = undefined) {
+	registerEventListener(type, handler, pluginID) {
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
@@ -2780,7 +2812,9 @@ class Reader {
 	 * @returns {void}
 	 */
 	unregisterEventListener(type, handler) {
-		this._registeredListeners = this._registeredListeners.filter(x => !(x.type === type && x.handler === handler));
+		this._registeredListeners = this._registeredListeners.filter(
+			x => !(x.type === type && x.handler === handler)
+		);
 	}
 
 	_unregisterEventListenerByPluginID(pluginID) {
@@ -2916,10 +2950,16 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback } = {}) {
+	/**
+	 * Open an item in a reader tab or window, reusing an existing one unless duplicates are allowed
+	 * @returns {Promise<{ instance: ReaderInstance, tabID: string | null, win: Window }>} The tab is null
+	 *     in a window, where win is the reader window
+	 */
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback, mainWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = Zotero.getMainWindow();
+		// mainWindow: the main window to open a tab in; defaults to the most recent one
+		let win = mainWindow || Zotero.getMainWindow();
 
 		await library.waitForDataLoad('item');
 
@@ -2939,8 +2979,9 @@ class Reader {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return undefined;
+					// Selecting the unloaded tab runs its load hook, which resolves with the reader it opened
+					reader = await win.Zotero_Tabs.select(existingTabID, false, { location });
+					return { instance: reader, tabID: existingTabID, win };
 				}
 			}
 		}
@@ -2986,6 +3027,7 @@ class Reader {
 				index: tabIndex,
 				tabID,
 				background: openInBackground,
+				mainWindow: win,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				contextPaneOpen: !win.ZoteroContextPane.collapsed,
@@ -3012,7 +3054,10 @@ class Reader {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
-		return reader;
+		if (openInWindow) {
+			return { instance: reader, tabID: null, win: reader._window };
+		}
+		return { instance: reader, tabID: reader.tabID, win };
 	}
 
 	async openPreview(itemID, iframe) {

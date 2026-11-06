@@ -1,0 +1,99 @@
+<vbox class="main-section subpane" id="zotero-subpane-plugin-data-edit-content"
+		onload="event.waitUntil(Zotero_Preferences.PluginData.initEditPane())">
+	<vbox class="main-section">
+		<hbox id="plugin-data-edit-status"
+				class="plugin-data-status" hidden="true">
+			<description id="plugin-data-edit-status-text" flex="1"/>
+		</hbox>
+
+		<groupbox aria-labelledby="plugin-data-access-heading" id="plugin-data-access">
+			<label><html:h2 id="plugin-data-access-heading" data-l10n-id="preferences-plugin-data-access-heading"/></label>
+			<html:ul id="plugin-data-capabilities"/>
+		</groupbox>
+
+		<groupbox aria-labelledby="plugin-data-edit-data-heading">
+			<label><html:h2 id="plugin-data-edit-data-heading" data-l10n-id="preferences-plugin-data-edit-data-heading"/></label>
+			<description id="plugin-data-edit-data-dir" class="plugin-data-path"/>
+			<description id="plugin-data-edit-data-empty"
+				data-l10n-id="preferences-plugin-data-edit-no-data" hidden="true"/>
+			<separator class="thin"/>
+			<hbox id="plugin-data-edit-data-actions" class="plugin-data-actions">
+				<button id="plugin-data-data-dir-show"
+					data-l10n-id="preferences-plugin-data-show-in-folder"
+					oncommand="Zotero_Preferences.PluginData.showEditDir()"/>
+				<spacer flex="1"/>
+				<button id="plugin-data-data-dir-clear"
+					data-l10n-id="preferences-plugin-data-clear-folder"
+					oncommand="Zotero_Preferences.PluginData.clearEditDir()"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox aria-labelledby="plugin-data-edit-prefs-heading">
+			<label><html:h2 id="plugin-data-edit-prefs-heading" data-l10n-id="preferences-plugin-data-edit-prefs-heading"/></label>
+			<separator class="thin"/>
+			<hbox id="plugin-data-prefs-container" class="virtualized-table-container plugin-data-table-container">
+				<html:div id="plugin-data-prefs-table" class="plugin-data-prefs-table"/>
+			</hbox>
+			<description id="plugin-data-prefs-empty"
+				data-l10n-id="preferences-plugin-data-edit-prefs-empty" hidden="true"/>
+			<separator class="thin"/>
+			<hbox class="plugin-data-actions">
+				<button id="plugin-data-prefs-add"
+					data-l10n-id="preferences-plugin-data-prefs-add-button"
+					oncommand="Zotero_Preferences.PluginData.addEditPref()"/>
+				<button id="plugin-data-prefs-edit" disabled="true"
+					data-l10n-id="preferences-plugin-data-prefs-edit-button"
+					oncommand="Zotero_Preferences.PluginData.editSelectedPref()"/>
+				<button id="plugin-data-prefs-reset" disabled="true"
+					data-l10n-id="preferences-plugin-data-prefs-reset-button"
+					oncommand="Zotero_Preferences.PluginData.resetSelectedPref()"/>
+				<button id="plugin-data-prefs-delete" disabled="true"
+					data-l10n-id="preferences-plugin-data-prefs-delete-button"
+					oncommand="Zotero_Preferences.PluginData.deleteSelectedPref()"/>
+				<spacer flex="1"/>
+				<button id="plugin-data-prefs-reset-all"
+					data-l10n-id="preferences-plugin-data-prefs-reset-all-button"
+					oncommand="Zotero_Preferences.PluginData.resetAllEditPrefs()"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox aria-labelledby="plugin-data-grants-heading">
+			<label><html:h2 id="plugin-data-grants-heading" data-l10n-id="preferences-plugin-data-grants-heading"/></label>
+			<separator class="thin"/>
+			<hbox id="plugin-data-grants-container" class="virtualized-table-container plugin-data-table-container">
+				<html:div id="plugin-data-grants-table" class="plugin-data-grants-table"/>
+			</hbox>
+			<description id="plugin-data-grants-empty"
+				data-l10n-id="preferences-plugin-data-grants-empty" hidden="true"/>
+			<separator class="thin"/>
+			<hbox class="plugin-data-actions">
+				<button id="plugin-data-grants-add-file"
+					data-l10n-id="preferences-plugin-data-add-grant-file"
+					oncommand="Zotero_Preferences.PluginData.addEditGrant('file')"/>
+				<button id="plugin-data-grants-add-folder"
+					data-l10n-id="preferences-plugin-data-add-grant-folder"
+					oncommand="Zotero_Preferences.PluginData.addEditGrant('folder')"/>
+				<button id="plugin-data-grants-remove" disabled="true"
+					data-l10n-id="preferences-plugin-data-grants-remove-button"
+					oncommand="Zotero_Preferences.PluginData.removeSelectedGrant()"/>
+				<spacer flex="1"/>
+				<button id="plugin-data-grants-remove-all"
+					data-l10n-id="preferences-plugin-data-grants-remove-all-button"
+					oncommand="Zotero_Preferences.PluginData.removeAllEditGrants()"/>
+			</hbox>
+		</groupbox>
+
+		<groupbox
+				aria-labelledby="plugin-data-edit-remove-all-heading">
+			<label><html:h2 id="plugin-data-edit-remove-all-heading" data-l10n-id="preferences-plugin-data-edit-remove-all-heading"/></label>
+			<description data-l10n-id="preferences-plugin-data-edit-remove-all-intro"/>
+			<separator class="thin"/>
+			<hbox class="plugin-data-actions">
+				<spacer flex="1"/>
+				<button id="plugin-data-edit-remove-all"
+					data-l10n-id="preferences-plugin-data-edit-remove-all-button"
+					oncommand="Zotero_Preferences.PluginData.removeAllForPlugin()"/>
+			</hbox>
+		</groupbox>
+	</vbox>
+</vbox>

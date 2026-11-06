@@ -163,6 +163,121 @@ Zotero.Utilities.Internal = {
 			.getService(Components.interfaces.nsIClipboardHelper)
 			.copyString(str);
 	},
+
+
+	/**
+	 * Copy one or more data types to the clipboard.
+	 *
+	 * @param {Object} data -- Key: MIME types; Values: corresponding data.
+	 *     Supported flavors:
+	 *       - "text/plain" (string)
+	 *       - "text/html" (string)
+	 *       - "image/*" (ArrayBuffer, Uint8Array, base64 string, or data URI)
+	 *       - "application/x-moz-nativeimage" (imgIContainer, or any input
+	 *         accepted by "image/*")
+	 *       - "application/x-moz-file" (string path or nsIFile)
+	 *     Other string values are wrapped as nsISupportsString,
+	 *     ArrayBuffer/TypedArray as nsIArrayBufferInputStream,
+	 *     and nsISupports objects are passed through directly.
+	 *     Such custom flavors may behave differently across platforms and apps.
+	 */
+	copyToClipboard: function (data) {
+		let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+			.createInstance(Components.interfaces.nsITransferable);
+		transferable.init(null);
+
+		for (let [flavor, value] of Object.entries(data)) {
+			let transferData;
+
+			// Normalize binary values: extract ArrayBuffer from typed arrays
+			// and copy cross-compartment buffers into this compartment
+			if (ArrayBuffer.isView(value)) {
+				value = value.buffer;
+			}
+			if (value instanceof ArrayBuffer
+				|| (typeof value === "object" && value
+					&& Cu.getClassName(value, true) === "ArrayBuffer")) {
+				if (Cu.getGlobalForObject(value) !== Cu.getGlobalForObject(this)) {
+					// Structured-clone the buffer into this compartment when the
+					// value comes from another compartment (e.g. a plugin sandbox)
+					value = Cu.cloneInto(Cu.waiveXrays(value), Cu.getGlobalForObject(this));
+				}
+			}
+
+			if (flavor === "application/x-moz-file") {
+				// File: accept a path string or nsIFile directly
+				if (typeof value === "string") {
+					let file = Components.classes["@mozilla.org/file/local;1"]
+						.createInstance(Components.interfaces.nsIFile);
+					file.initWithPath(value);
+					transferData = file;
+				}
+				else {
+					transferData = value;
+				}
+			}
+			else if (flavor === "application/x-moz-nativeimage"
+				&& value instanceof Components.interfaces.imgIContainer) {
+				// Native image: pass an imgIContainer (e.g. from getClipboard()) through directly
+				transferData = value;
+			}
+			else if (flavor === "application/x-moz-nativeimage"
+				|| flavor.startsWith("image/")) {
+				// Image: accept ArrayBuffer, base64 string, or data URI.
+				// For data URIs, the MIME type is extracted from the URI itself.
+				let mimeType = flavor.startsWith("image/") ? flavor : "image/png";
+				let buf;
+				if (typeof value === "string") {
+					let dataURIMatch = value.match(/^data:(image\/[^;,]+)/);
+					if (dataURIMatch) {
+						mimeType = dataURIMatch[1];
+					}
+					let b64 = value.includes(",") ? value.split(",")[1] : value;
+					let binary = atob(b64);
+					let u8 = new Uint8Array(binary.length);
+					for (let i = 0; i < binary.length; i++) {
+						u8[i] = binary.charCodeAt(i);
+					}
+					buf = u8.buffer;
+				}
+				else {
+					buf = value;
+				}
+				let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+					.getService(Components.interfaces.imgITools);
+				transferData = imgTools.decodeImageFromArrayBuffer(buf, mimeType);
+				flavor = "application/x-moz-nativeimage";
+			}
+			else if (typeof value === "string") {
+				// Text flavors (text/plain, text/html, etc.)
+				let str = Components.classes["@mozilla.org/supports-string;1"]
+					.createInstance(Components.interfaces.nsISupportsString);
+				str.data = value;
+				transferData = str;
+			}
+			else if (value instanceof ArrayBuffer) {
+				// Binary data for custom flavors
+				let inputStream = Components.classes["@mozilla.org/io/arraybuffer-input-stream;1"]
+					.createInstance(Components.interfaces.nsIArrayBufferInputStream);
+				inputStream.setData(value, 0, value.byteLength);
+				transferData = inputStream;
+			}
+			else {
+				// Pass through any nsISupports object directly
+				transferData = value;
+			}
+
+			transferable.addDataFlavor(flavor);
+			transferable.setTransferData(flavor, transferData);
+		}
+
+		let clipboardService = Components.classes["@mozilla.org/widget/clipboard;1"]
+			.getService(Components.interfaces.nsIClipboard);
+		clipboardService.setData(
+			transferable, null,
+			Components.interfaces.nsIClipboard.kGlobalClipboard
+		);
+	},
 	
 	
 	/*
@@ -791,28 +906,123 @@ Zotero.Utilities.Internal = {
 	},
 	
 	/**
-	 * Get string data from the clipboard
-	 * @param {String[]} mimeType MIME type of data to get
-	 * @return {String|null} Clipboard data, or null if none was available
+	 * Read an nsIInputStream fully and return its bytes as an ArrayBuffer
+	 *
+	 * @param {nsIInputStream} stream
+	 * @return {ArrayBuffer}
 	 */
-	getClipboard: function (mimeType) {
-		var clip = Services.clipboard;
-		if (!clip.hasDataMatchingFlavors([mimeType], 1, clip.kGlobalClipboard)) {
+	_inputStreamToArrayBuffer: function (stream) {
+		let binaryStream = Components.classes["@mozilla.org/binaryinputstream;1"]
+			.createInstance(Components.interfaces.nsIBinaryInputStream);
+		binaryStream.setInputStream(stream);
+		let bytes = binaryStream.readByteArray(stream.available());
+		binaryStream.close();
+		return new Uint8Array(bytes).buffer;
+	},
+
+	/**
+	 * Get data from the clipboard
+	 *   flavor                          | (none)        | "string"     | "binary"    | "path"
+	 *   --------------------------------|---------------|--------------|-------------|--------
+	 *   application/x-moz-file          | nsIFile       | file as text | ArrayBuffer | path
+	 *   application/x-moz-nativeimage   | imgIContainer | PNG base64   | ArrayBuffer | --
+	 *   text/* and custom flavors       | string        | string       | ArrayBuffer | --
+	 * Custom flavors may behave differently across platforms and apps.
+	 *
+	 * @param {String} mimeType MIME type (flavor) of data to get
+	 * @param {"string" | "binary" | "path" | null} [dataType] How to interpret the data: "string", "binary",
+	 *     or "path". If omitted, returns the native object (file/image) or a string.
+	 * @return {String|ArrayBuffer|nsIFile|imgIContainer|null} Clipboard data, or null if none was available
+	 */
+	getClipboard: function (mimeType, dataType) {
+		let clip = Services.clipboard;
+		// Some platforms can't give a copied image back as a native image, so fall back to PNG
+		let flavors = mimeType === "application/x-moz-nativeimage" ? [mimeType, "image/png"] : [mimeType];
+		let flavor;
+		let data = {};
+		for (flavor of flavors) {
+			if (!clip.hasDataMatchingFlavors([flavor], clip.kGlobalClipboard)) {
+				continue;
+			}
+			let transferable = Components.classes["@mozilla.org/widget/transferable;1"]
+							.createInstance(Components.interfaces.nsITransferable);
+			transferable.init(null);
+			transferable.addDataFlavor(flavor);
+			clip.getData(transferable, clip.kGlobalClipboard);
+			try {
+				transferable.getTransferData(flavor, data, {});
+				break;
+			}
+			catch {}
+		}
+		if (!data.value) {
 			return null;
 		}
-		var trans = Components.classes["@mozilla.org/widget/transferable;1"]
-						.createInstance(Components.interfaces.nsITransferable);
-		trans.addDataFlavor(mimeType);
-		clip.getData(trans, clip.kGlobalClipboard);
-		var str = {};
 		try {
-			trans.getTransferData(mimeType, str, {});
-			str = str.value.QueryInterface(Components.interfaces.nsISupportsString).data;
+			switch (mimeType) {
+				case "application/x-moz-file": {
+					let file = data.value.QueryInterface(Components.interfaces.nsIFile);
+					if (!dataType) {
+						return file;
+					}
+					if (dataType === "path") {
+						return file.path;
+					}
+					let istream = Components.classes["@mozilla.org/network/file-input-stream;1"]
+						.createInstance(Components.interfaces.nsIFileInputStream);
+					istream.init(file, 0x01, 0o444, 0); // read-only
+					let buffer = this._inputStreamToArrayBuffer(istream);
+					istream.close();
+					return dataType === "binary" ? buffer : new TextDecoder().decode(buffer);
+				}
+				case "application/x-moz-nativeimage": {
+					if (dataType && dataType !== "binary" && dataType !== "string") {
+						return null;
+					}
+					let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+						.getService(Components.interfaces.imgITools);
+					let buffer;
+					if (flavor === "image/png") {
+						buffer = this._inputStreamToArrayBuffer(
+							data.value.QueryInterface(Components.interfaces.nsIInputStream)
+						);
+						if (!dataType) {
+							return imgTools.decodeImageFromArrayBuffer(buffer, "image/png");
+						}
+					}
+					else {
+						let image = data.value.QueryInterface(Components.interfaces.imgIContainer);
+						if (!dataType) {
+							return image;
+						}
+						buffer = this._inputStreamToArrayBuffer(imgTools.encodeImage(image, "image/png"));
+					}
+					if (dataType === "binary") {
+						return buffer;
+					}
+					// base64 of the PNG bytes
+					let bytes = new Uint8Array(buffer);
+					let binary = "";
+					for (let i = 0; i < bytes.length; i++) {
+						binary += String.fromCharCode(bytes[i]);
+					}
+					return btoa(binary);
+				}
+			}
+			// Custom / generic flavors: read as raw bytes or as a string
+			if (dataType === "binary") {
+				return this._inputStreamToArrayBuffer(
+					data.value.QueryInterface(Components.interfaces.nsIInputStream)
+				);
+			}
+			if (dataType === "path") {
+				return null;
+			}
+			return data.value.QueryInterface(Components.interfaces.nsISupportsString).data;
 		}
-		catch (e) {
+		catch {
 			return null;
 		}
-		return str;
 	},
 	
 	/**
@@ -2404,9 +2614,11 @@ Zotero.Utilities.Internal = {
 	 * Open an element's <menupopup> child (as a native context menu on macOS).
 	 *
 	 * @param {XULElement} element
+	 * @param {Element} [expandTarget]
+	 * Element that receives the `aria-expanded` state. Defaults to `element`.
 	 * @return {Boolean} If a <menupopup> child was found and opened
 	 */
-	showNativeElementPopup(element) {
+	showNativeElementPopup(element, expandTarget = element) {
 		let popup = element.hasAttribute('popup')
 			? element.getRootNode().getElementById(element.getAttribute('popup'))
 			: element.querySelector(':scope > menupopup');
@@ -2417,7 +2629,8 @@ Zotero.Utilities.Internal = {
 				let dir = win.getComputedStyle(element).direction;
 				popup.openPopupAtScreen(
 					win.screenX + (dir == 'rtl' ? rect.right : rect.left),
-					win.screenY + rect.bottom,
+					// Match the MacOS 26 menu behavior
+					win.screenY + rect.bottom + 5,
 					true
 				);
 			}
@@ -2425,18 +2638,20 @@ Zotero.Utilities.Internal = {
 				popup.openPopup(element, 'after_start', 0, 0, true, false);
 			}
 			element.setAttribute('open', true);
+			expandTarget.setAttribute('aria-expanded', 'true');
 
 			let handler = (event) => {
 				if (event.target == popup) {
 					element.setAttribute('open', false);
+					expandTarget.setAttribute('aria-expanded', 'false');
 					popup.removeEventListener('popuphiding', handler);
 				}
 			};
 			popup.addEventListener('popuphiding', handler);
-			
+
 			return true;
 		}
-		
+
 		return false;
 	},
 

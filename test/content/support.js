@@ -694,6 +694,48 @@ async function executeTransactionWithForcedRollback(fn, options) {
 }
 
 /**
+ * An AddonManager addon with only what PluginSandbox reads off one, so a test loads a plugin without an XPI
+ * @param {Object} [options]
+ * @param {String} options.id
+ * @param {String} [options.name]
+ * @param {String} [options.version]
+ * @param {String[]} [options.permissions]
+ * @param {String[]} [options.origins] - host_permissions
+ * @param {String[]} [options.prefPermissions] - pref_permissions prefixes
+ * @param {String[]} [options.interopPermissions] - interop_permissions
+ * @param {String} [options.contentSecurityPolicy] - content_security_policy
+ * @param {String} [options.resourceURI] - The plugin's root
+ * @return {Object}
+ */
+function createMockPlugin({
+	id,
+	name = "Test Plugin",
+	version = "1.0.0",
+	permissions = ["default"],
+	origins = [],
+	prefPermissions = [],
+	interopPermissions = [],
+	contentSecurityPolicy = null,
+	resourceURI = "file:///nonexistent/",
+} = {}) {
+	return {
+		id,
+		name,
+		version,
+		installPermissions: {
+			permissions,
+			origins,
+			pref_permissions: prefPermissions,
+			interop_permissions: interopPermissions,
+			content_security_policy: contentSecurityPolicy,
+		},
+		getResourceURI() {
+			return Services.io.newURI(resourceURI);
+		}
+	};
+}
+
+/**
  * Returns the nsIFile corresponding to the test data directory
  * (i.e., test/tests/data)
  */

@@ -60,8 +60,34 @@ Zotero.File = new function () {
 		var file = this.pathToFile(pathOrFile);
 		return Services.io.newFileURI(file).spec;
 	}
-	
-	
+
+
+	/**
+	 * Resolve a moz-extension:// URI to the underlying file:// or jar:// URI
+	 * via the registered WebExtensionPolicy.
+	 *
+	 * @param {String|nsIURI} uri
+	 * @return {nsIURI}
+	 */
+	this.resolveExtensionURI = function (uri) {
+		if (typeof uri == 'string') {
+			uri = Services.io.newURI(uri);
+		}
+		if (uri.scheme !== 'moz-extension') {
+			return uri;
+		}
+		let policy = WebExtensionPolicy.getByHostname(uri.host);
+		if (!policy) {
+			throw new Error(`No WebExtensionPolicy for moz-extension host '${uri.host}'`);
+		}
+		return Services.io.newURI(
+			uri.pathQueryRef.replace(/^\//, ''),
+			null,
+			Services.io.newURI(policy.baseURL)
+		);
+	};
+
+
 	/**
 	 * Encode special characters in file paths that might cause problems,
 	 *  like # (but preserve slashes or colons)
@@ -298,6 +324,22 @@ Zotero.File = new function () {
 		else if (typeof source == 'string') {
 			if (source.startsWith('file:')) {
 				source = OS.Path.fromFileURI(source);
+			}
+			else if (source.startsWith('moz-extension:')) {
+				let resolvedURI = this.resolveExtensionURI(source);
+				if (resolvedURI instanceof Ci.nsIFileURL) {
+					source = resolvedURI.file.path;
+				}
+				else {
+					// jar: or other non-file URI
+					let channel = NetUtil.newChannel({
+						uri: resolvedURI.spec,
+						loadUsingSystemPrincipal: true,
+						securityFlags: Ci.nsILoadInfo.SEC_ALLOW_CROSS_ORIGIN_SEC_CONTEXT_IS_NULL,
+						contentPolicyType: Ci.nsIContentPolicy.TYPE_OTHER,
+					});
+					return this.getContentsAsync(channel, charset, maxLength);
+				}
 			}
 		}
 		else {
@@ -1074,7 +1116,11 @@ Zotero.File = new function () {
 		return newFile;
 	}
 	
-	
+	/**
+	 * @param {String} file
+	 * @param {String} newFile
+	 * @returns {String} - Path of new file
+	 */
 	this.copyToUnique = function (file, newFile) {
 		file = this.pathToFile(file);
 		newFile = this.pathToFile(newFile);
@@ -1089,7 +1135,7 @@ Zotero.File = new function () {
 		
 		// Copy file to unique name
 		file.copyToFollowingLinks(newFile.parent, newName);
-		return newFile;
+		return newFile.path;
 	}
 	
 	

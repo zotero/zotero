@@ -1,0 +1,30 @@
+library-toolbar-buttons, titlebar-buttons {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+
+	toolbarbutton {
+		flex-shrink: 0;
+		// Label provided for menu mode is hidden in button mode
+		.toolbarbutton-text {
+			display: none;
+		}
+	}
+
+	toolbarbutton.zotero-custom-button {
+		fill: currentColor;
+		-moz-context-properties: fill, fill-opacity;
+
+		@media (prefers-color-scheme: light) {
+			list-style-image: var(--custom-button-icon-light, none);
+		}
+
+		@media (prefers-color-scheme: dark) {
+			list-style-image: var(--custom-button-icon-dark, none);
+		}
+	}
+
+	toolbarbutton.zotero-custom-button-overflow {
+		@include svgicon-menu("chevron-12-double", "universal", "16");
+	}
+}
