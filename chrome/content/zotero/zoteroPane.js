@@ -5104,6 +5104,12 @@ var ZoteroPane = new function () {
 				let nsIURI = Services.io.newURI(uri, null, null);
 				let handler = Services.io.getProtocolHandler("zotero").wrappedJSObject;
 				let extension = handler.getExtension(nsIURI);
+				// Don't pass URIs with unsupported extensions to the OS, which would just
+				// send them back to us
+				if (!extension) {
+					Zotero.logError(`Unsupported zotero: URI '${uri}'`);
+					continue;
+				}
 				if (extension.noContent) {
 					extension.doAction(nsIURI);
 					return;
