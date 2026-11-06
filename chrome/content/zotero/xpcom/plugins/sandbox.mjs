@@ -34,7 +34,7 @@ import { ScopeVariables } from "chrome://zotero/content/xpcom/plugins/variables.
 import { PluginProtocol } from "chrome://zotero/content/xpcom/plugins/protocol.mjs";
 import { PluginFileAccess } from "chrome://zotero/content/xpcom/plugins/fileAccess.mjs";
 import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
-import { PluginNames } from "chrome://zotero/content/xpcom/plugins/names.mjs";
+import { PluginInfo } from "chrome://zotero/content/xpcom/plugins/info.mjs";
 import { PluginDOM } from "chrome://zotero/content/xpcom/plugins/dom.mjs";
 import { PluginTimers } from "chrome://zotero/content/xpcom/plugins/timers.mjs";
 import { PluginNetwork } from "chrome://zotero/content/xpcom/plugins/network.mjs";
@@ -62,8 +62,9 @@ async function loadScope(addon, globalVars = {}) {
 
 	let ready = PluginFileAccess.register(addon.id, uuid);
 
-	// Record plugin name so that its data can be identified after uninstall.
-	PluginNames.record(addon.id, addon.name);
+	// Retain plugin metadata so its data can be identified after uninstall.
+	let privileged = VarCheck.isPrivilegedPermission(addon);
+	PluginInfo.record(addon.id, { name: addon.name, legacy: privileged });
 
 	// Register moz-extension:// protocol with allowed origins from host_permissions
 	PluginProtocol.register(
@@ -72,7 +73,6 @@ async function loadScope(addon, globalVars = {}) {
 		addon.installPermissions?.content_security_policy
 	);
 
-	let privileged = VarCheck.isPrivilegedPermission(addon);
 	privilegeByID.set(addon.id, privileged);
 	let scope;
 	if (privileged) {
