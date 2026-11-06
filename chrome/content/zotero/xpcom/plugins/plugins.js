@@ -34,6 +34,7 @@ Zotero.Plugins = new function () {
 		PluginSandbox: "chrome://zotero/content/xpcom/plugins/sandbox.mjs",
 		PluginProtocol: "chrome://zotero/content/xpcom/plugins/protocol.mjs",
 		PluginPrefs: "chrome://zotero/content/xpcom/plugins/prefs.mjs",
+		PluginInfo: "chrome://zotero/content/xpcom/plugins/info.mjs",
 	});
 	const { XPCOMUtils } = ChromeUtils.importESModule("resource://gre/modules/XPCOMUtils.sys.mjs");
 	XPCOMUtils.defineLazyServiceGetters(lazy, {
@@ -860,6 +861,13 @@ Zotero.Plugins = new function () {
 		},
 		
 		async onUninstalling(addon) {
+			if (addon.type === "extension") {
+				// Retain metadata for the Plugin Data page, including plugins that never loaded.
+				lazy.PluginInfo.record(addon.id, {
+					name: addon.name,
+					legacy: lazy.VarCheck.isPrivilegedPermission(addon),
+				});
+			}
 			Zotero.debug("Uninstalling plugin " + addon.id);
 			this.uninstalling.add(addon.id);
 			if (addon.isActive) {

@@ -81,11 +81,11 @@
 				helpURL: 'https://www.zotero.org/support/preferences/cite',
 			},
 			{
-				id: 'zotero-prefpane-plugin-permissions',
-				label: 'preferences-pane-plugin-permissions',
-				image: 'chrome://zotero/skin/20/universal/magic-wand.svg',
-				src: 'chrome://zotero/content/preferences/preferences_pluginPermissions.xhtml',
-				scripts: ['chrome://zotero/content/preferences/preferences_pluginPermissions.js'],
+				id: 'zotero-prefpane-plugin-data',
+				label: 'preferences-pane-plugin-data',
+				image: 'chrome://zotero/skin/20/universal/folder-open.svg',
+				src: 'chrome://zotero/content/preferences/preferences_pluginData.xhtml',
+				scripts: ['chrome://zotero/content/preferences/preferences_pluginData.js'],
 				defaultXUL: true,
 			},
 			{
@@ -107,10 +107,10 @@
 				helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
 			},
 			{
-				id: 'zotero-subpane-plugin-permissions-edit',
-				parent: 'zotero-prefpane-plugin-permissions',
-				label: 'preferences-plugin-permissions-edit-subpane',
-				src: 'chrome://zotero/content/preferences/preferences_pluginPermissions_edit.xhtml',
+				id: 'zotero-subpane-plugin-data-edit',
+				parent: 'zotero-prefpane-plugin-data',
+				label: 'preferences-plugin-data-edit-subpane',
+				src: 'chrome://zotero/content/preferences/preferences_pluginData_edit.xhtml',
 				defaultXUL: true,
 			}
 		]),

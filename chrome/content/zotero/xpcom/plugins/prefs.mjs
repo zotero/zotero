@@ -29,7 +29,7 @@ import { PluginUUID } from "chrome://zotero/content/xpcom/plugins/uuid.mjs";
 // Never declarable, as a prefix or as a pref
 const FORBIDDEN_PREF_PREFIXES = [
 	"extensions.zotero.pluginFileAccess.",
-	"extensions.zotero.pluginNames.",
+	"extensions.zotero.pluginInfo.",
 	"extensions.zotero.dataDir",
 	"extensions.update.",
 	"extensions.blocklist.",
