@@ -131,12 +131,15 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	 * that case — showing no tags — rather than throwing upwards and breaking the UI.
 	 * Real bugs (TypeError, etc.) are re-thrown so they surface in tests and logs.
 	 */
-	async _safeGetTags(...args) {
+	async _safeGetTags(types, tagIDs) {
 		try {
-			// The rows' results, or only the items the view kept of them
+			// The rows' results, or only the items the view kept of them,
+			// with the annotations the items list shows beneath them as
+			// context rows
+			let contextAnnotations = !Zotero.Prefs.get('hideContextAnnotationRows');
 			let tags = this.itemIDs
-				? await Zotero.CollectionTreeRow.getTagsWithin(this.itemIDs, ...args)
-				: await Zotero.CollectionTreeRow.getTagsAcrossRows(this.collectionTreeRows || [], ...args);
+				? await Zotero.CollectionTreeRow.getTagsWithin(this.itemIDs, types, tagIDs, contextAnnotations)
+				: await Zotero.CollectionTreeRow.getTagsAcrossRows(this.collectionTreeRows || [], types, tagIDs, contextAnnotations);
 			// Multiple rows (collections, or collections across libraries) can return
 			// the same tag, so dedupe by name and type
 			return this._dedupeTags(tags);

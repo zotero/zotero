@@ -1162,7 +1162,8 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		if (isTags) {
 			let tmpTable = await Zotero.Search.idsToTempTable(items.map(item => item.id));
 			try {
-				let tags = await Zotero.Tags.getAllWithin({ tmpTable });
+				// The items' annotations aren't items here (see above), so take their tags too
+				let tags = await Zotero.Tags.getAllWithin({ tmpTable, contextAnnotations: true });
 				
 				let tagQ = searchParams.get('q');
 				if (tagQ) {

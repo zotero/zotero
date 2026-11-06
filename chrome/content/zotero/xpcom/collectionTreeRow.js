@@ -546,22 +546,26 @@ Zotero.CollectionTreeRow.prototype.getChildTags = function () {
 /**
  * Returns all the tags used by items in the current view
  *
+ * @param {Number[]} [types]
+ * @param {Number[]} [tagIDs]
+ * @param {Boolean} [contextAnnotations=false] - Include the tags of the annotations under
+ *     attachments in the results, shown beneath them as context rows
  * @return {Promise<Object[]>}
  */
-Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
+Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs, contextAnnotations = false) {
 	switch (this.type) {
 		// TODO: implement?
 		case 'share':
 			return [];
-		
+
 		case 'bucket':
 			return [];
-			
+
 		case 'feeds':
 			return [];
 	}
 	var results = await this.getSearchResults(true);
-	return Zotero.Tags.getAllWithin({ tmpTable: results, types, tagIDs });
+	return Zotero.Tags.getAllWithin({ tmpTable: results, types, tagIDs, contextAnnotations });
 };
 
 
@@ -575,16 +579,18 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
  * @param {Zotero.CollectionTreeRow[]} rows
  * @param {Number[]} [types]
  * @param {Number[]} [tagIDs]
+ * @param {Boolean} [contextAnnotations=false] - Include the tags of the annotations under
+ *     attachments in the results, shown beneath them as context rows
  * @return {Promise<Object[]>}
  */
-Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs) {
+Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs, contextAnnotations = false) {
 	// share/bucket/feeds rows never contribute tags (see getTags())
 	var tagRows = rows.filter(row => !['share', 'bucket', 'feeds'].includes(row.type));
 	if (!tagRows.length) {
 		return [];
 	}
 	if (tagRows.length == 1) {
-		return tagRows[0].getTags(types, tagIDs);
+		return tagRows[0].getTags(types, tagIDs, contextAnnotations);
 	}
 	// Combine the rows' search results into a single set of item IDs
 	var itemIDs = new Set();
@@ -593,7 +599,7 @@ Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs
 			itemIDs.add(id);
 		}
 	}
-	return Zotero.CollectionTreeRow.getTagsWithin([...itemIDs], types, tagIDs);
+	return Zotero.CollectionTreeRow.getTagsWithin([...itemIDs], types, tagIDs, contextAnnotations);
 };
 
 
@@ -603,12 +609,14 @@ Zotero.CollectionTreeRow.getTagsAcrossRows = async function (rows, types, tagIDs
  * @param {Number[]} itemIDs
  * @param {Number[]} [types]
  * @param {Number[]} [tagIDs]
+ * @param {Boolean} [contextAnnotations=false] - Include the tags of the annotations under
+ *     attachments among the items, shown beneath them as context rows
  * @return {Promise<Object[]>}
  */
-Zotero.CollectionTreeRow.getTagsWithin = async function (itemIDs, types, tagIDs) {
+Zotero.CollectionTreeRow.getTagsWithin = async function (itemIDs, types, tagIDs, contextAnnotations = false) {
 	var tmpTable = await Zotero.Search.idsToTempTable(itemIDs);
 	try {
-		return await Zotero.Tags.getAllWithin({ tmpTable, types, tagIDs });
+		return await Zotero.Tags.getAllWithin({ tmpTable, types, tagIDs, contextAnnotations });
 	}
 	finally {
 		await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });

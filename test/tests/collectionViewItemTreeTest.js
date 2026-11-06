@@ -1028,12 +1028,12 @@ describe("CollectionViewItemTree", function () {
 				itemsView.selection.select(itemsView.getRowIndexByID('SM' + attachment.id + '-0'));
 				await zp.itemSelected();
 				let quote = zp.itemPane.querySelector('#zotero-search-results-pane search-result-row .quote');
-				// The whole passage, with the tree's line marked and the match
-				// bold inside it
+				// The whole passage, with the tree's line marked -- in pieces
+				// around the match, which is bold inside it
 				assert.equal(quote.textContent, text);
-				let marked = quote.querySelector('.snippet');
-				assert.equal(marked.textContent, 'The owl sentence is quoted.');
-				assert.equal(marked.querySelector('.match').textContent, 'owl');
+				let marked = [...quote.querySelectorAll('.snippet')];
+				assert.equal(marked.map(span => span.textContent).join(''), 'The owl sentence is quoted.');
+				assert.equal(quote.querySelector('.snippet .match').textContent, 'owl');
 			});
 
 			it("should hide non-matching annotations when the attachment has match rows", async function () {

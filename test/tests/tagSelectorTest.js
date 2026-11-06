@@ -187,6 +187,9 @@ describe("Tag Selector", function () {
 			}
 			var collection = await createDataObject('collection');
 			await select(win, collection);
+			// Updates from before can still be landing, so wait on the
+			// tags themselves rather than count updates
+			await waitForCallback(() => !tagSelector.state.tags.length);
 			var matched = createUnsavedDataObject('item',
 				{ title: 'Tagbm owl migration', collections: [collection.id] });
 			matched.setTags(['kept']);
@@ -194,17 +197,33 @@ describe("Tag Selector", function () {
 			var other = createUnsavedDataObject('item',
 				{ title: 'Something else entirely', collections: [collection.id] });
 			other.setTags(['dropped']);
-			var promise = waitForTagSelector(win);
 			await other.saveTx();
-			await promise;
-			assert.sameMembers(getRegularTags(), ['kept', 'dropped']);
+			// Under the matched item's attachment, an annotation that
+			// matches the query itself and one that doesn't
+			var attachment = await importFileAttachment('test.pdf', { parentID: matched.id });
+			var context = await createAnnotation('highlight', attachment);
+			context.addTag('silent');
+			await context.saveTx({ skipSelect: true });
+			var quoted = await createAnnotation('highlight', attachment);
+			quoted.annotationText = 'Tagbm owl migration';
+			quoted.addTag('quoted');
+			await quoted.saveTx({ skipSelect: true });
+			await waitForCallback(() => tagSelector.state.tags.length == 4);
+			assert.sameMembers(getRegularTags(), ['kept', 'dropped', 'silent', 'quoted']);
 
-			promise = waitForTagSelector(win);
+			// The unmatched annotation is a context row under the matched
+			// attachment, and its tag follows the row
+			Zotero.Prefs.set('hideContextAnnotationRows', false);
 			await win.ZoteroPane.itemsView.setFilter('search', 'tagbm owl migration');
-			await promise;
-			assert.sameMembers(getRegularTags(), ['kept']);
+			await waitForCallback(() => tagSelector.state.tags.length == 3);
+			assert.sameMembers(getRegularTags(), ['kept', 'silent', 'quoted']);
+
+			Zotero.Prefs.set('hideContextAnnotationRows', true);
+			await waitForCallback(() => tagSelector.state.tags.length == 2);
+			assert.sameMembers(getRegularTags(), ['kept', 'quoted']);
 		}
 		finally {
+			Zotero.Prefs.clear('hideContextAnnotationRows');
 			Zotero.Prefs.set('search.quicksearch-mode', 'fields');
 			await win.ZoteroPane.itemsView.setFilter('search', '');
 			stub.restore();
@@ -233,7 +252,11 @@ describe("Tag Selector", function () {
 			tagSelector.handleSearch('');
 			await Zotero.Promise.delay(500);
 
+			// Wait for the update the erase brings, so it doesn't land in
+			// the next test's wait
+			promise = waitForTagSelector(win);
 			await item.eraseTx();
+			await promise;
 		});
 
 		it("should match accented tags from an unaccented search term", async function () {
@@ -255,7 +278,11 @@ describe("Tag Selector", function () {
 			tagSelector.handleSearch('');
 			await promise;
 
+			// Wait for the update the erase brings, so it doesn't land in
+			// the next test's wait
+			promise = waitForTagSelector(win);
 			await item.eraseTx();
+			await promise;
 		});
 	});
 	

@@ -159,9 +159,12 @@ Zotero.Tags = new function () {
 	 * @param {Object.String} tmpTable - Temporary table with items to use
 	 * @param {Object.Number[]} [types] - Array of tag types to fetch
 	 * @param {Object.Number[]} [tagIDs] - Array of tagIDs to limit the result to
+	 * @param {Object.Boolean} [contextAnnotations=false] - Include the tags of the annotations
+	 *     under attachments in tmpTable, which the items list shows beneath them as context
+	 *     rows unless hideContextAnnotationRows is set
 	 * @return {Promise<Array[]>} - Promise for an array of tag objects in API JSON format
 	 */
-	this.getAllWithin = async function ({ libraryID, tmpTable, types, tagIDs }) {
+	this.getAllWithin = async function ({ libraryID, tmpTable, types, tagIDs, contextAnnotations = false }) {
 		// mozStorage/Proxy are slow, so get in a single column
 		var sql = "SELECT DISTINCT tagID || ':' || type FROM itemTags "
 			+ "JOIN tags USING (tagID) ";
@@ -178,9 +181,10 @@ Zotero.Tags = new function () {
 				throw new Error("tmpTable and libraryID are mutually exclusive");
 			}
 			sql += "AND itemID IN (SELECT itemID FROM " + tmpTable;
-			// TEMP: Match parent attachments for annotation tags
-			sql += " UNION SELECT itemID FROM itemAnnotations WHERE parentItemID IN "
-				+ "(SELECT itemID FROM " + tmpTable + ")";
+			if (contextAnnotations) {
+				sql += " UNION SELECT itemID FROM itemAnnotations WHERE parentItemID IN "
+					+ "(SELECT itemID FROM " + tmpTable + ")";
+			}
 			sql += ") ";
 		}
 		if (types && types.length) {
