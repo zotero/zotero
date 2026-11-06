@@ -200,7 +200,9 @@
 				this.render();
 			});
 			
-			this._prefsObserverID = Zotero.Prefs.registerObserver(`panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this));
+			this._unobserveOpenState = Zotero.Prefs.observeForWindow(
+				window, `panes.${this.dataset.pane}.open`, this._restoreOpenState.bind(this)
+			);
 			
 			if (this.hasAttribute('data-l10n-id') && !this.hasAttribute('data-l10n-args')) {
 				this.setAttribute('data-l10n-args', JSON.stringify({ count: 0 }));
@@ -358,12 +360,13 @@
 
 			this._contextMenu?.remove();
 			
-			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
+			this._unobserveOpenState?.();
+			this._unobserveOpenState = null;
 		}
 		
 		_saveOpenState() {
 			if (this._disableSavingOpenState || this._skipSaveOpenState) return;
-			Zotero.Prefs.set(`panes.${this.dataset.pane}.open`, this.open);
+			Zotero.Prefs.setForWindow(window, `panes.${this.dataset.pane}.open`, this.open);
 		}
 		
 		_restoreOpenState() {
@@ -372,7 +375,7 @@
 				return;
 			}
 			this._restoringOpenState = true;
-			this.open = Zotero.Prefs.get(`panes.${this.dataset.pane}.open`) ?? true;
+			this.open = Zotero.Prefs.getForWindow(window, `panes.${this.dataset.pane}.open`) ?? true;
 			this._restoringOpenState = false;
 		}
 

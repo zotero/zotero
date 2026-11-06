@@ -87,7 +87,7 @@
 
 		_dropIndicator = null;
 
-		_prefObserverID = null;
+		_unobservePaneOrder = null;
 
 		get observedAttributes() {
 			return ["no-context-notes"];
@@ -341,7 +341,9 @@
 			});
 			this.setAttribute("role", "tablist");
 
-			this._prefObserverID = Zotero.Prefs.registerObserver("sidenav.order", this.handlePaneOrderChange);
+			this._unobservePaneOrder = Zotero.Prefs.observeForWindow(
+				window, "sidenav.order", this.handlePaneOrderChange
+			);
 
 			this._initialized = true;
 		}
@@ -357,7 +359,8 @@
 			this._buttonContainer.removeEventListener('dragend', this.handleButtonDragEnd);
 			this._buttonContainer.removeEventListener('dragleave', this.handleButtonDragLeave);
 
-			Zotero.Prefs.unregisterObserver(this._prefObserverID);
+			this._unobservePaneOrder?.();
+			this._unobservePaneOrder = null;
 
 			this._initialized = false;
 		}
@@ -456,13 +459,13 @@
 				currentOrder.push(paneID);
 			}
 
-			Zotero.Prefs.set("sidenav.order", currentOrder.join(","));
+			Zotero.Prefs.setForWindow(window, "sidenav.order", currentOrder.join(","));
 		}
 		
 
 		getPersistedOrder(value = null) {
 			if (value === null) {
-				value = Zotero.Prefs.get("sidenav.order");
+				value = Zotero.Prefs.getForWindow(window, "sidenav.order");
 			}
 			if (!value) return this._builtInPanes;
 			try {
@@ -991,10 +994,10 @@
 			}
 		};
 
-		handlePaneOrderChange = async (value) => {
+		handlePaneOrderChange = async () => {
 			// If no container, wait until it's set
 			if (!this.container) return;
-			let order = this.getPersistedOrder(value);
+			let order = this.getPersistedOrder();
 			let hasChange = false;
 			for (let i = 0; i < order.length; i++) {
 				let paneID = order[i];

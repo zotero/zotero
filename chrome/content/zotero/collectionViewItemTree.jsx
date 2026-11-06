@@ -350,7 +350,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			let rowChanged;
 			switch (type) {
 				case 'search':
-					rowChanged = collectionTreeRow.setSearch(data, Zotero.Prefs.get('search.quicksearch-mode'));
+					rowChanged = collectionTreeRow.setSearch(
+						data, Zotero.Prefs.getForWindow(window, 'search.quicksearch-mode')
+					);
 					break;
 				case 'citation-search':
 					rowChanged = collectionTreeRow.setSearch(data, 'fields');

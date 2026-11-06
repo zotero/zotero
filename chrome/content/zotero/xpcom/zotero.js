@@ -1169,6 +1169,8 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 	 * @param {Object} [args.movedTab] - { windowID, tabID } of a tab in another window to move
 	 *     into this one as its only tab
 	 * @param {Object} [args.geometry] - { screenX, screenY, width, height } to open the window at
+	 * @param {Object} [args.windowSettings] - The window's own settings, as returned by
+	 *     ZoteroPane.getWindowSettings() -- by default, those of the most recent window
 	 * @return {ChromeWindow}
 	 */
 	this.openMainWindow = function (args) {
@@ -1176,8 +1178,12 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		var flags = "chrome,all,dialog=no,resizable=yes";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
-		// A new window takes its pane layout from the window it's opened from
-		Services.wm.getMostRecentWindow("navigator:browser")?.ZoteroPane?.serializePersist();
+		// A new window takes its pane layout and settings from the window it's opened from
+		let sourcePane = Services.wm.getMostRecentWindow("navigator:browser")?.ZoteroPane;
+		sourcePane?.serializePersist();
+		if (sourcePane?.getWindowSettings && !args?.sessionState && !args?.windowSettings) {
+			args = Object.assign({}, args, { windowSettings: sourcePane.getWindowSettings() });
+		}
 		// Box the args so they reliably cross openWindow()'s nsISupports argument
 		return ww.openWindow(null, chromeURI, '_blank', flags, args ? { wrappedJSObject: args } : null);
 	}

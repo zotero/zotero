@@ -249,6 +249,10 @@ var ZoteroPane = new function () {
 	var _initialReaderTabState = null;
 	var _initialNoteTabState = null;
 	var _initialMovedTab = null;
+	// Settings this window keeps for itself (see getWindowSetting())
+	var _windowSettings = normalizeWindowSettings();
+	// Observers of the prefs behind this window's settings, by pref name
+	var _windowSettingObservers = new Map();
 	var lastFocusedElement = null;
 	this.lastKeyPress = null;
 	// When this window was last activated, for ordering saved window states
@@ -611,6 +615,7 @@ var ZoteroPane = new function () {
 	 */
 	function takeWindowState() {
 		let args = getWindowArgs();
+		_windowSettings = normalizeWindowSettings(args.windowSettings);
 		// Where a tab torn off from another window was dropped
 		if (args.geometry) {
 			restoreWindowGeometry(args.geometry);
@@ -634,6 +639,7 @@ var ZoteroPane = new function () {
 		}
 		if (args.sessionState) {
 			_sessionPaneState = args.sessionState;
+			_windowSettings = normalizeWindowSettings(_sessionPaneState.settings);
 			restoreWindowGeometry(_sessionPaneState.geometry);
 			return;
 		}
@@ -643,6 +649,9 @@ var ZoteroPane = new function () {
 		let states = Zotero.Session.getPendingPaneStates();
 		_sessionPaneState = states[0] || null;
 		_otherSessionPaneStates = states.slice(1);
+		if (_sessionPaneState?.settings) {
+			_windowSettings = normalizeWindowSettings(_sessionPaneState.settings);
+		}
 		// The window opens with the persisted geometry, which is shared by all windows and
 		// holds the position of whichever closed last, so when there are other windows to
 		// restore, use its own saved geometry instead
@@ -803,6 +812,12 @@ var ZoteroPane = new function () {
 		ZoteroPane.progressWindow = new Zotero.ProgressWindow({ window });
 		
 		Zotero.Keys.windowInit(document);
+		
+		window.addEventListener('zotero-window-setting-change', (event) => {
+			if (event.detail.name == 'search.quicksearch-mode') {
+				Zotero.updateQuickSearchBox(document);
+			}
+		});
 		
 		if (Zotero.restoreFromServer) {
 			Zotero.restoreFromServer = false;
@@ -1076,6 +1091,10 @@ var ZoteroPane = new function () {
 		ZoteroContextPane.destroy();
 		updateOtherWindowsTabs();
 		Zotero.Plugins.notifyMainWindowUnload(window);
+		for (let symbol of _windowSettingObservers.values()) {
+			Zotero.Prefs.unregisterObserver(symbol);
+		}
+		_windowSettingObservers.clear();
 
 		// A window closed before it restored its saved state shouldn't come back in the next
 		// session, unless it's the last one
@@ -7185,9 +7204,113 @@ var ZoteroPane = new function () {
 				height: window.outerHeight,
 				sizemode: document.documentElement.getAttribute('sizemode')
 			},
-			tabs: Zotero_Tabs.getState()
+			tabs: Zotero_Tabs.getState(),
+			settings: this.getWindowSettings()
 		};
 	};
+	
+	/**
+	 * Get a setting that this window keeps for itself, such as an item pane or quick search
+	 * setting
+	 *
+	 * A window's settings are saved with its state and copied to windows opened from it, so
+	 * changing one in a window doesn't affect other windows. A setting the window hasn't
+	 * changed or been opened with comes from the pref of the same name, which holds the value
+	 * set most recently in any window, and a change to the pref from outside of a main window
+	 * applies to all windows.
+	 *
+	 * @param {String} name - Pref name
+	 * @return {*}
+	 */
+	this.getWindowSetting = function (name) {
+		observeWindowSettingPref(name);
+		if (!(name in _windowSettings.prefs)) {
+			_windowSettings.prefs[name] = Zotero.Prefs.get(name);
+		}
+		return structuredClone(_windowSettings.prefs[name]);
+	};
+	
+	/**
+	 * Set a setting for this window, and save it to the pref of the same name for windows that
+	 * open without one
+	 *
+	 * @param {String} name - Pref name
+	 * @param {*} value - undefined to clear
+	 */
+	this.setWindowSetting = function (name, value) {
+		observeWindowSettingPref(name);
+		_windowSettings.prefs[name] = structuredClone(value);
+		// Pref observers run synchronously within the write, so other windows see the flag and
+		// keep their own values
+		Zotero.Prefs.settingForWindow = true;
+		try {
+			if (value === undefined) {
+				Zotero.Prefs.clear(name);
+			}
+			else {
+				Zotero.Prefs.set(name, value);
+			}
+		}
+		finally {
+			Zotero.Prefs.settingForWindow = false;
+		}
+		dispatchWindowSettingChange(name);
+	};
+	
+	/**
+	 * Get the column settings this window keeps for an item tree, if it has any
+	 *
+	 * @param {String} id - The tree's prefsId
+	 * @return {Object|null}
+	 */
+	this.getItemTreeColumnPrefs = function (id) {
+		let prefs = _windowSettings.itemTreeColumns[id];
+		return prefs ? structuredClone(prefs) : null;
+	};
+	
+	/**
+	 * @param {String} id - The tree's prefsId
+	 * @param {Object} prefs
+	 */
+	this.setItemTreeColumnPrefs = function (id, prefs) {
+		_windowSettings.itemTreeColumns[id] = structuredClone(prefs);
+	};
+	
+	/**
+	 * @return {Object} - The settings this window keeps, for its state
+	 */
+	this.getWindowSettings = function () {
+		return structuredClone(_windowSettings);
+	};
+	
+	function normalizeWindowSettings(settings) {
+		return {
+			prefs: structuredClone(settings?.prefs || {}),
+			itemTreeColumns: structuredClone(settings?.itemTreeColumns || {})
+		};
+	}
+	
+	function observeWindowSettingPref(name) {
+		if (_windowSettingObservers.has(name)) {
+			return;
+		}
+		_windowSettingObservers.set(name, Zotero.Prefs.registerObserver(name, () => {
+			// A change made outside of a main window (e.g., in about:config or the settings)
+			// applies to all windows, but a change made in a window, which also writes the pref
+			// for windows opened later, applies only to that window, so skip it here
+			if (Zotero.Prefs.settingForWindow) {
+				return;
+			}
+			_windowSettings.prefs[name] = Zotero.Prefs.get(name);
+			dispatchWindowSettingChange(name);
+		}));
+	}
+	
+	function dispatchWindowSettingChange(name) {
+		window.dispatchEvent(
+			new CustomEvent('zotero-window-setting-change', { detail: { name } })
+		);
+	}
 	
 	/**
 	 * Unserializes zotero-persist elements from preferences

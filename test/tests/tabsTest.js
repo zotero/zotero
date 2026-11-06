@@ -778,6 +778,72 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should keep item pane and quick search settings to each window", async function () {
+			await selectCollection(win, collection);
+			await win.ZoteroPane.selectItem(item.id);
+			await selectCollection(win2, collection);
+			await zp2.selectItem(item.id);
+			let getSection = w => w.ZoteroPane.itemPane._itemDetails
+				.querySelector('collapsible-section[data-pane="info"]');
+			let open = getSection(win).open;
+			let mode = Zotero.Prefs.getForWindow(win, 'search.quicksearch-mode');
+			let otherMode = mode == 'fields' ? 'titleCreatorYear' : 'fields';
+			try {
+				getSection(win2).open = !open;
+				assert.equal(getSection(win).open, open);
+				// The pref holds the most recent change, for windows that open without one
+				assert.equal(Zotero.Prefs.get('panes.info.open'), !open);
+				
+				zp2.libraryView.getElement('zotero-tb-search').searchModePopup
+					.querySelector(`menuitem[value="${otherMode}"]`).doCommand();
+				assert.equal(Zotero.Prefs.getForWindow(win2, 'search.quicksearch-mode'), otherMode);
+				assert.equal(Zotero.Prefs.getForWindow(win, 'search.quicksearch-mode'), mode);
+			}
+			finally {
+				getSection(win2).open = open;
+				Zotero.Prefs.setForWindow(win2, 'search.quicksearch-mode', mode);
+			}
+		});
+		
+		it("should reopen a window with its own settings", async function () {
+			let mode = Zotero.Prefs.getForWindow(win, 'search.quicksearch-mode');
+			let otherMode = mode == 'fields' ? 'titleCreatorYear' : 'fields';
+			let isDateAddedHidden = view => view.itemsView._getColumns()
+				.find(column => column.dataKey == 'dateAdded').hidden;
+			let dateAddedHidden = isDateAddedHidden(zp.libraryView);
+			
+			let win3 = await loadZoteroPane();
+			Zotero.Prefs.setForWindow(win3, 'search.quicksearch-mode', otherMode);
+			let itemsView = win3.ZoteroPane.itemsView;
+			itemsView.tree._columns.toggleHidden(
+				itemsView._getColumns().findIndex(column => column.dataKey == 'dateAdded')
+			);
+			let openWindows = Zotero.getMainWindows();
+			win3.close();
+			await waitForCallback(() => win3.closed, 50, 20);
+			
+			await tabs.undoClose();
+			let newWin;
+			try {
+				await waitForCallback(
+					() => (newWin = Zotero.getMainWindows().find(x => !openWindows.includes(x)))
+						&& newWin.ZoteroPane.libraryView?.loaded,
+					100,
+					20
+				);
+				assert.equal(Zotero.Prefs.getForWindow(newWin, 'search.quicksearch-mode'), otherMode);
+				assert.equal(isDateAddedHidden(newWin.ZoteroPane.libraryView), !dateAddedHidden);
+				
+				assert.equal(Zotero.Prefs.getForWindow(win, 'search.quicksearch-mode'), mode);
+				await zp.itemsView.reloadColumnPrefs();
+				assert.equal(isDateAddedHidden(zp.libraryView), dateAddedHidden);
+			}
+			finally {
+				newWin?.close();
+				Zotero.Prefs.set('search.quicksearch-mode', mode);
+			}
+		});
+		
 		it("should open each selected collection in a tab of its own in a new window", async function () {
 			let otherCollection = await createDataObject('collection');
 			await zp2.collectionsView.restoreSelection([collection.treeViewID, otherCollection.treeViewID]);

@@ -410,16 +410,10 @@ Zotero.Prefs = new function () {
 				Zotero.logError(e);
 			}
 		}],
+		// Main windows keep their own mode (see ZoteroPane.getWindowSetting())
 		[ "search.quicksearch-mode", function (val) {
 			var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator);
-			var enumerator = wm.getEnumerator("navigator:browser");
-			while (enumerator.hasMoreElements()) {
-				var win = enumerator.getNext();
-				if (!win.ZoteroPane) continue;
-				Zotero.updateQuickSearchBox(win.ZoteroPane.document);
-			}
-			
 			var enumerator = wm.getEnumerator("zotero:item-selector");
 			while (enumerator.hasMoreElements()) {
 				var win = enumerator.getNext();
@@ -476,6 +470,66 @@ Zotero.Prefs = new function () {
 	
 	var _observers = {};
 	var _observersBySymbol = {};
+	
+	// True while a main window writes one of its own settings to the pref (see
+	// ZoteroPane.setWindowSetting()), so that other windows' observers can tell the write apart
+	// from a change made outside of a main window (e.g., in about:config) and ignore it
+	this.settingForWindow = false;
+	
+	/**
+	 * Get a setting that each main window keeps for itself (see ZoteroPane.getWindowSetting()),
+	 * or the pref of the same name outside of a main window
+	 *
+	 * @param {Window} win
+	 * @param {String} name
+	 * @return {*}
+	 */
+	this.getForWindow = function (win, name) {
+		if (win.ZoteroPane?.getWindowSetting) {
+			return win.ZoteroPane.getWindowSetting(name);
+		}
+		return this.get(name);
+	};
+	
+	/**
+	 * @param {Window} win
+	 * @param {String} name
+	 * @param {*} value - undefined to clear
+	 */
+	this.setForWindow = function (win, name, value) {
+		if (win.ZoteroPane?.setWindowSetting) {
+			win.ZoteroPane.setWindowSetting(name, value);
+		}
+		else if (value === undefined) {
+			this.clear(name);
+		}
+		else {
+			this.set(name, value);
+		}
+	};
+	
+	/**
+	 * Observe a setting that each main window keeps for itself, or the pref of the same name
+	 * outside of a main window
+	 *
+	 * @param {Window} win
+	 * @param {String} name
+	 * @param {Function} handler
+	 * @return {Function} - Call to stop observing
+	 */
+	this.observeForWindow = function (win, name, handler) {
+		if (win.ZoteroPane?.getWindowSetting) {
+			let listener = (event) => {
+				if (event.detail.name == name) {
+					handler();
+				}
+			};
+			win.addEventListener('zotero-window-setting-change', listener);
+			return () => win.removeEventListener('zotero-window-setting-change', listener);
+		}
+		let symbol = this.registerObserver(name, handler);
+		return () => this.unregisterObserver(symbol);
+	};
 	
 	/**
 	 * @param {String} name - Preference name; if not global, this is on the extensions.zotero branch

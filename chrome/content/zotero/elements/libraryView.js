@@ -1132,7 +1132,7 @@
 			// items list refreshes once
 			let searchText = state.quickSearch || '';
 			let tags = new Set(state.tags?.selected || []);
-			let mode = Zotero.Prefs.get('search.quicksearch-mode');
+			let mode = Zotero.Prefs.getForWindow(window, 'search.quicksearch-mode');
 			// A quick search with conditions in it is run as a search, as search() does
 			let query = Zotero.SearchQuery.getSearch(searchText, { mode });
 			this._quickSearchIsQuery = !!query;
@@ -1552,7 +1552,7 @@
 			// carries none of its own -- with one, a multi-library selection would
 			// match only in that library
 			let query = Zotero.SearchQuery.getSearch(searchVal, {
-				mode: Zotero.Prefs.get('search.quicksearch-mode')
+				mode: Zotero.Prefs.getForWindow(window, 'search.quicksearch-mode')
 			});
 			if (query) {
 				this._quickSearchIsQuery = true;

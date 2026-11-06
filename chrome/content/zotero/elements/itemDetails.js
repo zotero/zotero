@@ -187,7 +187,9 @@
 
 			this._notifierID = Zotero.Notifier.registerObserver(
 				this, ['item', 'itempane', 'tab'], 'ItemDetails');
-			this._prefsObserverID = Zotero.Prefs.registerObserver('pinnedPane', this._restorePinnedPane.bind(this));
+			this._unobservePinnedPane = Zotero.Prefs.observeForWindow(
+				window, 'pinnedPane', this._restorePinnedPane.bind(this)
+			);
 
 			this._disableScrollHandler = false;
 			this._pinnedPaneMinScrollHeight = 0;
@@ -211,7 +213,8 @@
 			this._intersectionOb.disconnect();
 
 			Zotero.Notifier.unregisterObserver(this._notifierID);
-			Zotero.Prefs.unregisterObserver(this._prefsObserverID);
+			this._unobservePinnedPane?.();
+			this._unobservePinnedPane = null;
 		}
 
 		async render() {
@@ -666,19 +669,14 @@
 				return;
 			}
 			let pinnedPane = this.pinnedPane;
-			if (pinnedPane) {
-				Zotero.Prefs.set('pinnedPane', pinnedPane);
-			}
-			else {
-				Zotero.Prefs.clear('pinnedPane');
-			}
+			Zotero.Prefs.setForWindow(window, 'pinnedPane', pinnedPane || undefined);
 		}
 
 		_restorePinnedPane() {
 			if (this.tabType !== 'library') {
 				return;
 			}
-			let pinnedPane = Zotero.Prefs.get('pinnedPane') || '';
+			let pinnedPane = Zotero.Prefs.getForWindow(window, 'pinnedPane') || '';
 			if (this.pinnedPane !== pinnedPane) {
 				this.pinnedPane = pinnedPane;
 			}

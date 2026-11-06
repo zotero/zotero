@@ -2496,6 +2496,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._columnPrefs = prefs;
+		window.ZoteroPane?.setItemTreeColumnPrefs?.(this.prefsId, prefs);
 		// Invalidate the cached _columns array; next _getColumns() call will
 		// rebuild canonical state from COLUMNS defs + _columnPrefs + viewType.
 		this._columnsId = null;
@@ -2511,8 +2512,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_loadColumnPrefsFromFile = async () => {
 		if (!this.props.columnPicker) return;
+		// A main window keeps its own column settings, starting with the ones saved most
+		// recently in any window
+		let windowPrefs = window.ZoteroPane?.getItemTreeColumnPrefs?.(this.prefsId);
+		if (windowPrefs) {
+			this._columnPrefs = windowPrefs;
+			return;
+		}
 		await _migrateTreePrefsFile();
 		this._columnPrefs = await TreePrefs.get(this.prefsId);
+		window.ZoteroPane?.setItemTreeColumnPrefs?.(this.prefsId, this._columnPrefs);
 	}
 
 	/**

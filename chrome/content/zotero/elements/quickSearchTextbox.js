@@ -113,7 +113,7 @@
 					event.stopPropagation();
 					// If there's text in the field, seed the Advanced Search with it,
 					// reproducing the current quick search mode as editable conditions.
-					let mode = Zotero.Prefs.get('search.quicksearch-mode');
+					let mode = Zotero.Prefs.getForWindow(window, 'search.quicksearch-mode');
 					// Shift-click opens the Advanced Search in a new window, and
 					// Cmd/Ctrl-click in a new tab
 					if (event.shiftKey) {
@@ -173,7 +173,7 @@
 				item.value = mode;
 
 				item.addEventListener('command', () => {
-					Zotero.Prefs.set("search.quicksearch-mode", mode);
+					Zotero.Prefs.setForWindow(window, "search.quicksearch-mode", mode);
 					this.updateMode();
 
 					if (this.value) {
@@ -193,10 +193,10 @@
 		}
 
 		updateMode() {
-			let mode = Zotero.Prefs.get("search.quicksearch-mode");
+			let mode = Zotero.Prefs.getForWindow(window, "search.quicksearch-mode");
 
 			if (!this._searchModes[mode]) {
-				Zotero.Prefs.set("search.quicksearch-mode", "fields");
+				Zotero.Prefs.setForWindow(window, "search.quicksearch-mode", "fields");
 				mode = 'fields';
 			}
 
