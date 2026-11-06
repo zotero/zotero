@@ -25,11 +25,14 @@
 
 import CollectionTree from 'zotero/collectionTree';
 import CollectionViewItemTree from 'zotero/collectionViewItemTree';
+const { getCSSIcon } = require('components/icons');
+const { COLUMNS } = require('zotero/itemTreeColumns');
 
 var itemsView;
 var collectionsView;
 var loaded;
 var io;
+var suggestedItemsTempTable;
 const isSelectItemsDialog = !!document.querySelector('#zotero-select-items-dialog');
 const isEditBibliographyDialog = !!document.querySelector('#zotero-edit-bibliography-dialog');
 const isAddEditItemsDialog = !!document.querySelector('#zotero-add-citation-dialog');
@@ -62,9 +65,82 @@ var doLoad = async function () {
 	if(io.wrappedJSObject) io = io.wrappedJSObject;
 	if(io.addBorder) document.getElementsByTagName("dialog")[0].style.border = "1px solid black";
 	if(io.singleSelection) document.getElementById("zotero-items-tree").setAttribute("seltype", "single");
+
+	let columns = COLUMNS;
+	let customRows = [];
+	if (io.itemIDs) {
+		let items = await Zotero.Items.getAsync(io.itemIDs);
+		let itemIDs = items.map(item => item.id);
+		let libraryIDs = new Set(items.map(item => item.libraryID));
+		suggestedItemsTempTable = await Zotero.Search.idsToTempTable(itemIDs, { idColumn: 'id' });
+		let search = new Zotero.Search();
+		search.name = Zotero.getString('select-items-suggested-items');
+		// Called by CollectionViewItemTree when the custom row is loaded or filtered
+		let getSuggestedItems = async function () {
+			let ids = [];
+			for (let libraryID of libraryIDs) {
+				let filteredSearch = new Zotero.Search();
+				filteredSearch.libraryID = libraryID;
+				filteredSearch.addCondition('tempTable', 'is', suggestedItemsTempTable);
+				if (this.searchText) {
+					let condition = 'quicksearch-'
+						+ (this.searchMode || Zotero.Prefs.get('search.quicksearch-mode'));
+					filteredSearch.addCondition(condition, 'contains', this.searchText);
+				}
+				for (let tag of this.tags) {
+					filteredSearch.addCondition('tag', 'is', tag);
+				}
+				ids.push(...await filteredSearch.search());
+			}
+			return Zotero.Items.getAsync(ids);
+		};
+		customRows.push({
+			id: 'suggested-items',
+			type: 'suggestedItems',
+			ref: search,
+			properties: {
+				iconName: 'duplicates',
+				// This cross-library row has no libraryID
+				isWithinGroup: () => false,
+				getItems: getSuggestedItems
+			}
+		});
+		if ([...libraryIDs].some(id => id != Zotero.Libraries.userLibraryID)) {
+			let libraryColumn = {
+				dataKey: 'library',
+				label: 'select-items-library-column',
+				showInColumnPicker: true,
+				defaultIn: ['suggestedItems'],
+				enabledIn: ['suggestedItems'],
+				width: '180',
+				minWidth: 120,
+				zoteroPersist: ['width', 'hidden', 'sortDirection'],
+				renderCell(index, libraryName, column, _isFirstColumn, doc) {
+					let item = this.getRow(index).ref;
+					let library = Zotero.Libraries.get(item.libraryID);
+					let cell = doc.createElement('span');
+					cell.className = `cell ${column.className}`;
+					let icon = getCSSIcon(library.libraryType === 'group' ? 'library-group' : 'library');
+					icon.classList.add('cell-icon', 'item-icon', 'icon-item-type');
+					let text = doc.createElement('span');
+					text.className = 'cell-text';
+					text.textContent = libraryName;
+					cell.append(icon, text);
+					return cell;
+				}
+			};
+			let attachmentColumnIndex = COLUMNS.findIndex(column => column.dataKey === 'hasAttachment');
+			columns = [
+				...COLUMNS.slice(0, attachmentColumnIndex),
+				libraryColumn,
+				...COLUMNS.slice(attachmentColumnIndex)
+			];
+		}
+	}
 	
 	itemsView = await CollectionViewItemTree.init(document.getElementById('zotero-items-tree'), {
 		onSelectionChange: () => {
+			updateShowInZoteroButton();
 			if (isEditBibliographyDialog) {
 				Zotero_Bibliography_Dialog.treeItemSelected();
 			}
@@ -78,8 +154,15 @@ var doLoad = async function () {
 		id: io.itemTreeID || "select-items-dialog",
 		dragAndDrop: false,
 		regularOnly: io.onlyRegularItems,
+		columns,
 		columnPicker: true,
 		multiSelect: io.multiSelect,
+		getExtraField: (item, field) => {
+			if (field === 'library' && item.libraryID) {
+				return Zotero.Libraries.get(item.libraryID).name;
+			}
+			return undefined;
+		},
 		emptyMessage: Zotero.getString('pane.items.loading')
 	});
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
@@ -88,19 +171,34 @@ var doLoad = async function () {
 	const hideSources = io.hideCollections || ['duplicates', 'trash', 'feeds'];
 	collectionsView = await CollectionTree.init(document.getElementById('zotero-collections-tree'), {
 		onSelectionChange: () => onCollectionSelected(),
+		customRows,
 		filterLibraryIDs,
 		hideSources
 	});
 
 	await collectionsView.makeVisible();
 
-	if (io.select) {
+	if (io.itemIDs) {
+		await collectionsView.selectWait(collectionsView.getRowIndexByID('suggested-items'));
+	}
+	else if (io.select) {
 		await collectionsView.selectItem(io.select);
 	}
 	
 	Zotero.updateQuickSearchBox(document);
 
 	document.addEventListener('dialogaccept', doAccept);
+	if (io.itemIDs) {
+		let showInZoteroButton = document.querySelector("dialog button[dlgtype='extra1']");
+		document.l10n.setAttributes(showInZoteroButton, 'select-items-show-in-zotero');
+		showInZoteroButton.addEventListener('click', async () => {
+			await Zotero.Utilities.Internal.showInLibrary(itemsView.getSelectedItems());
+		});
+		updateShowInZoteroButton();
+	}
+	else if (!io.extraButtons?.some(button => button.type === 'extra1')) {
+		document.querySelector("dialog button[dlgtype='extra1']")?.setAttribute('hidden', true);
+	}
 	
 	if (isSelectItemsDialog) {
 		// Set proper tab order. It is only needed in selectItemsDialog -- other dialogs' focus order is correct
@@ -126,13 +224,25 @@ var doLoad = async function () {
 	loaded = true;
 };
 
-function doUnload()
-{
-	collectionsView.unregister();
-	if(itemsView)
-		itemsView.unregister();
-	
-	io.deferred && io.deferred.resolve();
+function doUnload() {
+	collectionsView?.unregister();
+	itemsView?.unregister();
+	if (suggestedItemsTempTable) {
+		Zotero.DB.queryAsync(
+			`DROP TABLE IF EXISTS ${suggestedItemsTempTable}`,
+			false,
+			{ noCache: true }
+		).catch(e => Zotero.logError(e));
+	}
+	io?.deferred?.resolve();
+}
+
+function updateShowInZoteroButton() {
+	let button = document.querySelector("dialog button[dlgtype='extra1']");
+	if (!button || !io?.itemIDs || !collectionsView) return;
+	let row = collectionsView.getRow(collectionsView.selection.focused);
+	button.hidden = row?.type !== 'suggestedItems';
+	button.disabled = button.hidden || !itemsView?.getSelectedItems().length;
 }
 
 var onCollectionSelected = async function () {
@@ -142,21 +252,31 @@ var onCollectionSelected = async function () {
 	if (itemsView && itemsView.collectionTreeRows[0]?.id == collectionTreeRow.id) {
 		return;
 	}
+	document.getElementById('zotero-tb-search').onCollectionSelected();
 	collectionTreeRow.setSearch('');
-	Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
+	if (collectionTreeRow.type !== 'suggestedItems') {
+		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
+	}
 	
 	itemsView.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 	
 	// Load library data if necessary
-	var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-	if (!library.getDataLoaded('item')) {
-		Zotero.debug("Waiting for items to load for library " + library.libraryID);
-		await library.waitForDataLoad('item');
+	if (collectionTreeRow.type !== 'suggestedItems') {
+		var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
+		if (!library.getDataLoaded('item')) {
+			Zotero.debug("Waiting for items to load for library " + library.libraryID);
+			await library.waitForDataLoad('item');
+		}
 	}
-	
+	// Prevent a race-condition if rapidly clicking on different libraries without loaded
+	// item data
+	if (collectionsView.getRow(collectionsView.selection.focused)?.id !== collectionTreeRow.id) {
+		return;
+	}
 	await itemsView.changeCollectionTreeRows([collectionTreeRow]);
 	
 	itemsView.clearItemsPaneMessage();
+	updateShowInZoteroButton();
 };
 
 function onSearch()
