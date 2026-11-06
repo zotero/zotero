@@ -30,8 +30,8 @@ var { AddonManager } = ChromeUtils.importESModule(
 	"resource://gre/modules/AddonManager.sys.mjs");
 var { PluginUUID } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/uuid.mjs");
-var { PluginNames } = ChromeUtils.importESModule(
-	"chrome://zotero/content/xpcom/plugins/names.mjs");
+var { PluginInfo } = ChromeUtils.importESModule(
+	"chrome://zotero/content/xpcom/plugins/info.mjs");
 var { PluginPrefs } = ChromeUtils.importESModule(
 	"chrome://zotero/content/xpcom/plugins/prefs.mjs");
 var { PluginFileAccess, PersistedGrantLayer } = ChromeUtils.importESModule(
@@ -49,11 +49,10 @@ var React = require("react");
 var ReactDOM = require("react-dom");
 var VirtualizedTable = require("components/virtualized-table");
 var { makeRowRenderer } = VirtualizedTable;
-var { getCSSIcon } = require("components/icons");
 
-const PARENT_PANE_ID = 'zotero-prefpane-plugin-permissions';
-const EDIT_PANE_ID = 'zotero-subpane-plugin-permissions-edit';
-const EDIT_PANE_CONTENT_SELECTOR = '#zotero-subpane-plugin-permissions-edit-content';
+const PARENT_PANE_ID = 'zotero-prefpane-plugin-data';
+const EDIT_PANE_ID = 'zotero-subpane-plugin-data-edit';
+const EDIT_PANE_CONTENT_SELECTOR = '#zotero-subpane-plugin-data-edit-content';
 
 function formatSize(bytes) {
 	if (!bytes) return "0 B";
@@ -81,61 +80,26 @@ async function confirmPrompt({ titleKey, bodyKey, actionKey, args }) {
 	return ps.confirmEx(window, title, body, flags, label, "", "", null, {}) === 0;
 }
 
-function renderEditCell(index, data, column) {
-	let cell = document.createElement('span');
-	cell.className = `cell ${column.className} edit-action-cell`;
-	if (data.legacy) {
-		let badge = document.createElement('span');
-		badge.className = 'legacy-badge';
-		badge.textContent = '!';
-		badge.setAttribute('title', data.legacyLabel);
-		badge.setAttribute('aria-label', data.legacyLabel);
-		cell.appendChild(badge);
-		return cell;
-	}
-	cell.classList.add('clickable');
-	let button = document.createElement('span');
-	button.className = 'icon-action';
-	button.setAttribute('role', 'button');
-	button.setAttribute('aria-label', data.ariaLabel);
-	button.appendChild(getCSSIcon(data.iconKey));
-	button.addEventListener('click', (event) => data.onClick(index, event));
-	cell.appendChild(button);
-	return cell;
-}
-
-function renderSizeCell(index, data, column) {
-	let cell = document.createElement('span');
-	cell.className = `cell ${column.className}`;
-	if (data === '—') cell.classList.add('size-na');
-	cell.textContent = data;
-	return cell;
-}
-
 function renderNameCell(row, column) {
 	let cell = document.createElement('span');
 	cell.className = `cell ${column.className}`;
-	if (!row.pluginID) cell.classList.add('plugin-name-uninstalled');
-	cell.textContent = row.name;
-	return cell;
-}
-
-function renderModeCell(index, data, column) {
-	let cell = document.createElement('span');
-	cell.className = `cell ${column.className} grant-mode-cell`;
-	let pill = document.createElement('span');
-	pill.className = `grant-mode mode-${data}`;
-	pill.textContent = data;
-	cell.appendChild(pill);
+	let text = document.createElement('span');
+	text.className = 'cell-text';
+	text.textContent = row.name;
+	cell.appendChild(text);
+	cell.title = row.pluginID || row.uuid;
 	return cell;
 }
 
 function renderPrefNameCell(row, column) {
 	let cell = document.createElement('span');
-	cell.className = `cell ${column.className} pref-name-cell`;
+	cell.className = `cell ${column.className}`;
 	if (row.isModified) cell.classList.add('pref-modified');
-	cell.textContent = row.name;
-	cell.setAttribute('title', row.fullKey);
+	let text = document.createElement('span');
+	text.className = 'cell-text';
+	text.textContent = row.name;
+	cell.appendChild(text);
+	cell.title = row.fullKey;
 	return cell;
 }
 
@@ -156,52 +120,7 @@ function prefHasDefault(defaultBranch, name) {
 	}
 }
 
-function renderPrefValueCell(row, column) {
-	let cell = document.createElement('span');
-	cell.className = `cell ${column.className} pref-value-cell`;
-	if (row.isModified) cell.classList.add('pref-modified');
-	cell.classList.add(`pref-type-${row.typeText}`);
-
-	if (row.typeText === 'boolean') {
-		cell.classList.add('pref-editable');
-		cell.textContent = row.valueText;
-		cell.setAttribute('role', 'button');
-		cell.setAttribute('aria-label', row.toggleAriaLabel);
-		cell.addEventListener('click', row.onToggle);
-		return cell;
-	}
-
-	let input = document.createElement('input');
-	input.className = 'pref-value-input';
-	input.type = 'text';
-	input.value = row.valueText;
-	let initial = row.valueText;
-	let done = false;
-	let commit = () => {
-		if (done) return;
-		done = true;
-		if (input.value !== initial) row.onCommit(input.value);
-	};
-	input.addEventListener('keydown', (event) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			input.blur();
-		}
-		else if (event.key === 'Escape') {
-			event.preventDefault();
-			input.value = initial;
-			input.blur();
-		}
-	});
-	input.addEventListener('blur', commit);
-	for (let type of ['mousedown', 'mouseup', 'click']) {
-		input.addEventListener(type, event => event.stopPropagation());
-	}
-	cell.appendChild(input);
-	return cell;
-}
-
-Zotero_Preferences.PluginPermissions = {
+Zotero_Preferences.PluginData = {
 	_rows: [],
 	_tree: null,
 	_editTarget: null,
@@ -215,12 +134,27 @@ Zotero_Preferences.PluginPermissions = {
 		// VirtualizedTable column headers go through Zotero.getString (.properties only),
 		// so resolve FTL keys up front and pass the values as labels.
 		this._labels = Object.fromEntries(await Promise.all([
-			"preferences-plugin-permissions-col-plugin",
-			"preferences-plugin-permissions-col-permissions",
-			"preferences-plugin-permissions-col-prefs",
-			"preferences-plugin-permissions-col-data",
-			"preferences-plugin-permissions-edit-row",
-			"preferences-plugin-permissions-legacy-badge",
+			"preferences-plugin-data-col-plugin",
+			"preferences-plugin-data",
+			"preferences-plugin-data-grants-heading",
+			"preferences-plugin-data-edit-prefs-heading",
+			"preferences-plugin-data-col-status",
+			"preferences-plugin-data-col-settings",
+			"preferences-plugin-data-status-legacy",
+			"preferences-plugin-data-status-legacy-disabled",
+			"preferences-plugin-data-status-legacy-uninstalled",
+			"preferences-plugin-data-status-enabled",
+			"preferences-plugin-data-status-disabled",
+			"preferences-plugin-data-status-uninstalled",
+			"preferences-plugin-data-unknown",
+			"preferences-plugin-data-pref-name",
+			"preferences-plugin-data-pref-value",
+			"preferences-plugin-data-grant-path",
+			"preferences-plugin-data-grant-access",
+			"preferences-plugin-data-grant-read",
+			"preferences-plugin-data-grant-write",
+			"preferences-plugin-data-grant-deny",
+			"preferences-plugin-data-col-data",
 		].map(async key => [key, await document.l10n.formatValue(key) || key])));
 
 		let pane = document.getElementById(PARENT_PANE_ID);
@@ -256,8 +190,18 @@ Zotero_Preferences.PluginPermissions = {
 	},
 
 	refresh: async function () {
-		this._rows = await this._collectRows();
+		let generation = this._refreshGeneration = (this._refreshGeneration || 0) + 1;
+		let uuid = this._selectedRow()?.uuid;
+		let rows = await this._collectRows();
+		if (generation !== this._refreshGeneration) return;
+		this._rows = rows;
 		await this._renderTable();
+		if (uuid) {
+			let index = this._rows.findIndex(row => row.uuid === uuid);
+			if (index === -1) this._tree.selection.clearSelection();
+			else this._tree.selection.select(index);
+		}
+		this._updatePluginActions();
 	},
 
 	_collectRows: async function () {
@@ -266,32 +210,41 @@ Zotero_Preferences.PluginPermissions = {
 		for (let addon of addons) {
 			let uuid = PluginUUID.getByID(addon.id);
 			let scope = PluginSandbox.getScope(addon.id);
-			let permissions = scope?.PERMISSIONS;
-			let legacy = VarCheck.isPrivilegedScope(scope);
+			let permissions = scope?.PERMISSIONS
+				|| VarCheck.resolvePermissions(addon.installPermissions.permissions);
+			let legacy = VarCheck.isPrivilegedPermission(addon);
+			PluginInfo.record(addon.id, { name: addon.name, legacy });
 			byUUID.set(uuid, {
 				name: addon.name || addon.id,
 				legacy,
 				pluginID: addon.id,
 				permissions,
+				enabled: addon.isActive,
+				statusText: this._labels[legacy
+					? (addon.isActive ? "preferences-plugin-data-status-legacy" : "preferences-plugin-data-status-legacy-disabled")
+					: (addon.isActive ? "preferences-plugin-data-status-enabled" : "preferences-plugin-data-status-disabled")],
 			});
 		}
 
 		let orphans = new Set();
 		let addIfOrphan = uuid => !byUUID.has(uuid) && orphans.add(uuid);
-		for (let { uuid } of PluginNames.list()) addIfOrphan(uuid);
+		for (let { uuid } of PluginInfo.list()) addIfOrphan(uuid);
 		for (let uuid of PluginFileAccess.listFileAccessUUIDs()) addIfOrphan(uuid);
 		for (let uuid of await this._listSubdirs("plugin-data")) addIfOrphan(uuid);
 		for (let uuid of orphans) {
+			let info = PluginInfo.get(uuid);
+			let legacy = info?.legacy === true;
 			byUUID.set(uuid, {
-				name: PluginNames.get(uuid) || uuid,
-				legacy: false,
+				name: info?.name || this._labels["preferences-plugin-data-unknown"],
+				legacy,
 				pluginID: null,
 				permissions: [],
+				enabled: false,
+				statusText: this._labels[legacy
+					? "preferences-plugin-data-status-legacy-uninstalled"
+					: "preferences-plugin-data-status-uninstalled"],
 			});
 		}
-
-		let editAriaLabel = this._labels["preferences-plugin-permissions-edit-row"];
-		let legacyLabel = this._labels["preferences-plugin-permissions-legacy-badge"];
 
 		let sizeByUUID = new Map(await Promise.all(
 			[...byUUID].map(async ([uuid, info]) => {
@@ -303,49 +256,20 @@ Zotero_Preferences.PluginPermissions = {
 		let rows = [];
 		for (let [uuid, info] of byUUID) {
 			let dataSize = sizeByUUID.get(uuid);
-			let permissionsText;
-			if (info.legacy || !info.pluginID) permissionsText = "—";
-			else permissionsText = String(info.permissions?.length ?? 0);
-			let prefsText;
-			if (info.legacy) {
-				prefsText = "—";
-			}
-			else {
-				let keys = new Set();
-				try {
-					for (let k of Services.prefs.getBranch(PluginPrefs.getBranch(uuid)).getChildList("")) {
-						keys.add(k);
-					}
-				}
-				catch {}
-				prefsText = String(keys.size);
-			}
 			rows.push({
 				uuid,
-				name: info.name,
-				legacy: info.legacy,
-				pluginID: info.pluginID,
-				permissions: info.permissions,
-				permissionsText,
-				prefsText,
+				...info,
+				settingsText: info.legacy
+					? "—"
+					: String(Services.prefs.getBranch(PluginPrefs.getBranch(uuid)).getChildList("").length),
 				dataText: info.legacy ? "—" : formatSize(dataSize),
-				edit: {
-					legacy: info.legacy,
-					legacyLabel,
-					iconKey: "edit",
-					isFocusable: true,
-					ariaLabel: editAriaLabel,
-					onClick: info.legacy
-						? null
-						: () => this._openEditFor(uuid, info.name, info.pluginID),
-				},
 			});
 		}
-		// Sink legacy rows to the bottom; alphabetical within each group.
-		rows.sort((a, b) => {
-			if (a.legacy !== b.legacy) return a.legacy ? 1 : -1;
-			return a.name.localeCompare(b.name);
-		});
+		// Plugin type, installation state, enabled state, then name.
+		rows.sort((a, b) => Number(a.legacy) - Number(b.legacy)
+			|| Number(!a.pluginID) - Number(!b.pluginID)
+			|| Number(!a.enabled) - Number(!b.enabled)
+			|| a.name.localeCompare(b.name) || a.uuid.localeCompare(b.uuid));
 		return rows;
 	},
 
@@ -369,102 +293,79 @@ Zotero_Preferences.PluginPermissions = {
 	},
 
 	_renderTable: async function () {
+		document.getElementById("plugin-data-empty").hidden = !!this._rows.length;
 		if (this._tree) {
 			this._tree.invalidate();
 			if ([...this._tree.selection.selected].some(i => i >= this._rows.length)) {
 				this._tree.selection.clearSelection();
 			}
-			this._updateSelectionInfo();
+			this._updatePluginActions();
 			return;
 		}
 
 		const columns = [
 			{
 				dataKey: "name",
-				label: this._labels["preferences-plugin-permissions-col-plugin"],
-				flex: 4,
+				label: this._labels["preferences-plugin-data-col-plugin"],
+				flex: 1,
 				renderCell: (index, _data, column) => renderNameCell(this._rows[index], column),
 			},
 			{
-				dataKey: "permissionsText",
-				label: this._labels["preferences-plugin-permissions-col-permissions"],
+				dataKey: "statusText",
+				label: this._labels["preferences-plugin-data-col-status"],
 				fixedWidth: true,
-				width: 100,
-				renderCell: renderSizeCell,
-			},
-			{
-				dataKey: "prefsText",
-				label: this._labels["preferences-plugin-permissions-col-prefs"],
-				fixedWidth: true,
-				width: 60,
-				renderCell: renderSizeCell,
+				width: 140,
 			},
 			{
 				dataKey: "dataText",
-				label: this._labels["preferences-plugin-permissions-col-data"],
+				label: this._labels["preferences-plugin-data-col-data"],
 				fixedWidth: true,
-				width: 70,
-				renderCell: renderSizeCell,
+				width: 100,
 			},
 			{
-				dataKey: "edit",
-				label: " ",
-				htmlLabel: ' ',
+				dataKey: "settingsText",
+				label: this._labels["preferences-plugin-data-col-settings"],
 				fixedWidth: true,
-				width: 40,
-				renderCell: renderEditCell,
+				width: 70,
 			},
 		];
+		let renderRow = makeRowRenderer(index => this._rows[index]);
 		await new Promise((resolve) => {
-			ReactDOM.createRoot(document.getElementById("plugin-permissions-table"))
+			ReactDOM.createRoot(document.getElementById("plugin-data-table"))
 				.render(
 					<VirtualizedTable
 						getRowCount={() => this._rows.length}
-						id="plugin-permissions-vtable"
+						id="plugin-data-vtable"
+						label={this._labels["preferences-plugin-data"]}
 						ref={(ref) => {
 							this._tree = ref;
 							resolve();
 						}}
-						renderItem={makeRowRenderer(index => this._rows[index])}
+						renderItem={(index, ...args) => {
+							let row = renderRow(index, ...args);
+							row.classList.toggle("legacy-plugin", this._rows[index].legacy);
+							row.setAttribute("aria-disabled", this._rows[index].legacy);
+							return row;
+						}}
+						isSelectable={index => !this._rows[index].legacy}
 						showHeader={true}
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
 						getRowString={index => this._rows[index].name}
-						onActivate={() => this._openSelected()}
-						onSelectionChange={() => this._updateSelectionInfo()}
+						onActivate={(_event, indices) => {
+							if (!indices.some(index => this._rows[index]?.legacy)) this._openSelected();
+						}}
+						onSelectionChange={() => this._updatePluginActions()}
 					/>
 				);
 		});
-		this._updateSelectionInfo();
+		this._updatePluginActions();
 	},
 
-	_updateSelectionInfo: function () {
-		let container = document.getElementById("plugin-permissions-selection-info");
-		if (!container) return;
-		let legacy = document.getElementById("plugin-permissions-info-legacy");
-		let uninstalled = document.getElementById("plugin-permissions-info-uninstalled");
-		let installed = document.getElementById("plugin-permissions-info-installed");
-
+	_updatePluginActions: function () {
 		let row = this._selectedRow();
-		if (!row) {
-			container.hidden = true;
-			legacy.hidden = uninstalled.hidden = installed.hidden = true;
-			return;
-		}
-
-		let mode;
-		if (row.legacy) mode = 'legacy';
-		else if (row.pluginID) mode = 'installed';
-		else mode = 'uninstalled';
-		container.hidden = false;
-		legacy.hidden = mode !== 'legacy';
-		uninstalled.hidden = mode !== 'uninstalled';
-		installed.hidden = mode !== 'installed';
-		if (mode === 'installed') {
-			document.getElementById("plugin-permissions-info-permissions-text")
-				.textContent = row.permissions.length ? row.permissions.join(", ") : "—";
-		}
+		document.getElementById("plugin-data-manage").disabled = !row || row.legacy;
 	},
 
 	_selectedRow: function () {
@@ -475,16 +376,13 @@ Zotero_Preferences.PluginPermissions = {
 	},
 
 	_openSelected: function () {
-		if (!this._tree) return;
-		let idx = this._tree.selection.focused;
-		if (idx < 0 || idx >= this._rows.length) return;
-		let row = this._rows[idx];
-		if (row.legacy) return;
-		this._openEditFor(row.uuid, row.name, row.pluginID);
-	},
-
-	_openEditFor: function (uuid, name, pluginID = null) {
-		this._editTarget = { uuid, name, pluginID };
+		let row = this._selectedRow();
+		if (!row || row.legacy) return;
+		if (this._editTarget?.uuid !== row.uuid) {
+			this._editPrefsTree?.selection.clearSelection();
+			this._editGrantsTree?.selection.clearSelection();
+		}
+		this._editTarget = { ...row };
 		Zotero_Preferences.navigateToPane(EDIT_PANE_ID);
 	},
 
@@ -507,12 +405,13 @@ Zotero_Preferences.PluginPermissions = {
 		if (h1) h1.textContent = name;
 
 		await this._refreshStatusBanner(pluginID);
+		await this._refreshAccessSection(pluginID);
 		await this._refreshDirSection({
 			dir: PluginFileAccess.getDataDirByUUID(uuid),
 			size: () => PluginFileAccess.getDataDirSizeByUUID(uuid),
-			dirID: "plugin-permissions-edit-data-dir",
-			emptyID: "plugin-permissions-edit-data-empty",
-			actionsID: "plugin-permissions-edit-data-actions",
+			dirID: "plugin-data-edit-data-dir",
+			emptyID: "plugin-data-edit-data-empty",
+			actionsID: "plugin-data-edit-data-actions",
 		});
 		await this._renderEditGrants();
 		await this._renderEditPrefs();
@@ -521,8 +420,8 @@ Zotero_Preferences.PluginPermissions = {
 	_refreshStatusBanner: async function (pluginID) {
 		let addon = pluginID ? await AddonManager.getAddonByID(pluginID) : null;
 		let state = !addon ? 'uninstalled' : (addon.isActive ? 'enabled' : 'disabled');
-		let banner = document.getElementById("plugin-permissions-edit-status");
-		let text = document.getElementById("plugin-permissions-edit-status-text");
+		let banner = document.getElementById("plugin-data-edit-status");
+		let text = document.getElementById("plugin-data-edit-status-text");
 		if (state === 'enabled') {
 			banner.hidden = true;
 			text.removeAttribute('data-l10n-id');
@@ -530,95 +429,140 @@ Zotero_Preferences.PluginPermissions = {
 		}
 		document.l10n.setAttributes(text,
 			state === 'disabled'
-				? 'preferences-plugin-permissions-edit-status-disabled'
-				: 'preferences-plugin-permissions-edit-status-uninstalled');
+				? 'preferences-plugin-data-edit-status-disabled'
+				: 'preferences-plugin-data-edit-status-uninstalled');
 		banner.hidden = false;
+	},
+
+	_refreshAccessSection: async function (pluginID) {
+		let addon = pluginID ? await AddonManager.getAddonByID(pluginID) : null;
+		let section = document.getElementById("plugin-data-access");
+		section.hidden = !addon;
+		if (!addon) return;
+		let scope = PluginSandbox.getScope(pluginID);
+		let permissions = scope?.PERMISSIONS || VarCheck.resolvePermissions(addon.installPermissions.permissions);
+		let capabilities = permissions.filter(permission => permission !== "default"
+			&& !(permission === "dataRead" && permissions.includes("dataWrite"))
+			&& !(permission === "fileSystemRead" && permissions.includes("fileSystemWrite"))
+			&& !(permissions.includes("ui") && ["itemTree",
+				"itemPane",
+				"menu",
+				"button",
+				"shortcut",
+				"windowResource",
+				"reader",
+				"preferencePane",
+				"userPrompt",
+				"window",
+				"tab"].includes(permission)));
+		let labels = await Promise.all(capabilities.map(permission => document.l10n.formatValue(
+			`preferences-plugin-data-capability-${permission}`)));
+		// Network access comes from host_permissions, not a separate API permission.
+		if (addon.installPermissions.origins?.length) {
+			labels.push(await document.l10n.formatValue("preferences-plugin-data-capability-network"));
+		}
+		let list = document.getElementById("plugin-data-capabilities");
+		list.replaceChildren();
+		if (!labels.length) labels.push(await document.l10n.formatValue("preferences-plugin-data-access-basic"));
+		for (let label of labels) {
+			let item = document.createElement("li");
+			item.textContent = label;
+			list.appendChild(item);
+		}
 	},
 
 	_refreshDirSection: async function ({ dir, size, dirID, emptyID, actionsID }) {
 		let exists = await FileIO.exists(dir);
 		let bytes = exists ? await size() : 0;
-		document.getElementById(dirID).textContent = `${PathIdentity.toNative(dir)} (${formatSize(bytes)})`;
+		document.getElementById(dirID).textContent = formatSize(bytes);
+		document.getElementById(dirID).setAttribute("tooltiptext", PathIdentity.toNative(dir));
 		document.getElementById(dirID).hidden = !exists;
 		document.getElementById(emptyID).hidden = exists;
 		document.getElementById(actionsID).hidden = !exists;
+		document.getElementById("plugin-data-data-dir-clear").disabled = !bytes;
 	},
 
 	_renderEditGrants: async function () {
-		let removeLabel = await document.l10n.formatValue(
-			"preferences-plugin-permissions-remove-grant") || "Remove";
-
-		let grants = this._editLayer.list();
-		grants.sort((a, b) => a.path.localeCompare(b.path));
+		let selected = this._selectedGrant();
+		let grants = this._editLayer.list().sort((a, b) => a.path.localeCompare(b.path) || a.mode.localeCompare(b.mode));
 		this._editGrants = grants.map(grant => ({
-			mode: grant.mode,
-			// Shown in the platform's spelling; the layer keeps the canonical one
+			...grant,
+			canonicalPath: grant.path,
 			path: PathIdentity.toNative(grant.path),
-			remove: {
-				iconKey: "minus-circle",
-				isFocusable: true,
-				ariaLabel: removeLabel,
-				onClick: () => {
-					this._editLayer.remove(g => g.path === grant.path && g.mode === grant.mode);
-					this._renderEditGrants();
-					this.refresh();
-				},
-			},
+			access: this._labels[`preferences-plugin-data-grant-${grant.mode}`],
 		}));
-
 		let hasGrants = this._editGrants.length > 0;
-		document.getElementById("plugin-permissions-grants-container").hidden = !hasGrants;
-		document.getElementById("plugin-permissions-grants-empty").hidden = hasGrants;
-
+		document.getElementById("plugin-data-grants-container").hidden = !hasGrants;
+		document.getElementById("plugin-data-grants-empty").hidden = hasGrants;
+		document.getElementById("plugin-data-grants-remove-all").disabled = !hasGrants;
 		if (this._editGrantsTree) {
 			this._editGrantsTree.invalidate();
+			let index = selected ? this._editGrants.findIndex(grant => grant.canonicalPath === selected.canonicalPath && grant.mode === selected.mode) : -1;
+			if (index === -1) this._editGrantsTree.selection.clearSelection();
+			else this._editGrantsTree.selection.select(index);
+			this._updateGrantActions();
+			await this._fitTable("plugin-data-grants-container", this._editGrants.length);
 			return;
 		}
-
 		const columns = [
-			{
-				dataKey: "mode",
-				label: " ",
-				htmlLabel: ' ',
-				fixedWidth: true,
-				width: 80,
-				renderCell: renderModeCell,
-			},
-			{
-				dataKey: "path",
-				label: " ",
-				htmlLabel: ' ',
-				flex: 1,
-			},
-			{
-				dataKey: "remove",
-				label: " ",
-				htmlLabel: ' ',
-				fixedWidth: true,
-				width: 36,
-				type: "button",
-			},
+			{ dataKey: "path", label: this._labels["preferences-plugin-data-grant-path"], flex: 1 },
+			{ dataKey: "access", label: this._labels["preferences-plugin-data-grant-access"], fixedWidth: true, width: 100 },
 		];
 		await new Promise((resolve) => {
-			ReactDOM.createRoot(document.getElementById("plugin-permissions-grants-table"))
-				.render(
-					<VirtualizedTable
-						getRowCount={() => this._editGrants.length}
-						id="plugin-permissions-grants-vtable"
-						ref={(ref) => {
-							this._editGrantsTree = ref;
-							resolve();
-						}}
-						renderItem={makeRowRenderer(index => this._editGrants[index])}
-						showHeader={false}
-						columns={columns}
-						staticColumns={true}
-						disableFontSizeScaling={true}
-						getRowString={index => this._editGrants[index].path}
-						isSelectable={() => false}
-					/>
-				);
+			ReactDOM.createRoot(document.getElementById("plugin-data-grants-table")).render(
+				<VirtualizedTable
+					getRowCount={() => this._editGrants.length}
+					id="plugin-data-grants-vtable"
+					label={this._labels["preferences-plugin-data-grants-heading"]}
+					ref={(ref) => {
+						this._editGrantsTree = ref; resolve();
+					}}
+					renderItem={makeRowRenderer(index => this._editGrants[index])}
+					showHeader={true}
+					columns={columns}
+					staticColumns={true}
+					disableFontSizeScaling={true}
+					getRowString={index => this._editGrants[index].path}
+					onSelectionChange={() => this._updateGrantActions()}
+				/>
+			);
 		});
+		this._updateGrantActions();
+		await this._fitTable("plugin-data-grants-container", this._editGrants.length);
+	},
+
+	_selectedGrant: function () {
+		return this._editGrantsTree?.selection.count
+			? this._editGrants[this._editGrantsTree.selection.focused]
+			: null;
+	},
+
+	_updateGrantActions: function () {
+		document.getElementById("plugin-data-grants-remove").disabled = !this._selectedGrant();
+	},
+
+	removeSelectedGrant: async function () {
+		let grant = this._selectedGrant();
+		if (!grant) return;
+		this._editLayer.remove(entry => entry.path === grant.canonicalPath && entry.mode === grant.mode);
+		await this._renderEditGrants();
+		await this.refresh();
+	},
+
+	_fitTable: async function (containerID, count) {
+		await new Promise(resolve => window.requestAnimationFrame(resolve));
+		let container = document.getElementById(containerID);
+		if (container.hidden) return;
+		let row = container.querySelector(".row");
+		let header = container.querySelector(".virtualized-table-header");
+		if (!row || !header) return;
+		let rowHeight = row.getBoundingClientRect().height;
+		let headerHeight = header.getBoundingClientRect().height;
+		// A newly loaded subpane is still hidden. Its showing event will size it.
+		if (!rowHeight || !headerHeight) return;
+		let bodyStyle = window.getComputedStyle(container.querySelector(".virtualized-table-body"));
+		let padding = parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom);
+		container.style.height = Math.min(220, Math.ceil(headerHeight + rowHeight * count + padding + 2)) + "px";
 	},
 
 	// Prefs live under the plugin's branch (see setupPreferences in xpcom/plugins/globals.mjs)
@@ -634,11 +578,7 @@ Zotero_Preferences.PluginPermissions = {
 
 		let keys = new Set(userBranch.getChildList(""));
 
-		let [toggleLabel, resetLabel, deleteLabel] = await Promise.all([
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-toggle"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-reset"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-delete"),
-		]);
+		let selectedName = this._selectedPref()?.name;
 
 		this._editPrefs = [...keys].sort().map((name) => {
 			let fullKey = prefPrefix + name;
@@ -678,73 +618,139 @@ Zotero_Preferences.PluginPermissions = {
 				value,
 				valueText: typeText === "boolean" ? (value ? "true" : "false") : String(value),
 				isModified,
-				toggleAriaLabel: toggleLabel,
-				onToggle: () => this._togglePref(fullKey),
-				onCommit: text => this._commitPrefEdit(fullKey, text),
-				reset: {
-					// `refresh` reverts to a default; `trash` clears (no default to revert to).
-					iconKey: defaulted ? "refresh" : "trash",
-					isFocusable: isModified,
-					ariaLabel: defaulted ? resetLabel : deleteLabel,
-					disabled: !isModified,
-					onClick: isModified ? () => this._resetPref(fullKey) : () => {},
-				},
+				hasDefault: defaulted,
 			};
 		});
 
 		let hasPrefs = this._editPrefs.length > 0;
-		document.getElementById("plugin-permissions-prefs-container").hidden = !hasPrefs;
-		document.getElementById("plugin-permissions-prefs-empty").hidden = hasPrefs;
+		document.getElementById("plugin-data-prefs-reset-all").disabled = !this._editPrefs.some(row => row.isModified && row.hasDefault);
+		document.getElementById("plugin-data-prefs-container").hidden = !hasPrefs;
+		document.getElementById("plugin-data-prefs-empty").hidden = hasPrefs;
 
 		if (this._editPrefsTree) {
 			this._editPrefsTree.invalidate();
+			let index = this._editPrefs.findIndex(row => row.name === selectedName);
+			if (index === -1) this._editPrefsTree.selection.clearSelection();
+			else this._editPrefsTree.selection.select(index);
+			this._updatePrefActions();
+			await this._fitTable("plugin-data-prefs-container", this._editPrefs.length);
 			return;
 		}
 
 		const columns = [
 			{
 				dataKey: "name",
-				label: " ",
-				htmlLabel: ' ',
+				label: this._labels["preferences-plugin-data-pref-name"],
 				flex: 2,
 				renderCell: (index, _data, column) => renderPrefNameCell(this._editPrefs[index], column),
 			},
-			{
-				dataKey: "value",
-				label: " ",
-				htmlLabel: ' ',
-				flex: 3,
-				renderCell: (index, _data, column) => renderPrefValueCell(this._editPrefs[index], column),
-			},
-			{
-				dataKey: "reset",
-				label: " ",
-				htmlLabel: ' ',
-				fixedWidth: true,
-				width: 36,
-				type: "button",
-			},
+			{ dataKey: "valueText", label: this._labels["preferences-plugin-data-pref-value"], flex: 3 },
 		];
 		await new Promise((resolve) => {
-			ReactDOM.createRoot(document.getElementById("plugin-permissions-prefs-table"))
+			ReactDOM.createRoot(document.getElementById("plugin-data-prefs-table"))
 				.render(
 					<VirtualizedTable
 						getRowCount={() => this._editPrefs.length}
-						id="plugin-permissions-prefs-vtable"
+						id="plugin-data-prefs-vtable"
+						label={this._labels["preferences-plugin-data-edit-prefs-heading"]}
 						ref={(ref) => {
 							this._editPrefsTree = ref;
 							resolve();
 						}}
 						renderItem={makeRowRenderer(index => this._editPrefs[index])}
-						showHeader={false}
+						showHeader={true}
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
 						getRowString={index => this._editPrefs[index].name}
-						isSelectable={() => false}
+						onSelectionChange={() => this._updatePrefActions()}
+						onActivate={() => this.editSelectedPref()}
 					/>
 				);
 		});
+		this._updatePrefActions();
+		await this._fitTable("plugin-data-prefs-container", this._editPrefs.length);
+	},
+
+	_selectedPref: function () {
+		return this._editPrefsTree?.selection.count
+			? this._editPrefs[this._editPrefsTree.selection.focused]
+			: null;
+	},
+
+	_updatePrefActions: function () {
+		let row = this._selectedPref();
+		let edit = document.getElementById("plugin-data-prefs-edit");
+		edit.disabled = !row || row.typeText === "unknown";
+		document.l10n.setAttributes(edit, row?.typeText === "boolean"
+			? "preferences-plugin-data-prefs-toggle-button"
+			: "preferences-plugin-data-prefs-edit-button");
+		let reset = document.getElementById("plugin-data-prefs-reset");
+		reset.disabled = !row?.isModified || !row.hasDefault;
+		document.getElementById("plugin-data-prefs-delete").disabled = !row;
+	},
+
+	editSelectedPref: async function () {
+		let row = this._selectedPref();
+		if (!row || row.typeText === "unknown") return;
+		if (row.typeText === "boolean") {
+			await this._togglePref(row.fullKey);
+			return;
+		}
+		let title = await document.l10n.formatValue("preferences-plugin-data-prefs-edit-title");
+		let value = { value: row.valueText };
+		if (Services.prompt.prompt(window, title, row.name, value, null, { value: false })) {
+			await this._commitPrefEdit(row.fullKey, value.value);
+		}
+	},
+
+	resetSelectedPref: async function () {
+		let row = this._selectedPref();
+		if (row?.isModified && row.hasDefault) await this._clearPref(row.fullKey);
+	},
+
+	deleteSelectedPref: async function () {
+		let row = this._selectedPref();
+		if (!row) return;
+		let prefs = Services.prefs.getBranch("");
+		let defaults = Services.prefs.getDefaultBranch("");
+		try {
+			// Gecko only exposes branch deletion. Preserve other settings in that
+			// branch so deleting "foo" never deletes "foo.bar" as well.
+			let prefix = row.fullKey.endsWith(".") ? row.fullKey : row.fullKey + ".";
+			let affected = new Set(prefs.getChildList(prefix));
+			affected.add(prefix.slice(0, -1));
+			let saved = [];
+			for (let name of affected) {
+				if (name === row.fullKey) continue;
+				for (let branch of [defaults, prefs]) {
+					if (branch === defaults ? !prefHasDefault(defaults, name) : !prefs.prefHasUserValue(name)) continue;
+					let type = branch.getPrefType(name);
+					let kind = type === prefs.PREF_BOOL
+						? "BoolPref"
+						: type === prefs.PREF_INT ? "IntPref" : "StringPref";
+					saved.push({ branch, name, kind, value: branch["get" + kind](name) });
+				}
+			}
+			try {
+				prefs.deleteBranch(row.fullKey);
+			}
+			finally {
+				for (let { branch, name, kind, value } of saved) {
+					try {
+						branch["set" + kind](name, value);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		await this._renderEditPrefs();
+		await this.refresh();
 	},
 
 	_togglePref: async function (fullKey) {
@@ -768,7 +774,9 @@ Zotero_Preferences.PluginPermissions = {
 				// Reject decimals or trailing garbage; the re-render below
 				// keeps the previously-stored value.
 				if (!Number.isFinite(n) || String(n) !== trimmed) {
-					await this._renderEditPrefs();
+					Services.prompt.alert(window,
+						await document.l10n.formatValue("preferences-plugin-data-prefs-edit-title"),
+						await document.l10n.formatValue("preferences-plugin-data-prefs-number-invalid"));
 					return;
 				}
 				rootBranch.setIntPref(fullKey, n);
@@ -783,7 +791,7 @@ Zotero_Preferences.PluginPermissions = {
 		await this._renderEditPrefs();
 	},
 
-	_resetPref: async function (fullKey) {
+	_clearPref: async function (fullKey) {
 		try {
 			Services.prefs.getBranch("").clearUserPref(fullKey);
 		}
@@ -791,6 +799,7 @@ Zotero_Preferences.PluginPermissions = {
 			Zotero.logError(e);
 		}
 		await this._renderEditPrefs();
+		await this.refresh();
 	},
 
 	addEditPref: async function () {
@@ -799,12 +808,12 @@ Zotero_Preferences.PluginPermissions = {
 		let rootBranch = Services.prefs.getBranch("");
 
 		let [title, nameMsg, nameInvalid, nameExists, typeMsg, valMsg] = await Promise.all([
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-title"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-name"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-name-invalid"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-exists"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-type"),
-			document.l10n.formatValue("preferences-plugin-permissions-prefs-add-value"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-title"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-name"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-name-invalid"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-exists"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-type"),
+			document.l10n.formatValue("preferences-plugin-data-prefs-add-value"),
 		]);
 
 		let nameResult = { value: "" };
@@ -854,9 +863,9 @@ Zotero_Preferences.PluginPermissions = {
 	resetAllEditPrefs: async function () {
 		if (!this._editTarget) return;
 		let confirmed = await confirmPrompt({
-			titleKey: "preferences-plugin-permissions-prefs-reset-all-confirm-title",
-			bodyKey: "preferences-plugin-permissions-prefs-reset-all-confirm-body",
-			actionKey: "preferences-plugin-permissions-prefs-reset-all-confirm-action",
+			titleKey: "preferences-plugin-data-prefs-reset-all-confirm-title",
+			bodyKey: "preferences-plugin-data-prefs-reset-all-confirm-body",
+			actionKey: "preferences-plugin-data-prefs-reset-all-confirm-action",
 			args: {},
 		});
 		if (!confirmed) return;
@@ -898,9 +907,9 @@ Zotero_Preferences.PluginPermissions = {
 	clearEditDir: async function () {
 		if (!this._editTarget) return;
 		let confirmed = await confirmPrompt({
-			titleKey: "preferences-plugin-permissions-clear-folder-confirm-title",
-			bodyKey: "preferences-plugin-permissions-clear-folder-confirm-body",
-			actionKey: "preferences-plugin-permissions-clear-folder-confirm-action",
+			titleKey: "preferences-plugin-data-clear-folder-confirm-title",
+			bodyKey: "preferences-plugin-data-clear-folder-confirm-body",
+			actionKey: "preferences-plugin-data-clear-folder-confirm-action",
 			args: { name: this._editTarget.name },
 		});
 		if (!confirmed) return;
@@ -924,9 +933,9 @@ Zotero_Preferences.PluginPermissions = {
 		if (!this._editTarget || !this._editLayer) return;
 		if (!this._editLayer.list().length) return;
 		let confirmed = await confirmPrompt({
-			titleKey: "preferences-plugin-permissions-grants-remove-all-confirm-title",
-			bodyKey: "preferences-plugin-permissions-grants-remove-all-confirm-body",
-			actionKey: "preferences-plugin-permissions-grants-remove-all-confirm-action",
+			titleKey: "preferences-plugin-data-grants-remove-all-confirm-title",
+			bodyKey: "preferences-plugin-data-grants-remove-all-confirm-body",
+			actionKey: "preferences-plugin-data-grants-remove-all-confirm-action",
 			args: {},
 		});
 		if (!confirmed) return;
@@ -950,11 +959,12 @@ Zotero_Preferences.PluginPermissions = {
 
 	_pickGrantMode: async function () {
 		let [title, label] = await Promise.all([
-			document.l10n.formatValue("preferences-plugin-permissions-add-grant-mode-title"),
-			document.l10n.formatValue("preferences-plugin-permissions-add-grant-mode-label"),
+			document.l10n.formatValue("preferences-plugin-data-add-grant-mode-title"),
+			document.l10n.formatValue("preferences-plugin-data-add-grant-mode-label"),
 		]);
 		let modes = ["read", "write", "deny"];
-		let labels = ["Allow read", "Allow write", "Deny"];
+		let labels = await Promise.all(modes.map(mode => document.l10n.formatValue(
+			`preferences-plugin-data-grant-mode-${mode}`)));
 		let selected = { value: 0 };
 		let ok = Services.prompt.select(window, title, label, labels, selected);
 		return ok ? modes[selected.value] : null;
@@ -968,19 +978,11 @@ Zotero_Preferences.PluginPermissions = {
 		Zotero_Preferences.navigateToPane(PARENT_PANE_ID);
 	},
 
-	removeAllForSelected: async function () {
-		let row = this._selectedRow();
-		if (!row) return;
-		if (!await this._confirmRemoveAll(row.name)) return;
-		await this._wipePluginData(row);
-		await this.refresh();
-	},
-
 	_confirmRemoveAll: function (name) {
 		return confirmPrompt({
-			titleKey: "preferences-plugin-permissions-edit-remove-all-confirm-title",
-			bodyKey: "preferences-plugin-permissions-edit-remove-all-confirm-body",
-			actionKey: "preferences-plugin-permissions-edit-remove-all-confirm-action",
+			titleKey: "preferences-plugin-data-edit-remove-all-confirm-title",
+			bodyKey: "preferences-plugin-data-edit-remove-all-confirm-body",
+			actionKey: "preferences-plugin-data-edit-remove-all-confirm-action",
 			args: { name },
 		});
 	},
@@ -1002,6 +1004,6 @@ Zotero_Preferences.PluginPermissions = {
 		// Keep the UUID→name pref for active plugins so the name still
 		// renders until the next load re-registers it.
 		let addon = pluginID ? await AddonManager.getAddonByID(pluginID) : null;
-		if (!addon?.isActive) PluginNames.forget(uuid);
+		if (!addon?.isActive) PluginInfo.forget(uuid);
 	},
 };
