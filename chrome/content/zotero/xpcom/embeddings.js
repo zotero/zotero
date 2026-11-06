@@ -1199,10 +1199,12 @@ Zotero.Embeddings = new function () {
 	 * @param {Boolean} [options.isPriority=true] - Read anchored chunks ahead
 	 *     of what's queued in the document worker
 	 * @return {Promise<Object[]>} - [{ chunkIndex, score, text, outlinePath,
-	 *     pageLabel, position, anchor, annotations }], the anchor the
-	 *     chunk's place in the file as the chunker gives it, null for a
+	 *     pageLabel, position, anchor, annotations, segments }], the anchor
+	 *     the chunk's place in the file as the chunker gives it, null for a
 	 *     plain-text chunk, and the annotations the attachment's on the
-	 *     chunk's text, as Zotero.SDT.readAnchors() gives them
+	 *     chunk's text and the segments the text's structure, as
+	 *     Zotero.SDT.readAnchors() gives them, the segments null for a
+	 *     plain-text chunk
 	 */
 	this.getIndexedChunks = async function (itemID, { queryText = null, isPriority = true } = {}) {
 		if (!this.isEnabled()) {
@@ -1264,7 +1266,8 @@ Zotero.Embeddings = new function () {
 			pageLabel: source.pageLabel,
 			position: source.position,
 			anchor: source.anchor,
-			annotations: source.annotations
+			annotations: source.annotations,
+			segments: source.segments
 		};
 	}
 
@@ -1273,8 +1276,9 @@ Zotero.Embeddings = new function () {
 	// by cutting the attachment's plain text again
 	//
 	// @return {Promise<Object[]>} - One { text, outlinePath, pageLabel,
-	//     position, anchor, annotations } per row, in order; `position` is
-	//     the one the reader navigates to, the first of the chunk's
+	//     position, anchor, annotations, segments } per row, in order;
+	//     `position` is the one the reader navigates to, the first of the
+	//     chunk's, and `segments` the structure of the text, where known
 	async function _loadChunkSources(itemID, rows, { isPriority }) {
 		let sources = rows.map(() => ({
 			text: null,
@@ -1282,7 +1286,8 @@ Zotero.Embeddings = new function () {
 			pageLabel: null,
 			position: null,
 			anchor: null,
-			annotations: []
+			annotations: [],
+			segments: null
 		}));
 		let structured = [];
 		let plain = [];
@@ -1350,7 +1355,8 @@ Zotero.Embeddings = new function () {
 					outlinePath: found.outlinePath || null,
 					pageLabel: found.pageLabel,
 					position: found.position || null,
-					annotations: found.annotations
+					annotations: found.annotations,
+					segments: found.segments || null
 				});
 			}
 		}

@@ -483,10 +483,10 @@ describe("Zotero.BestMatch", function () {
 			let excerpts = await session.getMatchingExcerpts(attachment.id);
 			assert.lengthOf(excerpts, 1);
 			// Cut off this thread, from structure already extracted, each
-			// passage placed for the reader to open it at and marked with
-			// the annotations on it
+			// passage placed for the reader to open it at, marked with the
+			// annotations on it and described by its structure
 			assert.isTrue(chunksStub.alwaysCalledWith(attachment.id,
-				{ cachedOnly: true, isPriority: true, annotations: true }));
+				{ cachedOnly: true, isPriority: true, annotations: true, segments: true }));
 			assert.equal(excerpts[0].text, 'An owl hunts at night.');
 			assert.deepEqual(excerpts[0].position, { pageIndex: 3, rects: [[10, 20, 300, 40]] });
 			assert.equal(excerpts[0].pageLabel, '4');

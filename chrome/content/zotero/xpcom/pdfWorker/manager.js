@@ -719,15 +719,18 @@ class PDFWorker {
 	 * @param {Boolean} [options.isPriority]
 	 * @param {Object[]} [options.positions] - Reader positions to find
 	 *     within each chunk's text
+	 * @param {Boolean} [options.segments] - Give each chunk its `segments`,
+	 *     the structure of its text, as readStructuredDocumentTextAnchors()
+	 *     does
 	 * @returns {Promise<Object>} - { chunks, sourceHash, chunkerVersion },
 	 *     each chunk with `positions`, the reader positions its anchor
 	 *     resolves to, and `overlaps`, per given position the { start, end }
 	 *     ranges of its text covered or null
 	 */
-	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = [] } = {}) {
+	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = [], segments = false } = {}) {
 		return this._enqueue(async () => {
 			try {
-				var result = await this._query('sdt.getChunks', { buf, positions }, [buf]);
+				var result = await this._query('sdt.getChunks', { buf, positions, segments }, [buf]);
 			}
 			catch (e) {
 				this._throwWorkerError('sdt.getChunks', e);
@@ -746,9 +749,9 @@ class PDFWorker {
 	 * @param {Integer} itemID - The attachment
 	 * @param {ArrayBuffer} buf - Its pack, as getStructuredDocumentText() returns it
 	 * @param {Object} options
-	 * @param {Object} options.anchor - The chunk's anchor, as getStructuredDocumentTextChunks() gives it
-	 * @param {Integer} options.start - The selection's offsets into the chunk's text
-	 * @param {Integer} options.end
+	 * @param {Array[]} options.ranges - Content ranges in the structure, each
+	 *     [start, end] points made from a chunk's `segments`, one per run of
+	 *     text to annotate
 	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
 	 * @param {String} [options.color] - The annotation color
 	 * @param {String} [options.password] - The PDF's, when it's encrypted
@@ -782,7 +785,7 @@ class PDFWorker {
 				var result = await this._query('createAnnotations', { packBuf: buf, fileBuf, ...options }, [buf, fileBuf]);
 			}
 			catch (e) {
-				this._throwWorkerError('createAnnotations', e, { anchor: options.anchor });
+				this._throwWorkerError('createAnnotations', e, { ranges: options.ranges });
 			}
 			Zotero.debug(`Annotated a chunk selection of item ${attachment.libraryKey} in ${new Date() - t} ms`);
 			return result;

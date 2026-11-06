@@ -862,7 +862,7 @@ Zotero.BestMatch = new function () {
 			// which is not a price a preview may charge. Cut and placed in the
 			// document worker.
 			let cut = await Zotero.SDT.getItemChunks(itemID,
-				{ cachedOnly: true, isPriority, annotations: true });
+				{ cachedOnly: true, isPriority, annotations: true, segments: true });
 			if (cut.ok && cut.chunks.length) {
 				return cut.chunks;
 			}

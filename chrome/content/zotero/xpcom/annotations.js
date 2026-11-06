@@ -344,28 +344,28 @@ Zotero.Annotations = new function () {
 	};
 
 	/**
-	 * Annotate text selected within an anchored chunk of an attachment's
-	 * text, as Zotero.SDT.getItemChunks() cuts it: a highlight or underline
-	 * over the selected words, saved as annotation items of the attachment,
-	 * one per stretch of the selection that sits together in the document,
-	 * as a selection across a caption makes two. Made from the attachment's
-	 * structured text, with the file read for what it alone doesn't give.
-	 * PDF attachments only so far.
+	 * Annotate content ranges in an attachment's structured text: a
+	 * highlight or underline over the text they address, saved as
+	 * annotation items of the attachment, one per range. A range is
+	 * [start, end], points in the structure made from a chunk's `segments`
+	 * (see Zotero.SDT.readAnchors()), one per run of a selection -- a
+	 * stretch of it that sits together in the document, as a selection
+	 * across a caption has two. Made from the attachment's structured text,
+	 * with the file read for what it alone doesn't give. PDF attachments
+	 * only so far.
 	 *
 	 * @param {Integer} itemID
-	 * @param {Object} anchor - The chunk's anchor
-	 * @param {Integer} start - Offsets into the chunk's text
-	 * @param {Integer} end
+	 * @param {Array[]} ranges
 	 * @param {Object} [options]
 	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
 	 * @param {String} [options.color] - Hex color, the reader's default when omitted
 	 * @returns {Promise<Object>} - { ok: true, items } with the saved
 	 *     annotation items, or { ok: false, reason }: Zotero.SDT.getPack()'s
 	 *     reasons, 'unsupported' for an attachment not annotated this way,
-	 *     'unresolved' when the selection isn't found in the document, or
-	 *     'failed' when the worker couldn't annotate it
+	 *     'unresolved' when the ranges aren't found in the document, or
+	 *     'failed' when the worker couldn't annotate them
 	 */
-	this.createFromSelection = async function (itemID, anchor, start, end, { type = 'highlight', color } = {}) {
+	this.createFromRanges = async function (itemID, ranges, { type = 'highlight', color } = {}) {
 		let item = await Zotero.Items.getAsync(itemID);
 		// Until the worker annotates EPUBs and snapshots as well
 		if (!item || !item.isPDFAttachment()) {
@@ -378,9 +378,7 @@ Zotero.Annotations = new function () {
 		let made;
 		try {
 			made = await Zotero.PDFWorker.createAnnotations(itemID, result.bytes, {
-				anchor,
-				start,
-				end,
+				ranges,
 				type,
 				color: color || this.DEFAULT_COLOR,
 				isPriority: true,

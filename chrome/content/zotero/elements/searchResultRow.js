@@ -246,15 +246,15 @@
 		}
 
 		// Offer to annotate the passage once a selection of its text is made,
-		// where the passage knows where it sits in the document and the
-		// attachment is one that can be annotated this way -- a PDF, until
-		// EPUBs and snapshots are. Selecting is fine regardless, to copy.
+		// where the passage's structure is known and the attachment is one
+		// that can be annotated this way -- a PDF, until EPUBs and snapshots
+		// are. Selecting is fine regardless, to copy.
 		// The popup points at the end the selection was finished at, below
 		// it for a forward selection and above for a backward one, as in the
 		// reader.
 		_handleQuoteMouseUp = () => {
 			let offsets = this._getSelectedOffsets();
-			if (!offsets || !this._result?.anchor || !Zotero.Items.get(this.itemID)?.isPDFAttachment()) {
+			if (!offsets || !this._result?.segments?.length || !Zotero.Items.get(this.itemID)?.isPDFAttachment()) {
 				return;
 			}
 			this._selection = offsets;
@@ -316,16 +316,38 @@
 			return start < end ? { start, end } : null;
 		}
 
+		// The selection as content ranges in the document's structure, one
+		// per run of the passage's text it crosses -- a stretch read as the
+		// document orders it -- between the points at its ends in the
+		// segments it falls in
+		_getSelectedRanges({ start, end }) {
+			let ranges = [];
+			for (let segment of this._result.segments || []) {
+				let from = Math.max(start, segment.start);
+				let to = Math.min(end, segment.end);
+				if (from >= to) {
+					continue;
+				}
+				let point = offset => [...segment.ref, segment.offset + offset - segment.start];
+				let last = ranges.at(-1);
+				if (last?.run === segment.run) {
+					last.range[1] = point(to);
+				}
+				else {
+					ranges.push({ run: segment.run, range: [point(from), point(to)] });
+				}
+			}
+			return ranges.map(({ range }) => range);
+		}
+
 		// Make the annotation, and stay open to tag it
 		async _createAnnotation(color) {
 			if (this._annotated) {
 				return;
 			}
-			let { start, end } = this._selection;
 			let type = Zotero.Prefs.get('reader.textSelectionAnnotationMode') || 'highlight';
-			let result = await Zotero.Annotations.createFromSelection(
-				this.itemID, this._result.anchor, start, end, { type, color }
-			);
+			let ranges = this._getSelectedRanges(this._selection);
+			let result = await Zotero.Annotations.createFromRanges(this.itemID, ranges, { type, color });
 			if (this._popup.state != 'open') {
 				return;
 			}
@@ -380,32 +402,117 @@
 		}
 
 		// The passage's text, with the query's matches and the annotations
-		// over it marked, and its snippet wrapped too when asked to mark it
+		// over it marked, and its snippet wrapped too when asked to mark it.
+		// Shown as the document's blocks where the passage's structure is
+		// known, as running text otherwise.
 		_renderQuote() {
 			let text = this._result.text || '';
-			let snippet = this.highlightSnippet ? this._result.snippet : null;
+			let segments = this._result.segments;
 			this._quote.replaceChildren();
-			if (!snippet) {
-				this._appendMarked(this._quote, text, 0, text.length);
-				return;
+			this._quote.classList.toggle('structured', !!segments?.length);
+			if (segments?.length) {
+				this._renderBlocks(text, segments);
 			}
-			let marked = document.createElement('span');
-			marked.className = 'snippet';
-			this._appendMarked(this._quote, text, 0, snippet.start);
-			this._appendMarked(marked, text, snippet.start, snippet.end);
-			this._quote.append(marked);
-			this._appendMarked(this._quote, text, snippet.end, text.length);
+			else {
+				this._appendMarked(this._quote, text, 0, text.length);
+			}
 		}
 
-		// Append text[start, end) to a node, cut where a match or an
-		// annotation starts or ends, each piece wrapped in a span per layer
-		// over it: matches as before, annotations carrying their color
+		// Simple rendering of segments of structured-text
+		_renderBlocks(text, segments) {
+			let open = [];
+			let cursor = 0;
+			let innermost = () => open.at(-1)?.element ?? this._quote;
+			for (let segment of segments) {
+				let chain = [...segment.path, segment.block];
+				let placeholder = chain.findIndex(block => ['table', 'image'].includes(block.type));
+				if (placeholder >= 0) {
+					chain = chain.slice(0, placeholder + 1);
+				}
+				let shared = 0;
+				while (shared < open.length && shared < chain.length
+						&& open[shared].key == chain[shared].ref.join('.')) {
+					shared++;
+				}
+				open.length = shared;
+				if (segment.start > cursor) {
+					this._appendMarked(innermost(), text, cursor, segment.start);
+				}
+				for (let block of chain.slice(shared)) {
+					let element = this._createBlockElement(block);
+					innermost().append(element);
+					open.push({ key: block.ref.join('.'), element });
+				}
+				let target = innermost();
+				if (placeholder >= 0) {
+					target = document.createElement('span');
+					target.className = 'hidden-text';
+					innermost().append(target);
+				}
+				this._appendMarked(this._styled(target, segment.style), text, segment.start, segment.end);
+				cursor = segment.end;
+			}
+			if (cursor < text.length) {
+				this._appendMarked(this._quote, text, cursor, text.length);
+			}
+		}
+
+		// An element for a block, after the reader's rendering of the same
+		// structure; math is shown as text, marked for what it is, a table
+		// or an image as a placeholder
+		_createBlockElement(block) {
+			let tags = {
+				paragraph: 'p',
+				heading: 'h4',
+				blockquote: 'blockquote',
+				list: block.ordered ? 'ol' : 'ul',
+				listitem: 'li',
+				table: 'figure',
+				caption: 'figcaption',
+				note: 'aside',
+				preformatted: 'pre',
+				math: 'div',
+				image: 'figure',
+			};
+			let element = document.createElement(tags[block.type] || 'div');
+			element.className = `block ${block.type}`;
+			element.dataset.ref = block.ref.join('.');
+			if (block.type == 'list' && block.ordered && block.startIndex > 1) {
+				element.start = block.startIndex;
+			}
+			return element;
+		}
+
+		// Where a segment's text goes for its inline style: wrappers inside
+		// the given node, innermost last, as the reader nests them
+		_styled(node, style) {
+			if (!style) {
+				return node;
+			}
+			for (let [flag, tag] of [['bold', 'strong'], ['italic', 'em'], ['sup', 'sup'], ['sub', 'sub'], ['monospace', 'code']]) {
+				if (style[flag]) {
+					let wrapper = document.createElement(tag);
+					node.append(wrapper);
+					node = wrapper;
+				}
+			}
+			return node;
+		}
+
+		// Append text[start, end) to a node, cut where a match, an annotation
+		// or the snippet starts or ends, each piece wrapped in a span per
+		// layer over it: matches and the snippet as such, annotations
+		// carrying their color
 		_appendMarked(node, text, start, end) {
 			let layers = [
-				...(this._result.ranges || []).map(([from, to]) => ({ from, to })),
+				...(this._result.ranges || []).map(([from, to]) => ({ from, to, className: 'match' })),
 				...(this._result.annotations || []).flatMap(annotation => annotation.ranges
 					.map(({ start: from, end: to }) => ({ from, to, annotation }))),
 			];
+			let snippet = this.highlightSnippet ? this._result.snippet : null;
+			if (snippet) {
+				layers.push({ from: snippet.start, to: snippet.end, className: 'snippet' });
+			}
 			let cuts = new Set([start, end]);
 			for (let { from, to } of layers) {
 				if (from > start && from < end) cuts.add(from);
@@ -429,7 +536,7 @@
 						}
 					}
 					else {
-						span.className = 'match';
+						span.className = layer.className;
 					}
 					span.append(piece);
 					piece = span;
@@ -463,6 +570,7 @@
 			}
 			this._result.text = read.text;
 			this._result.annotations = read.annotations;
+			this._result.segments = read.segments;
 			this.render();
 		}
 

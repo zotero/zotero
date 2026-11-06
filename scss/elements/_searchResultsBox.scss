@@ -61,6 +61,65 @@ search-result-row {
 		@include search-match-highlight;
 	}
 
+	// A passage shown as the document's blocks, where its structure is
+	// known. The separators between blocks stay in the text, for offsets
+	// into it to count through the quote, so whitespace collapses here
+	.body .quote.structured {
+		white-space: normal;
+
+		.block {
+			margin: 0;
+		}
+
+		.block + .block {
+			margin-top: 0.4em;
+		}
+
+		h4.block {
+			font-size: inherit;
+			font-weight: 600;
+		}
+
+		pre.block {
+			white-space: pre-wrap;
+			font-family: monospace;
+			font-size: 0.9em;
+		}
+
+		figcaption.block, aside.block {
+			font-size: 0.9em;
+			font-style: italic;
+		}
+
+		// A table or an image stands as a placeholder; its text is kept
+		// for offsets' sake but not shown
+		figure.block {
+			font-style: italic;
+			color: var(--fill-tertiary);
+
+			&.table::before {
+				content: '[Table]';
+			}
+
+			&.image::before {
+				content: '[Image]';
+			}
+
+			.hidden-text {
+				display: none;
+			}
+		}
+
+		.block.math {
+			font-family: monospace;
+			color: var(--fill-tertiary);
+		}
+
+		ul.block, ol.block {
+			padding-inline-start: 1.2em;
+		}
+	}
+
 	// The attachment's annotations over the passage, in their own colors:
 	// a highlight as a wash behind the words, an underline beneath them
 	.body .quote .annotation.highlight {

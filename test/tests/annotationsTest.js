@@ -339,21 +339,33 @@ describe("Zotero.Annotations", function() {
 		});
 	});
 
-	describe("#createFromSelection()", function () {
-		it("should annotate text selected within a chunk of a PDF", async function () {
+	describe("#createFromRanges()", function () {
+		it("should annotate content ranges in a PDF's structured text", async function () {
 			// The structured text is extracted and the selection annotated
 			// in the document worker
 			this.timeout(120000);
 			let item = await importFileAttachment('test.pdf');
-			let cut = await Zotero.SDT.getItemChunks(item.id);
+			let cut = await Zotero.SDT.getItemChunks(item.id, { segments: true });
 			assert.isTrue(cut.ok, cut.reason);
 			let chunk = cut.chunks.find(chunk => chunk.text.includes('easy-to-use tool'));
-			assert.ok(chunk?.anchor);
+			assert.ok(chunk?.segments?.length);
+			// Each segment: a stretch of the text from one node of one block
+			for (let segment of chunk.segments) {
+				assert.isAtMost(segment.end, chunk.text.length);
+				assert.isArray(segment.ref);
+				assert.equal(segment.block.type, 'paragraph');
+			}
 			let phrase = 'easy-to-use tool';
 			let start = chunk.text.indexOf(phrase);
 			let end = start + phrase.length;
+			// The content point at an offset into the chunk's text
+			let pointAt = (offset) => {
+				let segment = chunk.segments.find(s => offset >= s.start && offset <= s.end);
+				return [...segment.ref, segment.offset + offset - segment.start];
+			};
+			let ranges = [[pointAt(start), pointAt(end)]];
 
-			let result = await Zotero.Annotations.createFromSelection(item.id, chunk.anchor, start, end);
+			let result = await Zotero.Annotations.createFromRanges(item.id, ranges);
 			assert.isTrue(result.ok, result.reason);
 			assert.lengthOf(result.items, 1);
 			let [annotation] = result.items;
@@ -370,7 +382,7 @@ describe("Zotero.Annotations", function() {
 			assert.sameMembers(item.getAnnotations().map(x => x.id), [annotation.id]);
 
 			// A later one takes the type and color asked for
-			let again = await Zotero.Annotations.createFromSelection(item.id, chunk.anchor, start, end,
+			let again = await Zotero.Annotations.createFromRanges(item.id, ranges,
 				{ type: 'underline', color: '#ff6666' });
 			assert.isTrue(again.ok, again.reason);
 			assert.equal(again.items[0].annotationType, 'underline');
@@ -382,6 +394,7 @@ describe("Zotero.Annotations", function() {
 			let { chunks: [read, nothing] } = await Zotero.SDT.readAnchors(item.id, [chunk.anchor, null]);
 			assert.isNull(nothing);
 			assert.include(read.text, phrase);
+			assert.deepEqual(read.segments, chunk.segments);
 			let covered = { start: read.text.indexOf(phrase), end: read.text.indexOf(phrase) + phrase.length };
 			assert.sameDeepMembers(read.annotations.map(a => [a.key, a.type, a.color, a.ranges]), [
 				[annotation.key, 'highlight', Zotero.Annotations.DEFAULT_COLOR, [covered]],
@@ -395,12 +408,12 @@ describe("Zotero.Annotations", function() {
 
 			// What can't be annotated is reported
 			assert.deepEqual(
-				await Zotero.Annotations.createFromSelection(item.id, { pageRects: [[9, 0, 0, 1, 1]] }, 0, 1),
+				await Zotero.Annotations.createFromRanges(item.id, [[[99, 0, 0], [99, 0, 3]]]),
 				{ ok: false, reason: 'unresolved' }
 			);
 			let image = await importFileAttachment('test.png');
 			assert.deepEqual(
-				await Zotero.Annotations.createFromSelection(image.id, chunk.anchor, start, end),
+				await Zotero.Annotations.createFromRanges(image.id, ranges),
 				{ ok: false, reason: 'unsupported' }
 			);
 		});

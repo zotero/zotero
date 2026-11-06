@@ -198,12 +198,14 @@ Zotero.SDT = new function () {
 	 *     the cut at the front of the worker queue too
 	 * @param {Boolean} [options.annotations] - Give each chunk the
 	 *     attachment's `annotations` on its text, as readAnchors() does
+	 * @param {Boolean} [options.segments] - Give each chunk its `segments`,
+	 *     the structure of its text, as readAnchors() does
 	 * @returns {Promise<Object>} - { ok: true, chunks, contentHash }, the
 	 *     hash being the source file's as the pack records it, or
 	 *     { ok: false, reason }: getPack()'s reasons, or 'cut-failed' when
 	 *     the pack is there but the worker couldn't cut it
 	 */
-	this.getItemChunks = async function (itemID, { annotations = false, ...options } = {}) {
+	this.getItemChunks = async function (itemID, { annotations = false, segments = false, ...options } = {}) {
 		let result = await this.getPack(itemID, options);
 		if (!result.ok) {
 			return { ok: false, reason: result.reason };
@@ -214,7 +216,8 @@ Zotero.SDT = new function () {
 			cut = await Zotero.PDFWorker.getStructuredDocumentTextChunks(
 				result.bytes, {
 					isPriority: options.isPriority,
-					positions: marks.map(mark => mark.position)
+					positions: marks.map(mark => mark.position),
+					segments
 				});
 		}
 		catch {
@@ -264,12 +267,14 @@ Zotero.SDT = new function () {
 	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
 	 *     the read at the front of the worker queue too
 	 * @returns {Promise<Object>} { ok: true, chunks: [{ text, outlinePath,
-	 *     pageLabel, position, annotations } | null] }, `position` the
-	 *     reader position the chunk opens at and `annotations` the
-	 *     attachment's highlights and underlines on its text, each
-	 *     { key, type, color, comment, ranges } with the { start, end }
-	 *     ranges of `text` it covers; or { ok: false, reason }: getPack()'s
-	 *     reasons, or 'failed' when the worker couldn't read the pack
+	 *     pageLabel, segments, position, annotations } | null] },
+	 *     `segments` the structure of `text` as the chunker's
+	 *     getAnchorSegments() describes it, `position` the reader position
+	 *     the chunk opens at and `annotations` the attachment's highlights
+	 *     and underlines on its text, each { key, type, color, comment,
+	 *     ranges } with the { start, end } ranges of `text` it covers; or
+	 *     { ok: false, reason }: getPack()'s reasons, or 'failed' when the
+	 *     worker couldn't read the pack
 	 */
 	this.readAnchors = async function (itemID, anchors, options = {}) {
 		let result = await this.getPack(itemID, options);
