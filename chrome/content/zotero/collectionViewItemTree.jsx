@@ -1353,6 +1353,7 @@ class CollectionViewItemTree extends ItemTree {
 	 * based on the view's canDropCheck() and modifier keys.
 	 */
 	onDragOver(event, row) {
+		var listDrop = false;
 		try {
 			event.preventDefault();
 			event.stopPropagation();
@@ -1376,8 +1377,11 @@ class CollectionViewItemTree extends ItemTree {
 			}
 
 			if (!this.canDropCheck(row, Zotero.DragDrop.currentOrientation, event.dataTransfer)) {
-				this.setDropEffect(event, "none");
-				return false;
+				if (!this._getListDropTarget(event.dataTransfer)) {
+					this.setDropEffect(event, "none");
+					return false;
+				}
+				listDrop = true;
 			}
 
 			if (event.dataTransfer.getData("zotero/item")) {
@@ -1444,12 +1448,35 @@ class CollectionViewItemTree extends ItemTree {
 			return false;
 		}
 		finally {
-			let dropRow = event.dataTransfer.dropEffect != 'none' ? row : null;
+			// A drop into the list as a whole doesn't target a row
+			let dropRow = event.dataTransfer.dropEffect != 'none' && !listDrop ? row : null;
 			if (dropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
 				this._setDropRow(dropRow);
 			}
 		}
 	};
+
+	/**
+	 * The library or collection that items dragged from another view are added to when dropped
+	 * on this list, if the collection tree would accept them there
+	 *
+	 * @return {{ collectionsView: CollectionTree, treeRow: CollectionTreeRow }|null}
+	 */
+	_getListDropTarget(dataTransfer) {
+		if (!dataTransfer.types.includes('zotero/item') || this.collectionTreeRows.length != 1) {
+			return null;
+		}
+		var sourceTreeRow = Zotero.DragDrop.getDragSource();
+		var treeRow = this.collectionTreeRows[0];
+		if (!sourceTreeRow || sourceTreeRow.id == treeRow.id) {
+			return null;
+		}
+		var collectionsView = this.domEl.closest('library-view')?.collectionsView;
+		if (!collectionsView || !collectionsView.canDropOnTreeRow(treeRow, 0, dataTransfer)) {
+			return null;
+		}
+		return { collectionsView, treeRow };
+	}
 
 	/**
 	 * Called by treeRow.onDragOver() before setting the dropEffect
@@ -1596,6 +1623,20 @@ class CollectionViewItemTree extends ItemTree {
 	onDrop = async (event, row) => {
 		const dataTransfer = event.dataTransfer;
 		var orient = Zotero.DragDrop.currentOrientation;
+		if (!this.canDropCheck(row, orient, dataTransfer)) {
+			let listDropTarget = this._getListDropTarget(dataTransfer);
+			this._clearDropIndicator();
+			let dropEffect = Zotero.DragDrop.currentDropEffect || dataTransfer.dropEffect;
+			Zotero.DragDrop.currentDropEffect = null;
+			if (listDropTarget && dropEffect && dropEffect != "none") {
+				let { collectionsView, treeRow } = listDropTarget;
+				if (await collectionsView.canDropOnTreeRowAsync(treeRow, 0, dataTransfer)) {
+					await collectionsView.dropOnTreeRow(event, treeRow, dropEffect);
+				}
+			}
+			Zotero.DragDrop.currentDragSource = null;
+			return false;
+		}
 		if (row == -1) {
 			row = 0;
 			orient = -1;

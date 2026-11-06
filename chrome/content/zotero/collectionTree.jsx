@@ -1910,10 +1910,16 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	};
 
 	canDropCheck = (row, orient, dataTransfer) => {
-		const treeRow = this.getRow(row);
 		// TEMP
 		Zotero.debug("Row is " + row + "; orient is " + orient);
-		
+		return this.canDropOnTreeRow(this.getRow(row), orient, dataTransfer);
+	};
+	
+	/**
+	 * Whether the dragged objects can be dropped on a collection tree row, which doesn't need
+	 * to be visible in this tree
+	 */
+	canDropOnTreeRow = (treeRow, orient, dataTransfer) => {
 		var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 		if (!dragData) {
 			Zotero.debug("No drag data");
@@ -2081,7 +2087,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	async canDropCheckAsync(row, orient, dataTransfer) {
 		//Zotero.debug("Row is " + row + "; orient is " + orient);
-		
+		return this.canDropOnTreeRowAsync(this.getRow(row), orient, dataTransfer);
+	}
+	
+	async canDropOnTreeRowAsync(treeRow, orient, dataTransfer) {
 		var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 		if (!dragData) {
 			Zotero.debug("No drag data");
@@ -2091,8 +2100,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var data = dragData.data;
 		
 		if (orient == 0) {
-			var treeRow = this.getRow(row); //the collection we are dragging over
-			
 			if (dataType == 'zotero/item' && treeRow.isBucket()) {
 				return true;
 			}
@@ -2456,6 +2463,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				|| !(await this.canDropCheckAsync(row, orient, dataTransfer))) {
 			return false;
 		}
+		await this.dropOnTreeRow(event, treeRow, dropEffect);
+	}
+	
+	/**
+	 * Drop the dragged objects on a collection tree row, which doesn't need to be visible in
+	 * this tree
+	 */
+	async dropOnTreeRow(event, targetTreeRow, dropEffect) {
+		var dataTransfer = event.dataTransfer;
 		var dragData = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
 		if (!dragData) {
 			Zotero.debug("No drag data");
@@ -2464,7 +2480,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var dataType = dragData.dataType;
 		var data = dragData.data;
 		var sourceTreeRow = Zotero.DragDrop.getDragSource(dataTransfer);
-		var targetTreeRow = treeRow;
 		
 		var copyOptions = {
 			tags: Zotero.Prefs.get('groups.copyTags'),

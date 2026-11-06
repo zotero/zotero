@@ -2319,7 +2319,49 @@ describe("CollectionViewItemTree", function () {
 			
 			assert.equal(attachment.parentItemID, item2.id);
 		});
-		
+
+		it("should add items dragged from another view to the list's collection", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { collections: [collection.id] });
+			var item2 = await createDataObject('item');
+			await selectCollection(win, collection);
+			itemsView = zp.itemsView;
+
+			var dataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copyMove',
+				types: ['zotero/item'],
+				getData: function (type) {
+					if (type == 'zotero/item') {
+						return item2.id + "";
+					}
+					return "";
+				},
+				mozItemCount: 1
+			};
+			// Over a regular item, which can't take the dragged item as a child
+			var index = itemsView.getRowIndexByID(item1.id);
+			var rowEl = {
+				classList: { contains: () => false },
+				getBoundingClientRect: () => ({ y: 0, height: 100 })
+			};
+			Zotero.DragDrop.currentDragSource = cv.getRow(cv.getRowIndexByID('L' + item2.libraryID));
+			itemsView.onDragOver({
+				preventDefault: () => {},
+				stopPropagation: () => {},
+				currentTarget: rowEl,
+				target: rowEl,
+				clientY: 50,
+				dataTransfer
+			}, index);
+			assert.equal(dataTransfer.dropEffect, 'copy');
+
+			await drop(index, 0, dataTransfer);
+
+			assert.isTrue(collection.hasItem(item2.id));
+			assert.isNull(Zotero.DragDrop.currentDragSource);
+		});
+
 		it("should move a child item from last item in list to another", async function () {
 			var collection = await createDataObject('collection');
 			await waitForItemsLoad(win);
