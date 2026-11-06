@@ -99,13 +99,13 @@ describe("Zotero_Tabs", function() {
 			let reader = await Zotero.Reader.open(attachment.id);
 			let tabs = win.Zotero_Tabs;
 			tabs.select('zotero-pane');
-			let historyLength = tabs._history.length;
+			let lastClosed = Zotero.Session.getLastClosed();
 			
 			tabs.unload(reader.tabID);
 			
 			let { tab } = tabs._getTab(reader.tabID);
 			assert.equal(tab.type, 'reader-unloaded');
-			assert.lengthOf(tabs._history, historyLength);
+			assert.equal(Zotero.Session.getLastClosed(), lastClosed);
 			tabs.close(reader.tabID);
 		});
 	});
@@ -432,7 +432,7 @@ describe("Zotero_Tabs", function() {
 			await view.search();
 			await view.itemsView.selectItem(item2.id);
 			let title = tabs._getTab(id).tab.title;
-			let historyLength = tabs._history.length;
+			let lastClosed = Zotero.Session.getLastClosed();
 			
 			tabs.select(zp.primaryLibraryView.tabID);
 			assert.isTrue(tabs.canUnload(id));
@@ -445,7 +445,7 @@ describe("Zotero_Tabs", function() {
 			assert.equal(tab.title, title);
 			assert.equal(tabIndex, 1);
 			// An unloaded tab isn't a closed one
-			assert.lengthOf(tabs._history, historyLength);
+			assert.equal(Zotero.Session.getLastClosed(), lastClosed);
 			
 			tabs.select(id);
 			let restoredView = await waitForLibraryView(id);
@@ -981,6 +981,73 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 
+		it("should reopen a tab closed in another window at the end of this one", async function () {
+			let { id } = await addLibraryTab({ collections: [collection.treeViewID] });
+			tabs.close(id);
+			await win2.Zotero_Tabs.undoClose();
+			let newID = win2.Zotero_Tabs.selectedID;
+			try {
+				assert.equal(win2.Zotero_Tabs._getTab(newID).tabIndex, win2.Zotero_Tabs._tabs.length - 1);
+				let view = await waitForCallback(() => win2.ZoteroPane.getLibraryView(newID)?.loaded
+					&& win2.ZoteroPane.getLibraryView(newID), 50, 20);
+				await view.waitForLibraryTabState();
+				assert.deepEqual(view.getCollectionTreeRows().map(row => row.id), [collection.treeViewID]);
+			}
+			finally {
+				win2.Zotero_Tabs.close(newID);
+			}
+		});
+		
+		it("should reopen a closed window with its tabs", async function () {
+			let win3 = await loadZoteroPane();
+			win3.Zotero_Tabs.addLibraryTab({ state: { collections: [collection.treeViewID] } });
+			let tabCount = win3.Zotero_Tabs._tabs.length;
+			let openWindows = Zotero.getMainWindows();
+			win3.close();
+			await waitForCallback(() => win3.closed, 50, 20);
+			
+			await tabs.undoClose();
+			let newWin;
+			try {
+				await waitForCallback(
+					() => (newWin = Zotero.getMainWindows().find(x => !openWindows.includes(x)))
+						&& newWin.Zotero_Tabs?.numTabs == tabCount,
+					100,
+					20
+				);
+				assert.isTrue(newWin.Zotero_Tabs.isLibraryTab(newWin.Zotero_Tabs.selectedID));
+			}
+			finally {
+				newWin?.close();
+			}
+		});
+		
+		it("should reopen a window closed by closing its last tab", async function () {
+			let attachment = await importPDFAttachment(await createDataObject('item'));
+			let win3 = await loadZoteroPane();
+			let reader = await Zotero.Reader.open(attachment.id, null, { window: win3 });
+			win3.Zotero_Tabs.close(win3.ZoteroPane.libraryView.tabID);
+			let openWindows = Zotero.getMainWindows();
+			win3.Zotero_Tabs.close(reader.tabID);
+			await waitForCallback(() => win3.closed, 50, 20);
+			
+			await tabs.undoClose();
+			let newWin;
+			try {
+				await waitForCallback(
+					() => (newWin = Zotero.getMainWindows().find(x => !openWindows.includes(x)))
+						&& newWin.Zotero_Tabs?.numTabs,
+					100,
+					20
+				);
+				assert.equal(newWin.Zotero_Tabs._tabs.length, 1);
+				assert.equal(newWin.Zotero_Tabs.parseTabType().tabContentType, 'reader');
+			}
+			finally {
+				newWin?.close();
+			}
+		});
+		
 		/**
 		 * Drag items, collections, or saved searches over another window's tab bar and drop them
 		 * at its end

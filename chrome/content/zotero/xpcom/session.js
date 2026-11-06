@@ -35,6 +35,8 @@ Zotero.Session = new function () {
 	// Saved main-window states that haven't been restored into a window yet
 	let _pendingPaneStates = [];
 	let _finalized = false;
+	// Tabs and main windows closed during the session, most recent last
+	let _closed = [];
 	
 	Zotero.defineProperty(this, 'state', {
 		get: () => {
@@ -78,6 +80,43 @@ Zotero.Session = new function () {
 		_pendingPaneStates = _pendingPaneStates.filter(x => x !== state);
 	};
 	
+	/**
+	 * Remember tabs closed together in a main window, for reopening
+	 *
+	 * @param {String} windowID - The window's Zotero_Tabs.windowID
+	 * @param {Object[]} tabs - { index, data, title, type } entries
+	 */
+	this.addClosedTabs = function (windowID, tabs) {
+		_closed.push({ windowID, tabs });
+	};
+
+	/**
+	 * Remember a closed main window, for reopening
+	 *
+	 * @param {Object} state - As returned by ZoteroPane.getState()
+	 */
+	this.addClosedWindow = function (state) {
+		_closed.push({ window: state });
+	};
+
+	/**
+	 * The most recently closed tabs or window, as { windowID, tabs } or { window }
+	 *
+	 * @return {Object|null}
+	 */
+	this.getLastClosed = function () {
+		return _closed[_closed.length - 1] || null;
+	};
+
+	/**
+	 * Remove and return the most recently closed tabs or window, for reopening
+	 *
+	 * @return {Object|null}
+	 */
+	this.takeLastClosed = function () {
+		return _closed.pop() || null;
+	};
+
 	this.setLastClosedZoteroPaneState = function (state) {
 		// This is the last open main window, so any other saved pane states are stale
 		_state.windows = _state.windows

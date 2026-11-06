@@ -1084,13 +1084,20 @@ var ZoteroPane = new function () {
 			Zotero.Session.removePendingPaneState(unrestoredState);
 		}
 		let panes = Zotero.getZoteroPanes();
+		let state = this.getState();
 		if (!panes.length) {
-			Zotero.Session.setLastClosedZoteroPaneState(this.getState() || unrestoredState);
+			Zotero.Session.setLastClosedZoteroPaneState(state || unrestoredState);
 		}
-		// The layout is only switched by window size when there's a single window, so when
-		// one window remains, let it recalculate the layout
-		else if (panes.length == 1) {
-			panes[0].updateLayoutConstraints();
+		else {
+			// A window closed by closing its last tab was made reopenable then
+			if (state?.tabs.length) {
+				Zotero.Session.addClosedWindow(state);
+			}
+			// The layout is only switched by window size when there's a single window, so
+			// when one window remains, let it recalculate the layout
+			if (panes.length == 1) {
+				panes[0].updateLayoutConstraints();
+			}
 		}
 
 		Zotero_Tabs.closeAll();

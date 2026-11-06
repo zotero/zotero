@@ -83,7 +83,6 @@ var Zotero_Tabs = new function () {
 	this._tabs = [];
 	this._selectedID = null;
 	this._prevSelectedID = null;
-	this._history = [];
 	this._focusOptions = {};
 
 	this._loadableTypes = ['reader', 'note', 'library'];
@@ -1077,6 +1076,9 @@ var Zotero_Tabs = new function () {
 		var historyEntry = [];
 		var closedIDs = [];
 		var tmpTabs = this._tabs.slice();
+		// Closing all of a window's tabs closes the window, which is reopened as a whole
+		var closesWindow = !skipWindowClose && this._tabs.every(tab => ids.includes(tab.id));
+		var windowState = closesWindow && !skipHistory ? ZoteroPane.getState() : null;
 		for (var id of ids) {
 			let { tab, tabIndex } = this._getTab(id);
 			if (!tab) {
@@ -1131,8 +1133,11 @@ var Zotero_Tabs = new function () {
 				}
 			});
 		}
-		if (!skipHistory) {
-			this._history.push(historyEntry);
+		if (windowState) {
+			Zotero.Session.addClosedWindow(windowState);
+		}
+		else if (!skipHistory && !closesWindow) {
+			Zotero.Session.addClosedTabs(this._windowID, historyEntry);
 		}
 		Zotero.Notifier.trigger('close', 'tab', [closedIDs], this._getNotifierExtraData(closedIDs));
 		this._update();
@@ -1144,26 +1149,39 @@ var Zotero_Tabs = new function () {
 
 	/**
 	 * Close all closable tabs, leaving the window open for its caller to close
+	 *
+	 * The tabs aren't reopenable on their own, since the closing window is.
 	 */
 	this.closeAll = function () {
-		this.close(this._tabs.filter(x => x.closable).map(x => x.id), { skipWindowClose: true });
+		this.close(
+			this._tabs.filter(x => x.closable).map(x => x.id),
+			{ skipHistory: true, skipWindowClose: true }
+		);
 	};
 	
 	/**
-	 * Undo tabs closing
+	 * Reopen the tabs or window closed most recently in any window, with tabs reopened in this
+	 * window
 	 */
 	this.undoClose = async function () {
-		var historyEntry = this._history.pop();
-		if (historyEntry) {
+		var closed = Zotero.Session.takeLastClosed();
+		if (closed?.window) {
+			Zotero.openMainWindow({ sessionState: closed.window });
+			return;
+		}
+		if (closed) {
+			// Tabs closed in another window go at the end of this one
+			let endIndex = closed.windowID === this._windowID ? null : this._tabs.length;
 			let maxIndex = -1;
 			let openPromises = [];
-			for (let tab of historyEntry) {
+			for (let [i, tab] of closed.tabs.entries()) {
 				let { tabContentType } = this.parseTabType(tab.type);
 				let undoCloseHook = this._getHook(tabContentType, 'undoClose');
-				openPromises.push(undoCloseHook({ data: tab.data, title: tab.title }, tab.index)
+				let index = endIndex === null ? tab.index : endIndex + i;
+				openPromises.push(undoCloseHook({ data: tab.data, title: tab.title }, index)
 					.then((opened) => {
-						if (opened && tab.index > maxIndex) {
-							maxIndex = tab.index;
+						if (opened && index > maxIndex) {
+							maxIndex = index;
 						}
 					}));
 			}
@@ -1912,17 +1930,23 @@ var Zotero_Tabs = new function () {
 		}
 		// Undo close
 		if (this._hasHook(tabContentType, 'undoClose')) {
+			let lastClosed = Zotero.Session.getLastClosed();
 			menuitem = document.createXULElement('menuitem');
-			menuitem.setAttribute(
-				'label',
-				Zotero.getString(
-					'tabs.undoClose',
-					[],
-					// If not disabled, show proper plural for tabs to reopen
-					this._history.length ? this._history[this._history.length - 1].length : 1
-				)
-			);
-			menuitem.toggleAttribute('disabled', !this._history.length);
+			if (lastClosed?.window) {
+				document.l10n.setAttributes(menuitem, 'tabs-reopen-closed-window');
+			}
+			else {
+				menuitem.setAttribute(
+					'label',
+					Zotero.getString(
+						'tabs.undoClose',
+						[],
+						// If not disabled, show proper plural for tabs to reopen
+						lastClosed ? lastClosed.tabs.length : 1
+					)
+				);
+			}
+			menuitem.toggleAttribute('disabled', !lastClosed);
 			menuitem.addEventListener('command', () => {
 				this.undoClose();
 			});

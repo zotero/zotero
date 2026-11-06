@@ -469,6 +469,8 @@ import-online-relink-kb = { general-more-information }
 import-online-connection-error = { -app-name } could not connect to { $targetApp }. Please check your internet connection and try again.
 
 tab-title-multiple-collections = Multiple
+tabs-reopen-closed-window =
+    .label = Reopen Closed Window
 
 items-table-cell-notes =
     .aria-label = { $count ->
