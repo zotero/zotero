@@ -892,6 +892,20 @@ export function ZoteroProtocolHandler() {
 	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
 	this._extensions[ZOTERO_SCHEME + "://open"] = OpenExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenExtension;
+	
+	// Block deprecated third-party extensions
+	for (let blocked of ["://plugin", "://ztoolkit-debug"]) {
+		Object.defineProperty(this._extensions, ZOTERO_SCHEME + blocked, {
+			get() {
+				return undefined;
+			},
+			set() {
+				// Ignore
+			},
+			configurable: false,
+			enumerable: false,
+		});
+	}
 }
 
 
