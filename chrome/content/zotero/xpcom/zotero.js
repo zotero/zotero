@@ -2190,6 +2190,9 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 		}
 		
 		var [action, newMismatch] = Zotero.getBuildMismatchStartupAction(versions, mismatch);
+		if (action == 'restart') {
+			newMismatch.info = _getBuildMismatchInfo();
+		}
 		if (newMismatch) {
 			Zotero.Prefs.set('buildMismatch', JSON.stringify(newMismatch));
 		}
@@ -2202,10 +2205,97 @@ const { CommandLineOptions } = ChromeUtils.importESModule("chrome://zotero/conte
 			Zotero.Utilities.Internal.quit(true);
 			return false;
 		}
+		// Report the mismatch the first time the error is shown, since the regular repository check
+		// won't run
+		if (newMismatch) {
+			_reportBuildMismatch(newMismatch);
+		}
 		Zotero.startupError = Zotero.ftl.formatValueSync(
 			'startup-error-incomplete-update', { domain: ZOTERO_CONFIG.DOMAIN_NAME }
 		);
 		return false;
+	}
+	
+	/**
+	 * Get details of the installation to report with a build mismatch, leaving out any that
+	 * can't be read
+	 */
+	function _getBuildMismatchInfo() {
+		var info = {};
+		var add = (name, fn) => {
+			try {
+				info[name] = fn();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		};
+		var getModified = file => Math.round(file.lastModifiedTime / 1000);
+		var getLastUpdate = (fileName) => {
+			let file = Services.dirsvc.get('UpdRootD', Ci.nsIFile);
+			file.append(fileName);
+			if (!file.exists()) {
+				return null;
+			}
+			let doc = new DOMParser().parseFromString(
+				Zotero.File.getContents(file, null, 100000), 'text/xml'
+			);
+			let update = doc.querySelector('update');
+			if (!update) {
+				return null;
+			}
+			let patch = update.querySelector('patch[selected="true"]')
+				|| update.querySelector('patch');
+			return {
+				appVersion: update.getAttribute('appVersion'),
+				buildID: update.getAttribute('buildID'),
+				installDate: update.getAttribute('installDate'),
+				statusText: update.getAttribute('statusText'),
+				patchType: patch && patch.getAttribute('type'),
+				patchState: patch && patch.getAttribute('state')
+			};
+		};
+		
+		add('buildID', () => Services.appinfo.appBuildID);
+		add('platformVersion', () => Services.appinfo.platformVersion);
+		add('exeModified', () => getModified(Services.dirsvc.get('XREExeF', Ci.nsIFile)));
+		// The jar the resources are read from, with application.ini in the same directory
+		var jarFile;
+		add('jarModified', () => {
+			let spec = Services.io.getProtocolHandler('resource')
+				.QueryInterface(Ci.nsIResProtocolHandler)
+				.resolveURI(Services.io.newURI('resource://zotero/version'));
+			jarFile = Services.io.newURI(spec).QueryInterface(Ci.nsIJARURI).JARFile
+				.QueryInterface(Ci.nsIFileURL).file;
+			return getModified(jarFile);
+		});
+		add('appIniModified', () => {
+			let file = jarFile.parent;
+			file.append('application.ini');
+			return getModified(file);
+		});
+		add('lastUpdate', () => getLastUpdate('updates.xml'));
+		add('activeUpdate', () => getLastUpdate('active-update.xml'));
+		return info;
+	}
+	
+	/**
+	 * Send a build mismatch to the repository without waiting for a response
+	 */
+	function _reportBuildMismatch(mismatch) {
+		try {
+			let xmlhttp = new XMLHttpRequest();
+			xmlhttp.mozBackgroundRequest = true;
+			xmlhttp.open(
+				'GET',
+				ZOTERO_CONFIG.REPOSITORY_URL + 'updated?mismatch='
+					+ encodeURIComponent(JSON.stringify(mismatch))
+			);
+			xmlhttp.send();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	/**
