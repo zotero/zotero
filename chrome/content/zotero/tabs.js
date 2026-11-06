@@ -743,6 +743,8 @@ var Zotero_Tabs = new function () {
 				onTabSelect={this.select.bind(this)}
 				onTabMove={this.move.bind(this)}
 				onTabDropFromWindow={this._onTabDropFromWindow.bind(this)}
+				canOpenDrop={this._canOpenDrop.bind(this)}
+				onOpenDrop={this._onOpenDrop.bind(this)}
 				onDrawDragThumbnail={this._drawThumbnail.bind(this)}
 				onTabTearOff={this._onTabTearOff.bind(this)}
 				onTabClose={id => this.canClose(id) && this.close(id)}
@@ -1346,6 +1348,83 @@ var Zotero_Tabs = new function () {
 		}
 		sourceWindow.Zotero_Tabs.moveToWindow(id, window, index)
 			.catch(e => Zotero.logError(e));
+	};
+
+	/**
+	 * Whether a drag holds items, collections, or saved searches, which open in new tabs when
+	 * dropped on the tab bar
+	 *
+	 * @param {DataTransfer} dataTransfer
+	 * @return {Boolean}
+	 */
+	this._canOpenDrop = function (dataTransfer) {
+		return ['zotero/item', 'zotero/collection', 'zotero/search']
+			.some(type => dataTransfer.types.includes(type));
+	};
+
+	/**
+	 * Open items, collections, or saved searches dropped on the tab bar in new tabs, selecting
+	 * the first
+	 *
+	 * @param {DataTransfer} dataTransfer
+	 * @param {Integer} index
+	 */
+	this._onOpenDrop = function (dataTransfer, index) {
+		let { dataType, data: ids } = Zotero.DragDrop.getDataFromDataTransfer(dataTransfer);
+		this._openDroppedObjects(dataType, ids, index)
+			.catch(e => Zotero.logError(e));
+	};
+
+	this._openDroppedObjects = async function (dataType, ids, index) {
+		let select = true;
+		if (dataType == 'zotero/collection' || dataType == 'zotero/search') {
+			let objectsClass = dataType == 'zotero/collection' ? Zotero.Collections : Zotero.Searches;
+			for (let object of objectsClass.get(ids)) {
+				this.addLibraryTab({
+					title: object.name,
+					icon: dataType == 'zotero/collection' ? 'collection' : 'search',
+					state: { collections: [object.treeViewID], focusedCollection: object.treeViewID },
+					index: index++,
+					select
+				});
+				select = false;
+			}
+			return;
+		}
+		for (let item of Zotero.Items.get(ids)) {
+			let options = { tabIndex: index++, openInBackground: !select, window };
+			select = false;
+			if (item.isNote()) {
+				await Zotero.Notes.open(item.id, null, options);
+				continue;
+			}
+			let location = null;
+			let attachment = item;
+			if (item.isAnnotation()) {
+				location = { annotationID: item.key };
+				attachment = item.parentItem;
+			}
+			else if (item.isRegularItem()) {
+				attachment = await item.getBestAttachment();
+			}
+			if (attachment?.attachmentReaderType) {
+				await Zotero.Reader.open(attachment.id, location, options);
+				continue;
+			}
+			// An item with nothing to open in a tab is shown in its library
+			let library = Zotero.Libraries.get(item.libraryID);
+			this.addLibraryTab({
+				title: library.name,
+				icon: library.libraryType == 'group' ? 'library-group' : 'library',
+				state: {
+					collections: [library.treeViewID],
+					focusedCollection: library.treeViewID,
+					items: [item.treeViewID]
+				},
+				index: options.tabIndex,
+				select: !options.openInBackground
+			});
+		}
 	};
 
 	/**

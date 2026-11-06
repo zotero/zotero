@@ -981,6 +981,101 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 
+		/**
+		 * Drag items, collections, or saved searches over another window's tab bar and drop them
+		 * at its end
+		 *
+		 * @param {String} type
+		 * @param {Integer[]} ids
+		 */
+		function dropOnTabBar(type, ids) {
+			let tabBar = win2.document.querySelector('#tab-bar-container .tabs-wrapper .tabs');
+			let { right, top } = tabBar.getBoundingClientRect();
+			let dataTransfer = new win2.DataTransfer();
+			dataTransfer.setData(type, ids.join(','));
+			for (let eventType of ['dragover', 'drop']) {
+				tabBar.dispatchEvent(new win2.DragEvent(eventType, {
+					bubbles: true, cancelable: true, dataTransfer, clientX: right - 5, clientY: top + 5
+				}));
+			}
+		}
+
+		it("should select a tab that a drag rests on", async function () {
+			let targetID = win2.Zotero_Tabs.selectedID;
+			let id = win2.Zotero_Tabs.addLibraryTab();
+			try {
+				await waitForCallback(
+					() => win2.document.querySelector(`#tab-bar-container .tab.selected[data-id="${id}"]`),
+					50,
+					20
+				);
+				let tabNode = win2.document.querySelector(`#tab-bar-container .tab[data-id="${targetID}"]`);
+				let dataTransfer = new win2.DataTransfer();
+				dataTransfer.setData('zotero/item', String(item.id));
+				tabNode.dispatchEvent(
+					new win2.DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer })
+				);
+				assert.equal(win2.Zotero_Tabs.selectedID, id);
+				await waitForCallback(() => win2.Zotero_Tabs.selectedID == targetID, 100, 20);
+			}
+			finally {
+				win2.Zotero_Tabs.close(id);
+			}
+		});
+
+		it("should open a collection dropped on the tab bar in a new tab", async function () {
+			let count = win2.Zotero_Tabs._tabs.length;
+			dropOnTabBar('zotero/collection', [collection.id]);
+			let newID = win2.Zotero_Tabs.selectedID;
+			try {
+				assert.equal(win2.Zotero_Tabs._tabs.length, count + 1);
+				assert.equal(win2.Zotero_Tabs._getTab(newID).tabIndex, count);
+				await waitForCallback(() => win2.ZoteroPane.getLibraryView(newID)?.loaded, 50, 20);
+				let view = win2.ZoteroPane.getLibraryView(newID);
+				await view.waitForLibraryTabState();
+				assert.deepEqual(view.getCollectionTreeRows().map(row => row.id), [collection.treeViewID]);
+			}
+			finally {
+				win2.Zotero_Tabs.close(newID);
+			}
+		});
+
+		it("should open an item dropped on the tab bar in a reader tab", async function () {
+			let parentItem = await createDataObject('item');
+			let attachment = await importPDFAttachment(parentItem);
+			dropOnTabBar('zotero/item', [parentItem.id]);
+			let reader;
+			await waitForCallback(
+				() => (reader = Zotero.Reader.getByTabID(win2.Zotero_Tabs.selectedID)),
+				50,
+				20
+			);
+			try {
+				assert.equal(reader.itemID, attachment.id);
+				assert.equal(reader._window, win2);
+			}
+			finally {
+				reader.close();
+			}
+		});
+
+		it("should show an item with nothing to open dropped on the tab bar in a library tab", async function () {
+			let newItem = await createDataObject('item');
+			let count = win2.Zotero_Tabs._tabs.length;
+			dropOnTabBar('zotero/item', [newItem.id]);
+			await waitForCallback(() => win2.Zotero_Tabs._tabs.length > count, 50, 20);
+			let newID = win2.Zotero_Tabs.selectedID;
+			try {
+				await waitForCallback(() => win2.ZoteroPane.getLibraryView(newID)?.loaded, 50, 20);
+				let view = win2.ZoteroPane.getLibraryView(newID);
+				await view.waitForLibraryTabState();
+				assert.sameMembers(view.itemsView.getSelectedItems(true), [newItem.id]);
+			}
+			finally {
+				win2.Zotero_Tabs.close(newID);
+			}
+		});
+
 		it("should move a reader tab to another window", async function () {
 			let attachment = await importPDFAttachment(otherItem);
 			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });

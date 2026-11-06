@@ -132,6 +132,8 @@ const DRAG_THUMBNAIL_OFFSET = -16;
 const DROP_INDICATOR_INSET = 4;
 // How far a dragged tab's pointer moves before the tab follows it
 const DRAG_MOVE_THRESHOLD = 8;
+// How long a drag rests on a tab before the tab is selected
+const SPRING_LOAD_DELAY = 750;
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
@@ -156,6 +158,8 @@ const TabBar = forwardRef(function (props, ref) {
 	const tearOffOffsetRef = useRef();
 	// Whether the dragged tab was dropped on this window's own tab bar
 	const droppedInOwnWindowRef = useRef(false);
+	// The tab a drag is resting on, and the timer that selects it
+	const springLoadRef = useRef({ id: null, timer: null });
 	const tabsInnerContainerRef = useRef();
 	const tabsRef = useRef();
 	const spacerRef = useRef();
@@ -462,16 +466,61 @@ const TabBar = forwardRef(function (props, ref) {
 		return index === -1 ? tabNodes.length : index;
 	}
 
-	const handleTabBarDragOver = useCallback((event) => {
-		event.preventDefault();
-		event.dataTransfer.dropEffect = 'move';
-		// A tab from another window is only inserted when dropped, so show where it would go
-		if (!dragIDRef.current) {
-			if (event.dataTransfer.types.includes('zotero/tab')) {
-				setDropIndex(getDropIndex(event.clientX));
-			}
+	function cancelSpringLoad() {
+		clearTimeout(springLoadRef.current.timer);
+		springLoadRef.current = { id: null, timer: null };
+	}
+
+	// Select a tab that a drag of something other than a tab rests on, so that it can be dropped
+	// in the tab's content
+	const handleSpringLoadDragOver = useCallback((event) => {
+		if (dragIDRef.current || event.dataTransfer.types.includes('zotero/tab')) {
 			return;
 		}
+		let tabNode = event.target.closest('.tab');
+		let id = tabNode?.dataset.id || null;
+		if (id === springLoadRef.current.id) {
+			return;
+		}
+		cancelSpringLoad();
+		if (!id || tabNode.classList.contains('selected')) {
+			return;
+		}
+		let timer = setTimeout(() => {
+			springLoadRef.current.timer = null;
+			props.onTabSelect(id);
+		}, SPRING_LOAD_DELAY);
+		springLoadRef.current = { id, timer };
+	}, [props.onTabSelect]);
+
+	const handleSpringLoadDragLeave = useCallback((event) => {
+		if (tabsInnerContainerRef.current.contains(event.relatedTarget)) {
+			return;
+		}
+		cancelSpringLoad();
+	}, []);
+
+	const handleTabBarDragOver = useCallback((event) => {
+		let { dataTransfer } = event;
+		// A tab from another window, or objects to open in new tabs, are only taken when
+		// dropped, so show where they would go
+		if (!dragIDRef.current) {
+			let isTab = dataTransfer.types.includes('zotero/tab');
+			if (!isTab && !props.canOpenDrop(dataTransfer)) {
+				return;
+			}
+			event.preventDefault();
+			let effect = isTab || dataTransfer.effectAllowed == 'move' ? 'move' : 'copy';
+			// See LibraryTree#setDropEffect()
+			if (!isTab && (Zotero.isWin || Zotero.isLinux)) {
+				dataTransfer.effectAllowed = effect;
+			}
+			dataTransfer.dropEffect = effect;
+			setDropIndex(getDropIndex(event.clientX));
+			return;
+		}
+		event.preventDefault();
+		dataTransfer.dropEffect = 'move';
 		setDragImageShown(event.dataTransfer, false);
 		// Start moving the tab once the pointer passes the drag threshold
 		if (!dragMovedRef.current) {
@@ -552,6 +601,14 @@ const TabBar = forwardRef(function (props, ref) {
 
 	const handleTabBarDrop = useCallback((event) => {
 		setDropIndex(null);
+		cancelSpringLoad();
+		if (!event.dataTransfer.types.includes('zotero/tab')) {
+			if (props.canOpenDrop(event.dataTransfer)) {
+				event.preventDefault();
+				props.onOpenDrop(event.dataTransfer, getDropIndex(event.clientX));
+			}
+			return;
+		}
 		let payload;
 		try {
 			payload = JSON.parse(event.dataTransfer.getData('zotero/tab'));
@@ -570,7 +627,7 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		event.preventDefault();
 		props.onTabDropFromWindow(payload.windowID, payload.id, getDropIndex(event.clientX));
-	}, [props.onTabDropFromWindow, props.windowID]);
+	}, [props.onTabDropFromWindow, props.canOpenDrop, props.onOpenDrop, props.windowID]);
 
 	const handleTabClose = useCallback((event, id) => {
 		// When a tab is being closed, lock the widths of tabs and scroll position,
@@ -639,6 +696,8 @@ const TabBar = forwardRef(function (props, ref) {
 				className="tab-bar-inner-container"
 				onWheel={handleWheel}
 				onMouseLeave={handleTabBarMouseLeave}
+				onDragOver={handleSpringLoadDragOver}
+				onDragLeave={handleSpringLoadDragLeave}
 			>
 				<div className="pinned-tabs">
 					<div
@@ -725,6 +784,8 @@ TabBar.propTypes = {
 	onLoad: PropTypes.func.isRequired,
 	onTabMove: PropTypes.func.isRequired,
 	onTabDropFromWindow: PropTypes.func.isRequired,
+	canOpenDrop: PropTypes.func.isRequired,
+	onOpenDrop: PropTypes.func.isRequired,
 	onDrawDragThumbnail: PropTypes.func.isRequired,
 	onTabTearOff: PropTypes.func.isRequired,
 	onRefocus: PropTypes.func.isRequired,
