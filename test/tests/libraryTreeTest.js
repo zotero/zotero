@@ -99,10 +99,8 @@ describe("Zotero.LibraryTree", function() {
 			var { rowEl, dataTransfer } = startDrag(view, view.getRowIndexByID(item2.id));
 			assert.sameMembers(zp.getSelectedItems(true), [item1.id]);
 			assert.equal(dataTransfer.getData('zotero/item'), item2.id);
-			assert.isTrue(rowEl.classList.contains('target'));
 			
 			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
-			assert.isFalse(rowEl.classList.contains('target'));
 		});
 		
 		it("should drag an unselected collection without selecting it", async function () {

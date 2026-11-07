@@ -1296,8 +1296,8 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	/**
-	 * Mark a row that an action applies to without the row being selected (e.g., a dragged
-	 * row or the row a context menu was opened on)
+	 * Mark a row that an action applies to without the row being selected (e.g., a
+	 * right-clicked row)
 	 *
 	 * @param {Number|null} index
 	 */

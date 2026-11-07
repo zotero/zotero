@@ -352,7 +352,6 @@ var LibraryTree = class LibraryTree extends React.Component {
 		else {
 			this._dragIndices = [index];
 			dragElems = [event.currentTarget];
-			this.tree.setTargetRow(index);
 		}
 		// Set drag image
 		for (let elem of dragElems) {
@@ -365,7 +364,6 @@ var LibraryTree = class LibraryTree extends React.Component {
 	onDragEnd(_event, _index) {
 		this._dragImageContainer.innerHTML = "";
 		this._dragIndices = [];
-		this.tree.setTargetRow(null);
 	}
 };
 
