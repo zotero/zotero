@@ -139,6 +139,88 @@ describe("search-result-row", function () {
 		assert.equal(win.getComputedStyle(figure.querySelector('.hidden-text')).display, 'none');
 	});
 
+	describe("annotation popup", function () {
+		var attachment, annotation;
+
+		before(async function () {
+			let item = await createDataObject('item');
+			attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+			annotation = await createAnnotation('highlight', attachment, { comment: 'Noted' });
+			annotation.setTags(['owls']);
+			await annotation.saveTx({ skipSelect: true });
+		});
+
+		afterEach(function () {
+			row._popup.hidePopup();
+		});
+
+		// The passage with the annotation drawn over its first word
+		function show() {
+			let { text, segments } = passage([
+				{ text: 'Owls hunt at night.', ref: [0, 0], run: 0, block: { type: 'paragraph', ref: [0] }, path: [] },
+			]);
+			row.itemID = attachment.id;
+			row.result = { text, segments, ranges: [], annotations: [{
+				key: annotation.key, type: 'highlight', color: '#ffd400', comment: 'Noted',
+				ranges: [{ start: 0, end: 4 }]
+			}] };
+			return row.querySelector('.quote .annotation');
+		}
+
+		it("should open a clicked annotation with its page, comment and tags, and no colors", async function () {
+			let span = show();
+			win.getSelection().removeAllRanges();
+			span.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true }));
+			await waitForCallback(() => row._popup.state == 'open');
+			assert.isTrue(row._popup.querySelector('.selection-tools').hidden);
+			let editor = row._popup.querySelector('.annotation-editor');
+			assert.isFalse(editor.hidden);
+			assert.equal(editor.querySelector('.head .title').textContent,
+				'Page ' + annotation.annotationPageLabel);
+			assert.include(editor.querySelector('.head .icon').src, 'annotate-highlight');
+			assert.equal(editor.querySelector('.comment').value, 'Noted');
+			let tagsBox = editor.querySelector('.tags-editor');
+			assert.equal(tagsBox.item, annotation);
+			assert.deepEqual([...tagsBox.querySelectorAll('.row editable-text')].map(e => e.value), ['owls']);
+		});
+
+		it("should save a changed comment to the annotation", async function () {
+			let span = show();
+			win.getSelection().removeAllRanges();
+			span.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true }));
+			await waitForCallback(() => row._popup.state == 'open');
+			row._popup.querySelector('.comment').value = ' Noted again ';
+			await row._saveComment();
+			assert.equal(annotation.annotationComment, 'Noted again');
+			// Unchanged text isn't saved again
+			let save = sinon.spy(annotation, 'saveTx');
+			await row._saveComment();
+			assert.isFalse(save.called);
+			save.restore();
+		});
+	});
+
+	it("should stay expanded when its annotations are redrawn", async function () {
+		// A passage long enough to be clamped
+		let { text, segments } = passage([{
+			text: Array(40).fill('Owls hunt at night and sleep by day.').join(' '),
+			ref: [0, 0], run: 0, block: { type: 'paragraph', ref: [0] }, path: []
+		}]);
+		row.result = { text, segments, ranges: [] };
+		await waitForCallback(() => !row._showMore.hidden);
+		row._toggleExpanded();
+		assert.isTrue(row.classList.contains('expanded'));
+
+		row.setAnnotations({ text, segments, annotations: [{ key: 'A', type: 'highlight',
+			color: '#ffd400', ranges: [{ start: 0, end: 4 }] }] });
+		assert.ok(row.querySelector('.quote .annotation'));
+		// Measured collapsed within the frame, then shown in full again
+		await new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
+		assert.isTrue(row.classList.contains('expanded'));
+		assert.isFalse(row._showMore.hidden);
+		assert.equal(row._showMore.getAttribute('data-l10n-id'), 'search-result-row-show-less');
+	});
+
 	it("should show a passage of unknown structure as running text", function () {
 		row.result = { text: 'Owls hunt at night.\n\nHawks hunt by day.', ranges: [[0, 4]] };
 		let quote = row.querySelector('.quote');

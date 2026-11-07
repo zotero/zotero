@@ -229,10 +229,67 @@ search-result-row {
 			justify-content: space-between;
 		}
 
-		// The editor of the annotation's tags, which the popup grows down to hold
-		.tags-editor {
-			min-width: 0;
-			width: 100%;
+		// One of the two is shown at a time; the display set below would
+		// otherwise override the hidden attribute
+		.selection-tools[hidden], .annotation-editor[hidden] {
+			display: none;
+		}
+
+		// The selection's tools, stacked with a gap between the row of
+		// colors and the pill
+		.selection-tools {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+		}
+
+		// An existing annotation, laid out as the reader's annotation popup:
+		// its type and page in a head, the comment, and the tags beneath a
+		// rule, the whole wider than the colors need
+		&.annotation .popup-body {
+			width: 260px;
+			padding: 0;
+			gap: 0;
+		}
+
+		.annotation-editor {
+			display: flex;
+			flex-direction: column;
+
+			.head {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				padding: 6px 8px;
+				border-bottom: 1px solid var(--fill-quinary);
+
+				.icon {
+					width: 16px;
+					height: 16px;
+					-moz-context-properties: fill;
+					fill: var(--annotation-color, var(--fill-secondary));
+				}
+
+				.title {
+					font-weight: 600;
+				}
+			}
+
+			.comment {
+				width: 100%;
+				box-sizing: border-box;
+				padding: 4px;
+
+				.input {
+					min-height: 3.5em;
+				}
+			}
+
+			.tags-editor {
+				min-width: 0;
+				width: 100%;
+				border-top: 1px solid var(--fill-quinary);
+			}
 		}
 
 		// The reader's color buttons: a 14px swatch in a 20px button that

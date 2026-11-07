@@ -55,12 +55,21 @@
 			</html:div>
 			<panel class="selection-popup" type="arrow" noautofocus="true" animate="false">
 				<html:div class="popup-body">
-					<html:div class="colors"/>
-					<html:div class="tool-toggle">
-						<html:button class="highlight" data-mode="highlight"/>
-						<html:button class="underline" data-mode="underline"/>
+					<html:div class="selection-tools">
+						<html:div class="colors"/>
+						<html:div class="tool-toggle">
+							<html:button class="highlight" data-mode="highlight"/>
+							<html:button class="underline" data-mode="underline"/>
+						</html:div>
 					</html:div>
-					<tags-box class="tags-editor" hidden="true"/>
+					<html:div class="annotation-editor" hidden="true">
+						<html:div class="head">
+							<image class="icon"/>
+							<html:div class="title"/>
+						</html:div>
+						<editable-text class="comment" multiline="true"/>
+						<tags-box class="tags-editor"/>
+					</html:div>
 				</html:div>
 			</panel>
 		`);
@@ -117,9 +126,10 @@
 			document.removeEventListener('scroll', this._handleScroll, true);
 		}
 
-		// The popup over a selection, as the reader's: the annotation colors,
-		// and the choice between a highlight and an underline, which is the
-		// reader's own setting
+		// The popup, as the reader's two: over a selection, the annotation
+		// colors and the choice between a highlight and an underline, which
+		// is the reader's own setting; over an existing annotation, its
+		// page, comment and tags
 		_initSelectionPopup() {
 			let colors = this._popup.querySelector('.colors');
 			for (let [l10nID, color] of Zotero.Annotations.COLORS) {
@@ -137,10 +147,17 @@
 					this._updateToolToggle();
 				});
 			}
+			this._tools = this._popup.querySelector('.selection-tools');
+			this._editor = this._popup.querySelector('.annotation-editor');
 			this._tagsBox = this._popup.querySelector('.tags-editor');
+			this._comment = this._popup.querySelector('.comment');
+			this._comment.placeholder = Zotero.getString('pdfReader.addComment');
+			this._comment.addEventListener('change', () => {
+				this._saveComment().catch(e => Zotero.logError(e));
+			});
 			// A press on the popup's buttons must leave the selection alone,
-			// which a mousedown would otherwise collapse; the tag field is
-			// let through so that it can take focus
+			// which a mousedown would otherwise collapse; the text fields are
+			// let through so that they can take focus
 			this._popup.addEventListener('mousedown', (event) => {
 				if (!event.target.closest('editable-text')) {
 					event.preventDefault();
@@ -156,11 +173,20 @@
 				}
 			}).observe(this._popup.querySelector('.popup-body'));
 			this._popup.addEventListener('popupshowing', () => {
-				this._updateToolToggle();
-				// The tags come once the annotation exists
-				this._annotated = false;
-				this._tagsBox.item = null;
-				this._tagsBox.hidden = true;
+				// Over a selection, the tools to make an annotation with;
+				// over an existing annotation, that annotation's editors
+				let annotation = this._opening;
+				this._opening = null;
+				this._popup.classList.toggle('annotation', !!annotation);
+				this._tools.hidden = !!annotation;
+				this._editor.hidden = !annotation;
+				if (annotation) {
+					this._showAnnotationEditor(annotation);
+				}
+				else {
+					this._updateToolToggle();
+					this._tagsBox.item = null;
+				}
 			});
 			// The popup's size is known once shown: place it by it, and
 			// remember it for the next time
@@ -173,30 +199,32 @@
 			this._popup.addEventListener('popuphidden', () => {
 				document.removeEventListener('selectionchange', this._handleSelectionChange);
 				document.removeEventListener('scroll', this._handleScroll, true);
-				// A selection that was annotated has served its purpose
-				if (this._annotated) {
-					window.getSelection().removeAllRanges();
+				if (this._annotation) {
+					this._finishEdits(this._annotation).catch(e => Zotero.logError(e));
 				}
-				if (this._annotations?.length > 1) {
-					this._copyTags(this._annotations).catch(e => Zotero.logError(e));
-				}
-				this._annotations = null;
+				this._annotation = null;
 				this._selection = null;
-				this._annotated = false;
 			});
 		}
 
-		// Give the selection's other annotations the tags the first ended up
-		// with, a tag still being typed included
-		async _copyTags([first, ...rest]) {
+		// Keep what the fields hold when the popup closes, a tag still being
+		// typed included
+		async _finishEdits(item) {
 			await this._tagsBox.blurOpenField();
-			let tags = first.getTags();
-			await Zotero.DB.executeTransaction(async () => {
-				for (let item of rest) {
-					item.setTags(tags);
-					await item.save();
-				}
-			});
+			await this._saveComment(item);
+		}
+
+		// Save the comment field to the annotation it edits, when changed
+		async _saveComment(item = this._annotation) {
+			if (!item || this._comment.readOnly) {
+				return;
+			}
+			let comment = this._comment.value.trim();
+			if (comment == (item.annotationComment || '')) {
+				return;
+			}
+			item.annotationComment = comment;
+			await item.saveTx({ skipSelect: true });
 		}
 
 		// Where the popup goes for the caret it points at: centered on it
@@ -221,21 +249,28 @@
 			return { x: window.mozInnerScreenX + left, y: window.mozInnerScreenY + top };
 		}
 
-		// The editor of the annotations' tags, as the reader's tags popup
-		// shows it: open, with a field to type into, its + button adding
-		// more. Edits save to the first annotation as they're made, and
-		// reach the others when the popup closes.
-		_showTagsEditor(items) {
-			this._annotations = items;
+		// The annotation as the reader's popup shows it: its type and page
+		// in the head, its comment, and its tags as the reader's tags popup
+		// shows them -- open, the + button adding more. Edits save as
+		// they're made.
+		_showAnnotationEditor(item) {
+			this._annotation = item;
+			let editable = item.isEditable();
+			let head = this._editor.querySelector('.head');
+			head.style.setProperty('--annotation-color', item.annotationColor);
+			head.querySelector('.icon').src
+				= `chrome://zotero/skin/16/universal/annotate-${item.annotationType}.svg`;
+			head.querySelector('.title').textContent
+				= Zotero.getString('pdfReader.page') + ' ' + (item.annotationPageLabel || '-');
+			this._comment.readOnly = !editable;
+			this._comment.value = item.annotationComment || '';
 			let box = this._tagsBox;
-			box.editable = true;
-			box.item = items[0];
-			box.hidden = false;
+			box.editable = editable;
+			box.item = item;
 			box.render();
 			box.open = true;
 			box.collapsible = false;
 			box.querySelector('.head')?.removeAttribute('tabindex');
-			box.newTag();
 		}
 
 		_updateToolToggle() {
@@ -248,13 +283,24 @@
 		// Offer to annotate the passage once a selection of its text is made,
 		// where the passage's structure is known and the attachment is one
 		// that can be annotated this way -- a PDF, until EPUBs and snapshots
-		// are. Selecting is fine regardless, to copy.
+		// are. Selecting is fine regardless, to copy. A click on an
+		// annotation drawn over the passage opens it instead, to see and
+		// edit its comment and tags.
 		// The popup points at the end the selection was finished at, below
 		// it for a forward selection and above for a backward one, as in the
-		// reader.
-		_handleQuoteMouseUp = () => {
+		// reader; at an annotation, below it.
+		_handleQuoteMouseUp = (event) => {
 			let offsets = this._getSelectedOffsets();
-			if (!offsets || !this._result?.segments?.length || !Zotero.Items.get(this.itemID)?.isPDFAttachment()) {
+			if (!offsets) {
+				let span = event.target.closest?.('.annotation');
+				let annotation = span && this._getAnnotation(span.dataset.annotationKey);
+				if (annotation) {
+					this._opening = annotation;
+					this._openPopup({ rect: span.getBoundingClientRect(), below: true });
+				}
+				return;
+			}
+			if (!this._result?.segments?.length || !Zotero.Items.get(this.itemID)?.isPDFAttachment()) {
 				return;
 			}
 			this._selection = offsets;
@@ -263,13 +309,23 @@
 			this._selectionRange = selection.getRangeAt(0).cloneRange();
 			let caret = this._selectionRange.cloneRange();
 			caret.collapse(!forward);
-			this._anchor = { rect: caret.getBoundingClientRect(), below: forward };
 			document.addEventListener('selectionchange', this._handleSelectionChange);
+			this._openPopup({ rect: caret.getBoundingClientRect(), below: forward });
+		};
+
+		// The attachment's annotation drawn with the key, as an item
+		_getAnnotation(key) {
+			let libraryID = Zotero.Items.get(this.itemID)?.libraryID;
+			return libraryID ? Zotero.Items.getByLibraryAndKey(libraryID, key) || null : null;
+		}
+
+		_openPopup(anchor) {
+			this._anchor = anchor;
 			// Scroll events don't bubble, so they're caught on the way down
 			document.addEventListener('scroll', this._handleScroll, true);
 			let { x, y } = this._getPopupPosition();
 			this._popup.openPopupAtScreen(x, y, false);
-		};
+		}
 
 		// Scrolling moves the text the popup points at out from under it
 		_handleScroll = () => {
@@ -282,7 +338,7 @@
 		// Focusing the tag field collapses the selection without meaning to
 		// leave it, so that case puts the selection back instead.
 		_handleSelectionChange = () => {
-			if (this._annotated || this._getSelectedOffsets()) {
+			if (this._getSelectedOffsets()) {
 				return;
 			}
 			if (this._popup.contains(document.activeElement)) {
@@ -340,24 +396,29 @@
 			return ranges.map(({ range }) => range);
 		}
 
-		// Make the annotation, and stay open to tag it
+		// Make the annotation and close, as the reader does; a click on the
+		// annotation then opens it for its comment and tags
 		async _createAnnotation(color) {
-			if (this._annotated) {
+			if (this._creating) {
 				return;
 			}
-			let type = Zotero.Prefs.get('reader.textSelectionAnnotationMode') || 'highlight';
-			let ranges = this._getSelectedRanges(this._selection);
-			let result = await Zotero.Annotations.createFromRanges(this.itemID, ranges, { type, color });
-			if (this._popup.state != 'open') {
-				return;
+			this._creating = true;
+			try {
+				let type = Zotero.Prefs.get('reader.textSelectionAnnotationMode') || 'highlight';
+				let ranges = this._getSelectedRanges(this._selection);
+				let result = await Zotero.Annotations.createFromRanges(this.itemID, ranges, { type, color });
+				if (!result.ok) {
+					Zotero.debug(`Couldn't annotate the selected passage text: ${result.reason}`);
+				}
+				else {
+					// The selection has served its purpose
+					window.getSelection().removeAllRanges();
+				}
 			}
-			if (!result.ok) {
-				Zotero.debug(`Couldn't annotate the selected passage text: ${result.reason}`);
+			finally {
+				this._creating = false;
 				this._popup.hidePopup();
-				return;
 			}
-			this._annotated = true;
-			this._showTagsEditor(result.items);
 		}
 
 		render() {
@@ -384,12 +445,20 @@
 			this._renderQuote();
 
 			// Offer "Show More" only when the quote is actually clamped,
-			// which is only measurable once the card has a layout
-			this.classList.remove('expanded');
-			this._showMore.hidden = true;
+			// which is only measurable once the card has a layout, and
+			// collapsed: a card shown in full stays so across a redraw, so
+			// it's measured collapsed within the frame and never shows
+			// otherwise
+			let expanded = this.classList.contains('expanded');
+			if (!expanded) {
+				this._setExpanded(false);
+				this._showMore.hidden = true;
+			}
 			requestAnimationFrame(() => {
+				this.classList.remove('expanded');
 				this._showMore.hidden
 					= this._quote.scrollHeight <= this._quote.clientHeight;
+				this._setExpanded(expanded && !this._showMore.hidden);
 			});
 
 			// A11y - make focusable and describe the card
@@ -575,7 +644,11 @@
 		}
 
 		_toggleExpanded() {
-			let expanded = this.classList.toggle('expanded');
+			this._setExpanded(!this.classList.contains('expanded'));
+		}
+
+		_setExpanded(expanded) {
+			this.classList.toggle('expanded', expanded);
 			document.l10n.setAttributes(this._showMore,
 				expanded ? 'search-result-row-show-less' : 'search-result-row-show-more');
 		}
