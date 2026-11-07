@@ -356,7 +356,9 @@ var LibraryTree = class LibraryTree extends React.Component {
 			this._dragIndices = [index];
 			dragElems = [event.currentTarget];
 		}
-		// Set drag image
+		// Set drag image, clearing any rows left from a drag that ended without a dragend (e.g.,
+		// because its source row was removed)
+		this._dragImageContainer.innerHTML = "";
 		for (let elem of dragElems) {
 			elem = elem.cloneNode(true);
 			elem.style.position = "initial";

@@ -112,6 +112,17 @@ describe("Zotero.LibraryTree", function() {
 			assert.equal(dataTransfer.getData('zotero/collection'), collection.id);
 			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
 		});
+		
+		it("should show only the dragged row after a drag that ended without a dragend", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			await select(win, collection1);
+			
+			startDrag(cv, cv.getRowIndexByID("C" + collection1.id));
+			var { rowEl } = startDrag(cv, cv.getRowIndexByID("C" + collection2.id));
+			assert.equal(cv._dragImageContainer.childElementCount, 1);
+			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
+		});
 	});
 	
 	describe("#_clearDropIndicator()", function () {
