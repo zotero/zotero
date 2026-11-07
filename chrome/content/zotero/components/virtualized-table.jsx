@@ -832,6 +832,8 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	_handleMouseDown = async (e, index) => {
+		// A new click means any earlier drag is over, so its mouseup shouldn't be ignored
+		this._isMouseDrag = false;
 		const modifierClick = e.shiftKey || e.ctrlKey || e.metaKey;
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention. A plain click
 		// on an unselected draggable row is also handled in mouseUp, so that dragging the row
