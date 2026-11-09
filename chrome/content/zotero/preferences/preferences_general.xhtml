@@ -223,15 +223,22 @@
 					native="true"
 				/>
 			</vbox>
-			
+		</groupbox>
+
+		<groupbox id="zotero-prefpane-reflowable-text-groupbox" aria-labelledby="preferences-reflowable-text-title" aria-describedby="preferences-reflowable-text-intro">
+			<label><html:h2 id="preferences-reflowable-text-title" data-l10n-id="preferences-reflowable-text-title"/></label>
+
+			<label id="preferences-reflowable-text-intro" data-l10n-id="preferences-reflowable-text-intro"/>
+			<separator class="thin"/>
+
 			<hbox align="center">
-				<label data-l10n-id="preferences-reader-ebook-font" control="reader-ebook-font-family"/>
+				<label data-l10n-id="preferences-reflowable-text-font" control="reader-ebook-font-family"/>
 				<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
 					<menupopup/>
 				</menulist>
 			</hbox>
 
-			<vbox class="indented-pref">
+			<vbox>
 				<checkbox
 					preference="extensions.zotero.reader.ebookHyphenate"
 					data-l10n-id="preferences-reader-ebook-hyphenate"

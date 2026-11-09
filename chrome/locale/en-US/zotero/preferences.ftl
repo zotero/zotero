@@ -24,7 +24,10 @@ preferences-reader-open-in-new-window =
     .label = Open files in new windows instead of tabs
 preferences-reader-auto-disable-tool =
     .label = Turn off note, text, and image annotation tools after each use
-preferences-reader-ebook-font = Ebook font:
+
+preferences-reflowable-text-title = Reflowable Text
+preferences-reflowable-text-intro = Customize the display of text within ebooks and Reading Mode. Additional appearance options can be set for each document within the reader.
+preferences-reflowable-text-font = Font:
 preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
 
