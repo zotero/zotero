@@ -1665,15 +1665,17 @@ Zotero.Server.LocalAPI._promptForAuthorization = async function (appName) {
 	let alwaysAllowLabel = Zotero.ftl.formatValueSync('general-always-allow');
 	let denyLabel = Zotero.ftl.formatValueSync('general-deny');
 
+	// Deny must be button 1: confirmEx() returns 1 when the dialog is dismissed
+	// via Escape or the window's close button
 	let index = Zotero.Prompt.confirm({
 		title,
 		text,
 		button0: allowLabel,
-		button1: alwaysAllowLabel,
-		button2: denyLabel,
-		defaultButton: 2,
+		button1: denyLabel,
+		button2: alwaysAllowLabel,
+		defaultButton: 1,
 	});
-	return { allow: index === 0 || index === 1, remember: index === 1 };
+	return { allow: index === 0 || index === 2, remember: index === 2 };
 };
 
 /**
