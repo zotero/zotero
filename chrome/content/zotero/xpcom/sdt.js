@@ -197,9 +197,12 @@ Zotero.SDT = new function () {
 	 * @param {Object} [options] - getPack()'s options, `isPriority` putting
 	 *     the cut at the front of the worker queue too
 	 * @param {Boolean} [options.annotations] - Give each chunk the
-	 *     attachment's `annotations` on its text, as readAnchors() does
+	 *     attachment's `annotations` on its text -- its highlights and
+	 *     underlines, each with the content ranges it covers -- and its
+	 *     `segments` with them
 	 * @param {Boolean} [options.segments] - Give each chunk its `segments`,
-	 *     the structure of its text, as readAnchors() does
+	 *     the structure of its text: one per stretch of it from a text
+	 *     node, with the node, the blocks over it and its style
 	 * @returns {Promise<Object>} - { ok: true, chunks, contentHash }, the
 	 *     hash being the source file's as the pack records it, or
 	 *     { ok: false, reason }: getPack()'s reasons, or 'cut-failed' when
@@ -217,7 +220,8 @@ Zotero.SDT = new function () {
 				result.bytes, {
 					isPriority: options.isPriority,
 					positions: marks.map(mark => mark.position),
-					segments
+					// Annotations fall on the segments' text nodes
+					segments: segments || annotations
 				});
 		}
 		catch {
@@ -234,10 +238,7 @@ Zotero.SDT = new function () {
 		}
 		let chunks = cut.chunks.map((chunk) => {
 			if (annotations) {
-				chunk = _withAnnotations(chunk, marks);
-			}
-			else {
-				delete chunk.overlaps;
+				chunk = _withAnnotations(chunk, marks, cut.positionRanges);
 			}
 			return _withFirstPosition(chunk);
 		});
@@ -268,13 +269,14 @@ Zotero.SDT = new function () {
 	 *     the read at the front of the worker queue too
 	 * @returns {Promise<Object>} { ok: true, chunks: [{ text, outlinePath,
 	 *     pageLabel, segments, position, annotations } | null] },
-	 *     `segments` the structure of `text` as the chunker's
-	 *     getAnchorSegments() describes it, `position` the reader position
-	 *     the chunk opens at and `annotations` the attachment's highlights
-	 *     and underlines on its text, each { key, type, color, comment,
-	 *     ranges } with the { start, end } ranges of `text` it covers; or
-	 *     { ok: false, reason }: getPack()'s reasons, or 'failed' when the
-	 *     worker couldn't read the pack
+	 *     `segments` the structure of `text` -- one per stretch of it from a
+	 *     text node, with the node, the blocks over it and its style --
+	 *     `position` the reader position the chunk opens at and
+	 *     `annotations` the attachment's highlights and underlines on its
+	 *     text, each { key, type, color, comment, ranges } with the content
+	 *     ranges of the chunk's text nodes it covers, [start, end] points
+	 *     [...ref, offset]; or { ok: false, reason }: getPack()'s reasons,
+	 *     or 'failed' when the worker couldn't read the pack
 	 */
 	this.readAnchors = async function (itemID, anchors, options = {}) {
 		let result = await this.getPack(itemID, options);
@@ -283,14 +285,14 @@ Zotero.SDT = new function () {
 		}
 		let marks = _getTextAnnotations(itemID);
 		try {
-			let chunks = await Zotero.PDFWorker.readStructuredDocumentTextAnchors(
+			let { chunks, positionRanges } = await Zotero.PDFWorker.readStructuredDocumentTextAnchors(
 				result.bytes, anchors, {
 					isPriority: options.isPriority,
 					positions: marks.map(mark => mark.position)
 				});
 			return {
 				ok: true,
-				chunks: chunks.map(chunk => chunk && _withFirstPosition(_withAnnotations(chunk, marks)))
+				chunks: chunks.map(chunk => chunk && _withFirstPosition(_withAnnotations(chunk, marks, positionRanges)))
 			};
 		}
 		catch {
@@ -378,13 +380,16 @@ Zotero.SDT = new function () {
 			}));
 	}
 
-	// The marks that cover some of the chunk's text, each with the ranges
-	// the worker found for its position, in place of the ranges
-	function _withAnnotations({ overlaps, ...chunk }, marks) {
+	// The marks that cover some of the chunk's text, each with those of the
+	// content ranges found for its position that lie on the chunk's text
+	// nodes -- the ones its segments show
+	function _withAnnotations(chunk, marks, positionRanges) {
+		let refs = new Set((chunk.segments || []).map(segment => segment.ref.join('.')));
 		let annotations = [];
 		marks.forEach(({ key, type, color, comment }, i) => {
-			if (overlaps?.[i]) {
-				annotations.push({ key, type, color, comment, ranges: overlaps[i] });
+			let ranges = (positionRanges[i] || []).filter(([from]) => refs.has(from.slice(0, -1).join('.')));
+			if (ranges.length) {
+				annotations.push({ key, type, color, comment, ranges });
 			}
 		});
 		return { ...chunk, annotations };

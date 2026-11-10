@@ -717,15 +717,14 @@ class PDFWorker {
 	 * @param {ArrayBuffer} buf - The pack, as getStructuredDocumentText() returns it
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority]
-	 * @param {Object[]} [options.positions] - Reader positions to find
-	 *     within each chunk's text
+	 * @param {Object[]} [options.positions] - Reader positions to locate in
+	 *     the structure
 	 * @param {Boolean} [options.segments] - Give each chunk its `segments`,
-	 *     the structure of its text, as readStructuredDocumentTextAnchors()
-	 *     does
-	 * @returns {Promise<Object>} - { chunks, sourceHash, chunkerVersion },
-	 *     each chunk with `positions`, the reader positions its anchor
-	 *     resolves to, and `overlaps`, per given position the { start, end }
-	 *     ranges of its text covered or null
+	 *     the structure of its text
+	 * @returns {Promise<Object>} - { chunks, positionRanges, sourceHash,
+	 *     chunkerVersion }, each chunk with `positions`, the reader
+	 *     positions its anchor resolves to; `positionRanges` per given
+	 *     position, the content ranges of the text it covers or null
 	 */
 	async getStructuredDocumentTextChunks(buf, { isPriority = false, positions = [], segments = false } = {}) {
 		return this._enqueue(async () => {
@@ -749,9 +748,9 @@ class PDFWorker {
 	 * @param {Integer} itemID - The attachment
 	 * @param {ArrayBuffer} buf - Its pack, as getStructuredDocumentText() returns it
 	 * @param {Object} options
-	 * @param {Array[]} options.ranges - Content ranges in the structure, each
-	 *     [start, end] points made from a chunk's `segments`, one per run of
-	 *     text to annotate
+	 * @param {Array[]} options.ranges - The text selected, as content ranges
+	 *     [start, end] of points made from a chunk's `segments`, one per
+	 *     segment, in text order
 	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
 	 * @param {String} [options.color] - The annotation color
 	 * @param {String} [options.password] - The PDF's, when it's encrypted
@@ -759,7 +758,7 @@ class PDFWorker {
 	 * @returns {Promise<Object|null>} - { text, annotations }: the selected
 	 *     text and its annotations in the reader's form, each with type,
 	 *     color, text, comment, tags, position, sortIndex and pageLabel;
-	 *     null when the selection doesn't resolve or the file is missing
+	 *     null when the selection doesn't resolve or a PDF's file is missing
 	 */
 	async createAnnotations(itemID, buf, { isPriority = false, ...options } = {}) {
 		return this._enqueue(async () => {
@@ -769,20 +768,24 @@ class PDFWorker {
 					|| attachment.isSnapshotAttachment())) {
 				throw new Error('Item must be a PDF, EPUB, or snapshot attachment');
 			}
-			let path = await attachment.getFilePathAsync();
-			if (!path) {
-				return null;
+			// Only a PDF's annotations take anything from the file itself
+			let fileBuf = null;
+			if (attachment.isPDFAttachment()) {
+				let path = await attachment.getFilePathAsync();
+				if (!path) {
+					return null;
+				}
+				let fileSize = (await IOUtils.stat(path)).size;
+				if (fileSize > Math.pow(2, 31) - 1) {
+					throw new Error(`The file "${path}" is too large`);
+				}
+				fileBuf = new Uint8Array(await IOUtils.read(path)).buffer;
 			}
-			let fileSize = (await IOUtils.stat(path)).size;
-			if (fileSize > Math.pow(2, 31) - 1) {
-				throw new Error(`The file "${path}" is too large`);
-			}
-			let fileBuf = await IOUtils.read(path);
-			fileBuf = new Uint8Array(fileBuf).buffer;
 
 			let t = new Date();
 			try {
-				var result = await this._query('createAnnotations', { packBuf: buf, fileBuf, ...options }, [buf, fileBuf]);
+				var result = await this._query('createAnnotations', { packBuf: buf, fileBuf, ...options },
+					[buf, fileBuf].filter(Boolean));
 			}
 			catch (e) {
 				this._throwWorkerError('createAnnotations', e, { ranges: options.ranges });
@@ -800,12 +803,12 @@ class PDFWorker {
 	 * @param {Object[]} anchors - A chunk's `anchor` per entry
 	 * @param {Object} [options]
 	 * @param {Boolean} [options.isPriority]
-	 * @param {Object[]} [options.positions] - Reader positions to find
-	 *     within each chunk's text
-	 * @returns {Promise<Object[]>} - Per anchor, { text, outlinePath,
-	 *     pageLabel, positions, overlaps } or null where it doesn't
-	 *     resolve; `overlaps` per given position, the ranges of the text
-	 *     it covers or null
+	 * @param {Object[]} [options.positions] - Reader positions to locate in
+	 *     the structure
+	 * @returns {Promise<Object>} - { chunks, positionRanges }: per anchor,
+	 *     { text, outlinePath, pageLabel, segments, positions } or null
+	 *     where it doesn't resolve; per given position, the content ranges
+	 *     of the text it covers or null
 	 */
 	async readStructuredDocumentTextAnchors(buf, anchors, { isPriority = false, positions = [] } = {}) {
 		return this._enqueue(async () => {

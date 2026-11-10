@@ -353,17 +353,12 @@ describe("Zotero.Annotations", function() {
 			for (let segment of chunk.segments) {
 				assert.isAtMost(segment.end, chunk.text.length);
 				assert.isArray(segment.ref);
-				assert.equal(segment.block.type, 'paragraph');
+				assert.equal(segment.blocks.at(-1).type, 'paragraph');
 			}
 			let phrase = 'easy-to-use tool';
 			let start = chunk.text.indexOf(phrase);
 			let end = start + phrase.length;
-			// The content point at an offset into the chunk's text
-			let pointAt = (offset) => {
-				let segment = chunk.segments.find(s => offset >= s.start && offset <= s.end);
-				return [...segment.ref, segment.offset + offset - segment.start];
-			};
-			let ranges = [[pointAt(start), pointAt(end)]];
+			let ranges = rangesBetween(chunk, start, end);
 
 			let result = await Zotero.Annotations.createFromRanges(item.id, ranges);
 			assert.isTrue(result.ok, result.reason);
@@ -390,15 +385,14 @@ describe("Zotero.Annotations", function() {
 			assert.equal(again.items[0].annotationPageLabel, '1');
 			assert.deepEqual(JSON.parse(again.items[0].annotationPosition), position);
 
-			// Both read back over the words they cover, in the chunk's text
+			// Both read back over the ranges they were made from
 			let { chunks: [read, nothing] } = await Zotero.SDT.readAnchors(item.id, [chunk.anchor, null]);
 			assert.isNull(nothing);
 			assert.include(read.text, phrase);
 			assert.deepEqual(read.segments, chunk.segments);
-			let covered = { start: read.text.indexOf(phrase), end: read.text.indexOf(phrase) + phrase.length };
 			assert.sameDeepMembers(read.annotations.map(a => [a.key, a.type, a.color, a.ranges]), [
-				[annotation.key, 'highlight', Zotero.Annotations.DEFAULT_COLOR, [covered]],
-				[again.items[0].key, 'underline', '#ff6666', [covered]],
+				[annotation.key, 'highlight', Zotero.Annotations.DEFAULT_COLOR, ranges],
+				[again.items[0].key, 'underline', '#ff6666', ranges],
 			]);
 			// The cut gives the same when asked
 			let recut = await Zotero.SDT.getItemChunks(item.id, { annotations: true });
@@ -416,6 +410,101 @@ describe("Zotero.Annotations", function() {
 				await Zotero.Annotations.createFromRanges(image.id, ranges),
 				{ ok: false, reason: 'unsupported' }
 			);
+		});
+
+		// The ranges of a chunk's segments between two offsets into its text,
+		// one per segment, as the card describes a selection, leaving out the
+		// text of tables and images, which it shows as placeholders
+		function rangesBetween(chunk, start, end) {
+			let point = (s, offset) => [...s.ref, s.offset + offset - s.start];
+			return chunk.segments
+				.filter(s => Math.max(start, s.start) < Math.min(end, s.end)
+					&& !s.blocks.some(block => ['table', 'image'].includes(block.type)))
+				.map(s => [point(s, Math.max(start, s.start)), point(s, Math.min(end, s.end))]);
+		}
+
+		// The selection over the chunk that spans the most blocks, from inside
+		// its first word to inside its last, with the text it covers
+		async function selectAcrossBlocks(item) {
+			let cut = await Zotero.SDT.getItemChunks(item.id, { segments: true });
+			assert.isTrue(cut.ok, cut.reason);
+			let blocks = chunk => new Set(chunk.segments.map(s => s.blocks.at(-1).ref.join())).size;
+			let chunk = cut.chunks.filter(chunk => chunk.anchor).sort((a, b) => blocks(b) - blocks(a))[0];
+			assert.isAbove(blocks(chunk), 1, 'The document must chunk across blocks');
+			let start = chunk.segments[0].start + 1;
+			let end = chunk.segments.at(-1).end - 1;
+			return { chunk, ranges: rangesBetween(chunk, start, end), text: chunk.text.slice(start, end) };
+		}
+
+		// The annotations made of a selection in an EPUB or snapshot: one
+		// per position the reader stores it as, each provisionally at the
+		// top of its section or document, with a zero offset for the reader
+		// to replace, together covering the selection and whatever the
+		// document has between the blocks selected
+		async function checkProvisional(item, chunk, result, { ranges, text, type, sortIndex }) {
+			assert.isTrue(result.ok, result.reason);
+			assert.isAtLeast(result.items.length, 1);
+			for (let annotation of result.items) {
+				assert.equal(annotation.annotationType, type);
+				// No page label, dropped as empty when saved
+				assert.notOk(annotation.annotationPageLabel);
+				assert.equal(annotation.annotationSortIndex, sortIndex(JSON.parse(annotation.annotationPosition)));
+			}
+			let [head, tail] = [text.split('\n\n')[0], text.split('\n\n').at(-1)];
+			assert.isTrue(result.items[0].annotationText.startsWith(head), result.items[0].annotationText);
+			assert.isTrue(result.items.at(-1).annotationText.endsWith(tail), result.items.at(-1).annotationText);
+			// Their positions read back from the selection's first point to its last
+			let { chunks: [read] } = await Zotero.SDT.readAnchors(item.id, [chunk.anchor]);
+			// Content points in document order
+			let before = (a, b) => {
+				let i = a.findIndex((n, j) => n != b[j]);
+				return i == -1 ? a.length - b.length : a[i] - (b[i] ?? -1);
+			};
+			let covered = result.items.flatMap(a => read.annotations.find(found => found.key == a.key).ranges)
+				.sort((a, b) => before(a[0], b[0]));
+			assert.deepEqual(covered[0][0], ranges[0][0]);
+			assert.deepEqual(covered.at(-1)[1], ranges.at(-1)[1]);
+		}
+
+		it("should annotate a selection across blocks of an EPUB at the top of its section", async function () {
+			this.timeout(120000);
+			let item = await importFileAttachment('recognizeEPUB_test_content.epub');
+			let { chunk, ranges, text } = await selectAcrossBlocks(item);
+			assert.include(text, '\n\n');
+			let result = await Zotero.Annotations.createFromRanges(item.id, ranges);
+			await checkProvisional(item, chunk, result, {
+				ranges, text, type: 'highlight',
+				// The section the CFI's base step counts to
+				sortIndex: (position) => {
+					assert.equal(position.type, 'FragmentSelector');
+					let [, step] = position.value.match(/^epubcfi\(\/\d+\/(\d+)!/);
+					return String(step / 2 - 1).padStart(5, '0') + '|00000000';
+				},
+			});
+		});
+
+		it("should annotate a selection across blocks of a snapshot at the top of the document", async function () {
+			this.timeout(120000);
+			let paragraphs = Array.from({ length: 6 }, (_, i) => `<p>Paragraph ${i + 1} of the page keeps owls, hawks and other birds of prey in view for the reader to annotate at length.</p>`);
+			let file = Zotero.getTempDirectory();
+			file.append('snapshot-' + Zotero.Utilities.randomString() + '.html');
+			await Zotero.File.putContentsAsync(file, `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Birds</title></head>
+				<body><article><h1>Birds of prey</h1>${paragraphs.join('\n')}</article></body></html>`);
+			let parent = await createDataObject('item');
+			let item = await Zotero.Attachments.importSnapshotFromFile({
+				title: 'Birds', url: 'http://example.com/birds', file, parentItemID: parent.id,
+				contentType: 'text/html', charset: 'utf-8'
+			});
+			let { chunk, ranges, text } = await selectAcrossBlocks(item);
+			assert.include(text, '\n\n');
+			let result = await Zotero.Annotations.createFromRanges(item.id, ranges, { type: 'underline' });
+			await checkProvisional(item, chunk, result, {
+				ranges, text, type: 'underline',
+				sortIndex: (position) => {
+					assert.equal(position.type, 'TextPositionSelector');
+					return '0000000';
+				},
+			});
 		});
 	});
 

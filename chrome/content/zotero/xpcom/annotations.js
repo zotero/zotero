@@ -344,18 +344,18 @@ Zotero.Annotations = new function () {
 	};
 
 	/**
-	 * Annotate content ranges in an attachment's structured text: a
-	 * highlight or underline over the text they address, saved as
-	 * annotation items of the attachment, one per range. A range is
-	 * [start, end], points in the structure made from a chunk's `segments`
-	 * (see Zotero.SDT.readAnchors()), one per run of a selection -- a
-	 * stretch of it that sits together in the document, as a selection
-	 * across a caption has two. Made from the attachment's structured text,
-	 * with the file read for what it alone doesn't give. PDF attachments
-	 * only so far.
+	 * Annotate content ranges of an attachment's structured text: a
+	 * highlight or underline over them, saved as annotation items of the
+	 * attachment, one per position the reader stores the selection as --
+	 * per page of a PDF, per section of an EPUB, one for a snapshot.
+	 * A range is [start, end], points [...ref, offset] in the structure
+	 * made from a chunk's `segments`, one per segment selected, so that
+	 * only text shown as selected is annotated.
+	 * An EPUB's or snapshot's annotations carry a provisional
+	 * sort index that places them at the top of their section or document.
 	 *
 	 * @param {Integer} itemID
-	 * @param {Array[]} ranges
+	 * @param {Array[]} ranges - In text order
 	 * @param {Object} [options]
 	 * @param {String} [options.type='highlight'] - 'highlight' or 'underline'
 	 * @param {String} [options.color] - Hex color, the reader's default when omitted
@@ -367,8 +367,7 @@ Zotero.Annotations = new function () {
 	 */
 	this.createFromRanges = async function (itemID, ranges, { type = 'highlight', color } = {}) {
 		let item = await Zotero.Items.getAsync(itemID);
-		// Until the worker annotates EPUBs and snapshots as well
-		if (!item || !item.isPDFAttachment()) {
+		if (!item || !(item.isPDFAttachment() || item.isEPUBAttachment() || item.isSnapshotAttachment())) {
 			return { ok: false, reason: 'unsupported' };
 		}
 		let result = await Zotero.SDT.getPack(itemID, { isPriority: true });

@@ -30,6 +30,8 @@
 	// its pointer stays from its own corners
 	const POPUP_MARGIN = 8;
 	const POINTER_INSET = 16;
+	// The blocks shown as a placeholder, their text kept but not displayed
+	const PLACEHOLDER_BLOCKS = ['table', 'image'];
 
 	// A best-match search result card: one passage of an item's text that the
 	// query matched (see Zotero.BestMatch.Session#getPreviews()) -- where the
@@ -300,7 +302,11 @@
 				}
 				return;
 			}
-			if (!this._result?.segments?.length || !Zotero.Items.get(this.itemID)?.isPDFAttachment()) {
+			// Only a passage of known structure can be annotated, in an
+			// attachment the reader annotates
+			let item = Zotero.Items.get(this.itemID);
+			if (!this._result?.segments?.length
+					|| !(item?.isPDFAttachment() || item?.isEPUBAttachment() || item?.isSnapshotAttachment())) {
 				return;
 			}
 			this._selection = offsets;
@@ -372,28 +378,16 @@
 			return start < end ? { start, end } : null;
 		}
 
-		// The selection as content ranges in the document's structure, one
-		// per run of the passage's text it crosses -- a stretch read as the
-		// document orders it -- between the points at its ends in the
-		// segments it falls in
+		// The selection as content ranges in the document's structure: the
+		// part of each displayed segment it covers, between points in the
+		// segment's text node. The text of a placeholder is in the quote but
+		// not shown, so a selection over it selects nothing of it
 		_getSelectedRanges({ start, end }) {
-			let ranges = [];
-			for (let segment of this._result.segments || []) {
-				let from = Math.max(start, segment.start);
-				let to = Math.min(end, segment.end);
-				if (from >= to) {
-					continue;
-				}
-				let point = offset => [...segment.ref, segment.offset + offset - segment.start];
-				let last = ranges.at(-1);
-				if (last?.run === segment.run) {
-					last.range[1] = point(to);
-				}
-				else {
-					ranges.push({ run: segment.run, range: [point(from), point(to)] });
-				}
-			}
-			return ranges.map(({ range }) => range);
+			let point = (segment, offset) => [...segment.ref, segment.offset + offset - segment.start];
+			return (this._result.segments || [])
+				.filter(segment => Math.max(start, segment.start) < Math.min(end, segment.end)
+					&& !segment.blocks.some(block => PLACEHOLDER_BLOCKS.includes(block.type)))
+				.map(segment => [point(segment, Math.max(start, segment.start)), point(segment, Math.min(end, segment.end))]);
 		}
 
 		// Make the annotation and close, as the reader does; a click on the
@@ -406,7 +400,9 @@
 			try {
 				let type = Zotero.Prefs.get('reader.textSelectionAnnotationMode') || 'highlight';
 				let ranges = this._getSelectedRanges(this._selection);
-				let result = await Zotero.Annotations.createFromRanges(this.itemID, ranges, { type, color });
+				let result = ranges.length
+					? await Zotero.Annotations.createFromRanges(this.itemID, ranges, { type, color })
+					: { ok: false, reason: 'nothing selected' };
 				if (!result.ok) {
 					Zotero.debug(`Couldn't annotate the selected passage text: ${result.reason}`);
 				}
@@ -479,6 +475,7 @@
 			let segments = this._result.segments;
 			this._quote.replaceChildren();
 			this._quote.classList.toggle('structured', !!segments?.length);
+			this._annotationLayers = segments?.length ? this._getAnnotationLayers(segments) : [];
 			if (segments?.length) {
 				this._renderBlocks(text, segments);
 			}
@@ -487,14 +484,38 @@
 			}
 		}
 
+		// The annotations' content ranges as offsets into the passage's
+		// text: each lies on a text node, and the segment showing that
+		// part of the node places it
+		_getAnnotationLayers(segments) {
+			let layers = [];
+			for (let annotation of this._result.annotations || []) {
+				for (let [from, to] of annotation.ranges || []) {
+					let ref = from.slice(0, -1).join('.');
+					for (let segment of segments) {
+						if (segment.ref.join('.') != ref) {
+							continue;
+						}
+						let start = Math.max(from.at(-1), segment.offset);
+						let end = Math.min(to.at(-1), segment.offset + segment.end - segment.start);
+						if (start < end) {
+							layers.push({ from: segment.start + start - segment.offset,
+								to: segment.start + end - segment.offset, annotation });
+						}
+					}
+				}
+			}
+			return layers;
+		}
+
 		// Simple rendering of segments of structured-text
 		_renderBlocks(text, segments) {
 			let open = [];
 			let cursor = 0;
 			let innermost = () => open.at(-1)?.element ?? this._quote;
 			for (let segment of segments) {
-				let chain = [...segment.path, segment.block];
-				let placeholder = chain.findIndex(block => ['table', 'image'].includes(block.type));
+				let chain = segment.blocks;
+				let placeholder = chain.findIndex(block => PLACEHOLDER_BLOCKS.includes(block.type));
 				if (placeholder >= 0) {
 					chain = chain.slice(0, placeholder + 1);
 				}
@@ -575,8 +596,7 @@
 		_appendMarked(node, text, start, end) {
 			let layers = [
 				...(this._result.ranges || []).map(([from, to]) => ({ from, to, className: 'match' })),
-				...(this._result.annotations || []).flatMap(annotation => annotation.ranges
-					.map(({ start: from, end: to }) => ({ from, to, annotation }))),
+				...(this._annotationLayers || []),
 			];
 			let snippet = this.highlightSnippet ? this._result.snippet : null;
 			if (snippet) {

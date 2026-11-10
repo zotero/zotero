@@ -44,14 +44,14 @@ describe("search-result-row", function () {
 		let table = { type: 'table', ref: [2] };
 		let tr = { type: 'tablerow', ref: [2, 0] };
 		return passage([
-			{ text: 'Birds', ref: [0, 0], run: 0, block: { type: 'heading', ref: [0] }, path: [] },
-			{ text: 'Owls', ref: [1, 0, 0], run: 0, block: { type: 'listitem', ref: [1, 0] }, path: [list], style: { bold: true } },
-			{ text: 'Hawks', ref: [1, 1, 0, 0], run: 0, block: { type: 'paragraph', ref: [1, 1, 0] },
-				path: [list, { type: 'listitem', ref: [1, 1] }] },
-			{ text: 'Bird', ref: [2, 0, 0, 0, 0], run: 0, block: { type: 'paragraph', ref: [2, 0, 0, 0] },
-				path: [table, tr, { type: 'tablecell', ref: [2, 0, 0] }] },
-			{ text: 'Owl', ref: [2, 0, 1, 0, 0], run: 1, block: { type: 'paragraph', ref: [2, 0, 1, 0] },
-				path: [table, tr, { type: 'tablecell', ref: [2, 0, 1] }] },
+			{ text: 'Birds', ref: [0, 0], blocks: [{ type: 'heading', ref: [0] }] },
+			{ text: 'Owls', ref: [1, 0, 0], blocks: [list, { type: 'listitem', ref: [1, 0] }], style: { bold: true } },
+			{ text: 'Hawks', ref: [1, 1, 0, 0],
+				blocks: [list, { type: 'listitem', ref: [1, 1] }, { type: 'paragraph', ref: [1, 1, 0] }] },
+			{ text: 'Bird', ref: [2, 0, 0, 0, 0],
+				blocks: [table, tr, { type: 'tablecell', ref: [2, 0, 0] }, { type: 'paragraph', ref: [2, 0, 0, 0] }] },
+			{ text: 'Owl', ref: [2, 0, 1, 0, 0],
+				blocks: [table, tr, { type: 'tablecell', ref: [2, 0, 1] }, { type: 'paragraph', ref: [2, 0, 1, 0] }] },
 		]);
 	}
 
@@ -65,7 +65,7 @@ describe("search-result-row", function () {
 			ranges: [[at('Hawks'), at('Hawks') + 5]],
 			snippet: { start: at('Owls'), end: at('Owls') + 4 },
 			annotations: [{ key: 'A', type: 'highlight', color: '#ffd400',
-				ranges: [{ start: segments[3].start, end: segments[3].end }] }]
+				ranges: [[[2, 0, 0, 0, 0, 0], [2, 0, 0, 0, 0, 4]]] }]
 		};
 		let quote = row.querySelector('.quote');
 		// Every character of the passage, separators included, so offsets
@@ -93,30 +93,30 @@ describe("search-result-row", function () {
 		assert.equal(win.getComputedStyle(hidden[0]).display, 'none');
 	});
 
-	it("should address a selection as content ranges in the structure, one per run", function () {
+	it("should address a selection as ranges of the structure's text it shows, one per segment", function () {
 		let { text, segments } = structured();
 		let at = phrase => text.indexOf(phrase);
 		row.result = { text, segments, ranges: [] };
-		// From inside the first item through the data cell: the three
-		// stretches that read in document order are one range, the cell
-		// that doesn't is another
+		// From inside the first item to inside the last cell: the table's
+		// text, shown as a placeholder, isn't selected
 		let selected = row._getSelectedRanges({ start: at('Owls') + 1, end: text.length - 1 });
 		assert.deepEqual(selected, [
-			[[1, 0, 0, 1], [2, 0, 0, 0, 0, 4]],
-			[[2, 0, 1, 0, 0, 0], [2, 0, 1, 0, 0, 2]],
+			[[1, 0, 0, 1], [1, 0, 0, 4]],
+			[[1, 1, 0, 0, 0], [1, 1, 0, 0, 5]],
 		]);
-		// Nothing for a selection off the passage's text
+		// Nothing for a selection off the passage's text, or on a placeholder alone
 		assert.deepEqual(row._getSelectedRanges({ start: 5, end: 7 }), []);
+		assert.deepEqual(row._getSelectedRanges({ start: at('Bird\n\nOwl'), end: text.length }), []);
 	});
 
 	it("should mark a range across two nodes through the separator between them", function () {
 		// Two nodes of one paragraph: the chunker separates them by a space
 		let { text, segments } = passage([
-			{ text: 'Owls hunt', ref: [0, 0], run: 0, block: { type: 'paragraph', ref: [0] }, path: [] },
+			{ text: 'Owls hunt', ref: [0, 0], blocks: [{ type: 'paragraph', ref: [0] }] },
 		]);
 		text += ' at night.';
-		segments.push({ start: text.length - 9, end: text.length, ref: [0, 1], offset: 0, run: 0,
-			block: { type: 'paragraph', ref: [0] }, path: [] });
+		segments.push({ start: text.length - 9, end: text.length, ref: [0, 1], offset: 0,
+			blocks: [{ type: 'paragraph', ref: [0] }] });
 		row.result = { text, segments, ranges: [[5, 12]] };
 		let quote = row.querySelector('.quote');
 		assert.equal(quote.textContent, text);
@@ -126,9 +126,9 @@ describe("search-result-row", function () {
 
 	it("should keep an image's text in the quote without showing it", function () {
 		let { text, segments } = passage([
-			{ text: 'Figure 1. An owl.', ref: [0, 0], run: 0, block: { type: 'caption', ref: [0] }, path: [] },
-			{ text: '0 20 40 60 80', ref: [1, 0], run: 0, block: { type: 'image', ref: [1] }, path: [] },
-			{ text: 'Owls hunt at night.', ref: [2, 0], run: 0, block: { type: 'paragraph', ref: [2] }, path: [] },
+			{ text: 'Figure 1. An owl.', ref: [0, 0], blocks: [{ type: 'caption', ref: [0] }] },
+			{ text: '0 20 40 60 80', ref: [1, 0], blocks: [{ type: 'image', ref: [1] }] },
+			{ text: 'Owls hunt at night.', ref: [2, 0], blocks: [{ type: 'paragraph', ref: [2] }] },
 		]);
 		row.result = { text, segments, ranges: [] };
 		let quote = row.querySelector('.quote');
@@ -157,12 +157,12 @@ describe("search-result-row", function () {
 		// The passage with the annotation drawn over its first word
 		function show() {
 			let { text, segments } = passage([
-				{ text: 'Owls hunt at night.', ref: [0, 0], run: 0, block: { type: 'paragraph', ref: [0] }, path: [] },
+				{ text: 'Owls hunt at night.', ref: [0, 0], blocks: [{ type: 'paragraph', ref: [0] }] },
 			]);
 			row.itemID = attachment.id;
 			row.result = { text, segments, ranges: [], annotations: [{
 				key: annotation.key, type: 'highlight', color: '#ffd400', comment: 'Noted',
-				ranges: [{ start: 0, end: 4 }]
+				ranges: [[[0, 0, 0], [0, 0, 4]]]
 			}] };
 			return row.querySelector('.quote .annotation');
 		}
@@ -204,7 +204,7 @@ describe("search-result-row", function () {
 		// A passage long enough to be clamped
 		let { text, segments } = passage([{
 			text: Array(40).fill('Owls hunt at night and sleep by day.').join(' '),
-			ref: [0, 0], run: 0, block: { type: 'paragraph', ref: [0] }, path: []
+			ref: [0, 0], blocks: [{ type: 'paragraph', ref: [0] }]
 		}]);
 		row.result = { text, segments, ranges: [] };
 		await waitForCallback(() => !row._showMore.hidden);
@@ -212,7 +212,7 @@ describe("search-result-row", function () {
 		assert.isTrue(row.classList.contains('expanded'));
 
 		row.setAnnotations({ text, segments, annotations: [{ key: 'A', type: 'highlight',
-			color: '#ffd400', ranges: [{ start: 0, end: 4 }] }] });
+			color: '#ffd400', ranges: [[[0, 0, 0], [0, 0, 4]]] }] });
 		assert.ok(row.querySelector('.quote .annotation'));
 		// Measured collapsed within the frame, then shown in full again
 		await new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
