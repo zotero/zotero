@@ -1136,6 +1136,33 @@ describe("Zotero.Integration", function () {
 				await execCommand('refresh', docID);
 				assert.equal(applications[docID].doc.fields.length, 1);
 			});
+			
+			it('should set codes after texts with a plugin that sets fields in batches', async function () {
+				var docID = this.test.fullTitle();
+				var item = await createDataObject('item', { libraryID: Zotero.Libraries.userLibraryID });
+				item.setCreator(0, { creatorType: 'author', firstName: 'Foo', lastName: 'Bar' });
+				setAddEditItems(item);
+				await initDoc(docID);
+				await execCommand('addEditCitation', docID);
+				var doc = applications[docID].doc;
+				// Report text that differs from what was set, as Word does when it renders RTF
+				doc.setFieldTexts = sinon.spy(async function (fields, texts) {
+					fields.forEach((field, i) => field.text = texts[i].toUpperCase());
+				});
+				doc.setFieldCodes = sinon.spy(async function (fields, codes) {
+					fields.forEach((field, i) => field.code = codes[i]);
+				});
+				
+				item.setCreator(0, { creatorType: 'author', firstName: 'Foo', lastName: 'Baz' });
+				await execCommand('refresh', docID);
+				
+				assert.isTrue(doc.setFieldTexts.calledOnce);
+				assert.isTrue(doc.setFieldTexts.calledBefore(doc.setFieldCodes));
+				var citation = await new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)
+					.unserialize();
+				assert.include(doc.fields[0].text, 'BAZ');
+				assert.equal(citation.properties.plainCitation, doc.fields[0].text);
+			});
 		});
 	});
 	

@@ -1341,6 +1341,13 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 	// Descending order sort
 	indicesToUpdate = indicesToUpdate.sort((a, b) => b - a);
 	
+	// Plugins that can update many fields at once get all text updates and then all code
+	// updates in two calls
+	var batchUpdates = typeof this._doc.setFieldTexts == 'function'
+		&& typeof this._doc.setFieldCodes == 'function';
+	var textUpdates = [];
+	var codeUpdates = [];
+	
 	var nUpdated=0;
 	for(var i of indicesToUpdate) {
 		if(this.progressCallback && nUpdated % 10 == 0) {
@@ -1357,7 +1364,6 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 		if (citation) {
 			let citationField = citation.field;
 			
-			var isRich = false;
 			if (!citation.properties.dontUpdate) {
 				var formattedCitation = citation.properties.custom
 					? citation.properties.custom : citation.text;
@@ -1402,20 +1408,29 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 					// for citations that were inserted with delay styling
 					var wasDelayed = citation.properties.formattedCitation
 						&& citation.properties.formattedCitation.includes(DELAYED_CITATION_RTF_STYLING);
-					if (this.outputFormat == 'rtf' && wasDelayed) {
-						isRich = await citationField.setText(`${DELAYED_CITATION_RTF_STYLING_CLEAR}{${formattedCitation}}`);
-					} else {
-						isRich = await citationField.setText(formattedCitation);
-					}
-					
+					let text = this.outputFormat == 'rtf' && wasDelayed
+						? `${DELAYED_CITATION_RTF_STYLING_CLEAR}{${formattedCitation}}`
+						: formattedCitation;
 					citation.properties.formattedCitation = formattedCitation;
-					citation.properties.plainCitation = await citationField.getText();
+					if (batchUpdates) {
+						textUpdates.push({ field: citationField, text, citation });
+					}
+					else {
+						await citationField.setText(text);
+						citation.properties.plainCitation = await citationField.getText();
+					}
 				}
 			}
 			
-			var serializedCitation = citation.serialize();
-			if (serializedCitation != citation.properties.field) {
-				await citationField.setCode(serializedCitation);
+			if (batchUpdates) {
+				// Serialized after the text is set, since the code includes the plain text
+				codeUpdates.push({ citation });
+			}
+			else {
+				var serializedCitation = citation.serialize();
+				if (serializedCitation != citation.properties.field) {
+					await citationField.setCode(serializedCitation);
+				}
 			}
 			nUpdated++;
 		}
@@ -1433,7 +1448,12 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 			
 			if (forceBibliography || this.bibliographyDataHasChanged) {
 				let code = this.bibliography.serialize();
-				await bibliographyField.setCode(code);
+				if (batchUpdates) {
+					codeUpdates.push({ field: bibliographyField, code });
+				}
+				else {
+					await bibliographyField.setCode(code);
+				}
 			}
 			
 			// get bibliography and format as RTF
@@ -1473,14 +1493,34 @@ Zotero.Integration.Session.prototype._updateDocument = async function (forceCita
 			// Jump to next event loop step for UI updates
 			await Zotero.Promise.delay();
 			
-			if (bibliographyText) {
-				await bibliographyField.setText(bibliographyText);
+			let text = bibliographyText || "{Bibliography}";
+			if (batchUpdates) {
+				textUpdates.push({ field: bibliographyField, text });
 			}
 			else {
-				await bibliographyField.setText("{Bibliography}");
+				await bibliographyField.setText(text);
 			}
 			nUpdated += 5;
 		}
+	}
+	
+	if (batchUpdates) {
+		await Zotero.Integration.Field.setTexts(this._doc, textUpdates);
+		for (let { field, citation } of textUpdates) {
+			if (citation) {
+				citation.properties.plainCitation = await field.getText();
+			}
+		}
+		let codes = [];
+		for (let { citation, field, code } of codeUpdates) {
+			if (citation) {
+				code = citation.serialize();
+				if (code == citation.properties.field) continue;
+				field = citation.field;
+			}
+			codes.push({ field, code });
+		}
+		await Zotero.Integration.Field.setCodes(this._doc, codes);
 	}
 	
 	// Do these operations in reverse in case plug-ins care about order
@@ -2887,15 +2927,19 @@ Zotero.Integration.Field = class {
 	}
 	
 	async setCode(code) {
+		await this._field.setCode(this._getRawCode(code));
+		this._code = code;
+	}
+	
+	_getRawCode(code) {
 		// Boo. Inconsistent order.
 		if (this.type == INTEGRATION_TYPE_ITEM) {
-			await this._field.setCode(`ITEM CSL_CITATION ${code}`);
-		} else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			await this._field.setCode(`BIBL ${code} CSL_BIBLIOGRAPHY`);
-		} else {
-			await this._field.setCode(`TEMP`);
+			return `ITEM CSL_CITATION ${code}`;
 		}
-		this._code = code;
+		else if (this.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
+			return `BIBL ${code} CSL_BIBLIOGRAPHY`;
+		}
+		return `TEMP`;
 	}
 
 	getCode() {
@@ -2923,6 +2967,13 @@ Zotero.Integration.Field = class {
 		
 	async setText(text) {
 		this._text = null;
+		var isRich;
+		({ text, isRich } = this._prepareText(text));
+		await this._field.setText(text, isRich);
+		return isRich;
+	}
+	
+	_prepareText(text) {
 		var isRich = false;
 		// If RTF wrap with RTF tags
 		if (Zotero.Integration.currentSession.outputFormat == "rtf" && text.includes("\\")) {
@@ -2931,8 +2982,41 @@ Zotero.Integration.Field = class {
 			}
 			isRich = true;
 		}
-		await this._field.setText(text, isRich);
-		return isRich;
+		return { text, isRich };
+	}
+};
+
+/**
+ * Sets the text of several fields with a single plugin call
+ * @param {Object} doc - Plugin document that implements setFieldTexts()
+ * @param {Array<{ field: Zotero.Integration.Field, text: String }>} updates
+ */
+Zotero.Integration.Field.setTexts = async function (doc, updates) {
+	if (!updates.length) return;
+	var prepared = updates.map(({ field, text }) => field._prepareText(text));
+	for (let { field } of updates) {
+		field._text = null;
+	}
+	await doc.setFieldTexts(
+		updates.map(({ field }) => field._field),
+		prepared.map(({ text }) => text),
+		prepared.map(({ isRich }) => isRich)
+	);
+};
+
+/**
+ * Sets the codes of several fields with a single plugin call
+ * @param {Object} doc - Plugin document that implements setFieldCodes()
+ * @param {Array<{ field: Zotero.Integration.Field, code: String }>} updates
+ */
+Zotero.Integration.Field.setCodes = async function (doc, updates) {
+	if (!updates.length) return;
+	await doc.setFieldCodes(
+		updates.map(({ field }) => field._field),
+		updates.map(({ field, code }) => field._getRawCode(code))
+	);
+	for (let { field, code } of updates) {
+		field._code = code;
 	}
 };
 Zotero.Integration.Field.INTERFACE = ['delete', 'removeCode', 'select', 'setText',
