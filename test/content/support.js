@@ -1143,6 +1143,18 @@ var generateTranslatorExportData = async function generateTranslatorExportData(l
 
 
 /**
+ * Fail the current suite or test right away when bundled translators and styles weren't installed
+ * (runtests.sh -b)
+ *
+ * Call from a before() hook for a whole suite, or at the start of an it().
+ */
+function requireBundledFiles() {
+	if (Zotero.skipBundledFiles) {
+		throw new Error("Requires bundled translators and styles -- rerun without -b");
+	}
+}
+
+/**
  * Build a dummy translator that can be passed to Zotero.Translate
  */
 function buildDummyTranslator(translatorType, code, info={}) {

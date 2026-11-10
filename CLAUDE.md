@@ -27,7 +27,7 @@ test/runtests.sh -f                # Stop after first failure
 test/runtests.sh -s item           # Start at a specific test file
 test/runtests.sh -e item           # End at a specific test file
 test/runtests.sh -c                # Open JS console, don't quit on completion
-test/runtests.sh -b                # Skip bundled translator/style installation (for faster startup when not necessary)
+test/runtests.sh -b                # Skip bundled translator/style installation (for faster startup; tests that need them fail with "rerun without -b")
 test/runtests.sh -d 5              # Enable debug logging (level 1-5; default is 3)
 ```
 

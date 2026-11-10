@@ -428,6 +428,7 @@ describe("Zotero_Tabs", function() {
 			});
 			
 			it("should import from the clipboard into the tab it was started from", async function () {
+				requireBundledFiles();
 				Zotero.Utilities.Internal.copyTextToClipboard(
 					"@article{tab_test_nodate,\n	title = {Tab Import},\n}"
 				);

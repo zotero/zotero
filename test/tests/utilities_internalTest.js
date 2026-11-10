@@ -639,6 +639,7 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 
 		it("should offer Quick Copy text for only the parent when dragging an attachment along with its parent", async function () {
+			requireBundledFiles();
 			let item = await createDataObject('item', { title: 'Parent Title' });
 			let attachment = await importFileAttachment('test.pdf', {
 				parentID: item.id,
