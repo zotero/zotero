@@ -560,12 +560,13 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			
 			// Toggle all open containers closed and open to refresh child items
 			var t = new Date();
-			for (let i = this.rows.length - 1; i >= 0; i--) {
-				if (this.isContainerOpen(i)) {
-					this._refreshContainer(i, true);
+			this._batchRowChanges(() => {
+				for (let i = this.rows.length - 1; i >= 0; i--) {
+					if (this.isContainerOpen(i)) {
+						this._refreshContainer(i);
+					}
 				}
-			}
-			this.refreshRowMap();
+			});
 			Zotero.debug(`Refreshed open parents in ${new Date() - t} ms`);
 
 			if (this._showSectionHeaders) {
@@ -598,20 +599,21 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			return;
 		}
 
-		for (let i = 0; i < this.rowCount; i++) {
-			if (!this.isContainer(i) || this.isContainerOpen(i)) {
-				continue;
+		this._batchRowChanges(() => {
+			for (let i = 0; i < this.rowCount; i++) {
+				if (!this.isContainer(i) || this.isContainerOpen(i)) {
+					continue;
+				}
+				let item = this.getRow(i).ref;
+				let attachments = item.isRegularItem() ? item.getAttachments() : [];
+				// expand item row if it is a parent of a match
+				// OR if it has a child that is a parent of a match
+				let shouldBeOpened = searchParentIDs.has(item.id) || attachments.some(id => searchParentIDs.has(id));
+				if (shouldBeOpened) {
+					this._toggleOpenState(i);
+				}
 			}
-			let item = this.getRow(i).ref;
-			let attachments = item.isRegularItem() ? item.getAttachments() : [];
-			// expand item row if it is a parent of a match
-			// OR if it has a child that is a parent of a match
-			let shouldBeOpened = searchParentIDs.has(item.id) || attachments.some(id => searchParentIDs.has(id));
-			if (shouldBeOpened) {
-				this._toggleOpenState(i, true);
-			}
-		}
-		this.refreshRowMap();
+		});
 	}
 
 	expandMatchParents() {
@@ -862,12 +864,12 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 					// If item moved from top level to under another item, remove the old row
 					if (parentIndex == -1 && parentItemID) {
 						// Close container to remove any sub-items
-						this._closeContainer(row, true);
+						this._closeContainer(row);
 						this._removeRow(row);
 					}
 					// If moved from under another item to top level, remove old row and add new one
 					else if (parentIndex != -1 && !parentItemID) {
-						this._closeContainer(row, true);
+						this._closeContainer(row);
 						this._removeRow(row, true);
 
 						let beforeRow = this.getRowCount();

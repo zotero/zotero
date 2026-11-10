@@ -209,94 +209,151 @@ class ItemTreeRowProvider {
 		});
 	}
 	
-	_closeContainer(index, skipRowMapRefresh = false) {
+	_closeContainer(index) {
 		if (this.isContainerOpen(index)) {
-			this._toggleOpenState(index, skipRowMapRefresh);
+			this._toggleOpenState(index);
 		}
 	}
 	
-	_openContainer(index, skipRowMapRefresh = false) {
+	_openContainer(index) {
 		if (!this.isContainerOpen(index)) {
-			this._toggleOpenState(index, skipRowMapRefresh);
+			this._toggleOpenState(index);
 		}
 	}
 
-	_refreshContainer(index, skipRowMapRefresh = false) {
+	_refreshContainer(index) {
 		if (!this.isContainer(index)) return;
-		this._closeContainer(index, true);
-		this._openContainer(index, true);
-		if (!skipRowMapRefresh) {
-			this.refreshRowMap();
-		}
+		this._batchRowChanges(() => {
+			this._closeContainer(index);
+			this._openContainer(index);
+		});
 	}
 
-	_toggleOpenState(index, skipRowMapRefresh = false) {
+	_toggleOpenState(index) {
 		if (!this.isContainer(index)) {
 			return false;
 		}
 
-		let count = 0;
-
-		if (this.isContainerOpen(index)) {
-			// Close
-			let level = this.getLevel(index);
-			// Remove child rows
-			while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
-				this.itemTree.selection.adjustForRowRemoval(index + 1, true);
-				this._removeRow(index + 1, true);
-				count++;
+		this._batchRowChanges(() => {
+			if (this.isContainerOpen(index)) {
+				// Close
+				let container = this._rows[index];
+				let level = this.getLevel(index);
+				// Remove child rows, moving their selection to the container
+				while ((index + 1 < this._rows.length) && (this.getLevel(index + 1) > level)) {
+					this._moveSelection(this._rows[index + 1].id, container.id);
+					this._removeRow(index + 1, true);
+				}
+				container.isOpen = false;
 			}
-			this._rows[index].isOpen = false;
+			else if (!this.isContainerEmpty(index)) {
+				// Open
+				let row = this.getRow(index);
+				let level = this.getLevel(index);
+				let childRefs = row.getChildItems({
+					searchMode: this._searchMode,
+					searchItemIDs: this._searchItemIDs,
+					includeTrashed: this._includeTrashed,
+					filterChildItems: this.itemTree.props.filterChildItems,
+				});
+
+				let childRows = childRefs.map(ref => this.createRow(ref, level + 1, false));
+				if (this._sortFields && this.shouldSortChildren(row)) {
+					childRows.sort((a, b) => this._compareRows(a, b));
+				}
+
+				for (let i = 0; i < childRows.length; i++) {
+					this._addRow(childRows[i], index + i + 1, true);
+				}
+
+				row.isOpen = true;
+			}
+		});
+	}
+
+	/**
+	 * Run fn, which adds and removes rows, then refresh the row map and move the selection,
+	 * focus, and pivot to the new indexes of their rows. A nested call joins the outer one,
+	 * so the row map is refreshed once at the end of the outermost call.
+	 *
+	 * The selection is tracked by row ID instead of being adjusted after each row change,
+	 * which takes O(changed rows × selected rows) when toggling many rows with a large
+	 * selection. Selection indexes are stale until the outermost call returns.
+	 *
+	 * @param {Function} fn
+	 */
+	_batchRowChanges(fn) {
+		if (this._selectionByID) {
+			fn();
+			return;
 		}
-		else if (!this.isContainerEmpty(index)) {
-			// Open
-			let row = this.getRow(index);
-			let level = this.getLevel(index);
-			let childRefs = row.getChildItems({
-				searchMode: this._searchMode,
-				searchItemIDs: this._searchItemIDs,
-				includeTrashed: this._includeTrashed,
-				filterChildItems: this.itemTree.props.filterChildItems,
-			});
-
-			let childRows = childRefs.map(ref => this.createRow(ref, level + 1, false));
-			if (this._sortFields && this.shouldSortChildren(row)) {
-				childRows.sort((a, b) => this._compareRows(a, b));
-			}
-
-			for (let i = 0; i < childRows.length; i++) {
-				count++;
-				this._addRow(childRows[i], index + i + 1, true);
-			}
-			this.itemTree.selection.adjustForRowInsertion(index, count);
-
-			this._rows[index].isOpen = true;
-		}
-		if (!skipRowMapRefresh && count > 0) {
+		// Without a tree, the selection is a shared stub that mustn't be modified
+		let selection = this.itemTree.tree?.selection;
+		if (!selection) {
+			fn();
 			this.refreshRowMap();
+			return;
+		}
+		let getID = index => this._rows[index]?.id;
+		this._selectionByID = {
+			selected: new Set(Array.from(selection.selected, getID)),
+			focused: getID(selection.focused),
+			pivot: getID(selection.pivot),
+		};
+		try {
+			fn();
+		}
+		finally {
+			let { selected, focused, pivot } = this._selectionByID;
+			this._selectionByID = null;
+			this.refreshRowMap();
+			selection.selected = new Set(
+				Array.from(selected, id => this._rowMap[id]).filter(index => index !== undefined)
+			);
+			selection.focused = this._rowMap[focused] ?? selection.focused;
+			selection.pivot = this._rowMap[pivot] ?? selection.pivot;
 		}
 	}
 
-	toggleOpenState(index, skipRowMapRefresh = false) {
-		let selection = this.itemTree.selection;
-		let preserveDetachedFocus = !selection.isSelected(selection.focused);
+	/**
+	 * Within _batchRowChanges(), move the selection, focus, and pivot from a row that is
+	 * being removed to another row
+	 *
+	 * @param {String} fromID - treeViewID of the removed row
+	 * @param {String} toID - treeViewID of the row to move the selection to
+	 */
+	_moveSelection(fromID, toID) {
+		let tracked = this._selectionByID;
+		if (!tracked) return;
+		if (tracked.selected.delete(fromID)) {
+			tracked.selected.add(toID);
+		}
+		if (tracked.focused === fromID) {
+			tracked.focused = toID;
+		}
+		if (tracked.pivot === fromID) {
+			tracked.pivot = toID;
+		}
+	}
+
+	toggleOpenState(index) {
 		this.itemTree._cacheState();
-		let selectedBefore = this.itemTree._cachedSelection;
-		this._toggleOpenState(index, skipRowMapRefresh);
+		let selectedBefore = new Set(this.itemTree._cachedSelection);
+		// _toggleOpenState() keeps the selection and focus on their rows, so the cached
+		// selection doesn't need to be restored
+		this._toggleOpenState(index);
 		// Preserve viewport when toggling a container instead of jumping to the current selection.
 		this.runListeners('update', true, {
-			restoreSelection: !preserveDetachedFocus,
+			restoreSelection: false,
 			expandCollapsedParents: false,
 			restoreScroll: true,
 		});
-		if (preserveDetachedFocus) {
-			// Collapsing a container with selected descendants moves their selection to the
-			// container row, and listeners have to be notified of the new selection
-			let selectedAfter = this.itemTree.getSelectedObjects();
-			if (selectedAfter.length != selectedBefore.length
-					|| selectedAfter.some(ref => !selectedBefore.includes(ref))) {
-				selection._updateTree();
-			}
+		// Collapsing a container with selected descendants moves their selection to the
+		// container row, and listeners have to be notified of the new selection
+		let selectedAfter = this.itemTree.getSelectedObjects();
+		if (selectedAfter.length != selectedBefore.size
+				|| selectedAfter.some(ref => !selectedBefore.has(ref))) {
+			this.itemTree.selection._updateTree();
 		}
 	}
 
@@ -333,15 +390,16 @@ class ItemTreeRowProvider {
 			deepestExpandedLevel++;
 		}
 
-		for (let i = 0; i < this.rowCount; i++) {
-			if (this.isContainer(i)
-					&& !this.isContainerOpen(i)
-					&& !this.isContainerEmpty(i)
-					&& (acrossAllLevels || this.getLevel(i) <= deepestExpandedLevel)) {
-				this._toggleOpenState(i, true);
+		this._batchRowChanges(() => {
+			for (let i = 0; i < this.rowCount; i++) {
+				if (this.isContainer(i)
+						&& !this.isContainerOpen(i)
+						&& !this.isContainerEmpty(i)
+						&& (acrossAllLevels || this.getLevel(i) <= deepestExpandedLevel)) {
+					this._toggleOpenState(i);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 		this.runListeners('update', true, {
 			restoreSelection: true,
 			expandCollapsedParents: false,
@@ -368,14 +426,15 @@ class ItemTreeRowProvider {
 			}
 		}
 
-		for (let i = 0; i < this.rowCount; i++) {
-			if (this.isContainer(i)
-					&& this.isContainerOpen(i)
-					&& (acrossAllLevels || this.getLevel(i) === maxLevelWithExpanded)) {
-				this._toggleOpenState(i, true);
+		this._batchRowChanges(() => {
+			for (let i = 0; i < this.rowCount; i++) {
+				if (this.isContainer(i)
+						&& this.isContainerOpen(i)
+						&& (acrossAllLevels || this.getLevel(i) === maxLevelWithExpanded)) {
+					this._toggleOpenState(i);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 		this.runListeners('update', true, {
 			restoreSelection: true,
 			expandCollapsedParents: false,
@@ -386,12 +445,13 @@ class ItemTreeRowProvider {
 	_expandRows(indices) {
 		// Reverse sort so that as we open indices don't change.
 		indices.sort((a, b) => b - a);
-		for (let index of indices) {
-			if (!this.isContainerOpen(index)) {
-				this._toggleOpenState(index, true);
+		this._batchRowChanges(() => {
+			for (let index of indices) {
+				if (!this.isContainerOpen(index)) {
+					this._toggleOpenState(index);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 	}
 
 	expandRows(indices) {
@@ -403,12 +463,13 @@ class ItemTreeRowProvider {
 	collapseRows(indices) {
 		this.itemTree._cacheState();
 		indices.sort((a, b) => b - a);
-		for (let index of indices) {
-			if (this.isContainerOpen(index)) {
-				this._toggleOpenState(index, true);
+		this._batchRowChanges(() => {
+			for (let index of indices) {
+				if (this.isContainerOpen(index)) {
+					this._toggleOpenState(index);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 		this.runListeners('update', true, { restoreSelection: true, expandCollapsedParents: false });
 	}
 
@@ -510,13 +571,14 @@ class ItemTreeRowProvider {
 			}
 		}
 		// Close top-level containers from bottom up
-		for (let i = toClose.length - 1; i >= 0; i--) {
-			let row = this._rowMap[toClose[i]];
-			if (row !== undefined && this.isContainerOpen(row)) {
-				this._toggleOpenState(row, true);
+		this._batchRowChanges(() => {
+			for (let i = toClose.length - 1; i >= 0; i--) {
+				let row = this._rowMap[toClose[i]];
+				if (row !== undefined && this.isContainerOpen(row)) {
+					this._toggleOpenState(row);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 		return openIDs;
 	}
 
@@ -541,12 +603,13 @@ class ItemTreeRowProvider {
 		rowsToOpen.sort((a, b) => a - b);
 
 		// Reopen from bottom up
-		for (var i = rowsToOpen.length - 1; i >= 0; i--) {
-			if (!this.isContainerOpen(rowsToOpen[i])) {
-				this._toggleOpenState(rowsToOpen[i], true);
+		this._batchRowChanges(() => {
+			for (let i = rowsToOpen.length - 1; i >= 0; i--) {
+				if (!this.isContainerOpen(rowsToOpen[i])) {
+					this._toggleOpenState(rowsToOpen[i]);
+				}
 			}
-		}
-		this.refreshRowMap();
+		});
 
 		if (nextLevelToOpen.length) {
 			this._restoreOpenState(nextLevelToOpen, true);
@@ -763,10 +826,11 @@ class ItemTreeRowProvider {
 			let parentRows = [...parentItemIDs].map(itemID => this._rowMap[itemID]);
 			parentRows.sort((a, b) => b - a);
 
-			for (let row of parentRows) {
-				this._refreshContainer(row, true);
-			}
-			this.refreshRowMap();
+			this._batchRowChanges(() => {
+				for (let row of parentRows) {
+					this._refreshContainer(row);
+				}
+			});
 
 			let numSorted = itemIDs.length - skipped.length;
 			if (numSorted) {
@@ -1734,21 +1798,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.tree.invalidate();
 	}
 	
-	closeContainer(index, skipRowMapRefresh=false) {
+	closeContainer(index) {
 		if (!this.isContainerOpen(index)) return;
-		return this.toggleOpenState(index, skipRowMapRefresh);
+		return this.toggleOpenState(index);
 	}
 
-	openContainer(index, skipRowMapRefresh=false) {
+	openContainer(index) {
 		if (this.isContainerOpen(index)) return;
-		return this.toggleOpenState(index, skipRowMapRefresh);
+		return this.toggleOpenState(index);
 	}
 	
-	toggleOpenState(index, skipRowMapRefresh=false) {
-		return this.tree.toggleOpenState(index, skipRowMapRefresh);
+	toggleOpenState(index) {
+		return this.tree.toggleOpenState(index);
 	}
 
-	onToggleOpenState(index, skipRowMapRefresh=false) {
+	onToggleOpenState(index) {
 		// Shouldn't happen but does if an item is dragged over a closed
 		// container until it opens and then released, since the container
 		// is no longer in the same place when the spring-load closes
@@ -1757,7 +1821,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		this._cacheState();
-		return this.rowProvider.toggleOpenState(index, skipRowMapRefresh);
+		return this.rowProvider.toggleOpenState(index);
 	}
 
 	expandSelectedRows() {
