@@ -7227,7 +7227,8 @@ var ZoteroPane = new function () {
 		if (!(name in _windowSettings.prefs)) {
 			_windowSettings.prefs[name] = Zotero.Prefs.get(name);
 		}
-		return structuredClone(_windowSettings.prefs[name]);
+		let value = _windowSettings.prefs[name];
+		return value === null ? undefined : structuredClone(value);
 	};
 	
 	/**
@@ -7239,7 +7240,9 @@ var ZoteroPane = new function () {
 	 */
 	this.setWindowSetting = function (name, value) {
 		observeWindowSettingPref(name);
-		_windowSettings.prefs[name] = structuredClone(value);
+		// A cleared setting is stored as null, since undefined doesn't survive the JSON of a
+		// saved window state
+		_windowSettings.prefs[name] = value === undefined ? null : structuredClone(value);
 		// Pref observers run synchronously within the write, so other windows see the flag and
 		// keep their own values
 		Zotero.Prefs.settingForWindow = true;
@@ -7301,7 +7304,7 @@ var ZoteroPane = new function () {
 			if (Zotero.Prefs.settingForWindow) {
 				return;
 			}
-			_windowSettings.prefs[name] = Zotero.Prefs.get(name);
+			_windowSettings.prefs[name] = Zotero.Prefs.get(name) ?? null;
 			dispatchWindowSettingChange(name);
 		}));
 	}

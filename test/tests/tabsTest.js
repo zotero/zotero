@@ -845,6 +845,23 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should restore a window with a setting it cleared", async function () {
+			let newWin;
+			try {
+				Zotero.Prefs.setForWindow(win2, 'pinnedPane', undefined);
+				Zotero.Prefs.setForWindow(win, 'pinnedPane', 'tags');
+				// As saved in session.json
+				let windowSettings = JSON.parse(JSON.stringify(zp2.getWindowSettings()));
+				newWin = Zotero.openMainWindow({ windowSettings });
+				await waitForCallback(() => newWin.ZoteroPane?.libraryView?.loaded, 100, 20);
+				assert.isUndefined(Zotero.Prefs.getForWindow(newWin, 'pinnedPane'));
+			}
+			finally {
+				newWin?.close();
+				Zotero.Prefs.setForWindow(win, 'pinnedPane', undefined);
+			}
+		});
+		
 		it("should open each selected collection in a tab of its own in a new window", async function () {
 			let otherCollection = await createDataObject('collection');
 			await zp2.collectionsView.restoreSelection([collection.treeViewID, otherCollection.treeViewID]);
