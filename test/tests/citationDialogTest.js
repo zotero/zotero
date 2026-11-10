@@ -658,6 +658,29 @@ describe("Citation Dialog", function () {
 			SearchHandler.clearNonLibraryItemsCache();
 		});
 
+		it("should suggest the page of an item opened in a reader window", async function () {
+			let item = await createDataObject('item');
+			let attachment = await importFileAttachment('wonderland_short.pdf', {
+				contentType: 'application/pdf',
+				parentID: item.id
+			});
+			let reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+			let readerWin = reader._window;
+			try {
+				assert.notEqual(readerWin, win);
+				await reader._waitForReader();
+				await waitForCallback(() => reader.getCurrentPage());
+				await reader.navigate({ pageIndex: 2 });
+				await waitForCallback(() => reader.getCurrentPage() == "3");
+
+				assert.equal(await Helpers.getOpenTabPage(item), "3");
+			}
+			finally {
+				readerWin.close();
+				SearchHandler.clearNonLibraryItemsCache();
+			}
+		});
+
 		it("should not suggest a saved EPUB page whose position is out of date", async function () {
 			let item = await createDataObject('item');
 			let attachment = await importFileAttachment('stub.epub', {

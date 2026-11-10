@@ -514,17 +514,14 @@ export class CitationDialogHelpers {
 	// Returns the page if appropriate or null otherwise.
 	async getOpenTabPage(item) {
 		if (!item) return null;
-		let win = Zotero.getMainWindow();
-		if (!win) return null;
-		let tabs = item.getAttachments()
+		let windows = Zotero.getMainWindows()
+			.filter(win => win.Zotero_Tabs)
+			.sort((a, b) => (b.ZoteroPane?.lastActivated || 0) - (a.ZoteroPane?.lastActivated || 0));
+		let tabs = windows.flatMap(win => item.getAttachments()
 			.flatMap(attachmentID => win.Zotero_Tabs.getTabIDsByItemID(attachmentID)
-				.map(tabID => ({ attachmentID, tabID })));
-		// Look at the selected tab first
-		tabs.sort((a, b) => {
-			if (a.tabID === win.Zotero_Tabs.selectedID) return -1;
-			if (b.tabID === win.Zotero_Tabs.selectedID) return 1;
-			return 0;
-		});
+				.map(tabID => ({ attachmentID, tabID, selected: tabID === win.Zotero_Tabs.selectedID }))));
+		// Prefer selected tabs, then the most recently active window
+		tabs.sort((a, b) => b.selected - a.selected);
 		for (let { attachmentID, tabID } of tabs) {
 			let reader = Zotero.Reader.getByTabID(tabID);
 			let page = reader
