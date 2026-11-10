@@ -1182,7 +1182,7 @@ describe("ZoteroPane", function () {
 			await selectCollectionRows(["C" + c1.id]);
 			let cv = zp.collectionsView;
 			let menu = win.document.getElementById('zotero-collectionmenu');
-			let rowEl = cv.tree.getRowElement(cv.getRowIndexByID("C" + c2.id));
+			let rowEl = getVisibleRowElement(cv, cv.getRowIndexByID("C" + c2.id));
 			
 			let shown = new Promise(resolve => menu.addEventListener('popupshown', resolve, { once: true }));
 			rowEl.dispatchEvent(new win.MouseEvent('contextmenu', { bubbles: true, button: 2 }));

@@ -193,7 +193,8 @@ describe("Zotero_Tabs", function() {
 			let { collectionsView } = zp;
 			await collectionsView.selectByID('C' + collection1.id);
 			let menu = doc.getElementById('zotero-collectionmenu');
-			let rowEl = collectionsView.tree.getRowElement(
+			let rowEl = getVisibleRowElement(
+				collectionsView,
 				collectionsView.getRowIndexByID('C' + collection2.id)
 			);
 			let shown = new Promise(resolve => menu.addEventListener('popupshown', resolve, { once: true }));

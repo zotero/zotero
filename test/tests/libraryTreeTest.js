@@ -59,7 +59,7 @@ describe("Zotero.LibraryTree", function() {
 			await note.saveTx();
 			var view = zp.itemsView;
 			var row = view.getRowIndexByID(item.treeViewID);
-			var rowEl = view.tree.getRowElement(row);
+			var rowEl = getVisibleRowElement(view, row);
 			var cell = rowEl.querySelector('.cell');
 			
 			simulateDragOverRow(view, row, note.id);
@@ -74,7 +74,7 @@ describe("Zotero.LibraryTree", function() {
 	
 	describe("#onDragStart()", function () {
 		function startDrag(view, row) {
-			let rowEl = view.tree.getRowElement(row);
+			let rowEl = getVisibleRowElement(view, row);
 			rowEl.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0 }));
 			let dataTransfer = new win.DataTransfer();
 			rowEl.dispatchEvent(new win.DragEvent('dragstart', { bubbles: true, dataTransfer }));
@@ -83,7 +83,7 @@ describe("Zotero.LibraryTree", function() {
 		
 		it("should select an unselected draggable row on click", async function () {
 			var collection = await createDataObject('collection');
-			var rowEl = cv.tree.getRowElement(cv.getRowIndexByID("C" + collection.id));
+			var rowEl = getVisibleRowElement(cv, cv.getRowIndexByID("C" + collection.id));
 			rowEl.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0 }));
 			assert.equal(zp.getCollectionTreeRows()[0].id, "L" + Zotero.Libraries.userLibraryID);
 			rowEl.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true, button: 0 }));
@@ -120,7 +120,7 @@ describe("Zotero.LibraryTree", function() {
 			
 			var { rowEl } = startDrag(cv, cv.getRowIndexByID("C" + collection1.id));
 			rowEl.dispatchEvent(new win.DragEvent('dragend', { bubbles: true }));
-			rowEl = cv.tree.getRowElement(cv.getRowIndexByID("C" + collection2.id));
+			rowEl = getVisibleRowElement(cv, cv.getRowIndexByID("C" + collection2.id));
 			rowEl.dispatchEvent(new win.MouseEvent('mousedown', { bubbles: true, button: 0 }));
 			rowEl.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true, button: 0 }));
 			assert.equal(zp.getCollectionTreeRows()[0].ref, collection2);

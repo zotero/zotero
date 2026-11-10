@@ -484,6 +484,19 @@ async function waitForScrollToPane(itemDetails, paneID) {
 	await waitForFrames(5);
 }
 
+/**
+ * Get the element of a tree row, scrolling the row into view first, since rows outside the
+ * viewport of a virtualized tree have no element
+ *
+ * @param {LibraryTree} view
+ * @param {Number} row
+ * @return {Element}
+ */
+function getVisibleRowElement(view, row) {
+	view.ensureRowIsVisible(row);
+	return view.tree.getRowElement(row);
+}
+
 function clickOnItemsRow(win, itemsView, row) {
 	itemsView._treebox.scrollToRow(row);
 	let elem = itemsView.domEl.querySelector(`#${itemsView.id}-row-${row}`);
