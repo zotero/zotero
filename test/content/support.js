@@ -1149,7 +1149,12 @@ var generateTranslatorExportData = async function generateTranslatorExportData(l
  * Call from a before() hook for a whole suite, or at the start of an it().
  */
 function requireBundledFiles() {
-	if (Zotero.skipBundledFiles) {
+	// Check the command-line option rather than Zotero.skipBundledFiles, which resetDB() can
+	// also set
+	let { CommandLineOptions } = ChromeUtils.importESModule(
+		"chrome://zotero/content/modules/commandLineOptions.mjs"
+	);
+	if (CommandLineOptions.skipBundledFiles) {
 		throw new Error("Requires bundled translators and styles -- rerun without -b");
 	}
 }
