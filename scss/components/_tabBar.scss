@@ -140,12 +140,14 @@
 	}
 
 	&.scrollable {
-		.tabs-wrapper > .tabs > .tab.pinned {
-			display: none;
-		}
-
 		.scroll-start-arrow, .scroll-end-arrow {
 			display: flex;
+		}
+	}
+
+	&.scrollable:not(.scroll-pinned-tabs) {
+		.tabs-wrapper > .tabs > .tab.pinned {
+			display: none;
 		}
 
 		.pinned-tabs:has(.tab) {

@@ -334,9 +334,6 @@ var Zotero_Tabs = new function () {
 					data: tab.data || {},
 					select: tab.selected
 				});
-				if (tab.pinned) {
-					this.setPinned(id, true);
-				}
 				return {
 					itemID: null,
 					id
@@ -606,7 +603,7 @@ var Zotero_Tabs = new function () {
 		// would take other tabs with it or, for the last tab of the last window, quit
 		document.getElementById('cmd_close').toggleAttribute(
 			'disabled',
-			!!tab && !this._isClosable(tab) && (this._tabs.length > 1 || tab.closable)
+			!!tab && !this._isClosable(tab) && (this._tabs.length > 1 || tab.closable && !tab.pinned)
 		);
 		if (!tab) {
 			return;
@@ -856,9 +853,9 @@ var Zotero_Tabs = new function () {
 				o.data = Object.assign({}, tab.data, {
 					state: this._getLibraryTabCollectionsState(tab)
 				});
-				if (tab.pinned) {
-					o.pinned = true;
-				}
+			}
+			if (tab.pinned) {
+				o.pinned = true;
 			}
 			if (tab.id == this._selectedID) {
 				o.selected = true;
@@ -874,9 +871,13 @@ var Zotero_Tabs = new function () {
 			let tab = tabs[i];
 			let { tabContentType } = this.parseTabType(tab.type);
 			let restoreStateHook = this._getHook(tabContentType, 'restoreState');
-			let { itemID } = await restoreStateHook(tab, i, context);
+			let { itemID, id } = await restoreStateHook(tab, i, context);
 			if (itemID) {
 				itemIDs.push(itemID);
+			}
+			// Pinned tabs come first, so each one goes at the end of the pinned tabs so far
+			if (id && tab.pinned) {
+				this.setPinned(id, true);
 			}
 		}
 		if (!this._getTab(this._selectedID).tab && this._tabs.length) {
@@ -924,9 +925,10 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} select
 	 * @param {Object} selectOptions - Passed to select()
 	 * @param {Function} onClose
+	 * @param {Boolean} [pinned]
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ id, type, data, title, index, select, selectOptions, onClose, preventJumpback }) {
+	this.add = function ({ id, type, data, title, index, select, selectOptions, onClose, preventJumpback, pinned = false }) {
 		if (typeof type != 'string') {
 		}
 		if (title && typeof title != 'string') {
@@ -938,9 +940,15 @@ var Zotero_Tabs = new function () {
 		if (index !== undefined && !Number.isInteger(index)) {
 			throw new Error(`'index' should be an integer (was ${index} (${typeof index})`);
 		}
-		// New tabs go after the pinned tabs
-		if (index !== undefined) {
-			index = Math.max(index, this._getFirstUnpinnedIndex());
+		// Pinned tabs go at the start, and other tabs after them
+		let firstUnpinnedIndex = this._getFirstUnpinnedIndex();
+		if (index === undefined) {
+			index = pinned ? firstUnpinnedIndex : this._tabs.length;
+		}
+		else {
+			index = pinned
+				? Math.min(index, firstUnpinnedIndex)
+				: Math.max(index, firstUnpinnedIndex);
 		}
 		if (onClose !== undefined && typeof onClose != 'function') {
 			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
@@ -960,10 +968,8 @@ var Zotero_Tabs = new function () {
 		else {
 			tab = { id, type, title, data, onClose, pinned: false, closable: true, movable: true };
 		}
+		tab.pinned = pinned;
 		this.deck.appendChild(container);
-		if (index === undefined) {
-			index = this._tabs.length;
-		}
 		this._tabs.splice(index, 0, tab);
 		this._update();
 		Zotero.Notifier.trigger(
@@ -1209,15 +1215,22 @@ var Zotero_Tabs = new function () {
 	 * @param {Integer} newIndex
 	 */
 	this.move = function (id, newIndex) {
-		let minIndex = this._getFirstUnpinnedIndex();
-		if (!Number.isInteger(newIndex) || newIndex < minIndex) {
-			throw new Error(`'newIndex' should be an integer >= ${minIndex} (was ${newIndex} (${typeof newIndex})`);
+		if (!Number.isInteger(newIndex)) {
+			throw new Error(`'newIndex' should be an integer (was ${newIndex} (${typeof newIndex})`);
 		}
 		var { tab, tabIndex } = this._getTab(id);
 		if (tab && !tab.movable) {
 			throw new Error(`Tab '${id}' cannot be moved`);
 		}
-		if (!tab || tabIndex == newIndex) {
+		if (!tab) {
+			return;
+		}
+		// Pinned tabs move among the pinned tabs, and other tabs among the tabs after them
+		let firstUnpinnedIndex = this._getFirstUnpinnedIndex();
+		newIndex = tab.pinned
+			? Math.min(newIndex, firstUnpinnedIndex)
+			: Math.max(newIndex, firstUnpinnedIndex);
+		if (tabIndex == newIndex) {
 			return;
 		}
 		if (newIndex > tabIndex) {
@@ -1229,22 +1242,20 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Pin a library tab to the start of the tab bar, where it stays visible when the other tabs
-	 * scroll and can't be closed or moved, or unpin it
+	 * Pin a tab to the start of the tab bar, where it stays in the window and can't be closed by
+	 * the user, or unpin it
 	 *
 	 * @param {String} id
 	 * @param {Boolean} pinned
 	 */
 	this.setPinned = function (id, pinned) {
 		let { tab, tabIndex } = this._getTab(id);
-		if (!this._isLibraryTab(tab) || !!tab.pinned == pinned) {
+		if (!tab || !!tab.pinned == pinned) {
 			return;
 		}
 		// Place the tab at the end of the pinned tabs, or right after them when unpinned
 		this._tabs.splice(tabIndex, 1);
 		tab.pinned = pinned;
-		tab.closable = !pinned;
-		tab.movable = !pinned;
 		this._tabs.splice(this._getFirstUnpinnedIndex(), 0, tab);
 		this._update();
 	};
@@ -1261,7 +1272,7 @@ var Zotero_Tabs = new function () {
 	 */
 	this.moveToWindow = async function (id, targetWindow, index) {
 		let { tab } = this._getTab(id);
-		if (!tab || targetWindow === window || !targetWindow.Zotero_Tabs) {
+		if (!tab || tab.pinned || targetWindow === window || !targetWindow.Zotero_Tabs) {
 			return null;
 		}
 		let { tabContentType } = this.parseTabType(tab.type);
@@ -1370,6 +1381,9 @@ var Zotero_Tabs = new function () {
 		}
 		if (this._tabs.length == 1) {
 			window.moveTo(screenX, screenY);
+			return;
+		}
+		if (tab.pinned) {
 			return;
 		}
 		let { tabContentType } = this.parseTabType(tab.type);
@@ -1639,7 +1653,8 @@ var Zotero_Tabs = new function () {
 			type: `${tab.type}-unloaded`,
 			title: tab.title,
 			index: tabIndex,
-			data: tab.data
+			data: tab.data,
+			pinned: tab.pinned
 		});
 	};
 	
@@ -1705,11 +1720,11 @@ var Zotero_Tabs = new function () {
 	};
 	
 	/**
-	 * Outside of macOS, the last tab of the last window stays open, so that closing a tab
-	 * doesn't quit the app
+	 * Whether the user can close a tab. Pinned tabs stay open, and outside of macOS, so does the
+	 * last tab of the last window, so that closing a tab doesn't quit the app.
 	 */
 	this._isClosable = function (tab) {
-		if (!tab.closable) {
+		if (!tab.closable || tab.pinned) {
 			return false;
 		}
 		if (Zotero.isMac || this._tabs.length > 1) {
@@ -1888,7 +1903,10 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		if (tab.movable) {
+			// Pinned tabs move among the pinned tabs, and other tabs among the tabs after them
 			let firstUnpinnedIndex = this._getFirstUnpinnedIndex();
+			let startIndex = tab.pinned ? 0 : firstUnpinnedIndex;
+			let endIndex = tab.pinned ? firstUnpinnedIndex : this._tabs.length;
 			// Move tab
 			let menu = document.createXULElement('menu');
 			menu.setAttribute('label', Zotero.getString('tabs.move'));
@@ -1898,21 +1916,21 @@ var Zotero_Tabs = new function () {
 			// Move to start
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
-			menuitem.toggleAttribute('disabled', tabIndex == firstUnpinnedIndex);
+			menuitem.toggleAttribute('disabled', tabIndex == startIndex);
 			menuitem.addEventListener('command', () => {
-				this.move(id, firstUnpinnedIndex);
+				this.move(id, startIndex);
 			});
 			menupopup.appendChild(menuitem);
 			// Move to end
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
-			menuitem.toggleAttribute('disabled', tabIndex == this._tabs.length - 1);
+			menuitem.toggleAttribute('disabled', tabIndex == endIndex - 1);
 			menuitem.addEventListener('command', () => {
-				this.move(id, this._tabs.length);
+				this.move(id, endIndex);
 			});
 			menupopup.appendChild(menuitem);
 			// Move to new window
-			if (this._hasHook(tabContentType, 'moveToNewWindow')) {
+			if (!tab.pinned && this._hasHook(tabContentType, 'moveToNewWindow')) {
 				menuitem = document.createXULElement('menuitem');
 				menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
 				menuitem.toggleAttribute('disabled', this._tabs.length == 1);
@@ -1936,14 +1954,12 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Pin or unpin tab
-		if (this._isLibraryTab(tab)) {
-			menuitem = document.createXULElement('menuitem');
-			document.l10n.setAttributes(menuitem, tab.pinned ? 'tabs-unpin' : 'tabs-pin');
-			menuitem.addEventListener('command', () => {
-				this.setPinned(id, !tab.pinned);
-			});
-			popup.appendChild(menuitem);
-		}
+		menuitem = document.createXULElement('menuitem');
+		document.l10n.setAttributes(menuitem, tab.pinned ? 'tabs-unpin' : 'tabs-pin');
+		menuitem.addEventListener('command', () => {
+			this.setPinned(id, !tab.pinned);
+		});
+		popup.appendChild(menuitem);
 		// Separator
 		if (popup.hasChildNodes()) {
 			popup.appendChild(document.createXULElement('menuseparator'));
@@ -1958,7 +1974,8 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Close other tabs
-		let otherClosableIDs = this._tabs.filter(x => x.closable && x.id != id).map(x => x.id);
+		let otherClosableIDs = this._tabs.filter(x => x.closable && !x.pinned && x.id != id)
+			.map(x => x.id);
 		if (otherClosableIDs.length) {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));

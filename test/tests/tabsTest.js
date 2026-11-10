@@ -214,7 +214,7 @@ describe("Zotero_Tabs", function() {
 			try {
 				tabs.setPinned(id, true);
 				assert.equal(tabs._tabs[0].id, id);
-				assert.throws(() => tabs.close(id));
+				assert.isFalse(tabs.canClose(id));
 				let newID = tabs.addLibraryTab({ index: 0, select: false });
 				assert.equal(tabs._tabs[1].id, newID);
 			}
@@ -222,7 +222,61 @@ describe("Zotero_Tabs", function() {
 				tabs.setPinned(id, false);
 			}
 			assert.equal(tabs._tabs[0].id, id);
-			tabs.close(id);
+			assert.isTrue(tabs.canClose(id));
+		});
+
+		it("should reorder pinned tabs only among themselves", async function () {
+			let { id: id1 } = await addLibraryTab();
+			let { id: id2 } = await addLibraryTab();
+			try {
+				tabs.setPinned(id1, true);
+				tabs.setPinned(id2, true);
+				tabs.move(id2, 0);
+				assert.deepEqual(tabs._tabs.slice(0, 2).map(tab => tab.id), [id2, id1]);
+				tabs.move(id2, tabs._tabs.length);
+				assert.deepEqual(tabs._tabs.slice(0, 2).map(tab => tab.id), [id1, id2]);
+			}
+			finally {
+				tabs.setPinned(id1, false);
+				tabs.setPinned(id2, false);
+			}
+		});
+
+		it("should keep a pinned reader tab pinned when it's unloaded", async function () {
+			let reader = await Zotero.Reader.open(attachment.id);
+			await reader._initPromise;
+			tabs.setPinned(reader.tabID, true);
+			tabs.select(tabs._tabs.find(tab => tabs.isLibraryTab(tab.id)).id);
+
+			tabs.unload(reader.tabID);
+			let { tab, tabIndex } = tabs._getTab(reader.tabID);
+			assert.equal(tab.type, 'reader-unloaded');
+			assert.isTrue(tab.pinned);
+			assert.equal(tabIndex, 0);
+		});
+
+		it("should scroll pinned tabs with the other tabs when they'd fill the tab bar", async function () {
+			let win3 = await loadZoteroPane();
+			try {
+				win3.resizeTo(700, 600);
+				let tabs3 = win3.Zotero_Tabs;
+				for (let i = 0; i < 12; i++) {
+					let id = tabs3.addLibraryTab({ select: false });
+					if (i < 8) {
+						tabs3.setPinned(id, true);
+					}
+				}
+				// The tabs menu button stays in the window
+				let button = win3.document.getElementById('zotero-tb-tabs-menu');
+				await waitForCallback(
+					() => button.getBoundingClientRect().right <= win3.innerWidth,
+					50,
+					20
+				);
+			}
+			finally {
+				win3.close();
+			}
 		});
 
 		it("should restore a quick search with conditions as a search", async function () {
@@ -1049,6 +1103,30 @@ describe("Zotero_Tabs", function() {
 			}
 			finally {
 				win2.Zotero_Tabs.close(newID);
+			}
+		});
+
+		it("should keep a pinned tab dropped on another window's tab bar", async function () {
+			let { id } = await addLibraryTab();
+			tabs.setPinned(id, true);
+			try {
+				let tabNode = win.document.querySelector(`#tab-bar-container .tabs-wrapper .tab[data-id="${id}"]`);
+				let tabBar = win2.document.querySelector('#tab-bar-container .tabs-wrapper .tabs');
+				let dataTransfer = new win.DataTransfer();
+				let fire = (target, type) => target.dispatchEvent(
+					new target.ownerDocument.defaultView.DragEvent(type, { bubbles: true, cancelable: true, dataTransfer })
+				);
+				let count = win2.Zotero_Tabs._tabs.length;
+				fire(tabNode, 'dragstart');
+				fire(tabBar, 'dragover');
+				fire(tabBar, 'drop');
+				fire(tabNode, 'dragend');
+				await Zotero.Promise.delay(200);
+				assert.isTrue(tabs._getTab(id).tab.pinned);
+				assert.equal(win2.Zotero_Tabs._tabs.length, count);
+			}
+			finally {
+				tabs.setPinned(id, false);
 			}
 		});
 

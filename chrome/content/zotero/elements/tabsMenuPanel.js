@@ -185,8 +185,8 @@
 				closeButton.appendChild(closeIcon);
 				closeButton.addEventListener("click", this._handleCloseClick);
 
-				// Tabs that can't be closed have no close button
-				if (!tab.closable) {
+				// Pinned tabs and tabs that can't be closed have no close button
+				if (!tab.closable || tab.pinned) {
 					closeButton.hidden = true;
 				}
 
@@ -623,7 +623,6 @@
 			let row = event.target.closest(".row");
 			let tabId = event.dataTransfer.getData("zotero/tab");
 			let rowIndex = parseInt(row.getAttribute("index"));
-			if (rowIndex < Zotero_Tabs._getFirstUnpinnedIndex()) return;
 			Zotero_Tabs.move(tabId, rowIndex);
 		};
 

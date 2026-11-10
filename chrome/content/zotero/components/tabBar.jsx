@@ -38,7 +38,7 @@ const Tab = memo((props) => {
 	const handleTabMouseDown = useCallback(event => onTabMouseDown(event, id), [onTabMouseDown, id]);
 	const handleContextMenu = useCallback(event => onContextMenu(event, id), [onContextMenu, id]);
 	const handleTabClick = useCallback(event => onTabClick(event, id), [onTabClick, id]);
-	const handleDragStart = useCallback(event => onDragStart(event, id, movable), [onDragStart, id, movable]);
+	const handleDragStart = useCallback(event => onDragStart(event, id, movable, pinned), [onDragStart, id, movable, pinned]);
 	const handleTabClose = useCallback(event => onTabClose(event, id), [onTabClose, id]);
 	const handleAudioStatusClick = useCallback(event => onAudioStatusClick(event, id), [onAudioStatusClick, id]);
 	
@@ -144,6 +144,7 @@ const TabBar = forwardRef(function (props, ref) {
 	const [dropIndex, setDropIndex] = useState(null);
 	const dropIndicatorRef = useRef();
 	const dragIDRef = useRef(null);
+	const dragContainerRef = useRef(null);
 	const dragGrabbedDeltaXRef = useRef();
 	// Where the drag started, and whether the tab has moved from there yet
 	const dragStartXRef = useRef();
@@ -201,30 +202,27 @@ const TabBar = forwardRef(function (props, ref) {
 	// Use offsetLeft and offsetWidth to calculate and translate tab X position
 	useLayoutEffect(() => {
 		if (!dragIDRef.current) return;
-		let tab = Array.from(tabsRef.current.children).find(x => x.dataset.id === dragIDRef.current);
+		let container = dragContainerRef.current;
+		let tab = Array.from(container.children).find(x => x.dataset.id === dragIDRef.current);
 		if (tab) {
 			// While the actual tab node retains its space between other tabs,
 			// we use CSS translation to move it to the left/right side to
 			// position it under the mouse
 			let x = dragMouseX - tab.offsetLeft - dragGrabbedDeltaXRef.current;
 
-			// Keep the tab between the pinned tabs, or the start of the tab bar, and the last tab
-			let tabNodes = Array.from(tabsRef.current.querySelectorAll('.tab'))
-				.filter(node => node.offsetWidth);
-			let lastPinnedTab = tabNodes.filter(node => node.classList.contains('pinned')).pop();
-			let firstTab = tabNodes[0];
-			let lastTab = tabNodes[tabNodes.length - 1];
+			// Keep a pinned tab among the pinned tabs, and another tab among the tabs after them
+			let isPinned = tab.classList.contains('pinned');
+			let groupNodes = Array.from(container.querySelectorAll('.tab'))
+				.filter(node => node.offsetWidth && node.classList.contains('pinned') == isPinned);
+			let firstTab = groupNodes[0];
+			let lastTab = groupNodes[groupNodes.length - 1];
 			let minLeft, maxLeft;
 			if (Zotero.rtl) {
 				minLeft = lastTab.offsetLeft;
-				maxLeft = (lastPinnedTab
-					? lastPinnedTab.offsetLeft
-					: firstTab.offsetLeft + firstTab.offsetWidth) - tab.offsetWidth;
+				maxLeft = firstTab.offsetLeft + firstTab.offsetWidth - tab.offsetWidth;
 			}
 			else {
-				minLeft = lastPinnedTab
-					? lastPinnedTab.offsetLeft + lastPinnedTab.offsetWidth
-					: firstTab.offsetLeft;
+				minLeft = firstTab.offsetLeft;
 				maxLeft = lastTab.offsetLeft + lastTab.offsetWidth - tab.offsetWidth;
 			}
 			x = Math.min(Math.max(x, minLeft - tab.offsetLeft), maxLeft - tab.offsetLeft);
@@ -274,6 +272,14 @@ const TabBar = forwardRef(function (props, ref) {
 		let scrollable = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
 		if (scrollable) {
 			tabsInnerContainerRef.current.classList.add('scrollable');
+			// Pinned tabs stay in place while the other tabs scroll, unless they would take up
+			// more than half of the tab bar, in which case they scroll with the others
+			let pinnedWidth = [...tabsInnerContainerRef.current.querySelectorAll('.tab.pinned')]
+				.reduce((sum, tab) => sum + tab.offsetWidth, 0);
+			tabsInnerContainerRef.current.classList.toggle(
+				'scroll-pinned-tabs',
+				pinnedWidth > tabsInnerContainerRef.current.clientWidth / 2
+			);
 
 			if (tabsRef.current.scrollLeft !== 0) {
 				startArrowRef.current.classList.add('active');
@@ -290,7 +296,7 @@ const TabBar = forwardRef(function (props, ref) {
 			}
 		}
 		else {
-			tabsInnerContainerRef.current.classList.remove('scrollable');
+			tabsInnerContainerRef.current.classList.remove('scrollable', 'scroll-pinned-tabs');
 		}
 	}
 
@@ -350,11 +356,14 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 	}, [props.onTabClose]);
 
-	const handleDragStart = useCallback((event, id, movable) => {
+	const handleDragStart = useCallback((event, id, movable, pinned) => {
 		if (!movable) {
 			event.preventDefault();
 			return;
 		}
+		// The pinned tabs, which are shown apart from the others while the others scroll, or
+		// the tab list
+		dragContainerRef.current = event.target.closest('.tabs');
 		event.dataTransfer.effectAllowed = 'move';
 		// We don't want the generated image from the target element,
 		// therefore setting an empty image
@@ -385,9 +394,11 @@ const TabBar = forwardRef(function (props, ref) {
 				}
 			})
 			.catch(e => Zotero.logError(e));
-		// Identify the tab to the tab bar of another window
+		// Identify the tab to the tab bar of another window, unless it's pinned, which keeps it in
+		// this window
 		event.dataTransfer.setData(
-			'zotero/tab', JSON.stringify({ windowID: props.windowID, id })
+			pinned ? 'zotero/pinned-tab' : 'zotero/tab',
+			JSON.stringify({ windowID: props.windowID, id })
 		);
 		// Store the relative mouse to tab X position where the tab was grabbed
 		dragGrabbedDeltaXRef.current = event.clientX - event.target.offsetLeft;
@@ -537,11 +548,12 @@ const TabBar = forwardRef(function (props, ref) {
 		setDragMouseX(event.clientX);
 		
 		// Get the current tab DOM node
-		let tabIndex = Array.from(tabsRef.current.children).findIndex(x => x.dataset.id === dragIDRef.current);
-		let tab = tabsRef.current.children[tabIndex];
+		let container = dragContainerRef.current;
+		let tabIndex = Array.from(container.children).findIndex(x => x.dataset.id === dragIDRef.current);
+		let tab = container.children[tabIndex];
 
 		// Calculate the center points of each tab
-		let points = Array.from(tabsRef.current.children).map((child) => {
+		let points = Array.from(container.children).map((child) => {
 			return child.offsetLeft + child.offsetWidth / 2;
 		});
 		
@@ -587,6 +599,13 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		mouseMoveWaitUntil.current = Date.now() + 20;
 	}, [props.onTabMove]);
+
+	// Pinned tabs shown apart from the others can only be reordered among themselves
+	const handlePinnedTabsDragOver = useCallback((event) => {
+		if (dragIDRef.current) {
+			handleTabBarDragOver(event);
+		}
+	}, [handleTabBarDragOver]);
 
 	const handleTabBarDragLeave = useCallback((event) => {
 		// Moving between the tab bar's own children fires dragleave too
@@ -702,6 +721,7 @@ const TabBar = forwardRef(function (props, ref) {
 				<div className="pinned-tabs">
 					<div
 						className="tabs"
+						onDragOver={handlePinnedTabsDragOver}
 					>
 						{tabs.filter(tab => tab.pinned).map(tab => <Tab
 							{ ...tab }
