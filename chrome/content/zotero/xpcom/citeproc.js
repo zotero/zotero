@@ -111,7 +111,7 @@ var CSL = {
         "amend.": "amendment",
         "annot.": "annotation",
         "app.": "appendix",
-        "art.": "article",
+        "art.": "article-locator",
         "bibliog.": "bibliography",
         "bk.": "book",
         "ch.": "chapter",
@@ -146,7 +146,7 @@ var CSL = {
         "subsec.": "subsection",
         "supp.": "supplement",
         "tbl.": "table",
-        "tit.": "title",
+        "tit.": "title-locator",
         "vol.": "volume"
     },
     STATUTE_SUBDIV_STRINGS_REVERSE: {
@@ -161,6 +161,7 @@ var CSL = {
         "annotation": "annot.",
         "appendix": "app.",
         "article": "art.",
+        "article-locator": "art.",
         "bibliography": "bibliog.",
         "book": "bk.",
         "chapter": "ch.",
@@ -195,6 +196,7 @@ var CSL = {
         "supplement": "supp.",
         "table": "tbl.",
         "title": "tit.",
+        "title-locator": "tit.",
         "volume": "vol."
     },
 
@@ -208,7 +210,7 @@ var CSL = {
         "amend": "amendment",
         "annot": "annotation",
         "app": "appendix",
-        "art": "article",
+        "art": "article-locator",
         "bibliog": "bibliography",
         "bk": "book",
         "ch": "chapter",
@@ -243,7 +245,7 @@ var CSL = {
         "subsec": "subsection",
         "supp": "supplement",
         "tbl": "table",
-        "tit": "title",
+        "tit": "title-locator",
         "vol": "volume"
     },
     MODULE_MACROS: {
@@ -301,7 +303,7 @@ var CSL = {
         }
     },
 
-    MULTI_FIELDS: ["event", "publisher", "publisher-place", "event-place", "title", "container-title", "collection-title", "event-title", "original-title", "part-title", "reviewed-title", "volume-title", "authority","genre","title-short","medium","country","jurisdiction","archive","archive-place"],
+    MULTI_FIELDS: ["archive", "archive_collection", "archive_location", "archive-place", "authority", "collection-title", "container-title", "country", "division", "edition", "event", "event-place", "event-title", "genre", "jurisdiction", "medium", "original-publisher", "original-publisher-place", "original-title", "part-title", "publisher", "publisher-place", "reviewed-genre", "reviewed-title", "section", "source", "title", "title-short", "volume-title"],
 
     LangPrefsMap: {
         "title":"titles",
@@ -1578,7 +1580,6 @@ CSL.XmlJSON = function (dataObj) {
         name:"institution",
         attrs:{
             "institution-parts":"long",
-            "delimiter":", "
         },
         children:[
             {
@@ -2001,8 +2002,6 @@ CSL.XmlJSON.prototype.addInstitutionNodes = function(myjson) {
                 for (var key in myjson.children[i].attrs) {
                     attributes[key] = myjson.children[i].attrs[key];
                 }
-                attributes.delimiter = myjson.children[i].attrs.delimiter;
-                attributes.and = myjson.children[i].attrs.and;
                 insertPos = i;
                 for (var k=0,klen=myjson.children[i].children.length;k<klen;k+=1) {
                     if (myjson.children[i].children[k].attrs.name !== 'family') {
@@ -2020,16 +2019,16 @@ CSL.XmlJSON.prototype.addInstitutionNodes = function(myjson) {
         }
         if (insertPos > -1) {
             var institution = this.nodeCopy(this.institution);
+            for (var i = 0, ilen = CSL.NAME_ATTRIBUTES.length; i < ilen; i += 1) {
+                var attrname = CSL.NAME_ATTRIBUTES[i];
+                if ("undefined" !== typeof attributes[attrname]) {
+                    institution.attrs[attrname] = attributes[attrname];
+                }
+            }
             for (var i=0,ilen = CSL.INSTITUTION_KEYS.length;i<ilen;i+=1) {
                 var attrname = CSL.INSTITUTION_KEYS[i];
                 if ("undefined" !== typeof attributes[attrname]) {
                     institution.children[0].attrs[attrname] = attributes[attrname];
-                }
-                if (attributes.delimiter) {
-                    institution.attrs.delimiter = attributes.delimiter;
-                }
-                if (attributes.and) {
-                    institution.attrs.and = attributes.and;
                 }
             }
             myjson.children = myjson.children.slice(0,insertPos+1).concat([institution]).concat(myjson.children.slice(insertPos+1));
@@ -4787,7 +4786,7 @@ CSL.Doppeler = function(rexStr, stringMangler) {
                 match[i] = "";
             }
             var tag = match[i];
-            if (tag === "\'" && split[i+1].length > 0) {
+            if (tag === "\'" && split[i + 1].length > 0 && split[i + 1][0] !== " ") {
                 // Fixes https://forums.zotero.org/discussion/comment/294317
                 split[i+1] = match[i] + split[i+1];
                 match[i] = "";
@@ -15965,10 +15964,20 @@ CSL.Attributes["@locator"] = function (state, arg) {
     trylabels = trylabels.split(/\s+/);
     // Strip off any boolean prefix.
     var maketest = function (trylabel) {
+        if (trylabel === "article") {
+            trylabel = "article-locator";
+        } else if (trylabel === "title") {
+            trylabel = "title-locator";
+        }
         return function(Item, item) {
             var label;
             state.processNumber(false, item, "locator");
             label = state.tmp.shadow_numbers.locator.label;
+            // If item.label is not in CSL.STATUTE_SUBDIV_STRINGS_REVERSE,
+            // the label is undefined here.
+            if (!label) {
+                label = item && item.label ? item.label : "page";
+            }
             if (label && trylabel === label) {
                 return true;
             } else {
