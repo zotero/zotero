@@ -61,6 +61,18 @@ describe("Zotero.Plugins", function () {
 			assert.isFalse(addon.isActive);
 			// The running plugin gets shut down
 			await waitForCallback(() => events.includes('shutdown'), 10, 3);
+			// The Plugins pane shows the reason
+			// The module expects a window global
+			let { getAddonMessageInfo } = ChromeUtils.importESModule(
+				"chrome://mozapps/content/extensions/aboutaddons-utils.mjs",
+				{ global: "current" }
+			);
+			let { messageId, messageArgs } = await getAddonMessageInfo(
+				addon, { isCardExpanded: false, isInDisabledSection: true }
+			);
+			let l10n = new Localization(["branding/brand.ftl", "zotero.ftl"], true);
+			let [message] = l10n.formatMessagesSync([{ id: messageId, args: messageArgs }]);
+			assert.include(message.attributes.find(a => a.name == 'message').value, "Test block");
 
 			await Zotero.Plugins.setBlockedPlugins(10000, []);
 			assert.equal(addon.blocklistState, Ci.nsIBlocklistService.STATE_NOT_BLOCKED);

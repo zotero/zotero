@@ -429,8 +429,14 @@ function modify_omni {
 	# Hide unsigned-addon warning
 	replace_line 'export function isUnsignedWarningMessageDisabled\(\) \{' \
 		'export function isUnsignedWarningMessageDisabled() {if (true) return true;' $file
-	# Use our own localized string for blocked plugin notification
-	replace_line 'details-notification-hard-blocked-\$\{typeSuffix\}' 'plugins-blocked-plugin' $file
+	# Use our own localized string for blocked plugin notification, including the reason from
+	# the blocklist
+	replace_line 'const \{ STATE_BLOCKED, STATE_SOFTBLOCKED \} = Ci.nsIBlocklistService;' \
+		'const { STATE_BLOCKED, STATE_SOFTBLOCKED } = Ci.nsIBlocklistService;
+  let { Zotero } = ChromeUtils.importESModule("chrome:\/\/zotero\/content\/zotero.mjs");
+  let blockReason = Zotero.Plugins.getBlockedPluginReason(addon.id, addon.version);' $file
+	replace_line 'messageId: `details-notification-hard-blocked-\$\{typeSuffix\}`,' \
+		'messageId: blockReason ? "plugins-blocked-plugin-reason" : "plugins-blocked-plugin", messageArgs: { reason: blockReason },' $file
 	# Hide Recommendations tab in sidebar and recommendations in main pane
 	replace_line 'function isDiscoverEnabled\(\) \{' 'function isDiscoverEnabled() {return false;' $file
 
