@@ -471,6 +471,10 @@ import-online-connection-error = { -app-name } could not connect to { $targetApp
 tab-title-multiple-collections = Multiple
 tabs-reopen-closed-window =
     .label = Reopen Closed Window
+tabs-pin =
+    .label = Pin Tab
+tabs-unpin =
+    .label = Unpin Tab
 
 items-table-cell-notes =
     .aria-label = { $count ->

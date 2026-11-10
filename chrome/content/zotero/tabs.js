@@ -334,6 +334,9 @@ var Zotero_Tabs = new function () {
 					data: tab.data || {},
 					select: tab.selected
 				});
+				if (tab.pinned) {
+					this.setPinned(id, true);
+				}
 				return {
 					itemID: null,
 					id
@@ -853,6 +856,9 @@ var Zotero_Tabs = new function () {
 				o.data = Object.assign({}, tab.data, {
 					state: this._getLibraryTabCollectionsState(tab)
 				});
+				if (tab.pinned) {
+					o.pinned = true;
+				}
 			}
 			if (tab.id == this._selectedID) {
 				o.selected = true;
@@ -929,9 +935,12 @@ var Zotero_Tabs = new function () {
 		if (!title) {
 			title = "";
 		}
-		let minIndex = this._getFirstUnpinnedIndex();
-		if (index !== undefined && (!Number.isInteger(index) || index < minIndex)) {
-			throw new Error(`'index' should be an integer >= ${minIndex} (was ${index} (${typeof index})`);
+		if (index !== undefined && !Number.isInteger(index)) {
+			throw new Error(`'index' should be an integer (was ${index} (${typeof index})`);
+		}
+		// New tabs go after the pinned tabs
+		if (index !== undefined) {
+			index = Math.max(index, this._getFirstUnpinnedIndex());
 		}
 		if (onClose !== undefined && typeof onClose != 'function') {
 			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
@@ -1216,6 +1225,27 @@ var Zotero_Tabs = new function () {
 		}
 		this._tabs.splice(tabIndex, 1);
 		this._tabs.splice(newIndex, 0, tab);
+		this._update();
+	};
+
+	/**
+	 * Pin a library tab to the start of the tab bar, where it stays visible when the other tabs
+	 * scroll and can't be closed or moved, or unpin it
+	 *
+	 * @param {String} id
+	 * @param {Boolean} pinned
+	 */
+	this.setPinned = function (id, pinned) {
+		let { tab, tabIndex } = this._getTab(id);
+		if (!this._isLibraryTab(tab) || !!tab.pinned == pinned) {
+			return;
+		}
+		// Place the tab at the end of the pinned tabs, or right after them when unpinned
+		this._tabs.splice(tabIndex, 1);
+		tab.pinned = pinned;
+		tab.closable = !pinned;
+		tab.movable = !pinned;
+		this._tabs.splice(this._getFirstUnpinnedIndex(), 0, tab);
 		this._update();
 	};
 
@@ -1902,6 +1932,15 @@ var Zotero_Tabs = new function () {
 				let { tabContentType } = this.parseTabType(tab.type);
 				let duplicateHook = this._getHook(tabContentType, 'duplicate');
 				duplicateHook(tab, tabIndex);
+			});
+			popup.appendChild(menuitem);
+		}
+		// Pin or unpin tab
+		if (this._isLibraryTab(tab)) {
+			menuitem = document.createXULElement('menuitem');
+			document.l10n.setAttributes(menuitem, tab.pinned ? 'tabs-unpin' : 'tabs-pin');
+			menuitem.addEventListener('command', () => {
+				this.setPinned(id, !tab.pinned);
 			});
 			popup.appendChild(menuitem);
 		}

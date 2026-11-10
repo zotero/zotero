@@ -209,6 +209,22 @@ describe("Zotero_Tabs", function() {
 			await waitForLibraryView(newTabs[0].id);
 		});
 		
+		it("should keep a pinned tab at the start of the tab bar until it's unpinned", async function () {
+			let { id } = await addLibraryTab({ collections: ['C' + collection2.id] });
+			try {
+				tabs.setPinned(id, true);
+				assert.equal(tabs._tabs[0].id, id);
+				assert.throws(() => tabs.close(id));
+				let newID = tabs.addLibraryTab({ index: 0, select: false });
+				assert.equal(tabs._tabs[1].id, newID);
+			}
+			finally {
+				tabs.setPinned(id, false);
+			}
+			assert.equal(tabs._tabs[0].id, id);
+			tabs.close(id);
+		});
+
 		it("should restore a quick search with conditions as a search", async function () {
 			let { view } = await addLibraryTab({
 				collections: ['C' + collection2.id],
@@ -845,6 +861,31 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should reopen a window with its pinned tab", async function () {
+			let win3 = await loadZoteroPane();
+			let tabs3 = win3.Zotero_Tabs;
+			let pinnedID = tabs3.addLibraryTab({ select: false });
+			tabs3.setPinned(pinnedID, true);
+			let openWindows = Zotero.getMainWindows();
+			win3.close();
+			await waitForCallback(() => win3.closed, 50, 20);
+
+			await tabs.undoClose();
+			let newWin;
+			try {
+				await waitForCallback(
+					() => (newWin = Zotero.getMainWindows().find(x => !openWindows.includes(x)))
+						&& newWin.ZoteroPane.libraryView?.loaded,
+					100,
+					20
+				);
+				assert.deepEqual(newWin.Zotero_Tabs._tabs.map(tab => !!tab.pinned), [true, false]);
+			}
+			finally {
+				newWin?.close();
+			}
+		});
+
 		it("should restore a window with a setting it cleared", async function () {
 			let newWin;
 			try {
