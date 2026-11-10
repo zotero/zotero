@@ -599,7 +599,9 @@
 			event.preventDefault();
 			let tabId = event.dataTransfer.getData("zotero/tab");
 			let { tab: rowTab } = Zotero_Tabs._getTab(rowTabId);
-			if (!tabId || !rowTab?.movable) {
+			let { tab } = Zotero_Tabs._getTab(tabId);
+			// Pinned tabs move among the pinned tabs, and other tabs among the tabs after them
+			if (!tab || !rowTab?.movable || !!rowTab.pinned != !!tab.pinned) {
 				return false;
 			}
 			if (row.getAttribute("id") == "zotero-tabs-menu-dragged") {

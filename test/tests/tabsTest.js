@@ -242,6 +242,35 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 
+		it("should keep an unpinned tab dragged in the tabs menu after the pinned tabs", async function () {
+			let { id: pinnedID } = await addLibraryTab();
+			let { id } = await addLibraryTab();
+			tabs.setPinned(pinnedID, true);
+			let panel = tabs.tabsMenuPanel;
+			try {
+				let shown = new Promise(resolve => panel.addEventListener('popupshown', resolve, { once: true }));
+				tabs.showTabsMenu(true);
+				await shown;
+				let getRow = tabID => panel.querySelector(`.row[data-tab-id="${tabID}"]`);
+				let dataTransfer = new win.DataTransfer();
+				let fire = (target, type) => target.dispatchEvent(
+					new win.DragEvent(type, { bubbles: true, cancelable: true, dataTransfer })
+				);
+				fire(getRow(id), 'dragstart');
+				// The dragged row becomes the placeholder after a timeout
+				await Zotero.Promise.delay(10);
+				fire(getRow(pinnedID), 'dragover');
+				assert.isTrue(
+					!!(getRow(pinnedID).compareDocumentPosition(getRow(id)) & win.Node.DOCUMENT_POSITION_FOLLOWING)
+				);
+				fire(getRow(id), 'dragend');
+			}
+			finally {
+				tabs.showTabsMenu(false);
+				tabs.setPinned(pinnedID, false);
+			}
+		});
+
 		it("should keep a pinned reader tab pinned when it's unloaded", async function () {
 			let reader = await Zotero.Reader.open(attachment.id);
 			await reader._initPromise;
