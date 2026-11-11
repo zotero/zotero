@@ -211,14 +211,12 @@ describe("Tag Selector", function () {
 			await waitForCallback(() => tagSelector.state.tags.length == 4);
 			assert.sameMembers(getRegularTags(), ['kept', 'dropped', 'silent', 'quoted']);
 
-			// The unmatched annotation is a context row under the matched
-			// attachment, and its tag follows the row
+			// Only the tags of what the search kept: the unmatched annotation
+			// shown as a context row under the matched attachment, when
+			// context rows are shown, is no match, and its tag would
+			// filter to nothing
 			Zotero.Prefs.set('hideContextAnnotationRows', false);
 			await win.ZoteroPane.itemsView.setFilter('search', 'tagbm owl migration');
-			await waitForCallback(() => tagSelector.state.tags.length == 3);
-			assert.sameMembers(getRegularTags(), ['kept', 'silent', 'quoted']);
-
-			Zotero.Prefs.set('hideContextAnnotationRows', true);
 			await waitForCallback(() => tagSelector.state.tags.length == 2);
 			assert.sameMembers(getRegularTags(), ['kept', 'quoted']);
 		}

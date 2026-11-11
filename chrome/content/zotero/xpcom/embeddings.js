@@ -1123,15 +1123,12 @@ Zotero.Embeddings = new function () {
 	 * @param {Object} [options]
 	 * @param {Function} [options.shouldCancel] - Checked between chunks;
 	 *     return true to abandon scoring with a ScoringCancelledError
-	 * @return {Promise<Object>} - { scores, previewableIDs }: itemID ->
-	 *     similarity score, and the scored items with an above-floor chunk
-	 *     whose text can be re-derived for a preview
+	 * @return {Promise<Map>} - itemID -> similarity score
 	 */
 	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
 		let scores = new Map();
-		let previewableIDs = new Set();
 		if (!itemIDs.length || !this.isEnabled()) {
-			return { scores, previewableIDs };
+			return scores;
 		}
 		let { minScore } = await _requireReadyIndex();
 		let query = this.prepare(await this.embedQuery(queryText));
@@ -1148,20 +1145,11 @@ Zotero.Embeddings = new function () {
 				throw new this.ScoringCancelledError();
 			}
 			let chunk = itemIDs.slice(i, i + chunkSize);
-			// A chunk is previewable when there's something to re-derive its
-			// text from: its anchor in the document, or the attachment's
-			// plain text it was cut from. A chunk that no longer reads back
-			// -- an anchor that doesn't resolve, text since regenerated --
-			// derives as nothing and is dropped when the preview is derived.
 			let rows = await Zotero.DB.queryAsync(
-				"SELECT itemID, MAX(score) AS score, "
-					+ "MAX(CASE WHEN previewable THEN score END) AS previewableScore FROM ("
-					+ "SELECT itemID, "
-					+ "(anchor IS NOT NULL OR itemID IN (SELECT itemID FROM itemAttachments)) AS previewable, "
-					+ scoring.sql + " AS score "
+				"SELECT itemID, MAX(" + scoring.sql + ") AS score "
 					+ "FROM embeddings.itemEmbeddings "
-					+ "WHERE embedding IS NOT NULL AND itemID IN (" + chunk.map(() => '?').join(',') + ")"
-					+ ") GROUP BY itemID",
+					+ "WHERE embedding IS NOT NULL AND itemID IN (" + chunk.map(() => '?').join(',') + ") "
+					+ "GROUP BY itemID",
 				[...scoring.params, ...chunk]
 			);
 			for (let row of rows) {
@@ -1170,16 +1158,9 @@ Zotero.Embeddings = new function () {
 					continue;
 				}
 				scores.set(row.itemID, row.score);
-				// An above-floor chunk whose text can be re-derived makes its
-				// item's match showable; that chunk also puts the item's best
-				// at or above the floor, so the set stays within the returned
-				// items
-				if (row.previewableScore !== null && row.previewableScore >= minScore) {
-					previewableIDs.add(row.itemID);
-				}
 			}
 		}
-		return { scores, previewableIDs };
+		return scores;
 	};
 
 	/**

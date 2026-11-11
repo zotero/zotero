@@ -169,6 +169,8 @@ describe("search-result-row", function () {
 
 		it("should open a clicked annotation with its page, comment and tags, and no colors", async function () {
 			let span = show();
+			// The tags editor exists only while an annotation is shown
+			assert.isNull(row.querySelector('tags-box'));
 			win.getSelection().removeAllRanges();
 			span.dispatchEvent(new win.MouseEvent('mouseup', { bubbles: true }));
 			await waitForCallback(() => row._popup.state == 'open');
@@ -182,6 +184,9 @@ describe("search-result-row", function () {
 			let tagsBox = editor.querySelector('.tags-editor');
 			assert.equal(tagsBox.item, annotation);
 			assert.deepEqual([...tagsBox.querySelectorAll('.row editable-text')].map(e => e.value), ['owls']);
+			// and goes with the popup
+			row._popup.hidePopup();
+			await waitForCallback(() => !row.querySelector('tags-box'));
 		});
 
 		it("should save a changed comment to the annotation", async function () {

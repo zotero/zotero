@@ -160,8 +160,7 @@ Zotero.Tags = new function () {
 	 * @param {Object.Number[]} [types] - Array of tag types to fetch
 	 * @param {Object.Number[]} [tagIDs] - Array of tagIDs to limit the result to
 	 * @param {Object.Boolean} [contextAnnotations=false] - Include the tags of the annotations
-	 *     under attachments in tmpTable, which the items list shows beneath them as context
-	 *     rows unless hideContextAnnotationRows is set
+	 *     under attachments in tmpTable
 	 * @return {Promise<Array[]>} - Promise for an array of tag objects in API JSON format
 	 */
 	this.getAllWithin = async function ({ libraryID, tmpTable, types, tagIDs, contextAnnotations = false }) {

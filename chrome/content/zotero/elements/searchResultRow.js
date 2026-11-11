@@ -70,7 +70,6 @@
 							<html:div class="title"/>
 						</html:div>
 						<editable-text class="comment" multiline="true"/>
-						<tags-box class="tags-editor"/>
 					</html:div>
 				</html:div>
 			</panel>
@@ -151,7 +150,6 @@
 			}
 			this._tools = this._popup.querySelector('.selection-tools');
 			this._editor = this._popup.querySelector('.annotation-editor');
-			this._tagsBox = this._popup.querySelector('.tags-editor');
 			this._comment = this._popup.querySelector('.comment');
 			this._comment.placeholder = Zotero.getString('pdfReader.addComment');
 			this._comment.addEventListener('change', () => {
@@ -187,7 +185,6 @@
 				}
 				else {
 					this._updateToolToggle();
-					this._tagsBox.item = null;
 				}
 			});
 			// The popup's size is known once shown: place it by it, and
@@ -202,7 +199,12 @@
 				document.removeEventListener('selectionchange', this._handleSelectionChange);
 				document.removeEventListener('scroll', this._handleScroll, true);
 				if (this._annotation) {
-					this._finishEdits(this._annotation).catch(e => Zotero.logError(e));
+					let box = this._tagsBox;
+					this._tagsBox = null;
+					this._finishEdits(this._annotation, box)
+						.catch(e => Zotero.logError(e))
+						// Not box.remove(): tags-box's remove() takes a tag
+						.finally(() => this._editor.removeChild(box));
 				}
 				this._annotation = null;
 				this._selection = null;
@@ -211,8 +213,8 @@
 
 		// Keep what the fields hold when the popup closes, a tag still being
 		// typed included
-		async _finishEdits(item) {
-			await this._tagsBox.blurOpenField();
+		async _finishEdits(item, tagsBox) {
+			await tagsBox.blurOpenField();
 			await this._saveComment(item);
 		}
 
@@ -266,7 +268,12 @@
 				= Zotero.getString('pdfReader.page') + ' ' + (item.annotationPageLabel || '-');
 			this._comment.readOnly = !editable;
 			this._comment.value = item.annotationComment || '';
-			let box = this._tagsBox;
+			// The tags editor lives only while the popup shows an annotation,
+			// as each one watches the notifier
+			let box = document.createXULElement('tags-box');
+			box.className = 'tags-editor';
+			this._editor.append(box);
+			this._tagsBox = box;
 			box.editable = editable;
 			box.item = item;
 			box.render();

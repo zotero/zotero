@@ -312,6 +312,9 @@ Zotero.Lexical = new function () {
 	 * @param {Object} [options]
 	 * @param {Function} [options.shouldCancel] - Checked between stages;
 	 *     return true to abandon scoring with a ScoringCancelledError
+	 * @param {Boolean} [options.skipProximityGuard=false] - Score a
+	 *     document wherever its terms occur, however far apart: a broad
+	 *     search, ranked the same way
 	 * @return {Promise<Object>} - { scores, matches }: scores maps itemID ->
 	 *     score (0-1, higher is better); matches maps each scored itemID ->
 	 *     where the query matched it: { fields, creators, tags, note,
@@ -320,7 +323,7 @@ Zotero.Lexical = new function () {
 	 *     matched, and the terms its short texts were scored with, for
 	 *     marking them (see findHighlightRanges())
 	 */
-	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel } = {}) {
+	this.scoreItemIDs = async function (queryText, itemIDs, { shouldCancel, skipProximityGuard = false } = {}) {
 		// Scores below this aren't matches and aren't returned: the share of
 		// the query an item has to carry. Provisional until tuned against a
 		// real library.
@@ -338,7 +341,7 @@ Zotero.Lexical = new function () {
 		};
 		let candidates = new Set(itemIDs);
 		let shortTexts = await _scoreShortTexts(terms, itemIDs, checkCancel);
-		let documents = await _scoreDocuments(terms, candidates, checkCancel);
+		let documents = await _scoreDocuments(terms, candidates, checkCancel, { skipProximityGuard });
 		let own = new Map();
 		let records = new Map();
 		for (let [itemID, { score, record }] of shortTexts) {
@@ -685,14 +688,15 @@ Zotero.Lexical = new function () {
 	// expression is asked once, for every document matching any of the
 	// query's terms, and reports BM25's own ranking, which a document only
 	// keeps where the query's terms occur close together (see
-	// buildProximityExpression()). The ranking is returned as a fraction of
-	// what the query could earn (see _getCeiling()), so it reads as the
-	// share of the query a document carries: rarer terms move it most, a
-	// document missing a term forfeits that term's share, and repetition
-	// beyond the point where a text is clearly about a term adds nothing.
+	// buildProximityExpression()), unless skipProximityGuard is set. The
+	// ranking is returned as a fraction of what the query could earn (see
+	// _getCeiling()), so it reads as the share of the query a document
+	// carries: rarer terms move it most, a document missing a term forfeits
+	// that term's share, and repetition beyond the point where a text is
+	// clearly about a term adds nothing.
 	//
 	// @return {Promise<Map>} - rowid -> share, the best across the families
-	async function _scoreDocuments(terms, candidates, checkCancel) {
+	async function _scoreDocuments(terms, candidates, checkCancel, { skipProximityGuard = false } = {}) {
 		let shares = new Map();
 		let scoring = await _getScoringTerms(terms);
 		for (let [family, table] of Object.entries(CONTENT_TABLES)) {
@@ -716,7 +720,9 @@ Zotero.Lexical = new function () {
 			if (!rows.length) {
 				continue;
 			}
-			let proximity = Zotero.Lexical.buildProximityExpression(scoring, family);
+			let proximity = skipProximityGuard
+				? null
+				: Zotero.Lexical.buildProximityExpression(scoring, family);
 			if (proximity) {
 				let close = new Set(await Zotero.DB.columnQueryAsync(
 					"SELECT rowid FROM ftindex." + table

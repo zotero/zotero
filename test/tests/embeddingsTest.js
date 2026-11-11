@@ -267,7 +267,7 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything', [item.id]);
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything', [item.id]);
 				let expected = Zotero.Embeddings.cosine(
 					Zotero.Embeddings.prepare(query),
 					Zotero.Embeddings.prepare(passage)
@@ -316,7 +316,7 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
 					[close.id, distant.id]);
 				assert.isAbove(scores.get(close.id), 0.9);
 				assert.isFalse(scores.has(distant.id));
@@ -360,73 +360,12 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
 					[chunked.id, distant.id]);
 				// The item scores as its best chunk, not an average, so the
 				// unrelated first chunk doesn't dilute the match
 				assert.isAbove(scores.get(chunked.id), 0.9);
 				assert.isFalse(scores.has(distant.id));
-			}
-			finally {
-				stubs.forEach(stub => stub.restore());
-			}
-		});
-	});
-
-	describe("#scoreItemIDs() previewable items", function () {
-		it("should report which items a previewable chunk carries", async function () {
-			let axis = (index, scale = 1) => {
-				let vector = Float32Array.from(testMean);
-				vector[index] += scale;
-				return vector;
-			};
-			let store = async (item, chunkIndex, vector, { positioned = false } = {}) => {
-				let blob = storedBlob(vector);
-				await Zotero.DB.queryAsync(
-					"REPLACE INTO embeddings.itemEmbeddings "
-						+ "(itemID, chunkIndex, embedding, anchor) VALUES (?, ?, ?, ?)",
-					[item.id, chunkIndex, blob, positioned ? Zotero.Embeddings.Indexing.compactAnchor({ pageRects: [[0, 0, 0, 1, 1]] }) : null],
-					{ debugParams: false }
-				);
-			};
-			// One item matches through a chunk with source references (plus a
-			// below-floor chunk with references, which must not count), one
-			// matches only through a chunk without them, one matches through a
-			// chunk without them while its only chunk with references scores
-			// below the floor, and a distractor matches nothing
-			let chunked = await createDataObject('item');
-			await store(chunked, 0, axis(2), { positioned: true });
-			await store(chunked, 1, axis(0), { positioned: true });
-			let plain = await createDataObject('item');
-			await store(plain, 0, axis(0));
-			let buried = await createDataObject('item');
-			await store(buried, 0, axis(0));
-			await store(buried, 1, axis(2), { positioned: true });
-			let distant = await createDataObject('item');
-			await store(distant, 0, axis(3));
-
-			let stubs = [
-				sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true),
-				sinon.stub(Zotero.Embeddings, 'getModelVersion').returns('test-model/1'),
-				sinon.stub(Zotero.Embeddings, 'embedQuery').resolves(axis(0))
-			];
-			await Zotero.DB.queryAsync(
-				"REPLACE INTO embeddings.embeddingsMeta (key, value) "
-					+ "VALUES ('modelVersion', 'test-model/1')"
-			);
-			try {
-				let { scores, previewableIDs } = await Zotero.Embeddings.scoreItemIDs(
-					'anything', [chunked.id, plain.id, buried.id, distant.id]);
-				assert.isTrue(previewableIDs.has(chunked.id));
-				// A match carried only by chunks without source references is
-				// its own preview
-				assert.isTrue(scores.has(plain.id));
-				assert.isFalse(previewableIDs.has(plain.id));
-				// References on a chunk the query didn't match don't make the
-				// item's match showable
-				assert.isTrue(scores.has(buried.id));
-				assert.isFalse(previewableIDs.has(buried.id));
-				assert.isFalse(previewableIDs.has(distant.id));
 			}
 			finally {
 				stubs.forEach(stub => stub.restore());
@@ -4110,7 +4049,7 @@ describe("Zotero.Embeddings", function () {
 
 				// A processed-but-empty item can't be scored, and doesn't
 				// break scoring for anything else
-				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything', [attachment.id]);
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything', [attachment.id]);
 				assert.isFalse(scores.has(attachment.id));
 
 				// The record makes later passes skip the attachment without
@@ -4333,7 +4272,7 @@ describe("Zotero.Embeddings", function () {
 					+ "VALUES ('modelVersion', 'test-model/1')"
 			);
 			try {
-				let { scores } = await Zotero.Embeddings.scoreItemIDs('anything',
+				let scores = await Zotero.Embeddings.scoreItemIDs('anything',
 					[empty.id, distinct.id]);
 				// Without centering the two would be nearly indistinguishable,
 				// since both consist mostly of the shared direction

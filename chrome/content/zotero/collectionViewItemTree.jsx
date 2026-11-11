@@ -275,9 +275,9 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 * computes the ranks and bar fractions the Relevance column reads (see
 	 * Zotero.BestMatch.Session#score()). An item is kept when it or
 	 * anything beneath it matched, so a strongly matching annotation keeps
-	 * its attachment and its paper in the results. That holds whatever
-	 * supplies the query: a search's conditions define the scope, the
-	 * ranking what's shown of it.
+	 * its attachment and its paper in the results. Only the items given are
+	 * scored: a search's conditions define the scope, at the levels they
+	 * admit, and the ranking what's shown of it.
 	 *
 	 * @param {Zotero.Item[]} items - Merged results from all selected rows
 	 * @return {Promise<Zotero.Item[]>} - The matching items
@@ -288,16 +288,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		let queryRow = this.collectionTreeRows.find(rowIsBestMatchSearch);
 		let { query, engine } = queryRow.getBestMatchQuery();
 		let source = queryRow.getBestMatchSource();
-		// A search source returns the items its conditions describe; the
-		// ranking weighs what's beneath them too -- an
-		// attachment's text, a note, an annotation -- as it does the quick
-		// search's whole scope. So the descendants join the candidates, and
-		// the ones that match join the results.
-		let descendants = source
-			? items.flatMap(item => (item instanceof Zotero.Item ? item.getDescendants() : []))
-			: [];
 		let candidates = new Map();
-		for (let item of [...items, ...descendants]) {
+		for (let item of items) {
 			if (item instanceof Zotero.Item) {
 				candidates.set(item.id, item);
 			}
@@ -362,13 +354,6 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// it, so they say which items stay in the results
 		let kept = items.filter(item => item instanceof Zotero.Item
 			&& session.ranks.has(item.treeViewID));
-		let keptIDs = new Set(kept.map(item => item.treeViewID));
-		for (let item of descendants) {
-			if (session.ranks.has(item.treeViewID) && !keptIDs.has(item.treeViewID)) {
-				kept.push(item);
-				keptIDs.add(item.treeViewID);
-			}
-		}
 		this._bestMatchIndexState = await this._getBestMatchIndexState();
 		return kept;
 	}
@@ -454,6 +439,21 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 	 *
 	 * @param {Number[]} itemIDs
 	 */
+	// Rebuild the open rows of the added items' parents, so the new children
+	// show as a reopen would show them
+	async _refreshParentsOfAdded(itemIDs) {
+		let parents = new Set(itemIDs.map(id => Zotero.Items.get(id)?.parentItemID).filter(Boolean));
+		let open = [...parents].filter(id => this._rowMap[id] !== undefined && this.isContainerOpen(this._rowMap[id]));
+		if (!open.length) {
+			return;
+		}
+		this.itemTree._cacheState();
+		for (let id of open) {
+			this._refreshContainer(this._rowMap[id]);
+		}
+		await this.runListeners('update', true, { restoreSelection: true, restoreScroll: true });
+	}
+
 	async _redrawChangedMatches(itemIDs) {
 		// Kept, so a new query arriving while deriving is noticed
 		let session = this._bestMatchSession;
@@ -1084,11 +1084,14 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		// item -- doesn't rerun the search: its parent's place in the results
 		// stays, so the rows stay put under the user, as while annotating
 		// from a match row. A changed one is redrawn in place; an added one
-		// is seen by the next search.
+		// is shown under its parent where that's open.
 		if (type == 'item' && ['add', 'modify', 'refresh'].includes(action)
 				&& this._bestMatchSession && collectionTreeRows.some(rowIsBestMatchSearch)
 				&& ids.every(id => Zotero.Items.get(id)?.isTopLevelItem() === false)) {
-			if (action != 'add') {
+			if (action == 'add') {
+				await this._refreshParentsOfAdded(ids.map(id => parseInt(id)));
+			}
+			else {
 				await this._redrawChangedMatches(ids.map(id => parseInt(id)));
 			}
 			return;

@@ -114,12 +114,18 @@
 				// We want to be notified quickly about tab events
 				Zotero.Notifier.registerObserver(this, ['tab'], 'contextPane', 20),
 			];
+			// The similar content pane comes and goes with semantic search
+			this._semanticObserverID = Zotero.Prefs.registerObserver('search.bestMatch.enableSemantic', () => {
+				this._setupSimilarContext(Zotero_Tabs.selectedID, Zotero_Tabs.selectedType);
+				this.sidenav.render();
+			});
 		}
 
 		destroy() {
 			for (let id of this._notifierIDs) {
 				Zotero.Notifier.unregisterObserver(id);
 			}
+			Zotero.Prefs.unregisterObserver(this._semanticObserverID);
 		}
 
 		notify(action, type, ids, extraData) {
@@ -268,9 +274,10 @@
 		}
 
 		// Similar content follows a reader tab's selection; other tabs have
-		// none, so the pane goes back to the item when one is selected
+		// none, so the pane goes back to the item when one is selected. Its
+		// search is semantic, so without semantic search there's no pane
 		_setupSimilarContext(tabID, tabType) {
-			let enabled = tabType == 'reader';
+			let enabled = tabType == 'reader' && Zotero.Embeddings.isEnabled();
 			this.sidenav.contextSimilarPaneEnabled = enabled;
 			if (enabled) {
 				this._similarPane.tabID = tabID;

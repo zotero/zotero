@@ -2584,6 +2584,10 @@ var ZoteroPane = new function () {
 	 * @return {Boolean}
 	 */
 	this.canDeleteSelectedItems = function () {
+		// Search-match rows are passages of items, not items
+		if (this.itemsView.getSelectedSearchMatches().length) {
+			return false;
+		}
 		let collectionTreeRows = this.getCollectionTreeRows();
 		if (collectionTreeRows[0].isTrash()) {
 			for (let index of this.itemsView.selection.selected) {

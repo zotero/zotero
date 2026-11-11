@@ -53,7 +53,7 @@ describe("Similar content context pane", function () {
 			return {
 				scores,
 				lexical: { scores: new Map(), matches: new Map() },
-				semantic: { scores, previewable: new Set(scores.keys()) }
+				semantic: { scores }
 			};
 		});
 		stubs.push(scoreStub);
@@ -224,6 +224,27 @@ describe("Similar content context pane", function () {
 		similar.tabID = 'tab-1';
 		await waitFor(() => reads.callCount == 2 && otherCard().querySelector('.annotation'),
 			'the annotation in the first tab\'s results');
+	});
+
+	it("should be offered for a reader tab only while semantic search is on", function () {
+		let pane = doc.querySelector('#zotero-context-pane-inner');
+		// The sidenav hides the pane's button by this attribute
+		let offered = () => !pane.sidenav.hasAttribute('no-context-similar');
+		let enabled = sinon.stub(Zotero.Embeddings, 'isEnabled').returns(true);
+		stubs.push(enabled);
+		try {
+			pane._setupSimilarContext('tab-1', 'reader');
+			assert.isTrue(offered());
+			enabled.returns(false);
+			pane._setupSimilarContext('tab-1', 'reader');
+			assert.isFalse(offered());
+			enabled.returns(true);
+			pane._setupSimilarContext('zotero-pane', 'library');
+			assert.isFalse(offered());
+		}
+		finally {
+			pane._setupSimilarContext(win.Zotero_Tabs.selectedID, win.Zotero_Tabs.selectedType);
+		}
 	});
 
 	it("should say when semantic search isn't available", async function () {
