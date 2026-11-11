@@ -1690,6 +1690,24 @@ describe("Zotero.CollectionTree", function () {
 				assert.isBelow(newColIndex2, newColIndex3);
 				assert.equal(cv.getRow(newColIndex4).level, cv.getRow(newColIndex1).level);
 			})
+			
+			it("should allow dropping a subcollection onto a library row with the same ID", async function () {
+				let id = Zotero.ID.get('collections');
+				let group = await createGroup({ id });
+				let collectionB = await createDataObject('collection', { libraryID: group.libraryID });
+				let stub = sinon.stub(Zotero.ID, 'get').callThrough();
+				stub.withArgs('collections').returns(id);
+				try {
+					await createDataObject('collection', { libraryID: group.libraryID, parentKey: collectionB.key });
+				}
+				finally {
+					stub.restore();
+				}
+				
+				assert.isTrue(await canDrop('collection', 'L' + group.libraryID, [id]));
+				
+				await group.eraseTx();
+			});
 			                                                                                         
 			it("should expand the target collection to reveal an unselected moved collection", async function () {
 				var collectionA = await createDataObject('collection', { name: "A" });
