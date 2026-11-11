@@ -188,13 +188,17 @@ describe("Similar content context pane", function () {
 
 	it("should keep the cards' annotations current, on screen and in other tabs' results", async function () {
 		stubSearch();
-		// The passage reads back with a highlight over its first word
+		// The passage reads back as one paragraph's text node, with a
+		// highlight over its first word
+		let text = 'A passage much like the selection.';
 		let reads = sinon.stub(Zotero.SDT, 'readAnchors').callsFake(async (itemID, anchors) => ({
 			ok: true,
 			chunks: anchors.map(() => ({
-				text: 'A passage much like the selection.',
+				text,
+				segments: [{ start: 0, end: text.length, ref: [0, 0], offset: 0,
+					blocks: [{ type: 'paragraph', ref: [0] }] }],
 				annotations: [{ key: 'ANNOTKEY', type: 'highlight', color: '#ffd400', comment: '',
-					ranges: [{ start: 0, end: 1 }] }]
+					ranges: [[[0, 0, 0], [0, 0, 1]]] }]
 			}))
 		}));
 		stubs.push(reads);
