@@ -2287,7 +2287,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//  Private methods
 	//
 	// //////////////////////////////////////////////////////////////////////////////
-	
+
 	_renderItem(index, selection, oldDiv = null, columns = []) {
 		let row = this.getRow(index);
 		let rowData = this._getRowData(index);

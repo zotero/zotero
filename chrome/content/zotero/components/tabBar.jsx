@@ -774,6 +774,7 @@ const TabBar = forwardRef(function (props, ref) {
 							onAudioStatusClick={handleAudioStatusClick}
 						/>)}
 						<div ref={spacerRef} className="spacer"></div>
+						<div className="flex-spacer"></div>
 					</div>
 					<div ref={dropIndicatorRef} className="tab-drop-indicator" hidden/>
 				</div>

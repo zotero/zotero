@@ -68,7 +68,7 @@ describe("Zotero_Tabs", function() {
 				title: 'Not italic, <i>italic</i>'
 			});
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tab;
 			while (!tab?.textContent.includes('Not italic, italic')) {
 				await Zotero.Promise.delay(10);
@@ -82,7 +82,7 @@ describe("Zotero_Tabs", function() {
 				title: 'Something bad <img src="missing.jpg" onerror="alert(1)">'
 			});
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tab;
 			while (!tab?.textContent.includes('Something bad <img src="missing.jpg" onerror="alert(1)">')) {
 				await Zotero.Promise.delay(10);
@@ -96,7 +96,7 @@ describe("Zotero_Tabs", function() {
 		it("should not make an unloaded tab reopenable", async function () {
 			let item = await createDataObject('item');
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id);
+			let { instance: reader } = await Zotero.Reader.open(attachment.id);
 			let tabs = win.Zotero_Tabs;
 			tabs.select('zotero-pane');
 			let lastClosed = Zotero.Session.getLastClosed();
@@ -320,7 +320,7 @@ describe("Zotero_Tabs", function() {
 		
 		it("should leave a reader's menus and context pane alone when a background library tab finishes loading", async function () {
 			let pdf = await importPDFAttachment(item1);
-			let reader = await Zotero.Reader.open(pdf.id);
+			let { instance: reader } = await Zotero.Reader.open(pdf.id);
 			await reader._initPromise;
 			let { id } = tabs.add({
 				type: 'library-unloaded',
@@ -595,7 +595,7 @@ describe("Zotero_Tabs", function() {
 		
 		it("should not unload a window's last loaded library view", async function () {
 			let libraryTabID = zp.libraryView.tabID;
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
 			await reader._initPromise;
 			assert.equal(tabs.selectedID, reader.tabID);
 			assert.isFalse(tabs.canUnload(libraryTabID));
@@ -837,7 +837,7 @@ describe("Zotero_Tabs", function() {
 		
 		it("should open a reader tab in the window that requested it", async function () {
 			let attachment = await importPDFAttachment(item);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win2 });
 			await reader._initPromise;
 			try {
 				assert.equal(reader._window, win2);
@@ -858,7 +858,7 @@ describe("Zotero_Tabs", function() {
 			assert.isTrue(splitter.hasAttribute('hidden'));
 			
 			let attachment = await importPDFAttachment(otherItem);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
 			await reader._initPromise;
 			try {
 				// The other window's reader tab leaves this window showing its library
@@ -1048,7 +1048,7 @@ describe("Zotero_Tabs", function() {
 		
 		it("should move a reader tab to a new window with no library view", async function () {
 			let attachment = await importPDFAttachment(otherItem);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win2 });
 			await reader._initPromise;
 			let sourceTabID = reader.tabID;
 			let { tab, tabIndex } = win2.Zotero_Tabs._getTab(sourceTabID);
@@ -1258,7 +1258,7 @@ describe("Zotero_Tabs", function() {
 		it("should reopen a window closed by closing its last tab", async function () {
 			let attachment = await importPDFAttachment(await createDataObject('item'));
 			let win3 = await loadZoteroPane();
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win3 });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win3 });
 			win3.Zotero_Tabs.close(win3.ZoteroPane.libraryView.tabID);
 			let openWindows = Zotero.getMainWindows();
 			win3.Zotero_Tabs.close(reader.tabID);
@@ -1378,7 +1378,7 @@ describe("Zotero_Tabs", function() {
 
 		it("should move a reader tab to another window", async function () {
 			let attachment = await importPDFAttachment(otherItem);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
 			await reader._initPromise;
 			let sourceTabID = reader.tabID;
 			let readerWindow = reader._iframeWindow;
@@ -1403,7 +1403,7 @@ describe("Zotero_Tabs", function() {
 		it("should keep a moved reader working after its old window closes", async function () {
 			let win3 = await loadZoteroPane();
 			let attachment = await importPDFAttachment(otherItem);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win3 });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win3 });
 			await reader._initPromise;
 			let newID = await win3.Zotero_Tabs.moveToWindow(reader.tabID, win2);
 			win3.close();
@@ -1425,7 +1425,7 @@ describe("Zotero_Tabs", function() {
 				contentType: 'application/pdf',
 				parentID: otherItem.id
 			});
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
 			await reader._initPromise;
 			await reader.navigate({ pageIndex: 3 });
 			await waitForCallback(() => reader.getPrimaryViewState()?.pageIndex === 3, 100, 10);
@@ -1688,7 +1688,7 @@ describe("Zotero_Tabs", function() {
 			await win2.ZoteroPane.selectItem(item.id);
 			let otherItem = await createDataObject('item', { collections: [collection.id] });
 			let attachment = await importPDFAttachment(otherItem);
-			let reader = await Zotero.Reader.open(attachment.id, null, { window: win2 });
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win2 });
 			await reader._initPromise;
 			
 			// The window's observers are still registered while it tears down, and shouldn't be

@@ -29,7 +29,7 @@ describe("Note Editor", function () {
 		item.setNote('<p>Test note</p>');
 		await item.saveTx();
 
-		let editorInstance = await Zotero.Notes.open(item.id, null, options);
+		let { instance: editorInstance } = await Zotero.Notes.open(item.id, null, options);
 		await editorInstance._initPromise;
 		return editorInstance;
 	}
@@ -102,7 +102,7 @@ describe("Note Editor", function () {
 				
 				// Opening it in a new window again goes to that tab
 				let windowCount = Zotero.getMainWindows().length;
-				let reopened = await Zotero.Notes.open(editorInstance.itemID, null, { openInWindow: true });
+				let { instance: reopened } = await Zotero.Notes.open(editorInstance.itemID, null, { openInWindow: true });
 				assert.equal(reopened, editorInstance);
 				assert.lengthOf(Zotero.getMainWindows(), windowCount);
 			}

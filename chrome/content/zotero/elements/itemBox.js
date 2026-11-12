@@ -1155,6 +1155,7 @@
 			try {
 				onItemChange({
 					rowID,
+					itemID: this.item?.id,
 					item: this.item,
 					tabType: this.tabType,
 					editable: this.editable,
@@ -1181,6 +1182,7 @@
 			try {
 				data = onGetData({
 					rowID,
+					itemID: this.item?.id,
 					item: this.item,
 					tabType: this.tabType,
 					editable: this.editable,
@@ -2440,6 +2442,7 @@
 					try {
 						onSetData({
 							rowID,
+							itemID: this.item?.id,
 							item: this.item,
 							tabType: this.tabType,
 							editable: this.editable,
@@ -3027,7 +3030,6 @@
 				target.classList.remove("show-on-hover");
 			}
 
-			let targetElem = event.target.closest("editable-text")?._input;
 			let tabID;
 			let tabSubType;
 			if (typeof Zotero_Tabs != 'undefined') {
@@ -3041,16 +3043,27 @@
 				"itemPane/info/row",
 				{
 					event: undefined,
-					getContext: () => ({
-						items: [this.item],
-						tabID,
-						tabType: this.tabType,
-						tabSubType,
-						editable: this.editable,
-						fieldName,
-						// Do not expose the original ref to avoid memory leak
-						targetElem: targetElem ? new WeakRef(targetElem) : undefined,
-					})
+					getContext: () => {
+						let item = this.item;
+						return {
+							get itemIDs() {
+								return item ? [item.id] : [];
+							},
+							// @deprecated Privileged plugins only
+							get items() {
+								return [item];
+							},
+							tabID,
+							tabType: this.tabType,
+							tabSubType,
+							editable: this.editable,
+							fieldName,
+							get targetElem() {
+								let elem = target.closest("editable-text")?._input;
+								return elem ? new WeakRef(elem) : undefined;
+							},
+						};
+					}
 				}
 			);
 

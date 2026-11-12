@@ -108,7 +108,7 @@ var Zotero_Tabs = new function () {
 				// keeps its own
 				let { primaryViewState } = tab.data;
 				delete tab.data.primaryViewState;
-				let reader = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
+				let { instance: reader } = await Zotero.Reader.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
@@ -119,9 +119,10 @@ var Zotero_Tabs = new function () {
 					window
 				});
 				await reader._initPromise;
+				return reader;
 			},
 			note: async (tab, tabIndex, options) => {
-				let editorInstance = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
+				let { instance: editorInstance } = await Zotero.Notes.open(tab.data.itemID, options && options.location, {
 					tabID: tab.id,
 					title: tab.title,
 					tabIndex,
@@ -130,6 +131,7 @@ var Zotero_Tabs = new function () {
 					window
 				});
 				await editorInstance._initPromise;
+				return editorInstance;
 			},
 			library: async (tab, _tabIndex, options) => {
 				let container = this.getTabContent(tab.id);
@@ -469,7 +471,7 @@ var Zotero_Tabs = new function () {
 	this._getNotifierExtraData = function (ids, data) {
 		let extraData = {};
 		for (let id of ids) {
-			extraData[id] = Object.assign({}, data, { windowID: this._windowID });
+			extraData[id] = Object.assign({}, data, { windowID: this._windowID, browsingContextID: window.browsingContext.id });
 		}
 		return extraData;
 	};
@@ -1496,7 +1498,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 * @param {Object} options - Additional options for selecting the tab. Passed to tab hooks
 	 * @param {Boolean} options.keepTabFocused
-	 * @return {Promise}
+	 * @return {Promise | undefined} When the tab had to load, resolves with the instance its load hook opened
 	 */
 	this.select = function (id, reopening, options = {}) {
 		let { tab, tabIndex } = this._getTab(id);
@@ -1530,7 +1532,7 @@ var Zotero_Tabs = new function () {
 				let refocusHook = this._getHook(tabContentType, 'refocus');
 				setTimeout(() => refocusHook(tab, tabIndex, options), 0);
 			}
-			return;
+			return undefined;
 		}
 		let selectedTab;
 		if (this._selectedID) {
@@ -1569,15 +1571,17 @@ var Zotero_Tabs = new function () {
 			selectedTab.lastFocusedElement = document.activeElement;
 		}
 
+		let loading;
 		if (tabState === 'unloaded') {
 			tab.type = `${tabContentType}-loading`;
 			// Make sure the loading message is displayed first.
 			// Then, open reader and hide the loading message once it has loaded.
 			ZoteroContextPane.showLoadingMessage(true);
 			let loadHook = this._getHook(tabContentType, 'load');
-			tab.loadPromise = loadHook(tab, tabIndex, options).then(() => {
+			loading = tab.loadPromise = loadHook(tab, tabIndex, options).then((instance) => {
 				ZoteroContextPane.showLoadingMessage(false);
 				this.markAsLoaded(tab.id);
+				return instance;
 			});
 		}
 		// Notify previously selected tab content about selection change
@@ -1629,6 +1633,8 @@ var Zotero_Tabs = new function () {
 
 		// Notify tab content about selection change
 		currentTabContent?.onTabSelectionChanged(true);
+
+		return loading;
 	};
 	
 	this.canUnload = function (id) {
@@ -2014,14 +2020,26 @@ var Zotero_Tabs = new function () {
 			"main/tab",
 			{
 				getContext: () => {
-					let item = tab.data.itemID && Zotero.Items.get(tab.data.itemID);
-					let ret = {
-						items: item ? [item] : [],
-						tabType: tab.type,
+					let { type, subType, data } = this.getTabInfo(id);
+					return {
+						tabType: type,
+						tabSubType: subType,
 						tabID: id,
-						tabSubType: item ? item.attachmentReaderType : undefined,
+						get itemIDs() {
+							if (type === 'library') {
+								return ZoteroPane.getSelectedItems(true);
+							}
+							return data?.itemID ? [data.itemID] : [];
+						},
+						// @deprecated Privileged plugins only
+						get items() {
+							if (type === 'library') {
+								return ZoteroPane.getSelectedItems();
+							}
+							let item = data?.itemID ? Zotero.Items.get(data.itemID) : null;
+							return item ? [item] : [];
+						}
 					};
-					return ret;
 				}
 			}
 		);
@@ -2073,7 +2091,13 @@ var Zotero_Tabs = new function () {
 		}
 		let { tab } = this._getTab(tabID);
 		let info = Object.assign({}, tab);
-		if (!this._isLibraryTab(info)) {
+		if (info.type) {
+			// Parsed content type without the state suffix (e.g. "reader" instead of "reader-loading")
+			let { tabContentType, tabState } = this.parseTabType(info.type);
+			info.type = tabContentType;
+			info.state = tabState || 'loaded';
+		}
+		if (info.type !== 'library') {
 			let item = Zotero.Items.get(info.data?.itemID);
 			if (item && item.isAttachment()) {
 				info.subType = item.attachmentReaderType;

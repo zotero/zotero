@@ -40,8 +40,8 @@ Zotero.Notes = new function () {
 	 * @param {number} itemID
 	 * @param {Object} location - Not implemented yet
 	 * @param {Object} options
-	 * @returns {Promise<Zotero.EditorInstance | null>} Instance of Zotero.EditorInstance for the note.
-	 * If the note tab is opened in background (unloaded), returns null.
+	 * @returns {Promise<{ instance: Zotero.EditorInstance | null, tabID: string, win: Window }>}
+	 * The editor is null for a background tab, which stays unloaded.
 	 */
 	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey, window: ownerWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
@@ -85,21 +85,8 @@ Zotero.Notes = new function () {
 		if (win && !openInWindow && !allowDuplicate && !editorInstance) {
 			let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 			if (existingTabID) {
-				win.Zotero_Tabs.select(existingTabID, false, { location });
-				// Wait for the note editor to load
-				let timeout = 3000;
-				for (let i = 0; i < timeout; i += 100) {
-					editorInstance = this._editorInstances.find(
-						r => r.itemID === itemID && r.viewMode === 'tab' && r._window === win
-					);
-					if (editorInstance) {
-						return editorInstance;
-					}
-					await new Promise(resolve => setTimeout(resolve, 100));
-				}
-				if (!editorInstance) {
-					throw new Error('Timed out waiting for note editor to load');
-				}
+				editorInstance = await win.Zotero_Tabs.select(existingTabID, false, { location });
+				return { instance: editorInstance, tabID: existingTabID, win };
 			}
 		}
 
@@ -113,12 +100,13 @@ Zotero.Notes = new function () {
 				// TODO: implement this
 				editorInstance.navigate(location);
 			}
-			return editorInstance;
+			return { instance: editorInstance, tabID: editorInstance.tabID, win: editorInstance._window };
 		}
 
 		if (openInWindow) {
 			// The new window selects and focuses its note tab as it opens
-			return this._openInNewWindow(item, title);
+			editorInstance = await this._openInNewWindow(item, title);
+			return { instance: editorInstance, tabID: editorInstance?.tabID, win: editorInstance?._window };
 		}
 
 		let id;
@@ -144,7 +132,7 @@ Zotero.Notes = new function () {
 		}
 
 		if (openInBackground) {
-			return null;
+			return { instance: null, tabID: id, win };
 		}
 
 		if (!noteEditor) {
@@ -178,7 +166,7 @@ Zotero.Notes = new function () {
 			noteEditor.focus();
 		}
 		await noteEditor._initPromise;
-		return noteEditor._editorInstance;
+		return { instance: noteEditor._editorInstance, tabID: id, win };
 	};
 	
 	/**

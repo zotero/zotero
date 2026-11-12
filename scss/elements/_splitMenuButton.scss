@@ -1,16 +1,29 @@
 .split-menu-button {
 	display: flex;
 	align-items: center;
+	@media (-moz-platform: macos) {
+		// https://searchfox.org/firefox-esr140/source/toolkit/themes/osx/global/button.css#11
+		min-width: 79px;
+	}
+	@media not (-moz-platform: macos) {
+		// https://searchfox.org/firefox-esr140/source/toolkit/themes/windows/global/button.css#15
+		// https://searchfox.org/firefox-esr140/source/toolkit/themes/linux/global/in-content/common.css#32
+		min-width: 6.3em;
+	}
 	padding-right: 0;
 	gap: 6px;
 
+	&[hidden] {
+		display: none;
+	}
+
 	& [anonid="button-image-and-text-box"] {
-		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		// Allow the button to grow/shrink to fit the container
-		width: 0;
+		flex: 1 1 auto;
+		min-width: 0;
 	}
 
 	& [anonid="button-image"] {
@@ -33,6 +46,12 @@
 		display: flex;
 		align-items: center;
 		overflow: hidden;
+
+		&:focus-visible {
+			outline: var(--focus-outline);
+			outline-offset: var(--focus-outline-inset);
+			border-radius: 3px;
+		}
 	}
 
 	& [anonid="dropmarker-separator"] {

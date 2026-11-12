@@ -1322,7 +1322,7 @@ class VirtualizedTable extends React.Component {
 			if (column.iconPath) {
 				column.iconLabel = <span
 					className="icon icon-bg"
-					style={{backgroundImage: `url("${column.iconPath}")`}}>
+					style={{backgroundImage: Zotero.Utilities.Internal.cssURL(column.iconPath)}}>
 				</span>;
 			}
 			if (column.iconLabel) {
@@ -1333,6 +1333,10 @@ class VirtualizedTable extends React.Component {
 					label = column.htmlLabel;
 				} else if (typeof column.htmlLabel === "string") {
 					label = <span dangerouslySetInnerHTML={{ __html: column.htmlLabel }} />;
+				} else if (column.htmlLabel.svgSrc) {
+					// SVG from an unprivileged plugin. SVG as image rendering blocks
+					// scripts and external loads
+					label = <img src={column.htmlLabel.svgSrc} alt={column.label} />;
 				}
 			}
 			let resizer = (<Draggable

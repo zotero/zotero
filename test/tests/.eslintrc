@@ -9,6 +9,7 @@
 		"assert": "readonly",
 		"createDataObject": "readonly",
 		"createGroup": "readonly",
+		"createMockPlugin": "readonly",
 		"createUnsavedDataObject": "readonly",
 		"getPromiseError": "readonly",
 		"getGroup": "readonly",

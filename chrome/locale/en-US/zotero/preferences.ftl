@@ -168,3 +168,138 @@ fulltext-stats-attachments-indexed = Attachments indexed:
 fulltext-stats-partially-indexed = Partially indexed:
 fulltext-stats-not-available = Full-text content or file not available:
 fulltext-stats-notes-indexed = Notes indexed:
+preferences-pane-plugin-data = Plugin Data
+
+preferences-plugin-data = Plugin Data
+preferences-plugin-data-empty = No plugins.
+
+preferences-plugin-data-edit-subpane = Plugin Data
+preferences-plugin-data-edit-data-heading = Stored Data
+preferences-plugin-data-edit-no-data = No stored files.
+preferences-plugin-data-grants-heading = File Access
+preferences-plugin-data-grants-empty = No saved file access permissions.
+
+preferences-plugin-data-edit-status-disabled = This plugin is disabled.
+preferences-plugin-data-edit-status-uninstalled = This plugin is no longer installed.
+
+preferences-plugin-data-edit-remove-all-heading = Reset Plugin Data
+preferences-plugin-data-edit-remove-all-intro = Delete stored files, settings, and saved file access permissions for this plugin.
+preferences-plugin-data-edit-remove-all-button =
+    .label = Remove All Data…
+preferences-plugin-data-edit-remove-all-confirm-title = Remove All Plugin Data
+preferences-plugin-data-edit-remove-all-confirm-body = Remove all data stored for { $name }? This cannot be undone.
+preferences-plugin-data-edit-remove-all-confirm-action = Remove
+preferences-plugin-data-show-in-folder =
+    .label =
+        { PLATFORM() ->
+            [macos] Show in Finder
+           *[other] Show in Folder
+        }
+preferences-plugin-data-clear-folder =
+    .label = Clear Data…
+preferences-plugin-data-add-grant-file =
+    .label = Add File…
+preferences-plugin-data-add-grant-folder =
+    .label = Add Folder…
+preferences-plugin-data-remove-grant =
+    .aria-label = Remove
+
+preferences-plugin-data-clear-folder-confirm-title = Clear Data Folder
+preferences-plugin-data-clear-folder-confirm-body = Remove all files in { $name }'s data folder? This cannot be undone.
+preferences-plugin-data-clear-folder-confirm-action = Clear
+
+preferences-plugin-data-add-grant-mode-title = File Access
+preferences-plugin-data-add-grant-mode-label = What should the plugin be allowed to do with this file/folder?
+
+preferences-plugin-data-col-plugin = Plugin
+preferences-plugin-data-col-permissions = Permissions
+preferences-plugin-data-col-prefs = Prefs
+preferences-plugin-data-col-file-access = File Access
+preferences-plugin-data-col-data = Stored Data
+preferences-plugin-data-edit-row = Edit
+preferences-plugin-data-legacy-badge = Legacy
+preferences-plugin-data-legacy-hint = This plugin has full access to Zotero. Its permissions and stored data are managed by the plugin.
+preferences-plugin-data-installed-heading = Declared permissions:
+
+preferences-plugin-data-edit-prefs-heading = Settings
+preferences-plugin-data-edit-prefs-empty = No saved settings.
+preferences-plugin-data-prefs-reset = Reset to default
+preferences-plugin-data-prefs-delete = Delete preference
+preferences-plugin-data-prefs-toggle = Toggle value
+preferences-plugin-data-prefs-add-button =
+    .label = Add…
+preferences-plugin-data-prefs-reset-all-button =
+    .label = Reset All…
+preferences-plugin-data-prefs-add-title = Add Setting
+preferences-plugin-data-prefs-add-name = Name:
+preferences-plugin-data-prefs-add-type = Type:
+preferences-plugin-data-prefs-add-value = Value:
+preferences-plugin-data-prefs-add-name-invalid = Enter a setting name.
+preferences-plugin-data-prefs-add-exists = A setting with that name already exists.
+preferences-plugin-data-prefs-reset-all-confirm-title = Reset All
+preferences-plugin-data-prefs-reset-all-confirm-body = Reset all settings that have defaults? This cannot be undone.
+preferences-plugin-data-prefs-reset-all-confirm-action = Reset
+
+preferences-plugin-data-grants-remove-all-button =
+    .label = Remove All…
+preferences-plugin-data-grants-remove-all-confirm-title = Remove All File-Access Grants
+preferences-plugin-data-grants-remove-all-confirm-body = Remove all persisted file-access grants for this plugin? The plugin will re-prompt on next access.
+preferences-plugin-data-grants-remove-all-confirm-action = Remove All
+
+preferences-plugin-data-unknown = Unknown Plugin
+preferences-plugin-data-manage =
+    .label = Details…
+preferences-plugin-data-col-status = Status
+preferences-plugin-data-status-enabled = Enabled
+preferences-plugin-data-status-disabled = Disabled
+preferences-plugin-data-status-uninstalled = Uninstalled
+preferences-plugin-data-access-heading = Permissions
+preferences-plugin-data-access-basic = No additional permissions.
+preferences-plugin-data-capability-dataRead = Read library data
+preferences-plugin-data-capability-dataWrite = Modify library data
+preferences-plugin-data-capability-clipboardRead = Read clipboard
+preferences-plugin-data-capability-clipboardWrite = Write clipboard
+preferences-plugin-data-capability-fileSystemRead = Read files
+preferences-plugin-data-capability-fileSystemWrite = Write files
+preferences-plugin-data-capability-ui = User interface
+preferences-plugin-data-capability-itemTree = Customize items list
+preferences-plugin-data-capability-itemPane = Customize item pane
+preferences-plugin-data-capability-menu = Add menu items
+preferences-plugin-data-capability-button = Add toolbar buttons
+preferences-plugin-data-capability-shortcut = Add keyboard shortcuts
+preferences-plugin-data-capability-windowResource = Inject window resources
+preferences-plugin-data-capability-serverEndpoint = Exchange data with applications on this computer
+preferences-plugin-data-capability-reader = Reader integration
+preferences-plugin-data-capability-preferencePane = Add preference panes
+preferences-plugin-data-capability-userPrompt = Prompts & notifications
+preferences-plugin-data-capability-window = Manage windows
+preferences-plugin-data-capability-tab = Open and manage tabs
+preferences-plugin-data-pref-name = Name
+preferences-plugin-data-pref-value = Value
+preferences-plugin-data-prefs-edit-button =
+    .label = Edit…
+preferences-plugin-data-prefs-edit-title = Edit Setting
+preferences-plugin-data-prefs-reset-button =
+    .label = Reset
+preferences-plugin-data-prefs-delete-button =
+    .label = Delete
+preferences-plugin-data-prefs-number-invalid = Enter a whole number.
+preferences-plugin-data-grant-path = File or Folder
+preferences-plugin-data-grant-access = Access
+preferences-plugin-data-grant-read = Read
+preferences-plugin-data-grant-write = Write
+preferences-plugin-data-grant-deny = Blocked
+preferences-plugin-data-grants-remove-button =
+    .label = Remove
+preferences-plugin-data-prefs-toggle-button =
+    .label = Toggle
+preferences-plugin-data-grant-mode-read = Allow Reading
+preferences-plugin-data-grant-mode-write = Allow Writing
+preferences-plugin-data-grant-mode-deny = Block Access
+preferences-plugin-data-col-settings = Settings
+preferences-plugin-data-status-legacy = Legacy
+preferences-plugin-data-status-legacy-disabled = Legacy, disabled
+preferences-plugin-data-status-legacy-uninstalled = Legacy, uninstalled
+preferences-plugin-data-capability-preferences = Preferences access
+preferences-plugin-data-capability-pluginInterop = Use features from other plugins
+preferences-plugin-data-capability-network = Network access
