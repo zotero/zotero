@@ -290,8 +290,8 @@
 				let darkIcon = option.darkMenuIcon || option.menuIcon
 					|| option.darkIcon || option.icon;
 				if (lightIcon) {
-					elem.style.setProperty("--custom-menu-icon-light", `url(${lightIcon})`);
-					elem.style.setProperty("--custom-menu-icon-dark", `url(${darkIcon})`);
+					elem.style.setProperty("--custom-menu-icon-light", `url("${lightIcon}")`);
+					elem.style.setProperty("--custom-menu-icon-dark", `url("${darkIcon}")`);
 				}
 				popupElem.appendChild(elem);
 			}

@@ -517,7 +517,7 @@
 				button.setAttribute("custom", "true");
 				button.dataset.l10nId = l10nID;
 				button.dataset.l10nArgs = l10nArgs;
-				button.style = `--custom-sidenav-icon-light: url('${icon}'); --custom-sidenav-icon-dark: url('${darkIcon}');`;
+				button.style = `--custom-sidenav-icon-light: url("${icon}"); --custom-sidenav-icon-dark: url("${darkIcon}");`;
 
 				container.hidden = this._defaultStatus || !this.container.getEnabledPane(paneID);
 			}

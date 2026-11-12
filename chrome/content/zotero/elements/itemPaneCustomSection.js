@@ -148,7 +148,7 @@
 				this._sectionListeners.push({ type, listener });
 				let button = this._section.querySelector(`.${type}`);
 				button.dataset.l10nId = l10nID;
-				button.style = `--custom-button-icon-light: url('${icon}'); --custom-button-icon-dark: url('${darkIcon}');`;
+				button.style = `--custom-button-icon-light: url("${icon}"); --custom-button-icon-dark: url("${darkIcon}");`;
 			}
 
 			this._style.textContent = styles.join("\n");
@@ -226,7 +226,7 @@
 		}
 
 		updateSectionIcon() {
-			this.style = `--custom-section-icon-light: url('${this._lightIcon}'); --custom-section-icon-dark: url('${this._darkIcon}')`;
+			this.style = `--custom-section-icon-light: url("${this._lightIcon}"); --custom-section-icon-dark: url("${this._darkIcon}")`;
 		}
 
 		registerSectionButton(options) {
