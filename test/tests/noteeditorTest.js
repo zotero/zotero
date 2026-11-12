@@ -102,7 +102,7 @@ describe("Note Editor", function () {
 				
 				// Opening it in a new window again goes to that tab
 				let windowCount = Zotero.getMainWindows().length;
-				let reopened = await Zotero.Notes.open(editorInstance.itemID, null, { openInWindow: true });
+				let { instance: reopened } = await Zotero.Notes.open(editorInstance.itemID, null, { openInWindow: true });
 				assert.equal(reopened, editorInstance);
 				assert.lengthOf(Zotero.getMainWindows(), windowCount);
 			}

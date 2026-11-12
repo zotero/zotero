@@ -326,7 +326,7 @@ describe("Reader", function () {
 			let reader;
 			try {
 				let attachment = await importFileAttachment('test.pdf');
-				reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				({ instance: reader } = await Zotero.Reader.open(attachment.id, null, { openInWindow: true }));
 				await reader._initPromise;
 				let readerWin = reader._window;
 				assert.notEqual(readerWin, win);
@@ -338,7 +338,7 @@ describe("Reader", function () {
 				
 				// Opening the item in a window again selects the existing tab
 				let openWindows = Zotero.getMainWindows();
-				let sameReader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				let { instance: sameReader } = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
 				assert.equal(sameReader, reader);
 				assert.sameMembers(Zotero.getMainWindows(), openWindows);
 			}
