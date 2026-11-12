@@ -26,7 +26,7 @@ describe("Zotero.ShortcutManager", function () {
 
 	afterEach(async function () {
 		Zotero_Tabs.select("zotero-pane");
-		Zotero_Tabs.closeAll();
+		closeItemTabs(win);
 		await Zotero.ShortcutManager._shortcutManager._unregisterByPluginID(plugin.id);
 		await Zotero.ShortcutManager._shortcutManager._unregisterByPluginID(other.id);
 	});
@@ -208,15 +208,16 @@ describe("Zotero.ShortcutManager", function () {
 			assert.isTrue(event.defaultPrevented);
 			assert.equal(context.tabType, "reader");
 			assert.equal(context.tabSubType, "pdf");
-			assert.isUndefined(context.tabID);
+			assert.equal(context.tabID, reader.tabID);
+			assert.equal(context.windowID, readerWin.browsingContext.id);
 			assert.deepEqual(context.itemIDs, [pdfAttachment.id]);
 
 			let mainOnlyEvent = dispatchInReaderWin("e");
-			assert.isEmpty(calls, "a mainWindow shortcut passes through in the reader window");
-			assert.isFalse(mainOnlyEvent.defaultPrevented);
+			assert.deepEqual(calls, ["mainOnly"], "mainWindow shortcuts also run in reader-only main windows");
+			assert.isTrue(mainOnlyEvent.defaultPrevented);
 		}
 		finally {
-			reader.close();
+			readerWin.close();
 		}
 	});
 
