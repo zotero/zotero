@@ -354,12 +354,14 @@ export class CitationDialogSearchHandler {
 		// items open in reader tabs.
 		let tabType = this.dialogState.isAddingNote() ? 'note' : 'reader';
 		let tabs = [];
-		let win = Zotero.getMainWindow();
-		// If the main window is open, use it to get open tabs
-		if (win) {
-			tabs = win.Zotero_Tabs.getState();
+		// Get open tabs from every main window, starting with the most recently active one
+		let windows = Zotero.getMainWindows()
+			.filter(win => win.Zotero_Tabs)
+			.sort((a, b) => (b.ZoteroPane?.lastActivated || 0) - (a.ZoteroPane?.lastActivated || 0));
+		if (windows.length) {
+			tabs = windows.flatMap(win => win.Zotero_Tabs.getState());
 		}
-		// If the main window is closed, try to get tabs from the last saved session
+		// If no main window is open, try to get tabs from the last saved session
 		else {
 			let mainWindowLastState = Zotero.Session.state.windows.find(w => w.type === 'pane');
 			if (!mainWindowLastState) return [];
@@ -386,9 +388,11 @@ export class CitationDialogSearchHandler {
 		}
 		let selectedItemIDs = new Set(this.selectedItems.map(item => item.id));
 		tabItems.sort((a, b) => {
-			// Sort selected tab first
-			if (a.tab.selected) return -1;
-			else if (b.tab.selected) return 1;
+			// Sort selected tabs first, keeping the order of their windows
+			if (a.tab.selected || b.tab.selected) {
+				if (a.tab.selected && b.tab.selected) return 0;
+				return a.tab.selected ? -1 : 1;
+			}
 			// Then tabs whose items are selected in the item tree, since they get
 			// deduplicated out of the Selected Items group
 			let aItemSelected = selectedItemIDs.has(a.item.id);

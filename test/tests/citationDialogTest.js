@@ -758,6 +758,28 @@ describe("Citation Dialog", function () {
 			io.getItems = () => [];
 			delete io.isAllCitedDataLoaded;
 		});
+
+		it("should include items open in reader tabs in every main window in open items", async function () {
+			let tabItem = await createDataObject('item');
+			let tabAttachment = await importPDFAttachment(tabItem);
+			let windowItem = await createDataObject('item');
+			let windowAttachment = await importPDFAttachment(windowItem);
+
+			let tabReader = await Zotero.Reader.open(tabAttachment.id, null, { openInBackground: true });
+			let windowReader = await Zotero.Reader.open(windowAttachment.id, null, { openInWindow: true });
+			let readerWin = windowReader._window;
+			try {
+				await tabReader._initPromise;
+				await windowReader._initPromise;
+				assert.notEqual(readerWin, win);
+				assert.includeMembers(await SearchHandler._getOpenTabItems(), [tabItem, windowItem]);
+			}
+			finally {
+				readerWin.close();
+				win.Zotero_Tabs.close(tabReader.tabID);
+				SearchHandler.clearNonLibraryItemsCache();
+			}
+		});
 	});
 
 	describe("Dialog loading", function () {
