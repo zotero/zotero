@@ -129,6 +129,10 @@ pref("app.update.interval", 86400);
 // default=2 minutes
 pref("app.update.timerMinimumDelay", 120);
 
+// Don't restart silently on macOS to apply an update while no windows are open, which would leave
+// Zotero not running in the background until a window was opened
+pref("app.update.noWindowAutoRestart.enabled", false);
+
 // Whether or not we show a dialog box informing the user that the update was
 // successfully applied. This is off in Firefox by default since we show a
 // upgrade start page instead! Other apps may wish to show this UI, and supply
