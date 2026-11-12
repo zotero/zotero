@@ -190,32 +190,21 @@ class ManagerAPIBase extends PluginAPIBase {
 
 	/**
 	 * Resolve an unprivileged plugin's image URLs in place, relative ones against its root.
-	 * They can then be put in styles as `url("<url>")`
+	 * Put them in styles only through Zotero.Utilities.Internal.cssURL()
 	 * @param {object} obj
 	 * @param {string[]} keys - Keys of `obj` holding image URLs
 	 * @param {string} pluginID
-	 * @returns {boolean} False if a URL is not an allowed resource or doesn't stay inside a CSS url()
+	 * @returns {boolean} False if a URL is not an allowed resource
 	 */
 	_resolveImageURLs(obj, keys, pluginID) {
 		if (lazy.PluginSandbox.isPrivileged(pluginID)) {
 			return true;
 		}
-		let probe;
 		for (let key of keys) {
 			if (!obj[key]) continue;
 			let resolved = lazy.PluginProtocol.resolveImageURL(pluginID, obj[key]);
 			if (resolved === null) {
 				this._log(`'${key}' is not an allowed resource URL, got ${obj[key]}`, "warn");
-				return false;
-			}
-			// The CSS parser must read url("<url>") back as that same single URL, so nothing in it
-			// (e.g., `a");background:url("https://…`) ends it early.
-			probe ??= lazy.Zotero.Utilities.Internal.getDOMDocument().createElement("div");
-			let cssURL = `url("${resolved}")`;
-			// list-style-image takes one image only, no multiple URLs allowed. The node is detached so nothing loads
-			probe.style.setProperty("list-style-image", cssURL);
-			if (probe.style.getPropertyValue("list-style-image") !== cssURL) {
-				this._log(`'${key}' doesn't stay inside a CSS url(), got ${obj[key]}`, "warn");
 				return false;
 			}
 			obj[key] = resolved;

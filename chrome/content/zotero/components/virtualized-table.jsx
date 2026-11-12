@@ -1322,7 +1322,7 @@ class VirtualizedTable extends React.Component {
 			if (column.iconPath) {
 				column.iconLabel = <span
 					className="icon icon-bg"
-					style={{backgroundImage: `url("${column.iconPath}")`}}>
+					style={{backgroundImage: Zotero.Utilities.Internal.cssURL(column.iconPath)}}>
 				</span>;
 			}
 			if (column.iconLabel) {
