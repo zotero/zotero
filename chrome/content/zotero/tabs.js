@@ -471,7 +471,7 @@ var Zotero_Tabs = new function () {
 	this._getNotifierExtraData = function (ids, data) {
 		let extraData = {};
 		for (let id of ids) {
-			extraData[id] = Object.assign({}, data, { windowID: this._windowID });
+			extraData[id] = Object.assign({}, data, { windowID: this._windowID, browsingContextID: window.browsingContext.id });
 		}
 		return extraData;
 	};

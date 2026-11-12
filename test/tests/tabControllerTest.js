@@ -21,7 +21,7 @@ describe("Zotero.TabController", function () {
 	});
 
 	afterEach(function () {
-		win.Zotero_Tabs.closeAll();
+		closeItemTabs(win);
 	});
 
 	// A request from the plugin's sandbox, its response as plain data
@@ -171,11 +171,18 @@ describe("Zotero.TabController", function () {
 		assert.isTrue(rows[0].isLibrary());
 	});
 
-	it("should fail on unknown tabs, items and rows and protect the library tab", async function () {
+	it("should fail on unknown targets and respect tab close and move flags", async function () {
 		await requestError(command("selectTab", { windowID, tabID: "nope" }), codes.NOT_FOUND);
-		await requestError(command("closeTabs", { windowID, tabIDs: [libraryTabID] }), codes.NOT_ALLOWED);
-		await requestError(command("moveTab", { windowID, tabID: libraryTabID, index: 1 }), codes.NOT_ALLOWED);
-		await requestError(command("moveTab", { windowID, tabID: "nope", index: 0 }), codes.INVALID_PARAMS);
+		let { tab } = win.Zotero_Tabs._getTab(libraryTabID);
+		tab.closable = tab.movable = false;
+		try {
+			await requestError(command("closeTabs", { windowID, tabIDs: [libraryTabID] }), codes.NOT_ALLOWED);
+			await requestError(command("moveTab", { windowID, tabID: libraryTabID, index: 1 }), codes.NOT_ALLOWED);
+		}
+		finally {
+			tab.closable = tab.movable = true;
+		}
+		await requestError(command("moveTab", { windowID, tabID: "nope", index: 0 }), codes.NOT_FOUND);
 		await requestError(command("selectItems", { windowID, itemIDs: [-1] }), codes.NOT_FOUND);
 		await requestError(command("selectCollectionsOrLibraries", { windowID, type: "nope", ids: [1] }), codes.INVALID_PARAMS);
 		await requestError(command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [999999] }), codes.NOT_FOUND);
@@ -227,8 +234,8 @@ describe("Zotero.TabController", function () {
 		await requestError(command("openTab", { windowID, type: "note", itemID: -1 }), codes.NOT_FOUND);
 		await requestError(command("openTab", { windowID, type: "note", itemID: item.id }), codes.INVALID_PARAMS);
 		await requestError(command("openTab", { windowID, type: "reader", itemID: item.id }), codes.INVALID_PARAMS);
-		await requestError(command("openTab", { windowID, type: "library", itemID: note.id }), codes.INVALID_PARAMS);
-		await requestError(command("openTab", { windowID, type: "note", itemID: note.id, index: 0 }), codes.INVALID_PARAMS);
+		await requestError(command("openTab", { windowID, type: "unsupported", itemID: note.id }), codes.INVALID_PARAMS);
+		await requestError(command("openTab", { windowID, type: "note", itemID: note.id, index: -1 }), codes.INVALID_PARAMS);
 		await requestError(command("openTab", { windowID: -1, type: "note", itemID: note.id }), codes.NOT_FOUND);
 	});
 });
