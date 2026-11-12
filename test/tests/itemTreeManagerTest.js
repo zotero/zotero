@@ -91,19 +91,24 @@ describe("Zotero.ItemTreeManager", function () {
 	}
 
 	it("should register a column whose dataProvider answers for an item", async function () {
+		// A refresh still running restores its stale selection over the next test's
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
 		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
 			dataKey: "sandbox-col",
 			label: "Sandbox Column",
 			dataProvider: ({ itemID }) => "sandbox-data-" + itemID,
 		}));
 		assert.isString(dataKey);
+		await refreshed;
 		let column = Zotero.ItemTreeManager.getCustomColumns().find(c => c.dataKey === dataKey);
 		assert.equal(column.label, "Sandbox Column");
 
 		let item = await createDataObject("item");
 		assert.equal(Zotero.ItemTreeManager.getCustomCellData(item, dataKey), "sandbox-data-" + item.id);
 
+		refreshed = waitForNotifierEvent("refresh", "itemtree");
 		assert.isTrue(plugin.run(key => Zotero.ItemTreeManager.unregisterColumn(key), dataKey));
+		await refreshed;
 		assert.notExists(Zotero.ItemTreeManager.getCustomColumns().find(c => c.dataKey === dataKey));
 	});
 
@@ -270,6 +275,7 @@ describe("Zotero.ItemTreeManager", function () {
 		let item = await createDataObject("item");
 		await ZoteroPane.selectItem(item.id);
 		log.expect("dataProvider");
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
 		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
 			// A privileged plugin gets no injected ID
 			pluginID: PLUGIN_ID,
@@ -288,6 +294,7 @@ describe("Zotero.ItemTreeManager", function () {
 			},
 		}));
 		await log.get("dataProvider");
+		await refreshed;
 		await showColumn(dataKey);
 		assert.equal(win.getComputedStyle(selectedCell(dataKey)).color, "rgb(255, 0, 0)");
 	});
@@ -311,6 +318,7 @@ describe("Zotero.ItemTreeManager", function () {
 	});
 
 	it("should contain a throwing dataProvider", async function () {
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
 		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
 			dataKey: "sandbox-err-col",
 			label: "Error Column",
@@ -318,6 +326,7 @@ describe("Zotero.ItemTreeManager", function () {
 				throw new Error("Sandbox dataProvider error");
 			},
 		}));
+		await refreshed;
 		let item = await createDataObject("item");
 		// The base's fallbackReturn is "", which `|| null` turns into null
 		assert.isNull(Zotero.ItemTreeManager.getCustomCellData(item, dataKey));
@@ -327,6 +336,7 @@ describe("Zotero.ItemTreeManager", function () {
 		let item = await createDataObject("item");
 		await ZoteroPane.selectItem(item.id);
 		log.expect("dataProvider");
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
 		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
 			dataKey: "api-test-throws",
 			label: "APITest",
@@ -339,6 +349,7 @@ describe("Zotero.ItemTreeManager", function () {
 			},
 		}));
 		await log.get("dataProvider");
+		await refreshed;
 		await showColumn(dataKey);
 		assert.exists(selectedCell(dataKey));
 	});
