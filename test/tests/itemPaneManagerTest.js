@@ -349,6 +349,52 @@ describe("Zotero.ItemPaneManager", function () {
 			assert.equal(option.sectionButtons[0].icon, base + "icons/button.svg");
 		});
 
+		it("should keep icon URLs from adding declarations to the section's styles", function () {
+			loadSectionPlugin();
+			let register = icon => plugin.run(icon => Zotero.ItemPaneManager.registerSection({
+				paneID: "sandbox-css-section",
+				header: { l10nID: "example-item-pane-header", icon },
+				sidenav: { l10nID: "example-item-pane-header", icon },
+				sectionButtons: [{ type: "test", icon, onClick: () => {} }],
+				onRender: () => {},
+				src: "section.html",
+			}), icon);
+			// A URL that would end the url("…") it's put in is refused
+			for (let icon of [
+				'data:image/svg+xml,a");background:url("https://beacon.invalid/declaration");',
+				'data:image/svg+xml,a"), url("https://beacon.invalid/list',
+				'data:image/svg+xml,a\\");background:url("https://beacon.invalid/escaped");',
+				'data:image/svg+xml,a"\n);background:url("https://beacon.invalid/newline");',
+			]) {
+				assert.isFalse(register(icon), icon);
+			}
+			// Anything else stays inside it
+			let paneID = register("data:image/svg+xml,a');background:url('https://beacon.invalid/section');");
+			assert.isString(paneID);
+			// Built as the item pane builds a plugin's section
+			let option = Zotero.ItemPaneManager._sectionManager._optionsCache[paneID];
+			let section = win.document.createXULElement("item-pane-custom-section");
+			section.registerSectionIcon(option.header);
+			section.registerSectionButton(option.sectionButtons[0]);
+			win.document.documentElement.append(section);
+			try {
+				let button = section.querySelector(".test");
+				// The payload's background declaration would land on the elements themselves
+				for (let elem of [section, button]) {
+					assert.equal(elem.style.getPropertyValue("background-image"), "", elem.localName);
+					assert.equal(win.getComputedStyle(elem).backgroundImage, "none", elem.localName);
+				}
+				// The whole payload is the icon URL
+				assert.equal(section.style.getPropertyValue("--custom-section-icon-light"), `url("${option.header.icon}")`);
+				assert.equal(button.style.getPropertyValue("--custom-button-icon-light"), `url("${option.sectionButtons[0].icon}")`);
+				assert.deepEqual([...section.style], ["--custom-section-icon-light", "--custom-section-icon-dark"]);
+				assert.deepEqual([...button.style], ["--custom-button-icon-light", "--custom-button-icon-dark"]);
+			}
+			finally {
+				section.remove();
+			}
+		});
+
 		it("should let a privileged plugin use src too, keeping bodyXHTML", function () {
 			loadSectionPlugin(["*"]);
 			let register = src => plugin.run(src => Zotero.ItemPaneManager.registerSection({

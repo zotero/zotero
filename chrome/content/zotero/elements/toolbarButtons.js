@@ -133,9 +133,9 @@
 			button.dataset.l10nId = option.l10nID;
 			if (option.icon || option.darkIcon) {
 				button.style.setProperty("--custom-button-icon-light",
-					`url(${option.icon || option.darkIcon})`);
+					`url("${option.icon || option.darkIcon}")`);
 				button.style.setProperty("--custom-button-icon-dark",
-					`url(${option.darkIcon || option.icon})`);
+					`url("${option.darkIcon || option.icon}")`);
 			}
 			if (option._menuTarget) {
 				button.setAttribute("type", "menu");

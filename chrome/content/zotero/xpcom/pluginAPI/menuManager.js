@@ -567,9 +567,9 @@
 						else if (menuData.menuType === "submenu") {
 							menuElem.classList.add("menu-iconic");
 						}
-						menuElem.style.setProperty("--custom-menu-icon-light", `url(${menuData.icon})`);
+						menuElem.style.setProperty("--custom-menu-icon-light", `url("${menuData.icon}")`);
 						// Use the dark icon if available, otherwise use the light icon
-						menuElem.style.setProperty("--custom-menu-icon-dark", `url(${menuData.darkIcon || menuData.icon})`);
+						menuElem.style.setProperty("--custom-menu-icon-dark", `url("${menuData.darkIcon || menuData.icon}")`);
 					}
 					else {
 						// Make url invalid to avoid inheriting icons from parent menus
@@ -677,9 +677,9 @@
 					if (!_menuElem) {
 						return;
 					}
-					_menuElem.style.setProperty("--custom-menu-icon-light", `url(${icon})`);
+					_menuElem.style.setProperty("--custom-menu-icon-light", `url("${icon}")`);
 					// Use the dark icon if available, otherwise use the light icon
-					_menuElem.style.setProperty("--custom-menu-icon-dark", `url(${darkIcon || icon})`);
+					_menuElem.style.setProperty("--custom-menu-icon-dark", `url("${darkIcon || icon}")`);
 				},
 			};
 			// ZoteroPane's menu contexts define a collectionTreeRow property that
