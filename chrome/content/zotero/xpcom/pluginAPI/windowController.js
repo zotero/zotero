@@ -92,7 +92,7 @@
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number }} closeWindow
 	 * @property {{ windowID: number, pane: "start" | "end", open?: boolean }} togglePane
-	 * @property {{ type: "mainWindow" | "reader" | "note" | "preferencePane", itemID?: number, location?: object, state?: object }} openWindow
+	 * @property {{ type: "preferencePane", location?: { pane?: string } }} openWindow
 	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, allowResize?: { height?: boolean, width?: boolean }, parentWindowID?: number }} openPluginWindow
 	 *
 	 *
@@ -149,11 +149,9 @@
 					openWindow: {
 						params: {
 							type: lazy.Params.oneOf(lazy.WindowUtils.OPENABLE_WINDOW_TYPES),
-							state: { type: "object", optional: true },
-							itemID: { type: "number", optional: true },
 							location: { type: "object", optional: true },
 						},
-						handler: ({ type, itemID, location, state }) => this._openWindow(type, itemID, location, state),
+						handler: ({ location }) => this._openPreferences(location?.pane),
 					},
 					openPluginWindow: {
 						params: {
@@ -284,40 +282,6 @@
 					break;
 			}
 			return this._getPaneState(win, pane);
-		}
-
-		/**
-		 * Open an item, or the preferences window
-		 * @param {"mainWindow" | "reader" | "note" | "preferencePane"} type
-		 * @param {number} [itemID] - Required for reader and note, ignored for preferencePane
-		 * @param {object} [location] - The opener's location, or { pane } for preferencePane
-		 * @param {object} [state] - Initial library tab state for mainWindow
-		 * @returns {Promise<WindowControllerCommandResults["openWindow"]>}
-		 */
-		async _openWindow(type, itemID, location, state) {
-			if (type === "mainWindow") {
-				let win = Zotero.openMainWindow(state ? { libraryTabState: state } : undefined);
-				await new Promise(resolve => win.addEventListener("load", resolve, { once: true }));
-				await win.ZoteroPane.loadedPromise;
-				await win.Zotero_Tabs.getLoadPromise(win.Zotero_Tabs.selectedID);
-				return { windowID: lazy.WindowUtils.getWindowID(win) };
-			}
-			let { INVALID_PARAMS } = lazy.ControllerAPIBase.errorCodes;
-			if (type === "preferencePane") {
-				return this._openPreferences(location?.pane);
-			}
-			if (itemID === undefined) {
-				this._throw(INVALID_PARAMS, `Param 'itemID' is required for ${type}`);
-			}
-			lazy.WindowUtils.getOpenableItem(itemID, type);
-			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
-			let { instance, win } = await opener.open(itemID, location, { openInWindow: true });
-			// Resolve once the content has loaded; a new window is listed under its type only then
-			await instance._initPromise;
-			if (!win || win.closed) {
-				throw new Error(`No window opened for item ${itemID}`);
-			}
-			return { windowID: lazy.WindowUtils.getWindowID(win) };
 		}
 
 		/**
