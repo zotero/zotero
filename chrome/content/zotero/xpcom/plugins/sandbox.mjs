@@ -45,6 +45,8 @@ const SANDBOX_NUKE_DELAY_MS = 10000;
 var scopes = new Map();
 // Outlives the scope, so calls an unloaded sandbox makes before it is nuked keep its privilege
 var privilegeByID = new Map();
+// The manifest's help_url, if it's a web page
+var helpURLByID = new Map();
 
 /**
  * Adapted from loadBootstrapScope() in Firefox 60 ESR
@@ -74,6 +76,12 @@ async function loadScope(addon, globalVars = {}) {
 	);
 
 	privilegeByID.set(addon.id, privileged);
+	let helpURL = addon.installPermissions?.help_url;
+	if (helpURL && !(typeof helpURL == "string" && Zotero.Utilities.isHTTPURL(helpURL))) {
+		Zotero.warn(`Plugin ${addon.id}: ignoring help_url ${helpURL}, which must be an http(s) URL`);
+		helpURL = null;
+	}
+	helpURLByID.set(addon.id, helpURL || null);
 	let scope;
 	if (privileged) {
 		Zotero.debug(`Loading privileged scope for plugin ${addon.id}`);
@@ -112,6 +120,7 @@ function unloadScope(id) {
 		return;
 	}
 	scopes.delete(id);
+	helpURLByID.delete(id);
 	PluginProtocol.unregister(id);
 	PluginFileAccess.unregister(id);
 	PluginTimers.unregister(id);
@@ -129,6 +138,14 @@ function getScope(id) {
 // An ID that never loaded a scope is first-party chrome, e.g. zotero@zotero.org
 function isPrivileged(id) {
 	return privilegeByID.get(id) ?? true;
+}
+
+/**
+ * @param {string} id
+ * @returns {string | null} The loaded plugin's help page from its manifest
+ */
+function getHelpURL(id) {
+	return helpURLByID.get(id) ?? null;
 }
 
 function defineFrozenIdentity(scope, addon, uuid, privileged, perms) {
@@ -358,6 +375,6 @@ function loadUnprivilegedScope(addon, uuid, globalVars = {}) {
 	return scope;
 }
 
-const PluginSandbox = { loadScope, unloadScope, getScope, isPrivileged };
+const PluginSandbox = { loadScope, unloadScope, getScope, isPrivileged, getHelpURL };
 
 export { PluginSandbox };

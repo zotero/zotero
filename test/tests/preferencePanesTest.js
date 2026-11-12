@@ -5,8 +5,8 @@ describe("Zotero.PreferencePanes", function () {
 
 	var tmpDir;
 
-	function loadPrefPaneTestScope({ origins = [], permissions = ["default", "preferencePane"] } = {}) {
-		plugin.load(permissions, { origins, resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
+	function loadPrefPaneTestScope({ origins = [], permissions = ["default", "preferencePane"], helpURL = null } = {}) {
+		plugin.load(permissions, { origins, helpURL, resourceURI: PathUtils.toFileURI(tmpDir) + "/" });
 	}
 
 	// The page's navigation guard was registered first, so it has run when this resolves.
@@ -101,6 +101,70 @@ describe("Zotero.PreferencePanes", function () {
 		assert.lengthOf(pane.stylesheets, 0, "stylesheets should be dropped");
 		assert.lengthOf(pane.l10nResourceIDs, 0, "l10nFiles should be dropped");
 		assert.isFunction(pane.onLoad, "onLoad should be kept (wrapped for the sandbox)");
+	});
+
+	it("should take an unprivileged pane's help URL from the manifest, not helpURL", async function () {
+		let getHelpURL = async (options) => {
+			let paneID = await registerTestPane(options);
+			return Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID).helpURL;
+		};
+		loadPrefPaneTestScope({ helpURL: "https://example.com/help" });
+		assert.equal(await getHelpURL({ helpURL: "https://example.org/other" }), "https://example.com/help");
+		assert.equal(await getHelpURL(), "https://example.com/help", "every pane of the plugin gets it");
+
+		// Without help_url there's no help button, whatever the pane asks for
+		loadPrefPaneTestScope();
+		assert.isNull(await getHelpURL({ helpURL: "https://example.org/other" }));
+
+		// help_url must be a web page
+		for (let helpURL of ["javascript:alert(1)", "file:///etc/hosts", "zotero://select/library"]) {
+			loadPrefPaneTestScope({ helpURL });
+			assert.isNull(await getHelpURL(), helpURL);
+		}
+	});
+
+	it("should let a privileged plugin's helpURL take precedence over the manifest's", async function () {
+		owner.load(["*"], { helpURL: "https://example.com/help" });
+		let getHelpURL = async (helpURL) => {
+			let paneID = await owner.run((src, helpURL) => Zotero.PreferencePanes.register({
+				pluginID: PLUGIN_ID,
+				label: "Privileged Pane",
+				image: "chrome://zotero/skin/20/universal/cog.svg",
+				src,
+				helpURL,
+			}), PathUtils.toFileURI(PathUtils.join(tmpDir, "prefs.html")), helpURL);
+			return Zotero.PreferencePanes.pluginPanes.find(p => p.id == paneID).helpURL;
+		};
+		assert.equal(await getHelpURL("https://example.org/other"), "https://example.org/other");
+		assert.equal(await getHelpURL(), "https://example.com/help");
+	});
+
+	// Needs the manifest schema and passthrough patches fetch_xulrunner applies to omni.ja
+	it("should pass a real install's manifest help_url through to the plugin", async function () {
+		let { AddonManager } = ChromeUtils.importESModule("resource://gre/modules/AddonManager.sys.mjs");
+		let { PluginSandbox } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/sandbox.mjs");
+		const ID = "help-url-install-test@zotero.org";
+		let dir = await getTempDirectory();
+		await FileIO.writeUTF8(PathUtils.join(dir, "manifest.json"), JSON.stringify({
+			manifest_version: 2,
+			name: "Help URL Install Test",
+			version: "1.0.0",
+			applications: { zotero: { id: ID, update_url: "https://example.invalid/none.json", strict_max_version: "9999.*" } },
+			help_url: "https://example.com/help",
+		}));
+		await FileIO.writeUTF8(
+			PathUtils.join(dir, "bootstrap.js"),
+			"function install() {}\nfunction startup() {}\nfunction shutdown() {}\nfunction uninstall() {}\n"
+		);
+		let addon = await AddonManager.installTemporaryAddon(Zotero.File.pathToFile(dir));
+		try {
+			assert.equal(addon.installPermissions?.help_url, "https://example.com/help");
+			assert.equal(PluginSandbox.getHelpURL(ID), "https://example.com/help");
+		}
+		finally {
+			await addon.uninstall();
+			await FileIO.remove(dir, { recursive: true, ignoreAbsent: true });
+		}
 	});
 
 	it("should register under the caller's own pluginID, not a spoofed one", async function () {

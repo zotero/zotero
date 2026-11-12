@@ -736,6 +736,7 @@ async function executeTransactionWithForcedRollback(fn, options) {
  * @param {String[]} [options.prefPermissions] - pref_permissions prefixes
  * @param {String[]} [options.interopPermissions] - interop_permissions
  * @param {String} [options.contentSecurityPolicy] - content_security_policy
+ * @param {String} [options.helpURL] - help_url
  * @param {String} [options.resourceURI] - The plugin's root
  * @return {Object}
  */
@@ -748,6 +749,7 @@ function createMockPlugin({
 	prefPermissions = [],
 	interopPermissions = [],
 	contentSecurityPolicy = null,
+	helpURL = null,
 	resourceURI = "file:///nonexistent/",
 } = {}) {
 	return {
@@ -760,6 +762,7 @@ function createMockPlugin({
 			pref_permissions: prefPermissions,
 			interop_permissions: interopPermissions,
 			content_security_policy: contentSecurityPolicy,
+			help_url: helpURL,
 		},
 		getResourceURI() {
 			return Services.io.newURI(resourceURI);

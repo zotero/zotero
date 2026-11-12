@@ -311,6 +311,13 @@ function modify_omni {
 \      },
 ' chrome/toolkit/content/extensions/schemas/manifest.json
 	done
+	# Add help_url, the help page a plugin's preference panes link to
+	sed -i.bak '/"optional_host_permissions": {/i\
+\      "help_url": {\
+\        "type": "string",\
+\        "optional": true\
+\      },
+' chrome/toolkit/content/extensions/schemas/manifest.json
 
 	# 2. Pass each through from manifest to addon.installPermissions
 	# https://searchfox.org/firefox-esr140/source/toolkit/components/extensions/Extension.sys.mjs#1259
@@ -328,6 +335,11 @@ function modify_omni {
       content_security_policy: (this.manifest.content_security_policy && typeof this.manifest.content_security_policy === \"object\" ? this.manifest.content_security_policy.extension_pages : this.manifest.content_security_policy) || null,"
 	XPI_PERMS_LINES="${XPI_PERMS_LINES}
       content_security_policy: required?.content_security_policy ?? null,"
+	# Pass the manifest help_url through
+	EXTENSION_PERMS_LINES="${EXTENSION_PERMS_LINES}
+      help_url: this.manifest.help_url ?? null,"
+	XPI_PERMS_LINES="${XPI_PERMS_LINES}
+      help_url: required?.help_url ?? null,"
 	replace_line 'origins: this.originControls \? \[\] : this.getManifestOrigins\(\),' \
 		"origins: this.originControls ? [] : this.getManifestOrigins(),${EXTENSION_PERMS_LINES}" modules/Extension.sys.mjs
 	# https://searchfox.org/firefox-esr140/source/toolkit/mozapps/extensions/internal/XPIDatabase.sys.mjs#1412
