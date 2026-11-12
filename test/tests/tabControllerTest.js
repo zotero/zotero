@@ -57,7 +57,7 @@ describe("Zotero.TabController", function () {
 	it("should define the tab and library-selection requests", function () {
 		let { queries, commands } = Zotero.TabController._tabController.requestNames;
 		assert.sameMembers(queries, ["tabs"]);
-		assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
+		assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "setTabPinned", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
 	});
 
 	it("should require a window ID when addressing existing tabs", async function () {
@@ -383,5 +383,53 @@ describe("Zotero.TabController", function () {
 		finally {
 			target.close();
 		}
+	});
+
+	it("should pin tabs and keep pinned tabs in place", async function () {
+		let tabIDs = [];
+		for (let i = 0; i < 3; i++) {
+			let note = await createDataObject("item", { itemType: "note" });
+			let { tabID } = await requestResult(command("openTab", { windowID, type: "note", itemID: note.id, background: true }));
+			tabIDs.push(tabID);
+		}
+		let [first, second, unpinned] = tabIDs;
+		// Each newly pinned tab goes at the end of the pinned tabs
+		assert.deepEqual(await requestResult(command("setTabPinned", { windowID, tabID: first, pinned: true })), { index: 0 });
+		assert.deepEqual(await requestResult(command("setTabPinned", { windowID, tabID: second, pinned: true })), { index: 1 });
+		let { tabs } = await requestResult(query("tabs", { windowID }));
+		assert.deepEqual(
+			tabs.map(tab => [tab.tabID, tab.pinned]),
+			[[first, true], [second, true], [libraryTabID, false], [unpinned, false]]
+		);
+
+		// Pinned tabs reorder among themselves, and other tabs only after them
+		await requestResult(command("moveTab", { windowID, tabID: second, index: 0 }));
+		({ tabs } = await requestResult(query("tabs", { windowID })));
+		assert.deepEqual(tabs.slice(0, 2).map(tab => tab.tabID), [second, first]);
+		await requestError(command("moveTab", { windowID, tabID: second, index: 3 }), codes.INVALID_PARAMS);
+		await requestError(command("moveTab", { windowID, tabID: unpinned, index: 1 }), codes.INVALID_PARAMS);
+
+		// A pinned tab blocks the whole close, and stays in its window
+		await requestError(command("closeTabs", { windowID, tabIDs: [unpinned, first] }), codes.NOT_ALLOWED);
+		({ tabs } = await requestResult(query("tabs", { windowID })));
+		assert.lengthOf(tabs, 4);
+		let target = await loadZoteroPane();
+		try {
+			await requestError(command("moveTab", {
+				windowID, tabID: first, targetWindowID: target.browsingContext.id, index: 0,
+			}), codes.NOT_ALLOWED);
+			({ tabs } = await requestResult(query("tabs", { windowID })));
+			assert.include(tabs.map(tab => tab.tabID), first);
+		}
+		finally {
+			target.close();
+		}
+
+		// Unpinned, a tab goes right after the pinned tabs and can be closed
+		assert.deepEqual(await requestResult(command("setTabPinned", { windowID, tabID: first, pinned: false })), { index: 1 });
+		await requestResult(command("closeTabs", { windowID, tabIDs: [first] }));
+		({ tabs } = await requestResult(query("tabs", { windowID })));
+		assert.notInclude(tabs.map(tab => tab.tabID), first);
+		await requestError(command("setTabPinned", { windowID, tabID: "nope", pinned: true }), codes.NOT_FOUND);
 	});
 });
