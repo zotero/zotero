@@ -111,6 +111,7 @@ describe("Zotero.ItemTreeManager", function () {
 		let item = await createDataObject("item");
 		await ZoteroPane.selectItem(item.id);
 		log.expect("dataProvider");
+		let refreshed = waitForNotifierEvent("refresh", "itemtree");
 		let dataKey = plugin.run(() => Zotero.ItemTreeManager.registerColumn({
 			dataKey: "api-test",
 			label: "APITest",
@@ -120,6 +121,7 @@ describe("Zotero.ItemTreeManager", function () {
 			},
 		}));
 		await log.get("dataProvider");
+		await refreshed;
 		await showColumn(dataKey);
 		assert.equal(selectedCell(dataKey).textContent, String(item.id));
 	});
