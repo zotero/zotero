@@ -1,5 +1,6 @@
 describe("Zotero.TabController", function () {
 	var plugin = usePluginSandbox();
+	var { WindowUtils } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/window.mjs");
 	var codes = Zotero.TabController.errorCodes;
 	var win, windowID, libraryTabID;
 
@@ -59,7 +60,7 @@ describe("Zotero.TabController", function () {
 		assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
 	});
 
-	it("should require a window ID on every request", async function () {
+	it("should require a window ID when addressing existing tabs", async function () {
 		await requestError(query("tabs"), codes.INVALID_PARAMS);
 		await requestError(command("selectTab", { tabID: libraryTabID }), codes.INVALID_PARAMS);
 		await requestError(query("tabs", { windowID: -1 }), codes.NOT_FOUND);
@@ -150,7 +151,7 @@ describe("Zotero.TabController", function () {
 
 		assert.deepEqual(await requestResult(command("selectItems", { windowID, itemIDs: [] })), { selected: false });
 
-		let { tabID } = await requestResult(command("openTab", { windowID, type: "library" }));
+		let { tabID } = await requestResult(command("openTab", { windowID }));
 		assert.deepEqual(await requestResult(command("selectItems", {
 			windowID, tabID: libraryTabID, itemIDs: [item2.id], noTabSwitch: true, inLibraryRoot: true,
 		})), { selected: true });
@@ -219,7 +220,9 @@ describe("Zotero.TabController", function () {
 
 	it("should open notes and readers in tabs, reusing a tab unless duplicates are allowed", async function () {
 		let note = await createDataObject("item", { itemType: "note" });
-		let { tabID } = await requestResult(command("openTab", { windowID, type: "note", itemID: note.id }));
+		let opened = await requestResult(command("openTab", { windowID, type: "note", itemID: note.id }));
+		let { tabID } = opened;
+		assert.equal(opened.windowID, windowID);
 		assert.equal(win.Zotero_Tabs.selectedID, tabID);
 		let tab = (await waitForTabState(tabID, "loaded")).find(t => t.tabID === tabID);
 		assert.equal(tab.type, "note");
@@ -228,7 +231,7 @@ describe("Zotero.TabController", function () {
 		// The same item selects the existing tab
 		await requestResult(command("selectTab", { windowID, tabID: libraryTabID }));
 		let again = await requestResult(command("openTab", { windowID, type: "note", itemID: note.id }));
-		assert.equal(again.tabID, tabID);
+		assert.deepEqual(again, { windowID, tabID });
 		assert.equal(win.Zotero_Tabs.selectedID, tabID);
 
 		// A background duplicate is a new, unselected tab at the requested index, left unloaded
@@ -256,12 +259,61 @@ describe("Zotero.TabController", function () {
 	it("should fail opening a missing item, an item of the wrong kind, or at a bad index", async function () {
 		let item = await createDataObject("item");
 		let note = await createDataObject("item", { itemType: "note" });
-		await requestError(command("openTab", { windowID, type: "note", itemID: -1 }), codes.NOT_FOUND);
-		await requestError(command("openTab", { windowID, type: "note", itemID: item.id }), codes.INVALID_PARAMS);
-		await requestError(command("openTab", { windowID, type: "reader", itemID: item.id }), codes.INVALID_PARAMS);
-		await requestError(command("openTab", { windowID, type: "unsupported", itemID: note.id }), codes.INVALID_PARAMS);
-		await requestError(command("openTab", { windowID, type: "note", itemID: note.id, index: -1 }), codes.INVALID_PARAMS);
+		for (let target of [{ windowID }, {}]) {
+			await requestError(command("openTab", { ...target, type: "note" }), codes.INVALID_PARAMS);
+			await requestError(command("openTab", { ...target, type: "note", itemID: -1 }), codes.NOT_FOUND);
+			await requestError(command("openTab", { ...target, type: "note", itemID: item.id }), codes.INVALID_PARAMS);
+			await requestError(command("openTab", { ...target, type: "reader", itemID: item.id }), codes.INVALID_PARAMS);
+			await requestError(command("openTab", { ...target, type: "unsupported", itemID: note.id }), codes.INVALID_PARAMS);
+			await requestError(command("openTab", { ...target, type: "note", itemID: note.id, index: -1 }), codes.INVALID_PARAMS);
+		}
 		await requestError(command("openTab", { windowID: -1, type: "note", itemID: note.id }), codes.NOT_FOUND);
+	});
+
+	it("should open a new library window when windowID is omitted, defaulting to a library tab", async function () {
+		let collection = await createDataObject("collection");
+		for (let params of [undefined, { type: "library", state: { collections: ["C" + collection.id] } }]) {
+			let opened = await requestResult(command("openTab", params));
+			let target = WindowUtils.getMainWindow(opened.windowID);
+			try {
+				assert.notEqual(opened.windowID, windowID);
+				let result = await requestResult(query("tabs", { windowID: opened.windowID }));
+				assert.equal(result.selectedTabID, opened.tabID);
+				assert.lengthOf(result.tabs, 1);
+				assert.equal(result.tabs[0].tabID, opened.tabID);
+				assert.equal(result.tabs[0].type, "library");
+				assert.equal(result.tabs[0].state, "loaded");
+				if (params) {
+					assert.deepEqual(result.tabs[0].collectionIDs, [collection.id]);
+				}
+			}
+			finally {
+				target.close();
+			}
+		}
+	});
+
+	it("should open a new window with only the requested content tab even if the item is already open", async function () {
+		let note = await createDataObject("item", { itemType: "note" });
+		let attachment = await importFileAttachment("test.pdf");
+		for (let [type, itemID] of [["note", note.id], ["reader", attachment.id]]) {
+			await requestResult(command("openTab", { windowID, type, itemID }));
+			let opened = await requestResult(command("openTab", { type, itemID }));
+			let target = WindowUtils.getMainWindow(opened.windowID);
+			try {
+				assert.notEqual(opened.windowID, windowID);
+				let result = await requestResult(query("tabs", { windowID: opened.windowID }));
+				assert.equal(result.selectedTabID, opened.tabID);
+				assert.lengthOf(result.tabs, 1);
+				assert.equal(result.tabs[0].tabID, opened.tabID);
+				assert.equal(result.tabs[0].type, type);
+				assert.equal(result.tabs[0].state, "loaded");
+				assert.deepEqual(result.tabs[0].itemIDs, [itemID]);
+			}
+			finally {
+				target.close();
+			}
+		}
 	});
 
 	it("should open, describe, select, move and close library tabs", async function () {
