@@ -203,9 +203,9 @@ describe("Zotero.ButtonManager", function () {
 				await simulateMenuOpen(popup);
 				let overflowItems = popup.querySelectorAll(".zotero-custom-button-overflow-item");
 				assert.equal(overflowItems.length, 3);
-				assert.equal(overflowItems[0].style.getPropertyValue("--custom-menu-icon-light"), `url(${menuIcon})`,
+				assert.equal(overflowItems[0].style.getPropertyValue("--custom-menu-icon-light"), `url("${menuIcon}")`,
 					"a dedicated menu icon is preferred");
-				assert.equal(overflowItems[1].style.getPropertyValue("--custom-menu-icon-light"), `url(${ICON})`);
+				assert.equal(overflowItems[1].style.getPropertyValue("--custom-menu-icon-light"), `url("${ICON}")`);
 				overflowItems[0].dispatchEvent(new MouseEvent("command", { bubbles: false }));
 				assert.equal((await log.get("onCommand")).tabType, "library");
 				await simulateMenuClosed(popup);

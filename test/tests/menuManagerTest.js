@@ -345,8 +345,8 @@ describe("Zotero.MenuManager", function () {
 		await simulateMenuOpen(popup);
 		await log.get("onShowing");
 		let elem = menuItem(popup, "test-menu-set-icon");
-		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-light"), `url(${base}icons/set.svg)`);
-		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-dark"), `url(${base}icons/set.svg)`);
+		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-light"), `url("${base}icons/set.svg")`);
+		assert.equal(elem.style.getPropertyValue("--custom-menu-icon-dark"), `url("${base}icons/set.svg")`);
 		await simulateMenuClosed(popup);
 	});
 
