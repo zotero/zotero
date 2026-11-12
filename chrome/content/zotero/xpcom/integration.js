@@ -69,6 +69,13 @@ const TEMPLATE_VERSIONS = {
 	OpenOffice: 1
 };
 
+// Resource paths of the plugin installers, by agent
+const PLUGIN_INSTALLER_PATHS = {
+	MacWord16: 'zotero-macword-integration',
+	WinWord: 'zotero-winword-integration',
+	OpenOffice: 'zotero-libreoffice-integration'
+};
+
 const MENDELEY_URI_RE = /^http:\/\/www\.mendeley\.com\/documents\/\?uuid=(.*)/;
 
 const PLUGIN_PATHS = {
@@ -186,9 +193,10 @@ Zotero.Integration = new function () {
 		Zotero.debug(`Integration: ${agent} command invoked with outdated template.`);
 		
 		var ps = Services.prompt;
-		var title = Zotero.getString('general.warning');
-		var client = agent == "OpenOffice" ? "LibreOffice" : "Microsoft Word";
-		var message = Zotero.getString('integration.upgradeTemplate', [Zotero.appName, client]);
+		var title = Zotero.ftl.formatValueSync('integration-upgrade-template-title');
+		var message = Zotero.ftl.formatValueSync('integration-upgrade-template-outdated', {
+			client: agent == "OpenOffice" ? "LibreOffice" : "Microsoft Word"
+		});
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		var checkbox = {};
@@ -197,7 +205,7 @@ Zotero.Integration = new function () {
 			title,
 			message,
 			buttonFlags,
-			Zotero.getString('general.openPreferences'),
+			Zotero.ftl.formatValueSync('integration-upgrade-template-update-button'),
 			Zotero.getString('general.notNow'),
 			null,
 			Zotero.getString(
@@ -209,9 +217,19 @@ Zotero.Integration = new function () {
 		);
 
 		if (index == 0) {
-			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', {
-				scrollTo: '#wordProcessors'
-			});
+			// Start the plugin installer, which reports its progress and errors and asks the user
+			// to restart the word processor if necessary, and don't run the command meanwhile
+			try {
+				const { Installer } = ChromeUtils.importESModule(
+					`resource://${PLUGIN_INSTALLER_PATHS[agent]}/installer.mjs`);
+				new Installer(false, true);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', {
+					scrollTo: '#wordProcessors'
+				});
+			}
 			return true;
 		}
 
