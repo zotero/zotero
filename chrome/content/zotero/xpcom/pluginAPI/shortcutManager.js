@@ -29,6 +29,7 @@
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ManagerAPIBase: "chrome://zotero/content/xpcom/pluginAPI/managerAPIBase.mjs",
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 		ScopeVariables: "chrome://zotero/content/xpcom/plugins/variables.mjs",
 	});
 
@@ -61,6 +62,7 @@
 	 * @property {string[]} modifiers - Subset of `Zotero.Shortcuts.MODIFIERS`; must
 	 * include a non-shift modifier (see `NON_SHIFT_MODIFIERS`). "accel" is the platform's
 	 * primary modifier (Command on mac, Control on Windows/Linux)
+	 * @property {string[]} [enableForTabTypes] - Selected tab types, e.g. ["reader/pdf"]
 	 * @property {string} target - The window type the shortcut fires in, see
 	 * `VALID_TARGETS`.
 	 * @property {(context: ShortcutContext) => void | false} onCommand - Function to run when
@@ -73,7 +75,8 @@
 	 * @type {object}
 	 * @property {string} tabType - The tab content type, e.g. "library" or "reader"
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
-	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
+	 * @property {string} [tabID] - The selected tab ID
+	 * @property {number} windowID - The controller window ID
 	 * @property {number[]} itemIDs - The IDs of the items the shortcut acts on: the
 	 * selected items for a library tab, or the tab's own item otherwise
 	 * @property {number[]} [collectionIDs] - mainWindow's library tab only: the IDs of the
@@ -97,6 +100,7 @@
 						children: "string",
 					},
 					target: lazy.Params.oneOf(VALID_TARGETS),
+					enableForTabTypes: { type: "array", children: "string", optional: true },
 					onCommand: "function",
 				},
 			};
@@ -206,7 +210,13 @@
 		}
 
 		_handleShortcut(option, win) {
-			return option.onCommand(this._getContext(win));
+			let context = this._getContext(win);
+			if (option.enableForTabTypes && !lazy.WindowUtils.matchesTabType(
+				option.enableForTabTypes, context.tabType, context.tabSubType
+			)) {
+				return false;
+			}
+			return option.onCommand(context);
 		}
 
 		_getContext(win) {
@@ -221,6 +231,7 @@
 			}
 			let { id, type, subType, data } = win.Zotero_Tabs.getTabInfo();
 			let context = {
+				windowID: win.browsingContext.id,
 				tabType: type,
 				tabSubType: subType,
 				tabID: id,

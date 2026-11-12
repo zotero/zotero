@@ -28,6 +28,7 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
+		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	Zotero.Shortcuts = {
@@ -339,7 +340,7 @@
 				return;
 			}
 			// Every candidate combo's registrations fire
-			let registrations = combos.flatMap(combo => this._registrationsFor(combo, target));
+			let registrations = combos.flatMap(combo => this._registrationsFor(combo, target, win));
 			let handled = false;
 			// Every handler fires, so behavior can't depend on plugin load order
 			for (let registration of registrations) {
@@ -359,14 +360,13 @@
 
 		// Registrations matching a (combo, target), in registration order. A snapshot,
 		// so handlers may unregister shortcuts during dispatch
-		_registrationsFor(combo, target) {
-			let registrations = [];
-			for (let registration of this._registrations.values()) {
-				if (registration.combo == combo && registration.targets.has(target)) {
-					registrations.push(registration);
-				}
-			}
-			return registrations;
+		_registrationsFor(combo, target, win) {
+			return [...this._registrations.values()].filter((registration) => {
+				let matchesTarget = registration.targets.has(target)
+					|| (target === "mainWindow" && win && [...registration.targets].some(
+						type => lazy.WindowUtils.matchesWindowType(win, type)));
+				return registration.combo == combo && matchesTarget;
+			});
 		},
 
 		_combosFromEvent(event) {
