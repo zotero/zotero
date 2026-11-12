@@ -249,6 +249,44 @@ describe("Zotero.ButtonManager", function () {
 		Zotero_Tabs.close(tabID);
 	});
 
+	it("should keep reader buttons responsive after their tab moves and the old window closes", async function () {
+		let source = await loadZoteroPane();
+		let reader;
+		try {
+			let buttonIDs = [];
+			for (let i = 0; i < 8; i++) {
+				buttonIDs.push(await registerButton({ buttonID: `moved-reader-${i}`, target: "reader/toolbar" }));
+			}
+			let attachment = await importFileAttachment("test.pdf");
+			({ instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: source }));
+			await reader._initPromise;
+			await waitForCallback(() => buttonIn(reader._iframeWindow.document, buttonIDs[0]), 50, 5);
+			await source.Zotero_Tabs.moveToWindow(reader.tabID, win);
+			source.close();
+			await waitForCallback(() => source.closed, 20, 2);
+
+			log.expect("onCommand");
+			buttonIn(reader._iframeWindow.document, buttonIDs[0]).click();
+			let context = await log.get("onCommand");
+			assert.equal(context.windowID, win.browsingContext.id);
+			assert.equal(context.tabID, reader.tabID);
+
+			// Resize the reader viewport directly so the test doesn't depend on the desktop's screen size.
+			let browser = reader._iframe;
+			browser.style.flex = "none";
+			browser.style.width = browser.style.minWidth = browser.style.maxWidth = "400px";
+			let visibleCount = () => buttonIDs.filter(id => buttonIn(reader._iframeWindow.document, id).style.display !== "none").length;
+			await waitForCallback(() => visibleCount() < buttonIDs.length, 50, 5);
+			let narrowCount = visibleCount();
+			browser.style.width = browser.style.minWidth = browser.style.maxWidth = "1200px";
+			await waitForCallback(() => visibleCount() > narrowCount, 50, 5);
+		}
+		finally {
+			if (reader) Zotero_Tabs.close(reader.tabID);
+			source.close();
+		}
+	});
+
 	it("should not let the search box internals overflow while collapsing", async function () {
 		await withWideWindow(async () => {
 			for (let i = 0; i < 3; i++) {

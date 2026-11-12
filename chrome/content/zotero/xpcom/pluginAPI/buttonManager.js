@@ -87,6 +87,7 @@
 	/**
 	 * @typedef ButtonContext
 	 * @type {object}
+	 * @property {number} windowID - The main window containing the button's tab
 	 * @property {string} tabType - The tab content type, e.g. "library" or "reader"
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
 	 * @property {string} tabID - The tab ID, including readers in their own main window
@@ -408,18 +409,18 @@
 			}
 			data.container = container;
 			if (!data.resizeObserver) {
-				// A chrome-side observer on the reader iframe. The toolbar spans the full
-				// iframe width, so this covers window resizes and pane layout changes.
+				// The reader document survives a move to another main window; its chrome
+				// browser element and the window that hosted it do not.
 				// Toolbar-internal width changes (e.g. the page number growing) trigger
 				// a React re-render, which re-runs the renderToolbar event instead
-				let iframe = reader._iframe;
-				let observer = new iframe.documentGlobal.ResizeObserver(() => {
+				let doc = container.ownerDocument;
+				let observer = new doc.defaultView.ResizeObserver(() => {
 					let currentData = this._readerData.get(reader);
 					if (currentData?.container?.isConnected) {
 						this._updateOverflow(reader, currentData);
 					}
 				});
-				observer.observe(iframe);
+				observer.observe(doc.documentElement);
 				data.resizeObserver = observer;
 			}
 		}
