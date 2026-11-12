@@ -198,6 +198,7 @@ describe("Zotero.MenuManager", function () {
 			"main/menubar/go": "#menu_goPopup",
 			"main/menubar/tools": "#menu_ToolsPopup",
 			"main/menubar/help": "#menu_HelpPopup",
+			...(Zotero.isMac ? { "main/menubar/window": "#windowPopup" } : {}),
 		})) {
 			await checkContext(target, openBySelector(selector), [...TAB_KEYS, "itemIDs"]);
 		}

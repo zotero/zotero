@@ -42,6 +42,8 @@
 		"main/menubar/go",
 		"main/menubar/tools",
 		"main/menubar/help",
+		// MacOS only
+		"main/menubar/window",
 		// Main window library context menus
 		"main/library/item",
 		"main/library/collection",
