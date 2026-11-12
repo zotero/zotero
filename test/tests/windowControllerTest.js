@@ -236,7 +236,7 @@ describe("Zotero.WindowController", function () {
 			let { windowID: noteWindowID } = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
 			let noteWin = WindowUtils.getWindow(noteWindowID, "noteWindow");
 			opened.push(noteWin);
-			assert.equal(noteWin.name, "zotero-note-" + note.id);
+			assert.equal(noteWin.Zotero_Tabs.getTabInfo().data.itemID, note.id);
 			let { windows } = await requestResult(query("windows", { type: "noteWindow" }));
 			assert.equal(windows.find(w => w.windowID === noteWindowID).itemID, note.id);
 			let again = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
@@ -245,7 +245,7 @@ describe("Zotero.WindowController", function () {
 			let { windowID: readerWindowID } = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));
 			let readerWin = WindowUtils.getWindow(readerWindowID, "readerWindow");
 			opened.push(readerWin);
-			assert.equal(readerWin.reader.itemID, attachment.id);
+			assert.equal(readerWin.Zotero_Tabs.getTabInfo().data.itemID, attachment.id);
 			({ windows } = await requestResult(query("windows", { type: "readerWindow" })));
 			assert.equal(windows.find(w => w.windowID === readerWindowID).itemID, attachment.id);
 			again = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));

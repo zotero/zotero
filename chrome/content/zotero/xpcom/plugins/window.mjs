@@ -34,11 +34,29 @@ const { NOT_FOUND, INVALID_PARAMS } = PluginRequestError.codes;
  */
 const WINDOW_TYPES = Object.freeze({
 	mainWindow: "navigator:browser",
-	readerWindow: "zotero:reader",
-	noteWindow: "zotero:note",
+	// Compatibility filters on the selected tab of a main window
+	readerWindow: "navigator:browser",
+	noteWindow: "navigator:browser",
 	preferencePane: "zotero:pref",
 	pluginWindow: "zotero:pluginWindow",
 });
+
+// Enumerate each chrome window once when no compatibility filter is requested.
+const WINDOW_TYPES_CANONICAL = Object.freeze(["mainWindow", "preferencePane", "pluginWindow"]);
+
+/** Match compatibility window types against the selected tab, including unloaded tabs. */
+function matchesWindowType(win, type) {
+	if (win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
+		return false;
+	}
+	let tabType = type === "readerWindow" ? "reader" : type === "noteWindow" ? "note" : null;
+	return !tabType || win.Zotero_Tabs?.getTabInfo().type === tabType;
+}
+
+function getWindows(type) {
+	return Array.from(Services.wm.getEnumerator(WINDOW_TYPES[type]))
+		.filter(win => !Cu.isDeadWrapper(win) && !win.closed && matchesWindowType(win, type));
+}
 
 // Set on a plugin window's root element by PluginWindow.init()
 const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
@@ -46,8 +64,8 @@ const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
 // What a tab or window opens from an item
 const OPENABLE_TYPES = Object.freeze(["reader", "note"]);
 
-// What a window opens on top of those: the preferences, on a pane
-const OPENABLE_WINDOW_TYPES = Object.freeze([...OPENABLE_TYPES, "preferencePane"]);
+// Windows the controller can open, in addition to an item in its own main window
+const OPENABLE_WINDOW_TYPES = Object.freeze([...OPENABLE_TYPES, "preferencePane", "mainWindow"]);
 
 /**
  * Stable per-window handle used as the plugin-facing window ID
@@ -95,7 +113,7 @@ function getWindow(windowID, type, callerPluginID) {
 	if (!win || (callerPluginID && !canAccessWindow(win, callerPluginID))) {
 		throw new PluginRequestError(NOT_FOUND, `No window with ID ${windowID}`);
 	}
-	if (type && win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
+	if (type && !matchesWindowType(win, type)) {
 		throw new PluginRequestError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
 	}
 	return win;
@@ -185,6 +203,9 @@ function matchesTabType(tabTypes, tabType, tabSubType) {
 
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
+	WINDOW_TYPES_CANONICAL,
+	getWindows,
+	matchesWindowType,
 	OPENABLE_TYPES,
 	OPENABLE_WINDOW_TYPES,
 	getWindowID,

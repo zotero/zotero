@@ -93,7 +93,7 @@
 	 * @property {{ windowID: number }} focusWindow
 	 * @property {{ windowID: number }} closeWindow
 	 * @property {{ windowID: number, pane: "start" | "end", open?: boolean }} togglePane
-	 * @property {{ type: "reader" | "note" | "preferencePane", itemID?: number, location?: object }} openWindow
+	 * @property {{ type: "mainWindow" | "reader" | "note" | "preferencePane", itemID?: number, location?: object, state?: object }} openWindow
 	 * @property {{ url: string, features?: PluginWindowFeatures, name?: string, notitle?: boolean, allowResize?: { height?: boolean, width?: boolean }, parentWindowID?: number }} openPluginWindow
 	 *
 	 *
@@ -150,10 +150,11 @@
 					openWindow: {
 						params: {
 							type: lazy.Params.oneOf(lazy.WindowUtils.OPENABLE_WINDOW_TYPES),
+							state: { type: "object", optional: true },
 							itemID: { type: "number", optional: true },
 							location: { type: "object", optional: true },
 						},
-						handler: ({ type, itemID, location }) => this._openWindow(type, itemID, location),
+						handler: ({ type, itemID, location, state }) => this._openWindow(type, itemID, location, state),
 					},
 					openPluginWindow: {
 						params: {
@@ -189,10 +190,10 @@
 		 * @returns {WindowControllerQueryResults["windows"]}
 		 */
 		_queryWindows(type, pluginID) {
-			let types = type ? [type] : Object.keys(lazy.WindowUtils.WINDOW_TYPES);
+			let types = type ? [type] : lazy.WindowUtils.WINDOW_TYPES_CANONICAL;
 			let windows = [];
 			for (let windowType of types) {
-				for (let win of Services.wm.getEnumerator(lazy.WindowUtils.WINDOW_TYPES[windowType])) {
+				for (let win of lazy.WindowUtils.getWindows(windowType)) {
 					if (Cu.isDeadWrapper(win) || win.closed
 							|| (pluginID && !lazy.WindowUtils.canAccessWindow(win, pluginID))) {
 						continue;
@@ -215,13 +216,8 @@
 				title: win.document.title,
 				focused: Services.focus.activeWindow === win,
 			};
-			if (type === "readerWindow") {
-				info.itemID = win.reader?.itemID;
-			}
-			else if (type === "noteWindow") {
-				// note.xhtml gets its item through the window's io argument
-				let io = win.arguments?.[0];
-				info.itemID = parseInt((io?.wrappedJSObject || io)?.itemID) || undefined;
+			if (type === "readerWindow" || type === "noteWindow") {
+				info.itemID = win.Zotero_Tabs.getTabInfo().data?.itemID;
 			}
 			else if (type === "pluginWindow") {
 				info.pluginID = lazy.WindowUtils.getPluginWindowOwner(win);
@@ -257,6 +253,7 @@
 		 */
 		async _togglePane(windowID, pane, open, pluginID) {
 			let win = lazy.WindowUtils.getWindow(windowID, "mainWindow", pluginID);
+			await win.Zotero_Tabs.getLoadPromise(win.Zotero_Tabs.selectedID);
 			let { tabContentType } = win.Zotero_Tabs.parseTabType();
 			let state = this._getPaneState(win, pane);
 			if (open === state.open) {
@@ -265,9 +262,9 @@
 			switch (pane) {
 				case "start":
 					if (tabContentType === "library") {
-						let collectionsPane = win.document.getElementById("zotero-collections-pane");
+						let collectionsPane = win.ZoteroPane.libraryView.getElement("zotero-collections-pane");
 						let collapsed = collectionsPane.hasAttribute("collapsed");
-						win.document.getElementById("zotero-collections-splitter")
+						win.ZoteroPane.libraryView.getElement("zotero-collections-splitter")
 							.setAttribute("state", collapsed ? "open" : "collapsed");
 						collectionsPane.toggleAttribute("collapsed", !collapsed);
 						win.ZoteroPane.updateLayoutConstraints();
@@ -295,12 +292,20 @@
 
 		/**
 		 * Open an item, or the preferences window
-		 * @param {"reader" | "note" | "preferencePane"} type
+		 * @param {"mainWindow" | "reader" | "note" | "preferencePane"} type
 		 * @param {number} [itemID] - Required for reader and note, ignored for preferencePane
 		 * @param {object} [location] - The opener's location, or { pane } for preferencePane
+		 * @param {object} [state] - Initial library tab state for mainWindow
 		 * @returns {Promise<WindowControllerCommandResults["openWindow"]>}
 		 */
-		async _openWindow(type, itemID, location) {
+		async _openWindow(type, itemID, location, state) {
+			if (type === "mainWindow") {
+				let win = Zotero.openMainWindow(state ? { libraryTabState: state } : undefined);
+				await new Promise(resolve => win.addEventListener("load", resolve, { once: true }));
+				await win.ZoteroPane.loadedPromise;
+				await win.Zotero_Tabs.getLoadPromise(win.Zotero_Tabs.selectedID);
+				return { windowID: lazy.WindowUtils.getWindowID(win) };
+			}
 			let { INVALID_PARAMS } = lazy.ControllerAPIBase.errorCodes;
 			if (type === "preferencePane") {
 				return this._openPreferences(location?.pane);
@@ -430,7 +435,8 @@
 		 * @param {Window} win - A main window
 		 * @returns {LayoutState}
 		 */
-		_getLayoutState(win) {
+		async _getLayoutState(win) {
+			await win.Zotero_Tabs.getLoadPromise(win.Zotero_Tabs.selectedID);
 			let panes = {};
 			for (let pane of MAINWINDOW_PANES) {
 				panes[pane] = this._getPaneState(win, pane);
@@ -451,7 +457,7 @@
 				case "start":
 				{
 					state.open = tabContentType === "library"
-						? !win.document.getElementById("zotero-collections-pane").hasAttribute("collapsed")
+						? !win.ZoteroPane.libraryView.getElement("zotero-collections-pane").hasAttribute("collapsed")
 						: win.Zotero_Tabs.getSidebarState(tabContentType).open;
 					break;
 				}
