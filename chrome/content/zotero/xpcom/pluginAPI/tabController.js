@@ -33,8 +33,6 @@
 		Params: "chrome://zotero/content/xpcom/pluginAPI/apiParams.mjs",
 	});
 
-	const LIBRARY_TAB_ID = "zotero-pane";
-
 	const TAB_TYPES = ["library", "reader", "note"];
 
 	// Row type -> CollectionTreeRow.id prefix; the number is the collection or search ID for
@@ -81,16 +79,16 @@
 	 * @typedef {object} TabControllerCommandParams
 	 * @property {{ windowID: number, tabID: string }} selectTab
 	 * @property {{ windowID: number, tabIDs: string[] }} closeTabs
-	 * @property {{ windowID: number, tabID: string, index: number }} moveTab
-	 * @property {{ windowID: number, itemIDs: number[], inLibraryRoot?: boolean, noTabSwitch?: boolean }} selectItems
-	 * @property {{ windowID: number, type: CollectionTreeRowType, ids: number[] }} selectCollectionsOrLibraries
-	 * @property {{ windowID: number, type: "reader" | "note", itemID: number, index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} openTab
+	 * @property {{ windowID: number, tabID: string, index: number, targetWindowID?: number }} moveTab
+	 * @property {{ windowID: number, tabID?: string, itemIDs: number[], inLibraryRoot?: boolean, noTabSwitch?: boolean }} selectItems
+	 * @property {{ windowID: number, tabID?: string, type: CollectionTreeRowType, ids: number[] }} selectCollectionsOrLibraries
+	 * @property {{ windowID: number, type: "library" | "reader" | "note", itemID?: number, state?: object, index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} openTab
 	 *
 	 *
 	 * @typedef {object} TabControllerCommandResults
 	 * @property {{}} selectTab
 	 * @property {{}} closeTabs
-	 * @property {{}} moveTab
+	 * @property {{ windowID: number, tabID: string }} moveTab
 	 * @property {{ selected: boolean }} selectItems
 	 * @property {{ selected: boolean }} selectCollectionsOrLibraries
 	 * @property {{ tabID: string }} openTab
@@ -127,45 +125,49 @@
 							windowID: "number",
 							tabID: "string",
 							index: "number",
+							targetWindowID: { type: "number", optional: true },
 						},
-						handler: ({ windowID, tabID, index }) => this._moveTab(lazy.WindowUtils.getMainWindow(windowID), tabID, index),
+						handler: ({ windowID, tabID, index, targetWindowID }) => this._moveTab(lazy.WindowUtils.getMainWindow(windowID), tabID, index, targetWindowID),
 					},
 					selectItems: {
 						params: {
 							windowID: "number",
+							tabID: { type: "string", optional: true },
 							itemIDs: lazy.Params.intList,
 							inLibraryRoot: { type: "boolean", optional: true },
 							noTabSwitch: { type: "boolean", optional: true },
 						},
-						handler: ({ windowID, itemIDs, inLibraryRoot, noTabSwitch }) => this._selectItems(
-							lazy.WindowUtils.getMainWindow(windowID), itemIDs, { inLibraryRoot, noTabSwitch }
+						handler: ({ windowID, tabID, itemIDs, inLibraryRoot, noTabSwitch }) => this._selectItems(
+							lazy.WindowUtils.getMainWindow(windowID), itemIDs, { tabID, inLibraryRoot, noTabSwitch }
 						),
 					},
 					selectCollectionsOrLibraries: {
 						params: {
 							windowID: "number",
+							tabID: { type: "string", optional: true },
 							type: lazy.Params.oneOf(ROW_TYPES),
 							ids: {
 								type: "array",
 								checkHook: value => (value.length ? lazy.Params.intList.checkHook(value) : "Param 'ids' must not be empty"),
 							},
 						},
-						handler: ({ windowID, type, ids }) => this._selectCollectionsOrLibraries(
-							lazy.WindowUtils.getMainWindow(windowID), type, ids
+						handler: ({ windowID, tabID, type, ids }) => this._selectCollectionsOrLibraries(
+							lazy.WindowUtils.getMainWindow(windowID), type, ids, tabID
 						),
 					},
 					openTab: {
 						params: {
 							windowID: "number",
-							type: lazy.Params.oneOf(lazy.WindowUtils.OPENABLE_TYPES),
-							itemID: "number",
+							type: lazy.Params.oneOf(TAB_TYPES),
+							itemID: { type: "number", optional: true },
+							state: { type: "object", optional: true },
 							index: { type: "number", optional: true },
 							background: { type: "boolean", optional: true },
 							allowDuplicate: { type: "boolean", optional: true },
 							location: { type: "object", optional: true },
 						},
-						handler: ({ windowID, type, itemID, index, background, allowDuplicate, location }) => this._openTab(
-							lazy.WindowUtils.getMainWindow(windowID), type, itemID, { index, background, allowDuplicate, location }
+						handler: ({ windowID, type, itemID, state, index, background, allowDuplicate, location }) => this._openTab(
+							lazy.WindowUtils.getMainWindow(windowID), type, itemID, { state, index, background, allowDuplicate, location }
 						),
 					},
 				},
@@ -218,10 +220,27 @@
 				selected: tab.id === win.Zotero_Tabs.selectedID,
 			};
 			if (tab.type === "library") {
-				let pane = win.ZoteroPane;
-				info.libraryIDs = pane.getSelectedLibraryIDs();
-				info.collectionIDs = pane.collectionsView ? pane.getSelectedCollections(true) : [];
-				info.itemIDs = pane.getSelectedItems(true, { libraryTabOnly: true });
+				let view = win.ZoteroPane.getLibraryView(tabID);
+				let rows = view?.loaded ? view.getCollectionTreeRows() : null;
+				let saved = tab.data?.state || {};
+				info.collectionIDs = rows
+					? rows.filter(row => row.isCollection()).map(row => row.ref.id)
+					: (saved.collections || []).filter(id => /^C\d+$/.test(id)).map(id => Number(id.slice(1)));
+				info.libraryIDs = rows
+					? [...new Set(rows.map(row => row.ref?.libraryID).filter(Boolean))]
+					: [...new Set((saved.collections || []).map((id) => {
+						let key = Number(id.slice(1));
+						if (id[0] === "C") {
+							return Zotero.Collections.getLibraryAndKeyFromID(key)?.libraryID;
+						}
+						if (id[0] === "S") {
+							return Zotero.Searches.getLibraryAndKeyFromID(key)?.libraryID;
+						}
+						return Zotero.Libraries.get(key)?.libraryID;
+					}).filter(Boolean))];
+				info.itemIDs = view?.loaded
+					? view.itemsView.getSelectedItems(true)
+					: (saved.items || []).filter(id => Number.isInteger(id) && Zotero.Items.exists(id));
 			}
 			else {
 				info.itemIDs = tab.data?.itemID ? [tab.data.itemID] : [];
@@ -232,47 +251,85 @@
 			return info;
 		}
 
-		_selectTab(win, tabID) {
+		async _selectTab(win, tabID) {
 			this._getTab(win, tabID);
-			win.Zotero_Tabs.select(tabID);
+			await win.Zotero_Tabs.select(tabID);
+			await win.Zotero_Tabs.getLoadPromise(tabID);
 		}
 
 		_closeTabs(win, tabIDs) {
-			if (tabIDs.includes(LIBRARY_TAB_ID)) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, "The library tab cannot be closed");
-			}
 			for (let tabID of tabIDs) {
-				this._getTab(win, tabID);
+				if (!this._getTab(win, tabID).closable) {
+					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Tab ${tabID} cannot be closed`);
+				}
 			}
 			win.Zotero_Tabs.close(tabIDs);
 		}
 
-		/**
-		 * @param {number} index - Position in the current tab order; the library tab stays at 0
-		 */
-		_moveTab(win, tabID, index) {
-			if (!Number.isInteger(index) || index < 1) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer >= 1, got ${index}`);
+		async _moveTab(win, tabID, index, targetWindowID) {
+			let tab = this._getTab(win, tabID);
+			if (!tab.movable) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Tab ${tabID} cannot be moved`);
 			}
-			// TODO: update once we have multiple library tabs
-			if (tabID === LIBRARY_TAB_ID) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, "The library tab cannot be moved");
+			let target = targetWindowID === undefined ? win : lazy.WindowUtils.getMainWindow(targetWindowID);
+			this._validateIndex(target, index);
+			if (target === win) {
+				win.Zotero_Tabs.move(tabID, index);
 			}
-			this._getTab(win, tabID);
-			win.Zotero_Tabs.move(tabID, index);
+			else {
+				tabID = await win.Zotero_Tabs.moveToWindow(tabID, target, index);
+			}
+			return { windowID: target.browsingContext.id, tabID };
+		}
+
+		_validateIndex(win, index) {
+			let minimum = win.Zotero_Tabs._getFirstUnpinnedIndex();
+			if (!Number.isInteger(index) || index < minimum) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer >= ${minimum}, got ${index}`);
+			}
+		}
+
+		async _libraryView(win, tabID, libraryID) {
+			if (tabID === undefined) {
+				return win.ZoteroPane.openLibraryViewForLibrary(libraryID);
+			}
+			let tab = this._getTab(win, tabID);
+			if (win.Zotero_Tabs.parseTabType(tab.type).tabContentType !== "library") {
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Tab ${tabID} is not a library tab`);
+			}
+			let previousID = win.Zotero_Tabs.selectedID;
+			if (!win.ZoteroPane.getLibraryView(tabID)?.loaded) {
+				await win.Zotero_Tabs.select(tabID);
+			}
+			let view = await win.ZoteroPane.waitForLibraryView(tabID);
+			// Loading a view requires selecting it, but targeting it doesn't change the selection.
+			if (previousID !== win.Zotero_Tabs.selectedID && win.Zotero_Tabs._getTab(previousID).tab) {
+				await win.Zotero_Tabs.select(previousID);
+			}
+			return view;
 		}
 
 		/**
 		 * Open an item in a new tab; without allowDuplicate an existing tab is selected instead
 		 * @param {Window} win - A main window
-		 * @param {"reader" | "note"} type
+		 * @param {"library" | "reader" | "note"} type
 		 * @param {number} itemID
-		 * @param {{ index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} options
+		 * @param {{ state?: object, index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} options
 		 * @returns {Promise<TabControllerCommandResults["openTab"]>}
 		 */
-		async _openTab(win, type, itemID, { index, background, allowDuplicate, location }) {
-			if (index !== undefined && (!Number.isInteger(index) || index < 1)) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer >= 1, got ${index}`);
+		async _openTab(win, type, itemID, { state, index, background, allowDuplicate, location }) {
+			if (index !== undefined) {
+				this._validateIndex(win, index);
+			}
+			if (type === "library") {
+				let tabID = win.Zotero_Tabs.addLibraryTab({ state, index, select: !background });
+				if (!background) {
+					await win.ZoteroPane.waitForLibraryView(tabID);
+				}
+				return { tabID };
+			}
+			if (itemID === undefined) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'itemID' is required for ${type}`);
 			}
 			lazy.WindowUtils.getOpenableItem(itemID, type);
 			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
@@ -293,7 +350,7 @@
 		 * Select items in the library tab, switching to it unless told not to
 		 * @param {Window} win - A main window
 		 * @param {number[]} itemIDs
-		 * @param {{ inLibraryRoot?: boolean, noTabSwitch?: boolean }} options
+		 * @param {{ tabID?: string, inLibraryRoot?: boolean, noTabSwitch?: boolean }} options
 		 * @returns {Promise<TabControllerCommandResults["selectItems"]>}
 		 */
 		async _selectItems(win, itemIDs, options) {
@@ -305,8 +362,10 @@
 			if (!itemIDs.length) {
 				return { selected: false };
 			}
-			await win.ZoteroPane.selectItems(itemIDs, options);
-			let selectedIDs = new Set(win.ZoteroPane.getSelectedItems(true, { libraryTabOnly: true }));
+			let { tabID, ...selectionOptions } = options;
+			let view = await this._libraryView(win, tabID, Zotero.Items.get(itemIDs[0]).libraryID);
+			await win.ZoteroPane.selectItems(itemIDs, { ...selectionOptions, libraryView: view });
+			let selectedIDs = new Set(view.itemsView.getSelectedItems(true));
 			return { selected: itemIDs.every(itemID => selectedIDs.has(itemID)) };
 		}
 
@@ -336,9 +395,10 @@
 		 * @param {Window} win - A main window
 		 * @param {CollectionTreeRowType} type
 		 * @param {number[]} ids - Collection or search IDs for those types, otherwise library IDs
+		 * @param {string} [tabID] - Library tab to change; omitted, resolve a view for the library
 		 * @returns {Promise<TabControllerCommandResults["selectCollectionsOrLibraries"]>}
 		 */
-		async _selectCollectionsOrLibraries(win, type, ids) {
+		async _selectCollectionsOrLibraries(win, type, ids, tabID) {
 			let objectType = type === "collection" || type === "search" ? type : "library";
 			let objects = { collection: Zotero.Collections, search: Zotero.Searches, library: Zotero.Libraries };
 			for (let id of ids) {
@@ -346,7 +406,9 @@
 					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_FOUND, `No ${objectType} with ID ${id}`);
 				}
 			}
-			let view = win.ZoteroPane.collectionsView;
+			let first = objects[objectType].get(ids[0]);
+			let libraryView = await this._libraryView(win, tabID, first.libraryID);
+			let view = libraryView.collectionsView;
 			// Expand everything first: each expansion shifts the indices of the rows below it
 			for (let id of ids) {
 				await this._expandToRow(view, type, id);
