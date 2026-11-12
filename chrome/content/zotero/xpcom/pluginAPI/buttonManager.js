@@ -481,8 +481,9 @@
 		_getContext(reader) {
 			// No reader instance, matching the reader menubar menu context.
 			// Tab readers can be resolved with Zotero.Reader.getByTabID(tabID);
-			// a reader in a separate window has no tabID
+			// Readers in their own main window also have a tabID
 			return {
+				windowID: reader._window?.browsingContext.id,
 				tabType: "reader",
 				tabSubType: reader.type,
 				tabID: reader.tabID,

@@ -238,11 +238,13 @@
 		}
 
 		_getContext() {
+			let view = this.closest("library-view");
 			return {
+				windowID: this.documentGlobal.browsingContext.id,
 				tabType: "library",
 				tabSubType: undefined,
-				tabID: "zotero-pane",
-				itemIDs: this.documentGlobal.ZoteroPane.getSelectedItems(true),
+				tabID: view.tabID,
+				itemIDs: view.itemsView?.getSelectedItems(true) || [],
 			};
 		}
 	}
@@ -289,6 +291,7 @@
 		_getContext() {
 			let { id, subType, data, tabContentType } = this._getTabInfo();
 			let context = {
+				windowID: this.documentGlobal.browsingContext.id,
 				tabType: tabContentType,
 				tabSubType: subType,
 				tabID: id,
