@@ -508,7 +508,7 @@ var ZoteroPane = new function () {
 					ArrowNext: () => null,
 					ArrowPrevious: () => {
 						let buttons = document.querySelectorAll(
-							'#zotero-titlebar-custom-buttons > toolbarbutton:not([hidden])');
+							'#zotero-tabbar-custom-buttons > toolbarbutton:not([hidden])');
 						return buttons.length ? buttons[buttons.length - 1] : null;
 					},
 					Tab: () => document.getElementById('zotero-tb-sync-error'),
