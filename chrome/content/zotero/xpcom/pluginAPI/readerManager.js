@@ -65,6 +65,7 @@
 	/**
 	 * @typedef ReaderContext
 	 * @type {object}
+	 * @property {number} windowID - The main window containing the reader tab
 	 * @property {number} [itemID] - The itemID of the reader's attachment
 	 * @property {string} tabID - The reader tab ID, including readers in their own main window
 	 * @property {string} [type] - The reader type: "pdf", "epub", or "snapshot"
