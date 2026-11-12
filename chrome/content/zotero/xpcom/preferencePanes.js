@@ -157,8 +157,9 @@
 		 * @param {Function} [options.onLoad] Called after the pane content is loaded. Unprivileged
 		 * 		plugins receive `{ paneID, page }` (`page` is the pane page's messenger); privileged
 		 * 		plugins receive `{ doc, body }` (deprecated -- run scripts from the page at `src` instead)
-		 * @param {string} [options.helpURL] If provided, a help button will be displayed under the pane
-		 * 		and the provided URL will open when it is clicked
+		 * @param {string} [options.helpURL] URL a help button under the pane opens. If not provided, the
+		 * 		http(s) `help_url` from the plugin's manifest.json is used, and without either there's no button.
+		 * 		@deprecated Privileged plugins only; declare `help_url` in manifest.json instead.
 		 * @return {Promise<string>} Resolves to the ID of the pane if successfully added
 		 *
 		 * @example
@@ -202,7 +203,15 @@
 				options.scripts = [];
 				options.stylesheets = [];
 				options.l10nFiles = [];
+				if (options.helpURL !== undefined) {
+					Zotero.warn(
+						`Plugin ${options.pluginID}: 'helpURL' only available for privileged plugins. `
+						+ 'Declare help_url in manifest.json instead.'
+					);
+				}
 			}
+			// The manifest's help page, unless a privileged plugin names its own
+			let helpURL = (!embedded && options.helpURL) || lazy.PluginSandbox.getHelpURL(options.pluginID);
 
 			let src;
 			if (embedded) {
@@ -239,7 +248,7 @@
 				scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 				onLoad,
-				helpURL: options.helpURL,
+				helpURL,
 				embedded,
 				defaultXUL: true,
 			};
