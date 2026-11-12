@@ -179,8 +179,8 @@ Zotero.Integration = new function () {
 		if (typeof expectedTemplateVersion == 'undefined' || templateVersion >= expectedTemplateVersion) return false;
 		const daysToIgnore = 30;
 		const now = Math.floor(Date.now() / 1000);
-		const updateTemplateDelayedOn = Zotero.Prefs.get('integration.updateTemplateDelayedOn');
-		if (updateTemplateDelayedOn + (daysToIgnore * 86400) > now || upgradeTemplateNotNowTime + 86400 > now) {
+		const upgradeTemplateDelayedOn = Zotero.Prefs.get('integration.upgradeTemplateDelayedOn');
+		if (upgradeTemplateDelayedOn + (daysToIgnore * 86400) > now || upgradeTemplateNotNowTime + 86400 > now) {
 			return false;
 		}
 		Zotero.debug(`Integration: ${agent} command invoked with outdated template.`);
