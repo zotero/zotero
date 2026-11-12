@@ -250,10 +250,10 @@
 	}
 
 	/**
-	 * Custom buttons in the title bar, shown for every tab.
+	 * Custom buttons in the tab bar, shown for every tab.
 	 * Free space is measured via the flex spacer in the tab bar (tabBar.jsx)
 	 */
-	class TitlebarButtons extends ToolbarButtonsBase {
+	class TabBarButtons extends ToolbarButtonsBase {
 		_tabBar = null;
 
 		async init() {
@@ -323,5 +323,5 @@
 	}
 
 	customElements.define("library-toolbar-buttons", LibraryToolbarButtons);
-	customElements.define("titlebar-buttons", TitlebarButtons);
+	customElements.define("tabbar-buttons", TabBarButtons);
 }

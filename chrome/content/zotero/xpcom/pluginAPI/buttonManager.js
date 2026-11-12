@@ -36,8 +36,8 @@
 	const ICON_KEYS = ["icon", "darkIcon", "menuIcon", "darkMenuIcon"];
 
 	const VALID_TARGETS = [
-		// Main window title bar, before the tabs menu button
-		"main/titlebar",
+		// Main window tab bar, before the tabs menu button
+		"main/tabbar",
 		// Main window items toolbar (library tab toolbar)
 		"main/library/toolbar",
 		// Reader toolbar (reader tab/window toolbar)

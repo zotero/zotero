@@ -351,10 +351,10 @@ describe("Zotero.ButtonManager", function () {
 		assert.equal(compute(108 + 24, 2), 3);
 	});
 
-	it("should render buttons in the title bar", async function () {
+	it("should render buttons in the tab bar", async function () {
 		log.expect("onCommand");
-		let buttonID = await registerButton({ buttonID: "tabs-toolbar-test", target: "main/titlebar" });
-		let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+		let buttonID = await registerButton({ buttonID: "tabs-toolbar-test", target: "main/tabbar" });
+		let elem = doc.querySelector("#zotero-tabbar-custom-buttons");
 		let button = buttonIn(elem, buttonID);
 		assert.exists(button);
 		assert.isFalse(button.hidden);
@@ -370,12 +370,12 @@ describe("Zotero.ButtonManager", function () {
 		assert.notExists(elem.querySelector(`.${CSS.escape(buttonID)}`));
 	});
 
-	it("should collapse title bar buttons when the tab bar lacks space", async function () {
+	it("should collapse tab bar buttons when the tab bar lacks space", async function () {
 		await withWideWindow(async () => {
 			for (let i = 0; i < 3; i++) {
-				await registerButton({ buttonID: `tabs-overflow-test-${i}`, target: "main/titlebar" });
+				await registerButton({ buttonID: `tabs-overflow-test-${i}`, target: "main/tabbar" });
 			}
-			let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+			let elem = doc.querySelector("#zotero-tabbar-custom-buttons");
 			elem._updateOverflow();
 			let initialCount = elem._visibleCount;
 			assert.isAbove(initialCount, 0);
@@ -404,12 +404,12 @@ describe("Zotero.ButtonManager", function () {
 		});
 	});
 
-	it("should support keyboard navigation in the title bar", async function () {
+	it("should support keyboard navigation in the tab bar", async function () {
 		await withWideWindow(async () => {
 			for (let i = 0; i < 2; i++) {
-				await registerButton({ buttonID: `tabs-keynav-test-${i}`, target: "main/titlebar" });
+				await registerButton({ buttonID: `tabs-keynav-test-${i}`, target: "main/tabbar" });
 			}
-			let elem = doc.querySelector("#zotero-titlebar-custom-buttons");
+			let elem = doc.querySelector("#zotero-tabbar-custom-buttons");
 			elem._updateOverflow();
 			let buttons = elem.querySelectorAll(".zotero-custom-button");
 			let tabsMenu = doc.getElementById("zotero-tb-tabs-menu");
