@@ -61,6 +61,7 @@
 	 * @property {"pdf" | "epub" | "snapshot"} [subType] - Reader tabs only
 	 * @property {string} title
 	 * @property {boolean} selected
+	 * @property {boolean} pinned - Pinned tabs come first, stay in their window, and can't be closed
 	 * @property {number[]} itemIDs - The library tab's selected items, or the item a reader or note tab shows
 	 * @property {number[]} [libraryIDs] - Library tab only: the selected libraries
 	 * @property {number[]} [collectionIDs] - Library tab only: the selected collections
@@ -80,6 +81,7 @@
 	 * @property {{ windowID: number, tabID: string }} selectTab
 	 * @property {{ windowID: number, tabIDs: string[] }} closeTabs
 	 * @property {{ windowID: number, tabID: string, index: number, targetWindowID?: number }} moveTab
+	 * @property {{ windowID: number, tabID: string, pinned: boolean }} setTabPinned
 	 * @property {{ windowID: number, tabID?: string, itemIDs: number[], inLibraryRoot?: boolean, noTabSwitch?: boolean }} selectItems
 	 * @property {{ windowID: number, tabID?: string, type: CollectionTreeRowType, ids: number[] }} selectCollectionsOrLibraries
 	 * @property {{ windowID?: number, type?: "library" | "reader" | "note", itemID?: number, state?: object, index?: number, background?: boolean, allowDuplicate?: boolean, location?: object }} openTab
@@ -89,6 +91,7 @@
 	 * @property {{}} selectTab
 	 * @property {{}} closeTabs
 	 * @property {{ windowID: number, tabID: string }} moveTab
+	 * @property {{ index: number }} setTabPinned
 	 * @property {{ selected: boolean }} selectItems
 	 * @property {{ selected: boolean }} selectCollectionsOrLibraries
 	 * @property {{ windowID: number, tabID: string }} openTab
@@ -128,6 +131,14 @@
 							targetWindowID: { type: "number", optional: true },
 						},
 						handler: ({ windowID, tabID, index, targetWindowID }) => this._moveTab(lazy.WindowUtils.getMainWindow(windowID), tabID, index, targetWindowID),
+					},
+					setTabPinned: {
+						params: {
+							windowID: "number",
+							tabID: "string",
+							pinned: "boolean",
+						},
+						handler: ({ windowID, tabID, pinned }) => this._setTabPinned(lazy.WindowUtils.getMainWindow(windowID), tabID, pinned),
 					},
 					selectItems: {
 						params: {
@@ -222,6 +233,7 @@
 				state: tab.state,
 				title: tab.title,
 				selected: tab.id === win.Zotero_Tabs.selectedID,
+				pinned: !!tab.pinned,
 			};
 			if (tab.type === "library") {
 				let view = win.ZoteroPane.getLibraryView(tabID);
@@ -263,8 +275,10 @@
 
 		_closeTabs(win, tabIDs) {
 			for (let tabID of tabIDs) {
-				if (!this._getTab(win, tabID).closable) {
-					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Tab ${tabID} cannot be closed`);
+				let tab = this._getTab(win, tabID);
+				// Pinned tabs can only be closed once unpinned, as for the user
+				if (!tab.closable || tab.pinned) {
+					this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Tab ${tabID} ${tab.pinned ? "is pinned and " : ""}cannot be closed`);
 				}
 			}
 			win.Zotero_Tabs.close(tabIDs);
@@ -276,20 +290,35 @@
 				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Tab ${tabID} cannot be moved`);
 			}
 			let target = targetWindowID === undefined ? win : lazy.WindowUtils.getMainWindow(targetWindowID);
-			this._validateIndex(target, index);
 			if (target === win) {
+				this._validateIndex(win, index, tab.pinned);
 				win.Zotero_Tabs.move(tabID, index);
+				return { windowID: win.browsingContext.id, tabID };
 			}
-			else {
-				tabID = await win.Zotero_Tabs.moveToWindow(tabID, target, index);
+			if (tab.pinned) {
+				this._throw(lazy.ControllerAPIBase.errorCodes.NOT_ALLOWED, `Pinned tab ${tabID} cannot be moved to another window`);
 			}
-			return { windowID: target.browsingContext.id, tabID };
+			this._validateIndex(target, index);
+			let movedID = await win.Zotero_Tabs.moveToWindow(tabID, target, index);
+			if (!movedID) {
+				throw new Error(`Tab ${tabID} could not be moved to window ${targetWindowID}`);
+			}
+			return { windowID: target.browsingContext.id, tabID: movedID };
 		}
 
-		_validateIndex(win, index) {
-			let minimum = win.Zotero_Tabs._getFirstUnpinnedIndex();
-			if (!Number.isInteger(index) || index < minimum) {
-				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer >= ${minimum}, got ${index}`);
+		_setTabPinned(win, tabID, pinned) {
+			this._getTab(win, tabID);
+			win.Zotero_Tabs.setPinned(tabID, pinned);
+			return { index: win.Zotero_Tabs._getTab(tabID).tabIndex };
+		}
+
+		// Pinned tabs move among the pinned tabs, and other tabs among the tabs after them
+		_validateIndex(win, index, pinned = false) {
+			let firstUnpinned = win.Zotero_Tabs._getFirstUnpinnedIndex();
+			let valid = pinned ? index >= 0 && index <= firstUnpinned : index >= firstUnpinned;
+			if (!Number.isInteger(index) || !valid) {
+				let range = pinned ? `from 0 to ${firstUnpinned}` : `>= ${firstUnpinned}`;
+				this._throw(lazy.ControllerAPIBase.errorCodes.INVALID_PARAMS, `Param 'index' must be an integer ${range}, got ${index}`);
 			}
 		}
 
