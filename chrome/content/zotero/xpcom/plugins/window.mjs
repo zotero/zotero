@@ -41,11 +41,8 @@ const WINDOW_TYPES = Object.freeze({
 // Set on a plugin window's root element by PluginWindow.init()
 const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
 
-// What a tab or window opens from an item
-const OPENABLE_TYPES = Object.freeze(["reader", "note"]);
-
-// Windows the controller can open, in addition to an item in its own main window
-const OPENABLE_WINDOW_TYPES = Object.freeze([...OPENABLE_TYPES, "preferencePane", "mainWindow"]);
+// Utility windows opened by WindowController; main-window tabs are opened by TabController
+const OPENABLE_WINDOW_TYPES = Object.freeze(["preferencePane"]);
 
 /**
  * Stable per-window handle used as the plugin-facing window ID
@@ -183,7 +180,6 @@ function matchesTabType(tabTypes, tabType, tabSubType) {
 
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
-	OPENABLE_TYPES,
 	OPENABLE_WINDOW_TYPES,
 	getWindowID,
 	getWindow,

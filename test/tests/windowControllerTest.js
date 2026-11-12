@@ -56,6 +56,8 @@ describe("Zotero.WindowController", function () {
 
 	it("should fail an unknown window type", async function () {
 		await requestError(query("windows", { type: "unknown" }), codes.INVALID_PARAMS);
+		await requestError(command("openWindow", { type: "unknown" }), codes.INVALID_PARAMS);
+		await requestError(command("openWindow"), codes.INVALID_PARAMS);
 	});
 
 	it("should not open a plugin window for a privileged plugin", async function () {
@@ -254,45 +256,15 @@ describe("Zotero.WindowController", function () {
 		});
 	});
 
-	it("should open a note and a reader in their own windows, reuse an open one, and close any window type", async function () {
-		let note = await createDataObject("item", { itemType: "note" });
-		let attachment = await importFileAttachment("test.pdf");
-		let opened = [];
+	it("should close a main window", async function () {
+		let target = await loadZoteroPane();
 		try {
-			let { windowID: noteWindowID } = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
-			let noteWin = WindowUtils.getWindow(noteWindowID, "mainWindow");
-			opened.push(noteWin);
-			assert.equal(noteWin.Zotero_Tabs.getTabInfo().data.itemID, note.id);
-			let { windows } = await requestResult(query("windows", { type: "mainWindow" }));
-			assert.equal(windows.find(w => w.windowID === noteWindowID).type, "mainWindow");
-			let again = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
-			assert.equal(again.windowID, noteWindowID, "an open note window is reused");
-
-			let { windowID: readerWindowID } = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));
-			let readerWin = WindowUtils.getWindow(readerWindowID, "mainWindow");
-			opened.push(readerWin);
-			assert.equal(readerWin.Zotero_Tabs.getTabInfo().data.itemID, attachment.id);
-			({ windows } = await requestResult(query("windows", { type: "mainWindow" })));
-			assert.equal(windows.find(w => w.windowID === readerWindowID).type, "mainWindow");
-			again = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));
-			assert.equal(again.windowID, readerWindowID, "an open reader window is reused");
-
 			// Not limited to the plugin's own windows
-			await requestResult(command("closeWindow", { windowID: readerWindowID }));
-			await waitForClosed(readerWin);
-			await requestResult(command("closeWindow", { windowID: noteWindowID }));
-			await waitForClosed(noteWin);
-
-			await requestError(command("openWindow", { type: "note", itemID: -1 }), codes.NOT_FOUND);
-			await requestError(command("openWindow", { type: "reader", itemID: note.id }), codes.INVALID_PARAMS);
-			await requestError(command("openWindow", { type: "library", itemID: note.id }), codes.INVALID_PARAMS);
+			await requestResult(command("closeWindow", { windowID: target.browsingContext.id }));
+			await waitForClosed(target);
 		}
 		finally {
-			for (let opener of opened) {
-				if (!opener.closed) {
-					opener.close();
-				}
-			}
+			target.close();
 		}
 	});
 
@@ -317,7 +289,8 @@ describe("Zotero.WindowController", function () {
 			assert.isTrue(windows.some(w => w.windowID === prefsWindowID));
 
 			await requestError(command("openWindow", { type: "preferencePane", location: { pane: "nope" } }), codes.NOT_FOUND);
-			await requestError(command("openWindow", { type: "note" }), codes.INVALID_PARAMS);
+			await requestResult(command("closeWindow", { windowID: prefsWindowID }));
+			await waitForClosed(prefsWin);
 		}
 		finally {
 			prefsWin.close();
@@ -421,21 +394,5 @@ describe("Zotero.WindowController", function () {
 				pluginWin.close();
 			}
 		});
-	});
-
-	it("should create a main window on a requested collection without duplicating query results", async function () {
-		let collection = await createDataObject("collection");
-		let opened = await requestResult(command("openWindow", {
-			type: "mainWindow", state: { collections: ["C" + collection.id] },
-		}));
-		let target = WindowUtils.getWindow(opened.windowID);
-		try {
-			assert.deepEqual(target.ZoteroPane.getSelectedCollections(true), [collection.id]);
-			let { windows } = await requestResult(query("windows"));
-			assert.lengthOf(windows.filter(w => w.windowID === opened.windowID), 1);
-		}
-		finally {
-			target.close();
-		}
 	});
 });
