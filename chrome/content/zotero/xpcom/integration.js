@@ -63,8 +63,10 @@ const EXPORTED_DOCUMENT_MARKER = "ZOTERO_TRANSFER_DOCUMENT";
 
 const NOTE_CITATION_PLACEHOLDER_LINK = 'https://www.zotero.org/?';
 
+// Template versions below which users are asked to update the plugin
 const TEMPLATE_VERSIONS = {
-	MacWord16: 2,
+	// Version 3 adds the macros that read and update fields much faster
+	MacWord16: 3,
 	WinWord: 1,
 	OpenOffice: 1
 };
@@ -194,9 +196,15 @@ Zotero.Integration = new function () {
 		
 		var ps = Services.prompt;
 		var title = Zotero.ftl.formatValueSync('integration-upgrade-template-title');
-		var message = Zotero.ftl.formatValueSync('integration-upgrade-template-outdated', {
-			client: agent == "OpenOffice" ? "LibreOffice" : "Microsoft Word"
-		});
+		var message;
+		if (agent == 'MacWord16' && templateVersion < 3) {
+			message = Zotero.ftl.formatValueSync('integration-upgrade-template-faster');
+		}
+		else {
+			message = Zotero.ftl.formatValueSync('integration-upgrade-template-outdated', {
+				client: agent == "OpenOffice" ? "LibreOffice" : "Microsoft Word"
+			});
+		}
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		var checkbox = {};

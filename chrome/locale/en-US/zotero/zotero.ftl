@@ -1182,6 +1182,7 @@ mac-word-plugin-install-folder-missing =
     }
 
 integration-upgrade-template-title = Plugin Update Available
+integration-upgrade-template-faster = An update to the { -app-name } plugin for Word makes updating citations much faster, especially in long documents. You’ll need to restart Word after updating.
 integration-upgrade-template-outdated = The { -app-name } plugin for { $client } is outdated.
 integration-upgrade-template-update-button = Update Plugin
 
