@@ -1080,6 +1080,21 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Wrap a URL in a quoted CSS url() with `"`, `\`, and line breaks escaped, so nothing in it
+	 * (e.g., `a");background:url("https://…`) can end it early
+	 *
+	 * @param {String} url
+	 * @return {String}
+	 */
+	cssURL: function (url) {
+		let escaped = String(url)
+			.replace(/["\\]/g, "\\$&")
+			.replace(/[\n\r\f]/g, c => "\\" + c.charCodeAt(0).toString(16) + " ");
+		return `url("${escaped}")`;
+	},
+	
+	
+	/**
 	 * A generator that yields promises that delay for the given intervals
 	 *
 	 * @param {Array<Integer>} intervals - An array of intervals in milliseconds

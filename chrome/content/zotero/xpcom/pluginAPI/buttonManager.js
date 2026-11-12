@@ -290,8 +290,8 @@
 				let darkIcon = option.darkMenuIcon || option.menuIcon
 					|| option.darkIcon || option.icon;
 				if (lightIcon) {
-					elem.style.setProperty("--custom-menu-icon-light", `url("${lightIcon}")`);
-					elem.style.setProperty("--custom-menu-icon-dark", `url("${darkIcon}")`);
+					elem.style.setProperty("--custom-menu-icon-light", Zotero.Utilities.Internal.cssURL(lightIcon));
+					elem.style.setProperty("--custom-menu-icon-dark", Zotero.Utilities.Internal.cssURL(darkIcon));
 				}
 				popupElem.appendChild(elem);
 			}
@@ -567,11 +567,11 @@
 			}
 			if (canLoad) {
 				// The URLs are validated at registration (_resolveImageURLs)
-				icon.style.setProperty(prop, `url("${url}")`);
+				icon.style.setProperty(prop, Zotero.Utilities.Internal.cssURL(url));
 				return;
 			}
 			this._getIconDataURI(url)
-				.then(dataURI => icon.style.setProperty(prop, `url("${dataURI}")`))
+				.then(dataURI => icon.style.setProperty(prop, Zotero.Utilities.Internal.cssURL(dataURI)))
 				.catch(e => Zotero.logError(e));
 		}
 
