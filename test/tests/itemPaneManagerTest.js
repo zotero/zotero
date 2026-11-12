@@ -170,16 +170,34 @@ describe("Zotero.ItemPaneManager", function () {
 		}
 
 		it("should render the row's current value on refreshInfoRow", async function () {
-			await selectNewItem();
+			let firstItem = await selectNewItem();
 			let rowID = await registerRow();
-			let valueElem = rowValue(rowID);
-			let oldValue = valueElem.value;
-			// With no onSetData the edit goes nowhere; a refresh renders what onGetData says
-			valueElem.value = "TEST CUSTOM ROW EDITED";
-			let refreshed = waitForNotifierEvent("refresh", "infobox");
-			plugin.run(rowID => Zotero.ItemPaneManager.refreshInfoRow(rowID), rowID);
-			await refreshed;
-			assert.equal(valueElem.value, oldValue);
+			let first = ZoteroPane.libraryView;
+			let secondTabID = win.Zotero_Tabs.addLibraryTab();
+			let other = await loadZoteroPane();
+			try {
+				let second = await ZoteroPane.waitForLibraryView(secondTabID);
+				let secondItem = await createDataObject("item");
+				let otherItem = await createDataObject("item");
+				await ZoteroPane.selectItems([secondItem.id], { libraryView: second, inLibraryRoot: true });
+				await other.ZoteroPane.selectItem(otherItem.id);
+				let cases = [[first, firstItem], [second, secondItem], [other.ZoteroPane.libraryView, otherItem]];
+				let valueFor = view => view.itemPane._itemDetails.getPane("info")
+					.querySelector(`[data-custom-row-id="${CSS.escape(rowID)}"] .value`);
+				// With no onSetData the edits go nowhere; every view refreshes from its own item.
+				for (let [view] of cases) valueFor(view).value = "TEST CUSTOM ROW EDITED";
+				let refreshed = waitForNotifierEvent("refresh", "infobox");
+				plugin.run(rowID => Zotero.ItemPaneManager.refreshInfoRow(rowID), rowID);
+				await refreshed;
+				for (let [view, item] of cases) {
+					assert.equal(valueFor(view)?.value, String(item.id), `value for ${view.tabID}`);
+				}
+			}
+			finally {
+				await win.Zotero_Tabs.select(first.tabID);
+				win.Zotero_Tabs.close(secondTabID);
+				other.close();
+			}
 		});
 
 		// https://github.com/zotero/zotero/issues/4874
