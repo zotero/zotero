@@ -34,29 +34,9 @@ const { NOT_FOUND, INVALID_PARAMS } = PluginRequestError.codes;
  */
 const WINDOW_TYPES = Object.freeze({
 	mainWindow: "navigator:browser",
-	// Compatibility filters on the selected tab of a main window
-	readerWindow: "navigator:browser",
-	noteWindow: "navigator:browser",
 	preferencePane: "zotero:pref",
 	pluginWindow: "zotero:pluginWindow",
 });
-
-// Enumerate each chrome window once when no compatibility filter is requested.
-const WINDOW_TYPES_CANONICAL = Object.freeze(["mainWindow", "preferencePane", "pluginWindow"]);
-
-/** Match compatibility window types against the selected tab, including unloaded tabs. */
-function matchesWindowType(win, type) {
-	if (win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
-		return false;
-	}
-	let tabType = type === "readerWindow" ? "reader" : type === "noteWindow" ? "note" : null;
-	return !tabType || win.Zotero_Tabs?.getTabInfo().type === tabType;
-}
-
-function getWindows(type) {
-	return Array.from(Services.wm.getEnumerator(WINDOW_TYPES[type]))
-		.filter(win => !Cu.isDeadWrapper(win) && !win.closed && matchesWindowType(win, type));
-}
 
 // Set on a plugin window's root element by PluginWindow.init()
 const PLUGIN_WINDOW_OWNER_ATTR = "data-plugin-id";
@@ -113,7 +93,7 @@ function getWindow(windowID, type, callerPluginID) {
 	if (!win || (callerPluginID && !canAccessWindow(win, callerPluginID))) {
 		throw new PluginRequestError(NOT_FOUND, `No window with ID ${windowID}`);
 	}
-	if (type && !matchesWindowType(win, type)) {
+	if (type && win.document.documentElement.getAttribute("windowtype") !== WINDOW_TYPES[type]) {
 		throw new PluginRequestError(NOT_FOUND, `Window ${windowID} is not a ${type}`);
 	}
 	return win;
@@ -203,9 +183,6 @@ function matchesTabType(tabTypes, tabType, tabSubType) {
 
 const WindowUtils = Object.freeze({
 	WINDOW_TYPES,
-	WINDOW_TYPES_CANONICAL,
-	getWindows,
-	matchesWindowType,
 	OPENABLE_TYPES,
 	OPENABLE_WINDOW_TYPES,
 	getWindowID,

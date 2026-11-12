@@ -2840,10 +2840,10 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, primaryViewState, secondViewState, preventJumpback, window: ownerWindow, mainWindow } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, primaryViewState, secondViewState, preventJumpback, window: ownerWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = ownerWindow || mainWindow || Zotero.getMainWindow();
+		let win = ownerWindow || Zotero.getMainWindow();
 
 		await library.waitForDataLoad('item');
 

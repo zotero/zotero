@@ -43,10 +43,10 @@ Zotero.Notes = new function () {
 	 * @returns {Promise<{ instance: Zotero.EditorInstance | null, tabID: string, win: Window }>}
 	 * The editor is null for a background tab, which stays unloaded.
 	 */
-	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey, window: ownerWindow, mainWindow } = {}) {
+	this.open = async function (itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, preventJumpback, parentItemKey, window: ownerWindow } = {}) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
-		let win = ownerWindow || mainWindow || Zotero.getMainWindow();
+		let win = ownerWindow || Zotero.getMainWindow();
 
 		if (!win) {
 			openInWindow = true;

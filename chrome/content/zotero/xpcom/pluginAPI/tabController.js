@@ -337,7 +337,7 @@
 				tabIndex: index,
 				openInBackground: background,
 				allowDuplicate,
-				mainWindow: win,
+				window: win,
 			});
 			if (!background) {
 				// Resolve once the content has loaded; a background tab stays unloaded

@@ -58,7 +58,8 @@ describe("Plugin Zotero.NotifierManager", function () {
 		try {
 			// The same cleanup the shared manager invokes on plugin shutdown.
 			assert.deepEqual(await Zotero.NotifierManager._manager._unregisterByPluginID(plugin.id), [ownID]);
-			await Zotero.Notifier.trigger("modify", "item", []);
+			// This checks observer ownership, independently of any pending notifier transaction.
+			await Zotero.Notifier.trigger("modify", "item", [], {}, true);
 			assert.equal(plugin.eval("calls"), 0);
 			assert.equal(other.eval("calls"), 1);
 			assert.equal(calls, 1);
@@ -326,5 +327,38 @@ describe("Plugin Zotero.NotifierManager", function () {
 		assert.ok(hasItemID, "extraData should contain deleted item ID");
 
 		plugin.eval("Zotero.NotifierManager.unregisterObserver(_observerID)");
+	});
+
+	it("should identify each tab notification's window with a usable controller ID", async function () {
+		plugin.load(["default", "dataRead", "tab"]);
+		let notifications = [];
+		plugin.expose("record", data => notifications.push(data));
+		assert.isString(plugin.run(() => Zotero.NotifierManager.registerObserver({
+			observerID: "tab-windows", types: ["tab"], onNotify: data => record(data),
+		})));
+		let windows = [];
+		try {
+			for (let i = 0; i < 2; i++) {
+				let win = await loadZoteroPane();
+				windows.push(win);
+				let windowID = win.browsingContext.id;
+				let { tabID } = await requestResult(plugin.run(windowID => Zotero.TabController.command("openTab", {
+					windowID, type: "library", background: true,
+				}), windowID));
+				await waitForCallback(() => notifications.some(data => data.event === "add" && data.ids.includes(tabID)), 20, 5);
+				let event = notifications.find(data => data.event === "add" && data.ids.includes(tabID));
+				let data = event.extraData[tabID];
+				assert.equal(data.windowID, windowID);
+				assert.notProperty(data, "browsingContextID");
+				let result = await requestResult(plugin.run(windowID => Zotero.TabController.query("tabs", { windowID }), data.windowID));
+				assert.include(result.tabs.map(tab => tab.tabID), tabID);
+			}
+		}
+		finally {
+			for (let win of windows) {
+				win.close();
+			}
+			await Zotero.DB.waitForTransaction();
+		}
 	});
 });
