@@ -19,22 +19,54 @@ describe("Zotero.WindowResourceManager", function () {
 		await Zotero.WindowResourceManager._manager._unregisterByPluginID(plugin.id);
 	});
 
-	it("should register and unregister an FTL resource", async function () {
-		// preferences.ftl is not loaded by default in the main window
-		let resourceID = plugin.run(() => Zotero.WindowResourceManager.registerResource({
-			resourceID: "test-ftl",
-			target: "mainWindow",
-			type: "ftl",
-			url: "preferences.ftl",
-		}));
-		assert.isString(resourceID);
+	function registerResource(target = "mainWindow") {
+		return plugin.run(target => Zotero.WindowResourceManager.registerResource({
+			resourceID: "test-ftl", target, type: "ftl", url: "preferences.ftl",
+		}), target);
+	}
 
-		// The strings resolve in the open window
+	it("should reject an unsupported window target", function () {
+		assert.isFalse(registerResource("unknown"));
+	});
+
+	it("should register and remove an FTL resource across open main windows", async function () {
+		let attachment = await importFileAttachment("test.pdf");
+		let { win: readerWin } = await Zotero.Reader.open(attachment.id, null, { window: win, openInWindow: true });
+		try {
+			let resourceID = registerResource();
+			assert.isString(resourceID);
+			let l10n = new Localization(["preferences.ftl"], true);
+			let id = "preferences-file-renaming-title";
+			let expected = l10n.formatValueSync(id);
+			for (let targetDoc of [doc, readerWin.document]) {
+				assert.equal(await targetDoc.l10n.formatValue(id), expected);
+			}
+			assert.isTrue(plugin.run(id => Zotero.WindowResourceManager.unregisterResource(id), resourceID));
+			for (let targetDoc of [doc, readerWin.document]) {
+				assert.notEqual(await targetDoc.l10n.formatValue(id), expected);
+			}
+		}
+		finally {
+			readerWin.close();
+		}
+	});
+
+	it("should apply registered resources to windows opened later", async function () {
+		assert.isString(registerResource());
 		let l10n = new Localization(["preferences.ftl"], true);
-		let expected = l10n.formatValueSync("preferences-file-renaming-title");
-		assert.equal(await doc.l10n.formatValue("preferences-file-renaming-title"), expected);
-
-		assert.isTrue(plugin.run(id => Zotero.WindowResourceManager.unregisterResource(id), resourceID));
-		assert.notExists(doc.querySelector(`link[href="preferences.ftl"]`), "the FTL link goes with it");
+		let id = "preferences-file-renaming-title";
+		for (let type of ["reader", "note"]) {
+			let item = type === "reader"
+				? await importFileAttachment("test.pdf")
+				: await createDataObject("item", { itemType: "note" });
+			let opener = type === "reader" ? Zotero.Reader : Zotero.Notes;
+			let { win: itemWin } = await opener.open(item.id, null, { window: win, openInWindow: true });
+			try {
+				assert.equal(await itemWin.document.l10n.formatValue(id), l10n.formatValueSync(id));
+			}
+			finally {
+				itemWin.close();
+			}
+		}
 	});
 });

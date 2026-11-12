@@ -50,7 +50,6 @@
 	 * @property {WindowType} type
 	 * @property {string} title
 	 * @property {boolean} focused
-	 * @property {number} [itemID] - The reader or note item for readerWindow and noteWindow
 	 * @property {string} [pluginID] - The owning plugin for pluginWindow
 	 */
 
@@ -190,10 +189,10 @@
 		 * @returns {WindowControllerQueryResults["windows"]}
 		 */
 		_queryWindows(type, pluginID) {
-			let types = type ? [type] : lazy.WindowUtils.WINDOW_TYPES_CANONICAL;
+			let types = type ? [type] : Object.keys(lazy.WindowUtils.WINDOW_TYPES);
 			let windows = [];
 			for (let windowType of types) {
-				for (let win of lazy.WindowUtils.getWindows(windowType)) {
+				for (let win of Services.wm.getEnumerator(lazy.WindowUtils.WINDOW_TYPES[windowType])) {
 					if (Cu.isDeadWrapper(win) || win.closed
 							|| (pluginID && !lazy.WindowUtils.canAccessWindow(win, pluginID))) {
 						continue;
@@ -216,10 +215,7 @@
 				title: win.document.title,
 				focused: Services.focus.activeWindow === win,
 			};
-			if (type === "readerWindow" || type === "noteWindow") {
-				info.itemID = win.Zotero_Tabs.getTabInfo().data?.itemID;
-			}
-			else if (type === "pluginWindow") {
+			if (type === "pluginWindow") {
 				info.pluginID = lazy.WindowUtils.getPluginWindowOwner(win);
 			}
 			return info;

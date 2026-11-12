@@ -23,9 +23,11 @@ describe("Zotero.ReaderManager", function () {
 			&& !readerBrowser.contentDocument.nodePrincipal.isSystemPrincipal, 10, 2);
 	});
 
-	after(function () {
+	after(async function () {
 		readerBrowser.remove();
 		win.close();
+		await Zotero.Promise.delay(0);
+		await Zotero.DB.waitForTransaction();
 	});
 
 	beforeEach(function () {
@@ -175,6 +177,39 @@ describe("Zotero.ReaderManager", function () {
 
 			assert.isTrue(plugin.run(id => Zotero.ReaderManager.unregisterContextMenuItem(id), menuItemID));
 			assert.lengthOf(dispatchReaderEvent("createAnnotationContextMenu"), 0);
+		});
+
+		it("should report the reader's current window and tab in context-menu callbacks", async function () {
+			let menuItemID = plugin.run(() => Zotero.ReaderManager.registerContextMenuItem({
+				menuItemID: "reader-context", target: "annotationContextMenu", label: "Read context",
+				onCommand: context => report("onCommand", context),
+			}));
+			assert.isString(menuItemID);
+			let attachment = await importFileAttachment("test.pdf");
+			let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
+			await reader._initPromise;
+			let target = await loadZoteroPane();
+			try {
+				for (let owner of [win, target]) {
+					if (owner !== win) {
+						let tabID = await win.Zotero_Tabs.moveToWindow(reader.tabID, owner, 0);
+						reader = Zotero.Reader.getByTabID(tabID);
+						await reader._initPromise;
+					}
+					log.expect("onCommand");
+					let items = dispatchReaderEvent("createAnnotationContextMenu", { reader });
+					assert.lengthOf(items, 1);
+					Cu.waiveXrays(items[0]).onCommand();
+					let context = await log.get("onCommand");
+					assert.equal(context.windowID, owner.browsingContext.id);
+					assert.equal(context.tabID, owner.Zotero_Tabs.selectedID);
+					assert.equal(context.itemID, attachment.id);
+				}
+			}
+			finally {
+				target.close();
+				await Zotero.DB.waitForTransaction();
+			}
 		});
 
 		it("should apply onShowing label and disabled overrides", function () {

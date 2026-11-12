@@ -112,6 +112,33 @@ describe("Zotero.ButtonManager", function () {
 		assert.notExists(toolbarButtons().querySelector(`.${CSS.escape(buttonID)}`));
 	});
 
+	it("should pass the owning library tab and selection to a toolbar button's callback", async function () {
+		let first = ZoteroPane.libraryView;
+		let firstItem = await createDataObject("item");
+		let secondItem = await createDataObject("item");
+		await ZoteroPane.selectItems([firstItem.id], { libraryView: first, inLibraryRoot: true });
+		let buttonID = await registerButton();
+		let tabID = Zotero_Tabs.addLibraryTab();
+		try {
+			let second = await ZoteroPane.waitForLibraryView(tabID);
+			await ZoteroPane.selectItems([secondItem.id], { libraryView: second, inLibraryRoot: true });
+			for (let [view, item] of [[second, secondItem], [first, firstItem]]) {
+				log.expect("onCommand");
+				let button = buttonIn(view.querySelector("library-toolbar-buttons"), buttonID);
+				assert.exists(button);
+				button.dispatchEvent(new win.MouseEvent("command", { bubbles: true }));
+				let context = await log.get("onCommand");
+				assert.equal(context.windowID, win.browsingContext.id);
+				assert.equal(context.tabID, view.tabID);
+				assert.deepEqual(context.itemIDs, [item.id]);
+			}
+		}
+		finally {
+			Zotero_Tabs.select(first.tabID);
+			Zotero_Tabs.close(tabID);
+		}
+	});
+
 	it("should render a dropdown button and populate its menu", async function () {
 		log.expect("onCommand");
 		let refreshed = waitForNotifierEvent("refresh", "custom-button");

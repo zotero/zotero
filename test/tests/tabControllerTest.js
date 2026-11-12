@@ -9,8 +9,9 @@ describe("Zotero.TabController", function () {
 		await win.ZoteroPane.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
 	});
 
-	after(function () {
+	after(async function () {
 		win.close();
+		await Zotero.DB.waitForTransaction();
 	});
 
 	beforeEach(async function () {
@@ -20,8 +21,15 @@ describe("Zotero.TabController", function () {
 		libraryTabID = tabs.find(t => t.type === "library").tabID;
 	});
 
-	afterEach(function () {
-		closeItemTabs(win);
+	afterEach(async function () {
+		let tabs = win.Zotero_Tabs;
+		await tabs.select(libraryTabID);
+		await win.ZoteroPane.waitForLibraryView(libraryTabID);
+		let otherIDs = tabs._tabs.filter(tab => tab.id !== libraryTabID).map(tab => tab.id);
+		if (otherIDs.length) {
+			tabs.close(otherIDs);
+		}
+		await win.ZoteroPane.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
 	});
 
 	// A request from the plugin's sandbox, its response as plain data
@@ -49,10 +57,6 @@ describe("Zotero.TabController", function () {
 		let { queries, commands } = Zotero.TabController._tabController.requestNames;
 		assert.sameMembers(queries, ["tabs"]);
 		assert.sameMembers(commands, ["selectTab", "closeTabs", "moveTab", "selectItems", "selectCollectionsOrLibraries", "openTab"]);
-	});
-
-	it("should find the library tab by type", function () {
-		assert.equal(libraryTabID, "zotero-pane");
 	});
 
 	it("should require a window ID on every request", async function () {
@@ -145,6 +149,14 @@ describe("Zotero.TabController", function () {
 		assert.sameMembers(win.ZoteroPane.getSelectedItems(true, { libraryTabOnly: true }), [item1.id]);
 
 		assert.deepEqual(await requestResult(command("selectItems", { windowID, itemIDs: [] })), { selected: false });
+
+		let { tabID } = await requestResult(command("openTab", { windowID, type: "library" }));
+		assert.deepEqual(await requestResult(command("selectItems", {
+			windowID, tabID: libraryTabID, itemIDs: [item2.id], noTabSwitch: true, inLibraryRoot: true,
+		})), { selected: true });
+		let result = await requestResult(query("tabs", { windowID }));
+		assert.equal(result.selectedTabID, tabID);
+		assert.deepEqual(result.tabs.find(tab => tab.tabID === libraryTabID).itemIDs, [item2.id]);
 	});
 
 	it("should select collections or libraries by type and IDs", async function () {
@@ -169,6 +181,15 @@ describe("Zotero.TabController", function () {
 		let rows = win.ZoteroPane.getCollectionTreeRows();
 		assert.lengthOf(rows, 1);
 		assert.isTrue(rows[0].isLibrary());
+
+		let { tabID } = await requestResult(command("openTab", { windowID, type: "library", background: true }));
+		assert.deepEqual(await requestResult(command("selectCollectionsOrLibraries", {
+			windowID, tabID, type: "collection", ids: [collection1.id],
+		})), { selected: true });
+		let result = await requestResult(query("tabs", { windowID }));
+		assert.equal(result.selectedTabID, libraryTabID);
+		assert.deepEqual(result.tabs.find(tab => tab.tabID === tabID).collectionIDs, [collection1.id]);
+		assert.isEmpty(result.tabs.find(tab => tab.tabID === libraryTabID).collectionIDs);
 	});
 
 	it("should fail on unknown targets and respect tab close and move flags", async function () {
@@ -184,6 +205,10 @@ describe("Zotero.TabController", function () {
 		}
 		await requestError(command("moveTab", { windowID, tabID: "nope", index: 0 }), codes.NOT_FOUND);
 		await requestError(command("selectItems", { windowID, itemIDs: [-1] }), codes.NOT_FOUND);
+		let note = await createDataObject("item", { itemType: "note" });
+		let { tabID } = await requestResult(command("openTab", { windowID, type: "note", itemID: note.id }));
+		await requestError(command("selectItems", { windowID, tabID, itemIDs: [note.id] }), codes.INVALID_PARAMS);
+		await requestError(command("selectItems", { windowID, tabID: "missing", itemIDs: [note.id] }), codes.NOT_FOUND);
 		await requestError(command("selectCollectionsOrLibraries", { windowID, type: "nope", ids: [1] }), codes.INVALID_PARAMS);
 		await requestError(command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [999999] }), codes.NOT_FOUND);
 		await requestError(command("selectCollectionsOrLibraries", { windowID, type: "collection", ids: [] }), codes.INVALID_PARAMS);
@@ -237,5 +262,74 @@ describe("Zotero.TabController", function () {
 		await requestError(command("openTab", { windowID, type: "unsupported", itemID: note.id }), codes.INVALID_PARAMS);
 		await requestError(command("openTab", { windowID, type: "note", itemID: note.id, index: -1 }), codes.INVALID_PARAMS);
 		await requestError(command("openTab", { windowID: -1, type: "note", itemID: note.id }), codes.NOT_FOUND);
+	});
+
+	it("should open, describe, select, move and close library tabs", async function () {
+		let first = await createDataObject("collection");
+		let second = await createDataObject("collection");
+		await requestResult(command("selectCollectionsOrLibraries", {
+			windowID, type: "collection", ids: [first.id],
+		}));
+		let { tabID } = await requestResult(command("openTab", {
+			windowID, type: "library", background: true, index: 0,
+			state: { collections: ["C" + second.id] },
+		}));
+		let { tabs, selectedTabID } = await requestResult(query("tabs", { windowID }));
+		assert.equal(tabs[0].tabID, tabID);
+		assert.equal(tabs[0].state, "unloaded");
+		assert.deepEqual(tabs[0].collectionIDs, [second.id]);
+		assert.deepEqual(tabs[0].libraryIDs, [second.libraryID]);
+		assert.equal(selectedTabID, libraryTabID);
+
+		await requestResult(command("selectTab", { windowID, tabID }));
+		tabs = await waitForTabState(tabID, "loaded");
+		assert.deepEqual(tabs.find(tab => tab.tabID === libraryTabID).collectionIDs, [first.id]);
+		assert.deepEqual(tabs.find(tab => tab.tabID === tabID).collectionIDs, [second.id]);
+
+		await requestResult(command("moveTab", { windowID, tabID: libraryTabID, index: 0 }));
+		({ tabs } = await requestResult(query("tabs", { windowID })));
+		assert.equal(tabs[0].tabID, libraryTabID);
+		await requestResult(command("closeTabs", { windowID, tabIDs: [tabID] }));
+		({ tabs } = await requestResult(query("tabs", { windowID })));
+		assert.deepEqual(tabs.map(tab => tab.tabID), [libraryTabID]);
+	});
+
+	it("should select collections in a window that has only a reader tab", async function () {
+		let collection = await createDataObject("collection");
+		let attachment = await importFileAttachment("test.pdf");
+		let { win: readerWin } = await Zotero.Reader.open(attachment.id, null, { window: win, openInWindow: true });
+		let readerWindowID = readerWin.browsingContext.id;
+		try {
+			let result = await requestResult(command("selectCollectionsOrLibraries", {
+				windowID: readerWindowID, type: "collection", ids: [collection.id],
+			}));
+			assert.isTrue(result.selected);
+			let { tabs, selectedTabID } = await requestResult(query("tabs", { windowID: readerWindowID }));
+			let library = tabs.find(tab => tab.type === "library");
+			assert.deepEqual(library.collectionIDs, [collection.id]);
+			assert.equal(selectedTabID, library.tabID);
+		}
+		finally {
+			readerWin.close();
+		}
+	});
+
+	it("should move a library tab to another window and return its new identity", async function () {
+		let { tabID: sourceTabID } = await requestResult(command("openTab", { windowID, type: "library" }));
+		let target = await loadZoteroPane();
+		try {
+			let moved = await requestResult(command("moveTab", {
+				windowID, tabID: sourceTabID, targetWindowID: target.browsingContext.id, index: 0,
+			}));
+			assert.equal(moved.windowID, target.browsingContext.id);
+			let source = await requestResult(query("tabs", { windowID }));
+			assert.notInclude(source.tabs.map(tab => tab.tabID), sourceTabID);
+			let destination = await requestResult(query("tabs", { windowID: moved.windowID }));
+			assert.equal(destination.selectedTabID, moved.tabID);
+			assert.equal(destination.tabs[0].tabID, moved.tabID);
+		}
+		finally {
+			target.close();
+		}
 	});
 });

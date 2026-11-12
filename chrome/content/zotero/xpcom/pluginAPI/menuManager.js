@@ -645,6 +645,7 @@
 
 			// Wrap getContext to include the default context variables
 			let defaultContext = {
+				windowID: popupElem.ownerDocument.defaultView.browsingContext.id,
 				get menuElem() {
 					return menuElemRef.deref();
 				},

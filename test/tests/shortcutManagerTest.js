@@ -147,9 +147,9 @@ describe("Zotero.ShortcutManager", function () {
 		assert.isEmpty(calls);
 	});
 
-	it("should scope reserved combos to their window target", function () {
+	it("should reserve main-window combos even for reader-only shortcuts", function () {
 		assert.isFalse(registerShortcut({ key: "1", modifiers: ["accel"] }), "tab jumping is reserved in the main window");
-		assert.isString(registerShortcut({ key: "1", modifiers: ["accel"], target: "readerWindow" }));
+		assert.isFalse(registerShortcut({ key: "1", modifiers: ["accel"], enableForTabTypes: ["reader"] }));
 	});
 
 	it("should report combo conflicts via checkShortcut", function () {
@@ -165,11 +165,10 @@ describe("Zotero.ShortcutManager", function () {
 		assert.equal(check("W", ["accel"], "mainWindow"), "RESERVED", "the static list (close tab)");
 		assert.equal(check("K", ["accel", "shift"], "mainWindow"), "REGISTERED", "a built-in registration (quicksearch)");
 		assert.equal(check("1", ["accel"], "mainWindow"), "RESERVED", "tab jumping is main-window-only");
-		assert.equal(check("1", ["accel"], "readerWindow"), "NONE");
 	});
 
 	it("should reject an invalid or missing target", function () {
-		assert.isFalse(registerShortcut({ target: "main" }));
+		assert.isFalse(registerShortcut({ target: "unknown" }));
 		assert.isFalse(registerShortcut({ target: ["mainWindow"] }));
 		assert.isFalse(plugin.run(() => Zotero.ShortcutManager.registerShortcut({
 			shortcutID: "no-target-test",
@@ -179,11 +178,9 @@ describe("Zotero.ShortcutManager", function () {
 		})));
 	});
 
-	it("should fire in a reader window with the readerWindow target", async function () {
+	it("should fire in a reader-only main window using a tab-type filter", async function () {
 		log.expect("onCommand");
-		assert.isString(registerShortcut({ target: "readerWindow" }));
-		// The same combo registers separately per target
-		assert.isString(registerShortcut({ shortcutID: "main-side-test" }));
+		assert.isString(registerShortcut({ enableForTabTypes: ["reader/pdf"] }));
 		assert.isString(registerRecorder("mainOnly", { key: "E" }));
 
 		let pdfAttachment = await importFileAttachment("test.pdf");
@@ -340,5 +337,19 @@ describe("Zotero.ShortcutManager", function () {
 	it("should be exposed via the ui umbrella permission", function () {
 		plugin.load(["default", "ui"]);
 		assert.equal(plugin.run(() => typeof Zotero.ShortcutManager.registerShortcut), "function");
+	});
+
+	it("should dispatch a shortcut only for its enabled tab types", async function () {
+		assert.isString(registerRecorder("reader", { enableForTabTypes: ["reader/pdf"] }));
+		assert.isFalse(dispatchKey("y", { accel: true, alt: true }).defaultPrevented);
+		assert.isEmpty(calls);
+		let attachment = await importFileAttachment("test.pdf");
+		let { instance: reader } = await Zotero.Reader.open(attachment.id, null, { window: win });
+		await reader._initPromise;
+		assert.isTrue(dispatchKey("y", { accel: true, alt: true }).defaultPrevented);
+		assert.deepEqual(calls, ["reader"]);
+		Zotero_Tabs.select("zotero-pane");
+		assert.isFalse(dispatchKey("y", { accel: true, alt: true }).defaultPrevented);
+		assert.deepEqual(calls, ["reader"]);
 	});
 });
