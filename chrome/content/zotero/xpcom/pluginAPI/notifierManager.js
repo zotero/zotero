@@ -62,7 +62,18 @@
 			try {
 				addedOption.notifierID = Zotero.Notifier.registerObserver(
 					{
-						notify: (event, type, ids, extraData) => addedOption.onNotify({ event, type, ids, extraData }),
+						notify: (event, type, ids, extraData) => {
+							if (type === "tab" && extraData) {
+								extraData = Object.fromEntries(Object.entries(extraData).map(([id, data]) => {
+									if (!data || !Number.isInteger(data.browsingContextID)) {
+										return [id, data];
+									}
+									let { browsingContextID, ...rest } = data;
+									return [id, { ...rest, windowID: browsingContextID }];
+								}));
+							}
+							return addedOption.onNotify({ event, type, ids, extraData });
+						},
 					},
 					addedOption.types, mainKey, addedOption.priority,
 				);
