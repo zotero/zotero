@@ -36,7 +36,6 @@
 	const VALID_TARGETS = [
 		"mainWindow",
 		"preferencePane",
-		"readerWindow",
 	];
 
 	const VALID_TYPES = [

@@ -66,8 +66,7 @@
 	 * @typedef ReaderContext
 	 * @type {object}
 	 * @property {number} [itemID] - The itemID of the reader's attachment
-	 * @property {string} [tabID] - The reader tab ID, or undefined for a reader in
-	 * a separate window
+	 * @property {string} tabID - The reader tab ID, including readers in their own main window
 	 * @property {string} [type] - The reader type: "pdf", "epub", or "snapshot"
 	 * @property {object} [params] - Event parameters, e.g. `{ annotation }` for
 	 * annotation-scoped sections and menus
@@ -305,6 +304,7 @@
 			try {
 				context.itemID = reader?.itemID;
 				context.tabID = reader?.tabID;
+				context.windowID = reader?._window?.browsingContext.id;
 				context.type = reader?.type;
 			}
 			catch (e) {

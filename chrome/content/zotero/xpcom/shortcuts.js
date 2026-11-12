@@ -28,7 +28,6 @@
 	const lazy = {};
 	ChromeUtils.defineESModuleGetters(lazy, {
 		ShortcutUtils: "resource://gre/modules/ShortcutUtils.sys.mjs",
-		WindowUtils: "chrome://zotero/content/xpcom/plugins/window.mjs",
 	});
 
 	Zotero.Shortcuts = {
@@ -127,11 +126,6 @@
 						return false;
 					}
 					return win.ZoteroPane.handleShortcutCommand(command, event);
-				};
-			},
-			readerWindow() {
-				return () => {
-					throw new Error("Reader window default handlers are not implemented");
 				};
 			},
 		},
@@ -340,7 +334,7 @@
 				return;
 			}
 			// Every candidate combo's registrations fire
-			let registrations = combos.flatMap(combo => this._registrationsFor(combo, target, win));
+			let registrations = combos.flatMap(combo => this._registrationsFor(combo, target));
 			let handled = false;
 			// Every handler fires, so behavior can't depend on plugin load order
 			for (let registration of registrations) {
@@ -360,12 +354,9 @@
 
 		// Registrations matching a (combo, target), in registration order. A snapshot,
 		// so handlers may unregister shortcuts during dispatch
-		_registrationsFor(combo, target, win) {
+		_registrationsFor(combo, target) {
 			return [...this._registrations.values()].filter((registration) => {
-				let matchesTarget = registration.targets.has(target)
-					|| (target === "mainWindow" && win && [...registration.targets].some(
-						type => lazy.WindowUtils.matchesWindowType(win, type)));
-				return registration.combo == combo && matchesTarget;
+				return registration.combo == combo && registration.targets.has(target);
 			});
 		},
 
@@ -522,10 +513,6 @@
 						combos.push(`accel+control+alt+${i}`);
 					}
 				}
-			}
-			else if (target == "readerWindow" && Zotero.isMac) {
-				// The Window menu's focus-Library key in secondary windows (platformKeys.js)
-				combos.push("accel+shift+L");
 			}
 			let set = new Set(combos.map(combo => this._canonicalizeComboString(combo)));
 			this._staticReserved.set(target, set);

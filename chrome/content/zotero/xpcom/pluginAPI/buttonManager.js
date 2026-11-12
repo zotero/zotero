@@ -89,7 +89,7 @@
 	 * @type {object}
 	 * @property {string} tabType - The tab content type, e.g. "library" or "reader"
 	 * @property {string} [tabSubType] - The tab subtype, e.g. the reader type ("pdf")
-	 * @property {string} [tabID] - The tab ID. Undefined for a reader in a separate window
+	 * @property {string} tabID - The tab ID, including readers in their own main window
 	 * @property {number[]} itemIDs - The IDs of the items the button acts on: the selected
 	 * items for a library tab, or the tab's own item otherwise
 	 */

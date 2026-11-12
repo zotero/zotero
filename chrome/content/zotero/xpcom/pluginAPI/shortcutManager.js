@@ -35,7 +35,6 @@
 
 	const VALID_TARGETS = [
 		"mainWindow",
-		"readerWindow",
 	];
 
 	const NON_SHIFT_MODIFIERS = ["accel", "control", "alt"];
@@ -220,15 +219,6 @@
 		}
 
 		_getContext(win) {
-			// Standalone reader window: no tab bar, the reader is on the window
-			if (!win.Zotero_Tabs) {
-				let reader = win.reader;
-				return {
-					tabType: "reader",
-					tabSubType: reader?.type,
-					itemIDs: reader?.itemID ? [reader.itemID] : [],
-				};
-			}
 			let { id, type, subType, data } = win.Zotero_Tabs.getTabInfo();
 			let context = {
 				windowID: win.browsingContext.id,

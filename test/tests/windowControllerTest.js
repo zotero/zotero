@@ -48,13 +48,14 @@ describe("Zotero.WindowController", function () {
 
 	it("should list every window type when no type is given", async function () {
 		let windowTypes = plugin.run(() => Array.from(Zotero.WindowController.windowTypes));
+		assert.sameMembers(windowTypes, ["mainWindow", "preferencePane", "pluginWindow"]);
 		let { windows } = await requestResult(query("windows"));
 		assert.isTrue(windows.some(w => w.type === "mainWindow"));
 		assert.isTrue(windows.every(w => windowTypes.includes(w.type)));
 	});
 
 	it("should fail an unknown window type", async function () {
-		await requestError(query("windows", { type: "popup" }), codes.INVALID_PARAMS);
+		await requestError(query("windows", { type: "unknown" }), codes.INVALID_PARAMS);
 	});
 
 	it("should not open a plugin window for a privileged plugin", async function () {
@@ -222,6 +223,31 @@ describe("Zotero.WindowController", function () {
 			}
 		});
 
+		it("should read and toggle the selected library tab's pane without changing other tabs", async function () {
+			let first = ZoteroPane.libraryView;
+			let firstPane = first.getElement("zotero-collections-pane");
+			let wasCollapsed = firstPane.hasAttribute("collapsed");
+			firstPane.removeAttribute("collapsed");
+			let tabID = Zotero_Tabs.addLibraryTab();
+			try {
+				let second = await ZoteroPane.waitForLibraryView(tabID);
+				let secondPane = second.getElement("zotero-collections-pane");
+				secondPane.setAttribute("collapsed", "true");
+				let state = await requestResult(query("getLayoutState", { windowID }));
+				assert.isFalse(state.panes.start.open);
+				await requestResult(command("togglePane", { windowID, pane: "start", open: true }));
+				assert.isFalse(secondPane.hasAttribute("collapsed"));
+				await requestResult(command("togglePane", { windowID, pane: "start", open: false }));
+				assert.isTrue(secondPane.hasAttribute("collapsed"));
+				assert.isFalse(firstPane.hasAttribute("collapsed"));
+			}
+			finally {
+				Zotero_Tabs.select(first.tabID);
+				Zotero_Tabs.close(tabID);
+				firstPane.toggleAttribute("collapsed", wasCollapsed);
+			}
+		});
+
 		it("should fail toggling an unknown pane or a pane of an unknown window", async function () {
 			await requestError(command("togglePane", { windowID, pane: "nope" }), codes.INVALID_PARAMS);
 			await requestError(command("togglePane", { windowID: -1, pane: "end" }), codes.NOT_FOUND);
@@ -234,20 +260,20 @@ describe("Zotero.WindowController", function () {
 		let opened = [];
 		try {
 			let { windowID: noteWindowID } = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
-			let noteWin = WindowUtils.getWindow(noteWindowID, "noteWindow");
+			let noteWin = WindowUtils.getWindow(noteWindowID, "mainWindow");
 			opened.push(noteWin);
 			assert.equal(noteWin.Zotero_Tabs.getTabInfo().data.itemID, note.id);
-			let { windows } = await requestResult(query("windows", { type: "noteWindow" }));
-			assert.equal(windows.find(w => w.windowID === noteWindowID).itemID, note.id);
+			let { windows } = await requestResult(query("windows", { type: "mainWindow" }));
+			assert.equal(windows.find(w => w.windowID === noteWindowID).type, "mainWindow");
 			let again = await requestResult(command("openWindow", { type: "note", itemID: note.id }));
 			assert.equal(again.windowID, noteWindowID, "an open note window is reused");
 
 			let { windowID: readerWindowID } = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));
-			let readerWin = WindowUtils.getWindow(readerWindowID, "readerWindow");
+			let readerWin = WindowUtils.getWindow(readerWindowID, "mainWindow");
 			opened.push(readerWin);
 			assert.equal(readerWin.Zotero_Tabs.getTabInfo().data.itemID, attachment.id);
-			({ windows } = await requestResult(query("windows", { type: "readerWindow" })));
-			assert.equal(windows.find(w => w.windowID === readerWindowID).itemID, attachment.id);
+			({ windows } = await requestResult(query("windows", { type: "mainWindow" })));
+			assert.equal(windows.find(w => w.windowID === readerWindowID).type, "mainWindow");
 			again = await requestResult(command("openWindow", { type: "reader", itemID: attachment.id }));
 			assert.equal(again.windowID, readerWindowID, "an open reader window is reused");
 
@@ -368,7 +394,7 @@ describe("Zotero.WindowController", function () {
 			let e = assert.throws(() => WindowUtils.getWindow(-1), /No window with ID/);
 			assert.instanceOf(e, PluginRequestError);
 			assert.equal(e.code, codes.NOT_FOUND);
-			e = assert.throws(() => WindowUtils.getWindow(windowID, "readerWindow"), /is not a readerWindow/);
+			e = assert.throws(() => WindowUtils.getWindow(windowID, "preferencePane"), /is not a preferencePane/);
 			assert.equal(e.code, codes.NOT_FOUND);
 			assert.throws(() => WindowUtils.getMainWindow(-1), /No window with ID/);
 			assert.strictEqual(WindowUtils.getMainWindow(windowID), win);
@@ -395,5 +421,21 @@ describe("Zotero.WindowController", function () {
 				pluginWin.close();
 			}
 		});
+	});
+
+	it("should create a main window on a requested collection without duplicating query results", async function () {
+		let collection = await createDataObject("collection");
+		let opened = await requestResult(command("openWindow", {
+			type: "mainWindow", state: { collections: ["C" + collection.id] },
+		}));
+		let target = WindowUtils.getWindow(opened.windowID);
+		try {
+			assert.deepEqual(target.ZoteroPane.getSelectedCollections(true), [collection.id]);
+			let { windows } = await requestResult(query("windows"));
+			assert.lengthOf(windows.filter(w => w.windowID === opened.windowID), 1);
+		}
+		finally {
+			target.close();
+		}
 	});
 });
