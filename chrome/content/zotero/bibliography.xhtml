@@ -12,7 +12,7 @@
 	class="bibliography-window"
 	data-l10n-id="bibliography-window"
 	drawintitlebar-platforms="mac"
-	onload="Zotero_File_Interface_Bibliography.init()">
+	onload="Zotero_File_Interface_Bibliography.init();">
 <dialog
 	buttons="cancel,accept"
 	class="zotero-dialog-window"
@@ -23,6 +23,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 		Services.scriptloader.loadSubScript('chrome://zotero/content/elements/styleConfigurator.js', this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/bibliography.js", this);
+		
 	</script>
 	<html:link rel="localization" href="zotero.ftl"/>
 	
@@ -35,7 +36,7 @@
 				<radio id="bibliography" data-l10n-id="bibliography-outputMode-bibliography"/>
 			</radiogroup>
 		</groupbox>
-		<groupbox class="radio-col">
+		<groupbox class="radio-row">
 			<html:label data-l10n-id="bibliography-outputMethod-label"></html:label>
 			<radiogroup id="output-method-radio">
 				<radio id="save-as-rtf" data-l10n-id="bibliography-outputMethod-saveAsRTF"/>
@@ -44,6 +45,7 @@
 				<radio id="print"  data-l10n-id="bibliography-outputMethod-print"/>
 			</radiogroup>
 		</groupbox>
+		<iframe id="zotero-csl-preview-box" flex="1" overflow="auto" type="content" />
 	</vbox>
 </dialog>
 </window>
