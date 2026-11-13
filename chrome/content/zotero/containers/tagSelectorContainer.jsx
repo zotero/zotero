@@ -247,11 +247,12 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 			return;
 		}
 		
-		// Ignore anything other than deletes in duplicates view
+		// Ignore anything other than deletes and restores in duplicates view
 		if (this.collectionTreeRows?.[0]?.isDuplicates()) {
 			switch (event) {
 				case 'delete':
 				case 'trash':
+				case 'restore':
 					break;
 				
 				default:
@@ -259,8 +260,8 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 			}
 		}
 		
-		// Ignore item events other than 'trash'
-		if (type == 'item' && event != 'trash') {
+		// Ignore item events other than 'trash' and 'restore'
+		if (type == 'item' && event != 'trash' && event != 'restore') {
 			return;
 		}
 		

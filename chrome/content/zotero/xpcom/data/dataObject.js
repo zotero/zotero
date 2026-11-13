@@ -1218,8 +1218,14 @@ Zotero.DataObject.prototype._saveData = function (env) {
 	
 	if (!env.options.skipNotifier && this._changedData.deleted !== undefined) {
 		Zotero.Notifier.queue('refresh', 'trash', this.libraryID, {}, env.options.notifierQueue);
-		if (!env.isNew && this._changedData.deleted) {
-			Zotero.Notifier.queue('trash', this._objectType, this.id, {}, env.options.notifierQueue);
+		if (!env.isNew) {
+			Zotero.Notifier.queue(
+				this._changedData.deleted ? 'trash' : 'restore',
+				this._objectType,
+				this.id,
+				{},
+				env.options.notifierQueue
+			);
 		}
 	}
 };

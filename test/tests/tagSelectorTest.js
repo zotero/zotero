@@ -613,6 +613,32 @@ describe("Tag Selector", function () {
 			assert.equal(getRegularTags().length, 0);
 		})
 		
+		it("should add a tag when an item in a collection is restored from the trash", async function () {
+			var promise = waitForTagSelector(win);
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			await promise;
+			
+			// Add trashed item with tag to collection
+			var item = await createDataObject('item', {
+				collections: [collection.id],
+				tags: ['A'],
+				deleted: true
+			});
+			
+			// Tag selector shouldn't show the trashed item's tag
+			assert.equal(getRegularTags().length, 0);
+			
+			// Restore item from trash
+			item.deleted = false;
+			promise = waitForTagSelector(win);
+			await item.saveTx();
+			await promise;
+			
+			// Tag selector should show the restored item's tag
+			assert.sameMembers(getRegularTags(), ['A']);
+		});
+		
 		it("shouldn't remove a tag when a tag is removed from an item in a collection in displayAllTags mode", async function () {
 			tagSelector.displayAllTags = true;
 			

@@ -382,6 +382,22 @@ describe("Zotero.DataObject", function () {
 			}
 		})
 		
+		it("should send 'trash' and 'restore' notifier events when trash status changes", async function () {
+			for (let type of types) {
+				let obj = await createDataObject(type);
+				
+				obj.deleted = true;
+				let promise = waitForNotifierEvent('trash', type);
+				await obj.saveTx();
+				assert.sameMembers((await promise).ids, [obj.id], type);
+				
+				obj.deleted = false;
+				promise = waitForNotifierEvent('restore', type);
+				await obj.saveTx();
+				assert.sameMembers((await promise).ids, [obj.id], type);
+			}
+		});
+		
 		it("should handle additional tag change in the middle of a save", async function () {
 			var item = await createDataObject('item');
 			item.setTags(['a']);

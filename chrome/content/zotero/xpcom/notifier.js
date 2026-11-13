@@ -125,7 +125,8 @@ Zotero.Notifier = new function () {
 	* Possible values:
 	*
 	* 	event: 'add', 'modify', 'delete', 'move' ('c', for changing parent),
-	*		'remove' (ci, it), 'refresh', 'redraw', 'trash', 'unreadCountUpdated', 'index',
+	*		'remove' (ci, it), 'refresh', 'redraw', 'trash', 'restore' (from trash),
+	*		'unreadCountUpdated', 'index',
 	 *		'pageChange' (file)
 	* 	type - 'collection', 'search', 'item', 'collection-item', 'item-tag', 'tag',
 	*		'group', 'relation', 'feed', 'feedItem', 'file'
@@ -389,7 +390,7 @@ Zotero.Notifier = new function () {
 		};
 		
 		var typeOrder = ['collection', 'search', 'item', 'collection-item', 'item-tag', 'tag'];
-		var eventOrder = ['add', 'modify', 'remove', 'move', 'delete', 'trash'];
+		var eventOrder = ['add', 'modify', 'remove', 'move', 'delete', 'trash', 'restore'];
 		
 		var queueTypes = Object.keys(queue);
 		queueTypes.sort(getSorter(typeOrder));
