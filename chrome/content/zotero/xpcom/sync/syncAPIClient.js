@@ -621,35 +621,31 @@ Zotero.Sync.APIClient.prototype = {
 	},
 
 
-	// Hidden prefs for Read Aloud custom endpoints:
-	//   extensions.zotero.reader.readAloud.customEndpoint
-	//     "{mode}=[url]". Empty/invalid falls back to the normal Zotero API
-	//     endpoint. Only "openai" is currently supported as a mode, where the
-	//     server must implement OpenAI's /audio/speech
-	//     (e.g. https://api.openai.com/v1).
+	// Hidden prefs for a custom Read Aloud endpoint, whose voices are offered
+	// in a separate Custom tier alongside the Zotero voices:
+	//   extensions.zotero.reader.readAloud.customEndpoint.url
+	//     Base URL (http/https) of a server implementing OpenAI's
+	//     /audio/speech API (e.g. https://api.openai.com/v1). Empty/invalid
+	//     disables the Custom tier.
 	//   extensions.zotero.reader.readAloud.customEndpoint.voices
-	//     Comma-separated voice IDs (openai mode only). Defaults to the
-	//     OpenAI TTS voice list.
+	//     Comma-separated voice IDs. Defaults to the OpenAI TTS voice list.
 	//   extensions.zotero.reader.readAloud.customEndpoint.apiKey
-	//     Sent as "Authorization: Bearer <key>" (openai mode only).
+	//     Sent as "Authorization: Bearer <key>"
 	//   extensions.zotero.reader.readAloud.customEndpoint.model
-	//     Model name sent in the request body (openai mode only).
+	//     Model name sent in the request body
 	_getReadAloudCustomEndpoint() {
-		let pref = Zotero.Prefs.get('reader.readAloud.customEndpoint');
-		if (!pref || typeof pref !== 'string') return null;
-		let match = pref.match(/^(\w+)=(.+)$/);
-		if (!match) return null;
-		let [, mode, url] = match;
-		if (mode !== 'openai') {
-			Zotero.debug(`Unsupported customEndpoint mode '${mode}'`);
-			return null;
-		}
+		let url = Zotero.Prefs.get('reader.readAloud.customEndpoint.url');
+		if (!url || typeof url !== 'string') return null;
+		let parsedURL;
 		try {
-			// eslint-disable-next-line no-new
-			new URL(url);
+			parsedURL = new URL(url);
 		}
 		catch {
-			Zotero.debug('Invalid customEndpoint pref value: ' + pref);
+			Zotero.debug('Invalid customEndpoint.url pref value: ' + url);
+			return null;
+		}
+		if (parsedURL.protocol !== 'http:' && parsedURL.protocol !== 'https:') {
+			Zotero.debug('customEndpoint.url must be an http or https URL: ' + url);
 			return null;
 		}
 		if (!url.endsWith('/')) {
@@ -658,24 +654,9 @@ Zotero.Sync.APIClient.prototype = {
 		let voicesPref = Zotero.Prefs.get('reader.readAloud.customEndpoint.voices');
 		let voices = typeof voicesPref === 'string'
 			? voicesPref.split(',').map(s => s.trim()).filter(Boolean)
-			: null;
-		let apiKey = Zotero.Prefs.get('reader.readAloud.customEndpoint.apiKey');
-		if (typeof apiKey !== 'string' || !apiKey) {
-			apiKey = null;
-		}
-		let model = Zotero.Prefs.get('reader.readAloud.customEndpoint.model');
-		if (typeof model !== 'string' || !model) {
-			model = 'gpt-4o-mini-tts';
-		}
-		return { mode, url, voices, apiKey, model };
-	},
-
-
-	async getReadAloudVoices() {
-		let custom = this._getReadAloudCustomEndpoint();
-		if (custom?.mode === 'openai') {
-			// Fall back to OpenAI's voice IDs
-			let voiceIDs = custom.voices ?? [
+			: [];
+		if (!voices.length) {
+			voices = [
 				'alloy',
 				'ash',
 				'ballad',
@@ -688,32 +669,69 @@ Zotero.Sync.APIClient.prototype = {
 				'shimmer',
 				'verse',
 			];
-			let voices = Object.fromEntries(voiceIDs.map(id => [id, { label: id }]));
-			// Derive a cache version from the endpoint and model so that
-			// changing either one invalidates previously cached audio
-			let cacheVersion = parseInt(
-				Zotero.Utilities.Internal.md5(custom.url + '|' + custom.model).slice(0, 8),
-				16
-			);
-			// OpenAI's TTS endpoint auto-detects language from the input
-			// text, so use the wildcard locale.
-			// The reader treats '*' as matching any language.
-			return {
-				voices: {
-					standard: [{
-						creditsPerMinute: 0,
-						segmentGranularity: 'sentence',
-						cacheVersion,
-						voices,
-						locales: { '*': voiceIDs },
-					}],
-				},
-				standardCreditsRemaining: null,
-				premiumCreditsRemaining: null,
-				devMode: false,
-			};
 		}
+		let apiKey = Zotero.Prefs.get('reader.readAloud.customEndpoint.apiKey');
+		if (typeof apiKey !== 'string' || !apiKey) {
+			apiKey = null;
+		}
+		let model = Zotero.Prefs.get('reader.readAloud.customEndpoint.model');
+		if (typeof model !== 'string' || !model) {
+			model = 'gpt-4o-mini-tts';
+		}
+		return { url, voices, apiKey, model };
+	},
 
+
+	/**
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.customOnly] - Only return voices from the custom
+	 *     endpoint, without contacting the Zotero API (e.g., when not logged in)
+	 */
+	async getReadAloudVoices({ customOnly = false } = {}) {
+		let custom = this._getReadAloudCustomEndpoint();
+		let customVoices = custom ? this._getReadAloudCustomVoices(custom) : null;
+		let customOnlyResult = {
+			voices: customVoices ? { custom: customVoices } : {},
+			standardCreditsRemaining: null,
+			premiumCreditsRemaining: null,
+			devMode: false,
+		};
+		if (customOnly) {
+			return customOnlyResult;
+		}
+		let result = await this._getReadAloudZoteroVoices();
+		if (customVoices) {
+			// Still offer custom voices if Zotero voices couldn't be loaded
+			if (result.error) {
+				return customOnlyResult;
+			}
+			result.voices.custom = customVoices;
+		}
+		return result;
+	},
+
+
+	_getReadAloudCustomVoices(custom) {
+		// Derive a cache version from the endpoint and model so that
+		// changing either one invalidates previously cached audio
+		let cacheVersion = parseInt(
+			Zotero.Utilities.Internal.md5(custom.url + '|' + custom.model).slice(0, 8),
+			16
+		);
+		// OpenAI's TTS endpoint auto-detects language from the input text,
+		// so use the wildcard locale, which the reader treats as matching
+		// any language
+		return [{
+			creditsPerMinute: 0,
+			segmentGranularity: 'sentence',
+			cacheVersion,
+			voices: Object.fromEntries(custom.voices.map(id => [id, { label: id }])),
+			locales: { '*': custom.voices },
+		}];
+	},
+
+
+	async _getReadAloudZoteroVoices() {
 		let url = this.baseURL + "tts/voices";
 		let params = new URLSearchParams();
 		params.set("lang", Services.locale.appLocaleAsBCP47);
@@ -764,48 +782,49 @@ Zotero.Sync.APIClient.prototype = {
 	},
 
 
-	async getReadAloudAudio(segment, voiceID) {
+	async getReadAloudCustomAudio(segment, voiceID) {
 		let custom = this._getReadAloudCustomEndpoint();
-		if (custom?.mode === 'openai') {
-			let text = segment === 'sample'
-				? "Isn't it nice to have a computer that will talk to you?"
-				: segment.text;
-			let headers = { "Content-Type": "application/json" };
-			if (custom.apiKey) {
-				headers.Authorization = `Bearer ${custom.apiKey}`;
-			}
-			try {
-				let xmlhttp = await Zotero.HTTP.request("POST", custom.url + "audio/speech", {
-					responseType: "blob",
-					headers,
-					body: JSON.stringify({
-						model: custom.model,
-						voice: voiceID,
-						input: text,
-						// eslint-disable-next-line camelcase
-						response_format: 'mp3',
-					}),
-					errorDelayMax: 8000,
-				});
-				return { audio: xmlhttp.response };
-			}
-			catch (e) {
-				Zotero.logError(e);
-
-				let error;
-				if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-					error = 'network';
-				}
-				else {
-					error = 'unknown';
-				}
-				return {
-					audio: null,
-					error,
-				};
-			}
+		if (!custom) {
+			return { audio: null, error: 'unknown' };
 		}
+		let text = segment === 'sample'
+			? "Isn't it nice to have a computer that will talk to you?"
+			: segment.text;
+		let headers = { "Content-Type": "application/json" };
+		if (custom.apiKey) {
+			headers.Authorization = `Bearer ${custom.apiKey}`;
+		}
+		try {
+			let xmlhttp = await Zotero.HTTP.request("POST", custom.url + "audio/speech", {
+				responseType: "blob",
+				headers,
+				body: JSON.stringify({
+					model: custom.model,
+					voice: voiceID,
+					input: text,
+					// eslint-disable-next-line camelcase
+					response_format: 'mp3',
+				}),
+				errorDelayMax: 8000,
+			});
+			let contentType = (xmlhttp.getResponseHeader('Content-Type') || '')
+				.split(';')[0].trim().toLowerCase();
+			if (!contentType.startsWith('audio/') && contentType !== 'application/octet-stream') {
+				throw new Error(`Unexpected Content-Type '${contentType}' from custom Read Aloud endpoint`);
+			}
+			return { audio: xmlhttp.response };
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return {
+				audio: null,
+				error: e instanceof Zotero.HTTP.BrowserOfflineException ? 'network' : 'unknown',
+			};
+		}
+	},
 
+
+	async getReadAloudAudio(segment, voiceID) {
 		let method;
 		let url;
 		let options = {
@@ -878,10 +897,6 @@ Zotero.Sync.APIClient.prototype = {
 
 
 	async getReadAloudCreditsRemaining() {
-		let custom = this._getReadAloudCustomEndpoint();
-		if (custom?.mode === 'openai') {
-			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
-		}
 		let uri = this.baseURL + "tts/credits";
 		try {
 			let xmlhttp = await this.makeRequest("GET", uri, {
@@ -902,10 +917,6 @@ Zotero.Sync.APIClient.prototype = {
 
 
 	async resetReadAloudCredits() {
-		let custom = this._getReadAloudCustomEndpoint();
-		if (custom?.mode === 'openai') {
-			return { standardCreditsRemaining: null, premiumCreditsRemaining: null };
-		}
 		let uri = this.baseURL + "tts/reset";
 		try {
 			let xmlhttp = await this.makeRequest("POST", uri, {
