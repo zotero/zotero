@@ -25,9 +25,9 @@ preferences-reader-open-in-new-window =
 preferences-reader-auto-disable-tool =
     .label = Turn off note, text, and image annotation tools after each use
 
-preferences-reflowable-text-title = Reflowable Text
-preferences-reflowable-text-intro = Customize the display of text within ebooks and Reading Mode. Additional appearance options can be set for each document within the reader.
-preferences-reflowable-text-font = Font:
+preferences-ebooks-reading-mode-title = Ebooks and Reading Mode
+preferences-ebooks-reading-mode-intro = Customize the display of text within ebooks and Reading Mode. Additional appearance options can be set for each document within the reader.
+preferences-ebooks-reading-mode-font = Font:
 preferences-reader-ebook-hyphenate =
     .label = Enable automatic hyphenation
 
