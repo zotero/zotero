@@ -51,31 +51,31 @@ describe('Zotero.SyncedSettings', function () {
 		});
 		
 		afterEach(async function () {
-			await Zotero.SyncedSettings.clear(libraryID, 'clientVersionTest');
+			await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
 		});
 		
 		it('should increment the library clientVersion when a setting is set outside a transaction', async function () {
 			let library = Zotero.Libraries.get(libraryID);
 			let versionBefore = library.clientVersion;
-			await Zotero.SyncedSettings.set(libraryID, 'clientVersionTest', 'a');
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
 			assert.isAbove(library.clientVersion, versionBefore);
 			assert.equal(
-				Zotero.SyncedSettings.getMetadata(libraryID, 'clientVersionTest').clientVersion,
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
 				library.clientVersion
 			);
 			assert.equal(
 				await Zotero.DB.valueQueryAsync(
 					"SELECT clientVersion FROM syncedSettings WHERE setting=? AND libraryID=?",
-					['clientVersionTest', libraryID]
+					['attachmentRenameTemplate', libraryID]
 				),
 				library.clientVersion
 			);
 			
 			versionBefore = library.clientVersion;
-			await Zotero.SyncedSettings.set(libraryID, 'clientVersionTest', 'b');
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'b');
 			assert.isAbove(library.clientVersion, versionBefore);
 			assert.equal(
-				Zotero.SyncedSettings.getMetadata(libraryID, 'clientVersionTest').clientVersion,
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
 				library.clientVersion
 			);
 		});
@@ -86,31 +86,31 @@ describe('Zotero.SyncedSettings', function () {
 			await Zotero.DB.executeTransaction(async () => {
 				item = createUnsavedDataObject('item');
 				await item.save();
-				await Zotero.SyncedSettings.set(libraryID, 'clientVersionTest', 'a');
+				await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
 			});
 			assert.equal(item.clientVersion, library.clientVersion);
 			assert.equal(
-				Zotero.SyncedSettings.getMetadata(libraryID, 'clientVersionTest').clientVersion,
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
 				library.clientVersion
 			);
 			await item.eraseTx();
 		});
 		
 		it('should load clientVersion from the database', async function () {
-			await Zotero.SyncedSettings.set(libraryID, 'clientVersionTest', 'a');
-			let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'clientVersionTest').clientVersion;
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
+			let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion;
 			await Zotero.SyncedSettings.loadAll(libraryID);
 			assert.equal(
-				Zotero.SyncedSettings.getMetadata(libraryID, 'clientVersionTest').clientVersion,
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
 				clientVersion
 			);
 		});
 		
 		it('should increment the library clientVersion when a setting is cleared', async function () {
 			let library = Zotero.Libraries.get(libraryID);
-			await Zotero.SyncedSettings.set(libraryID, 'clientVersionTest', 'a');
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
 			let versionBefore = library.clientVersion;
-			await Zotero.SyncedSettings.clear(libraryID, 'clientVersionTest');
+			await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
 			assert.isAbove(library.clientVersion, versionBefore);
 		});
 	});
