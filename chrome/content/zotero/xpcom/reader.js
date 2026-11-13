@@ -58,6 +58,16 @@ function getCustomThemes() {
 	return Array.isArray(customThemes) ? customThemes : [];
 }
 
+// Fluent messages for the undoable actions the reader reports
+const UNDO_ACTIONS = {
+	'add-annotations': 'undo-action-add-annotation',
+	'update-annotations': 'undo-action-edit-annotation',
+	'delete-annotations': 'undo-action-delete-annotation',
+	'convert-annotations': 'undo-action-convert-annotation',
+	'merge-annotations': 'undo-action-merge-annotations',
+};
+const UNDO_ACTION_FALLBACK = 'undo-action-edit-annotation';
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -444,6 +454,11 @@ class ReaderInstance {
 			onChangeSidebarView: (view) => {
 				Zotero.Prefs.set('reader.lastSidebarTab', view);
 			},
+			// Passing this hands undo/redo over to us, so leave it out when the
+			// undo history is disabled and let the reader keep handling its own
+			onChangeUndoHistory: Zotero.UndoHistory.isEnabled()
+				? history => this._updateUndoHistory(history)
+				: undefined,
 			onSetPopupPosition: (id, position) => {
 				this._setPopupPosition(id, position);
 			},
@@ -684,6 +699,8 @@ class ReaderInstance {
 			},
 		}, this._iframeWindow, { cloneFunctions: true }));
 
+		this._registerUndoHistoryProvider();
+
 		this._resolveInitPromise();
 		// Set the title again now that the internal reader can show it
 		this.updateTitle();
@@ -729,11 +746,62 @@ class ReaderInstance {
 		};
 	}
 
+	/**
+	 * Take part in the app-wide undo history, which owns the Undo/Redo commands
+	 * and interleaves the reader's annotation changes with changes made
+	 * elsewhere. The reader keeps its own annotation snapshots, so it does the
+	 * stepping itself and only reports what its history looks like.
+	 */
+	_registerUndoHistoryProvider() {
+		if (this._isTransient() || !Zotero.UndoHistory.isEnabled()) {
+			return;
+		}
+		Zotero.UndoHistory.registerProvider(this._instanceID, {
+			libraryID: this._item.libraryID,
+			window: this._iframeWindow,
+			undo: () => this._internalReader.undo(),
+			redo: () => this._internalReader.redo(),
+			reveal: () => this.reveal()
+		});
+	}
+
+	_updateUndoHistory(history) {
+		if (this._isTransient()) {
+			return;
+		}
+		try {
+			let { undoSteps, redoSteps } = JSON.parse(JSON.stringify(history));
+			Zotero.UndoHistory.setProviderSteps(this._instanceID, {
+				undoSteps: undoSteps.map(step => this._toUndoHistoryStep(step)),
+				redoSteps: redoSteps.map(step => this._toUndoHistoryStep(step))
+			});
+		}
+		catch (e) {
+			// Never let a problem here interfere with annotation editing
+			Zotero.logError(e);
+		}
+	}
+
+	_toUndoHistoryStep({ id, revision, action, count }) {
+		return {
+			id,
+			revision,
+			action: UNDO_ACTIONS[action] || UNDO_ACTION_FALLBACK,
+			actionArgs: { count }
+		};
+	}
+
+	/**
+	 * Bring this reader into view.
+	 */
+	reveal() {}
+
 	uninit() {
 		if (this._isUninitialized) {
 			return;
 		}
 		this._isUninitialized = true;
+		Zotero.UndoHistory.unregisterProvider(this._instanceID);
 		if (this._customEventHandler && this._iframeWindow) {
 			try {
 				this._iframeWindow.removeEventListener('customEvent', this._customEventHandler);
@@ -2185,6 +2253,16 @@ class ReaderTab extends ReaderInstance {
 		this._detachFromWindow();
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
+		}
+	}
+
+	reveal() {
+		if (this._isTabClosed) {
+			return;
+		}
+		this._window.Zotero_Tabs.select(this.tabID);
+		if (Services.focus.activeWindow !== this._window) {
+			this._window.focus();
 		}
 	}
 
