@@ -1079,7 +1079,7 @@ Zotero.Server.LocalAPI.Settings = class extends LocalAPIEndpoint {
 		}
 		let json = {};
 		for (let [name, setting] of Object.entries(Zotero.SyncedSettings.getAll(libraryID))) {
-			if (setting.clientVersion > since) {
+			if (since === 0 || setting.clientVersion > since) {
 				json[name] = settingToResponseJSON(setting);
 			}
 		}
