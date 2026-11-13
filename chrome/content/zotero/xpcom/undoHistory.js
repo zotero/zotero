@@ -199,7 +199,7 @@ Zotero.UndoHistory = {
 				}
 				return;
 			}
-			this._revealTab(entry.tabID);
+			this._revealTab(entry.tab);
 		}
 		catch (e) {
 			// A change that can't be revealed has still been applied
@@ -208,25 +208,38 @@ Zotero.UndoHistory = {
 	},
 
 	/**
-	 * Select a tab in the main window, bringing the window itself forward if
-	 * it's not the one in front (e.g. when undoing from a reader window)
+	 * Select a tab in the window it belongs to, bringing the window itself
+	 * forward if it's not the one in front (e.g. when undoing from another window)
 	 *
-	 * @param {String} tabID
+	 * @param {Object} [tab]
+	 * @param {nsIWeakReference} tab.windowRef
+	 * @param {String} tab.id
 	 */
-	_revealTab(tabID) {
-		let win = Zotero.getMainWindow();
-		// The tab may have been closed since the change was made
-		if (!tabID || !win?.Zotero_Tabs?._getTab(tabID).tab) {
+	_revealTab(tab) {
+		let win = tab?.windowRef.get();
+		// The window or tab may have been closed since the change was made
+		if (!win || win.closed || !win.Zotero_Tabs?._getTab(tab.id).tab) {
 			return;
 		}
-		win.Zotero_Tabs.select(tabID);
+		win.Zotero_Tabs.select(tab.id);
 		if (Services.focus.activeWindow !== win) {
 			win.focus();
 		}
 	},
 
-	_getSelectedTabID() {
-		return Zotero.getMainWindow()?.Zotero_Tabs?.selectedID || null;
+	/**
+	 * The selected tab in the main window a change is being made in. Tab IDs are
+	 * only unique within a window, so the window is recorded along with the ID.
+	 *
+	 * @return {Object|null}
+	 */
+	_getSelectedTab() {
+		let win = Services.wm.getMostRecentWindow('navigator:browser');
+		let id = win?.Zotero_Tabs?.selectedID;
+		if (!id) {
+			return null;
+		}
+		return { windowRef: Cu.getWeakReference(win), id };
 	},
 
 	_trimUndoStack() {
@@ -565,7 +578,7 @@ Zotero.UndoHistory = {
 				changes: [],
 				action: null,
 				actionArgs: null,
-				tabID: this._getSelectedTabID()
+				tab: this._getSelectedTab()
 			};
 		}
 		return this._pendingEntry;

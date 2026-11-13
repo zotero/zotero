@@ -384,6 +384,95 @@ describe("Reader", function () {
 			}
 		});
 
+		it('should undo a reader change from another window and reveal the reader in its window', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let reader = await Zotero.Reader.open(attachment.itemID, null, { window: win });
+			let win2 = await loadZoteroPane();
+			try {
+				await reader._initPromise;
+				let annotationManager = reader._internalReader._annotationManager;
+				annotationManager._skipAnnotationSavingDebounce = true;
+				Zotero.UndoHistory.clear();
+
+				annotationManager.addAnnotation(
+					Components.utils.cloneInto({
+						type: 'highlight',
+						color: '#ffd400',
+						sortIndex: '00000|003305|00000',
+						position: {
+							pageIndex: 0,
+							rects: [[0, 0, 100, 100]]
+						},
+						text: 'test'
+					}, reader._iframeWindow)
+				);
+				await waitForItemEvent('add');
+
+				win.Zotero_Tabs.select('zotero-pane');
+				// Move focus out of the quick search, which handles its own undo
+				Services.focus.clearFocus(win2);
+				// As the Edit menu and key_undo in the other window do
+				win2.goDoCommand('cmd_undo');
+				await waitForItemEvent('delete');
+				assert.lengthOf(attachment.getAnnotations(), 0);
+				assert.equal(win.Zotero_Tabs.selectedID, reader.tabID);
+
+				// A reader moved to another window keeps its history and is
+				// revealed in the window it moved to
+				let movedTabID = await win.Zotero_Tabs.moveToWindow(reader.tabID, win2);
+				win2.Zotero_Tabs.select('zotero-pane');
+				Services.focus.clearFocus(win);
+				win.goDoCommand('cmd_redo');
+				await waitForItemEvent('add');
+				assert.lengthOf(attachment.getAnnotations(), 1);
+				assert.equal(win2.Zotero_Tabs.selectedID, movedTabID);
+			}
+			finally {
+				await cleanupReaders(reader);
+				win2.close();
+			}
+		});
+
+		async function makeMostRecentWindow(w) {
+			w.focus();
+			await waitForCallback(
+				() => Services.wm.getMostRecentWindow('navigator:browser') === w, 50, 5
+			);
+		}
+
+		it('should select the library tab in its own window when undoing a library change from another window', async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			let win2 = await loadZoteroPane();
+			let win3;
+			let reader;
+			try {
+				// Changes are recorded against the window the user is working in
+				await makeMostRecentWindow(win2);
+				win2.Zotero_Tabs.select('zotero-pane');
+				let collection = await createDataObject('collection', { name: 'Original' });
+				Zotero.UndoHistory.clear();
+				collection.name = 'Modified';
+				await collection.saveTx({ undoAction: 'undo-action-rename-collection' });
+
+				reader = await Zotero.Reader.open(attachment.itemID, null, { window: win2 });
+				await reader._initPromise;
+				assert.equal(win2.Zotero_Tabs.selectedID, reader.tabID);
+
+				// Another window, whose library tab has the same ID, is now the most recent
+				win3 = await loadZoteroPane();
+				await makeMostRecentWindow(win3);
+				Services.focus.clearFocus(win3);
+				win3.goDoCommand('cmd_undo');
+				await waitForCallback(() => collection.name == 'Original', 50, 5);
+				assert.equal(win2.Zotero_Tabs.selectedID, 'zotero-pane');
+			}
+			finally {
+				await cleanupReaders(reader);
+				win2.close();
+				win3?.close();
+			}
+		});
+
 		it('should run undo commands from the app-wide history while a reader view has focus', async function () {
 			let attachment = await importFileAttachment('test.pdf');
 			let reader = await Zotero.Reader.open(attachment.itemID);
