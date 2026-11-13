@@ -1788,15 +1788,20 @@ class ReaderInstance {
 		// reader can move to another window
 		let openAudioCache = () => this._window.caches.open('read-aloud');
 		return {
-			getVoices: () => {
+			getVoices: (options) => {
+				let customOnly = !!options?.customOnly;
 				return new targetWindow.Promise(async (resolve) => {
 					let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-					let result = await client.getReadAloudVoices();
+					let result = await client.getReadAloudVoices({ customOnly });
 					resolve(Cu.cloneInto(result, targetWindow));
 					// Prune cache entries with outdated versions once per session,
-					// after the voices (and their current cache versions) are known
-					if (!readAloudCachePruned && result.voices) {
+					// after the voices (and their current cache versions) are known.
+					// Skip if only custom voices were returned, since we don't
+					// know which Zotero voice versions are still current.
+					if (!readAloudCachePruned
+							&& result.voices
+							&& Object.keys(result.voices).some(tier => tier !== 'custom')) {
 						this._pruneReadAloudCache(openAudioCache(), result.voices);
 					}
 				});
@@ -1831,7 +1836,9 @@ class ReaderInstance {
 					}
 					let apiKey = segment === 'sample' ? null : await Zotero.Sync.Data.Local.getAPIKey();
 					let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-					let result = await client.getReadAloudAudio(segment, voice.id);
+					let result = voice.tier === 'custom'
+						? await client.getReadAloudCustomAudio(segment, voice.id)
+						: await client.getReadAloudAudio(segment, voice.id);
 					// Skip caching when the server forbids it (e.g., error responses
 					// returned with Cache-Control: no-store)
 					if (result.audio && cache && !result.noStore) {
