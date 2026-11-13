@@ -223,21 +223,28 @@
 					native="true"
 				/>
 			</vbox>
+		</groupbox>
+		
+		<groupbox id="zotero-prefpane-ebooks-reading-mode-groupbox" aria-labelledby="preferences-ebooks-reading-mode-title" aria-describedby="preferences-ebooks-reading-mode-note">
+			<label><html:h2 id="preferences-ebooks-reading-mode-title" data-l10n-id="preferences-ebooks-reading-mode-title"/></label>
 			
 			<hbox align="center">
-				<label data-l10n-id="preferences-reader-ebook-font" control="reader-ebook-font-family"/>
+				<label data-l10n-id="preferences-ebooks-reading-mode-font" control="reader-ebook-font-family"/>
 				<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
 					<menupopup/>
 				</menulist>
 			</hbox>
 
-			<vbox class="indented-pref">
+			<vbox>
 				<checkbox
 					preference="extensions.zotero.reader.ebookHyphenate"
 					data-l10n-id="preferences-reader-ebook-hyphenate"
 					native="true"
 				/>
 			</vbox>
+			
+			<separator class="thin"/>
+			<label id="preferences-ebooks-reading-mode-note" data-l10n-id="preferences-ebooks-reading-mode-note"/>
 		</groupbox>
 
 		<groupbox id="zotero-prefpane-read-aloud-groupbox" aria-labelledby="preferences-read-aloud-title">
