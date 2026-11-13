@@ -89,6 +89,82 @@ describe("Zotero.Plugins", function () {
 			assert.isFalse(addon.isActive);
 			assert.isFalse(Zotero.Plugins.getBlockedPluginReason(addon.id, addon.version));
 		});
+
+		it("should not start a plugin blocked while enabling it", async function () {
+			var events = Zotero._pluginBlockingTestEvents = [];
+			addon = await installTestPlugin({
+				bootstrap: "function install() {}\n"
+					+ "function startup() { Zotero._pluginBlockingTestEvents.push('startup'); }\n"
+					+ "function shutdown() { Zotero._pluginBlockingTestEvents.push('shutdown'); }\n"
+					+ "function uninstall() {}\n",
+				files: { 'locale/en-US/startup.ftl': 'startup-race-test = Startup' }
+			});
+			// This creates the scope so that for the second enabling it will have a scope loaded.
+			await waitForCallback(() => events.includes('startup'), 10, 3);
+			await addon.disable();
+			await waitForCallback(() => events.includes('shutdown'), 10, 3);
+
+			var localeRead = false;
+			var resume = Zotero.Promise.defer();
+			var getResource = Zotero.File.getResourceAsync;
+			var resourceStub = sinon.stub(Zotero.File, 'getResourceAsync').callsFake(async function (url) {
+				if (url.endsWith('/locale/en-US/startup.ftl')) {
+					localeRead = true;
+					await resume.promise;
+				}
+				return getResource.call(this, url);
+			});
+			var enablingSpy = sinon.spy(Zotero.Plugins._addonObserver, 'onEnabling');
+			var enabling;
+			try {
+				enabling = addon.enable();
+				// Locale loading is asynchronous, after the scope loads but before startup runs.
+				await waitForCallback(() => localeRead, 10, 3);
+				await Zotero.Plugins.setBlockedPlugins(9999, [{ id: addon.id, versionRanges: [{}] }]);
+				await waitForCallback(() => events.filter(x => x == 'shutdown').length == 2, 10, 3);
+				assert.isTrue(addon.appDisabled);
+				resume.resolve();
+				await enabling;
+				// AddonManager doesn't await the asynchronous onEnabling listener.
+				await enablingSpy.firstCall.returnValue;
+				assert.equal(events.filter(x => x == 'startup').length, 1);
+			}
+			finally {
+				resume.resolve();
+				await enabling;
+				if (enablingSpy.called) await enablingSpy.firstCall.returnValue;
+				enablingSpy.restore();
+				resourceStub.restore();
+			}
+		});
+
+		it("should not start a plugin twice when the startup blocklist unblocks it", async function () {
+			var events = Zotero._pluginBlockingTestEvents = [];
+			addon = await installTestPlugin({
+				bootstrap: "function install() {}\n"
+					+ "function startup() { Zotero._pluginBlockingTestEvents.push('startup'); }\n"
+					+ "function shutdown() { Zotero._pluginBlockingTestEvents.push('shutdown'); }\n"
+					+ "function uninstall() {}\n"
+			});
+			await waitForCallback(() => events.includes('startup'), 10, 3);
+			await Zotero.Plugins.setBlockedPlugins(9999, [{ id: addon.id, versionRanges: [{}] }]);
+			await waitForCallback(() => events.includes('shutdown'), 10, 3);
+			var request = sinon.stub(Zotero.HTTP, 'request').resolves({
+				responseText: JSON.stringify({ version: 10000, blockedPlugins: [] })
+			});
+			// init() registers an app shutdown listener
+			var addShutdownListener = sinon.stub(Zotero, 'addShutdownListener');
+			try {
+				Zotero.Plugins.prefetchBlocklist();
+				await Zotero.Plugins.init();
+				await waitForCallback(() => events.filter(x => x == 'startup').length >= 2, 10, 3);
+				assert.equal(events.filter(x => x == 'startup').length, 2);
+			}
+			finally {
+				request.restore();
+				addShutdownListener.restore();
+			}
+		});
 	});
 
 	describe("#updateBlocklistFromServer()", function () {

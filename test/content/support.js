@@ -1363,6 +1363,7 @@ async function getImageBlob() {
  * @param {String} [options.version]
  * @param {String} [options.strictMaxVersion]
  * @param {String} [options.bootstrap] - Contents of bootstrap.js
+ * @param {Object<String, String>} [options.files] - Additional files, keyed by relative path
  * @return {Promise<AddonWrapper>}
  */
 async function installTestPlugin(options = {}) {
@@ -1392,6 +1393,11 @@ async function installTestPlugin(options = {}) {
 				+ 'function shutdown() {}\n'
 				+ 'function uninstall() {}\n'
 	);
+	for (let [name, contents] of Object.entries(options.files || {})) {
+		let path = PathUtils.join(dir, ...name.split('/'));
+		await IOUtils.makeDirectory(PathUtils.parent(path), { createAncestors: true });
+		await IOUtils.writeUTF8(path, contents);
+	}
 	var xpiPath = dir + '.xpi';
 	await Zotero.File.zipDirectory(dir, xpiPath);
 	var install = await AddonManager.getInstallForFile(

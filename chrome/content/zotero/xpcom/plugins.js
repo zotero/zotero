@@ -102,6 +102,9 @@ Zotero.Plugins = new function () {
 				continue;
 			}
 			addonVersions.set(addon.id, addon.version);
+			// Unblocking in shouldBlockPlugin() can run onEnabling(), which already loads and
+			// starts the plugin
+			if (scopes.has(addon.id)) continue;
 			_loadScope(addon);
 			setDefaultPrefs(addon);
 			await registerLocales(addon);
@@ -260,7 +263,8 @@ Zotero.Plugins = new function () {
 
 			// Skip disabled plugins, unless this plugin was started and the call is part of
 			// disabling it now (e.g., 'shutdown' after it was blocked while running)
-			if ((addon.softDisabled || addon.appDisabled) && !scopes.has(id)) {
+			if ((addon.softDisabled || addon.appDisabled)
+					&& (!scopes.has(id) || !['shutdown', 'uninstall'].includes(method))) {
 				Zotero.debug(`Skipping bootstrap method '${method}' for disabled plugin ${id}`);
 				return;
 			}
