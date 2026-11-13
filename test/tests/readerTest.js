@@ -755,10 +755,13 @@ describe("Reader", function () {
 			}
 		});
 		
-		it('should name the undone action in a reader window Edit menu', async function () {
+		it('should name a reader action in the Edit menu of the window containing the reader', async function () {
 			let attachment = await importFileAttachment('test.pdf');
+			// Opens a second main window with the reader in a tab
 			let reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+			let readerWin = reader._window;
 			try {
+				assert.notEqual(readerWin, win);
 				await reader._initPromise;
 				let annotationManager = reader._internalReader._annotationManager;
 				annotationManager._skipAnnotationSavingDebounce = true;
@@ -778,12 +781,10 @@ describe("Reader", function () {
 				);
 				await waitForItemEvent('add');
 
-				let doc = reader._window.document;
-				Zotero.UndoHistory.updateMenuItems(doc);
-				let undoItem = doc.getElementById('menu_undo');
-				assert.isFalse(undoItem.hasAttribute('data-l10n-id'));
+				let doc = readerWin.document;
+				doc.getElementById('menu_EditPopup').dispatchEvent(new readerWin.Event('popupshowing'));
 				assert.equal(
-					undoItem.getAttribute('label'),
+					doc.getElementById('menu_undo').getAttribute('label'),
 					Zotero.ftl.formatValueSync('menu-edit-undo-action', {
 						action: Zotero.ftl.formatValueSync('undo-action-add-annotation', { count: 1 })
 					})
@@ -791,6 +792,7 @@ describe("Reader", function () {
 			}
 			finally {
 				await cleanupReaders(reader);
+				readerWin.close();
 			}
 		});
 
