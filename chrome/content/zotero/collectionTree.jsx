@@ -2065,8 +2065,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				for (let id of data) {
 					let draggedCollection = Zotero.Collections.get(id);
 				
-					// Dragging within same library
-					if (treeRow.ref.libraryID == draggedCollection.libraryID) {
+					// Dragging onto a collection in the same library
+					if (treeRow.isCollection() && treeRow.ref.libraryID == draggedCollection.libraryID) {
 						// Collections cannot be dropped on themselves
 						if (id == treeRow.ref.id) {
 							return false;
