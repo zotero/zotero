@@ -224,13 +224,10 @@
 				/>
 			</vbox>
 		</groupbox>
-
-		<groupbox id="zotero-prefpane-ebooks-reading-mode-groupbox" aria-labelledby="preferences-ebooks-reading-mode-title" aria-describedby="preferences-ebooks-reading-mode-intro">
+		
+		<groupbox id="zotero-prefpane-ebooks-reading-mode-groupbox" aria-labelledby="preferences-ebooks-reading-mode-title" aria-describedby="preferences-ebooks-reading-mode-note">
 			<label><html:h2 id="preferences-ebooks-reading-mode-title" data-l10n-id="preferences-ebooks-reading-mode-title"/></label>
-
-			<label id="preferences-ebooks-reading-mode-intro" data-l10n-id="preferences-ebooks-reading-mode-intro"/>
-			<separator class="thin"/>
-
+			
 			<hbox align="center">
 				<label data-l10n-id="preferences-ebooks-reading-mode-font" control="reader-ebook-font-family"/>
 				<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
@@ -245,6 +242,9 @@
 					native="true"
 				/>
 			</vbox>
+			
+			<separator class="thin"/>
+			<label id="preferences-ebooks-reading-mode-note" data-l10n-id="preferences-ebooks-reading-mode-note"/>
 		</groupbox>
 
 		<groupbox id="zotero-prefpane-read-aloud-groupbox" aria-labelledby="preferences-read-aloud-title">
