@@ -1,0 +1,11 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY findCmd.label             "Traženje">
+<!ENTITY findCmd.key               "F">
+<!ENTITY findCmd.accesskey         "T">
+<!ENTITY findAgainCmd.label        "Nađi ponovo">
+<!ENTITY findAgainCmd.key          "G">
+<!ENTITY findAgainCmd.key2         "VK_F3">
+<!ENTITY findAgainCmd.accesskey    "N">

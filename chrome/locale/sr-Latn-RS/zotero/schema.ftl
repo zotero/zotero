@@ -1,0 +1,16 @@
+itemFields-eventPlace = Mesto događaja
+itemFields-originalDate = Originalni datum
+itemFields-originalPlace = Originalno mesto
+itemFields-originalPublisher = Originalni izdavač
+itemFields-partNumber = Broj dela
+itemFields-partTitle = Naslov dela
+itemFields-priorityDate = Datum prioriteta
+itemFields-sessionTitle = Naslov sesije
+creatorTypes-chair = Predsedavajući
+creatorTypes-creator = Autor
+creatorTypes-executiveProducer = Izvršni producent
+creatorTypes-host = Domaćin
+creatorTypes-narrator = Narator
+creatorTypes-originalCreator = Izvorni autor
+creatorTypes-organizer = Organizator
+creatorTypes-seriesCreator = Autor serije

@@ -18,3 +18,5 @@ tx pull -t -f -m sourceastranslation -r zotero.zoterojson
 npm run localize-ftl
 
 find $ROOT_DIR/chrome/locale -type f -name 'zotero.json' -not -path '*/en-US/*' -delete
+
+$SCRIPT_DIR/generate_sr_latn

@@ -1,0 +1,78 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Nadogradnja softvera">
+
+<!ENTITY  checking.title                  "Provera nadogradnji">
+<!ENTITY  updateCheck.label               "Tražimo novo izdanje programa &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Nadogradnje nisu pronađene">
+<!ENTITY  noupdatesautoenabled.intro      "Nema novih nadogradnji. &brandShortName;
+                                           će periodično proveravati nadogradnje.">
+<!ENTITY  noupdatesautodisabled.intro     "Nema novih nadogradnji. Proverite kasnije ili uključite 
+                                           automatsku proveru u programu &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Nadogradnja nije moguća">
+<!ENTITY  manualUpdate.desc               "Dostupna je preporučena nadogradnja za bezbednost i stabilnost, ali ne posedujete prava pristupa
+                                           potrebna da je instalirate. Obratite se administratoru sistema, ili da instalaciju
+                                           probate ponovo uz upotrebu korisničkog naloga koji ima dozvolu da instalira programe 
+                                           na ovaj računar.">
+<!ENTITY  manualUpdate.space.desc         "Preporučena nadogradnja bezbednosti i stabilnosti je dostupna,
+                                           ali nemate dovoljno prostora da je instalirate.">
+<!ENTITY  manualUpdateGetMsg.label        "Najsvežije izdanje programa &brandShortName; možete nabaviti na adresi:">
+
+<!ENTITY  unsupported.title               "Sistem nije podržan">
+<!ENTITY  unsupported.label               "Vaš &brandShortName; je zastareo, ali najnovija verzija nije
+                                           podržana na vašem sistemu. Nadogradite sistem, zatim pokušajte ponovo.
+                                           Više nećete videti ovu poruku, ali možete">
+<!ENTITY  unsupportedLink.label           "da saznate više.">
+
+<!ENTITY  clickHere.label                 "Pogledaj više informacija o ovoj nadogradnji">
+
+<!ENTITY  evangelism.desc                 "Preporučuje se da primenite ovu nadogradnju za 
+                                           &brandShortName; što je pre moguće.">
+
+<!ENTITY  downloadPage.title              "Preuzimanje programa &brandShortName;">
+<!ENTITY  downloading.intro               "Preuzimanje nadogradnje je u toku…">
+<!ENTITY  connecting.label                "Povezivanje sa serverom za nadogradnju…">
+<!ENTITY  verificationFailedText.label    "Program &brandShortName; nije mogao da utvrdi 
+                                           integritet nadogradnje koju je preuzeo, tako da
+                                           sada prima ceo paket.">
+
+<!ENTITY  viewDetails.tooltip             "Pregledaj detalje ove nadogradnje">
+
+<!ENTITY  details.link                    "Detalji">
+
+<!ENTITY  error.title                     "Nadogradnja nije uspela">
+
+<!ENTITY  error.label                     "Došlo je do problema pri traženju, preuzimanju ili isntalaciji ove nadogradnje. 
+                                           Program &brandShortName; nije nadograđen iz narednih razloga:">
+<!ENTITY  errorManual.label               "Program &brandShortName; možete da nadogradite ručno, posećivanjem ove 
+                                           veze i preuzimanjem najnovijeg izdanja:">
+<!ENTITY  errorpatching.intro             "Delimična nadogradnja nije mogla da se dovrši. 
+                                           Program &brandShortName; će ponovo da pokuša da preuzme cele nadogradnje.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; ne može odrediti da li su dostupne nadogradnje. 
+                                           Proverite da li imate najnoviju verziju &brandShortName;a sa:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Nešto sprečava &brandShortName; da se bezbedno nadogradi. 
+                                           Proverite da li imate najnoviju verziju &brandShortName;a sa:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Nešto pokušava da prevari &brandShortName; prihvatanjem nesigurne nadogradnje. 
+                                           Kontaktirajte svog dobavljača preže za pomoć.">
+
+<!ENTITY  finishedPage.title              "Nadogradnja je spremna za instalaciju">
+<!ENTITY  finishedPage.text               "Nadogradnja će biti instalirana pri narednom pokretanju programa &brandShortName;. Možete
+                                           odmah da ponovo pokrenete &brandShortName; ili da nastavite rad i to uradite kasnije.">
+
+<!ENTITY  finishedBackgroundPage.text     "Nadogradnja za bezbednost i stabilnost za &brandShortName; je preuzeta
+                                           i spremna je za instalaciju.">
+<!ENTITY  finishedBackground.name         "Nadogradnja:">
+<!ENTITY  finishedBackground.more         "Nadogradnja će biti instalirana pri narednom pokretanju programa &brandShortName;. Možete 
+                                           da odmah ponovo pokrenete &brandShortName; ili da nastavite sa radom i to uradite kasnije.">
+<!ENTITY  finishedBackground.moreElevated "Ova nadogradnja zahteva privilegije administratora. Nadogradnja će biti
+                                           instalirana kada se &brandShortName; sledeći put pokrene. Možete ponovo pokrenuti
+                                           &brandShortName; sada, nastaviti sa radom i ponovo pokrenuti kasnije ili odbiti ovu
+                                           nadogradnju.">
+
+<!ENTITY  update.details.label            "Detalji">
+<!ENTITY  update.installedOn.label        "Instalirano:">
+<!ENTITY  update.status.label             "Stanje:">

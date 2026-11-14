@@ -1,0 +1,19 @@
+<!ENTITY zotero.search.name "Ime:">
+
+<!ENTITY zotero.search.joinMode.prefix "Poklopi">
+<!ENTITY zotero.search.joinMode.any "bilo šta">
+<!ENTITY zotero.search.joinMode.all "sve">
+<!ENTITY zotero.search.joinMode.suffix "od sledećeg:">
+
+<!ENTITY zotero.search.recursive.label "Pretraži podzbirke">
+<!ENTITY zotero.search.noChildren "Prikaži samo stavke na najvišem nivou">
+<!ENTITY zotero.search.includeParentsAndChildren "Uključi roditelja i dete stavke koja se preklapa sa nađenim stavkama">
+
+<!ENTITY zotero.search.textModes.phrase "Izraz">
+<!ENTITY zotero.search.textModes.phraseBinary "Izraz (uključujući binarne datoteke)">
+<!ENTITY zotero.search.textModes.regexp "Regularni izraz">
+<!ENTITY zotero.search.textModes.regexpCS "Regularni izraz (prepoznaje velika/mala slova)">
+
+<!ENTITY zotero.search.date.units.days "dani">
+<!ENTITY zotero.search.date.units.months "meseci">
+<!ENTITY zotero.search.date.units.years "godine">

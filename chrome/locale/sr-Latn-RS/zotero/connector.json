@@ -1,0 +1,239 @@
+{
+  "general_more": {
+    "message": "Više…"
+  },
+  "general_moreInfo": {
+    "message": "Više podataka…"
+  },
+  "general_needHelp": {
+    "message": "Pomoć?"
+  },
+  "general_done": {
+    "message": "Gotovo"
+  },
+  "general_yes": {
+    "message": "Da"
+  },
+  "general_no": {
+    "message": "Ne"
+  },
+  "general_tryAgain": {
+    "message": "Pokušaj ponovo"
+  },
+  "general_warning": {
+    "message": "Upozorenje"
+  },
+  "general_ok": {
+    "message": "U redu"
+  },
+  "general_cancel": {
+    "message": "Otkaži"
+  },
+  "general_selectAll": {
+    "message": "Izaberi sve"
+  },
+  "general_deselectAll": {
+    "message": "Poništi izbor"
+  },
+  "general_pleaseWait": {
+    "message": "Sačekajte…"
+  },
+  "general_copyToClipboard": {
+    "message": "Kopiraj u ostavu"
+  },
+  "itemType_pdf": {
+    "message": "PDF prilog"
+  },
+  "itemType_epub": {
+    "message": "EPUB prilog"
+  },
+  "itemType_snapshot": {
+    "message": "Sličica"
+  },
+  "itemType_note": {
+    "message": "Beleška"
+  },
+  "itemType_link": {
+    "message": "Veb stranica"
+  },
+  "itemType_attachment": {
+    "message": "Prilog"
+  },
+  "progressWindow_savingTo": {
+    "message": "Čuvam u"
+  },
+  "progressWindow_detailsBtnView": {
+    "message": "Prikaži detalje"
+  },
+  "progressWindow_detailsBtnHide": {
+    "message": "Sakrij detalje"
+  },
+  "progressWindow_collectionSelector": {
+    "message": "Izbornik ciljne zbirke"
+  },
+  "progressWindow_savingItems": {
+    "message": "Čuvam $1 stavki. $2"
+  },
+  "progressWindow_savingItem": {
+    "message": "Čuvam stavku $1"
+  },
+  "progressWindow_saveItem": {
+    "message": "Stavka $1: $2"
+  },
+  "progressWindow_downloadComplete": {
+    "message": "Sačuvao sam $1"
+  },
+  "progressWindow_downloadCompletePlural": {
+    "message": "Sačuvao sam $1 za stavku $2"
+  },
+  "progressWindow_downloadFailed": {
+    "message": "Nije uspelo preuzimanje $1"
+  },
+  "progressWindow_downloadFailedPlural": {
+    "message": "Nije uspelo preuzimanje $1 za stavku $2"
+  },
+  "progressWindow_allDone": {
+    "message": "Čuvanje je završeno. Prozorče će se sada zatvoriti."
+  },
+  "progressWindow_alreadySaved": {
+    "message": "Stavke sa ove veb stranice su već sačuvane."
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Oznake (razdvojene zarezima)"
+  },
+  "progressWindow_filterPlaceholder": {
+    "message": "Filter zbirki"
+  },
+  "progressWindow_error_translation": {
+    "message": "Javila se greška prilikom čuvanja ove stavke. Pogledajte $1 za više podataka."
+  },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Došlo je do greške prilikom čuvanja ove stavke. $1 može da ograniči broj stavki koje se čuvaju odjednom. Pogledajte $2 za više podataka."
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Ispravljanje problema u prevodiocu"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Ograničenja pristupu stranici"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Javila se greška prilikom čuvanja pomoću $1. Pokušavam da sačuvam sa $2."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "Ova mogućnost nije podržana u verziji $1. Nadogradite program na $2."
+  },
+  "progressWindow_error_upgradeClient_latestVersion": {
+    "message": "poslednja verzija"
+  },
+  "itemSelector_title": {
+    "message": "Izaberite koje stavke želite da dodate u vašu zbirku:"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 povezivač nije dostupan na ovoj stranici"
+  },
+  "extensionIsDisabled_fileURL": {
+    "message": "$1 povezivač nije dostupan za adrese datoteka"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 povezivač nije dostupan za ekstenziju stranica"
+  },
+  "appConnector": {
+    "message": "$1 povezivač"
+  },
+  "upgradeApp": {
+    "message": "Nadogradi $1"
+  },
+  "firstRun_title": {
+    "message": "Instalirali ste $1 povezivač!"
+  },
+  "firstRun_text1": {
+    "message": " $1 povezivač vam omogućava da <a href=\"$2\">sačuvate stavke u $1</a> iz pregledača interneta na jedan klik."
+  },
+  "firstRun_text2": {
+    "message": "Još uvek niste <a href=\"$2\">preuzeli</a> $1 aplikaciju kako bi imali najbolje iskustvo."
+  },
+  "firstRun_acceptButton": {
+    "message": "Shvatam"
+  },
+  "error_connection_isAppRunning": {
+    "message": "Da li je $1 pokrenut?"
+  },
+  "error_connection_save": {
+    "message": "$1 ne može da stupi u vezu sa $2 programom za računar. Povezivač može da sačuva neke stranice na vaš $3 nalog, ali je najbolje da proverite da li je $2 otvoren pre pokušaja čuvanja."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Možete <a href=\"$1\">preuzeti $2</a> ili <a href=\"$3\">potražiti grešku u vezi </a> ukoliko je neophodno."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Omogući čuvanje u mrežnu biblioteku"
+  },
+  "reports_report_submitted": {
+    "message": "Vaš izveštaj o grešci je poslat.\n\nID broj izveštaja: $1\n\nMožete poslati poruku na Zoterov forum sa ovim ID brojem uz dodatne podatke koji opisuju problem i korake koji će pomoći programerima da ponove grešku.\n\nIzveštaji o greškama neće biti pregledani osim ukoliko ih ne postavite na forum."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Vaš izveštaj za pronalaženje grešaka je poslat.\n\nID broj greške je $1."
+  },
+  "reports_submission_failed": {
+    "message": "Došlo je do greške prilikom slanja vašeg izveštaja.\n\n$1\n\nProverite vezu sa internetom, a ukoliko se problem nastavi, pošaljite poruku na Zoterov forum."
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Citiranje pomoću veba zahteva izdanje $1 ili novije."
+  },
+  "integration_error_connection": {
+    "message": "$1 ne može da stupi u vezu sa $2 programom za računar. $2 mora biti otvoren kako bi koristili citiranje pomoću veba."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Ovaj dokument sadrži aktivne Zoterove citate koji će biti prikazani kao veze na zotero.org u preuzetim kopijama."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Da napravite verziju koja je pogodna za deljenje, izaberite <b>Napravi kopiju…</b> iz menija stavke, a zatim <b>Ukloni veze do citata</b> iz Zoterovog menija nove stavke i na kraju preuzmite kopiju bez veza. Uvek čuvajte originalne veze do dokumenata u slučaju da vam budu potrebne dodatne izmene."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Ipak preuzmi verziju sa vezama"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 ažurira vaš dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 integracija nije dostupna kada uređujete Microsoft Word .docx datoteke u Google Dokumentima. Izaberite Datoteka → Sačuvaj kao Google Dokument da omogućite integraciju.<br/><br/>Ukoliko želite da prenesete dokumente iz Word-a sa $1 citata u Google Dokumente, pogledajte tekst o <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">deljenju dokumenata između programa za obradu teksta</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Citate dokumenta uređuje drugi korisnik $1. Pokušajte ponovo malo kasnije."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 zaključava vaš dokument kako bi onemogućio drugim korisnicima da uređuju citate u isto vreme. Istovremeno uređivanje citata u dokumentu ga može oštetiti ili obrisati citate. Neke nepredvidive okolnosti, kao što su problemi na mreži, mogu trajno da zaključaju vaš dokument. Ukoliko verujete da se to desilo, možete zaobići zaključavanje.<br/><br/>Da li želite da zaobiđete zaključavanje dokumenta?"
+  },
+  "integration_googleDocs_authScopeError": {
+    "message": "Za dodavanje citati, programu $1 su potrebne dozvole da uređuje dokumente u Google Dokumentima. Pokušajte ponovo, ali dozvolite programu $1 da vidi, uređuje, pravi i briše vaše dokumente u Google Dokumentima."
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Izabrani Google nalog nema dozvole za uređivanje ovog dokumenta. Pokušajte ponovo i proverite da li ste izabrali nalog koji omogućava izmene dokumenta."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Prikaži $1 nepovezanih citata"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citati koje pokušavate da uredite su postali nevezani za $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Ponovo poveži citat"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Ovi citati si postali <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">nevezani sa $1</a>. Potrebno je da ih ponovo povežete pre nego što budu ažurirani ili prikazani unutar vaše bibliografije."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopiraj vezu bez proksija"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopiraj adresu stranice bez proksija"
+  },
+  "reloadViaProxy": {
+    "message": "Ponovo učitaj preko proksija"
+  },
+  "reloadVia": {
+    "message": "Ponovo učitaj preko $1"
+  },
+  "general_saveTo": {
+    "message": "Sačuvaj u $1"
+  }
+}

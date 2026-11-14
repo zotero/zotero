@@ -44,6 +44,7 @@ Zotero.Locale = {
 		'sk-SK': 'slovenčina',
 		'sl-SI': 'Slovenščina',
 		'sr-RS': 'Српски',
+		'sr-Latn-RS': 'Srpski (latinica)',
 		'sv-SE': 'Svenska',
 		'ta': 'தமிழ்',
 		'th-TH': 'ไทย',

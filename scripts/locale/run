@@ -30,5 +30,7 @@ rm -rf en-US-new locales content-locales output
 
 $SCRIPT_DIR/filter_connector_json "$LOCALES_DIR"
 
+$SCRIPT_DIR/generate_sr_latn
+
 cd "$ROOT_DIR/resource/schema/global"
 ./scripts/update-schema

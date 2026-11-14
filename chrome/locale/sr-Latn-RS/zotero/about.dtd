@@ -1,0 +1,13 @@
+<!ENTITY zotero.version "verzija">
+<!ENTITY zotero.whatsNew "Šta je novo">
+<!ENTITY zotero.createdby "Program napravili:">
+<!ENTITY zotero.director "Direktor:">
+<!ENTITY zotero.directors "Direktori:">
+<!ENTITY zotero.developers "Programeri:">
+<!ENTITY zotero.alumni "Predhodni:">
+<!ENTITY zotero.about.localizations "Prevodioci:">
+<!ENTITY zotero.about.additionalSoftware "Softver treće strane:">
+<!ENTITY zotero.thanks "Posebna zahvalnost:">
+<!ENTITY zotero.about.close "Zatvori">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Dodatne zasluge i zahvalnice">
+<!ENTITY zotero.citationProcessing "Citiranje i sređivanje bibliografije">

@@ -1,0 +1,19 @@
+<!ENTITY zotero.publications.my_publications "Moje objave">
+
+<!ENTITY zotero.publications.intro "Stavke koje ste dodali u Moje objave će biti prikazane na vašoj stranici u okviru sajta zotero.org. Ukoliko želite da dodate i priloge, oni će biti javno dostupni pod licencom koji izaberete. Dodajte samo radove koje ste sami napravili i datoteke za koje posedujete odgovarajuće pravne dozvole za deljenje.">
+<!ENTITY zotero.publications.include.checkbox.files "Uključi datoteke">
+<!ENTITY zotero.publications.include.checkbox.notes "Uključi beleške">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Možete podesiti šta se ovde prikazuje ako odete u zbirku Moje objave.">
+
+<!ENTITY zotero.publications.sharing.title "Izaberite kako ćete deliti vaš rad sa drugima">
+<!ENTITY zotero.publications.sharing.text "Možete zadržati sva prava nad svojim radom, postaviti slobodnu licencu ili dodeliti javni domen. U svim slučajevima će rad biti javno dostupan na stranici zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Da li želite da podelite svoj rad sa ostalima?">
+<!ENTITY zotero.publications.sharing.cc "Da, pod slobodnom Creative Commons licencom">
+<!ENTITY zotero.publications.sharing.cc0 "Da, postavi moj rad u javni domen">
+<!ENTITY zotero.publications.sharing.reserved "Ne, samo objavi moje podatke na zotero.org.">
+
+<!ENTITY zotero.publications.chooseLicense.title "Izaberite Creative Commons licencu">
+<!ENTITY zotero.publications.chooseLicense.text "Creative Commons licenca dozvoljava drugima da kopiraju i dalje dele vaš rad dok god je vaša zasluga jasno istaknuta, uz davanje veze do licence i navođenje ako je došlo do nekih promena. Dodatni uslovi mogu biti postavljeni ovde.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Da li da dozvolim deljenje izmena vašeg rada?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Da, dok god ga i drugi dele pod istim uslovima">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Da li dozvoljavate upotrebu vašeg rada u komercijalne svrhe?">
