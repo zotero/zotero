@@ -1003,7 +1003,7 @@ class EditorInstance {
 						if (item.checked) {
 							menuitem.setAttribute('type', 'checkbox');
 						}
-						menuitem.toggleAttribute('checked', item.checked);
+						menuitem.toggleAttribute('checked', !!item.checked);
 						menuitem.addEventListener('command', () => {
 							if (item.name === 'insertImage') {
 								return this._iframeWindow.eval('openImageFilePicker()');

@@ -1394,7 +1394,7 @@ class ReaderInstance {
 					else {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('label', item.label);
-						menuitem.toggleAttribute('disabled', item.disabled);
+						menuitem.toggleAttribute('disabled', !!item.disabled);
 						if (item.color) {
 							menuitem.className = 'menuitem-iconic';
 							menuitem.setAttribute('image', this._getColorIcon(item.color, item.checked));
