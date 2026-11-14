@@ -63,9 +63,9 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			assert.isTrue(watcher._storageRootIsLocalVolume());
 		});
 		
-		it("should return null on first call with no saved event ID", function () {
+		it("should return null on first call with no saved event ID", async function () {
 			watcher.init();
-			let result = watcher.getChangedItemKeys();
+			let result = await watcher.getChangedItemKeys();
 			assert.isNull(result, "First call should return null");
 			// Should have saved a baseline event ID
 			let savedId = Zotero.Prefs.get(PREF_FSEVENTS_EVENT_ID);
@@ -73,13 +73,13 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			assert.notEqual(savedId, "0");
 		});
 
-		it("should return an empty set when no files have changed", function () {
+		it("should return an empty set when no files have changed", async function () {
 			watcher.init();
 			// Establish baseline
-			watcher.getChangedItemKeys();
+			await watcher.getChangedItemKeys();
 
 			// Second call -- no changes
-			let result = watcher.getChangedItemKeys();
+			let result = await watcher.getChangedItemKeys();
 			assertIsSet(result);
 			assert.equal(result.size, 0);
 		});
@@ -92,7 +92,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			try {
 				watcher.init();
 				// Establish baseline
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Modify the file
 				let path = await item.getFilePathAsync();
@@ -103,7 +103,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				// Wait for FSEvents to register
 				await Zotero.Promise.delay(1000);
 
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result);
 				assert.isTrue(
 					result.has(item.key),
@@ -127,7 +127,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				// Wait for FSEvents from item creation to flush
 				// before establishing baseline
 				await Zotero.Promise.delay(1000);
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Modify only items 1 and 3
 				let path1 = await item1.getFilePathAsync();
@@ -141,7 +141,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 
 				await Zotero.Promise.delay(1000);
 
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result);
 				assert.isTrue(result.has(item1.key),
 					"Should contain key of first modified item");
@@ -164,7 +164,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 
 			try {
 				watcher.init();
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Modify file
 				let path = await item.getFilePathAsync();
@@ -175,12 +175,12 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				await Zotero.Promise.delay(1000);
 
 				// First query picks up the change
-				let result1 = watcher.getChangedItemKeys();
+				let result1 = await watcher.getChangedItemKeys();
 				assertIsSet(result1);
 				assert.isTrue(result1.has(item.key));
 
 				// Second query should be empty
-				let result2 = watcher.getChangedItemKeys();
+				let result2 = await watcher.getChangedItemKeys();
 				assertIsSet(result2);
 				assert.equal(result2.size, 0,
 					"Should not report the same change twice");
@@ -197,7 +197,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 
 			try {
 				watcher.init();
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Add a new file to the item's storage directory
 				let storageDir = Zotero.Attachments.getStorageDirectory(item).path;
@@ -206,7 +206,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 
 				await Zotero.Promise.delay(1000);
 
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result);
 				assert.isTrue(result.has(item.key),
 					"Should detect new file in storage directory");
@@ -216,7 +216,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			}
 		});
 
-		it("should return null when storage path has changed", function () {
+		it("should return null when storage path has changed", async function () {
 			// Simulate a previous run with a different storage path
 			Zotero.Prefs.set(PREF_FSEVENTS_STORAGE_PATH, "/some/other/path/");
 			Zotero.Prefs.set(PREF_FSEVENTS_EVENT_ID, "12345");
@@ -224,7 +224,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			watcher.init();
 
 			// The saved event ID should have been cleared
-			let result = watcher.getChangedItemKeys();
+			let result = await watcher.getChangedItemKeys();
 			assert.isNull(result,
 				"Should return null after storage path change");
 		});
@@ -237,7 +237,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			try {
 				watcher.init();
 				// Establish baseline
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				let savedId = Zotero.Prefs.get(PREF_FSEVENTS_EVENT_ID);
 				assert.ok(savedId, "Event ID should be saved");
@@ -247,7 +247,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				watcher.init();
 
 				// Should not return null -- saved event ID should be used
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result,
 					"Should return a Set (not null) after re-init "
 					+ "with saved event ID");
@@ -264,7 +264,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 
 			try {
 				watcher.init();
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Close the watcher
 				watcher.close();
@@ -280,7 +280,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				// Re-init and query -- FSEvents journal should have
 				// the change even though the watcher was closed
 				watcher.init();
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result);
 				assert.isTrue(result.has(item.key),
 					"Should detect changes that occurred while "
@@ -295,7 +295,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			this.timeout(15000);
 
 			watcher.init();
-			watcher.getChangedItemKeys();
+			await watcher.getChangedItemKeys();
 
 			// Create a non-standard directory name in the storage root
 			let storageRoot = watcher._storageRoot;
@@ -307,7 +307,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			await Zotero.Promise.delay(1000);
 
 			try {
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assertIsSet(result);
 				// Should not contain the invalid directory name
 				for (let key of result) {
@@ -319,6 +319,59 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			finally {
 				await IOUtils.remove(invalidDir, { recursive: true });
 			}
+		});
+
+		it("should fall back to full scans when the journal replay times out", async function () {
+			watcher.init();
+			await watcher.getChangedItemKeys();
+
+			// Leave the stream unstarted so that neither events nor the history sentinel arrive
+			watcher._FSEventStreamStart = () => true;
+			watcher._FSEventStreamStop = () => {};
+			let maxReplayTime = watcher._MAX_REPLAY_TIME;
+			watcher._MAX_REPLAY_TIME = 100;
+			let setSpy = sinon.spy(Zotero.Prefs, 'set');
+			try {
+				let result = await watcher.getChangedItemKeys();
+				assert.isNull(result, "Should signal full scans");
+				// The fallback scans cover everything up to now, so the baseline still advances
+				assert.isTrue(setSpy.calledWith(PREF_FSEVENTS_EVENT_ID));
+				assert.isNull(watcher._activeStream);
+			}
+			finally {
+				setSpy.restore();
+				watcher._MAX_REPLAY_TIME = maxReplayTime;
+			}
+		});
+
+		it("should keep the saved event ID when closed during a journal replay", async function () {
+			watcher.init();
+			await watcher.getChangedItemKeys();
+			let savedId = Zotero.Prefs.get(PREF_FSEVENTS_EVENT_ID);
+
+			watcher._FSEventStreamStart = () => true;
+			watcher._FSEventStreamStop = () => {};
+			let promise = watcher.getChangedItemKeys();
+			assert.ok(watcher._activeStream, "Replay should be pending");
+			watcher.close();
+			let result = await promise;
+			assertIsSet(result);
+			assert.equal(result.size, 0);
+			assert.equal(Zotero.Prefs.get(PREF_FSEVENTS_EVENT_ID), savedId);
+			assert.isNull(watcher._activeStream);
+		});
+
+		it("should signal full scans for a replay requested while one is pending", async function () {
+			watcher.init();
+			await watcher.getChangedItemKeys();
+
+			watcher._FSEventStreamStart = () => true;
+			watcher._FSEventStreamStop = () => {};
+			let first = watcher.getChangedItemKeys();
+			let second = await watcher.getChangedItemKeys();
+			assert.isNull(second);
+			watcher.close();
+			assertIsSet(await first);
 		});
 	});
 
@@ -365,7 +418,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 			try {
 				watcher.init();
 				// Establish baseline
-				watcher.getChangedItemKeys();
+				await watcher.getChangedItemKeys();
 
 				// Modify the file
 				let path = await item.getFilePathAsync();
@@ -377,7 +430,7 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 				await Zotero.Promise.delay(1000);
 
 				// Verify the watcher reports the change
-				let changedKeys = watcher.getChangedItemKeys();
+				let changedKeys = await watcher.getChangedItemKeys();
 				assertIsSet(changedKeys);
 				assert.isTrue(changedKeys.has(item.key));
 
@@ -664,13 +717,13 @@ describe("Zotero.Sync.Storage.FileChangeWatcher", function () {
 	});
 
 	describe("fallback behavior", function () {
-		it("should return null from getChangedItemKeys() when unavailable", function () {
+		it("should return null from getChangedItemKeys() when unavailable", async function () {
 			let savedAvailable = watcher.available;
 			let savedBackend = watcher._backend;
 			watcher.available = false;
 			watcher._backend = null;
 			try {
-				let result = watcher.getChangedItemKeys();
+				let result = await watcher.getChangedItemKeys();
 				assert.isNull(result);
 			}
 			finally {

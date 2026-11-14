@@ -151,7 +151,7 @@ Zotero.Sync.Storage.FileChangeWatcher = {
 		this._pruneScannedLibraries();
 		let keys;
 		try {
-			keys = this.getChangedItemKeys();
+			keys = await this.getChangedItemKeys();
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -260,17 +260,17 @@ Zotero.Sync.Storage.FileChangeWatcher = {
 	 * Drain the set of item keys whose storage files have changed since the last drain from the
 	 * platform backend
 	 *
-	 * @return {Set|null} Set of 8-char item keys, or null to signal that events may have been
-	 * missed and callers should fall back to full scans
+	 * @return {Promise<Set|null>} Set of 8-char item keys, or null to signal that events may
+	 * have been missed and callers should fall back to full scans
 	 */
-	getChangedItemKeys() {
+	async getChangedItemKeys() {
 		if (!this.available) {
 			return null;
 		}
 		try {
 			switch (this._backend) {
 				case 'fsevents':
-					return this._getChangedItemKeysFSEvents();
+					return await this._getChangedItemKeysFSEvents();
 				case 'rdcw':
 					return this._getChangedItemKeysRDCW();
 				case 'inotify':
