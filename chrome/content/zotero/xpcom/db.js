@@ -1673,11 +1673,9 @@ Zotero.DBConnection.prototype._openConnectionAsync = async function () {
 			}
 		}
 
-		// Set page cache size to 64MB. Pages are allocated only as they're read,
-		// so small databases don't use it all, but loading a library larger than
-		// the cache re-reads most pages from disk for every data type.
+		// Set page cache size to 8MB
 		let pageSize = await this.valueQueryAsync("PRAGMA page_size");
-		let cacheSize = 65536000 / pageSize;
+		let cacheSize = 8192000 / pageSize;
 		await this.queryAsync("PRAGMA cache_size=" + cacheSize);
 		
 		// Enable foreign key checks

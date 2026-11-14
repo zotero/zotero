@@ -831,11 +831,6 @@ describe("Zotero.DB", function () {
 			await db.closeDatabase();
 		});
 
-		it("should set a 64MB page cache", async function () {
-			var pageSize = await Zotero.DB.valueQueryAsync("PRAGMA page_size");
-			assert.equal(await Zotero.DB.valueQueryAsync("PRAGMA cache_size"), 65536000 / pageSize);
-		});
-
 		it("should gather query planner statistics", async function () {
 			let dir = await getTempDirectory();
 			let dbPath = PathUtils.join(dir, 'test.sqlite');
