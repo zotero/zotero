@@ -477,6 +477,53 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.lengthOf(noNewItemHere, 0);
 		});
 
+		it("should remove the collection created for the import if there are no new items", async () => {
+			const importer1 = getImporter();
+			await importer1.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+			
+			const collection = await createDataObject('collection');
+			const importer2 = getImporter();
+			importer2.createNewCollection = true;
+			importer2.newItemsOnly = true;
+			await importer2.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: [collection.id],
+				linkFiles: false,
+			});
+			
+			assert.isFalse(Zotero.Collections.exists(collection.id));
+		});
+		
+		it("shouldn't remove an existing collection selected for the import if there are no new items", async () => {
+			const importer1 = getImporter();
+			await importer1.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+			
+			const collection = await createDataObject('collection');
+			const item = await createDataObject('item', { collections: [collection.id] });
+			const importer2 = getImporter();
+			importer2.createNewCollection = false;
+			importer2.relinkOnly = true;
+			await importer2.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: [collection.id],
+				linkFiles: false,
+			});
+			
+			assert.isTrue(Zotero.Collections.exists(collection.id));
+			assert.sameMembers(collection.getChildItems(true), [item.id]);
+			
+			await collection.eraseTx();
+			await item.eraseTx();
+		});
+		
 		it("should handle empty creators and tags", async () => {
 			setHTTPResponse(server, 'https://api.mendeley.com/', {
 				method: 'GET',

@@ -373,7 +373,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			this._progress += 5; // we've assigned 5 arbitrary "ticks" for importing notebooks task, advance progress since we cannot import notebooks
 		}
 
-		if (this.newItemsOnly && rootCollectionKey && this.newItems.length === 0) {
+		if (this.createNewCollection && this.newItemsOnly && rootCollectionKey && this.newItems.length === 0) {
 			Zotero.debug(`Mendeley Import detected no new items, removing import collection containing ${this.newCollections.length} collections created during the import`);
 			const rootCollection = await Zotero.Collections.getAsync(options.collections[0]);
 			await rootCollection.eraseTx(this._saveOptions);
