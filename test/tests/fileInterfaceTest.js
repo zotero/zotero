@@ -1,13 +1,14 @@
 describe("Zotero_File_Interface", function () {
     let win;
     before(function* () {
+        requireBundledFiles();
         win = yield loadZoteroPane();
         yield OS.File.copy(OS.Path.join(getTestDataDirectory().path, "Test Import Translator.js"),
                            OS.Path.join(Zotero.getTranslatorsDirectory().path, "Test Import Translator.js"));
         yield Zotero.Translators.reinit();
     });
     after(function () {
-        win.close();
+        win?.close();
     });
 
     it('should import all types and fields into a new collection', async function () {
