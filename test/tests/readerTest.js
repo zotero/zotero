@@ -17,7 +17,7 @@ describe("Reader", function () {
 		it('should create/update annotations', async function () {
 			var attachment = await importFileAttachment('test.pdf');
 
-			var reader = await Zotero.Reader.open(attachment.itemID);
+			var { instance: reader } = await Zotero.Reader.open(attachment.itemID);
 			await reader._initPromise;
 			reader._internalReader._annotationManager._skipAnnotationSavingDebounce = true;
 
@@ -223,7 +223,7 @@ describe("Reader", function () {
 
 			try {
 				let attachment = await importFileAttachment('test.pdf');
-				reader = await Zotero.Reader.open(attachment.id);
+				({ instance: reader } = await Zotero.Reader.open(attachment.id));
 				await reader._initPromise;
 				let oldTabContainer = win.document.getElementById(reader.tabID);
 				sandbox.stub(attachment, 'getTabTitle').returns(title.promise);
@@ -243,7 +243,7 @@ describe("Reader", function () {
 				updates.push(...updateTitleSpy.getCalls().slice(1).map(call => call.returnValue));
 				assert.equal(updateTitleSpy.callCount, 2);
 
-				reopenedReader = await Zotero.Reader.open(attachment.id);
+				({ instance: reopenedReader } = await Zotero.Reader.open(attachment.id));
 				assert.notStrictEqual(reopenedReader, reader);
 
 				title.resolve('Stale title');
@@ -274,7 +274,7 @@ describe("Reader", function () {
 
 			try {
 				let attachment = await importFileAttachment('test.pdf');
-				reader = await Zotero.Reader.open(attachment.id);
+				({ instance: reader } = await Zotero.Reader.open(attachment.id));
 				await reader._initPromise;
 				tabID = reader.tabID;
 				let oldTabContainer = win.document.getElementById(tabID);
@@ -291,10 +291,13 @@ describe("Reader", function () {
 				};
 
 				openResult = await Zotero.Reader.open(attachment.id);
-				assert.isTrue(openResult === undefined, 'should select the unloaded tab');
-				reloadedReader = await waitForCallback(
-					() => Zotero.Reader._readers.find(r => r !== reader && r.tabID === tabID),
-					50, 5
+				assert.equal(openResult.tabID, tabID, 'should select the unloaded tab');
+				reloadedReader = openResult.instance;
+				assert.notStrictEqual(reloadedReader, reader);
+				assert.strictEqual(
+					reloadedReader,
+					Zotero.Reader._readers.find(r => r !== reader && r.tabID === tabID),
+					'should return the reader its load hook opened'
 				);
 				await reloadedReader._initPromise;
 
@@ -315,7 +318,7 @@ describe("Reader", function () {
 				let tab = tabID && win.Zotero_Tabs._getTab(tabID).tab;
 				if (tab) tab.onClose = null;
 				if (tab) win.Zotero_Tabs.close(tabID);
-				await cleanupReaders(reader, reloadedReader, openResult);
+				await cleanupReaders(reader, reloadedReader);
 			}
 		});
 
@@ -323,7 +326,7 @@ describe("Reader", function () {
 			let reader;
 			try {
 				let attachment = await importFileAttachment('test.pdf');
-				reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				({ instance: reader } = await Zotero.Reader.open(attachment.id, null, { openInWindow: true }));
 				await reader._initPromise;
 				let readerWin = reader._window;
 				assert.notEqual(readerWin, win);
@@ -335,7 +338,7 @@ describe("Reader", function () {
 				
 				// Opening the item in a window again selects the existing tab
 				let openWindows = Zotero.getMainWindows();
-				let sameReader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				let { instance: sameReader } = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
 				assert.equal(sameReader, reader);
 				assert.sameMembers(Zotero.getMainWindows(), openWindows);
 			}
@@ -350,7 +353,7 @@ describe("Reader", function () {
 
 			try {
 				let attachment = await importFileAttachment('test.pdf');
-				reader = await Zotero.Reader.open(attachment.id);
+				({ instance: reader } = await Zotero.Reader.open(attachment.id));
 				await reader._initPromise;
 				({ id: unloadedTabID } = win.Zotero_Tabs.add({
 					type: 'reader-unloaded',
@@ -360,8 +363,8 @@ describe("Reader", function () {
 				transactionOpen = true;
 				win.Zotero_Tabs.close(reader.tabID);
 
-				windowReader = await Zotero.Reader.open(
-					attachment.id, null, { openInWindow: true });
+				({ instance: windowReader } = await Zotero.Reader.open(
+					attachment.id, null, { openInWindow: true }));
 				await windowReader._initPromise;
 				assert.notEqual(windowReader._window, win);
 				assert.equal(win.Zotero_Tabs._getTab(unloadedTabID).tab.type, 'reader-unloaded');
@@ -388,7 +391,7 @@ describe("Reader", function () {
 			);
 			
 			try {
-				var reader = await Zotero.Reader.open(attachment.itemID);
+				var { instance: reader } = await Zotero.Reader.open(attachment.itemID);
 				await reader._initPromise;
 				assert.ok(reader._internalReader);
 			}
@@ -450,7 +453,7 @@ describe("Reader", function () {
 				await IOUtils.copy(bookSdrPath, PathUtils.join(tempPath, 'book.sdr'), { recursive: true });
 				
 				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
-				let reader = await Zotero.Reader.open(attachment.id);
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
 				await waitForReader(reader);
 				
 				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
@@ -462,7 +465,7 @@ describe("Reader", function () {
 			
 			it("should import EPUB annotations from KOReader (stored elsewhere)", async function () {
 				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
-				let reader = await Zotero.Reader.open(attachment.id);
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
 				await waitForReader(reader);
 
 				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
@@ -477,7 +480,7 @@ describe("Reader", function () {
 				await IOUtils.copy(metadataOpfPath, PathUtils.join(tempPath, 'metadata.opf'));
 
 				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
-				let reader = await Zotero.Reader.open(attachment.id);
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
 				await waitForReader(reader);
 
 				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);
@@ -499,7 +502,7 @@ describe("Reader", function () {
 				zipWriter.close();
 				
 				let attachment = await Zotero.Attachments.linkFromFile({ file: tempBookEpubPath });
-				let reader = await Zotero.Reader.open(attachment.id);
+				let { instance: reader } = await Zotero.Reader.open(attachment.id);
 				await waitForReader(reader);
 
 				let donePromise = Promise.all([waitForDialog(), waitForAdds(2)]);

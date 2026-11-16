@@ -35,6 +35,22 @@ ChromeUtils.registerWindowActor("FeedAbstract", {
 	messageManagerGroups: ["feedAbstract"]
 });
 
+ChromeUtils.registerWindowActor("ZoteroEmbeddedPluginPage", {
+	parent: {
+		esModuleURI: "chrome://zotero/content/actors/ZoteroEmbeddedPluginPageParent.mjs",
+	},
+	child: {
+		esModuleURI: "chrome://zotero/content/actors/ZoteroEmbeddedPluginPageChild.mjs",
+		// Inject the page messaging API before the page's own scripts run
+		events: {
+			DOMDocElementInserted: {},
+		},
+	},
+	// Embedded plugin pages are always the plugin's own moz-extension origin
+	matches: ["moz-extension://*/*"],
+	allFrames: true
+});
+
 ChromeUtils.registerWindowActor("ZoteroPrint", {
 	parent: {
 		esModuleURI: "chrome://zotero/content/actors/ZoteroPrintParent.mjs"

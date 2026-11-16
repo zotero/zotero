@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<!--
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2026 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					 https://www.zotero.org
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css" type="text/css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		windowtype="zotero:pluginWindow"
+		style="display: flex; --tab-min-height: 0;"
+		tooltip="html-tooltip">
+
+	<linkset>
+		<html:link rel="localization" href="browser/menubar.ftl"/>
+		<html:link rel="localization" href="browser/browserSets.ftl"/>
+		<html:link rel="localization" href="toolkit/global/textActions.ftl"/>
+	</linkset>
+
+	<script><![CDATA[
+		var { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
+		{
+			let raw = window.arguments && window.arguments[0];
+			let args = raw && (raw.wrappedJSObject || raw) || {};
+			if (args.notitle) {
+				document.documentElement.setAttribute("drawintitlebar-platforms", "mac,win,linux");
+				Services.scriptloader.loadSubScript("chrome://zotero/content/titlebar.js", window);
+			}
+		}
+		Services.scriptloader.loadSubScript("chrome://zotero/content/pluginWindow.js", this);
+	]]></script>
+
+	<commandset id="mainCommandSet">
+		<command id="cmd_close" oncommand="window.close();"/>
+
+		<commandset id="editMenuCommands"/>
+
+		<command id="cmd_fullZoomReduce"
+			oncommand="ZoomManager.reduce(document.getElementById('plugin-browser'));"/>
+		<command id="cmd_fullZoomEnlarge"
+			oncommand="ZoomManager.enlarge(document.getElementById('plugin-browser'));"/>
+		<command id="cmd_fullZoomReset"
+			oncommand="ZoomManager.reset(document.getElementById('plugin-browser'));"/>
+	</commandset>
+
+	<keyset id="mainKeyset">
+		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
+	</keyset>
+
+	<popupset>
+		<tooltip id="html-tooltip" page="true"/>
+		<panel
+			is="autocomplete-richlistbox-popup"
+			type="autocomplete-richlistbox"
+			id="PopupAutoComplete"
+			role="group"
+			noautofocus="true"
+			hidden="true"
+			overflowpadding="4"
+			norolluponanchor="true"
+			nomaxresults="true"
+		/>
+		<menupopup id="pluginContentContextMenu"
+				onpopupshowing="goUpdateGlobalEditMenuItems(true)">
+			<menuitem data-l10n-id="text-action-undo" command="cmd_undo"/>
+			<menuitem data-l10n-id="text-action-redo" command="cmd_redo"/>
+			<menuseparator/>
+			<menuitem data-l10n-id="text-action-cut" command="cmd_cut"/>
+			<menuitem data-l10n-id="text-action-copy" command="cmd_copy"/>
+			<menuitem data-l10n-id="text-action-paste" command="cmd_paste"/>
+			<menuitem data-l10n-id="text-action-delete" command="cmd_delete"/>
+			<menuseparator/>
+			<menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"/>
+		</menupopup>
+	</popupset>
+
+	<vbox flex="1">
+		<vbox id="titlebar">
+			<html:div type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
+					defaultset="menubar-items"
+					mode="icons" iconsize="small" defaulticonsize="small" autohide="false"
+					context="toolbar-context-menu">
+				<toolbaritem id="menubar-items" align="center">
+					<menubar id="main-menubar">
+						<menu id="menu-file" data-l10n-id="menu-file" hidden="true">
+							<menupopup id="menu-file-popup"/>
+						</menu>
+						<menu id="menu-edit" data-l10n-id="menu-edit" hidden="true">
+							<menupopup id="menu-edit-popup"/>
+						</menu>
+						<menu id="menu-view" data-l10n-id="menu-view" hidden="true">
+							<menupopup id="menu-view-popup"/>
+						</menu>
+						<menu id="menu-window" data-l10n-id="menu-window-menu" hidden="true">
+							<menupopup id="menu-window-popup"/>
+						</menu>
+						<menu id="menu-help" data-l10n-id="menu-help" hidden="true">
+							<menupopup id="menu-help-popup"/>
+						</menu>
+					</menubar>
+				</toolbaritem>
+			</html:div>
+		</vbox>
+		<browser id="plugin-browser"
+				 type="content"
+				 flex="1"
+				 disableglobalhistory="true"
+				 transparent="transparent"
+				 autocompletepopup="PopupAutoComplete"
+				 context="pluginContentContextMenu"/>
+	</vbox>
+</window>

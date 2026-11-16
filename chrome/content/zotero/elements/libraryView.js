@@ -185,7 +185,7 @@
 								</toolbarbutton>
 								
 								<spacer flex="1"/>
-								<image id="zotero-tb-search-spinner" class="zotero-tb-search-spinner zotero-spinner-16"/>
+								<library-toolbar-buttons id="zotero-tb-custom-buttons" target="main/library/toolbar"/>
 								<quick-search-textbox id="zotero-tb-search" timeout="250"
 										onkeydown="this.closest('library-view').handleSearchKeypress(this, event)"
 										oncommand="this.closest('library-view').search()"/>
@@ -1542,9 +1542,8 @@
 			if (!runAdvanced && Zotero.SearchQuery.hasOpenQuote(searchVal)) {
 				return;
 			}
-			var spinner = this.getElement('zotero-tb-search-spinner');
-			spinner.setAttribute("status", "animate");
-			spinner.style.visibility = 'visible';
+			// Spin the search box magnifier while the search is running
+			search.toggleAttribute("searching", true);
 			// A query with conditions in it ("by:smith crispr") filters by those
 			// and matches whatever text is left over the way the current mode
 			// does; anything else is text to search for, as typed
@@ -1571,8 +1570,7 @@
 				await this.itemsView.setFilter('search',
 					Zotero.SearchQuery.parse(searchVal).text);
 			}
-			spinner.style.removeProperty("visibility");
-			spinner.removeAttribute("status");
+			search.removeAttribute("searching");
 		}
 		
 		// Sets the itemsView message.
@@ -1662,7 +1660,30 @@
 			});
 			
 			itemTreeToolbar.addEventListener("keydown", (event) => {
+				// Custom plugin buttons between the New Note button and the search box,
+				// keyed by class since their ids are dynamic. Collapsed buttons are
+				// skipped; the overflow button is hidden unless some are collapsed.
+				let customButtonActions = {
+					ArrowNext: () => {
+						let next = event.target.nextElementSibling;
+						while (next?.hidden) {
+							next = next.nextElementSibling;
+						}
+						return next;
+					},
+					ArrowPrevious: () => {
+						let prev = event.target.previousElementSibling;
+						while (prev?.hidden) {
+							prev = prev.previousElementSibling;
+						}
+						return prev || this.getElement("zotero-tb-note-add");
+					},
+					Tab: () => this.getElement("zotero-tb-search").focus(),
+					ShiftTab: () => this.getElement('zotero-tb-collections-search').click()
+				};
 				let actionsMap = {
+					'zotero-custom-button': customButtonActions,
+					'zotero-custom-button-overflow': customButtonActions,
 					'zotero-tb-add': {
 						ArrowNext: () => this.getElement("zotero-tb-lookup"),
 						ArrowPrevious: () => null,
@@ -1692,7 +1713,8 @@
 						ShiftTab: () => this.getElement('zotero-tb-collections-search').click()
 					},
 					'zotero-tb-note-add': {
-						ArrowNext: () => null,
+						ArrowNext: () => this.getElement('zotero-tb-custom-buttons').querySelector(
+							'toolbarbutton:not([hidden])'),
 						ArrowPrevious: () => this.getElement("zotero-tb-attachment-add"),
 						Tab: () => this.getElement("zotero-tb-search").focus(),
 						ShiftTab: () => this.getElement('zotero-tb-collections-search').click()

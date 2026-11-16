@@ -292,16 +292,22 @@
 						Zotero.MenuManager.updateMenuPopup(menu, "sidenav/locate", {
 							event: undefined,
 							getContext: () => {
+								let container = this.container;
 								let ret = {
-									items: [],
+									get itemIDs() {
+										return container?.item ? [container.item.id] : [];
+									},
+									// @deprecated Privileged plugins only
+									get items() {
+										return container ? [container.item] : [];
+									},
 									tabType: undefined,
 									tabID: undefined,
 									tabSubType: undefined
 								};
-								if (this.container) {
-									ret.items = [this.container.item];
-									ret.tabType = this.container.tabType;
-									ret.tabID = this.container.tabID;
+								if (container) {
+									ret.tabType = container.tabType;
+									ret.tabID = container.tabID;
 								}
 								if (typeof Zotero_Tabs !== 'undefined') {
 									let { subType: tabSubType } = Zotero_Tabs.getTabInfo();
@@ -511,7 +517,7 @@
 				button.setAttribute("custom", "true");
 				button.dataset.l10nId = l10nID;
 				button.dataset.l10nArgs = l10nArgs;
-				button.style = `--custom-sidenav-icon-light: url('${icon}'); --custom-sidenav-icon-dark: url('${darkIcon}');`;
+				button.style = `--custom-sidenav-icon-light: ${Zotero.Utilities.Internal.cssURL(icon)}; --custom-sidenav-icon-dark: ${Zotero.Utilities.Internal.cssURL(darkIcon)};`;
 
 				container.hidden = this._defaultStatus || !this.container.getEnabledPane(paneID);
 			}

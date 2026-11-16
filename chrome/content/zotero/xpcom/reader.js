@@ -26,6 +26,7 @@
 var { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
 
 const { BlockingObserver } = ChromeUtils.importESModule("chrome://zotero/content/BlockingObserver.mjs");
+const { ScopeVariables } = ChromeUtils.importESModule("chrome://zotero/content/xpcom/plugins/variables.mjs");
 
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",
@@ -232,10 +233,6 @@ class ReaderInstance {
 		}
 		this._customEventHandler = (event) => {
 			let data = event.detail.wrappedJSObject;
-			let append = data.append;
-			data.append = (...args) => {
-				append(...Components.utils.cloneInto(args, this._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
-			};
 			data.reader = this;
 			Zotero.Reader._dispatchEvent(data);
 		};
@@ -2611,9 +2608,29 @@ class Reader {
 	}
 
 	_dispatchEvent(event) {
+		try {
+			Zotero.ReaderManager._handleEvent(event);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+
+		// Legacy raw-event API (privileged plugins only)
+		let wrappedEventCache = new Map();
 		for (let listener of this._registeredListeners) {
 			if (listener.type === event.type) {
-				listener.handler(event);
+				let wrappedEvent = wrappedEventCache.get(listener.pluginID);
+				if (!wrappedEvent) {
+					let dispatchedEvent = Object.assign({}, event);
+					dispatchedEvent.append = (...args) => {
+						args = ScopeVariables.fromScope(args, listener.pluginID);
+						event.append(...args);
+					};
+
+					wrappedEvent = ScopeVariables.toScope(dispatchedEvent, listener.pluginID);
+					wrappedEventCache.set(listener.pluginID, wrappedEvent);
+				}
+				listener.handler(wrappedEvent);
 			}
 		}
 	}
@@ -2639,9 +2656,12 @@ class Reader {
 	 */
 
 	/**
+	 * Register a low-level reader event listener. Available to privileged plugins
+	 * only; unprivileged plugins use `Zotero.ReaderManager` instead.
+	 *
 	 * @param {ReaderEventType} type - Event type
 	 * @param {ReaderEventHandler} handler - Event handler
-	 * @param {string} [pluginID] - Plugin ID
+	 * @param {string} pluginID - Plugin ID
 	 * @returns {void}
 	 *
 	 * @example
@@ -2680,7 +2700,7 @@ class Reader {
 	 * }, 'my-plugin@my-namespace.com');
 	 * ```
 	 */
-	registerEventListener(type, handler, pluginID = undefined) {
+	registerEventListener(type, handler, pluginID) {
 		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
@@ -2690,7 +2710,9 @@ class Reader {
 	 * @returns {void}
 	 */
 	unregisterEventListener(type, handler) {
-		this._registeredListeners = this._registeredListeners.filter(x => !(x.type === type && x.handler === handler));
+		this._registeredListeners = this._registeredListeners.filter(
+			x => !(x.type === type && x.handler === handler)
+		);
 	}
 
 	_unregisterEventListenerByPluginID(pluginID) {
@@ -2843,8 +2865,9 @@ class Reader {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return undefined;
+					// Selecting the unloaded tab runs its load hook, which resolves with the reader it opened
+					reader = await win.Zotero_Tabs.select(existingTabID, false, { location });
+					return { instance: reader, tabID: existingTabID, win };
 				}
 			}
 		}
@@ -2873,7 +2896,8 @@ class Reader {
 		}
 		else if (openInWindow) {
 			// The new window selects and focuses its reader tab as it opens
-			return this._openInNewWindow(item, { title, location, secondViewState });
+			reader = await this._openInNewWindow(item, { title, location, secondViewState });
+			return { instance: reader, tabID: reader?.tabID, win: reader?._window };
 		}
 		else {
 			reader = new ReaderTab({
@@ -2912,7 +2936,10 @@ class Reader {
 			// Do not change focus when tabs are traversed/selected using a keyboard
 			reader.focus();
 		}
-		return reader;
+		if (openInWindow) {
+			return { instance: reader, tabID: reader.tabID, win: reader._window };
+		}
+		return { instance: reader, tabID: reader.tabID, win };
 	}
 
 	/**

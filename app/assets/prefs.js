@@ -10,6 +10,8 @@ pref("network.prefetch-next", false);
 pref("network.dns.disablePrefetch", true);
 // Don't open TCP connection when clicking on a link in a snapshot
 pref("network.http.speculative-parallel-limit", 0);
+// No WebRTC, whose connections no content policy sees, so plugin pages can't reach hosts outside host_permissions
+pref("media.peerconnection.enabled", false);
 
 // Let operations run as long as necessary
 pref("dom.max_chrome_script_run_time", 0);
@@ -100,6 +102,10 @@ pref("toolkit.telemetry.enabled", false);
 pref("datareporting.policy.dataSubmissionEnabled", false);
 pref("toolkit.crashreporter.enabled", false);
 pref("extensions.remoteSettings.disabled", true);
+
+// Override "available" from firefox.js -- Relay's RemoteSettings lookups fail
+// here and break form-history/datalist autocomplete on plugin pages
+pref("signon.firefoxRelay.feature", "disabled");
 
 pref("extensions.update.url", "");
 
