@@ -2534,7 +2534,7 @@ describe("CollectionViewItemTree", function () {
 			await group.eraseTx();
 		});
 
-		it("should allow a blank-space file drop for a mixed collection and saved-search selection regardless of order", async function () {
+		it("should reject a blank-space file drop for a mixed collection and saved-search selection", async function () {
 			var collection = await createDataObject('collection');
 			var search = await createDataObject('search');
 
@@ -2552,21 +2552,78 @@ describe("CollectionViewItemTree", function () {
 				}
 			};
 
-			// Select the saved search first (so it's focused), then add the collection
-			await cv.selectByID("S" + search.id);
+			// Select the collection first (so it's focused), then add the saved search
+			await cv.selectByID("C" + collection.id);
 			await waitForItemsLoad(win);
-			cv.selection.toggleSelect(cv.getRowIndexByID("C" + collection.id));
+			cv.selection.toggleSelect(cv.getRowIndexByID("S" + search.id));
 			await zp.onCollectionSelected();
 			await zp.itemsView.waitForLoad();
 			itemsView = zp.itemsView;
 
-			// Allowed even though the focused row is a search, since a selected
-			// collection can receive the file
-			assert.isTrue(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+			assert.isFalse(itemsView.canDropCheck(-1, -1, fileDataTransfer));
 
 			await selectLibrary(win);
 		});
 
+		it("should create a top-level attachment when a file is dropped into blank space in Unfiled Items", async function () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.setVirtual(userLibraryID, 'unfiled', true, true);
+			await waitForItemsLoad(win);
+			itemsView = zp.itemsView;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['Files'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+			
+			assert.isTrue(itemsView.canDropCheck(-1, -1, fileDataTransfer));
+			
+			var promise = waitForItemEvent('add');
+			await drop(-1, -1, fileDataTransfer);
+			var ids = await promise;
+			var item = Zotero.Items.get(ids[0]);
+			assert.isTrue(item.isTopLevelItem());
+			assert.lengthOf(item.getCollections(), 0);
+			
+			await selectLibrary(win);
+		});
+		
+		it("should reject a blank-space file drop into views a new item doesn't belong to", async function () {
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var fileDataTransfer = {
+				dropEffect: 'copy',
+				effectAllowed: 'copy',
+				types: ['Files'],
+				mozItemCount: 1,
+				mozGetDataAt: function (type, i) {
+					if (type == 'application/x-moz-file' && i == 0) {
+						return file;
+					}
+				}
+			};
+			
+			await zp.setVirtual(userLibraryID, 'duplicates', true, true);
+			await waitForItemsLoad(win);
+			assert.isFalse(zp.itemsView.canDropCheck(-1, -1, fileDataTransfer));
+			
+			await selectTrash(win);
+			assert.isFalse(zp.itemsView.canDropCheck(-1, -1, fileDataTransfer));
+			
+			await selectLibrary(win);
+		});
+		
 		it("should create a stored top-level attachment when a file URI is dragged", async function () {
 			var promise = itemsView.waitForSelect();
 			var pdfFile = getTestDataDirectory();

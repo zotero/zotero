@@ -1605,11 +1605,11 @@ class CollectionViewItemTree extends ItemTree {
 					return false;
 				}
 			}
-			// Into blank space, require a row that can receive items -- a collection or a
-			// library root. A saved search or My Publications can't, and checking all
-			// selected rows keeps this order-independent for a mixed collection + search
-			// selection.
-			else if (!this.collectionTreeRows.some(r => r.isCollection() || r.isLibrary(true))) {
+			// Into blank space, require the new item to belong in every selected row --
+			// a library root, a collection, or Unfiled Items
+			else if (!this.collectionTreeRows.every(
+				r => r.isLibrary(true) || r.isCollection() || r.isUnfiled()
+			)) {
 				return false;
 			}
 
