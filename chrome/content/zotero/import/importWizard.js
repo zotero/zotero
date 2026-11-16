@@ -133,7 +133,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		fileHandlingEl.value = fileHandling;
 		createCollectionEl.checked = shouldCreateCollection;
 
-		if (relinkOnly) {
+		// Relinking only updates items from an earlier Mendeley import
+		if (relinkOnly && this.mendeleyHasPreviouslyImported) {
 			document.getElementById('relink-only-checkbox').checked = true;
 			this.onRelinkOnlyChange();
 		}
