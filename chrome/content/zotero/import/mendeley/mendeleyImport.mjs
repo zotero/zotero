@@ -327,7 +327,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			this._interruptChecker(true);
 		}
 
-		if (this._credentials && !this.skipNotebooks) {
+		if (this._credentials && !this.skipNotebooks && !this.relinkOnly) {
 			if (!this._refManagerToken) {
 				const token = await obtainReferenceManagerTokenWithRetry(this._credentials.username, this._credentials.password);
 				this._refManagerToken = {
