@@ -914,7 +914,7 @@ Zotero.DataObjects.prototype.reload = async function (ids, dataTypes, reloadUnch
 		let typeIDsByLibrary = {};
 		for (let id of ids) {
 			let obj = this._objectCache[id];
-			if (!obj || !obj._loaded[dataType] || obj._skipDataTypeLoad[dataType]
+			if (!obj || !obj._loaded[dataType] || obj._shouldSkipDataTypeLoad(dataType)
 					|| (!reloadUnchanged && !obj._changed[dataType])) {
 				continue;
 			}
