@@ -506,4 +506,29 @@ export class CitationDialogHelpers {
 			resolve();
 		}, delay);
 	}
+
+
+	// Get the page the current page in reader tab for a given top level item.
+	// If the tab is unloaded, try to use the last page saved by the reader before the tab was
+	// unloaded.
+	// Returns the page if appropriate or null otherwise.
+	async getOpenTabPage(item) {
+		if (!item) return null;
+		let windows = Zotero.getMainWindows()
+			.filter(win => win.Zotero_Tabs)
+			.sort((a, b) => (b.ZoteroPane?.lastActivated || 0) - (a.ZoteroPane?.lastActivated || 0));
+		let tabs = windows.flatMap(win => item.getAttachments()
+			.flatMap(attachmentID => win.Zotero_Tabs.getTabIDsByItemID(attachmentID)
+				.map(tabID => ({ attachmentID, tabID, selected: tabID === win.Zotero_Tabs.selectedID }))));
+		// Prefer selected tabs, then the most recently active window
+		tabs.sort((a, b) => b.selected - a.selected);
+		for (let { attachmentID, tabID } of tabs) {
+			let reader = Zotero.Reader.getByTabID(tabID);
+			let page = reader
+				? reader.getCurrentPage()
+				: await Zotero.Reader.getSavedPageLabel(attachmentID);
+			if (page) return page;
+		}
+		return null;
+	}
 }
