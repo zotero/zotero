@@ -137,13 +137,17 @@ function ZoteroLoader({
 		this.loader.globals[name] = injectedGlobals[name];
 	}
 	
+	// Import Zotero on first use and then reuse it, since importESModule() is slow enough to matter
+	// in hot loops such as item sorting
+	let zotero;
 	Object.defineProperty(this.loader.globals, "Zotero", {
 		get: () => {
-			const { Zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs");
-			// TODO: Cache
-			return Zotero;
+			if (!zotero) {
+				({ Zotero: zotero } = ChromeUtils.importESModule("chrome://zotero/content/zotero.mjs"));
+			}
+			return zotero;
 		}
-	})
+	});
 
 	// If we're using a new sandbox, patch Date#toLocale*String() there to
 	// follow the app locale
