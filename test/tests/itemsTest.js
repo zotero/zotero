@@ -976,4 +976,34 @@ describe("Zotero.Items", function () {
 			assert.strictEqual(item.getField('volume'), "");
 		});
 	});
+	
+	// Loading uses a fast path in setField() with cached field lookups, so check that it applies
+	// the same rules as the general path to values stored in the database
+	describe("#_loadItemData()", function () {
+		// Point a stored field at a raw value, bypassing setField(), then reload from the DB
+		async function loadRaw(item, field, raw) {
+			var fieldID = Zotero.ItemFields.getID(field);
+			var valueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=?", raw);
+			if (!valueID) {
+				valueID = Zotero.ID.get('itemDataValues');
+				await Zotero.DB.queryAsync("INSERT INTO itemDataValues (valueID, value) VALUES (?, ?)", [valueID, raw]);
+			}
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO itemData (itemID, fieldID, valueID) VALUES (?, ?, ?)", [item.id, fieldID, valueID]
+			);
+			await Zotero.Items._loadDataTypeInLibrary('itemData', item.libraryID, [item.id]);
+		}
+		
+		it("should strip newlines from single-line fields when loading", async function () {
+			var item = await createDataObject('item', { title: "Title" });
+			await loadRaw(item, 'title', "Line one\nLine two");
+			assert.equal(item.getField('title'), "Line one Line two");
+		});
+		
+		it("should hyphenate ISBNs when loading", async function () {
+			var item = await createDataObject('item', { itemType: 'book' });
+			await loadRaw(item, 'ISBN', "9780306406157");
+			assert.equal(item.getField('ISBN'), "978-0-306-40615-7");
+		});
+	});
 });
