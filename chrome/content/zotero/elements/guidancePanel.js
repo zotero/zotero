@@ -213,7 +213,7 @@ const getAnchorOffset = (anchorEl, popoverEl, padding = 5) => {
 		}
 
 		hide() {
-			this.panel.hidePopup();
+			this.panel?.hidePopup();
 		}
 
 		_initNavButton(dir, nextID) {
