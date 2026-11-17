@@ -1744,10 +1744,8 @@ Zotero.Item.prototype._saveData = async function (env) {
 	//
 	if (this._changed.itemData) {
 		let del = [];
-		
-		let valueSQL = "SELECT valueID FROM itemDataValues WHERE value=?";
-		let insertValueSQL = "INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES (?,?,?)";
-		let replaceSQL = "REPLACE INTO itemData VALUES (?,?,?)";
+		let fieldIDs = [];
+		let values = [];
 		
 		for (let fieldID in this._changed.itemData) {
 			fieldID = parseInt(fieldID);
@@ -1772,14 +1770,63 @@ Zotero.Item.prototype._saveData = async function (env) {
 				}
 			}
 			
-			let valueID = await Zotero.DB.valueQueryAsync(valueSQL, [value], { debug: true })
-			if (!valueID) {
-				valueID = Zotero.ID.get('itemDataValues');
-				let valueNormalized = Zotero.Utilities.Internal.normalizeForSearchStorage(value);
-				await Zotero.DB.queryAsync(insertValueSQL, [valueID, value, valueNormalized], { debug: false });
+			fieldIDs.push(fieldID);
+			values.push(value);
+		}
+		
+		// Write all the fields in three statements rather than two or three
+		// per field
+		if (values.length) {
+			let valueSQL = "(SELECT valueID FROM itemDataValues WHERE value=?)";
+			
+			// Look up every value at once: one row, with the ID of each value
+			// (or null) in a column of its own
+			let stored = [];
+			await Zotero.DB.queryAsync(
+				"SELECT " + values.map(() => valueSQL).join(", "),
+				values,
+				{
+					debug: true,
+					onRow: function (row) {
+						for (let i = 0; i < values.length; i++) {
+							stored[i] = row.getResultByIndex(i) !== null;
+						}
+					}
+				}
+			);
+			
+			// Add the values that aren't stored yet, once each. Two different
+			// strings can be stored as the same value (unpaired surrogates),
+			// so a row whose value is there by then is skipped.
+			let newValues = new Set(values.filter((_, i) => !stored[i]));
+			if (newValues.size) {
+				let params = [];
+				for (let value of newValues) {
+					params.push(
+						Zotero.ID.get('itemDataValues'),
+						value,
+						Zotero.Utilities.Internal.normalizeForSearchStorage(value)
+					);
+				}
+				await Zotero.DB.queryAsync(
+					"INSERT INTO itemDataValues (valueID, value, valueNormalized) VALUES "
+						+ Array.from(newValues, () => "(?,?,?)").join(", ")
+						+ " ON CONFLICT(value) DO NOTHING",
+					params,
+					{ debug: false }
+				);
 			}
 			
-			await Zotero.DB.queryAsync(replaceSQL, [itemID, fieldID, valueID], { debug: false });
+			let params = [];
+			for (let i = 0; i < values.length; i++) {
+				params.push(itemID, fieldIDs[i], values[i]);
+			}
+			await Zotero.DB.queryAsync(
+				"REPLACE INTO itemData VALUES "
+					+ values.map(() => "(?,?," + valueSQL + ")").join(", "),
+				params,
+				{ debug: false }
+			);
 		}
 		
 		// Delete blank fields
