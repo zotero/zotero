@@ -63,7 +63,6 @@ Zotero.DataObject = function () {
 	this._inCache = false;
 	
 	this._loaded = {};
-	this._skipDataTypeLoad = {};
 	this._markAllDataTypeLoadStates(false);
 	
 	this._clearChanged();
@@ -684,12 +683,12 @@ Zotero.DataObject.prototype.reload = async function (dataTypes, reloadUnchanged)
 	if (dataTypes && dataTypes.length) {
 		for (let i=0; i<dataTypes.length; i++) {
 			let dataType = dataTypes[i];
-			if (!this._loaded[dataType] || this._skipDataTypeLoad[dataType]
-					|| (!reloadUnchanged && !this._changed[dataType] && !this._dataTypesToReload.has(dataType))) {
+			if (!this._loaded[dataType] || this._shouldSkipDataTypeLoad(dataType)
+					|| (!reloadUnchanged && !this._changed[dataType] && !this._dataTypesToReload?.has(dataType))) {
 				continue;
 			}
 			await this.loadDataType(dataType, true);
-			this._dataTypesToReload.delete(dataType);
+			this._dataTypesToReload?.delete(dataType);
 		}
 	}
 };
@@ -724,6 +723,17 @@ Zotero.DataObject.prototype._requireData = function (dataType) {
 
 
 /**
+ * Whether a data type doesn't apply to this object and shouldn't be loaded
+ *
+ * @param {String} dataType
+ * @return {Boolean}
+ */
+Zotero.DataObject.prototype._shouldSkipDataTypeLoad = function (dataType) {
+	return false;
+};
+
+
+/**
  * Loads data for a given data type
  * @param {String} dataType
  * @param {Boolean} reload
@@ -736,7 +746,7 @@ Zotero.DataObject.prototype.loadDataType = function (dataType, reload) {
 Zotero.DataObject.prototype.loadAllData = async function (reload) {
 	for (let i=0; i<this._dataTypes.length; i++) {
 		let type = this._dataTypes[i];
-		if (!this._skipDataTypeLoad[type]) {
+		if (!this._shouldSkipDataTypeLoad(type)) {
 			await this.loadDataType(type, reload);
 		}
 	}
@@ -861,7 +871,8 @@ Zotero.DataObject.prototype._clearChanged = function (dataType) {
 		this._changed = {};
 		this._previousData = {};
 		this._changedData = {};
-		this._dataTypesToReload = new Set();
+		// Created when needed, since most objects never have data types to reload
+		this._dataTypesToReload = null;
 	}
 }
 
@@ -881,6 +892,9 @@ Zotero.DataObject.prototype._clearFieldChange = function (field) {
  * get lost), so we need to separately keep track of what changed.
  */
 Zotero.DataObject.prototype._markForReload = function (dataType) {
+	if (!this._dataTypesToReload) {
+		this._dataTypesToReload = new Set();
+	}
 	this._dataTypesToReload.add(dataType);
 }
 

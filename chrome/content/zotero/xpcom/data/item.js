@@ -457,6 +457,12 @@ Zotero.Item.prototype._finalizeLoadFromRow = function (row) {
 }
 
 
+// The 'note' data type applies only to notes and attachments
+Zotero.Item.prototype._shouldSkipDataTypeLoad = function (dataType) {
+	return dataType == 'note' && !this.isNote() && !this.isAttachment();
+};
+
+
 Zotero.Item.prototype._clearChanged = function (dataType) {
 	Zotero.DataObject.prototype._clearChanged.call(this, dataType);
 	// setType stores the old type under the 'itemType' alias, which the base
@@ -474,11 +480,6 @@ Zotero.Item.prototype.setType = function (itemTypeID, loadIn) {
 	if (itemTypeID == this._itemTypeID) {
 		return true;
 	}
-	
-	// Adjust 'note' data type based on whether the item is an attachment or note
-	var isAttachment = Zotero.ItemTypes.getID('attachment') == itemTypeID;
-	var isNote = Zotero.ItemTypes.getID('note') == itemTypeID;
-	this._skipDataTypeLoad.note = !(isAttachment || isNote);
 	
 	var oldItemTypeID = this._itemTypeID;
 	if (oldItemTypeID) {
