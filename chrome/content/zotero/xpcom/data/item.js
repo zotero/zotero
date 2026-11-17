@@ -1278,11 +1278,11 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 	else if (itemTypeID == itemTypeAnnotation) {
 		// Build annotation title from text and comment
 		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-		let plainText = parserUtils.convertToPlainText(this.annotationText || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
-		let plainComment = parserUtils.convertToPlainText(this.annotationComment || "", Ci.nsIDocumentEncoder.OutputRaw, 0);
+		let toPlainText = str => (str ? parserUtils.convertToPlainText(str, Ci.nsIDocumentEncoder.OutputRaw, 0) : "");
 		let maxComponentLength = 50;
 		// "{Annotation-Text}"
 		if (["highlight", "underline"].includes(this.annotationType)) {
+			let plainText = toPlainText(this.annotationText);
 			title = `“${plainText.slice(0, maxComponentLength)}`;
 			if (plainText.length > maxComponentLength) {
 				title += '…';
@@ -1291,6 +1291,7 @@ Zotero.Item.prototype.updateDisplayTitle = function () {
 		}
 		// "{Annotation-Text}" Comment
 		if (this.annotationComment) {
+			let plainComment = toPlainText(this.annotationComment);
 			if (title.length) title += ' ';
 			title += `${plainComment.slice(0, maxComponentLength)}`;
 			if (plainComment.length > maxComponentLength) {
