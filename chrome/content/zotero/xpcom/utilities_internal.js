@@ -334,20 +334,26 @@ Zotero.Utilities.Internal = {
 	  * @return	{String}
 	  */
 	sha1: function (str) {
-		var data = new TextEncoder().encode(str);
-		var ch = Components.classes["@mozilla.org/security/hash;1"]
-			.createInstance(Components.interfaces.nsICryptoHash);
+		// Reuse the encoder and hasher, since this can be called for many values in a row
+		var internal = Zotero.Utilities.Internal;
+		if (!internal._sha1Hasher) {
+			internal._sha1Encoder = new TextEncoder();
+			internal._sha1Hasher = Components.classes["@mozilla.org/security/hash;1"]
+				.createInstance(Components.interfaces.nsICryptoHash);
+		}
+		var data = internal._sha1Encoder.encode(str);
+		var ch = internal._sha1Hasher;
 		ch.init(ch.SHA1);
 		ch.update(data, data.length);
 		var hash = ch.finish(false);
 		
-		// Return the two-digit hexadecimal code for a byte
-		function toHexString(charCode) {
-			return ("0" + charCode.toString(16)).slice(-2);
+		// Convert the binary hash data to a hex string
+		const HEX_DIGITS = '0123456789abcdef';
+		var s = '';
+		for (let i = 0; i < hash.length; i++) {
+			let c = hash.charCodeAt(i);
+			s += HEX_DIGITS[c >> 4] + HEX_DIGITS[c & 15];
 		}
-		
-		// Convert the binary hash data to a hex string.
-		var s = Array.from(hash, (c, i) => toHexString(hash.charCodeAt(i))).join("");
 		return s;
 	},
 	
