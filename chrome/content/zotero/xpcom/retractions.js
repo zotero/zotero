@@ -105,7 +105,7 @@ Zotero.Retractions = {
 		this._cacheETag = null;
 		this._cacheDOIPrefixLength = null;
 		this._cachePMIDPrefixLength = null;
-		this._cachePrefixList = new Set();
+		this._cachePrefixList = new Zotero.Retractions.PrefixList();
 		this._suppressAlerts = false;
 	},
 	
@@ -984,9 +984,13 @@ Zotero.Retractions = {
 		this._cacheETag = data.etag;
 		this._cacheDOIPrefixLength = data.doiPrefixLength;
 		this._cachePMIDPrefixLength = data.pmidPrefixLength;
-		this._cachePrefixList = new Set();
+		this._cachePrefixList = new Zotero.Retractions.PrefixList(
+			data.doiPrefixLength, data.pmidPrefixLength
+		);
+		// Rows are a prefix string optionally followed by a space and other data
 		for (let row of data.data) {
-			this._cachePrefixList.add(row.split(' ')[0]);
+			let end = row.indexOf(' ');
+			this._cachePrefixList.add(row, end == -1 ? row.length : end);
 		}
 		// Add hard-coded prefixes
 		for (let row of this._fixedResults) {
@@ -1166,4 +1170,94 @@ Zotero.Retractions = {
 	_fixedResults: [
 		{ date: "1977-04-15", pmid: 993, retractionPMID: 195582, reasons: ["Results Not Reproducible"], urls: [] }
 	]
+};
+
+
+/**
+ * The prefix strings in the retractions list -- a type followed by the start of a DOI hash
+ * (e.g., 'd0001d') or of a PMID (e.g., 'p12345')
+ *
+ * The list has tens of thousands of prefixes, so DOI and PMID prefixes of the expected form are
+ * stored as bits indexed by their numeric values, which takes a small fraction of the memory of a
+ * Set of strings. Other prefixes are kept in a Set.
+ */
+Zotero.Retractions.PrefixList = class {
+	constructor(doiPrefixLength, pmidPrefixLength) {
+		this._other = new Set();
+		this._bits = null;
+		if (doiPrefixLength > 0 && doiPrefixLength <= 6 && pmidPrefixLength > 0 && pmidPrefixLength <= 7) {
+			this._doiPrefixLength = doiPrefixLength;
+			this._pmidPrefixLength = pmidPrefixLength;
+			// DOI prefixes first, followed by PMID prefixes
+			this._doiCount = 16 ** doiPrefixLength;
+			this._bits = new Uint8Array(Math.ceil((this._doiCount + 10 ** pmidPrefixLength) / 8));
+		}
+	}
+	
+	/**
+	 * @param {String} str
+	 * @param {Integer} [end] - End of the prefix string within str, if it doesn't end at the end
+	 */
+	add(str, end = str.length) {
+		let index = this._getBitIndex(str, end);
+		if (index == -1) {
+			this._other.add(str.substring(0, end));
+			return;
+		}
+		this._bits[index >> 3] |= 1 << (index & 7);
+	}
+	
+	has(prefixStr) {
+		let index = this._getBitIndex(prefixStr, prefixStr.length);
+		if (index == -1) {
+			return this._other.has(prefixStr);
+		}
+		return !!(this._bits[index >> 3] & (1 << (index & 7)));
+	}
+	
+	/**
+	 * Get the bit for a prefix string, parsing it directly, since the whole list is added at
+	 * startup
+	 *
+	 * @return {Integer} - The bit index, or -1 if the prefix isn't of a form stored as a bit
+	 */
+	_getBitIndex(str, end) {
+		if (!this._bits) {
+			return -1;
+		}
+		let length = end - 1;
+		let n = 0;
+		switch (str[0]) {
+			// DOI prefixes are the start of a lowercase hex hash, so they always have the full length
+			case Zotero.Retractions.TYPE_DOI:
+				if (length != this._doiPrefixLength) {
+					return -1;
+				}
+				for (let i = 1; i < end; i++) {
+					let c = str.charCodeAt(i);
+					let digit = c >= 48 && c <= 57 ? c - 48 : (c >= 97 && c <= 102 ? c - 87 : -1);
+					if (digit == -1) {
+						return -1;
+					}
+					n = n * 16 + digit;
+				}
+				return n;
+			
+			// PMIDs can be shorter than the prefix length, but they don't start with 0, so each
+			// prefix still has its own numeric value
+			case Zotero.Retractions.TYPE_PMID:
+				if (length < 1 || length > this._pmidPrefixLength || str.charCodeAt(1) == 48) {
+					return -1;
+				}
+				for (let i = 1; i < end; i++) {
+					let c = str.charCodeAt(i);
+					if (c < 48 || c > 57) {
+						return -1;
+					}
+					n = n * 10 + c - 48;
+				}
+				return this._doiCount + n;
+		}
+		return -1;
+	}
 };
