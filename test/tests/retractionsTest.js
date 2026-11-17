@@ -539,4 +539,59 @@ describe("Retractions", function () {
 			await item.eraseTx();
 		});
 	});
+	
+	describe("PrefixList", function () {
+		it("should contain added DOI and PMID prefixes", function () {
+			var list = new Zotero.Retractions.PrefixList(5, 5);
+			for (let str of ['d0001d', 'dfffff', 'p12345', 'p993']) {
+				list.add(str);
+			}
+			for (let str of ['d0001d', 'dfffff', 'p12345', 'p993']) {
+				assert.isTrue(list.has(str), str);
+			}
+			for (let str of ['d0001e', 'd00000', 'p12346', 'p9930', 'p99300', 'p99']) {
+				assert.isFalse(list.has(str), str);
+			}
+		});
+		
+		it("should add prefixes from the start of a string", function () {
+			var list = new Zotero.Retractions.PrefixList(5, 5);
+			var row = 'd0001d 1';
+			list.add(row, row.indexOf(' '));
+			row = 'x123 1';
+			list.add(row, row.indexOf(' '));
+			assert.isTrue(list.has('d0001d'));
+			assert.isTrue(list.has('x123'));
+			assert.isFalse(list.has('x123 1'));
+		});
+		
+		it("should contain prefixes that don't fit the expected forms", function () {
+			var list = new Zotero.Retractions.PrefixList(5, 5);
+			var others = ['dABCDE', 'd0001', 'd0001d0', 'p0123', 'p123456', 'x12345', 'p'];
+			for (let str of others) {
+				list.add(str);
+			}
+			for (let str of others) {
+				assert.isTrue(list.has(str), str);
+			}
+			assert.isFalse(list.has('dabcde'));
+			assert.isFalse(list.has('p123'));
+		});
+		
+		it("should contain prefixes with unsupported prefix lengths", function () {
+			var list = new Zotero.Retractions.PrefixList(8, 9);
+			list.add('d0001d0aa');
+			list.add('p123456789');
+			assert.isTrue(list.has('d0001d0aa'));
+			assert.isTrue(list.has('p123456789'));
+			assert.isFalse(list.has('d0001d0ab'));
+		});
+		
+		it("should be empty without prefix lengths", function () {
+			var list = new Zotero.Retractions.PrefixList();
+			assert.isFalse(list.has('d0001d'));
+			list.add('d0001d');
+			assert.isTrue(list.has('d0001d'));
+		});
+	});
 });
