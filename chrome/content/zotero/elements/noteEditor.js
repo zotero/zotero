@@ -26,6 +26,8 @@
 "use strict";
 
 {
+	const EDITOR_URL = 'resource://zotero/note-editor/editor.html';
+	
 	class NoteEditor extends XULElement {
 		constructor() {
 			super();
@@ -41,6 +43,7 @@
 				this._rejectInitPromise = reject;
 			});
 			this._editorInstance = null;
+			this._initEditorCount = 0;
 			this._destroyed = false;
 			this._bottomPlaceholder = null;
 			this._contextPaneOpen = null;
@@ -49,7 +52,7 @@
 				<html:div class="custom-head empty"></html:div>
 				<box flex="1" tooltip="html-tooltip" style="display: flex; flex-grow: 1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
-						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content" context="textbox-contextmenu"/>
+						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content" context="textbox-contextmenu"/>
 						<div id="links-container">
 							<links-box id="links-box" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 						</div>
@@ -76,6 +79,10 @@
 			let content = document.importNode(this.content, true);
 			this._iframe = content.querySelector('#editor-view');
 			this._iframe.addEventListener('DOMContentLoaded', (_event) => {
+				// The iframe loads about:blank until the editor is loaded
+				if (this._iframe.contentDocument?.documentURI != EDITOR_URL) {
+					return;
+				}
 				// For iframes without chrome priviledges, for unknown reasons,
 				// dataTransfer.getData() returns empty value for `drop` event
 				// when dragging something from the outside of Zotero.
@@ -93,10 +100,22 @@
 				this._initialized = true;
 			});
 			this.append(content);
+			// The item can be set before the element is attached
+			if (this._item) {
+				this._loadEditorView();
+			}
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'file'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
 			window.goBuildEditContextMenu();
+		}
+		
+		// Load the editor page into the iframe only once there's a note to show, since <note-editor>
+		// elements are often created without being used
+		_loadEditorView() {
+			if (this._iframe && !this._iframe.hasAttribute('src')) {
+				this._iframe.setAttribute('src', EDITOR_URL);
+			}
 		}
 		
 		destroy() {
@@ -129,14 +148,21 @@
 		};
 
 		initEditor = async (state, reloaded) => {
+			let initEditorCount = ++this._initEditorCount;
 			if (this._editorInstance) {
 				this._editorInstance.uninit();
+				this._editorInstance = null;
 			}
 
 			// Automatically upgrade editable v1 note before it's loaded
 			// TODO: Remove this at some point
 			if (this._mode == 'edit') {
 				await Zotero.Notes.upgradeSchemaV1(this._item);
+			}
+			
+			// Only the latest call creates an editor instance
+			if (initEditorCount != this._initEditorCount) {
+				return;
 			}
 
 			this._editorInstance = new Zotero.EditorInstance();
@@ -285,6 +311,7 @@
 			}
 
 			this._id('links-box').item = this._item;
+			this._loadEditorView();
 
 			(async () => {
 				// `item` field can be set before the constructor is called
