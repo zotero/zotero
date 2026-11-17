@@ -527,7 +527,11 @@ window.TagSelectorContainer = class TagSelectorContainer extends React.PureCompo
 			// re-use canvas object for better performance
 			var canvas = this.canvas || (this.canvas = document.createElement("canvas"));
 			var context = canvas.getContext("2d");
-			context.font = font;
+			// Setting the font parses it, so only set it when it changes
+			if (this.canvasFont !== font) {
+				context.font = font;
+				this.canvasFont = font;
+			}
 			var metrics = context.measureText(text);
 			width = metrics.width;
 		}
