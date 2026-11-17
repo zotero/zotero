@@ -460,6 +460,10 @@ function modify_omni {
 		'viewType !== "detail" \&\& viewType !== "shortcuts" \&\& viewType !== "updates";' \
 		chrome/toolkit/content/mozapps/extensions/components/addon-page-header.mjs
 
+	# Hide the Firefox support link in the Troubleshooting Mode warning
+	remove_line 'supportPage: "diagnose-firefox-issues-using-troubleshoot-mode",' \
+		chrome/toolkit/content/mozapps/extensions/components/global-warnings.mjs
+
 	# Customize empty-list message
 	replace_line 'createEmptyListMessage\(\) {' 'createEmptyListMessage() {
         var p = document.createElement("p");
@@ -475,6 +479,8 @@ function modify_omni {
 	replace_line 'Add-on' 'Plugin' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'add-ons' 'plugins' localization/en-US/toolkit/about/aboutAddons.ftl
 	replace_line 'Select add-on to install' 'Select plugin to install' localization/en-US/toolkit/about/aboutAddons.ftl
+	replace_line 'All plugins have been disabled by Troubleshoot Mode\.' \
+		'All plugins were disabled at startup by Troubleshooting Mode.' localization/en-US/toolkit/about/aboutAddons.ftl
 	
 	replace_line 'pref\("extensions.htmlaboutaddons.recommendations.enabled".+' 'pref("extensions.htmlaboutaddons.recommendations.enabled", false);' greprefs.js
 	
