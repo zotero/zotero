@@ -39,6 +39,8 @@ Zotero.ItemFields = new function () {
 	var _typeFieldNamesByBase = {};
 	var _baseFieldIDsByTypeAndField = {};
 	var _autocompleteFields = null;
+	var _itemDataKeys = [];
+	var _itemDataTemplates = { null: [], false: [] };
 	
 	// Privileged methods
 	this.getName = getName;
@@ -59,6 +61,7 @@ Zotero.ItemFields = new function () {
 	this.init = async function () {
 		_fields = {};
 		_fieldsFormats = [];
+		_itemDataTemplates = { null: [], false: [] };
 		
 		var result = await Zotero.DB.queryAsync('SELECT * FROM fieldFormats');
 		
@@ -121,6 +124,46 @@ Zotero.ItemFields = new function () {
 		
 		return _fields[field] ? _fields[field]['id'] : false;
 	}
+	
+	
+	/**
+	 * Get the key under which Zotero.Item#_itemData stores a field's value
+	 *
+	 * The key is the field ID prefixed with 'f'.
+	 *
+	 * @param {Integer} fieldID
+	 * @return {String}
+	 */
+	this._getItemDataKey = function (fieldID) {
+		var key = _itemDataKeys[fieldID];
+		if (!key) {
+			key = _itemDataKeys[fieldID] = 'f' + parseInt(fieldID);
+		}
+		return key;
+	};
+	
+	
+	/**
+	 * Get an object with the _itemData keys of an item type's fields, all set to the same value
+	 *
+	 * Zotero.Item copies these with Object.assign(), which is much faster than setting the keys one
+	 * at a time. They must not be modified.
+	 *
+	 * @param {Integer} itemTypeID
+	 * @param {null|false} value - null for fields that aren't loaded, or false for empty fields
+	 * @return {Object}
+	 */
+	this._getItemDataTemplate = function (itemTypeID, value) {
+		var templates = _itemDataTemplates[value];
+		var template = templates[itemTypeID];
+		if (!template) {
+			template = templates[itemTypeID] = {};
+			for (let fieldID of getItemTypeFields(itemTypeID)) {
+				template[this._getItemDataKey(fieldID)] = value;
+			}
+		}
+		return template;
+	};
 	
 	
 	/*

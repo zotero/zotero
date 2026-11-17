@@ -280,7 +280,7 @@ Zotero.Item.prototype.getField = function (field, unformatted, includeBaseMapped
 		var fieldID = Zotero.ItemFields.getID(field);
 	}
 	
-	let value = this._itemData[fieldID];
+	let value = this._getItemDataValue(fieldID);
 	
 	if (value === undefined) {
 		//Zotero.debug("Field '" + field + "' doesn't exist for item type " + this._itemTypeID + " in Item.getField()");
@@ -321,9 +321,40 @@ Zotero.Item.prototype.getExtraField = function (fieldName) {
 Zotero.Item.prototype.getUsedFields = function (asNames) {
 	this._requireData('itemData');
 	
+	return this._getItemDataFieldIDs()
+		.filter((id) => {
+			let value = this._getItemDataValue(id);
+			return value !== false && value !== null;
+		})
+		.map(id => asNames ? Zotero.ItemFields.getName(id) : id);
+};
+
+
+/**
+ * @param {Integer|String} fieldID
+ * @return {String|Integer|false|null|undefined} - false for a loaded empty field, null for a
+ *     field that isn't loaded or set, and undefined for a field not in the item's type
+ */
+Zotero.Item.prototype._getItemDataValue = function (fieldID) {
+	return this._itemData[Zotero.ItemFields._getItemDataKey(fieldID)];
+};
+
+
+Zotero.Item.prototype._setItemDataValue = function (fieldID, value) {
+	this._itemData[Zotero.ItemFields._getItemDataKey(fieldID)] = value;
+};
+
+
+/**
+ * @return {Integer[]} - IDs of the fields in _itemData
+ */
+Zotero.Item.prototype._getItemDataFieldIDs = function () {
 	return Object.keys(this._itemData)
-		.filter(id => this._itemData[id] !== false && this._itemData[id] !== null)
-		.map(id => asNames ? Zotero.ItemFields.getName(id) : parseInt(id));
+		.map(key => parseInt(key.substr(1)))
+		// Sort by field ID for now so toJSON() and getUsedFields() keep their existing field
+		// order. The integer order isn't meaningful, so this should be switched later to use the
+		// item type's field order.
+		.sort((a, b) => a - b);
 };
 
 
@@ -482,10 +513,10 @@ Zotero.Item.prototype.setType = function (itemTypeID, loadIn) {
 				var titleFieldID = Zotero.ItemFields.getID('title');
 				var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 				var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
-				if (this._itemData[bookTitleFieldID] && !this._itemData[titleFieldID]) {
-					copiedFields.push([titleFieldID, this._itemData[bookTitleFieldID]]);
+				if (this._getItemDataValue(bookTitleFieldID) && !this._getItemDataValue(titleFieldID)) {
+					copiedFields.push([titleFieldID, this._getItemDataValue(bookTitleFieldID)]);
 					newNotifierFields.push(titleFieldID);
-					if (this._itemData[shortTitleFieldID]) {
+					if (this._getItemDataValue(shortTitleFieldID)) {
 						this.setField(shortTitleFieldID, false);
 					}
 				}
@@ -523,18 +554,18 @@ Zotero.Item.prototype.setType = function (itemTypeID, loadIn) {
 			var titleFieldID = Zotero.ItemFields.getID('title');
 			var bookTitleFieldID = Zotero.ItemFields.getID('bookTitle');
 			var shortTitleFieldID = Zotero.ItemFields.getID('shortTitle');
-			if (this._itemData[titleFieldID]) {
-				copiedFields.push([bookTitleFieldID, this._itemData[titleFieldID]]);
+			if (this._getItemDataValue(titleFieldID)) {
+				copiedFields.push([bookTitleFieldID, this._getItemDataValue(titleFieldID)]);
 				newNotifierFields.push(bookTitleFieldID);
 				this.setField(titleFieldID, false);
 			}
-			if (this._itemData[shortTitleFieldID]) {
+			if (this._getItemDataValue(shortTitleFieldID)) {
 				this.setField(shortTitleFieldID, false);
 			}
 		}
 		
-		for (var fieldID in this._itemData) {
-			if (this._itemData[fieldID] &&
+		for (let fieldID of this._getItemDataFieldIDs()) {
+			if (this._getItemDataValue(fieldID) &&
 					(!obsoleteFields || obsoleteFields.indexOf(fieldID) == -1)) {
 				copiedFields.push([fieldID, this.getField(fieldID)]);
 			}
@@ -576,11 +607,7 @@ Zotero.Item.prototype.setType = function (itemTypeID, loadIn) {
 	}
 	
 	// Initialize this._itemData with type-specific fields
-	this._itemData = {};
-	var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
-	for (let fieldID of fields) {
-		this._itemData[fieldID] = null;
-	}
+	this._itemData = Object.assign({}, Zotero.ItemFields._getItemDataTemplate(itemTypeID, null));
 	
 	// DEBUG: clear change item data?
 	
@@ -627,15 +654,14 @@ Zotero.Item.prototype.setType = function (itemTypeID, loadIn) {
  */
 Zotero.Item.prototype.getFieldsNotInType = function (itemTypeID, allowBaseConversion) {
 	var fieldIDs = [];
-	for (var field in this._itemData) {
-		if (this._itemData[field]) {
-			var fieldID = Zotero.ItemFields.getID(field);
+	for (let fieldID of this._getItemDataFieldIDs()) {
+		if (this._getItemDataValue(fieldID)) {
 			if (Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 				continue;
 			}
 			
 			if (allowBaseConversion) {
-				var baseID = Zotero.ItemFields.getBaseIDFromTypeAndField(this.itemTypeID, field);
+				var baseID = Zotero.ItemFields.getBaseIDFromTypeAndField(this.itemTypeID, fieldID);
 				if (baseID) {
 					var newFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, baseID);
 					if (newFieldID) {
@@ -869,18 +895,19 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 		}
 		
 		// If existing value, make sure it's actually changing
-		if ((this._itemData[fieldID] === null && value === false)
-				|| (this._itemData[fieldID] !== null && this._itemData[fieldID] === value)) {
+		let currentValue = this._getItemDataValue(fieldID);
+		if ((currentValue === null && value === false)
+				|| (currentValue !== null && currentValue === value)) {
 			return false;
 		}
 		
 		// Save a copy of the field before modifying
 		this._markFieldChange(
-			Zotero.ItemFields.getName(field), this._itemData[fieldID]
+			Zotero.ItemFields.getName(field), currentValue
 		);
 	}
 	
-	this._itemData[fieldID] = value;
+	this._setItemDataValue(fieldID, value);
 	
 	if (!loadIn) {
 		if (!this._changed.itemData) {
@@ -892,7 +919,7 @@ Zotero.Item.prototype.setField = function (field, value, loadIn) {
 }
 
 /**
- * Override to correctly resolve item data fields via _itemData[fieldID]
+ * Override to correctly resolve item data fields from _itemData
  */
 Zotero.Item.prototype._getUndoData = function () {
 	let skipFields = Zotero.DataObject.UNDO_SKIP_FIELDS;
@@ -933,7 +960,7 @@ Zotero.Item.prototype._getUndoData = function () {
 		if (fieldID) {
 			// Item data field -- new value is in _itemData.
 			// After a type change, lost fields are no longer in _itemData.
-			let newValue = this._itemData[fieldID];
+			let newValue = this._getItemDataValue(fieldID);
 			fields[field] = {
 				old: this._previousData[field],
 				new: newValue !== undefined ? newValue : false
@@ -1051,7 +1078,7 @@ Zotero.Item.prototype._undoFieldMatches = function (field, recorded) {
  * @return {Boolean}
  */
 Zotero.Item.prototype._undoItemDataMatches = function (fieldID, recorded) {
-	let current = this._itemData ? this._itemData[fieldID] : undefined;
+	let current = this._itemData ? this._getItemDataValue(fieldID) : undefined;
 	let emptyCurrent = current === undefined || current === null || current === false || current === '';
 	let emptyRecorded = recorded === undefined || recorded === null || recorded === false || recorded === '';
 	if (emptyCurrent || emptyRecorded) {
@@ -6017,7 +6044,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	var embeddedImage = this.isEmbeddedImageAttachment();
 	
 	// Fields
-	for (let i in this._itemData) {
+	for (let i of this._getItemDataFieldIDs()) {
 		let val = this.getField(i) + '';
 		if (val !== '' || mode == 'full') {
 			obj[Zotero.ItemFields.getName(i)] = val;
