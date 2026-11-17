@@ -286,21 +286,15 @@ Zotero.Items = function () {
 						return;
 					}
 					let data = JSON.parse(row.getResultByIndex(1));
+					// Mark the type's fields as empty (false rather than the null of an unloaded
+					// field), and then set the stored values
+					Object.assign(item._itemData, Zotero.ItemFields._getItemDataTemplate(item.itemTypeID, false));
 					for (let fieldID in data) {
 						let value = data[fieldID];
 						if (value === null) {
 							value = false;
 						}
 						item.setField(parseInt(fieldID), value, true);
-					}
-					
-					// Set nonexistent fields in the cache list to false (instead of null)
-					let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
-					for (let j = 0; j < fieldIDs.length; j++) {
-						let fieldID = fieldIDs[j];
-						if (!(fieldID in data)) {
-							item.setField(fieldID, false, true);
-						}
 					}
 					allItemIDs.push(itemID);
 				}.bind(this)

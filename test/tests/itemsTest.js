@@ -954,7 +954,7 @@ describe("Zotero.Items", function () {
 			assert.isTrue(item._changed.creators[2]);
 		});
 		
-		it("should call setField() once for each field of the item type", async function () {
+		it("should call setField() once for each stored value", async function () {
 			var item = await createDataObject('item', { itemType: 'book', title: "Called" });
 			var original = Zotero.Item.prototype.setField;
 			var calls = [];
@@ -971,10 +971,9 @@ describe("Zotero.Items", function () {
 				Zotero.Item.prototype.setField = original;
 			}
 			var titleID = Zotero.ItemFields.getID('title');
-			var volumeID = Zotero.ItemFields.getID('volume');
 			assert.deepInclude(calls, [titleID, "Called", true]);
-			assert.deepInclude(calls, [volumeID, false, true]);
-			assert.lengthOf(calls, Zotero.ItemFields.getItemTypeFields(item.itemTypeID).length);
+			assert.lengthOf(calls, item.getUsedFields().length);
+			assert.strictEqual(item.getField('volume'), "");
 		});
 	});
 });
