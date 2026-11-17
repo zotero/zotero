@@ -44,7 +44,9 @@ Zotero.Feeds = new function () {
 			await Zotero.Promise.delay(5000);
 			return this.scheduleNextFeedCheck();
 		})
-		.then(() => _initPromise = null);
+		.finally(() => {
+			_initPromise = null;
+		});
 		
 		Zotero.SyncedSettings.onSyncDownload.addListener(Zotero.Libraries.userLibraryID, 'feeds', 
 			(oldValue, newValue, conflict) => { 
@@ -123,6 +125,10 @@ Zotero.Feeds = new function () {
 	
 	function _resumeInternal() {
 		Zotero.debug("Resuming feed updating");
+		// init() schedules the first check after its startup delay
+		if (_initPromise) {
+			return;
+		}
 		Zotero.Feeds.scheduleNextFeedCheck();
 	};
 	
