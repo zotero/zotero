@@ -21,6 +21,10 @@ SIGN=0
 
 # OS X Developer ID certificate information
 DEVELOPER_ID=F0F1FE48DB909B263AC51C8215374D87FDC12121
+# Code signing identity for local Mac builds (e.g., an "Apple Development" certificate), so that
+# firewalls and other tools can identify them across rebuilds. Can also be set in the environment.
+# If empty, local builds aren't signed.
+ZOTERO_MAC_DEV_SIGNING_IDENTITY="${ZOTERO_MAC_DEV_SIGNING_IDENTITY:-}"
 # Keychain and keychain password, if not building via the GUI
 KEYCHAIN=""
 KEYCHAIN_PASSWORD=""

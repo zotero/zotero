@@ -305,6 +305,11 @@ if [ ${#zip_files[@]} -gt 0 ]; then
 		perl -pi -e "s/^BuildID=.*/BuildID=$build_id/" "$(dirname "$omni_file")/application.ini"
 	done
 	
+	# Re-seal the bundle signature after modifying its contents
+	if [[ $platform = "m" ]] && [ -n "$ZOTERO_MAC_DEV_SIGNING_IDENTITY" ]; then
+		"$SCRIPT_DIR/codesign_local" "$STAGE_DIR/Zotero.app"
+	fi
+	
 	echo "Updated staged build with ${#zip_files[@]} changed file(s)"
 elif [ -n "$changes" ]; then
 	echo "No staged files changed"
