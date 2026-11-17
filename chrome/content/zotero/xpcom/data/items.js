@@ -258,45 +258,17 @@ Zotero.Items = function () {
 	//
 	this._loadItemData = async function (libraryID, ids, idSQL) {
 		var missingItems = {};
-		var itemFieldsCached = {};
 		
-		var sql = "SELECT itemID, fieldID, value FROM items "
-			+ "JOIN itemData USING (itemID) "
-			+ "JOIN itemDataValues USING (valueID) WHERE libraryID=? AND itemTypeID!=?" + idSQL;
-		var params = [libraryID, Zotero.ItemTypes.getID('note')];
-		await Zotero.DB.queryAsync(
-			sql,
-			params,
-			{
-				noCache: true,
-				onRow: function (row) {
-					let itemID = row.getResultByIndex(0);
-					let fieldID = row.getResultByIndex(1);
-					let value = row.getResultByIndex(2);
-					
-					//Zotero.debug('Setting field ' + fieldID + ' for item ' + itemID);
-					if (this._objectCache[itemID]) {
-						if (value === null) {
-							value = false;
-						}
-						this._objectCache[itemID].setField(fieldID, value, true);
-					}
-					else {
-						if (!missingItems[itemID]) {
-							missingItems[itemID] = true;
-							Zotero.logError("itemData row references nonexistent item " + itemID);
-						}
-					}
-					if (!itemFieldsCached[itemID]) {
-						itemFieldsCached[itemID] = {};
-					}
-					itemFieldsCached[itemID][fieldID] = true;
-				}.bind(this)
-			}
-		);
-		
-		var sql = "SELECT itemID FROM items WHERE libraryID=?" + idSQL;
-		var params = [libraryID];
+		// Get each item's fields as a JSON object, so that the query returns one row per item.
+		// Values should always be text, but a BLOB would make the whole query fail.
+		var sql = "SELECT itemID, json_group_object(fieldID, "
+			+ "CASE WHEN typeof(value)='blob' THEN CAST(value AS TEXT) ELSE value END) "
+			+ "FILTER (WHERE fieldID IS NOT NULL AND itemTypeID!=?) AS data "
+			+ "FROM items "
+			+ "LEFT JOIN itemData USING (itemID) "
+			+ "LEFT JOIN itemDataValues USING (valueID) "
+			+ "WHERE " + _libraryClause(ids) + idSQL + " GROUP BY itemID";
+		var params = [Zotero.ItemTypes.getID('note'), libraryID];
 		var allItemIDs = [];
 		await Zotero.DB.queryAsync(
 			sql,
@@ -306,17 +278,30 @@ Zotero.Items = function () {
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
+					if (!item) {
+						if (!missingItems[itemID]) {
+							missingItems[itemID] = true;
+							Zotero.logError("itemData row references nonexistent item " + itemID);
+						}
+						return;
+					}
+					let data = JSON.parse(row.getResultByIndex(1));
+					for (let fieldID in data) {
+						let value = data[fieldID];
+						if (value === null) {
+							value = false;
+						}
+						item.setField(parseInt(fieldID), value, true);
+					}
 					
 					// Set nonexistent fields in the cache list to false (instead of null)
 					let fieldIDs = Zotero.ItemFields.getItemTypeFields(item.itemTypeID);
-					for (let j=0; j<fieldIDs.length; j++) {
+					for (let j = 0; j < fieldIDs.length; j++) {
 						let fieldID = fieldIDs[j];
-						if (!itemFieldsCached[itemID] || !itemFieldsCached[itemID][fieldID]) {
-							//Zotero.debug('Setting field ' + fieldID + ' to false for item ' + itemID);
+						if (!(fieldID in data)) {
 							item.setField(fieldID, false, true);
 						}
 					}
-					
 					allItemIDs.push(itemID);
 				}.bind(this)
 			}
@@ -394,12 +379,52 @@ Zotero.Items = function () {
 	};
 	
 	
+	/**
+	 * Get the cached items that a data type is being loaded for, so that defaults can be set
+	 * for items without rows in the data type's table
+	 */
+	this._getItemsForLoad = function (libraryID, ids) {
+		if (ids.length) {
+			return ids.map((id) => {
+				let item = this._objectCache[id];
+				if (!item) {
+					throw new Error("Item " + id + " not loaded");
+				}
+				return item;
+			});
+		}
+		return Object.values(this._objectCache).filter(item => item.libraryID == libraryID);
+	};
+	
+	
+	/**
+	 * Get the libraryID condition for the item data loading queries, which group rows by itemID
+	 *
+	 * When loading a whole library, this returns '+libraryID=?'. The unary + keeps SQLite from
+	 * using the (libraryID, key) index, which returns items in key order and requires a temporary
+	 * B-tree to group them by itemID. Instead, SQLite scans the items table, which is in itemID
+	 * order, and groups rows as it goes -- about 3 times as fast for the item fields query in
+	 * testing. When loading specific items, this returns 'libraryID=?'.
+	 */
+	function _libraryClause(ids) {
+		return (ids.length ? "" : "+") + "libraryID=?";
+	}
+	
+	
 	this._loadCreators = async function (libraryID, ids, idSQL) {
-		var sql = 'SELECT itemID, creatorID, creatorTypeID, orderIndex '
-			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
-			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
+		var resetCreators = function (item) {
+			item._creators = [];
+			item._creatorIDs = [];
+			item._loaded.creators = true;
+			item._clearChanged('creators');
+		};
+		
+		// Get creators as a JSON array per item, for only the items that have creators
+		var sql = "SELECT itemID, "
+			+ "json_group_array(json_array(creatorID, creatorTypeID, orderIndex) ORDER BY orderIndex) AS data "
+			+ "FROM items CROSS JOIN itemCreators USING (itemID) "
+			+ "WHERE " + _libraryClause(ids) + idSQL + " GROUP BY itemID";
 		var params = [libraryID];
-		var rows = await Zotero.DB.queryAsync(sql, params, { noCache: true });
 		
 		// Mark creator indexes above the number of creators as changed,
 		// so that they're cleared if the item is saved
@@ -416,53 +441,41 @@ Zotero.Items = function () {
 			}
 		};
 		
-		var lastItemID;
-		var item;
-		var index = 0;
-		var maxOrderIndex = -1;
-		for (let i = 0; i < rows.length; i++) {
-			let row = rows[i];
-			let itemID = row.itemID;
-			
-			if (itemID != lastItemID) {
-				if (!this._objectCache[itemID]) {
-					throw new Error("Item " + itemID + " not loaded");
+		var loadedItemIDs = new Set();
+		await Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: true,
+				onRow: (row) => {
+					let itemID = row.getResultByIndex(0);
+					let item = this._objectCache[itemID];
+					let creators = JSON.parse(row.getResultByIndex(1));
+					resetCreators(item);
+					loadedItemIDs.add(itemID);
+					let maxOrderIndex = -1;
+					for (let i = 0; i < creators.length; i++) {
+						let [creatorID, creatorTypeID, orderIndex] = creators[i];
+						if (orderIndex > maxOrderIndex) {
+							maxOrderIndex = orderIndex;
+						}
+						let creatorData = Zotero.Creators.get(creatorID);
+						creatorData.creatorTypeID = creatorTypeID;
+						item._creators[i] = creatorData;
+						item._creatorIDs[i] = creatorID;
+					}
+					if (creators.length <= maxOrderIndex) {
+						fixIncorrectIndexes(item, creators.length, maxOrderIndex);
+					}
 				}
-				item = this._objectCache[itemID];
-				
-				item._creators = [];
-				item._creatorIDs = [];
-				item._loaded.creators = true;
-				item._clearChanged('creators');
-				
-				if (!row.creatorID) {
-					lastItemID = row.itemID;
-					continue;
-				}
-				
-				if (index <= maxOrderIndex) {
-					fixIncorrectIndexes(item, index, maxOrderIndex);
-				}
-				
-				index = 0;
-				maxOrderIndex = -1;
 			}
-			
-			lastItemID = row.itemID;
-			
-			if (row.orderIndex > maxOrderIndex) {
-				maxOrderIndex = row.orderIndex;
-			}
-			
-			let creatorData = Zotero.Creators.get(row.creatorID);
-			creatorData.creatorTypeID = row.creatorTypeID;
-			item._creators[index] = creatorData;
-			item._creatorIDs[index] = row.creatorID;
-			index++;
-		}
+		);
 		
-		if (index <= maxOrderIndex) {
-			fixIncorrectIndexes(item, index, maxOrderIndex);
+		// Clear creators of items without any, once the query has succeeded
+		for (let item of this._getItemsForLoad(libraryID, ids)) {
+			if (!loadedItemIDs.has(item.id)) {
+				resetCreators(item);
+			}
 		}
 	};
 	
@@ -863,106 +876,74 @@ Zotero.Items = function () {
 	
 	
 	this._loadTags = async function (libraryID, ids, idSQL) {
-		var sql = "SELECT itemID, name, type FROM items "
-			+ "LEFT JOIN itemTags USING (itemID) "
-			+ "LEFT JOIN tags USING (tagID) WHERE libraryID=?" + idSQL;
+		// Get tags as a JSON array per item, for only the items that have tags
+		var sql = "SELECT itemID, json_group_array(json_array(name, type)) AS data "
+			+ "FROM items "
+			+ "CROSS JOIN itemTags USING (itemID) "
+			+ "JOIN tags USING (tagID) "
+			+ "WHERE " + _libraryClause(ids) + idSQL + " GROUP BY itemID";
 		var params = [libraryID];
 		
-		var lastItemID;
-		var rows = [];
-		var setRows = function (itemID, rows) {
-			var item = this._objectCache[itemID];
-			if (!item) {
-				throw new Error("Item " + itemID + " not found");
-			}
-			
-			item._tags = [];
-			for (let i = 0; i < rows.length; i++) {
-				let row = rows[i];
-				item._tags.push(Zotero.Tags.cleanData(row));
-			}
-			
-			item._loaded.tags = true;
-		}.bind(this);
-		
+		var loadedItemIDs = new Set();
 		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
 				noCache: true,
-				onRow: function (row) {
+				onRow: (row) => {
 					let itemID = row.getResultByIndex(0);
-					
-					if (lastItemID && itemID !== lastItemID) {
-						setRows(lastItemID, rows);
-						rows = [];
-					}
-					
-					lastItemID = itemID;
-					
-					// Item has no tags
-					let tag = row.getResultByIndex(1);
-					if (tag === null) {
-						return;
-					}
-					
-					rows.push({
-						tag: tag,
-						type: row.getResultByIndex(2)
-					});
-				}.bind(this)
+					let item = this._objectCache[itemID];
+					item._tags = JSON.parse(row.getResultByIndex(1))
+						.map(([tag, type]) => Zotero.Tags.cleanData({ tag, type }));
+					item._loaded.tags = true;
+					loadedItemIDs.add(itemID);
+				}
 			}
 		);
-		if (lastItemID) {
-			setRows(lastItemID, rows);
+		
+		// Clear tags of items without any, once the query has succeeded
+		for (let item of this._getItemsForLoad(libraryID, ids)) {
+			if (!loadedItemIDs.has(item.id)) {
+				item._tags = [];
+				item._loaded.tags = true;
+			}
 		}
 	};
 	
 	
 	this._loadCollections = async function (libraryID, ids, idSQL) {
-		var sql = "SELECT itemID, collectionID FROM items "
-			+ "LEFT JOIN collectionItems USING (itemID) "
-			+ "WHERE libraryID=?" + idSQL;
-		var params = [libraryID];
-		
-		var lastItemID;
-		var rows = [];
-		var setRows = function (itemID, rows) {
-			var item = this._objectCache[itemID];
-			if (!item) {
-				throw new Error("Item " + itemID + " not found");
-			}
-			
-			item._collections = rows;
+		var setCollections = function (item, collections) {
+			item._collections = collections;
 			item._loaded.collections = true;
 			item._clearChanged('collections');
-		}.bind(this);
+		};
 		
+		// Get collections as a JSON array per item, for only the items in collections
+		var sql = "SELECT itemID, json_group_array(collectionID) AS data "
+			+ "FROM items "
+			+ "CROSS JOIN collectionItems USING (itemID) "
+			+ "WHERE " + _libraryClause(ids) + idSQL + " GROUP BY itemID";
+		var params = [libraryID];
+		
+		var loadedItemIDs = new Set();
 		await Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
 				noCache: true,
-				onRow: function (row) {
+				onRow: (row) => {
 					let itemID = row.getResultByIndex(0);
-					
-					if (lastItemID && itemID !== lastItemID) {
-						setRows(lastItemID, rows);
-						rows = [];
-					}
-					
-					lastItemID = itemID;
-					let collectionID = row.getResultByIndex(1);
-					// No collections
-					if (collectionID === null) {
-						return;
-					}
-					rows.push(collectionID);
-				}.bind(this)
+					setCollections(this._objectCache[itemID], JSON.parse(row.getResultByIndex(1)));
+					loadedItemIDs.add(itemID);
+				}
 			}
 		);
-		if (lastItemID) {
-			setRows(lastItemID, rows);
+		
+		// Clear collections of items not in any, once the query has succeeded
+		for (let item of this._getItemsForLoad(libraryID, ids)) {
+			if (!loadedItemIDs.has(item.id)) {
+				setCollections(item, []);
+			}
 		}
 	};
 	

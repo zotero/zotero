@@ -799,4 +799,182 @@ describe("Zotero.Items", function () {
 			assert.include(ids, att.id);
 		});
 	});
+	
+	describe("Data loading", function () {
+		var libraryID;
+		
+		before(function () {
+			libraryID = Zotero.Libraries.userLibraryID;
+		});
+		
+		function getState(item) {
+			return {
+				json: item.toJSON(),
+				parentID: item.parentID,
+				version: item.version,
+				synced: item.synced,
+				deleted: item.deleted
+			};
+		}
+		
+		it("should reload all items in a library with the same data", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection');
+			var full = createUnsavedDataObject('item', { itemType: 'book', title: "Full" });
+			full.setField('abstractNote', "Line one\nLine two");
+			full.setField('date', "2020-03-04");
+			full.setCreators([
+				{ firstName: "A", lastName: "One", creatorType: 'author' },
+				{ name: "Two", creatorType: 'editor' }
+			]);
+			full.setTags([{ tag: "manual" }, { tag: "automatic", type: 1 }]);
+			full.setCollections([collection1.id, collection2.id]);
+			full.synced = true;
+			await full.saveTx();
+			var empty = await createDataObject('item', { itemType: 'journalArticle' });
+			var note = await createDataObject('item', { itemType: 'note', parentID: full.id });
+			note.setNote("<p>Note title</p>");
+			await note.saveTx();
+			var attachment = await importFileAttachment('test.png', { parentItemID: full.id });
+			var trashed = await createDataObject('item', { deleted: true });
+			
+			var items = [full, empty, note, attachment, trashed];
+			var before = items.map(getState);
+			for (let dataType of ['primaryData', 'itemData', 'creators', 'tags', 'collections']) {
+				await Zotero.Items._loadDataTypeInLibrary(dataType, libraryID);
+			}
+			assert.deepEqual(items.map(getState), before);
+			assert.equal(note.getNoteTitle(), "Note title");
+			assert.equal(full.getDisplayTitle(), "Full");
+		});
+		
+		it("should reload specific items with the same data", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = createUnsavedDataObject('item', { title: "One" });
+			item1.setCreators([{ firstName: "A", lastName: "One", creatorType: 'author' }]);
+			item1.setTags([{ tag: "a" }]);
+			item1.setCollections([collection.id]);
+			await item1.saveTx();
+			var item2 = await createDataObject('item', { title: "Two" });
+			
+			var ids = [item1.id, item2.id];
+			var before = [item1, item2].map(getState);
+			for (let dataType of ['primaryData', 'itemData', 'creators', 'tags', 'collections']) {
+				await Zotero.Items._loadDataTypeInLibrary(dataType, libraryID, ids);
+			}
+			assert.deepEqual([item1, item2].map(getState), before);
+		});
+		
+		it("should clear creators, tags, and collections that were removed from the database", async function () {
+			var collection = await createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.setCreators([{ firstName: "A", lastName: "One", creatorType: 'author' }]);
+			item.setTags([{ tag: "a" }]);
+			item.setCollections([collection.id]);
+			await item.saveTx();
+			
+			await Zotero.DB.queryAsync("DELETE FROM itemCreators WHERE itemID=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM itemTags WHERE itemID=?", item.id);
+			await Zotero.DB.queryAsync("DELETE FROM collectionItems WHERE itemID=?", item.id);
+			for (let dataType of ['creators', 'tags', 'collections']) {
+				await Zotero.Items._loadDataTypeInLibrary(dataType, libraryID, [item.id]);
+			}
+			assert.lengthOf(item.getCreators(), 0);
+			assert.lengthOf(item.getTags(), 0);
+			assert.lengthOf(item.getCollections(), 0);
+		});
+		
+		it("should keep creators, tags, and collections if a reload fails", async function () {
+			var collection = await createDataObject('collection');
+			var item = createUnsavedDataObject('item');
+			item.setCreators([{ firstName: "A", lastName: "One", creatorType: 'author' }]);
+			item.setTags([{ tag: "a" }]);
+			item.setCollections([collection.id]);
+			await item.saveTx();
+			
+			var stub = sinon.stub(Zotero.DB, 'queryAsync').rejects(new Error("Query failed"));
+			try {
+				for (let dataType of ['creators', 'tags', 'collections']) {
+					let e = await getPromiseError(
+						Zotero.Items._loadDataTypeInLibrary(dataType, libraryID, [item.id])
+					);
+					assert.ok(e);
+				}
+			}
+			finally {
+				stub.restore();
+			}
+			assert.lengthOf(item.getCreators(), 1);
+			assert.lengthOf(item.getTags(), 1);
+			assert.sameMembers(item.getCollections(), [collection.id]);
+		});
+		
+		it("should group rows by itemID without sorting when loading a whole library", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([{ firstName: "A", lastName: "One", creatorType: 'author' }]);
+			item.setTags([{ tag: "a" }]);
+			item.setCollections([(await createDataObject('collection')).id]);
+			await item.saveTx();
+			
+			var spy = sinon.spy(Zotero.DB, 'queryAsync');
+			try {
+				for (let dataType of ['itemData', 'creators', 'tags', 'collections']) {
+					await Zotero.Items._loadDataTypeInLibrary(dataType, libraryID);
+				}
+			}
+			finally {
+				spy.restore();
+			}
+			var calls = spy.getCalls().filter(call => call.args[0].includes("GROUP BY itemID"));
+			assert.lengthOf(calls, 4);
+			for (let call of calls) {
+				let plan = [];
+				await Zotero.DB.queryAsync("EXPLAIN QUERY PLAN " + call.args[0], call.args[1], {
+					onRow: row => plan.push(row.getResultByName('detail'))
+				});
+				plan = plan.join("\n");
+				assert.notInclude(plan, "TEMP B-TREE FOR GROUP BY", call.args[0]);
+			}
+		});
+		
+		it("should load creators in order and mark indexes past a gap as changed", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{ firstName: "A", lastName: "One", creatorType: 'author' },
+				{ firstName: "B", lastName: "Two", creatorType: 'author' },
+				{ firstName: "C", lastName: "Three", creatorType: 'editor' }
+			]);
+			await item.saveTx();
+			
+			await Zotero.DB.queryAsync("DELETE FROM itemCreators WHERE itemID=? AND orderIndex=1", item.id);
+			await Zotero.Items._loadDataTypeInLibrary('creators', libraryID, [item.id]);
+			var creators = item.getCreators();
+			assert.deepEqual(creators.map(c => c.lastName), ["One", "Three"]);
+			assert.equal(creators[1].creatorTypeID, Zotero.CreatorTypes.getID('editor'));
+			assert.isTrue(item._changed.creators[2]);
+		});
+		
+		it("should call setField() once for each field of the item type", async function () {
+			var item = await createDataObject('item', { itemType: 'book', title: "Called" });
+			var original = Zotero.Item.prototype.setField;
+			var calls = [];
+			Zotero.Item.prototype.setField = function (field, value, loadIn) {
+				if (this.id == item.id) {
+					calls.push([field, value, loadIn]);
+				}
+				return original.apply(this, arguments);
+			};
+			try {
+				await Zotero.Items._loadDataTypeInLibrary('itemData', libraryID, [item.id]);
+			}
+			finally {
+				Zotero.Item.prototype.setField = original;
+			}
+			var titleID = Zotero.ItemFields.getID('title');
+			var volumeID = Zotero.ItemFields.getID('volume');
+			assert.deepInclude(calls, [titleID, "Called", true]);
+			assert.deepInclude(calls, [volumeID, false, true]);
+			assert.lengthOf(calls, Zotero.ItemFields.getItemTypeFields(item.itemTypeID).length);
+		});
+	});
 });

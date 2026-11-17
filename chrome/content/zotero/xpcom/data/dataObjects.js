@@ -545,7 +545,15 @@ Zotero.DataObjects.prototype._loadPrimaryData = async function (libraryID, ids, 
 		libraryID = false;
 	}
 	
-	var sql = this.primaryDataSQL;
+	// Return each row's columns as a single JSON array, since every column of every row in a
+	// result set has a significant memory cost
+	var columns = Object.keys(this._primaryDataSQLParts);
+	// Remove column aliases, which aren't allowed in json_array()
+	var exprs = Object.values(this._primaryDataSQLParts)
+		.map(expr => expr.replace(/\s+AS\s+\w+\s*$/i, ''));
+	// Give the column a short name, since mozStorage copies every column name for every row, and
+	// an unnamed column is named after its full expression, which for items is about 9 KB
+	var sql = 'SELECT json_array(' + exprs.join(', ') + ') AS data ' + this.primaryDataSQLFrom;
 	var params = [];
 	if (libraryID !== false) {
 		sql += ' AND O.libraryID=?';
@@ -561,12 +569,12 @@ Zotero.DataObjects.prototype._loadPrimaryData = async function (libraryID, ids, 
 		{
 			noCache: true,
 			onRow: function (row) {
-				var id = row.getResultByName(this._ZDO_id);
-				var columns = Object.keys(this._primaryDataSQLParts);
+				var values = JSON.parse(row.getResultByIndex(0));
 				var rowObj = {};
-				for (let i=0; i<columns.length; i++) {
-					rowObj[columns[i]] = row.getResultByIndex(i);
+				for (let i = 0; i < columns.length; i++) {
+					rowObj[columns[i]] = values[i];
 				}
+				var id = rowObj[this._ZDO_id];
 				var obj;
 				
 				// Existing object -- reload in place
