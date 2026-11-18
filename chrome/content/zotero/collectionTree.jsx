@@ -1124,7 +1124,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if(action == 'add')
 		{
 			// skipSelect isn't necessary if more than one object
-			let selectRow = ids.length == 1 && (!extraData[ids[0]] || !extraData[ids[0]].skipSelect);
+			let selectRow = ids.length == 1
+				&& (!extraData[ids[0]] || !extraData[ids[0]].skipSelect)
+				// Only the active window selects a new row
+				&& Zotero.getActiveZoteroPane()?.collectionsView == this;
 			
 			for (let id of ids) {
 				switch (type) {

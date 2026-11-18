@@ -937,6 +937,37 @@ describe("CollectionViewItemTree", function () {
 			assert.equal(selected[0].id, item.id);
 		});
 		
+		it("should only clear search and select new item in the active window", async function () {
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			var win2 = await loadZoteroPane();
+			try {
+				sinon.stub(Zotero, 'getActiveZoteroPane').returns(win2.ZoteroPane);
+
+				var searchString = Zotero.Items.get(existingItemID).getField('title');
+				quicksearch.searchTextbox.value = searchString;
+				quicksearch.doCommand();
+				await itemsView._refreshPromise;
+				await itemsView.selectItem(existingItemID);
+				
+				var item = await createDataObject('item', { title: Zotero.Utilities.randomString() });
+				
+				// The inactive window keeps its search and selection
+				assert.equal(quicksearch.value, searchString);
+				assert.isFalse(itemsView.getRowIndexByID(item.id));
+				assert.sameMembers(itemsView.getSelectedItems(true), [existingItemID]);
+				
+				// The active window selects the new item
+				assert.sameMembers(win2.ZoteroPane.itemsView.getSelectedItems(true), [item.id]);
+			}
+			finally {
+				Zotero.getActiveZoteroPane.restore?.();
+				win2.close();
+				quicksearch.searchTextbox.value = '';
+				quicksearch.doCommand();
+				await itemsView._refreshPromise;
+			}
+		});
+		
 		it("shouldn't clear quicksearch if skipSelect is passed", async function () {
 			var searchString = Zotero.Items.get(existingItemID).getField('title');
 			

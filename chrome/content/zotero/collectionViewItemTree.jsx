@@ -680,6 +680,8 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 			type == 'collection-item' ? ids[0].split('-')[1] : ids[0]
 		];
 
+		// New items are selected, and clear the quick search, only in the active window
+		let inActiveWindow = Zotero.getActiveZoteroPane()?.itemsView == this.itemTree;
 		let selectInActiveWindow = false;
 		let restoreSelection = true;
 		let restoreScroll = true;
@@ -813,7 +815,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 		else if ((collectionTreeRows.length > 1 || collectionTreeRows.some(row => row.isSearchMode()))
 				&& ['item', 'collection', 'search'].includes(type) && ['add', 'modify'].includes(action)) {
 			// If search mode, just re-run search
-			if (action == 'add' && this.hasQuickSearch()) {
+			if (action == 'add' && inActiveWindow && this.hasQuickSearch()) {
 				// For item adds, clear the quick search, unless all the new items have
 				// skipSelect or are child items
 				if (!items) items = Zotero.Items.get(ids);
@@ -1009,7 +1011,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 
 			var singleSelect = false;
 			// If adding a single top-level item and this is the active window, select it
-			if (action == 'add') {
+			if (action == 'add' && inActiveWindow) {
 				if (ids.length == 1) {
 					singleSelect = ids[0];
 				}

@@ -432,6 +432,22 @@ describe("Zotero.CollectionTree", function () {
 			assert.equal(selected, id);
 		});
 		
+		it("should select a new collection only in the active window", async function () {
+			var win2 = await loadZoteroPane();
+			try {
+				sinon.stub(Zotero, 'getActiveZoteroPane').returns(win2.ZoteroPane);
+				var collection = await createDataObject('collection', {}, { skipSelect: false });
+
+				assert.equal(cv.getSelectedLibraryIDs()[0], userLibraryID);
+				assert.lengthOf(cv.getSelectedCollections(), 0);
+				assert.equal(win2.ZoteroPane.collectionsView.getSelectedCollections(true)[0], collection.id);
+			}
+			finally {
+				Zotero.getActiveZoteroPane.restore?.();
+				win2.close();
+			}
+		});
+		
 		it("shouldn't select a new collection if skipNotifier is passed", async function () {
 			// Create collection with skipNotifier flag
 			var collection = new Zotero.Collection;
