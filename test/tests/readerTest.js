@@ -344,6 +344,28 @@ describe("Reader", function () {
 			}
 		});
 
+		it('should widen a reader window to fit the context pane', async function () {
+			let reader;
+			try {
+				let attachment = await importFileAttachment('test.pdf');
+				reader = await Zotero.Reader.open(attachment.id, null, { openInWindow: true });
+				await reader._initPromise;
+				let readerWin = reader._window;
+				let contextPane = readerWin.document.getElementById('zotero-context-pane');
+				readerWin.ZoteroContextPane.collapsed = true;
+				readerWin.resizeTo(400, readerWin.outerHeight);
+				await waitForCallback(() => readerWin.innerWidth < 900, 10, 5);
+				
+				readerWin.ZoteroContextPane.collapsed = false;
+				await waitForCallback(
+					() => contextPane.getBoundingClientRect().right <= readerWin.innerWidth, 10, 5);
+				assert.isAbove(contextPane.getBoundingClientRect().width, 0);
+			}
+			finally {
+				await cleanupReaders(reader);
+			}
+		});
+		
 		it('should open a reader window while a closed tab reader is pending', async function () {
 			let reader, windowReader, unloadedTabID;
 			let transactionOpen = false;

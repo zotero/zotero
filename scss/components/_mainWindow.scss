@@ -11,7 +11,10 @@
 }
 
 #main-window {
-	min-width: max(var(--width-of-fixed-components) + $min-width-items-pane, $min-width-tabs-deck);
+	min-width: max(
+		var(--width-of-fixed-components) + $min-width-items-pane,
+		var(--width-of-context-pane, 0px) + $min-width-tabs-deck
+	);
 	min-height: 300px;
 }
 
