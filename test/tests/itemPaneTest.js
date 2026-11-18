@@ -126,6 +126,36 @@ describe("Item pane", function () {
 			assert.equal(doc.querySelector('item-pane-header .title editable-text').value, item.getField('title'));
 		});
 		
+		it("should show title after expanding the context pane in a reader tab opened while the context pane was collapsed", async function () {
+			Zotero.Prefs.set('itemPaneHeader', 'title');
+			let item1 = await createDataObject('item', itemData);
+			let attachment1 = await importPDFAttachment(item1);
+			let item2 = await createDataObject('item', { title: 'Second Item' });
+			let attachment2 = await importPDFAttachment(item2);
+			
+			ZoteroContextPane.collapsed = false;
+			await ZoteroPane.viewItems([attachment1]);
+			let tabID1 = Zotero_Tabs.selectedID;
+			await Zotero.Reader.getByTabID(tabID1)._waitForReader();
+			ZoteroContextPane.togglePane();
+			
+			Zotero_Tabs.select('zotero-pane');
+			await ZoteroPane.viewItems([attachment2]);
+			let tabID2 = Zotero_Tabs.selectedID;
+			await Zotero.Reader.getByTabID(tabID2)._waitForReader();
+			
+			try {
+				ZoteroContextPane.togglePane();
+				let header = ZoteroContextPane.context._getItemContext(tabID2)
+					.querySelector('item-pane-header');
+				assert.isFalse(header.querySelector('.title').hidden);
+				assert.equal(header.querySelector('.title editable-text').value, item2.getField('title'));
+			}
+			finally {
+				Zotero_Tabs.close([tabID1, tabID2]);
+			}
+		});
+		
 		it("should show title/creator/year when set to Title/Creator/Year mode", async function () {
 			Zotero.Prefs.set('itemPaneHeader', 'titleCreatorYear');
 			let item = await createDataObject('item', itemData);

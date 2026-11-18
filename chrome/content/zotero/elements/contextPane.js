@@ -89,7 +89,7 @@
 		}
 
 		handleCollapse(prevState, newState) {
-			if (prevState === "true" && (!newState || newState === "false")) {
+			if (prevState !== null && newState === null) {
 				let itemContext = this._getItemContext(Zotero_Tabs.selectedID);
 				itemContext?.render();
 			}
