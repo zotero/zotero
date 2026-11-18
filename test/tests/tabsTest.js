@@ -1594,6 +1594,52 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should raise a reader's window only when it's the front main window", async function () {
+			let attachment = await importPDFAttachment(item);
+			let readerState = {
+				type: 'pane',
+				geometry: {},
+				tabs: [
+					{
+						type: 'reader',
+						title: item.getField('title'),
+						selected: true,
+						data: { itemID: attachment.id }
+					}
+				]
+			};
+			let readerWin, libraryWin;
+			try {
+				readerWin = Zotero.openMainWindow({ sessionState: readerState });
+				let reader;
+				await waitForCallback(() => {
+					reader = Zotero.Reader.getByTabID(readerWin.Zotero_Tabs?.selectedID);
+					return reader;
+				}, 100, 50);
+				await reader._initPromise;
+				let raiseRequests = 0;
+				readerWin.addEventListener('framefocusrequested', () => raiseRequests++, true);
+				
+				await reader.focus();
+				assert.isAbove(raiseRequests, 0);
+				
+				// As when a window is restored after this one at startup
+				libraryWin = Zotero.openMainWindow({
+					sessionState: { type: 'pane', geometry: {}, tabs: [] }
+				});
+				await waitForCallback(() => libraryWin.ZoteroPane?.libraryView?.loaded, 100, 10);
+				raiseRequests = 0;
+				await reader.focus();
+				assert.equal(raiseRequests, 0);
+				// Focus still goes to the reader for when its window is brought forward
+				assert.equal(readerWin.document.activeElement, reader._iframe);
+			}
+			finally {
+				readerWin?.close();
+				libraryWin?.close();
+			}
+		});
+		
 		it("should open a library tab in a window restored without tabs", async function () {
 			let sessionState = { type: 'pane', geometry: {}, tabs: [] };
 			let newWin;

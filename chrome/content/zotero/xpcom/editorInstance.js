@@ -345,7 +345,7 @@ class EditorInstance {
 	}
 
 	focus() {
-		this._iframeWindow.focus();
+		Zotero.Utilities.Internal.focusIframeWindow(this._iframeWindow);
 		this._postMessage({ action: 'focus' });
 	}
 

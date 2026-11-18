@@ -165,6 +165,30 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	/**
+	 * Focus an iframe's window
+	 *
+	 * Focusing an iframe window from chrome code raises its top-level window, so an iframe
+	 * in a main window that's behind another one (e.g., a window restored before it at
+	 * startup) only takes focus within its window.
+	 *
+	 * @param {Window} iframeWindow
+	 */
+	focusIframeWindow: function (iframeWindow) {
+		let topWindow = iframeWindow.browsingContext?.topChromeWindow;
+		let frontWindow = Services.wm.getMostRecentWindow('navigator:browser');
+		if (topWindow?.ZoteroPane && frontWindow && frontWindow !== topWindow) {
+			Services.focus.setFocus(
+				iframeWindow.browsingContext.embedderElement,
+				Services.focus.FLAG_NOSCROLL
+			);
+		}
+		else {
+			iframeWindow.focus();
+		}
+	},
+	
+	
 	/*
 	 * Adapted from http://developer.mozilla.org/en/docs/nsICryptoHash
 	 *

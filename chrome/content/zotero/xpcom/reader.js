@@ -140,7 +140,7 @@ class ReaderInstance {
 	
 	async focus() {
 		await this._waitForReader();
-		this._iframeWindow.focus();
+		Zotero.Utilities.Internal.focusIframeWindow(this._iframeWindow);
 		this._internalReader?.focus();
 	}
 
