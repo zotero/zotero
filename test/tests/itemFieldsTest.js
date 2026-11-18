@@ -64,4 +64,42 @@ describe("Zotero.ItemFields", function () {
 			assert.equal(Zotero.ItemFields.getDirection('book', 'creator-0-lastName', 'ar'), 'rtl');
 		});
 	});
+
+	describe("#_getLoadInfo()", function () {
+		it("should resolve a base field to the item type's field", function () {
+			var info = Zotero.ItemFields._getLoadInfo(
+				Zotero.ItemTypes.getID('thesis'), Zotero.ItemFields.getID('publisher')
+			);
+			assert.equal(info.fieldID, Zotero.ItemFields.getID('university'));
+			assert.isTrue(info.valid);
+		});
+
+		it("should mark a field that isn't valid for the item type", function () {
+			var info = Zotero.ItemFields._getLoadInfo(
+				Zotero.ItemTypes.getID('book'), Zotero.ItemFields.getID('websiteTitle')
+			);
+			assert.isFalse(info.valid);
+		});
+
+		it("should return false for an unknown field", function () {
+			assert.isFalse(Zotero.ItemFields._getLoadInfo(Zotero.ItemTypes.getID('book'), 999999));
+		});
+
+		// A plugin that replaces a lookup method must still be consulted
+		it("should use a replaced lookup method", function () {
+			var bookID = Zotero.ItemTypes.getID('book');
+			var titleID = Zotero.ItemFields.getID('title');
+			assert.isTrue(Zotero.ItemFields._getLoadInfo(bookID, titleID).valid);
+
+			var original = Zotero.ItemFields.isValidForType;
+			Zotero.ItemFields.isValidForType = () => false;
+			try {
+				assert.isFalse(Zotero.ItemFields._getLoadInfo(bookID, titleID).valid);
+			}
+			finally {
+				Zotero.ItemFields.isValidForType = original;
+			}
+			assert.isTrue(Zotero.ItemFields._getLoadInfo(bookID, titleID).valid);
+		});
+	});
 })
