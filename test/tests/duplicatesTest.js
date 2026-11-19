@@ -21,6 +21,19 @@ describe("Duplicate Items", function () {
 		win.close();
 	});
 
+	
+	describe("Title matching", function () {
+		it("should ignore differences in Unicode punctuation", async function () {
+			var item1 = await createDataObject('item', { title: 'Librarians’ Decisions – A “Study”' });
+			var item2 = await createDataObject('item', { title: 'Librarians\' decisions - a "study".' });
+			
+			var duplicates = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			await duplicates.getSearchObject();
+			assert.sameMembers(duplicates.getSetItemsByItemID(item1.id), [item1.id, item2.id]);
+		});
+	});
+	
+	
 	async function merge(itemID) {
 		var userLibraryID = Zotero.Libraries.userLibraryID;
 			
