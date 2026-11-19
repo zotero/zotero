@@ -22,6 +22,18 @@ describe("Duplicate Items", function () {
 	});
 	
 	
+	describe("Title matching", function () {
+		it("should ignore differences in Unicode punctuation", async function () {
+			var item1 = await createDataObject('item', { title: 'Librarians’ Decisions – A “Study”' });
+			var item2 = await createDataObject('item', { title: 'Librarians\' decisions - a "study".' });
+			
+			var duplicates = new Zotero.Duplicates(Zotero.Libraries.userLibraryID);
+			await duplicates.getSearchObject();
+			assert.sameMembers(duplicates.getSetItemsByItemID(item1.id), [item1.id, item2.id]);
+		});
+	});
+	
+	
 	describe("ISBN matching", function () {
 		it("should match books with equivalent ISBN-10 and ISBN-13", async function () {
 			var item1 = await createDataObject('item', { itemType: 'book', title: 'Effective Java' });

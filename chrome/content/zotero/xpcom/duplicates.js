@@ -117,7 +117,7 @@ Zotero.Duplicates.prototype._findDuplicates = async function () {
 		}
 		
 		str = Zotero.Utilities.removeDiacritics(str)
-			.replace(/[ !-/:-@[-`{-~]+/g, ' ') // Convert (ASCII) punctuation to spaces
+			.replace(/[\p{P}\s!-/:-@[-`{-~]+/gu, ' ') // Convert punctuation and whitespace to spaces
 			.trim()
 			.toLowerCase();
 		
