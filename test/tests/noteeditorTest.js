@@ -196,6 +196,46 @@ describe("Note Editor", function () {
 		});
 	});
 
+	describe("More menu", function () {
+		afterEach(function () {
+			closeItemTabs(win);
+		});
+
+		it("should open a note from the item pane in a new tab without tab actions", async function () {
+			let item = await createDataObject('item', { itemType: 'note', note: '<p>Test note</p>' });
+			await zp.selectItem(item.id);
+			let noteEditor = await waitForNoteEditor(item);
+			let paneDoc = noteEditor._editorInstance._iframeWindow.document;
+			let button = await waitForCallback(
+				() => paneDoc.querySelector('.more-dropdown button'), 50, 20
+			);
+			button.click();
+			let options = await waitForCallback(
+				() => paneDoc.querySelectorAll('.more-dropdown .option').length
+					&& [...paneDoc.querySelectorAll('.more-dropdown .option')],
+				50, 20
+			);
+			assert.deepEqual(
+				options.map(x => x.textContent),
+				[
+					Zotero.ftl.formatValueSync('general-open-in-new-tab'),
+					Zotero.ftl.formatValueSync('general-open-in-new-window')
+				]
+			);
+			
+			options[0].click();
+			let editorInstance = await waitForCallback(
+				() => Zotero.Notes.getByTabID(win.Zotero_Tabs.selectedID), 50, 40
+			);
+			assert.equal(editorInstance.itemID, item.id);
+			await editorInstance._initPromise;
+			let tabDoc = editorInstance._iframeWindow.document;
+			await waitForCallback(() => tabDoc.querySelector('.toolbar .end'), 50, 20);
+			// Show in Library and the open options are on the tab itself, leaving no options
+			assert.isNull(tabDoc.querySelector('.more-dropdown'));
+		});
+	});
+
 	describe("Saving", function () {
 		it("should retry a save that times out waiting for the database", async function () {
 			let editorInstance = await openEditor();

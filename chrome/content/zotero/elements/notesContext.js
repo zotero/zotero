@@ -77,7 +77,8 @@
 				
 				<menupopup class="context-pane-list-popup">
 					<menuitem class="context-pane-list-show-in-library" label="&zotero.items.menu.showInLibrary;"/>
-					<menuitem class="context-pane-list-edit-in-window" label="&zotero.context.editInWindow;"/>
+					<menuitem class="context-pane-list-open-in-new-tab" data-l10n-id="context-notes-open-in-new-tab"/>
+					<menuitem class="context-pane-list-open-in-new-window" data-l10n-id="context-notes-open-in-new-window"/>
 					<menuseparator/>
 					<menuitem class="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
 				</menupopup>
@@ -516,7 +517,11 @@
 					Zotero_Tabs.selectLibraryTab();
 					break;
 
-				case 'context-pane-list-edit-in-window':
+				case 'context-pane-list-open-in-new-tab':
+					ZoteroPane.openNote(id, { openInWindow: false });
+					break;
+
+				case 'context-pane-list-open-in-new-window':
 					ZoteroPane.openNote(id, { openInWindow: true });
 					break;
 

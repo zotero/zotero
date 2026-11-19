@@ -45,7 +45,6 @@ note-editor-show-on-page = Show on Page
 note-editor-add-citation = Add Citation
 note-editor-remove-citation = Hide Citation
 note-editor-find-and-replace = Find and Replace
-note-editor-edit-in-window = Edit in a Separate Window
 note-editor-apply-annotation-colors = Show Annotation Colors
 note-editor-remove-annotation-colors = Hide Annotation Colors
 note-editor-add-citations = Show Annotation Citations
