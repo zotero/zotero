@@ -36,6 +36,22 @@ describe("Zotero.Cite", function () {
 				"Jahrb. Heimatkunde"
 			);
 		});
+
+		it("shouldn't drop title words that resemble stop words", function () {
+			let titles = {
+				"Next Energy": "Next Energy",
+				"Transportation Research Part D: Transport and Environment": "Transp. Res. Part D Transp. Environ.",
+				"Journal of the Less-Common Metals": "J. Less-Common Met.",
+				"Revista das Ciências": "Rev. Ciênc."
+			};
+			for (let [title, abbreviation] of Object.entries(titles)) {
+				let obj = { default: { 'container-title': {} } };
+				Zotero.Cite.getAbbreviation(
+					"default", obj, "default", "container-title", title
+				);
+				assert.equal(obj.default['container-title'][title], abbreviation);
+			}
+		});
 	});
 	
 	describe("Dates", function () {
