@@ -69,6 +69,37 @@ describe("Zotero.SearchQuery", function () {
 			]);
 		});
 
+		it("should read a date written out in words as one value", function () {
+			for (let [query, value] of [
+				["date after March 2020", "March 2020"],
+				["date is 15 March 2020", "15 March 2020"],
+				["after:March 15, 2020", "March 15, 2020"]
+			]) {
+				let { tree, text } = Zotero.SearchQuery.parse(query);
+				assert.equal(tree.children[0].value, value, query);
+				assert.equal(text, "", query);
+			}
+			let { tree, text } = Zotero.SearchQuery.parse("date is March 2020 crispr");
+			assert.equal(tree.children[0].value, "March 2020");
+			assert.equal(text, "crispr");
+		});
+
+		it("should find items after a date written out in words", async function () {
+			let before = await createDataObject('item', { setTitle: true });
+			before.setField('date', '2020-02-15');
+			await before.saveTx();
+			let after = await createDataObject('item', { setTitle: true });
+			after.setField('date', '2020-04-15');
+			await after.saveTx();
+
+			let search = Zotero.SearchQuery.getSearch("date after March 2020", {
+				libraryID: Zotero.Libraries.userLibraryID
+			});
+			let ids = await search.search();
+			assert.include(ids, after.id);
+			assert.notInclude(ids, before.id);
+		});
+
 		it("should keep the unit in a relative date", async function () {
 			assert.deepEqual(clauses("added in the last 3 days"), [
 				{ condition: 'dateAdded', operator: 'isInTheLast', value: '3 days' }

@@ -1260,6 +1260,10 @@ Zotero.SearchQuery = new function () {
 		if (word.end <= pos) {
 			return null;
 		}
+		if (!word.quoted && _rangeKind(definition) === RANGE_KINDS.date
+				&& COMPARISON_OPERATORS.has(operatorName)) {
+			word = _readDateWords(text, pos, word);
+		}
 		// Conditions that filter their own values (a count has to be a number)
 		// reject anything else, so it isn't a clause
 		let filter = Zotero.SearchConditions.get(definition.condition).inlineFilter;
@@ -1274,6 +1278,28 @@ Zotero.SearchQuery = new function () {
 			return null;
 		}
 		return { value: word.value, end: word.end, quoted: word.quoted };
+	}
+	
+	// A date written out in words ("March 2020", "15 March 2020") as one
+	// value: the word at `pos` and as many of the words after it as still
+	// read entirely as a date, so `date is March 2020 crispr` leaves
+	// "crispr" as text
+	function _readDateWords(text, pos, word) {
+		let date = word;
+		let end = word.end;
+		while (end < text.length) {
+			let next = _readWord(text, end + /^\s*/.exec(text.slice(end))[0].length);
+			if (!next.value || next.quoted) {
+				break;
+			}
+			let value = text.slice(pos, next.end);
+			if (Zotero.Date.strToDate(value).part !== undefined) {
+				break;
+			}
+			date = { value, end: next.end };
+			end = next.end;
+		}
+		return date;
 	}
 	
 	// Whether a value works in a date or count comparison: a date for a field
