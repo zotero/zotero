@@ -209,6 +209,14 @@ describe("Zotero.Date", function () {
 			assert.equal(o.day, 26);
 			assert.equal(o.year, 2010);
 		});
+
+		it("should leave no part after a month at the end", function () {
+			for (let str of ["June", "26 June"]) {
+				let o = Zotero.Date.strToDate(str);
+				assert.equal(o.month, 5, str);
+				assert.notProperty(o, 'part', str);
+			}
+		});
 		
 		it("should parse Chinese month", function () {
 			Zotero.locale = 'zh-CN';
