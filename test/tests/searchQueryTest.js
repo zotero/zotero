@@ -469,12 +469,9 @@ describe("Zotero.SearchQuery", function () {
 			]);
 		});
 
-		it("should accept curly quotes and a spaced colon", function () {
+		it("should accept curly quotes", function () {
 			assert.deepEqual(clauses("by:“Mary Ann Test”"), [
 				{ condition: 'creator', operator: 'contains', value: 'Mary Ann Test' }
-			]);
-			assert.deepEqual(clauses("tag : foo"), [
-				{ condition: 'tag', operator: 'is', value: 'foo' }
 			]);
 		});
 
@@ -521,6 +518,37 @@ describe("Zotero.SearchQuery", function () {
 			assert.deepEqual(clauses("number of tags > 5"), [
 				{ condition: 'numTags', operator: 'isGreaterThan', value: '5' }
 			]);
+		});
+	});
+
+	describe("titles", function () {
+		it("should compare a date in words only with a date", function () {
+			for (let query of ["Year after year", "Date is not destiny", "when the date is unknown"]) {
+				let { tree, text } = Zotero.SearchQuery.parse(query);
+				assert.isNull(tree, query);
+				assert.equal(text, query);
+			}
+			assert.deepEqual(clauses("year after 2020"), [
+				{ condition: 'date', operator: 'isAfter', value: '2020' }
+			]);
+			assert.deepEqual(clauses('date is "spring"'), [
+				{ condition: 'date', operator: 'is', value: 'spring' }
+			]);
+			assert.deepEqual(clauses("date:spring"), [
+				{ condition: 'date', operator: 'is', value: 'spring' }
+			]);
+		});
+
+		it("should read a colon with a space next to it as text", function () {
+			for (let query of [
+				"Virtual Reality and the Vestibular System: A Brief Review",
+				"Language: A Biological Model",
+				"Note: on methods",
+				"tag : foo"
+			]) {
+				assert.isNull(Zotero.SearchQuery.parse(query).tree, query);
+			}
+			assert.lengthOf(clauses("crispr Tag:foo"), 1);
 		});
 	});
 
@@ -986,6 +1014,7 @@ describe("Zotero.SearchQuery", function () {
 		it("should complete the values a condition takes", function () {
 			assert.include(labels("type:"), "journal article");
 			assert.include(labels("type:jour"), "journal article");
+			assert.notInclude(labels("type: jour"), "journal article");
 			// Inserted so that the parser reads it back
 			let completions = Zotero.SearchQuery.getCompletions("type:jour");
 			let article = completions.completions.find(c => c.label === "journal article");

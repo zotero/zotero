@@ -204,6 +204,13 @@ Zotero.SearchQuery = new function () {
 
 	// Operators that take no value
 	const UNARY = new Set(['isEmpty', 'isNotEmpty']);
+	
+	// Operators that compare a date or a count, which a clause written in
+	// words only takes with a value of that kind -- `year after 2020`, but
+	// not "Year after year" or "Date is not destiny"
+	const COMPARISON_OPERATORS = new Set([
+		'is', 'isNot', 'isBefore', 'isAfter', 'isLessThan', 'isGreaterThan'
+	]);
 
 	// Operators that come before a condition instead of after it, reading
 	// the way they're said: `no doi`, `has doi`
@@ -679,6 +686,12 @@ Zotero.SearchQuery = new function () {
 		if (!split) {
 			return null;
 		}
+		// A colon with a space next to it doesn't make a clause (see
+		// _readClauseTokens())
+		if (!split.operator && (/\s/.test(head[split.fieldEnd - 1] || '')
+				|| /\s/.test(head[split.valueStart] || ''))) {
+			return null;
+		}
 		let words = head.slice(0, split.fieldEnd).trim().split(/\s+/);
 		let field = null;
 		for (let i = 0; i < words.length && !field; i++) {
@@ -1094,16 +1107,20 @@ Zotero.SearchQuery = new function () {
 	// doesn't make one
 	function _readClauseTokens(self, text, start, field) {
 		let definition = self.getField(field.name);
-		// A colon may be spaced away from its field ("tag : foo")
-		let afterField = field.end + /^\s*/.exec(text.slice(field.end))[0].length;
 		let operator = null;
-		if (text[afterField] === ':') {
-			operator = { name: ':', end: afterField + 1 };
+		// Require a value to come immediately after a colon, with no space,
+		// so a title and subtitle ("Language: A Biological Model") stays text
+		if (text[field.end] === ':') {
+			if (/\s/.test(text[field.end + 1] || '')) {
+				return null;
+			}
+			operator = { name: ':', end: field.end + 1 };
 		}
 		else {
 			// The longest reading the condition supports, so `date is before
 			// 2020` compares dates while `title is before` matches a title
 			// against "before"
+			let afterField = field.end + /^\s*/.exec(text.slice(field.end))[0].length;
 			for (let match of _matchPhrases(text, afterField, _operatorPhrases)) {
 				if (_supportsOperator(definition, _getOperators()[match.name])) {
 					operator = match;
@@ -1182,13 +1199,13 @@ Zotero.SearchQuery = new function () {
 			value: value.value,
 			field: field.name,
 			operator: operatorName,
+			operatorPhrase: operator.name,
 			start: operator.end,
 			end: value.end,
 			quoted: value.quoted
 		};
 		if (value.range) {
 			token.range = value.range;
-			token.operatorPhrase = operator.name;
 		}
 		tokens.push(token);
 		return { tokens, end: value.end };
@@ -1249,7 +1266,35 @@ Zotero.SearchQuery = new function () {
 		if (filter && filter(word.value) === false) {
 			return null;
 		}
+		// A comparison written in words needs a value it can compare, unless
+		// the value is quoted. The colon form takes any value, so `date:spring`
+		// can find a date written as "Spring 2020".
+		if (operatorPhrase !== ':' && !word.quoted
+				&& !_isComparableValue(definition, operatorName, word.value)) {
+			return null;
+		}
 		return { value: word.value, end: word.end, quoted: word.quoted };
+	}
+	
+	// Whether a value works in a date or count comparison: a date for a field
+	// that compares dates, a whole number for one that counts. Any value works
+	// for other fields and operators.
+	function _isComparableValue(definition, operatorName, value) {
+		let kind = _rangeKind(definition);
+		if (!kind || !COMPARISON_OPERATORS.has(operatorName)) {
+			return true;
+		}
+		if (kind === RANGE_KINDS.count) {
+			return /^\d+$/.test(value);
+		}
+		let lc = value.toLowerCase();
+		for (let word of ['yesterday', 'today', 'tomorrow']) {
+			if (lc === word || lc === Zotero.getString('date.' + word).toLowerCase()) {
+				return true;
+			}
+		}
+		let date = Zotero.Date.strToDate(value);
+		return !!(date.year || date.month || date.month === 0 || date.day);
 	}
 
 	// The value after an `or`, read for the same field and operator as the
@@ -1277,13 +1322,13 @@ Zotero.SearchQuery = new function () {
 			value: value.value,
 			field: previous.field,
 			operator: previous.operator,
+			operatorPhrase: previous.operatorPhrase,
 			start: pos,
 			end: value.end,
 			quoted: value.quoted
 		};
 		if (value.range) {
 			token.range = value.range;
-			token.operatorPhrase = previous.operatorPhrase;
 		}
 		return token;
 	}
