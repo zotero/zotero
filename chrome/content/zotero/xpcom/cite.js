@@ -551,7 +551,10 @@ Zotero.Cite.getAbbreviation = new function () {
 							// Complete match
 							newWord = cat[lcWord];
 							exactMatch = true;
-						} else if(lcWord.charAt(lcWord.length-1) == 's' && cat.hasOwnProperty(lcWord.substr(0, lcWord.length-1))) {
+						}
+						else if (lcWord.charAt(lcWord.length-1) == 's' && cat.hasOwnProperty(lcWord.substr(0, lcWord.length-1))
+								// Only remove short plural stop words (e.g., das, dos), not "less" or "others"
+								&& (cat[lcWord.substr(0, lcWord.length-1)] || lcWord.length <= 3)) {
 							// Try dropping 's'
 							newWord = cat[lcWord.substr(0, lcWord.length-1)];
 							exactMatch = true;
@@ -582,6 +585,9 @@ Zotero.Cite.getAbbreviation = new function () {
 					
 					// Fall back to full word
 					if(newWord === undefined) newWord = word;
+					
+					// Keep capital letters after the first word (e.g., Part A)
+					if (!newWord && j > 0 && word.length == 1 && word != lcWord) newWord = word;
 					
 					// Don't discard last word (e.g. Climate of the Past => Clim. Past)
 					if(!newWord && j == words.length-1) newWord = word;
