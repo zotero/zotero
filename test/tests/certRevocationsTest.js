@@ -1,10 +1,11 @@
 describe("CertRevocations", function () {
 	var { CertRevocations } = ChromeUtils.importESModule("chrome://zotero/content/modules/certRevocations.mjs");
 	
-	// OneCRL entry for "EM DV TLS CA - G3B", an eMudhra intermediate with a compromised key
+	// OneCRL-style entry for Let's Encrypt's R14, a backup intermediate signed by the built-in
+	// ISRG Root X1
 	var record = {
-		subject: "MD8xCzAJBgNVBAYTAk5MMRMwEQYDVQQKDAplTXVkaHJhIEJWMRswGQYDVQQDDBJFTSBEViBUTFMgQ0EgLSBHM0I=",
-		pubKeyHash: "6+1kdcLC2A/LGZ8/6N1uazzmC3frFdTkLD3sDG9bUQU="
+		subject: "MDMxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQwwCgYDVQQDEwNSMTQ=",
+		pubKeyHash: "8WR6XuPvrFTIkukwWE/keXm3rNHHbBJxvKHFB22GmIg="
 	};
 	
 	async function readCert(name) {
@@ -13,13 +14,10 @@ describe("CertRevocations", function () {
 		return certDB.constructX509FromBase64(pem.replace(/-----[^-]+-----|\s/g, ''));
 	}
 	
-	// Verify the intermediate via emSign Root TLS CA - G3, cross-signed by the built-in
-	// emSign ECC Root CA - G3
 	async function verify() {
 		var certDB = Cc["@mozilla.org/security/x509certdb;1"].getService(Ci.nsIX509CertDB);
-		var cert = await readCert('em-dv-tls-ca-g3b.pem');
-		var crossCert = await readCert('emsign-root-tls-ca-g3.pem');
-		// 2026-06-01, within the validity periods of both certificates
+		var cert = await readCert('letsencrypt-r14.pem');
+		// 2026-06-01, within the certificate's validity period
 		var time = Date.UTC(2026, 5, 1) / 1000;
 		return new Promise((resolve) => {
 			certDB.asyncVerifyCertAtTime(
@@ -28,7 +26,7 @@ describe("CertRevocations", function () {
 				Ci.nsIX509CertDB.FLAG_LOCAL_ONLY,
 				null,
 				time,
-				[crossCert.getRawDER()],
+				[],
 				errorCode => resolve(errorCode)
 			);
 		});
