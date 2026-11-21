@@ -1578,7 +1578,8 @@ var Zotero_Tabs = new function () {
 			tab.type = `${tabContentType}-loading`;
 			// Make sure the loading message is displayed first.
 			// Then, open reader and hide the loading message once it has loaded.
-			ZoteroContextPane.showLoadingMessage(true);
+			// A library view shows its own loading message in the items pane.
+			ZoteroContextPane.showLoadingMessage(tabContentType != 'library');
 			let loadHook = this._getHook(tabContentType, 'load');
 			tab.loadPromise = loadHook(tab, tabIndex, options).then(() => {
 				ZoteroContextPane.showLoadingMessage(false);

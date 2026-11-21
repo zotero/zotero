@@ -213,7 +213,8 @@
 			// DOM nodes (i.e. 10k notes)
 			// A library tab that finishes loading after another tab is selected leaves the
 			// context pane to that tab
-			if (tabType == 'library' && (action === 'select' || Zotero_Tabs.selectedID == tabID)) {
+			if (Zotero_Tabs.parseTabType(tabType).tabContentType == 'library'
+					&& (action === 'select' || Zotero_Tabs.selectedID == tabID)) {
 				_contextPaneSplitter.setAttribute('hidden', true);
 				_contextPane.setAttribute('collapsed', true);
 				ZoteroContextPane.showLoadingMessage(false);
