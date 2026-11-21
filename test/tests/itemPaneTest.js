@@ -173,6 +173,7 @@ describe("Item pane", function () {
 		});
 
 		it("should show bib entry when set to Bibliography Entry mode", async function () {
+			requireBundledFiles();
 			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
@@ -186,6 +187,7 @@ describe("Item pane", function () {
 		});
 
 		it("should update bib entry on item change when set to Bibliography Entry mode", async function () {
+			requireBundledFiles();
 			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			let item = await createDataObject('item', itemData);
@@ -214,6 +216,7 @@ describe("Item pane", function () {
 		});
 
 		it("should update bib entry on style change when set to Bibliography Entry mode", async function () {
+			requireBundledFiles();
 			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
@@ -227,6 +230,7 @@ describe("Item pane", function () {
 		});
 
 		it("should update bib entry on locale change when set to Bibliography Entry mode", async function () {
+			requireBundledFiles();
 			Zotero.Prefs.set('itemPaneHeader', 'bibEntry');
 			Zotero.Prefs.set('itemPaneHeader.bibEntry.style', 'http://www.zotero.org/styles/apa');
 			await createDataObject('item', itemData);
