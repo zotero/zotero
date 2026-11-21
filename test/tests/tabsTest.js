@@ -1708,6 +1708,38 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
+		it("should title a reader tab restored without a title once its library loads", async function () {
+			let group = await createGroup();
+			let attachment = await importPDFAttachment(null, { libraryID: group.libraryID });
+			let title = await attachment.getTabTitle();
+			// As at startup, before the group's items have loaded
+			delete Zotero.Items._objectCache[attachment.id];
+			group._dataLoaded.item = false;
+			delete group._dataLoadedDeferreds.item;
+			let sessionState = {
+				type: 'pane',
+				geometry: {},
+				tabs: [
+					{ type: 'library', selected: true },
+					{ type: 'reader', title: '', data: { itemID: attachment.id } }
+				]
+			};
+			let newWin;
+			try {
+				newWin = Zotero.openMainWindow({ sessionState });
+				await waitForCallback(
+					() => newWin.Zotero_Tabs?._tabs.find(tab => tab.data.itemID == attachment.id)
+						?.title === title,
+					100,
+					20
+				);
+			}
+			finally {
+				newWin?.close();
+				await group.eraseTx();
+			}
+		});
+		
 		it("should keep a saved window state in the session until a window restores it", async function () {
 			let windows = Zotero.Session.state.windows;
 			let sessionState = { type: 'pane', geometry: {}, tabs: [] };

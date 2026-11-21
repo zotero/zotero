@@ -393,11 +393,11 @@ var Zotero_Tabs = new function () {
 					: Zotero.getString('tab-title-multiple-collections');
 			},
 			reader: async (tab) => {
-				let item = Zotero.Items.get(tab.data.itemID);
+				let item = await getLoadedItem(tab.data.itemID);
 				return item ? item.getTabTitle() : "";
 			},
 			note: async (tab) => {
-				let item = Zotero.Items.get(tab.data.itemID);
+				let item = await getLoadedItem(tab.data.itemID);
 				if (!item) {
 					return "";
 				}
@@ -896,6 +896,22 @@ var Zotero_Tabs = new function () {
 		let items = await Zotero.Items.getAsync(itemIDs);
 		await Zotero.Items.loadDataTypes(items);
 	};
+	
+	/**
+	 * Get an item once its library's items have loaded, which they may not have yet when tabs
+	 * are restored at startup
+	 *
+	 * @param {Integer} itemID
+	 * @return {Promise<Zotero.Item|false>}
+	 */
+	async function getLoadedItem(itemID) {
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID) || {};
+		if (!libraryID) {
+			return false;
+		}
+		await Zotero.Libraries.get(libraryID).waitForDataLoad('item');
+		return Zotero.Items.get(itemID);
+	}
 	
 	/**
 	 * Create a library tab
