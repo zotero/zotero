@@ -1187,6 +1187,11 @@ mac-word-plugin-install-folder-missing =
        *[other] Word hasn’t finished setting up its startup folder. Open Word once, and then install the Word plugin from the Cite pane of the { -app-name } settings.
     }
 
+integration-upgrade-template-title = Plugin Update Available
+integration-upgrade-template-faster = An update to the { -app-name } plugin for Word makes updating citations much faster, especially in long documents. You’ll need to restart Word after updating.
+integration-upgrade-template-outdated = The { -app-name } plugin for { $client } is outdated.
+integration-upgrade-template-update-button = Update Plugin
+
 file-renaming-banner-message = { -app-name } now automatically keeps attachment filenames in sync as you make changes to items.
 file-renaming-banner-documentation-link = { general-learn-more }
 file-renaming-banner-settings-link = { general-settings }
