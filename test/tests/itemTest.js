@@ -1408,6 +1408,15 @@ describe("Zotero.Item", function () {
 	})
 	
 	
+	describe("#getTabTitle()", function () {
+		it("should use the filename for an attachment of an item without a title, creator, or date", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importPDFAttachment(item);
+			assert.equal(await attachment.getTabTitle(), 'test.pdf');
+		});
+	});
+	
+	
 	describe("#getBestAttachmentState()", function () {
 		it("should cache state for an existing file", async function () {
 			var parentItem = await createDataObject('item');

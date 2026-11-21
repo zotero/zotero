@@ -1306,7 +1306,7 @@ Zotero.Item.prototype.getTabTitle = async function () {
 		
 		readerTitle = parts.filter(Boolean).join(' - ');
 	}
-	return readerTitle;
+	return readerTitle || this.attachmentFilename || this.getDisplayTitle();
 };
 
 
