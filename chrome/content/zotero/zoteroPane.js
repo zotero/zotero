@@ -249,6 +249,7 @@ var ZoteroPane = new function () {
 	var _initialReaderTabState = null;
 	var _initialNoteTabState = null;
 	var _initialMovedTab = null;
+	var _isFirstWindow = false;
 	// Settings this window keeps for itself (see getWindowSetting())
 	var _windowSettings = normalizeWindowSettings();
 	// Observers of the prefs behind this window's settings, by pref name
@@ -646,6 +647,7 @@ var ZoteroPane = new function () {
 		if (Zotero.getZoteroPanes().some(pane => pane !== ZoteroPane)) {
 			return;
 		}
+		_isFirstWindow = true;
 		let states = Zotero.Session.getPendingPaneStates();
 		_sessionPaneState = states[0] || null;
 		_otherSessionPaneStates = states.slice(1);
@@ -735,7 +737,8 @@ var ZoteroPane = new function () {
 	
 	
 	/**
-	 * Open the library tab a window without a saved session state starts with
+	 * Open the library tab a window without a saved session state starts with, pinned if no
+	 * other main window was open when this one opened
 	 */
 	function openInitialLibraryTab() {
 		let state = _initialLibraryTabState;
@@ -747,7 +750,8 @@ var ZoteroPane = new function () {
 		Zotero_Tabs.addLibraryTab({
 			id: 'zotero-pane',
 			state,
-			selectOptions: { focusElementID }
+			selectOptions: { focusElementID },
+			pinned: _isFirstWindow
 		});
 		for (let data of _initialOtherLibraryTabs) {
 			Zotero_Tabs.addLibraryTab({ ...data, select: false });

@@ -26,6 +26,7 @@
 Zotero.Session = new function () {
 	const SESSION_FILE_NAME = 'session.json';
 	const DEBOUNCED_SAVING_DELAY = 5 * 60 * 1000; // 5 min
+	const SESSION_VERSION = 1;
 
 	let _state = {
 		windows: []
@@ -56,6 +57,15 @@ Zotero.Session = new function () {
 			}
 		}
 		_pendingPaneStates = _state.windows.filter(x => x.type == 'pane');
+		// Sessions saved by Zotero 10 and earlier have no version, and their main window's
+		// library tab was always at the start of the tab bar, so restore it pinned
+		if (!_state.version) {
+			let tab = _pendingPaneStates[0]?.tabs?.find(x => x.type == 'library');
+			if (tab) {
+				tab.pinned = true;
+			}
+		}
+		_state.version = SESSION_VERSION;
 		_initialized = true;
 	};
 	

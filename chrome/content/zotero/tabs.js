@@ -1006,9 +1006,12 @@ var Zotero_Tabs = new function () {
 	 * @param {Integer} [options.index]
 	 * @param {Boolean} [options.select=true]
 	 * @param {Object} [options.selectOptions] - Passed to select()
+	 * @param {Boolean} [options.pinned]
 	 * @return {String} - The id of the new tab
 	 */
-	this.addLibraryTab = function ({ id, title, icon, state, index, select = true, selectOptions } = {}) {
+	this.addLibraryTab = function ({
+		id, title, icon, state, index, select = true, selectOptions, pinned
+	} = {}) {
 		let data = {};
 		if (icon) {
 			data.icon = icon;
@@ -1016,7 +1019,9 @@ var Zotero_Tabs = new function () {
 		if (state) {
 			data.state = JSON.parse(JSON.stringify(state));
 		}
-		({ id } = this.add({ id, type: 'library-unloaded', title, data, index, select, selectOptions }));
+		({ id } = this.add({
+			id, type: 'library-unloaded', title, data, index, select, selectOptions, pinned
+		}));
 		return id;
 	};
 
