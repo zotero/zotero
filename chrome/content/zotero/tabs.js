@@ -238,7 +238,11 @@ var Zotero_Tabs = new function () {
 				return {
 					type: 'library',
 					title: tab.title,
-					data: { icon: tab.data.icon, state: tab.data.state }
+					data: {
+						icon: tab.data.icon,
+						state: tab.data.state,
+						unpinned: tab.data.unpinned
+					}
 				};
 			},
 			reader: (tab) => {
@@ -282,13 +286,16 @@ var Zotero_Tabs = new function () {
 		},
 		undoClose: {
 			library: async (tab, tabIndex) => {
-				this.addLibraryTab({
+				let id = this.addLibraryTab({
 					title: tab.title,
 					icon: tab.data.icon,
 					state: tab.data.state,
 					index: tabIndex,
 					select: false
 				});
+				if (tab.data.unpinned) {
+					this._getTab(id).tab.data.unpinned = true;
+				}
 				return true;
 			},
 			reader: async (tab, tabIndex) => {
@@ -1269,7 +1276,7 @@ var Zotero_Tabs = new function () {
 
 	/**
 	 * Pin a tab to the start of the tab bar, where it stays in the window and can't be closed by
-	 * the user, or unpin it
+	 * the user, or unpin it, which keeps a restored session from pinning it again
 	 *
 	 * @param {String} id
 	 * @param {Boolean} pinned
@@ -1282,6 +1289,12 @@ var Zotero_Tabs = new function () {
 		// Place the tab at the end of the pinned tabs, or right after them when unpinned
 		this._tabs.splice(tabIndex, 1);
 		tab.pinned = pinned;
+		if (pinned) {
+			delete tab.data.unpinned;
+		}
+		else {
+			tab.data.unpinned = true;
+		}
 		this._tabs.splice(this._getFirstUnpinnedIndex(), 0, tab);
 		this._update();
 	};

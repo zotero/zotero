@@ -26,7 +26,6 @@
 Zotero.Session = new function () {
 	const SESSION_FILE_NAME = 'session.json';
 	const DEBOUNCED_SAVING_DELAY = 5 * 60 * 1000; // 5 min
-	const SESSION_VERSION = 1;
 
 	let _state = {
 		windows: []
@@ -57,17 +56,29 @@ Zotero.Session = new function () {
 			}
 		}
 		_pendingPaneStates = _state.windows.filter(x => x.type == 'pane');
-		// Sessions saved by Zotero 10 and earlier have no version, and their main window's
-		// library tab was always at the start of the tab bar, so restore it pinned
-		if (!_state.version) {
-			let tab = _pendingPaneStates[0]?.tabs?.find(x => x.type == 'library');
-			if (tab) {
-				tab.pinned = true;
-			}
-		}
-		_state.version = SESSION_VERSION;
+		pinOnlyWindowLibraryTab(_pendingPaneStates);
 		_initialized = true;
 	};
+	
+	/**
+	 * Pin the library tab of a session's only main window, unless the window has a pinned tab
+	 * or the user unpinned the library tab
+	 *
+	 * @param {Object[]} paneStates
+	 */
+	function pinOnlyWindowLibraryTab(paneStates) {
+		if (paneStates.length != 1) {
+			return;
+		}
+		let tabs = paneStates[0].tabs || [];
+		if (tabs.some(x => x.pinned)) {
+			return;
+		}
+		let tab = tabs.find(x => x.type == 'library');
+		if (tab && !tab.data?.unpinned) {
+			tab.pinned = true;
+		}
+	}
 	
 	/**
 	 * The saved main-window states that haven't been restored into a window yet
@@ -134,6 +145,7 @@ Zotero.Session = new function () {
 			.concat([state]);
 		// Let the next window opened restore it
 		_pendingPaneStates = [state];
+		pinOnlyWindowLibraryTab(_pendingPaneStates);
 	};
 
 	/**

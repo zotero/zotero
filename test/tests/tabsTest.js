@@ -1677,24 +1677,33 @@ describe("Zotero_Tabs", function() {
 			}
 		});
 		
-		it("should pin the library tab of a session saved by an earlier version", async function () {
+		it("should pin the library tab of a session's only window unless the user unpinned it", async function () {
 			let path = PathUtils.join(Zotero.Profile.dir, 'session.json');
 			let contents = await IOUtils.exists(path) ? await IOUtils.readUTF8(path) : null;
-			let tabs = [{ type: 'library', selected: true }];
+			let id;
 			try {
-				await IOUtils.writeUTF8(path, JSON.stringify({ windows: [{ type: 'pane', tabs }] }));
+				let sessionTabs = [{ type: 'library', selected: true }];
+				let session = { windows: [{ type: 'pane', tabs: sessionTabs }] };
+				await IOUtils.writeUTF8(path, JSON.stringify(session));
 				await Zotero.Session.init();
 				assert.isTrue(Zotero.Session.getPendingPaneStates()[0].tabs[0].pinned);
 				
-				// An unpinned library tab in a versioned session stays unpinned
-				await IOUtils.writeUTF8(
-					path,
-					JSON.stringify({ version: 1, windows: [{ type: 'pane', tabs }] })
-				);
+				// An unpinned tab stays unpinned after being unloaded
+				({ id } = await addLibraryTab());
+				tabs.setPinned(id, true);
+				tabs.setPinned(id, false);
+				tabs.select(zp.primaryLibraryView.tabID);
+				tabs.unload(id);
+				assert.equal(tabs._getTab(id).tab.type, 'library-unloaded');
+				sessionTabs[0] = tabs.getState()[tabs._getTab(id).tabIndex];
+				await IOUtils.writeUTF8(path, JSON.stringify(session));
 				await Zotero.Session.init();
 				assert.isUndefined(Zotero.Session.getPendingPaneStates()[0].tabs[0].pinned);
 			}
 			finally {
+				if (id) {
+					tabs.close(id, { skipWindowClose: true });
+				}
 				if (contents === null) {
 					await IOUtils.remove(path);
 				}
