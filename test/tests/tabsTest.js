@@ -1680,6 +1680,7 @@ describe("Zotero_Tabs", function() {
 		it("should pin the library tab of a session's only window unless the user unpinned it", async function () {
 			let path = PathUtils.join(Zotero.Profile.dir, 'session.json');
 			let contents = await IOUtils.exists(path) ? await IOUtils.readUTF8(path) : null;
+			let selectedID = tabs.selectedID;
 			let id;
 			try {
 				let sessionTabs = [{ type: 'library', selected: true }];
@@ -1704,6 +1705,7 @@ describe("Zotero_Tabs", function() {
 				if (id) {
 					tabs.close(id, { skipWindowClose: true });
 				}
+				tabs.select(selectedID);
 				if (contents === null) {
 					await IOUtils.remove(path);
 				}
