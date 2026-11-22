@@ -246,11 +246,16 @@
 			}
 			// Set the libraries the search applies to: a temporary search spans all
 			// selected libraries, a saved search just its own. Used to scope value
-			// autocomplete and, when more than one library is involved, to drop the
-			// Collection/Saved Search condition, which can only resolve within one library.
+			// autocomplete and, when more than one library or a feed is involved, to drop
+			// the Collection/Saved Search conditions, which can only resolve within one
+			// regular library.
 			if (this.type === 'temporary') {
 				let libraryIDs = [];
 				for (let row of this._libraryView.getCollectionTreeRows()) {
+					if (row.isFeeds()) {
+						libraryIDs.push(...Zotero.Feeds.getAll().map(feed => feed.libraryID));
+						continue;
+					}
 					let id = row.ref && row.ref.libraryID;
 					if (id !== undefined && id !== null && !libraryIDs.includes(id)) {
 						libraryIDs.push(id);

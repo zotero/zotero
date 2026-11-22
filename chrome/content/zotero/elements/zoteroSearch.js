@@ -1501,9 +1501,12 @@
 			this.conditionID = condition.id;
 			var menu = this.querySelector('#conditionsmenu');
 
-			// Collection and saved search conditions resolve within a single library, so
-			// remove both when the selection spans multiple libraries
-			if (this.parent.scopeLibraryIDs && this.parent.scopeLibraryIDs.length > 1) {
+			// Collection and saved search conditions resolve within a single library, and
+			// feeds have neither, so remove both when the selection spans multiple libraries
+			// or includes a feed
+			let scopeLibraryIDs = this.parent.scopeLibraryIDs;
+			if (scopeLibraryIDs && (scopeLibraryIDs.length > 1
+					|| scopeLibraryIDs.some(id => Zotero.Libraries.get(id)?.libraryType == 'feed'))) {
 				for (let value of ['collection', 'savedSearch']) {
 					let item = menu.querySelector(`menuitem[value="${value}"]`);
 					if (item) {

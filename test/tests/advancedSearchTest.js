@@ -1569,6 +1569,33 @@ describe("Advanced Search", function () {
 					searchBox.scopeLibraryIDs = null;
 				}
 			});
+			
+			it("shouldn't appear in feeds", async function () {
+				var feed = await createFeed();
+				
+				let hasScopeConditions = () => {
+					let conditionsMenu = conditions.firstChild.querySelector('#conditionsmenu');
+					let values = [];
+					for (let i = 0; i < conditionsMenu.itemCount; i++) {
+						values.push(conditionsMenu.getItemAtIndex(i).value);
+					}
+					return values.includes('collection') || values.includes('savedSearch');
+				};
+				
+				await zp.collectionsView.selectFeeds();
+				pane.refresh();
+				assert.isFalse(hasScopeConditions());
+				
+				await zp.collectionsView.selectLibrary(feed.libraryID);
+				pane.refresh();
+				assert.isFalse(hasScopeConditions());
+				
+				await selectLibrary(win);
+				pane.refresh();
+				assert.isTrue(hasScopeConditions());
+				
+				await feed.eraseTx();
+			});
 		});
 		
 		describe("Saved Search", function () {
