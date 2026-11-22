@@ -41,6 +41,7 @@
 
 .tab-bar-inner-container {
 	display: flex;
+	min-height: var(--tab-min-height);
 
 	.tabs-wrapper {
 		position: relative;
