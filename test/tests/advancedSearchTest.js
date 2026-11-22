@@ -461,6 +461,33 @@ describe("Advanced Search", function () {
 		await feed.eraseTx();
 	});
 	
+	it("should open Advanced Search from a quick search in Feeds", async function () {
+		let feed = await createFeed();
+		let feedItem = await createDataObject('feedItem', { libraryID: feed.libraryID, title: "alpha beta" }, { skipSelect: true });
+		await createDataObject('feedItem', { libraryID: feed.libraryID, title: "delta" }, { skipSelect: true });
+		
+		await zp.collectionsView.selectFeeds();
+		await waitForItemsLoad(win);
+		
+		let iv = zp.itemsView;
+		await zp.openAdvancedSearchFromQuickSearch('alpha', 'fields');
+		await iv.waitForLoad();
+		
+		let searchBox = win.document.getElementById('zotero-tb-search');
+		assert.equal(deck.state, 'open');
+		assert.equal(searchBox.deck.selectedIndex, 1);
+		assert.equal(iv.rowCount, 1);
+		assert.isNumber(iv.getRowIndexByID(feedItem.id));
+		
+		await zp.setAdvancedSearchState('closed');
+		await iv.waitForLoad();
+		assert.equal(deck.state, 'closed');
+		assert.equal(iv.rowCount, 2);
+		
+		await selectLibrary(win);
+		await feed.eraseTx();
+	});
+	
 	// Run the 'zotero' autocomplete provider directly with given params
 	function autocomplete(searchString, params) {
 		return new Promise((resolve) => {

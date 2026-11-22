@@ -152,7 +152,14 @@
 				this._nameField.value = search.name;
 			}
 			else if (search) {
-				this._search = search.clone();
+				// A search without a library (e.g., in Feeds) can't be clone()d
+				if (search.libraryID === null) {
+					this._search = new Zotero.Search();
+					this._search.fromJSON(search.toJSON());
+				}
+				else {
+					this._search = search.clone();
+				}
 			}
 			else {
 				this._search = new Zotero.Search();
