@@ -1350,6 +1350,34 @@ describe("ZoteroPane", function () {
 			await selectLibrary(win);
 		});
 
+		it("should offer Remove from Collection when parent items are selected along with their child items", async function () {
+			let collection = await createDataObject('collection');
+			let item = await createDataObject('item', { collections: [collection.id] });
+			let note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let removeItems = menu.querySelector('.zotero-menuitem-remove-items');
+
+			await zp.collectionsView.selectByID("C" + collection.id);
+			await waitForItemsLoad(win);
+
+			await zp.itemsView.selectItems([note.id]);
+			await zp.buildItemContextMenu();
+			assert.isTrue(removeItems.hidden, "Not offered for a child item on its own");
+
+			await zp.itemsView.selectItems([item.id, note.id]);
+			assert.equal(zp.itemsView.selection.count, 2);
+			await zp.buildItemContextMenu();
+			assert.isFalse(removeItems.hidden, "Offered for a parent item and its child");
+
+			await zp.itemsView.deleteSelection();
+			assert.isFalse(item.inCollection(collection.id));
+			assert.isFalse(note.deleted);
+			assert.equal(note.parentItemID, item.id);
+
+			await selectLibrary(win);
+		});
+
 		it("shouldn't open the item context menu on a library header row", async function () {
 			let group = await createGroup();
 			let c1 = await createDataObject('collection');

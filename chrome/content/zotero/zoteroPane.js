@@ -4467,7 +4467,7 @@ var ZoteroPane = new function () {
 		// Removing from a collection isn't meaningful when a saved search is also
 		// selected, since its items needn't be in any of the collections
 		if (collectionTreeRows.every(row => row.isCollection())
-				&& items.every(item => item.isTopLevelItem())) {
+				&& Zotero.Items.keepTopLevel(items).every(item => item.isTopLevelItem())) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.add(m.removeItems);
 		}
