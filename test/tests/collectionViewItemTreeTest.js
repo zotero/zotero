@@ -863,6 +863,34 @@ describe("CollectionViewItemTree", function () {
 			assert.ok(await win.ZoteroPane.itemSelected.returnValues[1]);
 		});
 		
+		it("shouldn't add a duplicate row for a new item already shown at row 0", async function () {
+			var collection = await createDataObject('collection');
+			await select(win, collection);
+			itemsView = zp.itemsView;
+
+			var observerID = Zotero.Notifier.registerObserver(
+				{
+					notify: async (event) => {
+						if (event == 'add') {
+							await itemsView.refresh();
+						}
+					}
+				},
+				['item'],
+				'test',
+				1
+			);
+			try {
+				var item = await createDataObject('item', { collections: [collection.id] });
+			}
+			finally {
+				Zotero.Notifier.unregisterObserver(observerID);
+			}
+
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(itemsView.getRow(0).ref.id, item.id);
+		});
+
 		it("shouldn't select a new item if skipNotifier is passed", async function () {
 			// Select existing item
 			await itemsView.selectItem(existingItemID);
