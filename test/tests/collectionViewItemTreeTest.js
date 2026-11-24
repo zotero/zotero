@@ -889,6 +889,7 @@ describe("CollectionViewItemTree", function () {
 
 			assert.equal(itemsView.rowCount, 1);
 			assert.equal(itemsView.getRow(0).ref.id, item.id);
+			assert.sameMembers(itemsView.getSelectedItems(true), [item.id]);
 		});
 
 		it("shouldn't select a new item if skipNotifier is passed", async function () {
