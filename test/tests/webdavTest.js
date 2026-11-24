@@ -973,6 +973,17 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	});
 	
 	describe("Verify Server", function () {
+		it("should trim whitespace from the username", async function () {
+			Zotero.Prefs.set("sync.storage.username", `\t${davUsername} `);
+
+			var win = await loadPrefPane('account');
+			await win.Zotero_Preferences.Sync.onStorageSettingsChange();
+			assert.equal(Zotero.Prefs.get("sync.storage.username"), davUsername);
+			assert.equal(win.document.getElementById('storage-username').value, davUsername);
+
+			win.close();
+		});
+
 		it("should show an error for a connection error", async function () {
 			Zotero.Prefs.set("sync.storage.url", "127.0.0.1:9999");
 			
