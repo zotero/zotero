@@ -2136,7 +2136,7 @@ var ZoteroPane = new function () {
 		}
 		var items = ZoteroPane_Local.getSelectedItems();
 		var cmd = document.getElementById('cmd_zotero_newChildNote');
-		cmd.setAttribute("disabled", !this.canEdit() ||
+		cmd.toggleAttribute("disabled", !this.canEdit() ||
 			!(items.length == 1 && (items[0].isRegularItem() || !items[0].isTopLevelItem())));
 		
 		Zotero.MenuManager.updateMenuPopup(
