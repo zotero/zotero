@@ -933,12 +933,13 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				// if the item belongs in one of the selected views
 				if ((collectionTreeRows.some(row => row.isLibrary(true) && row.ref.libraryID == item.libraryID)
 					|| collectionTreeRows.some(row => row.isCollection() && item.inCollection(row.ref.id)))
-					// if we haven't already added it to our hash map
-					&& this._rowMap[item.id] === undefined
 					// Regular item or standalone note/attachment
 					&& item.isTopLevelItem()) {
-					let beforeRow = this.getRowCount();
-					this._addRow(this.createRow(item, 0, false), beforeRow);
+					// A refresh may have already added it
+					if (this._rowMap[item.id] === undefined) {
+						let beforeRow = this.getRowCount();
+						this._addRow(this.createRow(item, 0, false), beforeRow);
+					}
 					madeChanges = true;
 				}
 			}
