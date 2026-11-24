@@ -767,6 +767,7 @@ Zotero_Preferences.Sync = {
 			// Strip scheme, leading '://' or '//' (#3483), and trailing '/zotero'
 			.replace(/(^https?:\/\/|^:?\/\/|\/zotero\/?$|\/$)/g, '')
 		Zotero.Prefs.set('sync.storage.url', newURL);
+		Zotero.Prefs.set('sync.storage.username', Zotero.Prefs.get('sync.storage.username').trim());
 		
 		if (oldProtocol != newProtocol || oldURL != newURL) {
 			await Zotero.Sync.Storage.Local.resetAllSyncStates(Zotero.Libraries.userLibraryID);
