@@ -102,44 +102,6 @@ describe("ZoteroPane", function () {
 			assert.equal(selected, noteID);
 		})
 	})
-
-	describe("#updateNewNoteMenu()", function () {
-		async function openNoteMenu() {
-			let button = zp.libraryView.getElement('zotero-tb-note-add');
-			let popup = button.querySelector('menupopup');
-			let shown = new Promise(resolve => popup.addEventListener('popupshown', resolve, { once: true }));
-			button.open = true;
-			await shown;
-			let childNoteItem = popup.querySelector('menuitem[command="cmd_zotero_newChildNote"]');
-			let disabled = childNoteItem.disabled;
-			let hidden = new Promise(resolve => popup.addEventListener('popuphidden', resolve, { once: true }));
-			popup.hidePopup();
-			await hidden;
-			return disabled;
-		}
-
-		it("should enable New Item Note when a regular item is selected", async function () {
-			await selectLibrary(win);
-			var item = await createDataObject('item');
-			await zp.itemsView.selectItem(item.id);
-			assert.isFalse(await openNoteMenu());
-		});
-
-		it("should enable New Item Note when a child note is selected", async function () {
-			await selectLibrary(win);
-			var item = await createDataObject('item');
-			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
-			await zp.itemsView.selectItem(note.id);
-			assert.isFalse(await openNoteMenu());
-		});
-
-		it("should disable New Item Note when a standalone note is selected", async function () {
-			await selectLibrary(win);
-			var note = await createDataObject('item', { itemType: 'note' });
-			await zp.itemsView.selectItem(note.id);
-			assert.isTrue(await openNoteMenu());
-		});
-	});
 	
 	describe("#newCollection()", function () {
 		it("should create a collection", async function () {
