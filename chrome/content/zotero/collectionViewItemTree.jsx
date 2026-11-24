@@ -945,7 +945,7 @@ class CollectionViewItemTreeRowProvider extends ItemTreeRowProvider {
 				if ((collectionTreeRows.some(row => row.isLibrary(true) && row.ref.libraryID == item.libraryID)
 					|| collectionTreeRows.some(row => row.isCollection() && item.inCollection(row.ref.id)))
 					// if we haven't already added it to our hash map
-					&& !this._rowMap[item.id]
+					&& this._rowMap[item.id] === undefined
 					// Regular item or standalone note/attachment
 					&& item.isTopLevelItem()) {
 					let beforeRow = this.getRowCount();
