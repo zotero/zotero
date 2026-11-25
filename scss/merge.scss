@@ -86,8 +86,7 @@ merge-group {
 	font-weight: 600;
 }
 
-// zotero.css fixes groupbox headings at 14px; keep that size at the default 13px base
-// but scale with the font size setting
+// Scale with the font size setting instead of using the fixed size from zotero.css
 merge-pane groupbox > label > h2 {
-	font-size: calc(14em / 13);
+	font-size: 1.08em;
 }
