@@ -415,6 +415,12 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 				stream, runLoop, this._nsStr(this._REPLAY_RUN_LOOP_MODE)
 			);
 
+			// Resume the next replay from the ID at the stream's start, so changes made while this
+			// replay runs are picked up next time.
+			// This assumes every change from before the start is delivered before HistoryDone,
+			// which Apple implies but doesn't state:
+			// https://developer.apple.com/documentation/coreservices/kfseventstreameventflaghistorydone
+			resumeId = this._FSEventsGetCurrentEventId();
 			if (!this._FSEventStreamStart(stream)) {
 				Zotero.debug("FileChangeWatcher: FSEventStreamStart failed");
 				return null;
@@ -456,17 +462,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 					outcome = 'closed';
 					break;
 				}
-			}
-
-			if (outcome == 'done') {
-				// Resume the next replay from the current ID, which covers everything delivered
-				// so far, and then drain anything the service queued before the ID was read
-				resumeId = this._FSEventsGetCurrentEventId();
-				this._CFRunLoopRunInMode(
-					this._nsStr(this._REPLAY_RUN_LOOP_MODE),
-					this._REPLAY_POLL_INTERVAL / 1000,
-					false
-				);
 			}
 		}
 		finally {
