@@ -103,19 +103,6 @@ const MAX_WRITE_SETTINGS = 270;
 // Maximum length of a setting value (mirrors dataserver Zotero_Settings::$MAX_VALUE_LENGTH)
 const MAX_SETTING_VALUE_LENGTH = 30000;
 
-// Settings that can be written (mirrors dataserver Zotero_Settings::$allowedSettings)
-const ALLOWED_SETTINGS = [
-	'attachmentRenameTemplate',
-	'autoRenameFiles',
-	'autoRenameFilesFileTypes',
-	'feeds',
-	'tagColors',
-	/^lastPageIndex_(u|g[0-9]+)_[A-Z0-9]{8}$/,
-	/^lastRead_(g[0-9]+)_[A-Z0-9]{8}$/,
-	/^lastReadAloudPosition_(u|g[0-9]+)_[A-Z0-9]{8}$/,
-	'readerCustomThemes',
-];
-
 // Settings that only group admins can change in group libraries
 // (mirrors dataserver Zotero_Settings::$adminOnlySettings)
 const ADMIN_ONLY_SETTINGS = [
@@ -2250,7 +2237,7 @@ function mergePatchJSON(existingJSON, patchJSON) {
  * @throws HTTPError
  */
 function validateSettingJSON(libraryID, name, json) {
-	if (!ALLOWED_SETTINGS.some(s => (s instanceof RegExp ? s.test(name) : s === name))) {
+	if (!Zotero.SyncedSettings.isAllowedSetting(name)) {
 		throw new HTTPError(400, `Invalid setting '${name}'`);
 	}
 	if (json.value === undefined || json.value === null) {

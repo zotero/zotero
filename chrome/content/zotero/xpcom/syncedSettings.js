@@ -42,16 +42,20 @@ Zotero.SyncedSettings = (function () {
 		'readerCustomThemes'
 	];
 	
-	function _isAllowedSetting(setting) {
-		return _allowedSettings.some(x => (typeof x == 'string' ? x === setting : x.test(setting)));
-	}
-	
 	//
 	// Public methods
 	//
 	var module = {
 		idColumn: "setting",
 		table: "syncedSettings",
+
+		/**
+		 * @param {String} setting
+		 * @return {Boolean} - True if the server accepts writes to the setting
+		 */
+		isAllowedSetting: function (setting) {
+			return _allowedSettings.some(x => (typeof x == 'string' ? x === setting : x.test(setting)));
+		},
 
 		/**
 		 * An event which allows to tap into the sync transaction and update
@@ -224,7 +228,7 @@ Zotero.SyncedSettings = (function () {
 			var rows = await Zotero.DB.queryAsync(sql, libraryID);
 			var obj = {};
 			for (let row of rows) {
-				if (!_isAllowedSetting(row.setting)) {
+				if (!this.isAllowedSetting(row.setting)) {
 					Zotero.debug(`Skipping upload of invalid setting '${row.setting}'`, 2);
 					continue;
 				}
@@ -263,7 +267,7 @@ Zotero.SyncedSettings = (function () {
 			}
 			
 			// Reject local writes the server won't accept
-			if (!synced && !_isAllowedSetting(setting)) {
+			if (!synced && !this.isAllowedSetting(setting)) {
 				throw new Error(`Invalid synced setting '${setting}'`);
 			}
 			
