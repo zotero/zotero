@@ -85,3 +85,8 @@ merge-group {
 	margin-right: 1em;
 	font-weight: 600;
 }
+
+// Scale with the font size setting instead of using the fixed size from zotero.css
+merge-pane groupbox > label > h2 {
+	font-size: 1.08em;
+}
