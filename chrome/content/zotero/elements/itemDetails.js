@@ -77,7 +77,8 @@
 				return;
 			}
 
-			this._extraItems = val.filter(item => item instanceof Zotero.Item && item.isRegularItem());
+			this._extraItems = val.filter(item => item instanceof Zotero.Item
+				&& (item.isRegularItem() || item.isAttachment()));
 		}
 
 		/*

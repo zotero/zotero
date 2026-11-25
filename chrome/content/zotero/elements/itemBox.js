@@ -256,7 +256,10 @@
 			}
 			else {
 				this.hidden = true;
-				return;
+				// Attachments are shown here only when batch-editing (see ItemDetails#render())
+				if (!val?.isAttachment()) {
+					return;
+				}
 			}
 			
 			// When changing items, reset truncation of creator list
@@ -293,7 +296,8 @@
 			if (!Array.isArray(val)) {
 				return;
 			}
-			this._extraItems = val.filter(item => item instanceof Zotero.Item && item.isRegularItem());
+			this._extraItems = val.filter(item => item instanceof Zotero.Item
+				&& (item.isRegularItem() || item.isAttachment()));
 			this._unionFieldDescriptors = null;
 			this._resetRenderedFlags();
 		}
@@ -561,6 +565,16 @@
 						this._unionFieldDescriptors.set(desc.canonicalName, desc);
 					}
 				}
+				else if (this.item.isAttachment()) {
+					// Attachments of one link mode (see ItemPane#_canBatchEdit()): use the fields
+					// the attachment pane shows -- URL and Accessed only for web links and snapshots
+					fieldNames.push('title');
+					let linkMode = this.item.attachmentLinkMode;
+					if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL
+							|| linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+						fieldNames.push('url', 'accessDate');
+					}
+				}
 				else {
 					// Same-type batch: use the shared item type's fields
 					let fields = Zotero.ItemFields.getItemTypeFields(this.item.getField("itemTypeID"));
@@ -749,8 +763,10 @@
 					});
 				}
 				
-				// Add options button for title fields
-				if (this.editable && fieldID && (fieldName == 'seriesTitle' || fieldName == 'shortTitle'
+				// Add options button for title fields (not for attachments, whose title in the
+				// item pane header doesn't have the transform menu either)
+				if (this.editable && fieldID && !this.item.isAttachment()
+				&& (fieldName == 'seriesTitle' || fieldName == 'shortTitle'
 				|| Zotero.ItemFields.isFieldOfBase(fieldID, 'title')
 				|| Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 					let optionsButton = document.createXULElement("toolbarbutton");
@@ -2585,7 +2601,9 @@
 		
 		_fieldIsClickable(fieldName) {
 			return !this.clickByRow
-					&& ((this.clickable && !Zotero.Items.isPrimaryField(fieldName))
+					&& ((this.clickable && !Zotero.Items.isPrimaryField(fieldName)
+						// As in the attachment pane, only the title of an attachment is editable
+						&& (!this.item?.isAttachment() || fieldName == 'title'))
 					|| this._clickableFields.indexOf(fieldName) != -1);
 		}
 		

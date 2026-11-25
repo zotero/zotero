@@ -3519,6 +3519,134 @@ describe("Item pane", function () {
 			assert.equal(item3.getField('seriesTitle'), 'Proceedings of the ACM Conference',
 				"item3 should be transformed to title case");
 		});
+
+		describe("Attachments", function () {
+			async function enterBatchEdit(items) {
+				let itemPane = win.ZoteroPane.itemPane;
+				await ZoteroPane.selectItems(items.map(item => item.id));
+				await waitForFrame();
+				assert.equal(itemPane.mode, "batch-edit-prompt");
+				doc.getElementById('batch-edit-prompt-enable').click();
+				await itemPane._itemDetails._renderPromise;
+				assert.equal(itemPane.mode, "item");
+				return itemPane.querySelector('#zotero-editpane-info-box');
+			}
+
+			function getFieldNames(itemBox) {
+				return [...itemBox.querySelectorAll('.meta-label[fieldname]')]
+					.map(label => label.getAttribute('fieldname'));
+			}
+
+			async function linkFromURL(url, title) {
+				let attachment = await Zotero.Attachments.linkFromURL({ url, title });
+				createdItems.push(attachment);
+				return attachment;
+			}
+
+			async function importFile(options = {}) {
+				let attachment = await importFileAttachment('test.png', options);
+				createdItems.push(attachment);
+				return attachment;
+			}
+
+			it("should batch-edit the title of web link attachments", async function () {
+				let attachment1 = await linkFromURL('https://example.com/a', 'Link A');
+				let attachment2 = await linkFromURL('https://example.com/b', 'Link B');
+
+				let itemBox = await enterBatchEdit([attachment1, attachment2]);
+				let itemDetails = ZoteroPane.itemPane._itemDetails;
+				assert.isFalse(itemBox.hidden, "info section should be shown");
+				assert.isTrue(itemDetails.getPane('attachment-info').hidden, "attachment section should be hidden");
+
+				// Same fields as the attachment pane shows for web links
+				assert.sameOrderedMembers(
+					getFieldNames(itemBox),
+					['title', 'url', 'accessDate', 'dateAdded', 'dateModified']
+				);
+				let titleField = itemBox.querySelector('editable-text[fieldname="title"]');
+				assert.isFalse(titleField.readOnly, "title should be editable");
+				assert.isTrue(titleField.multipleValues, "title should show multiple values");
+				let urlField = itemBox.querySelector('editable-text[fieldname="url"]');
+				assert.isTrue(urlField.readOnly, "URL should be read-only, as in the attachment pane");
+				assert.isTrue(urlField.multipleValues, "URL should show multiple values");
+				assert.isTrue(
+					itemBox.querySelector('editable-text[fieldname="accessDate"]').readOnly,
+					"Accessed should be read-only, as in the attachment pane"
+				);
+				assert.isNull(
+					itemBox.querySelector('#itembox-field-title-options'),
+					"attachment title should not have the transform menu"
+				);
+
+				titleField._ignoredWindowInactiveBlur = false;
+				await activateZoteroPane();
+				await Zotero.Promise.delay(50);
+				titleField.focus();
+				await Zotero.Promise.delay(50);
+
+				let modifyPromise = waitForItemEvent('modify');
+				titleField.value = 'Shared Title';
+				titleField.blur();
+				await modifyPromise;
+
+				assert.equal(attachment1.getField('title'), 'Shared Title');
+				assert.equal(attachment2.getField('title'), 'Shared Title');
+				assert.equal(attachment1.getField('url'), 'https://example.com/a');
+				assert.equal(attachment2.getField('url'), 'https://example.com/b');
+
+				// A single attachment goes back to the attachment pane
+				await ZoteroPane.selectItem(attachment1.id);
+				await waitForFrame();
+				await itemDetails._renderPromise;
+				assert.isTrue(itemBox.hidden, "info section should be hidden for a single attachment");
+				assert.isFalse(itemDetails.getPane('attachment-info').hidden, "attachment section should be shown");
+			});
+
+			it("should show only the title when batch-editing stored file attachments", async function () {
+				let attachment1 = await importFile({ title: 'File A' });
+				let attachment2 = await importFile({ title: 'File B' });
+
+				let itemBox = await enterBatchEdit([attachment1, attachment2]);
+				assert.sameOrderedMembers(getFieldNames(itemBox), ['title', 'dateAdded', 'dateModified']);
+				assert.isFalse(itemBox.querySelector('editable-text[fieldname="title"]').readOnly);
+			});
+
+			it("should not offer batch editing for attachments with different link modes", async function () {
+				let link = await linkFromURL('https://example.com/', 'Link');
+				let file = await importFile();
+
+				await ZoteroPane.selectItems([link.id, file.id]);
+				await waitForFrame();
+				assert.equal(ZoteroPane.itemPane.mode, "message");
+			});
+
+			it("should not offer batch editing for a regular item and an attachment", async function () {
+				let item = await _createDataObject('item');
+				let attachment = await importFile();
+
+				await ZoteroPane.selectItems([item.id, attachment.id]);
+				await waitForFrame();
+				assert.equal(ZoteroPane.itemPane.mode, "message");
+			});
+
+			it("should show the Done button when batch-editing attachments in My Publications", async function () {
+				let item = await _createDataObject('item', { inPublications: true });
+				let attachment1 = await importFile({ parentID: item.id });
+				let attachment2 = await importFile({ parentID: item.id });
+
+				await ZoteroPane.collectionsView.selectByID("P" + item.libraryID);
+				await waitForItemsLoad(win);
+				try {
+					await enterBatchEdit([attachment1, attachment2]);
+					let header = ZoteroPane.itemPane._itemDetails._header;
+					assert.ok(header.querySelector('[data-l10n-id="item-pane-batch-editing-done"]'));
+					assert.isNull(header.querySelector('.item-pane-my-publications-button'));
+				}
+				finally {
+					await selectLibrary(win);
+				}
+			});
+		});
 	});
 
 	it("should focus read-only fields with multiple values, showing the Multiple placeholder", async function () {

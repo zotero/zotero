@@ -151,7 +151,7 @@
 			}
 			
 			// Multiple items selected (not duplicates)
-			if (!this.collectionTreeRows[0].isDuplicates() && this.data.length > 1 && this.data.every(item => item.isRegularItem() && !item.isFeedItem)) {
+			if (!this.collectionTreeRows[0].isDuplicates() && this.data.length > 1 && this._canBatchEdit(this.data)) {
 				// Hide the batch editing UI until the user opts-in
 				renderStatus = this._isBatchEditEnabled ? this.renderItemPane(this.data) : this.renderBatchEditorPrompt();
 			}
@@ -175,6 +175,24 @@
 				renderStatus = this.renderMessage();
 			}
 			return renderStatus;
+		}
+
+		/**
+		 * Regular items can be batch-edited together, and so can attachments, as long as they
+		 * all have the same link mode, since that determines which fields they show
+		 *
+		 * @param {Zotero.Item[]} items
+		 * @return {Boolean}
+		 */
+		_canBatchEdit(items) {
+			if (items.some(item => item.isFeedItem)) {
+				return false;
+			}
+			if (items.every(item => item.isRegularItem())) {
+				return true;
+			}
+			return items.every(item => item.isAttachment()
+				&& item.attachmentLinkMode == items[0].attachmentLinkMode);
 		}
 
 		notify(action, type) {
@@ -360,7 +378,9 @@
 			// My Publications buttons
 			var isPublications = this.collectionTreeRows[0].isPublications();
 			// Show in My Publications view if selected items are all notes or non-linked-file attachments
+			// (but not while batch-editing attachments, which shows the Done button instead)
 			var showMyPublicationsButtons = isPublications
+				&& !this._isBatchEditEnabled
 				&& this.data.every((item) => {
 					return item.isNote()
 						|| (item.isAttachment()
