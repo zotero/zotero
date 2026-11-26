@@ -30,6 +30,11 @@
  * Uses the macOS FSEvents persistent event journal to detect which storage files have changed
  * since the last sync. The event ID is saved to a pref so changes that occur while Zotero is
  * closed are still detected.
+ *
+ * The journal is volume-wide, so replaying it can keep fseventsd busy for minutes on a busy
+ * volume. Rather than flushing the stream synchronously, the stream's run-loop source is polled
+ * for delivered events between turns of the app's event loop, and a replay that runs too long is
+ * abandoned in favor of full scans.
  */
 Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 	_ctypes: null,
@@ -42,12 +47,30 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 	_FSEventStreamCreate: null,
 	_FSEventStreamScheduleWithRunLoop: null,
 	_FSEventStreamStart: null,
-	_FSEventStreamFlushSync: null,
 	_FSEventStreamStop: null,
 	_FSEventStreamInvalidate: null,
 	_FSEventStreamRelease: null,
 	_CFRunLoopGetCurrent: null,
+	_CFRunLoopRunInMode: null,
 	_FSEventStreamCallbackType: null,
+
+	// Longest to spend replaying the journal before falling back to full scans
+	_MAX_REPLAY_TIME: 30000, // 30 seconds
+
+	// How long to let the app run between polls of the stream's run-loop source
+	_REPLAY_POLL_INTERVAL: 10, // ms
+
+	// Longest a poll may keep handling batches of events before yielding to the app
+	_REPLAY_BURST_TIME: 8, // ms
+
+	// How long a poll waits for the next batch after handling one
+	_REPLAY_BATCH_WAIT: 2, // ms
+
+	// Private run-loop mode for the stream, so only the polls ever run its callback
+	_REPLAY_RUN_LOOP_MODE: "org.zotero.FileChangeWatcher.replay",
+
+	// Stream of a pending replay, holding its callback until native code is done with it
+	_activeStream: null,
 
 	// ObjC bridge helpers
 	_getClass: null,
@@ -224,11 +247,6 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 			ctypes.bool, ctypes.voidptr_t
 		);
 
-		this._FSEventStreamFlushSync = this._coreServicesLib.declare(
-			"FSEventStreamFlushSync", ctypes.default_abi,
-			ctypes.void_t, ctypes.voidptr_t
-		);
-
 		this._FSEventStreamStop = this._coreServicesLib.declare(
 			"FSEventStreamStop", ctypes.default_abi,
 			ctypes.void_t, ctypes.voidptr_t
@@ -247,6 +265,11 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		this._CFRunLoopGetCurrent = this._cfLib.declare(
 			"CFRunLoopGetCurrent", ctypes.default_abi,
 			ctypes.voidptr_t
+		);
+
+		this._CFRunLoopRunInMode = this._cfLib.declare(
+			"CFRunLoopRunInMode", ctypes.default_abi,
+			ctypes.int32_t, ctypes.voidptr_t, ctypes.double, ctypes.bool
 		);
 
 		// Check for data directory change since last run
@@ -276,7 +299,12 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		);
 	},
 
-	_getChangedItemKeysFSEvents() {
+	/**
+	 * Replay the journal since the saved event ID and collect the keys of changed storage folders
+	 *
+	 * @return {Promise<Set|null>} - Changed item keys, or null to signal full scans
+	 */
+	async _getChangedItemKeysFSEvents() {
 		let ctypes = this._ctypes;
 
 		// If no saved event ID, record baseline and signal full scan
@@ -294,6 +322,12 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		}
 		let sinceEventId = ctypes.UInt64(savedIdStr);
 
+		if (this._activeStream) {
+			Zotero.debug("FileChangeWatcher: FSEvents replay already in progress"
+				+ " -- signaling full scan");
+			return null;
+		}
+
 		// kFSEventStreamEventFlag flags indicating that events were dropped or coalesced,
 		// so changes may be missing from the replay
 		const MUST_SCAN_SUBDIRS = 0x01;
@@ -305,6 +339,7 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 
 		let changedKeys = new Set();
 		let droppedEvents = false;
+		let historyDone = false;
 		let storageRoot = this._storageRoot;
 		let keyPattern = this._keyPattern;
 
@@ -329,6 +364,7 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 					continue;
 				}
 				if (f & HISTORY_DONE) {
+					historyDone = true;
 					continue;
 				}
 				let p = paths[i].readString();
@@ -365,35 +401,96 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 			return null;
 		}
 
+		// Native code holds a pointer to the callback until the stream is released, so keep the
+		// closure referenced where close() can also find the stream to tear it down
+		this._activeStream = { stream, callbackFn, started: false };
+		const kCFRunLoopRunFinished = 1;
+		const kCFRunLoopRunHandledSource = 4;
+		let outcome = 'timeout';
+		// Where the next replay resumes from
+		let resumeId;
 		try {
 			let runLoop = this._CFRunLoopGetCurrent();
-			let runLoopMode = this._nsStr("kCFRunLoopDefaultMode");
 			this._FSEventStreamScheduleWithRunLoop(
-				stream, runLoop, runLoopMode
+				stream, runLoop, this._nsStr(this._REPLAY_RUN_LOOP_MODE)
 			);
 
-			let started = this._FSEventStreamStart(stream);
-			if (!started) {
+			// Resume the next replay from the ID at the stream's start, so changes made while this
+			// replay runs are picked up next time.
+			// This assumes every change from before the start is delivered before HistoryDone,
+			// which Apple implies but doesn't state:
+			// https://developer.apple.com/documentation/coreservices/kfseventstreameventflaghistorydone
+			resumeId = this._FSEventsGetCurrentEventId();
+			if (!this._FSEventStreamStart(stream)) {
 				Zotero.debug("FileChangeWatcher: FSEventStreamStart failed");
 				return null;
 			}
+			this._activeStream.started = true;
 
-			this._FSEventStreamFlushSync(stream);
-			this._FSEventStreamStop(stream);
+			// fseventsd walks the journal in its own process, so poll the stream's run-loop
+			// source for delivered events and leave the main thread to the app in between.
+			// fseventsd sends each batch only after the callback for the previous one returns,
+			// so once a batch arrives, keep handling batches for a short burst.
+			let deadline = Date.now() + this._MAX_REPLAY_TIME;
+			while (true) {
+				let burstEnd = Date.now() + this._REPLAY_BURST_TIME;
+				let wait = 0;
+				let result;
+				do {
+					// The mode string is autoreleased, so make it afresh for each call
+					result = this._CFRunLoopRunInMode(
+						this._nsStr(this._REPLAY_RUN_LOOP_MODE), wait, true
+					);
+					wait = this._REPLAY_BATCH_WAIT / 1000;
+				}
+				while (result == kCFRunLoopRunHandledSource && !historyDone
+					&& Date.now() < burstEnd);
+				if (historyDone) {
+					outcome = 'done';
+					break;
+				}
+				if (result == kCFRunLoopRunFinished) {
+					// Nothing scheduled in the mode, so the stream can never deliver
+					outcome = 'unscheduled';
+					break;
+				}
+				if (Date.now() >= deadline) {
+					break;
+				}
+				await Zotero.Promise.delay(this._REPLAY_POLL_INTERVAL);
+				if (!this._activeStream) {
+					outcome = 'closed';
+					break;
+				}
+			}
 		}
 		finally {
-			this._FSEventStreamInvalidate(stream);
-			this._FSEventStreamRelease(stream);
+			this._releaseActiveStream();
 		}
 
-		let newEventId = this._FSEventsGetCurrentEventId();
+		if (outcome == 'closed') {
+			// The saved event ID wasn't advanced, so the next replay covers this span again
+			Zotero.debug("FileChangeWatcher: FSEvents replay interrupted -- keeping saved event ID");
+			return new Set();
+		}
+
+		if (outcome != 'done') {
+			// The full scans triggered by the fallback cover everything up to now, so resuming
+			// from the current ID is safe
+			resumeId = this._FSEventsGetCurrentEventId();
+		}
 		Zotero.Prefs.set(
-			"sync.storage.watcher.fsEventsEventID", newEventId.toString()
+			"sync.storage.watcher.fsEventsEventID", resumeId.toString()
 		);
 
+		if (outcome != 'done') {
+			Zotero.debug("FileChangeWatcher: FSEvents replay didn't finish (" + outcome
+				+ ") -- signaling full scan");
+			return null;
+		}
+
 		if (droppedEvents) {
-			// The full scans triggered by the fallback cover everything up to now, so the
-			// advanced event ID baseline above remains valid
+			// As with an unfinished replay, the fallback scans cover everything up to now
 			Zotero.debug("FileChangeWatcher: FSEvents reported dropped or coalesced events"
 				+ " -- signaling full scan");
 			return null;
@@ -402,7 +499,24 @@ Object.assign(Zotero.Sync.Storage.FileChangeWatcher, {
 		return this._returnKeys(changedKeys);
 	},
 
+	/**
+	 * Stop and release the stream of a pending replay, which then ends as 'closed'
+	 */
+	_releaseActiveStream() {
+		let active = this._activeStream;
+		if (!active) {
+			return;
+		}
+		this._activeStream = null;
+		if (active.started) {
+			this._FSEventStreamStop(active.stream);
+		}
+		this._FSEventStreamInvalidate(active.stream);
+		this._FSEventStreamRelease(active.stream);
+	},
+
 	_closeFSEvents() {
+		this._releaseActiveStream();
 		if (this._objcLib) {
 			this._objcLib.close();
 			this._objcLib = null;
