@@ -2217,6 +2217,49 @@ describe("Zotero.Item", function () {
 			});
 		});
 		
+		it("should store a new value once when two fields hold it", async function () {
+			var value = Zotero.Utilities.randomString();
+			var item = new Zotero.Item('book');
+			item.setField('title', value);
+			item.setField('shortTitle', value);
+			await item.saveTx();
+			
+			var valueIDs = await Zotero.DB.columnQueryAsync(
+				"SELECT valueID FROM itemDataValues WHERE value=?", value
+			);
+			assert.lengthOf(valueIDs, 1);
+			assert.sameMembers(
+				await Zotero.DB.columnQueryAsync("SELECT valueID FROM itemData WHERE itemID=?", item.id),
+				[valueIDs[0], valueIDs[0]]
+			);
+		});
+		
+		it("should change, clear, and add fields in one save", async function () {
+			var other = await createDataObject('item', { title: Zotero.Utilities.randomString() });
+			var item = new Zotero.Item('book');
+			item.setField('title', 'A');
+			item.setField('publisher', 'B');
+			item.setField('place', 'C');
+			await item.saveTx();
+			
+			// A value another item holds, an empty value, and a new value
+			item.setField('title', other.getField('title'));
+			item.setField('publisher', '');
+			item.setField('edition', 'D');
+			await item.saveTx();
+			
+			var rows = await Zotero.DB.queryAsync(
+				"SELECT fieldName, value FROM itemData JOIN fieldsCombined USING (fieldID) "
+					+ "JOIN itemDataValues USING (valueID) WHERE itemID=?",
+				item.id
+			);
+			var stored = {};
+			for (let row of rows) {
+				stored[row.fieldName] = row.value;
+			}
+			assert.deepEqual(stored, { title: other.getField('title'), place: 'C', edition: 'D' });
+		});
+		
 		it("should reload child items for parent items", async function () {
 			var item = await createDataObject('item');
 			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
