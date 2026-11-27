@@ -93,6 +93,41 @@ describe("Connector Server", function () {
 		});
 	});
 
+	describe("SaveSession.SessionManager", function () {
+		var SessionManager = Zotero.Server.Connector.SessionManager;
+
+		it("should expire sessions older than the TTL when gc() runs", function () {
+			var id = "gcOld_" + Zotero.Utilities.randomString();
+			var session = SessionManager.create(id, 'saveItems', {});
+			// Backdate creation beyond the 10-minute TTL
+			session.created = new Date(Date.now() - 11 * 60 * 1000);
+
+			SessionManager.gc();
+
+			assert.isUndefined(SessionManager.get(id), "stale session should be removed by gc()");
+		});
+
+		it("should keep sessions newer than the TTL when gc() runs", function () {
+			var id = "gcNew_" + Zotero.Utilities.randomString();
+			var session = SessionManager.create(id, 'saveItems', {});
+
+			SessionManager.gc();
+
+			assert.strictEqual(SessionManager.get(id), session, "fresh session should survive gc()");
+			session.remove();
+		});
+
+		it("should remove a session via SaveSession#remove()", function () {
+			var id = "remove_" + Zotero.Utilities.randomString();
+			var session = SessionManager.create(id, 'saveItems', {});
+			assert.strictEqual(SessionManager.get(id), session);
+
+			session.remove();
+
+			assert.isUndefined(SessionManager.get(id), "remove() should delete the session from the manager");
+		});
+	});
+
 	describe('/connector/getTranslatorCode', function () {
 		it('should respond with translator code', async function () {
 			var code = 'function detectWeb() {}\nfunction doImport() {}';
