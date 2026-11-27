@@ -42,16 +42,20 @@ Zotero.SyncedSettings = (function () {
 		'readerCustomThemes'
 	];
 	
-	function _isAllowedSetting(setting) {
-		return _allowedSettings.some(x => (typeof x == 'string' ? x === setting : x.test(setting)));
-	}
-	
 	//
 	// Public methods
 	//
 	var module = {
 		idColumn: "setting",
 		table: "syncedSettings",
+
+		/**
+		 * @param {String} setting
+		 * @return {Boolean} - True if the server accepts writes to the setting
+		 */
+		isAllowedSetting: function (setting) {
+			return _allowedSettings.some(x => (typeof x == 'string' ? x === setting : x.test(setting)));
+		},
 
 		/**
 		 * An event which allows to tap into the sync transaction and update
@@ -94,7 +98,7 @@ Zotero.SyncedSettings = (function () {
 			
 			var invalid = [];
 			
-			var sql = "SELECT setting, value, synced, version FROM syncedSettings "
+			var sql = "SELECT setting, value, synced, version, clientVersion FROM syncedSettings "
 				+ "WHERE libraryID=?";
 			await Zotero.DB.queryAsync(
 				sql,
@@ -115,7 +119,8 @@ Zotero.SyncedSettings = (function () {
 						_cache[libraryID][setting] = {
 							value,
 							synced: !!row.getResultByIndex(2),
-							version: row.getResultByIndex(3)
+							version: row.getResultByIndex(3),
+							clientVersion: row.getResultByIndex(4)
 						};
 					}
 				}
@@ -178,9 +183,26 @@ Zotero.SyncedSettings = (function () {
 		},
 		
 		/**
-		 * Used by sync and tests
+		 * Return all settings in a library
 		 *
-		 * @return {Object} - Object with 'synced' and 'version' properties
+		 * @return {Object} - Object mapping setting names to objects with 'value', 'synced',
+		 *     'version', and 'clientVersion' properties
+		 */
+		getAll: function (libraryID) {
+			if (!_cache[libraryID]) {
+				throw new Zotero.Exception.UnloadedDataException(
+					"Synced settings not loaded for library " + libraryID,
+					"syncedSettings"
+				);
+			}
+			
+			return JSON.parse(JSON.stringify(_cache[libraryID]));
+		},
+		
+		/**
+		 * Used by sync, the local API, and tests
+		 *
+		 * @return {Object} - Object with 'synced', 'version', and 'clientVersion' properties
 		 */
 		getMetadata: function (libraryID, setting) {
 			if (!_cache[libraryID]) {
@@ -196,7 +218,8 @@ Zotero.SyncedSettings = (function () {
 			}
 			return {
 				synced: o.synced,
-				version: o.version
+				version: o.version,
+				clientVersion: o.clientVersion
 			};
 		},
 		
@@ -205,7 +228,7 @@ Zotero.SyncedSettings = (function () {
 			var rows = await Zotero.DB.queryAsync(sql, libraryID);
 			var obj = {};
 			for (let row of rows) {
-				if (!_isAllowedSetting(row.setting)) {
+				if (!this.isAllowedSetting(row.setting)) {
 					Zotero.debug(`Skipping upload of invalid setting '${row.setting}'`, 2);
 					continue;
 				}
@@ -244,7 +267,7 @@ Zotero.SyncedSettings = (function () {
 			}
 			
 			// Reject local writes the server won't accept
-			if (!synced && !_isAllowedSetting(setting)) {
+			if (!synced && !this.isAllowedSetting(setting)) {
 				throw new Error(`Invalid synced setting '${setting}'`);
 			}
 			
@@ -287,29 +310,35 @@ Zotero.SyncedSettings = (function () {
 			synced = synced ? 1 : 0;
 			version = parseInt(version);
 			
-			if (hasCurrentValue) {
-				var sql = "UPDATE syncedSettings SET " + (version > 0 ? "version=?, " : "") + 
-					"value=?, synced=? WHERE setting=? AND libraryID=?";
-				var args = [JSON.stringify(value), synced, setting, libraryID];
-				if (version > 0) {
-					args.unshift(version)
+			var clientVersion = await _runInTransaction(async () => {
+				let clientVersion = await Zotero.Libraries.get(libraryID).incrementClientVersion();
+				if (hasCurrentValue) {
+					let sql = "UPDATE syncedSettings SET " + (version > 0 ? "version=?, " : "")
+						+ "value=?, synced=?, clientVersion=? WHERE setting=? AND libraryID=?";
+					let args = [JSON.stringify(value), synced, clientVersion, setting, libraryID];
+					if (version > 0) {
+						args.unshift(version);
+					}
+					await Zotero.DB.queryAsync(sql, args);
 				}
-				await Zotero.DB.queryAsync(sql, args);
-			}
-			else {
-				var sql = "INSERT INTO syncedSettings "
-					+ "(setting, libraryID, value, version, synced) VALUES (?, ?, ?, ?, ?)";
-				await Zotero.DB.queryAsync(
-					sql, [setting, libraryID, JSON.stringify(value), version, synced]
-				);
-			}
+				else {
+					let sql = "INSERT INTO syncedSettings "
+						+ "(setting, libraryID, value, version, synced, clientVersion) "
+						+ "VALUES (?, ?, ?, ?, ?, ?)";
+					await Zotero.DB.queryAsync(
+						sql, [setting, libraryID, JSON.stringify(value), version, synced, clientVersion]
+					);
+				}
+				return clientVersion;
+			});
 
 			var metadata = this.getMetadata(libraryID, setting);
 			
 			_cache[libraryID][setting] = {
 				value,
 				synced: !!synced,
-				version: version > 0 || !hasCurrentValue ? version : metadata.version
+				version: version > 0 || !hasCurrentValue ? version : metadata.version,
+				clientVersion
 			};
 			
 			var conflict = metadata && !metadata.synced && metadata.version < version;
@@ -342,8 +371,11 @@ Zotero.SyncedSettings = (function () {
 				extraData[id].skipDeleteLog = true;
 			}
 			
-			var sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
-			await Zotero.DB.queryAsync(sql, [setting, libraryID]);
+			await _runInTransaction(async () => {
+				await Zotero.Libraries.get(libraryID).incrementClientVersion();
+				let sql = "DELETE FROM syncedSettings WHERE setting=? AND libraryID=?";
+				await Zotero.DB.queryAsync(sql, [setting, libraryID]);
+			});
 			
 			delete _cache[libraryID][setting];
 			
@@ -351,6 +383,13 @@ Zotero.SyncedSettings = (function () {
 			return true;
 		}
 	};
+	
+	async function _runInTransaction(func) {
+		if (Zotero.DB.inTransaction()) {
+			return func();
+		}
+		return Zotero.DB.executeTransaction(func);
+	}
 	
 	return module;
 }());

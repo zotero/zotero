@@ -3857,6 +3857,15 @@ Zotero.Schema = new function () {
 					}
 				}
 			}
+			
+			else if (i == 132) {
+				if (!(await Zotero.DB.columnExists('syncedSettings', 'clientVersion'))) {
+					await Zotero.DB.queryAsync("ALTER TABLE syncedSettings ADD COLUMN clientVersion INT NOT NULL DEFAULT 0");
+				}
+				// Give existing settings the next client version of their library
+				await Zotero.DB.queryAsync("UPDATE libraries SET clientVersion = clientVersion + 1 WHERE libraryID IN (SELECT libraryID FROM syncedSettings WHERE clientVersion = 0)");
+				await Zotero.DB.queryAsync("UPDATE syncedSettings SET clientVersion = (SELECT clientVersion FROM libraries WHERE libraryID = syncedSettings.libraryID) WHERE clientVersion = 0");
+			}
 		}
 		
 		await _updateDBVersion('userdata', toVersion);

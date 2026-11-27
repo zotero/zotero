@@ -42,4 +42,76 @@ describe('Zotero.SyncedSettings', function () {
 			assert.sameMembers(Object.keys(settings), ['lastPageIndex_u_AAAAAAAA']);
 		});
 	});
+	
+	describe('clientVersion', function () {
+		let libraryID;
+		
+		before(function () {
+			libraryID = Zotero.Libraries.userLibraryID;
+		});
+		
+		afterEach(async function () {
+			await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+		});
+		
+		it('should increment the library clientVersion when a setting is set outside a transaction', async function () {
+			let library = Zotero.Libraries.get(libraryID);
+			let versionBefore = library.clientVersion;
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
+			assert.isAbove(library.clientVersion, versionBefore);
+			assert.equal(
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
+				library.clientVersion
+			);
+			assert.equal(
+				await Zotero.DB.valueQueryAsync(
+					"SELECT clientVersion FROM syncedSettings WHERE setting=? AND libraryID=?",
+					['attachmentRenameTemplate', libraryID]
+				),
+				library.clientVersion
+			);
+			
+			versionBefore = library.clientVersion;
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'b');
+			assert.isAbove(library.clientVersion, versionBefore);
+			assert.equal(
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
+				library.clientVersion
+			);
+		});
+		
+		it('should share the transaction clientVersion when a setting is set inside a transaction', async function () {
+			let library = Zotero.Libraries.get(libraryID);
+			let item;
+			await Zotero.DB.executeTransaction(async () => {
+				item = createUnsavedDataObject('item');
+				await item.save();
+				await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
+			});
+			assert.equal(item.clientVersion, library.clientVersion);
+			assert.equal(
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
+				library.clientVersion
+			);
+			await item.eraseTx();
+		});
+		
+		it('should load clientVersion from the database', async function () {
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
+			let clientVersion = Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion;
+			await Zotero.SyncedSettings.loadAll(libraryID);
+			assert.equal(
+				Zotero.SyncedSettings.getMetadata(libraryID, 'attachmentRenameTemplate').clientVersion,
+				clientVersion
+			);
+		});
+		
+		it('should increment the library clientVersion when a setting is cleared', async function () {
+			let library = Zotero.Libraries.get(libraryID);
+			await Zotero.SyncedSettings.set(libraryID, 'attachmentRenameTemplate', 'a');
+			let versionBefore = library.clientVersion;
+			await Zotero.SyncedSettings.clear(libraryID, 'attachmentRenameTemplate');
+			assert.isAbove(library.clientVersion, versionBefore);
+		});
+	});
 });
