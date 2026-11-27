@@ -471,6 +471,13 @@ Zotero.Server.RequestHandler.prototype._processEndpoint = async function (method
 			);
 		};
 		
+		// Hold requests until initialization finishes, since endpoints can depend on data
+		// that isn't loaded yet
+		if (!Zotero.initialized && !endpoint.allowBeforeInitialization) {
+			Zotero.debug(`Waiting for Zotero to initialize before handling ${this.pathname}`);
+			await Zotero.initializationPromise;
+		}
+		
 		// Pass to endpoint
 		//
 		// Single-parameter endpoint
