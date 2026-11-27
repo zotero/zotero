@@ -103,7 +103,11 @@ Zotero_File_Exporter.prototype.save = async function () {
 	}
 	
 	// present options dialog
-	var io = { translators, exportingNotes };
+	var io = {
+		translators,
+		exportingNotes,
+		exportingLibrary: !!(this.libraryID && !this.collection && !this.items),
+	};
 	window.openDialog("chrome://zotero/content/exportOptions.xhtml",
 		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {
