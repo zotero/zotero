@@ -1,0 +1,16 @@
+<vbox id="zotero-prefpane-plugin-data"
+		onload="event.waitUntil(Zotero_Preferences.PluginData.init())">
+	<vbox class="main-section">
+		<groupbox>
+			<hbox class="virtualized-table-container plugin-data-table-container" id="plugin-data-list-container">
+				<html:div id="plugin-data-table" class="plugin-data-table"/>
+			</hbox>
+			<description id="plugin-data-empty" data-l10n-id="preferences-plugin-data-empty" hidden="true"/>
+			<hbox class="plugin-data-actions">
+				<spacer flex="1"/>
+				<button id="plugin-data-manage" data-l10n-id="preferences-plugin-data-manage" disabled="true"
+					oncommand="Zotero_Preferences.PluginData._openSelected()"/>
+			</hbox>
+		</groupbox>
+	</vbox>
+</vbox>

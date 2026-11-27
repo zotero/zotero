@@ -52,6 +52,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
 		if (editPreferencesSeparator) editPreferencesSeparator.hidden = true;
 		if (editPreferencesItem) editPreferencesItem.hidden = true;
 		
+		// Reference the mac-only help <key> dynamically -- a static reference would
+		// compute a bogus Ctrl+? accelerator on other platforms
+		let openHelpItem = document.getElementById('menu_openHelp');
+		if (openHelpItem) openHelpItem.setAttribute('key', 'key_openHelpMac');
+		
 		// Non-main windows: Add Window → Zotero to focus/reopen main window
 		if (windowMenu && window.location.href !== AppConstants.BROWSER_CHROME_URL) {
 			MozXULElement.insertFTLIfNeeded('branding/brand.ftl');

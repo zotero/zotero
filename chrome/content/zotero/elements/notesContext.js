@@ -209,8 +209,15 @@
 				Zotero.MenuManager.updateMenuPopup(addChildNotePopup, "notesPane/addItemNote", {
 					event: undefined,
 					getContext: () => {
+						let getItems = () => [this._getCurrentAttachment()];
 						let ret = {
-							items: [this._getCurrentAttachment()],
+							get itemIDs() {
+								return getItems().map(item => item?.id).filter(id => id);
+							},
+							// @deprecated Privileged plugins only
+							get items() {
+								return getItems();
+							},
 						};
 						if (typeof Zotero_Tabs !== 'undefined') {
 							let { id, type, subType } = Zotero_Tabs.getTabInfo();
@@ -233,8 +240,15 @@
 				Zotero.MenuManager.updateMenuPopup(addStandaloneNotePopup, "notesPane/addStandaloneNote", {
 					event: undefined,
 					getContext: () => {
+						let getItems = () => [this._getCurrentAttachment()];
 						let ret = {
-							items: [this._getCurrentAttachment()],
+							get itemIDs() {
+								return getItems().map(item => item?.id).filter(id => id);
+							},
+							// @deprecated Privileged plugins only
+							get items() {
+								return getItems();
+							},
 						};
 						if (typeof Zotero_Tabs !== 'undefined') {
 							let { id, type, subType } = Zotero_Tabs.getTabInfo();

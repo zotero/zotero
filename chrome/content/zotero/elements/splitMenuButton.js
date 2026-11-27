@@ -50,14 +50,60 @@
 			});
 			
 			this.addEventListener('keydown', (event) => {
-				if (event.key == 'ArrowDown' && Zotero.Utilities.Internal.showNativeElementPopup(this)) {
+				if (event.key == 'ArrowDown' && this._openMenu()) {
 					event.preventDefault();
 				}
 			});
 		}
 
+		static get observedAttributes() {
+			return ["label"];
+		}
+
 		connectedCallback() {
 			this.append(this.contentFragment);
+			this._applyLabelAttr();
+
+			let dropmarker = this.querySelector('[anonid="dropmarker-box"]');
+			// Make the dropmarker a proper menu button so screen readers can target it
+			dropmarker.setAttribute('role', 'button');
+			dropmarker.setAttribute('tabindex', '0');
+			dropmarker.setAttribute('aria-haspopup', 'menu');
+			dropmarker.setAttribute('aria-expanded', 'false');
+			// Consumers can pass `dropmarker-aria-label` on the parent <button>
+			// (in a Fluent message) to give the menu button a specific name.
+			if (!dropmarker.hasAttribute('aria-label')) {
+				dropmarker.setAttribute(
+					'aria-label',
+					this.getAttribute('dropmarker-aria-label') || 'More options',
+				);
+			}
+
+			dropmarker.addEventListener('mousedown', (event) => {
+				event.stopPropagation();
+				this._openMenu();
+			});
+			dropmarker.addEventListener('click', (event) => {
+				event.stopPropagation();
+			});
+			dropmarker.addEventListener('keydown', (event) => {
+				if (event.key == 'Enter' || event.key == ' ') {
+					event.preventDefault();
+					event.stopPropagation();
+					this._openMenu();
+				}
+			});
+		}
+
+		attributeChangedCallback(name) {
+			if (name === "label") this._applyLabelAttr();
+		}
+
+		_applyLabelAttr() {
+			let attr = this.getAttribute("label");
+			if (attr === null) return;
+			let span = this.querySelector('[anonid="button-text"]');
+			if (span) span.textContent = attr;
 		}
 
 		disconnectedCallback() {
@@ -101,7 +147,14 @@
 		}
 
 		set image(value) {
-			this.querySelector('[anonid="button-image"]').src = value;
+			let buttonImage = this.querySelector('[anonid="button-image"]');
+			if (value) {
+				buttonImage.src = value;
+				buttonImage.hidden = false;
+			}
+			else {
+				buttonImage.hidden = true;
+			}
 		}
 
 		get label() {
@@ -129,7 +182,12 @@
 			Object.defineProperty(this, "dropmarkerFragment", { value: frag });
 			return frag;
 		}
-		
+
+		_openMenu() {
+			let dropmarker = this.querySelector('[anonid="dropmarker-box"]');
+			return Zotero.Utilities.Internal.showNativeElementPopup(this, dropmarker);
+		}
+
 		_isEventInDropmarkerBox(event) {
 			let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
 			return !Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right;
