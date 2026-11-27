@@ -1088,6 +1088,7 @@ Zotero.Server.Connector.Ping.prototype = {
 	supportedMethods: ["GET", "POST"],
 	supportedDataTypes: ["application/json", "text/plain"],
 	permitBookmarklet: true,
+	allowBeforeInitialization: true,
 	
 	/**
 	 * Sends 200 and HTML status on GET requests

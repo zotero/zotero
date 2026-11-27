@@ -11,6 +11,68 @@ describe("Zotero.Server", function () {
 	
 	describe('DataListener', function () {
 		describe("_processEndpoint()", function () {
+			it("should wait for initialization before calling the endpoint", async function () {
+				var called = false;
+				
+				var endpoint = "/test/" + Zotero.Utilities.randomString();
+				var handler = function () {};
+				handler.prototype = {
+					supportedMethods: ["GET"],
+					
+					init: function (_options) {
+						called = true;
+						return 204;
+					}
+				};
+				Zotero.Server.Endpoints[endpoint] = handler;
+				
+				var deferred = Zotero.Promise.defer();
+				var originalPromise = Zotero.initializationPromise;
+				Zotero.initialized = false;
+				Zotero.initializationPromise = deferred.promise;
+				try {
+					let reqPromise = Zotero.HTTP.request("GET", serverPath + endpoint);
+					await Zotero.Promise.delay(250);
+					assert.isFalse(called);
+					
+					Zotero.initialized = true;
+					deferred.resolve();
+					let req = await reqPromise;
+					assert.isTrue(called);
+					assert.equal(req.status, 204);
+				}
+				finally {
+					Zotero.initialized = true;
+					Zotero.initializationPromise = originalPromise;
+				}
+			});
+			
+			it("should call an endpoint that allows requests before initialization", async function () {
+				var endpoint = "/test/" + Zotero.Utilities.randomString();
+				var handler = function () {};
+				handler.prototype = {
+					supportedMethods: ["GET"],
+					allowBeforeInitialization: true,
+					
+					init: function (_options) {
+						return 204;
+					}
+				};
+				Zotero.Server.Endpoints[endpoint] = handler;
+				
+				var originalPromise = Zotero.initializationPromise;
+				Zotero.initialized = false;
+				Zotero.initializationPromise = new Promise(() => {});
+				try {
+					let req = await Zotero.HTTP.request("GET", serverPath + endpoint);
+					assert.equal(req.status, 204);
+				}
+				finally {
+					Zotero.initialized = true;
+					Zotero.initializationPromise = originalPromise;
+				}
+			});
+			
 			describe("1 argument", function () {
 				it("integer return", async function () {
 					var called = false;
