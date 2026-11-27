@@ -340,6 +340,7 @@ class ReaderInstance {
 			readAloudEnabledVoices: await this._getReadAloudEnabledVoices(),
 			readAloudRemoteInterface: this._getReadAloudRemoteInterface(this._iframeWindow),
 			readAloudHighlightGranularity: Zotero.Prefs.get('reader.readAloud.highlightGranularity'),
+			readAloudVerticalControls: Zotero.Prefs.get('reader.readAloud.verticalControls'),
 			getSDTPack: this._createGetSDTPack(this._iframeWindow),
 			loggedIn: Zotero.Sync.Runner.enabled,
 			onOpenContextMenu: () => {
@@ -756,6 +757,7 @@ class ReaderInstance {
 			Zotero.Prefs.registerObserver('reader.popupPositions', this._handlePopupPositionsPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloudVoices', this._handleReadAloudVoicesPrefChange),
 			Zotero.Prefs.registerObserver('reader.readAloud.highlightGranularity', this._handleReadAloudHighlightGranularityChange),
+			Zotero.Prefs.registerObserver('reader.readAloud.verticalControls', this._handleReadAloudVerticalControlsChange),
 		];
 
 		return true;
@@ -1420,6 +1422,12 @@ class ReaderInstance {
 	_handleReadAloudHighlightGranularityChange = () => {
 		this._internalReader.setReadAloudHighlightGranularity(
 			Zotero.Prefs.get('reader.readAloud.highlightGranularity')
+		);
+	};
+
+	_handleReadAloudVerticalControlsChange = () => {
+		this._internalReader.setReadAloudVerticalControls(
+			Zotero.Prefs.get('reader.readAloud.verticalControls')
 		);
 	};
 
